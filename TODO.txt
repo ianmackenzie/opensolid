@@ -1,3 +1,40 @@
+Add enough STEP support to "handcraft" planar/extruded surfaces etc.
+- convert curves to simple B-spline curves (piecewise cubic or quintic)
+- or even just support lines, arcs (and maybe Bezier curves) for now?
+
+Optimize curve segment bounds computation using tangent bounds
+- find max angle of tangent from joining line
+- use that to construct a 'sphere' bounding box at the line midpoint
+- take hull with endpoints
+
+Remove Resolution.predicate
+
+Rework arc length parameterization to not require temporary curve construction?
+- work direction on generic VectorCurve, compute magnitude on the fly
+- just return a generic (Number -> Number)
+  - have a separate function like parameterizationCurve that actually constructs a curve
+
+Optimize findPoint to immediately reject monotonic segments where no solution is possible
+- if segment is monotonic then check if point is definitely "off either end"
+
+Try to reuse compiled expressions when composing them into larger expressions?
+- in particular: compose UV curve with 3D surface function to make 3D curve
+
+Add Region2D.unsafe?
+- take correct, preconstructed loops directly
+
+Remove last uses of Linearization.error
+
+Replace uses of tangentDirection etc. curves/functions with direct tangentDirectionBounds etc.?
+- *might* be able to avoid funky desingularization logic entirely
+
+Add VectorBounds.direction
+- replace existing uses of DirectionBounds.unsafe and VectorBounds.normalize
+
+Move directionBounds, tangentDirectionBounds, normalDirectionBounds into Nondegenerate modules?
+- *can* be evaluated for degenerate geometries but it's not very meaningful to do so
+- allowing evaluation for degenerate geometries makes it easier to cache in Segment types though...
+
 Add generic Curve.samplingPoints and update Curve2D to use it
 - check overall bounds size and first derivative bounds size as well as second derivative
 - maybe implement via search tree! then can use tangent bounds if that helps...
@@ -37,14 +74,12 @@ Add Curve#D.steps etc. functions
 Try to remove unsafeQuotient and unsafeSqrt functions in favour of using Nonzero/Nondegenerate machinery?
 
 Try moving e.g. Curve type family into Curve.Exists typeclass?
-- then add Nondegenerate as well...
-- or have Curve.Nondegenerate module with Nondegenerate type and its own Exists typeclass?
 
 Try using involute profile directly in SpurGear module, instead of spline approximation
 
 Switch to using |> and <| instead of & and $
 
-Add NonEmpty and Fuzzy to Prelude?
+Add Fuzzy to Prelude?
 
 Add ParameterInterval module and move 'includes' and 'isInterior' functions there
 - also move Bounds2D.includes and Domain.isInterior to UvBounds.[includes,iInterior]
@@ -58,9 +93,6 @@ Optimize Region2d.contains
   if a curve segment bounds doesn't include the test point,
   can calculate "swept angle around point" by just looking at the two endpoints!
   Then take sum of swept angles for each segment
-
-Switch Curve2D over to using new generic intersection algorithm
-- add in logic to determine sign of crossing intersections?
 
 Deduplicate code from Tests.Curve2D and Tests.Curve3D into Tests.Curve?
 
@@ -78,19 +110,11 @@ Cache e.g. search trees in curve values, but provide function for stripping cach
   - Curve2D.strip
   - Curve2D.clean
   - Curve2D.compact
-- probably can't get rid of cached derivatives though...
-- would have to store 'unsafe' search tree, since it depends on a tolerance...
-  - store search tree result computed with zero tolerance,
-    then return that if curve is not a point according to the *current* tolerance?
 
 Switch to Vector, VectorBounds purely *forwarding* to Vector2D, VectorBounds2D etc.?
 - don't call back into e.g. Vector from Vector2D
 - more efficient (all operations on primitives are monomorphized, easily inlineable etc.)
 - don't have to have 'fat' .hs-boot files for primitives
-
-Add "mutually exclusive" callback to generic bisection search?
-- perform deduplication *during* search instead of as a post-processing step;
-  a bit cleaner and should hopefully also be more efficient
 
 Get rid of fields other than internally in modules
 
