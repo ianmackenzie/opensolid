@@ -6,6 +6,8 @@ module OpenSolid.VectorCurve3D
   , on
   , compiled
   , isZero
+  , singular0
+  , singular1
   , derivative
   , nondegenerate
   , startValue
@@ -466,6 +468,17 @@ nondegenerate = VectorCurve.nondegenerate
 
 isZero :: Tolerance units => VectorCurve3D units space -> Bool
 isZero curve = curve.maxSampledMagnitude <= ?tolerance
+
+singularityTolerance :: VectorCurve3D units space -> Quantity units
+singularityTolerance curve = Tolerance.unitless * curve.maxSampledMagnitude
+
+singular0 :: VectorCurve3D units space -> Bool
+singular0 curve =
+  Tolerance.using (singularityTolerance curve) (curve.startValue ~= Vector3D.zero)
+
+singular1 :: VectorCurve3D units space -> Bool
+singular1 curve =
+  Tolerance.using (singularityTolerance curve) (curve.endValue ~= Vector3D.zero)
 
 transformBy :: Transform3D tag space -> VectorCurve3D units space -> VectorCurve3D units space
 transformBy transform curve = do

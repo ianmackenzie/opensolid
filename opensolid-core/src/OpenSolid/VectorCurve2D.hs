@@ -37,6 +37,8 @@ module OpenSolid.VectorCurve2D
   , squaredMagnitude_
   , reverse
   , isZero
+  , singular0
+  , singular1
   , zeros
   , direction
   , placeIn
@@ -776,6 +778,17 @@ magnitude = VectorCurve.magnitude
 
 isZero :: Tolerance units => VectorCurve2D units space -> Bool
 isZero curve = curve.maxSampledMagnitude <= ?tolerance
+
+singularityTolerance :: VectorCurve2D units space -> Quantity units
+singularityTolerance curve = Tolerance.unitless * curve.maxSampledMagnitude
+
+singular0 :: VectorCurve2D units space -> Bool
+singular0 curve =
+  Tolerance.using (singularityTolerance curve) (curve.startValue ~= Vector2D.zero)
+
+singular1 :: VectorCurve2D units space -> Bool
+singular1 curve =
+  Tolerance.using (singularityTolerance curve) (curve.endValue ~= Vector2D.zero)
 
 zeros :: Tolerance units => VectorCurve2D units space -> Result IsDegenerate (List Number)
 zeros = VectorCurve.zeros

@@ -3,6 +3,8 @@ module OpenSolid.VectorCurve
   , Exists
   , Nondegenerate
   , isZero
+  , singular0
+  , singular1
   , constant
   , zero
   , bezier
@@ -116,6 +118,8 @@ class
   where
   constant :: Vector dimension units space -> VectorCurve dimension units space
   isZero :: Tolerance units => VectorCurve dimension units space -> Bool
+  singular0 :: VectorCurve dimension units space -> Bool
+  singular1 :: VectorCurve dimension units space -> Bool
   bezier :: NonEmpty (Vector dimension units space) -> VectorCurve dimension units space
   value :: VectorCurve dimension units space -> Number -> Vector dimension units space
   bounds :: VectorCurve dimension units space -> Interval Unitless -> VectorBounds dimension units space
@@ -130,6 +134,12 @@ class
 instance Exists 1 units Void where
   constant = Curve1D.constant
   isZero curve = curve ~= Curve1D.constant Quantity.zero
+  singular0 curve =
+    Tolerance.using (Curve1D.singularityTolerance curve) do
+      Curve1D.value curve 0.0 ~= Quantity.zero
+  singular1 curve =
+    Tolerance.using (Curve1D.singularityTolerance curve) do
+      Curve1D.value curve 1.0 ~= Quantity.zero
   derivative = Curve1D.derivative
   value = Curve1D.value
   bounds = Curve1D.bounds
@@ -140,6 +150,8 @@ instance Exists 1 units Void where
 instance Exists 2 units space where
   constant = VectorCurve2D.constant
   isZero = VectorCurve2D.isZero
+  singular0 = VectorCurve2D.singular0
+  singular1 = VectorCurve2D.singular1
   derivative = VectorCurve2D.derivative
   value = VectorCurve2D.value
   bounds = VectorCurve2D.bounds
@@ -150,6 +162,8 @@ instance Exists 2 units space where
 instance Exists 3 units space where
   constant = VectorCurve3D.constant
   isZero = VectorCurve3D.isZero
+  singular0 = VectorCurve3D.singular0
+  singular1 = VectorCurve3D.singular1
   derivative = VectorCurve3D.derivative
   value = VectorCurve3D.value
   bounds = VectorCurve3D.bounds

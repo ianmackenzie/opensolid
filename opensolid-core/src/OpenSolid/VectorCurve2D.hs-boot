@@ -8,6 +8,8 @@ module OpenSolid.VectorCurve2D
   , compiled
   , derivative
   , isZero
+  , singular0
+  , singular1
   , value
   , bounds
   , squaredMagnitude_
@@ -136,6 +138,8 @@ bezier :: NonEmpty (Vector2D units space) -> VectorCurve2D units space
 compiled :: VectorCurve2D units space -> Compiled units space
 derivative :: VectorCurve2D units space -> VectorCurve2D units space
 isZero :: Tolerance units => VectorCurve2D units space -> Bool
+singular0 :: VectorCurve2D units space -> Bool
+singular1 :: VectorCurve2D units space -> Bool
 value :: VectorCurve2D units space -> Number -> Vector2D units space
 bounds :: VectorCurve2D units space -> Interval Unitless -> VectorBounds2D units space
 quotient ::

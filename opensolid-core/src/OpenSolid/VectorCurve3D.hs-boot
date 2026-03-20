@@ -8,6 +8,8 @@ module OpenSolid.VectorCurve3D
   , compiled
   , derivative
   , isZero
+  , singular0
+  , singular1
   , value
   , bounds
   , quotient
@@ -139,6 +141,8 @@ bezier :: NonEmpty (Vector3D units space) -> VectorCurve3D units space
 compiled :: VectorCurve3D units space -> Compiled units space
 derivative :: VectorCurve3D units space -> VectorCurve3D units space
 isZero :: Tolerance units => VectorCurve3D units space -> Bool
+singular0 :: VectorCurve3D units space -> Bool
+singular1 :: VectorCurve3D units space -> Bool
 value :: VectorCurve3D units space -> Number -> Vector3D units space
 bounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
 quotient ::
