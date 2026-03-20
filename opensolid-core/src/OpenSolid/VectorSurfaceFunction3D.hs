@@ -4,6 +4,11 @@ module OpenSolid.VectorSurfaceFunction3D
   ( VectorSurfaceFunction3D
   , Compiled
   , new
+  , isZero
+  , singularU0
+  , singularU1
+  , singularV0
+  , singularV1
   , desingularize
   , desingularized
   , zero
@@ -27,7 +32,6 @@ module OpenSolid.VectorSurfaceFunction3D
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Direction3D (Direction3D)
@@ -39,6 +43,8 @@ import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.NewtonRaphson3D qualified as NewtonRaphson3D
 import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
+import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
@@ -49,11 +55,13 @@ import OpenSolid.SurfaceFunction1D.Quotient qualified as SurfaceFunction1D.Quoti
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds3D (VectorBounds3D)
@@ -61,25 +69,15 @@ import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 
 data VectorSurfaceFunction3D units space
   = VectorSurfaceFunction3D
-      (Compiled units space)
-      ~(VectorSurfaceFunction3D units space)
-      ~(VectorSurfaceFunction3D units space)
-
-instance
-  HasField
-    "du"
-    (VectorSurfaceFunction3D units space)
-    (VectorSurfaceFunction3D units space)
-  where
-  getField (VectorSurfaceFunction3D _ du _) = du
-
-instance
-  HasField
-    "dv"
-    (VectorSurfaceFunction3D units space)
-    (VectorSurfaceFunction3D units space)
-  where
-  getField (VectorSurfaceFunction3D _ _ dv) = dv
+  { compiled :: Compiled units space
+  , du :: ~(VectorSurfaceFunction3D units space)
+  , dv :: ~(VectorSurfaceFunction3D units space)
+  , maxSampledMagnitude :: Quantity units
+  , singularU0 :: ~Bool
+  , singularU1 :: ~Bool
+  , singularV0 :: ~Bool
+  , singularV1 :: ~Bool
+  }
 
 type Compiled units space =
   CompiledFunction
@@ -96,8 +94,17 @@ instance
     (VectorSurfaceFunction3D unitsA space1)
     (VectorSurfaceFunction3D unitsB space2)
   where
-  coerce (VectorSurfaceFunction3D c du dv) =
-    VectorSurfaceFunction3D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
+  coerce function =
+    VectorSurfaceFunction3D
+      { compiled = Units.coerce function.compiled
+      , du = Units.coerce function.du
+      , dv = Units.coerce function.dv
+      , maxSampledMagnitude = Units.coerce function.maxSampledMagnitude
+      , singularU0 = function.singularU0
+      , singularU1 = function.singularU1
+      , singularV0 = function.singularV0
+      , singularV1 = function.singularV1
+      }
 
 instance Negation (VectorSurfaceFunction3D units space) where
   negate function = new (negate function.compiled) (\p -> negate (derivative p function))
@@ -445,23 +452,61 @@ instance
   where
   lhs `dot` rhs = Vector3D.unit lhs `dot` rhs
 
-instance
-  HasField
-    "compiled"
-    (VectorSurfaceFunction3D units space)
-    (Compiled units space)
-  where
-  getField (VectorSurfaceFunction3D c _ _) = c
-
 new ::
   Compiled units space ->
   (SurfaceParameter -> VectorSurfaceFunction3D units space) ->
   VectorSurfaceFunction3D units space
-new c derivativeFunction = do
+new givenCompiled derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
-  let dv' = VectorSurfaceFunction3D dv.compiled du.dv dv.dv
-  VectorSurfaceFunction3D c du dv'
+  let dv' =
+        VectorSurfaceFunction3D
+          { compiled = dv.compiled
+          , du = du.dv
+          , dv = dv.dv
+          , maxSampledMagnitude = dv.maxSampledMagnitude
+          , singularU0 = dv.singularU0
+          , singularU1 = dv.singularU1
+          , singularV0 = dv.singularV0
+          , singularV1 = dv.singularV1
+          }
+  let sampledMagnitude uvPoint = Vector3D.magnitude (CompiledFunction.value givenCompiled uvPoint)
+  let maxSampledMagnitude = NonEmpty.maximumOf sampledMagnitude UvPoint.samples
+  VectorSurfaceFunction3D
+    { compiled = givenCompiled
+    , du = du
+    , dv = dv'
+    , maxSampledMagnitude = maxSampledMagnitude
+    , singularU0 = boundaryIsSingular U 0.0 givenCompiled maxSampledMagnitude
+    , singularU1 = boundaryIsSingular U 1.0 givenCompiled maxSampledMagnitude
+    , singularV0 = boundaryIsSingular V 0.0 givenCompiled maxSampledMagnitude
+    , singularV1 = boundaryIsSingular V 1.0 givenCompiled maxSampledMagnitude
+    }
+
+boundaryIsSingular :: SurfaceParameter -> Number -> Compiled units space -> Quantity units -> Bool
+boundaryIsSingular parameter parameterValue compiledFunction maxSampledMagnitude =
+  Tolerance.using (Tolerance.unitless * maxSampledMagnitude) do
+    let isZeroAt testPoint = CompiledFunction.value compiledFunction testPoint ~= Vector3D.zero
+    NonEmpty.all isZeroAt (testPoints parameter parameterValue)
+
+testPoints :: SurfaceParameter -> Number -> NonEmpty UvPoint
+testPoints U uValue = NonEmpty.map (\v -> UvPoint uValue v) Parameter.samples
+testPoints V vValue = NonEmpty.map (\u -> UvPoint u vValue) Parameter.samples
+
+isZero :: Tolerance units => VectorSurfaceFunction3D units space -> Bool
+isZero function = function.maxSampledMagnitude <= ?tolerance
+
+singularU0 :: VectorSurfaceFunction3D units space -> Bool
+singularU0 = (.singularU0)
+
+singularU1 :: VectorSurfaceFunction3D units space -> Bool
+singularU1 = (.singularU1)
+
+singularV0 :: VectorSurfaceFunction3D units space -> Bool
+singularV0 = (.singularV0)
+
+singularV1 :: VectorSurfaceFunction3D units space -> Bool
+singularV1 = (.singularV1)
 
 desingularize ::
   VectorSurfaceFunction3D units space ->
