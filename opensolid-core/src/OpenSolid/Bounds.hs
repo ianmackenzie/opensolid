@@ -17,6 +17,7 @@ import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D (Bounds2D), Bounds3D (Bounds3D))
+import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 
 type family Bounds dimension units space = bounds | bounds -> dimension units space where
@@ -30,6 +31,8 @@ class
   , Intersects (Point dimension units space) (Bounds dimension units space) (Tolerance units)
   , Intersects (Bounds dimension units space) (Point dimension units space) (Tolerance units)
   , Intersects (Bounds dimension units space) (Bounds dimension units space) (Tolerance units)
+  , Addition (Point dimension units space) (VectorBounds dimension units space) (Bounds dimension units space)
+  , Subtraction (Point dimension units space) (VectorBounds dimension units space) (Bounds dimension units space)
   ) =>
   Exists dimension units space
   where
