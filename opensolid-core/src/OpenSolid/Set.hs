@@ -33,6 +33,8 @@ data Set dimension units space item where
     Set dimension units space item ->
     Set dimension units space item
 
+deriving instance (Bounds.Exists dimension units space, Show item) => Show (Set dimension units space item)
+
 bounds ::
   Bounds.Exists dimension units space =>
   Set dimension units space item ->
