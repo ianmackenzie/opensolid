@@ -23,6 +23,7 @@ module OpenSolid.VectorBounds3D
   , maxMagnitude#
   , maxSquaredMagnitude
   , maxSquaredMagnitude_
+  , diameter
   , isResolved
   , areDistinct
   , areIndependent
@@ -271,6 +272,10 @@ maxSquaredMagnitude_ (VectorBounds3D x y z) = do
   let yMagnitude = max (Quantity.abs minY) (Quantity.abs maxY)
   let zMagnitude = max (Quantity.abs minZ) (Quantity.abs maxZ)
   Quantity.squared_ xMagnitude + Quantity.squared_ yMagnitude + Quantity.squared_ zMagnitude
+
+diameter :: VectorBounds3D units space -> Quantity units
+diameter (VectorBounds3D x y z) =
+  Quantity.hypot3 (Interval.width x) (Interval.width y) (Interval.width z)
 
 isResolved :: VectorBounds3D units space -> Bool
 isResolved (VectorBounds3D x y z) =

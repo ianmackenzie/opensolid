@@ -5,6 +5,8 @@ module OpenSolid.VectorBounds
   , center
   , squaredMagnitude_
   , magnitude
+  , normalize
+  , diameter
   , isResolved
   , areDistinct
   , areIndependent
@@ -15,9 +17,10 @@ module OpenSolid.VectorBounds
 where
 
 import Data.Void (Void)
-import OpenSolid.Interval (Interval)
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Prelude
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector)
@@ -97,6 +100,8 @@ class
   center :: VectorBounds dimension units space -> Vector dimension units space
   squaredMagnitude_ :: VectorBounds dimension units space -> Interval (units ?*? units)
   magnitude :: VectorBounds dimension units space -> Interval units
+  normalize :: VectorBounds dimension units space -> VectorBounds dimension Unitless space
+  diameter :: VectorBounds dimension units space -> Quantity units
   isResolved :: VectorBounds dimension units space -> Bool
   areDistinct :: VectorBounds dimension units space -> VectorBounds dimension units space -> Bool
   areIndependent :: VectorBounds dimension units space -> VectorBounds dimension units space -> Bool
@@ -106,6 +111,11 @@ instance Exists 1 units Void where
   center = Interval.midpoint
   squaredMagnitude_ = Interval.squared_
   magnitude = Interval.abs
+  normalize (Interval low high)
+    | low > Quantity.zero = Interval.constant 1.0
+    | high < Quantity.zero = Interval.constant -1.0
+    | otherwise = Interval -1.0 1.0
+  diameter = Interval.width
   isResolved = Interval.isResolved
   areDistinct = Interval.areDistinct
   areIndependent _ _ = False
@@ -115,6 +125,8 @@ instance Exists 2 units space where
   center = VectorBounds2D.center
   squaredMagnitude_ = VectorBounds2D.squaredMagnitude_
   magnitude = VectorBounds2D.magnitude
+  normalize = VectorBounds2D.normalize
+  diameter = VectorBounds2D.diameter
   isResolved = VectorBounds2D.isResolved
   areDistinct = VectorBounds2D.areDistinct
   areIndependent = VectorBounds2D.areIndependent
@@ -124,6 +136,8 @@ instance Exists 3 units space where
   center = VectorBounds3D.center
   squaredMagnitude_ = VectorBounds3D.squaredMagnitude_
   magnitude = VectorBounds3D.magnitude
+  normalize = VectorBounds3D.normalize
+  diameter = VectorBounds3D.diameter
   isResolved = VectorBounds3D.isResolved
   areDistinct = VectorBounds3D.areDistinct
   areIndependent = VectorBounds3D.areIndependent
