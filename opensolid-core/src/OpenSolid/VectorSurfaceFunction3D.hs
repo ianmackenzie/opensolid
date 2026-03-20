@@ -17,6 +17,8 @@ module OpenSolid.VectorSurfaceFunction3D
   , bounds
   , compiled
   , derivative
+  , derivativeValue
+  , derivativeBounds
   , placeIn
   , relativeTo
   , transformBy
@@ -553,6 +555,22 @@ derivative ::
   VectorSurfaceFunction3D units space
 derivative U = (.du)
 derivative V = (.dv)
+
+derivativeValue ::
+  SurfaceParameter ->
+  VectorSurfaceFunction3D units space ->
+  UvPoint ->
+  Vector3D units space
+derivativeValue U function uvPoint = value function.du uvPoint
+derivativeValue V function uvPoint = value function.dv uvPoint
+
+derivativeBounds ::
+  SurfaceParameter ->
+  VectorSurfaceFunction3D units space ->
+  UvBounds ->
+  VectorBounds3D units space
+derivativeBounds U function uvBounds = bounds function.du uvBounds
+derivativeBounds V function uvBounds = bounds function.dv uvBounds
 
 placeIn ::
   Frame3D global local ->
