@@ -1,5 +1,6 @@
 module OpenSolid.Arc2D
-  ( Arc2D (Arc2D)
+  ( Arc2D
+  , new
   , centerPoint
   , radius
   , startAngle
@@ -19,26 +20,44 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Vector2D qualified as Vector2D
 
 -- | An arc in 2D.
-newtype Arc2D units space
+data Arc2D units space
   = Arc2D
-      ( "centerPoint" ::: Point2D units space
-      , "radius" ::: Quantity units
-      , "startAngle" ::: Angle
-      , "endAngle" ::: Angle
-      )
+  { centerPoint :: Point2D units space
+  , radius :: Quantity units
+  , startAngle :: Angle
+  , endAngle :: Angle
+  }
   deriving (Show)
 
+new ::
+  ("centerPoint" ::: Point2D units space) ->
+  ("radius" ::: Quantity units) ->
+  ("startAngle" ::: Angle) ->
+  ("endAngle" ::: Angle) ->
+  Arc2D units space
+new
+  ("centerPoint" ::: givenCenterPoint)
+  ("radius" ::: givenRadius)
+  ("startAngle" ::: givenStartAngle)
+  ("endAngle" ::: givenEndAngle) =
+    Arc2D
+      { centerPoint = givenCenterPoint
+      , radius = givenRadius
+      , startAngle = givenStartAngle
+      , endAngle = givenEndAngle
+      }
+
 centerPoint :: Arc2D units space -> Point2D units space
-centerPoint (Arc2D fields) = fields.centerPoint
+centerPoint = (.centerPoint)
 
 radius :: Arc2D units space -> Quantity units
-radius (Arc2D fields) = fields.radius
+radius = (.radius)
 
 startAngle :: Arc2D units space -> Angle
-startAngle (Arc2D fields) = fields.startAngle
+startAngle = (.startAngle)
 
 endAngle :: Arc2D units space -> Angle
-endAngle (Arc2D fields) = fields.endAngle
+endAngle = (.endAngle)
 
 startPoint :: Arc2D units space -> Point2D units space
 startPoint arc = centerPoint arc + Vector2D.polar (radius arc) (startAngle arc)
@@ -55,8 +74,8 @@ sweptAround :: Point2D units space -> Point2D units space -> Angle -> Arc2D unit
 sweptAround givenCenterPoint givenStartPoint givenSweptAngle = do
   let computedStartAngle = Point2D.angleFrom givenCenterPoint givenStartPoint
   Arc2D
-    ( #centerPoint givenCenterPoint
-    , #radius (Point2D.distanceFrom givenCenterPoint givenStartPoint)
-    , #startAngle computedStartAngle
-    , #endAngle (computedStartAngle + givenSweptAngle)
-    )
+    { centerPoint = givenCenterPoint
+    , radius = (Point2D.distanceFrom givenCenterPoint givenStartPoint)
+    , startAngle = computedStartAngle
+    , endAngle = (computedStartAngle + givenSweptAngle)
+    }

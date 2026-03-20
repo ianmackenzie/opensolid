@@ -51,6 +51,7 @@ common config
     ImplicitParams
     LexicalNegation
     MultiWayIf
+    NoFieldSelectors
     NoImplicitPrelude
     OverloadedLabels
     OverloadedRecordDot

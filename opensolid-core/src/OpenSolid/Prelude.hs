@@ -323,33 +323,6 @@ instance
   where
   fromLabel = (name1 :::)
 
-instance HasField name1 (name1 ::: value1, name2 ::: value2) value1 where
-  getField (_ ::: value, _) = value
-
-instance HasField name2 (name1 ::: value1, name2 ::: value2) value2 where
-  getField (_, _ ::: value) = value
-
-instance HasField name1 (name1 ::: value1, name2 ::: value2, name3 ::: value3) value1 where
-  getField (_ ::: value, _, _) = value
-
-instance HasField name2 (name1 ::: value1, name2 ::: value2, name3 ::: value3) value2 where
-  getField (_, _ ::: value, _) = value
-
-instance HasField name3 (name1 ::: value1, name2 ::: value2, name3 ::: value3) value3 where
-  getField (_, _, _ ::: value) = value
-
-instance HasField name1 (name1 ::: value1, name2 ::: value2, name3 ::: value3, name4 ::: value4) value1 where
-  getField (_ ::: value, _, _, _) = value
-
-instance HasField name2 (name1 ::: value1, name2 ::: value2, name3 ::: value3, name4 ::: value4) value2 where
-  getField (_, _ ::: value, _, _) = value
-
-instance HasField name3 (name1 ::: value1, name2 ::: value2, name3 ::: value3, name4 ::: value4) value3 where
-  getField (_, _, _ ::: value, _) = value
-
-instance HasField name4 (name1 ::: value1, name2 ::: value2, name3 ::: value3, name4 ::: value4) value4 where
-  getField (_, _, _, _ ::: value) = value
-
 ----- Composition -----
 
 class Composition f g h | f g -> h where

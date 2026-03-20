@@ -24,7 +24,7 @@ import OpenSolid.Prelude
 import OpenSolid.Vector2D qualified as Vector2D
 
 -- | A metric spur gear.
-newtype SpurGear = Metric ("numTeeth" ::: Int, "module_" ::: Length)
+data SpurGear = Metric {numTeeth :: Int, module_ :: Length}
 
 instance FFI SpurGear where
   representation = FFI.classRepresentation "SpurGear"
@@ -32,15 +32,15 @@ instance FFI SpurGear where
 -- | Create a metric spur gear with the given number of teeth and module.
 metric :: "numTeeth" ::: Int -> "module" ::: Length -> SpurGear
 metric ("numTeeth" ::: givenNumTeeth) ("module" ::: givenModule) =
-  Metric (#numTeeth givenNumTeeth, #module_ givenModule)
+  Metric{numTeeth = givenNumTeeth, module_ = givenModule}
 
 -- | The number of teeth of a gear.
 numTeeth :: SpurGear -> Int
-numTeeth (Metric fields) = fields.numTeeth
+numTeeth = (.numTeeth)
 
 -- | The module of a gear.
 module_ :: SpurGear -> Length
-module_ (Metric fields) = fields.module_
+module_ = (.module_)
 
 -- | The pitch diameter of a gear.
 pitchDiameter :: SpurGear -> Length
