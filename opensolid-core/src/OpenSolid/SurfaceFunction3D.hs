@@ -7,6 +7,7 @@ module OpenSolid.SurfaceFunction3D
   , bounds
   , derivative
   , normalDirection
+  , normalDirectionBounds
   , placeIn
   , relativeTo
   , transformBy
@@ -18,6 +19,7 @@ import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
+import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
@@ -38,6 +40,7 @@ import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector3D (Vector3D)
+import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
@@ -205,6 +208,12 @@ normalDirection function = do
   dvDirection <- VectorSurfaceFunction3D.direction function.dv
   let crossProduct = duDirection `cross` dvDirection
   Tolerance.using Tolerance.unitless (VectorSurfaceFunction3D.direction crossProduct)
+
+normalDirectionBounds :: SurfaceFunction3D space -> UvBounds -> DirectionBounds3D space
+normalDirectionBounds function uvBounds = do
+  let duDirectionBounds = VectorSurfaceFunction3D.directionBounds function.du uvBounds
+  let dvDirectionBounds = VectorSurfaceFunction3D.directionBounds function.dv uvBounds
+  VectorBounds3D.direction (duDirectionBounds `cross` dvDirectionBounds)
 
 transformBy :: Transform3D tag space -> SurfaceFunction3D space -> SurfaceFunction3D space
 transformBy transform function = do
