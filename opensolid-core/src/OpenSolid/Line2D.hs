@@ -25,10 +25,7 @@ import OpenSolid.UvSpace (UvSpace)
 -- | A line in 2D, with a start point and end point.
 data Line2D units space
   = -- | Construct a line from its start and end points.
-    Line2D
-    { startPoint :: Point2D units space
-    , endPoint :: Point2D units space
-    }
+    Line2D (Point2D units space) (Point2D units space)
 
 instance FFI (Line2D Meters FFI.Space) where
   representation = FFI.classRepresentation "Line2D"
@@ -39,12 +36,12 @@ instance FFI (Line2D Unitless UvSpace) where
 -- | Get the start point of a line.
 {-# INLINE startPoint #-}
 startPoint :: Line2D units space -> Point2D units space
-startPoint = (.startPoint)
+startPoint (Line2D p1 _) = p1
 
 -- | Get the end point of a line.
 {-# INLINE endPoint #-}
 endPoint :: Line2D units space -> Point2D units space
-endPoint = (.endPoint)
+endPoint (Line2D _ p2) = p2
 
 -- | Get the start and end points of a line as a tuple.
 endpoints :: Line2D units space -> (Point2D units space, Point2D units space)
