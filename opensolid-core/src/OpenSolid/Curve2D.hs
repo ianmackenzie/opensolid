@@ -71,7 +71,6 @@ module OpenSolid.Curve2D
   , curvature
   , curvature_
   , toPolyline
-  , samplingPoints
   , medialAxis
   , arcLengthParameterization
   , parameterizeByArcLength
@@ -107,7 +106,6 @@ import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
 import OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
-import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -116,7 +114,6 @@ import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Line2D (Line2D (Line2D))
-import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
@@ -131,7 +128,6 @@ import OpenSolid.Polyline2D (Polyline2D (Polyline2D))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
-import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
@@ -999,18 +995,7 @@ curvature curve = Result.map Units.specialize (curvature_ curve)
 
 toPolyline :: Resolution units -> Curve2D units space -> Polyline2D units space
 toPolyline resolution curve =
-  Polyline2D (NonEmpty.map (point curve) (samplingPoints resolution curve))
-
-samplingPoints :: Resolution units -> Curve2D units space -> NonEmpty Number
-samplingPoints resolution curve = do
-  let size subdomain =
-        Point2D.distanceFrom (point curve subdomain.lower) (point curve subdomain.upper)
-  let error subdomain =
-        Linearization.error
-          (VectorBounds2D.magnitude (secondDerivativeBounds curve subdomain))
-          subdomain
-  let predicate = Resolution.predicate (#size size) (#error error) resolution
-  Domain1D.samplingPoints predicate
+  Polyline2D (NonEmpty.map (point curve) (Curve.samplingPoints resolution curve))
 
 medialAxis ::
   forall units space.
