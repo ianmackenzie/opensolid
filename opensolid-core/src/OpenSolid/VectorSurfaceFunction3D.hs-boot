@@ -3,11 +3,11 @@ module OpenSolid.VectorSurfaceFunction3D
   , Compiled
   , new
   , constant
+  , compiled
   , derivative
   )
 where
 
-import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3D, VectorBounds3D)
@@ -29,12 +29,6 @@ type Compiled units space =
     (Vector3D units space)
     UvBounds
     (VectorBounds3D units space)
-
-instance
-  HasField
-    "compiled"
-    (VectorSurfaceFunction3D units space)
-    (Compiled units space)
 
 instance HasUnits (VectorSurfaceFunction3D units space) units
 
@@ -95,6 +89,7 @@ new ::
   Compiled units space ->
   (SurfaceParameter -> VectorSurfaceFunction3D units space) ->
   VectorSurfaceFunction3D units space
+compiled :: VectorSurfaceFunction3D units space -> Compiled units space
 derivative ::
   SurfaceParameter ->
   VectorSurfaceFunction3D units space ->

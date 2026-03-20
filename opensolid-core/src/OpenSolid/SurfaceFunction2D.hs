@@ -289,12 +289,13 @@ instance
     (VectorSurfaceFunction3D units space)
   where
   f . g = do
-    let dfdu = f.du . g
-    let dfdv = f.dv . g
+    let dfdu = VectorSurfaceFunction3D.derivative U f . g
+    let dfdv = VectorSurfaceFunction3D.derivative V f . g
+    let compiledComposed = VectorSurfaceFunction3D.compiled f . g.compiled
     let composedDerivative p = do
           let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
           dfdu * dudp + dfdv * dvdp
-    VectorSurfaceFunction3D.new (f.compiled . g.compiled) composedDerivative
+    VectorSurfaceFunction3D.new compiledComposed composedDerivative
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>

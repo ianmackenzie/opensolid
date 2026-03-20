@@ -83,6 +83,7 @@ import OpenSolid.Surface3D.Revolved qualified as Surface3D.Revolved
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D, normal, position))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
@@ -648,9 +649,9 @@ surfaceSize f uvBounds = do
 
 surfaceError :: SurfaceFunction3D space -> UvBounds -> Length
 surfaceError f uvBounds = do
-  let fuuBounds = VectorSurfaceFunction3D.bounds f.du.du uvBounds
-  let fuvBounds = VectorSurfaceFunction3D.bounds f.du.dv uvBounds
-  let fvvBounds = VectorSurfaceFunction3D.bounds f.dv.dv uvBounds
+  let fuuBounds = VectorSurfaceFunction3D.bounds (f.du & VectorSurfaceFunction3D.derivative U) uvBounds
+  let fuvBounds = VectorSurfaceFunction3D.bounds (f.du & VectorSurfaceFunction3D.derivative V) uvBounds
+  let fvvBounds = VectorSurfaceFunction3D.bounds (f.dv & VectorSurfaceFunction3D.derivative V) uvBounds
   SurfaceLinearization.error fuuBounds fuvBounds fvvBounds uvBounds
 
 addBoundaryInnerEdgeVertices ::

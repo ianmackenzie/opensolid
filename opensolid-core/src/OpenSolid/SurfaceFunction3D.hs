@@ -75,7 +75,7 @@ instance
   where
   lhs + rhs =
     new
-      (lhs.compiled + rhs.compiled)
+      (lhs.compiled + VectorSurfaceFunction3D.compiled rhs)
       (\parameter -> derivative parameter lhs + VectorSurfaceFunction3D.derivative parameter rhs)
 
 instance
@@ -96,7 +96,7 @@ instance
   where
   lhs - rhs =
     new
-      (lhs.compiled - rhs.compiled)
+      (lhs.compiled - VectorSurfaceFunction3D.compiled rhs)
       (\parameter -> derivative parameter lhs - VectorSurfaceFunction3D.derivative parameter rhs)
 
 instance
@@ -170,11 +170,15 @@ new ::
   Compiled space ->
   (SurfaceParameter -> VectorSurfaceFunction3D Meters space) ->
   SurfaceFunction3D space
-new c derivativeFunction = do
+new givenCompiled derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
-  let dv' = VectorSurfaceFunction3D.new dv.compiled (\case U -> du.dv; V -> dv.dv)
-  SurfaceFunction3D c du dv'
+  let dvCompiled = VectorSurfaceFunction3D.compiled dv
+  let dvDerivative p = case p of
+        U -> VectorSurfaceFunction3D.derivative V du
+        V -> VectorSurfaceFunction3D.derivative V dv
+  let dv' = VectorSurfaceFunction3D.new dvCompiled dvDerivative
+  SurfaceFunction3D givenCompiled du dv'
 
 constant :: Point3D space -> SurfaceFunction3D space
 constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction3D.zero)

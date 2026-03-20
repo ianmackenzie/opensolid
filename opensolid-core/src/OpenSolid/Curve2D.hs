@@ -137,7 +137,7 @@ import OpenSolid.SurfaceFunction1D.Zeros qualified as SurfaceFunction1D.Zeros
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
-import OpenSolid.SurfaceParameter (SurfaceParameter)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
@@ -155,6 +155,7 @@ import OpenSolid.VectorCurve3D (VectorCurve3D)
 import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
+import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
 -- | A parametric curve in 2D space.
 data Curve2D units space = Curve2D
@@ -324,9 +325,11 @@ instance
   where
   function . uvCurve = do
     let (dudt, dvdt) = VectorCurve2D.components uvCurve.derivative
-    VectorCurve3D.new
-      (function.compiled . uvCurve.compiled)
-      (function.du . uvCurve * dudt + function.dv . uvCurve * dvdt)
+    let compiledComposed = VectorSurfaceFunction3D.compiled function . uvCurve.compiled
+    let composedDerivative =
+          VectorSurfaceFunction3D.derivative U function . uvCurve * dudt
+            + VectorSurfaceFunction3D.derivative V function . uvCurve * dvdt
+    VectorCurve3D.new compiledComposed composedDerivative
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>

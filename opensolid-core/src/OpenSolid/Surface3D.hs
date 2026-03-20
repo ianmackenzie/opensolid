@@ -67,6 +67,7 @@ import OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
@@ -199,9 +200,9 @@ relativeTo frame surface =
 toMesh :: Length -> Surface3D space -> Mesh (Point3D space)
 toMesh accuracy surface = do
   let f = surface.function
-  let fuu = f.du.du
-  let fuv = f.du.dv
-  let fvv = f.dv.dv
+  let fuu = f.du & VectorSurfaceFunction3D.derivative U
+  let fuv = f.du & VectorSurfaceFunction3D.derivative V
+  let fvv = f.dv & VectorSurfaceFunction3D.derivative V
   let boundaryLoops = Region2D.boundaryLoops surface.domain
   let boundaryPolygons = NonEmpty.map (toPolygon accuracy f fuu fuv fvv) boundaryLoops
   let boundaryEdges = NonEmpty.combine Polygon2D.edges boundaryPolygons

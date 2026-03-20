@@ -10,6 +10,7 @@ module OpenSolid.VectorSurfaceFunction3D
   , constant
   , value
   , bounds
+  , compiled
   , derivative
   , placeIn
   , relativeTo
@@ -497,6 +498,9 @@ value function uvPoint = CompiledFunction.value function.compiled uvPoint
 
 bounds :: VectorSurfaceFunction3D units space -> UvBounds -> VectorBounds3D units space
 bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
+
+compiled :: VectorSurfaceFunction3D units space -> Compiled units space
+compiled = (.compiled)
 
 derivative ::
   SurfaceParameter ->
