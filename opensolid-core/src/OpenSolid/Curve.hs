@@ -17,6 +17,7 @@ module OpenSolid.Curve
   , derivativeBounds
   , secondDerivativeValue
   , secondDerivativeBounds
+  , tangentDirectionBounds
   , isPoint
   , singular0
   , singular1
@@ -45,6 +46,7 @@ import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
+import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
@@ -214,6 +216,13 @@ secondDerivativeBounds ::
   Interval Unitless ->
   VectorBounds dimension units space
 secondDerivativeBounds curve tBounds = VectorCurve.bounds (secondDerivative curve) tBounds
+
+tangentDirectionBounds ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Interval Unitless ->
+  DirectionBounds dimension space
+tangentDirectionBounds curve tBounds = VectorCurve.directionBounds (derivative curve) tBounds
 
 findPoint ::
   (Exists dimension units space, Tolerance units) =>
