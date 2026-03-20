@@ -74,8 +74,8 @@ quadrisect (Interval low high) = do
     else throw InfiniteRecursion
 
 pairwise :: Bounds c => (a -> b -> c) -> Domain a -> Domain b -> Domain c
-pairwise function (Domain value1 children1) (Domain value2 children2) =
-  Domain (function value1 value2) $
+pairwise function (Domain bounds1 children1) (Domain bounds2 children2) =
+  Domain (function bounds1 bounds2) $
     [pairwise function child1 child2 | child1 <- children1, child2 <- children2]
 
 data Size = Small | Large deriving (Eq, Ord, Show)
