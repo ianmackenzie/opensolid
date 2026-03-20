@@ -30,6 +30,7 @@ module OpenSolid.Curve
   , Intersections (IntersectionPoints, OverlappingSegments)
   , IntersectionPoint
   , intersections
+  , samplingPoints
   )
 where
 
@@ -51,10 +52,11 @@ import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
-import OpenSolid.Interval (Interval)
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate), Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
@@ -62,6 +64,8 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
+import OpenSolid.Resolution (Resolution)
+import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Search qualified as Search
 import OpenSolid.Search.Domain qualified as Search.Domain
@@ -267,3 +271,29 @@ intersections ::
   Curve dimension units space ->
   Result IsDegenerate (Maybe Intersections)
 intersections = Intersections.intersections
+
+samplingPoints ::
+  Exists dimension units space =>
+  Resolution units ->
+  Curve dimension units space ->
+  NonEmpty Number
+samplingPoints resolution curve = do
+  let collect (Interval t1 t2) p1 p2 accumulated = do
+        let tWidth = t2 - t1
+        let tMid = t1 + 0.5 * tWidth
+        let pMid = point curve tMid
+        let midError = Point.linearDeviation p1 p2 pMid
+        let lobattoOffset = 0.5 * tWidth * Number.sqrt (3 / 7)
+        let tLeft = tMid + lobattoOffset
+        let tRight = tMid - lobattoOffset
+        let leftError = Point.linearDeviation p1 p2 (point curve tLeft)
+        let rightError = Point.linearDeviation p1 p2 (point curve tRight)
+        let error = midError `max` leftError `max` rightError
+        let size = Point.distanceFrom p1 p2
+        if Resolution.acceptable ("size" ::: size) ("error" ::: error) resolution
+          then NonEmpty.push t1 accumulated
+          else
+            accumulated
+              & collect (Interval tMid t2) pMid p2
+              & collect (Interval t1 tMid) p1 pMid
+  collect Interval.unit (startPoint curve) (endPoint curve) (NonEmpty.one 1.0)
