@@ -541,7 +541,7 @@ instance Estimate.Interface (Integral units) units where
 
 singularityTolerance :: Curve1D units -> Quantity units
 singularityTolerance curve =
-  1e-9 * NonEmpty.maximumOf (Quantity.abs . value curve) Parameter.samples
+  Tolerance.unitless * NonEmpty.maximumOf (Quantity.abs . value curve) Parameter.samples
 
 ----- ZERO FINDING -----
 
