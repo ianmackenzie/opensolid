@@ -163,11 +163,12 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
         | not (Curve.Segment.bounds segment1 `intersects` Curve.Segment.bounds segment2) =
             Resolved Nothing
         | otherwise = do
-            let tangentBounds1 = Curve.Segment.tangentBounds segment1
-            let tangentBounds2 = Curve.Segment.tangentBounds segment2
+            let tangentDirectionBounds1 = Curve.Segment.tangentDirectionBounds segment1
+            let tangentDirectionBounds2 = Curve.Segment.tangentDirectionBounds segment2
             let curvatureVectorBounds1_ = Curve.Segment.curvatureVectorBounds_ segment1
             let curvatureVectorBounds2_ = Curve.Segment.curvatureVectorBounds_ segment2
-            let isCrossing = DirectionBounds.areIndependent tangentBounds1 tangentBounds2
+            let isCrossing =
+                  DirectionBounds.areIndependent tangentDirectionBounds1 tangentDirectionBounds2
             let curvatureVectorsAreDistinct =
                   VectorBounds.areDistinct curvatureVectorBounds1_ curvatureVectorBounds2_
             let isLocal EndpointSolution{t1, t2} =
@@ -185,9 +186,9 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
             let hasContinuation = case singleEndpointSolution of
                   Just EndpointSolution{t1, t2}
                     | (t1 == 0.0 && t2 == 0.0) || (t1 == 1.0 && t2 == 1.0) ->
-                        DirectionBounds.areDistinct tangentBounds1 tangentBounds2
+                        DirectionBounds.areDistinct tangentDirectionBounds1 tangentDirectionBounds2
                     | (t1 == 0.0 && t2 == 1.0) || (t1 == 1.0 && t2 == 0.0) ->
-                        DirectionBounds.areDistinct tangentBounds1 -tangentBounds2
+                        DirectionBounds.areDistinct tangentDirectionBounds1 -tangentDirectionBounds2
                     | otherwise -> False
                   Nothing -> False
             let hasTangentEndpointSolution = case singleEndpointSolution of

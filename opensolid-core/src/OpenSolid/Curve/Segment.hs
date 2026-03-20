@@ -6,7 +6,7 @@ module OpenSolid.Curve.Segment
   , derivativeBounds
   , secondDerivativeBounds
   , curvatureVectorBounds_
-  , tangentBounds
+  , tangentDirectionBounds
   , new
   , monotonic
   , crossingTangents
@@ -36,7 +36,7 @@ data Segment dimension units space = Segment
   , bounds :: ~(Bounds dimension units space)
   , derivativeBounds :: ~(VectorBounds dimension units space)
   , secondDerivativeBounds :: ~(VectorBounds dimension units space)
-  , tangentBounds :: ~(DirectionBounds dimension space)
+  , tangentDirectionBounds :: ~(DirectionBounds dimension space)
   , curvatureVectorBounds_ :: ~(VectorBounds dimension (Unitless ?/? units) space)
   }
 
@@ -63,7 +63,7 @@ instance
       , bounds = Units.coerce segment.bounds
       , derivativeBounds = VectorBounds.coerce segment.derivativeBounds
       , secondDerivativeBounds = VectorBounds.coerce segment.secondDerivativeBounds
-      , tangentBounds = segment.tangentBounds
+      , tangentDirectionBounds = segment.tangentDirectionBounds
       , curvatureVectorBounds_ = VectorBounds.coerce segment.curvatureVectorBounds_
       }
 
@@ -87,8 +87,8 @@ curvatureVectorBounds_ ::
   VectorBounds dimension (Unitless ?/? units) space
 curvatureVectorBounds_ segment = segment.curvatureVectorBounds_
 
-tangentBounds :: Segment dimension units space -> DirectionBounds dimension space
-tangentBounds segment = segment.tangentBounds
+tangentDirectionBounds :: Segment dimension units space -> DirectionBounds dimension space
+tangentDirectionBounds segment = segment.tangentDirectionBounds
 
 monotonic :: VectorBounds.Exists dimension units space => Segment dimension units space -> Bool
 monotonic segment = Interval.isResolved (VectorBounds.magnitude segment.derivativeBounds)
@@ -99,8 +99,8 @@ crossingTangents ::
   Nonzero (Segment dimension units space) ->
   Bool
 crossingTangents (Nonzero segment1) (Nonzero segment2) = do
-  let bounds1 = DirectionBounds.unwrap segment1.tangentBounds
-  let bounds2 = DirectionBounds.unwrap segment2.tangentBounds
+  let bounds1 = DirectionBounds.unwrap segment1.tangentDirectionBounds
+  let bounds2 = DirectionBounds.unwrap segment2.tangentDirectionBounds
   let notEqual = Interval.isResolved (VectorBounds.magnitude (bounds1 - bounds2))
   let notOpposite = Interval.isResolved (VectorBounds.magnitude (bounds1 + bounds2))
   notEqual && notOpposite
@@ -138,7 +138,7 @@ new givenCurve givenParameterBounds = do
     , bounds = curveBounds
     , derivativeBounds = curveDerivativeBounds
     , secondDerivativeBounds = curveSecondDerivativeBounds
-    , tangentBounds =
+    , tangentDirectionBounds =
         DirectionBounds.unsafe
           (curveDerivativeBounds / VectorBounds.magnitude curveDerivativeBounds)
     , curvatureVectorBounds_ =
