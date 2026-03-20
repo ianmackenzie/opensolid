@@ -19,6 +19,7 @@ module OpenSolid.Curve3D
   , secondDerivativeValue
   , secondDerivativeBounds
   , tangentDirection
+  , tangentDirectionBounds
   , curvatureVector
   , startPoint
   , endPoint
@@ -51,6 +52,7 @@ import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionCurve3D (DirectionCurve3D)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
@@ -307,6 +309,9 @@ tangentDirection ::
   Curve3D space ->
   Result IsDegenerate (DirectionCurve3D space)
 tangentDirection = Curve.tangentDirection
+
+tangentDirectionBounds :: Curve3D space -> Interval Unitless -> DirectionBounds3D space
+tangentDirectionBounds = Curve.tangentDirectionBounds
 
 curvatureVector ::
   Tolerance Meters =>

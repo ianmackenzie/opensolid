@@ -37,6 +37,7 @@ module OpenSolid.Curve2D
   , derivative
   , secondDerivative
   , tangentDirection
+  , tangentDirectionBounds
   , curvatureVector_
   , curvatureVector
   , offsetLeftwardBy
@@ -103,6 +104,7 @@ import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
+import OpenSolid.DirectionBounds2D (DirectionBounds2D)
 import OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1D qualified as Domain1D
@@ -730,6 +732,9 @@ tangentDirection ::
   Curve2D units space ->
   Result IsDegenerate (DirectionCurve2D space)
 tangentDirection = Curve.tangentDirection
+
+tangentDirectionBounds :: Curve2D units space -> Interval Unitless -> DirectionBounds2D space
+tangentDirectionBounds = Curve.tangentDirectionBounds
 
 curvatureVector_ ::
   Tolerance units =>
