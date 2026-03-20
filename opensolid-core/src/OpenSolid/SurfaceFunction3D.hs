@@ -6,6 +6,7 @@ module OpenSolid.SurfaceFunction3D
   , point
   , bounds
   , derivative
+  , nondegenerate
   , normalDirection
   , normalDirectionBounds
   , placeIn
@@ -24,7 +25,7 @@ import OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
-import OpenSolid.Nondegenerate (IsDegenerate)
+import OpenSolid.Nondegenerate (IsDegenerate, Nondegenerate (Nondegenerate))
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
@@ -198,6 +199,16 @@ derivative ::
   VectorSurfaceFunction3D Meters space
 derivative U = (.du)
 derivative V = (.dv)
+
+nondegenerate ::
+  Tolerance Meters =>
+  SurfaceFunction3D space ->
+  Result IsDegenerate (Nondegenerate (SurfaceFunction3D space))
+nondegenerate function = do
+  _ <- VectorSurfaceFunction3D.nondegenerate function.du
+  _ <- VectorSurfaceFunction3D.nondegenerate function.dv
+  -- TODO also check if partial derivative directions are parallel at any UV corner?
+  Ok (Nondegenerate function)
 
 normalDirection ::
   Tolerance Meters =>

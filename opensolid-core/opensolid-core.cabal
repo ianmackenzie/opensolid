@@ -223,6 +223,7 @@ library
     OpenSolid.SurfaceFunction1D.Zeros
     OpenSolid.SurfaceFunction2D
     OpenSolid.SurfaceFunction3D
+    OpenSolid.SurfaceFunction3D.Nondegenerate
     OpenSolid.SurfaceParameter
     OpenSolid.SurfaceVertex3D
     OpenSolid.Svg
