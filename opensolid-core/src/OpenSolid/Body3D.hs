@@ -30,13 +30,12 @@ import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CDT qualified as CDT
 import OpenSolid.Circle2D qualified as Circle2D
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
-import OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
-import OpenSolid.DirectionSurfaceFunction3D qualified as DirectionSurfaceFunction3D
 import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -48,14 +47,13 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.Line2D qualified as Line2D
-import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
+import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate), Nondegenerate)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D (Plane3D))
@@ -66,7 +64,6 @@ import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Polygon2D (Polygon2D (Polygon2D))
 import OpenSolid.Polygon2D qualified as Polygon2D
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
@@ -82,20 +79,17 @@ import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.Surface3D.Revolved qualified as Surface3D.Revolved
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
-import OpenSolid.SurfaceLinearization qualified as SurfaceLinearization
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.SurfaceFunction3D.Nondegenerate qualified as SurfaceFunction3D.Nondegenerate
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D, normal, position))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
-import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvBounds (UvBounds, pattern UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector3D qualified as Vector3D
-import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve3D (VectorCurve3D)
 import OpenSolid.VectorCurve3D qualified as VectorCurve3D
-import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 import OpenSolid.World3D qualified as World3D
 
 -- | A solid body in 3D, defined by a set of boundary surfaces.
@@ -563,7 +557,7 @@ toMatingEdge id1 curve1 HalfEdge{halfEdgeId = id2, curve3D = curve2, uvCurve}
 
 toPointMesh :: Tolerance Meters => Resolution Meters -> Body3D space -> Mesh (Point3D space)
 toPointMesh resolution body = do
-  let toVertex surfaceFunction _ _ uvPoint = SurfaceFunction3D.point surfaceFunction uvPoint
+  let toVertex function _ uvPoint = SurfaceFunction3D.Nondegenerate.point function uvPoint
   toMesh resolution toVertex body
 
 toSurfaceMesh ::
@@ -572,16 +566,16 @@ toSurfaceMesh ::
   Body3D space ->
   Mesh (SurfaceVertex3D space)
 toSurfaceMesh resolution body = do
-  let toVertex surfaceFunction normalDirection handedness uvPoint =
+  let toVertex function handedness uvPoint =
         SurfaceVertex3D
-          { position = SurfaceFunction3D.point surfaceFunction uvPoint
-          , normal = handedness * DirectionSurfaceFunction3D.value normalDirection uvPoint
+          { position = SurfaceFunction3D.Nondegenerate.point function uvPoint
+          , normal =
+              handedness * SurfaceFunction3D.Nondegenerate.normalDirectionValue function uvPoint
           }
   toMesh resolution toVertex body
 
 type ToVertex vertex space =
-  SurfaceFunction3D space ->
-  DirectionSurfaceFunction3D space ->
+  Nondegenerate (SurfaceFunction3D space) ->
   Sign ->
   UvPoint ->
   vertex
@@ -604,55 +598,78 @@ boundarySurfaceSegments ::
   Resolution Meters ->
   BoundarySurface space ->
   (SurfaceId, Set2D Unitless UvSpace UvBounds)
-boundarySurfaceSegments resolution BoundarySurface{surfaceId, surfaceFunction, uvBounds} =
-  (surfaceId, boundarySurfaceSegmentSet resolution surfaceFunction uvBounds)
+boundarySurfaceSegments resolution BoundarySurface{surfaceId, surfaceFunction, uvBounds} = do
+  let Bounds2D (Interval u1 u2) (Interval v1 v2) = uvBounds
+  let p11 = SurfaceFunction3D.point surfaceFunction (UvPoint u1 v1)
+  let p21 = SurfaceFunction3D.point surfaceFunction (UvPoint u2 v1)
+  let p12 = SurfaceFunction3D.point surfaceFunction (UvPoint u1 v2)
+  let p22 = SurfaceFunction3D.point surfaceFunction (UvPoint u2 v2)
+  (surfaceId, boundarySurfaceSegmentSet resolution surfaceFunction uvBounds p11 p21 p12 p22)
 
 boundarySurfaceSegmentSet ::
   Resolution Meters ->
   SurfaceFunction3D space ->
   UvBounds ->
+  Point3D space ->
+  Point3D space ->
+  Point3D space ->
+  Point3D space ->
   Set2D Unitless UvSpace UvBounds
-boundarySurfaceSegmentSet resolution surfaceFunction uvBounds = do
-  let acceptableSize =
-        Quantity.isInfinite resolution.maxSize
-          || surfaceSize surfaceFunction uvBounds <= resolution.maxSize
-  let acceptableError =
-        Quantity.isInfinite resolution.maxError
-          || surfaceError surfaceFunction uvBounds <= resolution.maxError
-  if acceptableSize && acceptableError
+boundarySurfaceSegmentSet resolution function uvBounds p11 p21 p12 p22 = do
+  let d1 = p21 - p12
+  let d2 = p22 - p11
+  let size = max (Vector3D.magnitude d1) (Vector3D.magnitude d2)
+  let n = Vector3D.normalize (d1 `cross_` d2)
+  let UvBounds uBounds vBounds = uvBounds
+  let uMid = Interval.midpoint uBounds
+  let vMid = Interval.midpoint vBounds
+  let uvCenter = UvPoint uMid vMid
+  let pCenter = SurfaceFunction3D.point function uvCenter
+  let error point = Quantity.abs ((point - pCenter) `dot` n)
+  let maxCornerError = error p11 `max` error p12 `max` error p21 `max` error p22
+  let uWidth = Interval.width uBounds
+  let vWidth = Interval.width vBounds
+  let uOffset = 0.5 * uWidth * Number.sqrt (3 / 7)
+  let vOffset = 0.5 * vWidth * Number.sqrt (3 / 7)
+  let uInterior1 = uMid - uOffset
+  let uInterior2 = uMid + uOffset
+  let vInterior1 = vMid - vOffset
+  let vInterior2 = vMid + vOffset
+  let interiorError uvPoint = error (SurfaceFunction3D.point function uvPoint)
+  let interiorError11 = interiorError (UvPoint uInterior1 vInterior1)
+  let interiorError21 = interiorError (UvPoint uInterior2 vInterior1)
+  let interiorError12 = interiorError (UvPoint uInterior1 vInterior2)
+  let interiorError22 = interiorError (UvPoint uInterior2 vInterior2)
+  let maxError =
+        maxCornerError
+          `max` interiorError11
+          `max` interiorError21
+          `max` interiorError12
+          `max` interiorError22
+  if Resolution.acceptable (#size size) (#error maxError) resolution
     then Set2D.Leaf uvBounds uvBounds
     else do
-      let Bounds2D uBounds vBounds = uvBounds
-      let (u1, u2) = Interval.bisect uBounds
-      let (v1, v2) = Interval.bisect vBounds
-      let set11 = boundarySurfaceSegmentSet resolution surfaceFunction (Bounds2D u1 v1)
-      let set12 = boundarySurfaceSegmentSet resolution surfaceFunction (Bounds2D u1 v2)
-      let set21 = boundarySurfaceSegmentSet resolution surfaceFunction (Bounds2D u2 v1)
-      let set22 = boundarySurfaceSegmentSet resolution surfaceFunction (Bounds2D u2 v2)
-      let set1 = Set2D.Node (Bounds2D u1 vBounds) set11 set12
-      let set2 = Set2D.Node (Bounds2D u2 vBounds) set21 set22
+      let Interval u1 u2 = uBounds
+      let Interval v1 v2 = vBounds
+      let pMid1 = SurfaceFunction3D.point function (UvPoint uMid v1)
+      let pMid2 = SurfaceFunction3D.point function (UvPoint uMid v2)
+      let p1Mid = SurfaceFunction3D.point function (UvPoint u1 vMid)
+      let p2Mid = SurfaceFunction3D.point function (UvPoint u2 vMid)
+      let uBounds1 = Interval u1 uMid
+      let uBounds2 = Interval uMid u2
+      let vBounds1 = Interval v1 vMid
+      let vBounds2 = Interval vMid v2
+      let uvBounds11 = UvBounds uBounds1 vBounds1
+      let uvBounds21 = UvBounds uBounds2 vBounds1
+      let uvBounds12 = UvBounds uBounds1 vBounds2
+      let uvBounds22 = UvBounds uBounds2 vBounds2
+      let set11 = boundarySurfaceSegmentSet resolution function uvBounds11 p11 pMid1 p1Mid pCenter
+      let set21 = boundarySurfaceSegmentSet resolution function uvBounds21 pMid1 p21 pCenter p2Mid
+      let set12 = boundarySurfaceSegmentSet resolution function uvBounds12 p1Mid pCenter p12 pMid2
+      let set22 = boundarySurfaceSegmentSet resolution function uvBounds22 pCenter p2Mid pMid2 p22
+      let set1 = Set2D.Node (Bounds2D uBounds vBounds1) set11 set21
+      let set2 = Set2D.Node (Bounds2D uBounds vBounds2) set12 set22
       Set2D.Node uvBounds set1 set2
-
-surfaceSize :: SurfaceFunction3D space -> UvBounds -> Length
-surfaceSize f uvBounds = do
-  let p00 = SurfaceFunction3D.point f (Bounds2D.lowerLeftCorner uvBounds)
-  let p10 = SurfaceFunction3D.point f (Bounds2D.lowerRightCorner uvBounds)
-  let p01 = SurfaceFunction3D.point f (Bounds2D.upperLeftCorner uvBounds)
-  let p11 = SurfaceFunction3D.point f (Bounds2D.upperRightCorner uvBounds)
-  let d1# = Point3D.distanceFrom# p00 p10
-  let d2# = Point3D.distanceFrom# p10 p11
-  let d3# = Point3D.distanceFrom# p11 p01
-  let d4# = Point3D.distanceFrom# p01 p00
-  let d5# = Point3D.distanceFrom# p00 p11
-  let d6# = Point3D.distanceFrom# p10 p01
-  Quantity# (max# (max# (max# (max# (max# d1# d2#) d3#) d4#) d5#) d6#)
-
-surfaceError :: SurfaceFunction3D space -> UvBounds -> Length
-surfaceError f uvBounds = do
-  let fuuBounds = VectorSurfaceFunction3D.bounds (f.du & VectorSurfaceFunction3D.derivative U) uvBounds
-  let fuvBounds = VectorSurfaceFunction3D.bounds (f.du & VectorSurfaceFunction3D.derivative V) uvBounds
-  let fvvBounds = VectorSurfaceFunction3D.bounds (f.dv & VectorSurfaceFunction3D.derivative V) uvBounds
-  SurfaceLinearization.error fuuBounds fuvBounds fvvBounds uvBounds
 
 addBoundaryInnerEdgeVertices ::
   Resolution Meters ->
@@ -784,10 +801,10 @@ boundarySurfaceMesh ::
   BoundarySurface space ->
   Mesh vertex
 boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById toVertex boundarySurface = do
-  let BoundarySurface{surfaceId, surfaceFunction, handedness, edgeLoops} = boundarySurface
-  case SurfaceFunction3D.normalDirection surfaceFunction of
+  let BoundarySurface{surfaceId, handedness, edgeLoops} = boundarySurface
+  case SurfaceFunction3D.nondegenerate boundarySurface.surfaceFunction of
     Error IsDegenerate -> Mesh.empty
-    Ok normalDirection -> do
+    Ok surfaceFunction -> do
       let boundaryPolygons = NonEmpty.map (toPolygon innerEdgeVerticesById) edgeLoops
       let boundarySegments = NonEmpty.combine Polygon2D.edges boundaryPolygons
       let boundarySegmentSet = Set2D.partitionBy Line2D.bounds boundarySegments
@@ -808,7 +825,7 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById toVertex boundaryS
           -- Decent refinement option: (Just (List.length steinerPoints, steinerVertex))
           let uvPointMesh = CDT.unsafe boundaryVertexLoops steinerPoints
           let uvPoints = Mesh.vertices uvPointMesh
-          let vertices = Array.map (toVertex surfaceFunction normalDirection handedness) uvPoints
+          let vertices = Array.map (toVertex surfaceFunction handedness) uvPoints
           let faceIndices =
                 case handedness of
                   Positive -> Mesh.faceIndices uvPointMesh
