@@ -3,6 +3,7 @@ module OpenSolid.Resolution
   , maxError
   , maxSize
   , custom
+  , acceptable
   , predicate
   )
 where
@@ -41,5 +42,9 @@ predicate ::
   a ->
   Bool
 predicate ("size" ::: size) ("error" ::: error) resolution value =
-  (Quantity.isInfinite resolution.maxSize || size value <= resolution.maxSize)
-    && (Quantity.isInfinite resolution.maxError || error value <= resolution.maxError)
+  acceptable (#size (size value)) (#error (error value)) resolution
+
+acceptable :: "size" ::: Quantity units -> "error" ::: Quantity units -> Resolution units -> Bool
+acceptable ("size" ::: size) ("error" ::: error) resolution =
+  (Quantity.isInfinite resolution.maxSize || size <= resolution.maxSize)
+    && (Quantity.isInfinite resolution.maxError || error <= resolution.maxError)
