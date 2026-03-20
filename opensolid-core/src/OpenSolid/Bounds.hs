@@ -4,6 +4,7 @@ module OpenSolid.Bounds
   , constant
   , contains
   , aggregate2
+  , intersection
   , cyclicCoordinate
   , diameter
   )
@@ -38,6 +39,10 @@ class
     Bounds dimension units space ->
     Bounds dimension units space ->
     Bounds dimension units space
+  intersection ::
+    Bounds dimension units space ->
+    Bounds dimension units space ->
+    Maybe (Bounds dimension units space)
   cyclicCoordinate :: Int -> Bounds dimension units space -> Interval units
   diameter :: Bounds dimension units space -> Quantity units
 
@@ -45,6 +50,7 @@ instance Exists 2 units space where
   constant = Bounds2D.constant
   contains = Bounds2D.contains
   aggregate2 = Bounds2D.aggregate2
+  intersection = Bounds2D.intersection
   cyclicCoordinate i (Bounds2D x y) = case i % 2 of 0 -> x; _ -> y
   diameter = Bounds2D.diameter
 
@@ -52,5 +58,6 @@ instance Exists 3 Meters space where
   constant = Bounds3D.constant
   contains = Bounds3D.contains
   aggregate2 = Bounds3D.aggregate2
+  intersection = Bounds3D.intersection
   cyclicCoordinate i (Bounds3D x y z) = case i % 3 of 0 -> x; 1 -> y; _ -> z
   diameter = Bounds3D.diameter
