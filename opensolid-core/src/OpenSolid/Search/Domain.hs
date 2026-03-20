@@ -5,6 +5,7 @@ module OpenSolid.Search.Domain
   , contains
   , overlapping
   , isSmall
+  , isPrimary
   , unitInterval
   , pairwise
   , Size (..)
@@ -30,21 +31,27 @@ class Bounds bounds where
   contains :: bounds -> bounds -> Bool
   overlapping :: bounds -> bounds -> Bool
   isSmall :: bounds -> Bool
+  isPrimary :: bounds -> Bool
 
 instance Bounds (Interval Unitless) where
   contains = Interval.contains
   overlapping interval1 interval2 = Interval.overlap interval1 interval2 > 0.0
   isSmall interval = Interval.width interval <= Desingularization.t0
+  isPrimary (Interval low high) = do
+    let n = low / (high - low)
+    Number.floor n == Number.ceiling n
 
 instance Bounds UvBounds where
   contains = Bounds2D.contains
   overlapping (UvBounds u1 v1) (UvBounds u2 v2) = overlapping u1 u2 && overlapping v1 v2
   isSmall (UvBounds u v) = isSmall u && isSmall v
+  isPrimary (UvBounds u v) = isPrimary u && isPrimary v
 
 instance (Bounds bounds1, Bounds bounds2) => Bounds (bounds1, bounds2) where
   contains (b1, b2) (a1, a2) = contains b1 a1 && contains b2 a2
   overlapping (b1, b2) (a1, a2) = overlapping b1 a1 && overlapping b2 a2
   isSmall (b1, b2) = isSmall b1 && isSmall b2
+  isPrimary (b1, b2) = isPrimary b1 && isPrimary b2
 
 unitInterval :: Domain (Interval Unitless)
 unitInterval = split Interval.unit
