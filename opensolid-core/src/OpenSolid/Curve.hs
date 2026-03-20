@@ -30,6 +30,7 @@ module OpenSolid.Curve
   , Intersections (IntersectionPoints, OverlappingSegments)
   , IntersectionPoint
   , intersections
+  , linearDeviation
   , samplingPoints
   )
 where
@@ -272,6 +273,18 @@ intersections ::
   Result IsDegenerate (Maybe Intersections)
 intersections = Intersections.intersections
 
+linearDeviation ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Interval Unitless ->
+  Quantity units
+linearDeviation curve (Interval t1 t2) = do
+  let p1 = point curve t1
+  let p2 = point curve t2
+  let pMid = point curve (Number.midpoint t1 t2)
+  let midError = Point.linearDeviation p1 p2 pMid
+  max midError (leftRightError curve t1 t2 p1 p2)
+
 samplingPoints ::
   Exists dimension units space =>
   Resolution units ->
@@ -279,16 +292,10 @@ samplingPoints ::
   NonEmpty Number
 samplingPoints resolution curve = do
   let collect (Interval t1 t2) p1 p2 accumulated = do
-        let tWidth = t2 - t1
-        let tMid = t1 + 0.5 * tWidth
+        let tMid = Number.midpoint t1 t2
         let pMid = point curve tMid
         let midError = Point.linearDeviation p1 p2 pMid
-        let lobattoOffset = 0.5 * tWidth * Number.sqrt (3 / 7)
-        let tLeft = tMid + lobattoOffset
-        let tRight = tMid - lobattoOffset
-        let leftError = Point.linearDeviation p1 p2 (point curve tLeft)
-        let rightError = Point.linearDeviation p1 p2 (point curve tRight)
-        let error = midError `max` leftError `max` rightError
+        let error = max midError (leftRightError curve t1 t2 p1 p2)
         let size = Point.distanceFrom p1 p2
         if Resolution.acceptable ("size" ::: size) ("error" ::: error) resolution
           then NonEmpty.push t1 accumulated
@@ -297,3 +304,21 @@ samplingPoints resolution curve = do
               & collect (Interval tMid t2) pMid p2
               & collect (Interval t1 tMid) p1 pMid
   collect Interval.unit (startPoint curve) (endPoint curve) (NonEmpty.one 1.0)
+
+leftRightError ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Number ->
+  Number ->
+  Point dimension units space ->
+  Point dimension units space ->
+  Quantity units
+leftRightError curve t1 t2 p1 p2 = do
+  let tWidth = t2 - t1
+  let tMid = t1 + 0.5 * tWidth
+  let tOffset = 0.5 * tWidth * Number.sqrt (3 / 7)
+  let tLeft = tMid + tOffset
+  let tRight = tMid - tOffset
+  let leftError = Point.linearDeviation p1 p2 (point curve tLeft)
+  let rightError = Point.linearDeviation p1 p2 (point curve tRight)
+  max leftError rightError
