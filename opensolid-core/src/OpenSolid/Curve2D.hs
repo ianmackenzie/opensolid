@@ -53,6 +53,7 @@ module OpenSolid.Curve2D
   , isOnAxis
   , xCoordinate
   , yCoordinate
+  , coordinates
   , placeIn
   , relativeTo
   , placeOn
@@ -78,7 +79,6 @@ module OpenSolid.Curve2D
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.ArcLength qualified as ArcLength
@@ -174,15 +174,6 @@ type Compiled units space =
 type Segment units space = Curve.Segment 2 units space
 
 type SearchTree units space = Curve.Search.Tree 2 units space
-
-instance HasField "xCoordinate" (Curve2D units space) (Curve1D units) where
-  getField = xCoordinate
-
-instance HasField "yCoordinate" (Curve2D units space) (Curve1D units) where
-  getField = yCoordinate
-
-instance HasField "coordinates" (Curve2D units space) (Curve1D units, Curve1D units) where
-  getField = coordinates
 
 instance FFI (Curve2D Meters FFI.Space) where
   representation = FFI.classRepresentation "Curve2D"
@@ -1043,8 +1034,8 @@ medialAxis curve1 curve2 = do
               (curve1 . SurfaceFunction1D.u) + radius * (normal1 . SurfaceFunction1D.u)
         let toSegment solutionCurve =
               MedialAxis.Segment
-                { t1 = solutionCurve.xCoordinate
-                , t2 = solutionCurve.yCoordinate
+                { t1 = xCoordinate solutionCurve
+                , t2 = yCoordinate solutionCurve
                 , t12 = solutionCurve
                 , curve = curve . solutionCurve
                 , radius = radius . solutionCurve

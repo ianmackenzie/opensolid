@@ -1524,8 +1524,8 @@ curve2D =
     , Class.member1 "Point" "Parameter Value" (flip Curve2D.point) $(docs 'Curve2D.point)
     , Class.property "Derivative" Curve2D.derivative "The derivative of the curve."
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
-    , Class.property "X Coordinate" (.xCoordinate) $(docs 'Curve2D.xCoordinate)
-    , Class.property "Y Coordinate" (.yCoordinate) $(docs 'Curve2D.yCoordinate)
+    , Class.property "X Coordinate" (Curve2D.xCoordinate) $(docs 'Curve2D.xCoordinate)
+    , Class.property "Y Coordinate" (Curve2D.yCoordinate) $(docs 'Curve2D.yCoordinate)
     , Class.plus @DisplacementCurve2D Self
     , Class.minus @DisplacementCurve2D Self
     , Class.minusSelf
@@ -1554,8 +1554,8 @@ uvCurve =
     , Class.member1 "Point" "Parameter Value" (flip Curve2D.point) $(docs 'Curve2D.point)
     , Class.property "Derivative" Curve2D.derivative "The derivative of the curve."
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
-    , Class.property "U Coordinate" (.xCoordinate) "Get the U coordinate of a UV curve as a scalar curve."
-    , Class.property "V Coordinate" (.yCoordinate) "Get the V coordinate of a UV curve as a scalar curve."
+    , Class.property "U Coordinate" (Curve2D.xCoordinate) "Get the U coordinate of a UV curve as a scalar curve."
+    , Class.property "V Coordinate" (Curve2D.yCoordinate) "Get the V coordinate of a UV curve as a scalar curve."
     , Class.plus @UvVectorCurve Self
     , Class.minus @UvVectorCurve Self
     , Class.minusSelf

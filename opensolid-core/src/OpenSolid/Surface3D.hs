@@ -151,7 +151,7 @@ revolved ::
 revolved sketchPlane curve axis angle = do
   let frame2D = Frame2D.fromYAxis axis
   let localCurve = Curve2D.relativeTo frame2D curve
-  let xCoordinate = localCurve.xCoordinate
+  let xCoordinate = Curve2D.xCoordinate localCurve
   if xCoordinate ~= Curve1D.zero
     then Error Revolved.ProfileIsOnAxis
     else case Curve1D.sign xCoordinate of
@@ -163,7 +163,7 @@ revolved sketchPlane curve axis angle = do
               Negative -> (SurfaceFunction1D.v, SurfaceFunction1D.u)
         let theta = angle * revolutionParameter
         let radius = xCoordinate . curveParameter
-        let height = localCurve.yCoordinate . curveParameter
+        let height = Curve2D.yCoordinate localCurve . curveParameter
         let surfaceFunction =
               frame3D.originPoint
                 + radius * SurfaceFunction1D.cos theta * frame3D.rightwardDirection
