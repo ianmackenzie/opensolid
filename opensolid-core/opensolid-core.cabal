@@ -246,6 +246,7 @@ library
     OpenSolid.VectorBounds2D
     OpenSolid.VectorBounds3D
     OpenSolid.VectorCurve
+    OpenSolid.VectorCurve.Direction
     OpenSolid.VectorCurve.Nondegenerate
     OpenSolid.VectorCurve.Nonzero
     OpenSolid.VectorCurve2D

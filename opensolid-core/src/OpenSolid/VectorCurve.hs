@@ -43,7 +43,6 @@ import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DirectionCurve (DirectionCurve)
 import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
-import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate), Nondegenerate (Nondegenerate))
@@ -59,6 +58,7 @@ import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
+import OpenSolid.VectorCurve.Direction qualified as VectorCurve.Direction
 import {-# SOURCE #-} OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -232,14 +232,7 @@ directionBounds ::
   Interval Unitless ->
   DirectionBounds dimension space
 directionBounds curve tBounds =
-  DirectionBounds.unsafe $
-    VectorBounds.normalize $
-      if
-        | Interval.lower tBounds == 0.0 && singular0 curve ->
-            derivativeBounds curve tBounds
-        | Interval.upper tBounds == 1.0 && singular1 curve ->
-            negate (derivativeBounds curve tBounds)
-        | otherwise -> bounds curve tBounds
+  VectorCurve.Direction.bounds curve tBounds (bounds curve tBounds) (derivativeBounds curve tBounds)
 
 zeros ::
   (Exists dimension units space, Tolerance units) =>
