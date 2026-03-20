@@ -1,6 +1,8 @@
 module OpenSolid.VectorCurve
   ( VectorCurve
   , Exists
+  , singular0
+  , singular1
   , value
   , bounds
   , derivative
@@ -35,6 +37,8 @@ instance Exists 2 units space
 
 instance Exists 3 units space
 
+singular0 :: Exists dimension units space => VectorCurve dimension units space -> Bool
+singular1 :: Exists dimension units space => VectorCurve dimension units space -> Bool
 value ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
