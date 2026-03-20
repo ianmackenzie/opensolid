@@ -6,9 +6,11 @@ module OpenSolid.Maybe
   , collect
   , isJust
   , isNothing
+  , orFail
   )
 where
 
+import Data.Text qualified
 import OpenSolid.Prelude
 import Prelude qualified
 
@@ -36,3 +38,7 @@ isJust Nothing = False
 isNothing :: Maybe a -> Bool
 isNothing Nothing = True
 isNothing (Just _) = False
+
+orFail :: MonadFail m => Text -> Maybe a -> m a
+orFail _ (Just value) = Prelude.return value
+orFail message Nothing = Prelude.fail (Data.Text.unpack message)
