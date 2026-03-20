@@ -748,10 +748,8 @@ edgeLinearizationPredicate
     let startPoint = Curve3D.point curve3D tStart
     let endPoint = Curve3D.point curve3D tEnd
     let edgeLength = Point3D.distanceFrom startPoint endPoint
-    let edgeSecondDerivativeBounds = Curve3D.secondDerivativeBounds curve3D tBounds
-    let edgeSecondDerivativeMagnitude = VectorBounds3D.magnitude edgeSecondDerivativeBounds
-    edgeLength <= resolution.maxSize
-      && Linearization.error edgeSecondDerivativeMagnitude tBounds <= resolution.maxError
+    let edgeLinearDeviation = Curve.linearDeviation curve3D tBounds
+    Resolution.acceptable (#size edgeLength) (#error edgeLinearDeviation) resolution
       && validEdge uvBounds edgeSize surfaceSegments
       && validEdge matingUvBounds matingEdgeSize matingSurfaceSegments
 
