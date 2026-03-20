@@ -1,5 +1,3 @@
-{-# LANGUAGE NoFieldSelectors #-}
-
 module OpenSolid.CDT (unsafe) where
 
 import Foreign qualified
