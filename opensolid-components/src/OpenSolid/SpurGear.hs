@@ -21,7 +21,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
-import OpenSolid.Vector2D qualified as Vector2D
+import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 -- | A metric spur gear.
 data SpurGear = Metric {numTeeth :: Int, module_ :: Length}
@@ -66,6 +66,7 @@ that you can then extrude to form a gear body.
 -}
 profile :: Tolerance Meters => SpurGear -> List (Curve2D Meters space)
 profile gear = do
+  -- Dimensions
   let n = numTeeth gear
   let m = module_ gear
   let phi = Angle.degrees 20.0 -- pressure angle
@@ -77,33 +78,31 @@ profile gear = do
         | rd > rb = Angle.radians (Number.sqrt (Number.squared (rd / rb) - 1.0))
         | otherwise = Angle.zero
   let theta2 = Angle.radians (Number.sqrt (Number.squared (ra / rb) - 1.0))
+
+  -- Curve definition
   let theta = Curve1D.interpolateFrom theta1 theta2
-  let alpha = Angle.radians (Angle.tan phi - Angle.inRadians phi + Number.pi / Number.fromInt (2 * n))
-  let x = rb * (Curve1D.sin (theta - alpha) - theta / Angle.radian * Curve1D.cos (theta - alpha))
-  let y = rb * (Curve1D.cos (theta - alpha) + theta / Angle.radian * Curve1D.sin (theta - alpha))
-  let involuteLeft = Curve2D.xy x y
-  let leftStart = Curve2D.startPoint involuteLeft
-  let leftEnd = Curve2D.endPoint involuteLeft
-  let leftStartTangent
-        | rd > rb = Vector2D.normalize (Curve2D.derivativeValue involuteLeft 0.0)
-        | otherwise = Vector2D.polar 1.0 (Angle.halfPi + alpha)
-  let leftEndTangent = Vector2D.normalize (Curve2D.derivativeValue involuteLeft 1.0)
-  let leftDerivativeMagnitude = Point2D.distanceFrom leftStart leftEnd
-  let leftApproximation =
-        Curve2D.hermite
-          leftStart
-          [leftDerivativeMagnitude * leftStartTangent]
-          leftEnd
-          [leftDerivativeMagnitude * leftEndTangent]
-  let rightApproximation = Curve2D.mirrorAcross Axis2D.y leftApproximation
-  let tip = Curve2D.lineFrom (Curve2D.endPoint leftApproximation) (Curve2D.endPoint rightApproximation)
+  let theta_ = theta / Angle.radians 1.0
+  let deltaTheta_ = (theta2 - theta1) / Angle.radians 1.0
+  let alpha = Angle.radians (Angle.tan phi) - phi + Angle.pi / Number.fromInt (2 * n)
+  let sinTerm = Curve1D.sin (theta - alpha)
+  let cosTerm = Curve1D.cos (theta - alpha)
+  let x = rb * (sinTerm - theta_ * cosTerm)
+  let y = rb * (cosTerm + theta_ * sinTerm)
+  let positionCurve = Curve2D.xy x y
+  let derivativeCurve = rb * theta_ * deltaTheta_ * VectorCurve2D.xy sinTerm cosTerm
+  let involuteLeft = Curve2D.new (Curve2D.compiled positionCurve) derivativeCurve
+  let involuteRight = Curve2D.mirrorAcross Axis2D.y involuteLeft
+
+  -- Profile construction
+  let tip = Curve2D.lineFrom (Curve2D.endPoint involuteLeft) (Curve2D.endPoint involuteRight)
   let angularSpacing = Angle.twoPi / Number.fromInt n
   let nextToothStart =
-        Point2D.rotateAround Point2D.origin angularSpacing (Curve2D.startPoint rightApproximation)
+        Point2D.rotateAround Point2D.origin angularSpacing (Curve2D.startPoint involuteRight)
+  let leftStart = Curve2D.startPoint involuteLeft
   let connector
         | rd > rb = Curve2D.lineFrom leftStart nextToothStart
         | otherwise = Curve2D.arcFrom leftStart nextToothStart -Angle.pi
-  let toothProfileCurves = [leftApproximation, rightApproximation, tip, connector]
+  let toothProfileCurves = [connector, involuteLeft, tip, involuteRight]
   let rotatedProfileCurves i = do
         let angle = Number.fromInt i * angularSpacing
         List.map (Curve2D.rotateAround Point2D.origin angle) toothProfileCurves
