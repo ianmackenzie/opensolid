@@ -6,6 +6,7 @@ module OpenSolid.Search
   , surfaceDomain
   , tree
   , pairwise
+  , primary
   , exclusive
   , isInterior
   )
@@ -57,6 +58,25 @@ pairwise ::
 pairwise function (Tree domainBounds1 value1 children1) (Tree domainBounds2 value2 children2) =
   Tree (domainBounds1, domainBounds2) (function value1 value2) $
     [pairwise function child1 child2 | child1 <- children1, child2 <- children2]
+
+primary ::
+  (bounds -> value -> Fuzzy (Maybe solution)) ->
+  Tree bounds value ->
+  List (bounds, solution)
+primary callback searchTree = collectPrimary callback searchTree []
+
+collectPrimary ::
+  (bounds -> value -> Fuzzy (Maybe solution)) ->
+  Tree bounds value ->
+  List (bounds, solution) ->
+  List (bounds, solution)
+collectPrimary callback (Tree bounds value children) accumulated =
+  if Domain.isPrimary bounds
+    then case callback bounds value of
+      Resolved Nothing -> accumulated
+      Resolved (Just solution) -> (bounds, solution) : accumulated
+      Unresolved -> List.foldr (collectPrimary callback) accumulated children
+    else accumulated
 
 data SolutionTree bounds solution
   = Leaf bounds (Maybe solution)
