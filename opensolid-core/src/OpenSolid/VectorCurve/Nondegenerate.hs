@@ -13,9 +13,10 @@ import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
-import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Prelude
+import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorCurve (VectorCurve)
@@ -42,22 +43,20 @@ direction ::
 direction (Nondegenerate curve) = DirectionCurve.unsafe (curve / magnitude (Nondegenerate curve))
 
 directionValue ::
-  ( VectorCurve.Exists dimension units space
-  , Direction.Exists dimension space
-  , Tolerance units
-  ) =>
+  (VectorCurve.Exists dimension units space, Direction.Exists dimension space) =>
   Nondegenerate (VectorCurve dimension units space) ->
   Number ->
   Direction dimension space
-directionValue (Nondegenerate curve) tValue = do
-  let value = VectorCurve.value curve tValue
+directionValue (Nondegenerate curve) tValue =
   Direction.unsafe $
-    Vector.normalize $
-      if
-        | value != Vector.zero -> value
-        | tValue == 0.0 -> VectorCurve.derivativeValue curve tValue
-        | tValue == 1.0 -> negate (VectorCurve.derivativeValue curve tValue)
-        | otherwise -> throw (InternalError "Internal degeneracy in Nondegenerate vector curve")
+    Tolerance.using Quantity.zero $
+      Vector.normalize $
+        if
+          | tValue == 0.0 && VectorCurve.singular0 curve ->
+              VectorCurve.derivativeValue curve 0.0
+          | tValue == 1.0 && VectorCurve.singular1 curve ->
+              negate (VectorCurve.derivativeValue curve 1.0)
+          | otherwise -> VectorCurve.value curve tValue
 
 squaredMagnitude ::
   ( VectorCurve.Exists dimension units1 space
