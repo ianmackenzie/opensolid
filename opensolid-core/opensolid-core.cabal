@@ -254,6 +254,7 @@ library
     OpenSolid.VectorSurfaceFunction
     OpenSolid.VectorSurfaceFunction2D
     OpenSolid.VectorSurfaceFunction3D
+    OpenSolid.VectorSurfaceFunction3D.Nondegenerate
     OpenSolid.Volume
     OpenSolid.World3D
 

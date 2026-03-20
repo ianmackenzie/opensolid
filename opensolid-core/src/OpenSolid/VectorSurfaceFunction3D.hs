@@ -9,6 +9,7 @@ module OpenSolid.VectorSurfaceFunction3D
   , singularU1
   , singularV0
   , singularV1
+  , nondegenerate
   , desingularize
   , desingularized
   , zero
@@ -48,8 +49,8 @@ import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.NewtonRaphson3D qualified as NewtonRaphson3D
-import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate), Nondegenerate (Nondegenerate))
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
@@ -513,6 +514,12 @@ singularV0 = (.singularV0)
 
 singularV1 :: VectorSurfaceFunction3D units space -> Bool
 singularV1 = (.singularV1)
+
+nondegenerate ::
+  Tolerance units =>
+  VectorSurfaceFunction3D units space ->
+  Result IsDegenerate (Nondegenerate (VectorSurfaceFunction3D units space))
+nondegenerate function = if isZero function then Error IsDegenerate else Ok (Nondegenerate function)
 
 desingularize ::
   VectorSurfaceFunction3D units space ->
