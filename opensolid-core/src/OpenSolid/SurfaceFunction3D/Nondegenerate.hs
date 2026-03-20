@@ -1,5 +1,6 @@
 module OpenSolid.SurfaceFunction3D.Nondegenerate
-  ( derivative
+  ( point
+  , derivative
   , normalDirectionValue
   )
 where
@@ -7,6 +8,7 @@ where
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
@@ -17,6 +19,12 @@ import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D.Nondegenerate qualified as VectorSurfaceFunction3D.Nondegenerate
+
+point ::
+  Nondegenerate (SurfaceFunction3D space) ->
+  UvPoint ->
+  Point3D space
+point (Nondegenerate function) uvPoint = SurfaceFunction3D.point function uvPoint
 
 derivative ::
   SurfaceParameter ->
