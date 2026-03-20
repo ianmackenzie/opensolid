@@ -18,6 +18,8 @@ module OpenSolid.Curve
   , secondDerivativeValue
   , secondDerivativeBounds
   , isPoint
+  , singular0
+  , singular1
   , nondegenerate
   , nonzero
   , tangentDirection
@@ -135,6 +137,12 @@ secondDerivative = VectorCurve.derivative . derivative
 
 isPoint :: (Exists dimension units space, Tolerance units) => Curve dimension units space -> Bool
 isPoint curve = VectorCurve.isZero (derivative curve)
+
+singular0 :: Exists dimension units space => Curve dimension units space -> Bool
+singular0 curve = VectorCurve.singular0 (derivative curve)
+
+singular1 :: Exists dimension units space => Curve dimension units space -> Bool
+singular1 curve = VectorCurve.singular1 (derivative curve)
 
 nondegenerate ::
   (Exists dimension units space, Tolerance units) =>

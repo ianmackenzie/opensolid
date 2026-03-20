@@ -13,6 +13,8 @@ module OpenSolid.Curve
   , secondDerivativeBounds
   , tangentDirection
   , curvatureVector_
+  , singular0
+  , singular1
   )
 where
 
@@ -95,3 +97,5 @@ curvatureVector_ ::
   ) =>
   Curve dimension units space ->
   Result HasSingularity (VectorCurve dimension (Unitless ?/? units) space)
+singular0 :: Exists dimension units space => Curve dimension units space -> Bool
+singular1 :: Exists dimension units space => Curve dimension units space -> Bool
