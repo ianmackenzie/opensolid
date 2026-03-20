@@ -21,7 +21,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (Nondegenerate)
+import OpenSolid.Nondegenerate (IsDegenerate, Nondegenerate)
 import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Pair qualified as Pair
@@ -55,7 +55,7 @@ intersections ::
   ) =>
   Curve dimension units space ->
   Curve dimension units space ->
-  Result Curve.IsPoint (Maybe Intersections)
+  Result IsDegenerate (Maybe Intersections)
 intersections curve1 curve2 = do
   nondegenerate1 <- Curve.nondegenerate curve1
   nondegenerate2 <- Curve.nondegenerate curve2

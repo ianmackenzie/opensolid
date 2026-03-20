@@ -72,7 +72,7 @@ import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson2D qualified as NewtonRaphson2D
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate (IsDegenerate, Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
@@ -516,7 +516,7 @@ derivative = (.derivative)
 nondegenerate ::
   Tolerance units =>
   VectorCurve2D units space ->
-  Result VectorCurve.IsZero (Nondegenerate (VectorCurve2D units space))
+  Result IsDegenerate (Nondegenerate (VectorCurve2D units space))
 nondegenerate = VectorCurve.nondegenerate
 
 transformBy ::
@@ -777,13 +777,13 @@ magnitude = VectorCurve.magnitude
 isZero :: Tolerance units => VectorCurve2D units space -> Bool
 isZero curve = curve.maxSampledMagnitude <= ?tolerance
 
-zeros :: Tolerance units => VectorCurve2D units space -> Result VectorCurve.IsZero (List Number)
+zeros :: Tolerance units => VectorCurve2D units space -> Result IsDegenerate (List Number)
 zeros = VectorCurve.zeros
 
 direction ::
   Tolerance units =>
   VectorCurve2D units space ->
-  Result VectorCurve.IsZero (DirectionCurve2D space)
+  Result IsDegenerate (DirectionCurve2D space)
 direction = VectorCurve.direction
 
 placeIn ::

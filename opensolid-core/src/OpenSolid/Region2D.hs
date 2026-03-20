@@ -61,6 +61,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
@@ -296,7 +297,7 @@ checkCurvesForInnerIntersection curve1 curve2 =
     -- We can ignore cases where either curve is actually a point,
     -- since we'll still find any inner intersections
     -- when we check with the *neighbours* of those degenerate curves
-    Error Curve.IsPoint -> Ok ()
+    Error IsDegenerate -> Ok ()
     -- Any overlap between boundary curves is bad
     Ok (Just Curve.OverlappingSegments{}) ->
       Error BoundedBy.BoundaryIntersectsItself

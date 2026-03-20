@@ -9,6 +9,7 @@ import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
+import OpenSolid.Nondegenerate (IsDegenerate)
 import OpenSolid.Prelude
 
 data Intersections
@@ -22,4 +23,4 @@ intersections ::
   ) =>
   Curve dimension units space ->
   Curve dimension units space ->
-  Result Curve.IsPoint (Maybe Intersections)
+  Result IsDegenerate (Maybe Intersections)

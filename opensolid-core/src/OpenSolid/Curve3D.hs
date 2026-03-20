@@ -44,7 +44,7 @@ import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (HasSingularity, IsPoint)
+import OpenSolid.Curve (HasSingularity)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve1D (Curve1D)
@@ -60,6 +60,7 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nondegenerate (IsDegenerate)
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D qualified as Point2D
@@ -301,7 +302,10 @@ secondDerivativeBounds ::
   VectorBounds3D Meters space
 secondDerivativeBounds = Curve.secondDerivativeBounds
 
-tangentDirection :: Tolerance Meters => Curve3D space -> Result IsPoint (DirectionCurve3D space)
+tangentDirection ::
+  Tolerance Meters =>
+  Curve3D space ->
+  Result IsDegenerate (DirectionCurve3D space)
 tangentDirection = Curve.tangentDirection
 
 curvatureVector ::
@@ -369,7 +373,7 @@ intersections ::
   Tolerance Meters =>
   Curve3D space ->
   Curve3D space ->
-  Result Curve.IsPoint (Maybe Curve.Intersections)
+  Result IsDegenerate (Maybe Curve.Intersections)
 intersections = Curve.intersections
 
 searchTree :: Curve3D space -> SearchTree space

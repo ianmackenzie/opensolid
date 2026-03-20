@@ -6,7 +6,6 @@ module OpenSolid.SurfaceFunction3D
   , point
   , bounds
   , derivative
-  , IsDegenerate (IsDegenerate)
   , normalDirection
   , placeIn
   , relativeTo
@@ -23,6 +22,7 @@ import OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
+import OpenSolid.Nondegenerate (IsDegenerate)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
@@ -192,28 +192,15 @@ derivative ::
 derivative U = (.du)
 derivative V = (.dv)
 
-data IsDegenerate = IsDegenerate deriving (Eq, Show)
-
-derivativeDirection ::
-  Tolerance units =>
-  VectorSurfaceFunction3D units space ->
-  Result IsDegenerate (DirectionSurfaceFunction3D space)
-derivativeDirection partialDerivative =
-  case VectorSurfaceFunction3D.direction partialDerivative of
-    Ok direction -> Ok direction
-    Error VectorSurfaceFunction3D.IsZero -> Error IsDegenerate
-
 normalDirection ::
   Tolerance Meters =>
   SurfaceFunction3D space ->
   Result IsDegenerate (DirectionSurfaceFunction3D space)
 normalDirection function = do
-  duDirection <- derivativeDirection function.du
-  dvDirection <- derivativeDirection function.dv
+  duDirection <- VectorSurfaceFunction3D.direction function.du
+  dvDirection <- VectorSurfaceFunction3D.direction function.dv
   let crossProduct = duDirection `cross` dvDirection
-  case Tolerance.using Tolerance.unitless (VectorSurfaceFunction3D.direction crossProduct) of
-    Ok directionFunction -> Ok directionFunction
-    Error VectorSurfaceFunction3D.IsZero -> Error IsDegenerate
+  Tolerance.using Tolerance.unitless (VectorSurfaceFunction3D.direction crossProduct)
 
 transformBy :: Transform3D tag space -> SurfaceFunction3D space -> SurfaceFunction3D space
 transformBy transform function = do

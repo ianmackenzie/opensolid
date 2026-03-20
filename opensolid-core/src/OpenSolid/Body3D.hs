@@ -55,6 +55,7 @@ import OpenSolid.Map qualified as Map
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D (Plane3D))
@@ -786,7 +787,7 @@ boundarySurfaceMesh ::
 boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById toVertex boundarySurface = do
   let BoundarySurface{surfaceId, surfaceFunction, handedness, edgeLoops} = boundarySurface
   case SurfaceFunction3D.normalDirection surfaceFunction of
-    Error SurfaceFunction3D.IsDegenerate -> Mesh.empty
+    Error IsDegenerate -> Mesh.empty
     Ok normalDirection -> do
       let boundaryPolygons = NonEmpty.map (toPolygon innerEdgeVerticesById) edgeLoops
       let boundarySegments = NonEmpty.combine Polygon2D.edges boundaryPolygons

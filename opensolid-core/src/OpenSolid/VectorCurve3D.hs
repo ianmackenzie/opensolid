@@ -55,7 +55,7 @@ import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate (IsDegenerate, Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
@@ -461,7 +461,7 @@ derivative = (.derivative)
 nondegenerate ::
   Tolerance units =>
   VectorCurve3D units space ->
-  Result VectorCurve.IsZero (Nondegenerate (VectorCurve3D units space))
+  Result IsDegenerate (Nondegenerate (VectorCurve3D units space))
 nondegenerate = VectorCurve.nondegenerate
 
 isZero :: Tolerance units => VectorCurve3D units space -> Bool
@@ -676,13 +676,13 @@ squaredMagnitude_ curve = do
 magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 magnitude = VectorCurve.magnitude
 
-zeros :: Tolerance units => VectorCurve3D units space -> Result VectorCurve.IsZero (List Number)
+zeros :: Tolerance units => VectorCurve3D units space -> Result IsDegenerate (List Number)
 zeros = VectorCurve.zeros
 
 direction ::
   Tolerance units =>
   VectorCurve3D units space ->
-  Result VectorCurve.IsZero (DirectionCurve3D space)
+  Result IsDegenerate (DirectionCurve3D space)
 direction = VectorCurve.direction
 
 placeIn ::

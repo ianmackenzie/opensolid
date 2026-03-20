@@ -21,7 +21,6 @@ module OpenSolid.VectorSurfaceFunction3D
   , squaredMagnitude
   , squaredMagnitude_
   , magnitude
-  , IsZero (IsZero)
   , direction
   , newtonRaphson
   )
@@ -38,6 +37,7 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.NewtonRaphson3D qualified as NewtonRaphson3D
+import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
@@ -604,14 +604,12 @@ squaredMagnitude = Units.specialize . squaredMagnitude_
 magnitude :: Tolerance units => VectorSurfaceFunction3D units space -> SurfaceFunction1D units
 magnitude function = SurfaceFunction1D.sqrt_ (squaredMagnitude_ function)
 
-data IsZero = IsZero deriving (Eq, Show)
-
 direction ::
   Tolerance units =>
   VectorSurfaceFunction3D units space ->
-  Result IsZero (DirectionSurfaceFunction3D space)
+  Result IsDegenerate (DirectionSurfaceFunction3D space)
 direction function = case quotient function (magnitude function) of
-  Error DivisionByZero -> Error IsZero
+  Error DivisionByZero -> Error IsDegenerate
   Ok normalizedFunction -> Ok (DirectionSurfaceFunction3D.unsafe normalizedFunction)
 
 newtonRaphson :: VectorSurfaceFunction3D units space -> UvPoint -> UvPoint

@@ -2,7 +2,6 @@ module OpenSolid.VectorCurve
   ( VectorCurve
   , Exists
   , Nondegenerate
-  , IsZero (IsZero)
   , isZero
   , constant
   , zero
@@ -41,7 +40,7 @@ import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate), Nondegenerate (Nondegenerate))
 import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
@@ -66,8 +65,6 @@ type family
   VectorCurve 1 units Void = Curve1D units
   VectorCurve 2 units space = VectorCurve2D units space
   VectorCurve 3 units space = VectorCurve3D units space
-
-data IsZero = IsZero deriving (Eq, Show)
 
 class
   ( Vector.Exists dimension units space
@@ -166,8 +163,8 @@ zero = constant Vector.zero
 nondegenerate ::
   (Exists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
-  Result IsZero (Nondegenerate (VectorCurve dimension units space))
-nondegenerate curve = if isZero curve then Error IsZero else Ok (Nondegenerate curve)
+  Result IsDegenerate (Nondegenerate (VectorCurve dimension units space))
+nondegenerate curve = if isZero curve then Error IsDegenerate else Ok (Nondegenerate curve)
 
 secondDerivative ::
   Exists dimension units space =>
@@ -206,17 +203,17 @@ secondDerivativeBounds curve tBounds = bounds (secondDerivative curve) tBounds
 direction ::
   (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>
   VectorCurve dimension units space ->
-  Result IsZero (DirectionCurve dimension space)
+  Result IsDegenerate (DirectionCurve dimension space)
 direction vectorCurve = Result.map VectorCurve.Nondegenerate.direction (nondegenerate vectorCurve)
 
 zeros ::
   (Exists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
-  Result IsZero (List Number)
+  Result IsDegenerate (List Number)
 zeros vectorCurve =
   case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.zeros (squaredMagnitude_ vectorCurve)) of
     Ok zeros1D -> Ok (List.map (.location) zeros1D)
-    Error Curve1D.IsZero -> Error IsZero
+    Error Curve1D.IsZero -> Error IsDegenerate
 
 desingularize ::
   Exists dimension units space =>

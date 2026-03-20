@@ -5,7 +5,6 @@ module OpenSolid.Curve
   , Exists
   , Segment
   , SearchTree
-  , IsPoint (IsPoint)
   , HasSingularity (HasSingularity)
   , derivative
   , overallBounds
@@ -52,7 +51,7 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate), Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
@@ -72,8 +71,6 @@ import OpenSolid.VectorCurve qualified as VectorCurve
 type family Curve dimension units space = curve | curve -> dimension units space where
   Curve 2 units space = Curve2D units space
   Curve 3 Meters space = Curve3D space
-
-data IsPoint = IsPoint deriving (Eq, Show)
 
 data HasSingularity = HasSingularity deriving (Eq, Show)
 
@@ -142,9 +139,9 @@ isPoint curve = VectorCurve.isZero (derivative curve)
 nondegenerate ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  Result IsPoint (Nondegenerate (Curve dimension units space))
+  Result IsDegenerate (Nondegenerate (Curve dimension units space))
 nondegenerate curve =
-  if VectorCurve.isZero (derivative curve) then Error IsPoint else Ok (Nondegenerate curve)
+  if VectorCurve.isZero (derivative curve) then Error IsDegenerate else Ok (Nondegenerate curve)
 
 nonzero ::
   (Exists dimension units space, Tolerance units) =>
@@ -158,11 +155,8 @@ nonzero curve =
 tangentDirection ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  Result IsPoint (DirectionCurve dimension space)
-tangentDirection curve =
-  case VectorCurve.direction (derivative curve) of
-    Ok directionCurve -> Ok directionCurve
-    Error VectorCurve.IsZero -> Error IsPoint
+  Result IsDegenerate (DirectionCurve dimension space)
+tangentDirection curve = VectorCurve.direction (derivative curve)
 
 curvatureVector_ ::
   ( Exists dimension units space
@@ -254,5 +248,5 @@ intersections ::
   ) =>
   Curve dimension units space ->
   Curve dimension units space ->
-  Result IsPoint (Maybe Intersections)
+  Result IsDegenerate (Maybe Intersections)
 intersections = Intersections.intersections

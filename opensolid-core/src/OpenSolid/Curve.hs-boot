@@ -1,7 +1,6 @@
 module OpenSolid.Curve
   ( Curve
   , Exists
-  , IsPoint
   , point
   , bounds
   , startPoint
@@ -23,6 +22,7 @@ import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.Interval (Interval)
+import OpenSolid.Nondegenerate (IsDegenerate)
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.Vector (Vector)
@@ -35,8 +35,6 @@ type family Curve dimension units space = curve | curve -> dimension units space
   Curve 3 Meters space = Curve3D space
 
 class Exists (dimension :: Natural) (units :: Type) (space :: Type)
-
-data IsPoint
 
 data HasSingularity
 
@@ -89,7 +87,7 @@ secondDerivativeBounds ::
 tangentDirection ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  Result IsPoint (DirectionCurve dimension space)
+  Result IsDegenerate (DirectionCurve dimension space)
 curvatureVector_ ::
   ( Exists dimension units space
   , VectorCurve.Exists dimension (Unitless ?/? units) space

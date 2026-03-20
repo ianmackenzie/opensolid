@@ -92,7 +92,7 @@ import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (HasSingularity, IsPoint (IsPoint))
+import OpenSolid.Curve (HasSingularity)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve1D (Curve1D)
@@ -117,6 +117,7 @@ import OpenSolid.Line2D (Line2D (Line2D))
 import OpenSolid.Linearization qualified as Linearization
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Orientation2D (Orientation2D)
 import OpenSolid.Orientation2D qualified as Orientation2D
@@ -724,7 +725,7 @@ secondDerivative = Curve.secondDerivative
 tangentDirection ::
   Tolerance units =>
   Curve2D units space ->
-  Result IsPoint (DirectionCurve2D space)
+  Result IsDegenerate (DirectionCurve2D space)
 tangentDirection = Curve.tangentDirection
 
 curvatureVector_ ::
@@ -743,7 +744,7 @@ offsetLeftwardBy ::
   Tolerance units =>
   Quantity units ->
   Curve2D units space ->
-  Result IsPoint (Curve2D units space)
+  Result IsDegenerate (Curve2D units space)
 offsetLeftwardBy offset curve = do
   tangentCurve <- tangentDirection curve
   let offsetCurve = VectorCurve2D.rotateBy Angle.quarterTurn (offset * tangentCurve)
@@ -753,7 +754,7 @@ offsetRightwardBy ::
   Tolerance units =>
   Quantity units ->
   Curve2D units space ->
-  Result IsPoint (Curve2D units space)
+  Result IsDegenerate (Curve2D units space)
 offsetRightwardBy distance = offsetLeftwardBy -distance
 
 distanceAlong :: Axis2D units space -> Curve2D units space -> Curve1D units
@@ -809,7 +810,7 @@ intersections ::
   Tolerance units =>
   Curve2D units space ->
   Curve2D units space ->
-  Result Curve.IsPoint (Maybe Curve.Intersections)
+  Result IsDegenerate (Maybe Curve.Intersections)
 intersections = Curve.intersections
 
 g2 ::
@@ -964,14 +965,14 @@ unconvert factor curve = convert (Units.simplify (1.0 ?/? factor)) curve
 curvature_ ::
   Tolerance units =>
   Curve2D units space ->
-  Result IsPoint (Curve1D (Unitless ?/? units))
+  Result IsDegenerate (Curve1D (Unitless ?/? units))
 curvature_ curve = do
   tangent <- tangentDirection curve
   let numerator = tangent `cross` secondDerivative curve
   let denominator = VectorCurve2D.squaredMagnitude_ (derivative curve)
   case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.quotient_ numerator denominator) of
     Ok quotient_ -> Ok (Units.simplify quotient_)
-    Error DivisionByZero -> Error IsPoint
+    Error DivisionByZero -> Error IsDegenerate
 
 {-| Get the curvature of a 2D curve.
 
@@ -985,7 +986,7 @@ Positive curvature is defined as curving to the left (relative to the curve's ta
 curvature ::
   (Tolerance units1, Units.Inverse units1 units2) =>
   Curve2D units1 space ->
-  Result IsPoint (Curve1D units2)
+  Result IsDegenerate (Curve1D units2)
 curvature curve = Result.map Units.specialize (curvature_ curve)
 
 toPolyline :: Resolution units -> Curve2D units space -> Polyline2D units space
@@ -1008,7 +1009,7 @@ medialAxis ::
   Tolerance units =>
   Curve2D units space ->
   Curve2D units space ->
-  Result IsPoint (List (MedialAxis.Segment units space))
+  Result IsDegenerate (List (MedialAxis.Segment units space))
 medialAxis curve1 curve2 = do
   let p1 = curve1 . SurfaceFunction1D.u
   let p2 = curve2 . SurfaceFunction1D.v
