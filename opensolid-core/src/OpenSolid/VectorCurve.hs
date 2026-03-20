@@ -21,6 +21,7 @@ module OpenSolid.VectorCurve
   , nondegenerate
   , magnitude
   , direction
+  , directionBounds
   , zeros
   , desingularized
   , desingularize
@@ -37,9 +38,12 @@ import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Zero qualified
 import OpenSolid.Desingularization qualified as Desingularization
+import OpenSolid.DirectionBounds (DirectionBounds)
+import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DirectionCurve (DirectionCurve)
 import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate), Nondegenerate (Nondegenerate))
@@ -54,6 +58,7 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds (VectorBounds)
+import OpenSolid.VectorBounds qualified as VectorBounds
 import {-# SOURCE #-} OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -70,6 +75,7 @@ type family
 
 class
   ( Vector.Exists dimension units space
+  , VectorBounds.Exists dimension units space
   , Exists dimension Unitless space
   , HasUnits (VectorCurve dimension units space) units
   , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
@@ -219,6 +225,21 @@ direction ::
   VectorCurve dimension units space ->
   Result IsDegenerate (DirectionCurve dimension space)
 direction vectorCurve = Result.map VectorCurve.Nondegenerate.direction (nondegenerate vectorCurve)
+
+directionBounds ::
+  (Exists dimension units space, DirectionBounds.Exists dimension space) =>
+  VectorCurve dimension units space ->
+  Interval Unitless ->
+  DirectionBounds dimension space
+directionBounds curve tBounds =
+  DirectionBounds.unsafe $
+    VectorBounds.normalize $
+      if
+        | Interval.lower tBounds == 0.0 && singular0 curve ->
+            derivativeBounds curve tBounds
+        | Interval.upper tBounds == 1.0 && singular1 curve ->
+            negate (derivativeBounds curve tBounds)
+        | otherwise -> bounds curve tBounds
 
 zeros ::
   (Exists dimension units space, Tolerance units) =>
