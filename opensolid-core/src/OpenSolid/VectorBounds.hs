@@ -44,6 +44,7 @@ class
   , HasUnits (VectorBounds dimension units space) units
   , Units.Coercion (VectorBounds dimension units space) (VectorBounds dimension Unitless space)
   , Units.Coercion (VectorBounds dimension Unitless space) (VectorBounds dimension units space)
+  , Show (VectorBounds dimension units space)
   , Negation (VectorBounds dimension units space)
   , Addition
       (VectorBounds dimension units space)
