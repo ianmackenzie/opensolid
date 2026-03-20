@@ -15,12 +15,13 @@ module OpenSolid.Curve.Segment
 where
 
 import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds qualified as Bounds
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.CurvatureVector qualified as Curve.CurvatureVector
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
-import OpenSolid.Interval (Interval)
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Point (Point)
@@ -29,6 +30,8 @@ import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
+import OpenSolid.VectorCurve qualified as VectorCurve
+import OpenSolid.VectorCurve.Direction qualified as VectorCurve.Direction
 
 data Segment dimension units space = Segment
   { startPoint :: ~(Point dimension units space)
@@ -119,28 +122,54 @@ distinctCurvatures segment1 segment2 = do
 
 new ::
   ( Curve.Exists dimension units space
+  , VectorCurve.Exists dimension units space
+  , Bounds.Exists dimension units space
   , DirectionBounds.Exists dimension space
   , VectorBounds.Exists dimension units space
   , VectorBounds.Exists dimension (Unitless ?/? units) space
+  , Addition
+      (Point dimension units space)
+      (VectorBounds dimension units space)
+      (Bounds dimension units space)
+  , Subtraction
+      (Point dimension units space)
+      (VectorBounds dimension units space)
+      (Bounds dimension units space)
   ) =>
   Curve dimension units space ->
   Interval Unitless ->
   Segment dimension units space
-new givenCurve givenParameterBounds = do
-  let curveStartPoint = Curve.startPoint givenCurve
-  let curveEndPoint = Curve.endPoint givenCurve
-  let curveBounds = Curve.bounds givenCurve givenParameterBounds
-  let curveDerivativeBounds = Curve.derivativeBounds givenCurve givenParameterBounds
-  let curveSecondDerivativeBounds = Curve.secondDerivativeBounds givenCurve givenParameterBounds
+new givenCurve tBounds = do
+  let Interval t1 t2 = tBounds
+  let p1 = Curve.point givenCurve t1
+  let p2 = Curve.point givenCurve t2
+  let segmentBounds0 = Curve.bounds givenCurve tBounds
+  let segmentDerivativeBounds = Curve.derivativeBounds givenCurve tBounds
+  let segmentSecondDerivativeBounds = Curve.secondDerivativeBounds givenCurve tBounds
+  let leftBounds = Bounds.aggregate2 (Bounds.constant p1) (p1 + 0.5 * segmentDerivativeBounds)
+  let rightBounds = Bounds.aggregate2 (Bounds.constant p2) (p2 - 0.5 * segmentDerivativeBounds)
+  let segmentBounds1 = Bounds.aggregate2 leftBounds rightBounds
+  let segmentBounds =
+        case Bounds.intersection segmentBounds0 segmentBounds1 of
+          Just intersection -> intersection
+          -- Shouldn't happen, bounds and derivative bounds should be consistent
+          Nothing -> segmentBounds0
+  let segmentTangentDirectionBounds =
+        VectorCurve.Direction.bounds
+          (Curve.derivative givenCurve)
+          tBounds
+          segmentDerivativeBounds
+          segmentSecondDerivativeBounds
+  let segmentCurvatureVectorBounds_ =
+        Curve.CurvatureVector.bounds_
+          segmentDerivativeBounds
+          segmentSecondDerivativeBounds
   Segment
-    { startPoint = curveStartPoint
-    , endPoint = curveEndPoint
-    , bounds = curveBounds
-    , derivativeBounds = curveDerivativeBounds
-    , secondDerivativeBounds = curveSecondDerivativeBounds
-    , tangentDirectionBounds =
-        DirectionBounds.unsafe
-          (curveDerivativeBounds / VectorBounds.magnitude curveDerivativeBounds)
-    , curvatureVectorBounds_ =
-        Curve.CurvatureVector.bounds_ curveDerivativeBounds curveSecondDerivativeBounds
+    { startPoint = p1
+    , endPoint = p2
+    , bounds = segmentBounds
+    , derivativeBounds = segmentDerivativeBounds
+    , secondDerivativeBounds = segmentSecondDerivativeBounds
+    , tangentDirectionBounds = segmentTangentDirectionBounds
+    , curvatureVectorBounds_ = segmentCurvatureVectorBounds_
     }
