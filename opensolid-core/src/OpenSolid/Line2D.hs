@@ -1,5 +1,3 @@
-{-# LANGUAGE UnboxedTuples #-}
-
 module OpenSolid.Line2D
   ( Line2D (Line2D)
   , startPoint
@@ -85,7 +83,8 @@ distanceTo# p0 (Line2D p1 p2) = do
   let vy# = y2# -# y1#
   let lengthSquared# = vx# *# vx# +# vy# *# vy#
   let dotProduct# = ux# *# vx# +# uy# *# vy#
-  case (# dotProduct# <=# 0.0##, dotProduct# >=# lengthSquared# #) of
-    (# 1#, _ #) -> hypot2# ux# uy#
-    (# _, 1# #) -> hypot2# (x0# -# x2#) (y0# -# y2#)
-    (# _, _ #) -> abs# (vx# *# uy# -# vy# *# ux#) /# sqrt# lengthSquared#
+  case dotProduct# <=# 0.0## of
+    1# -> hypot2# ux# uy#
+    _ -> case dotProduct# >=# lengthSquared# of
+      1# -> hypot2# (x0# -# x2#) (y0# -# y2#)
+      _ -> abs# (vx# *# uy# -# vy# *# ux#) /# sqrt# lengthSquared#
