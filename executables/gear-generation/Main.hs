@@ -35,7 +35,7 @@ gearBody numTeeth = do
 
 main :: IO ()
 main = Tolerance.using Length.nanometer do
-  let resolution = Resolution.maxError (Length.millimeters 0.1)
+  let resolution = Resolution.maxError (Length.millimeters 0.01)
   let writeGlb numTeeth = do
         timer <- Timer.start
         body <- Result.orFail (gearBody numTeeth)
