@@ -209,6 +209,10 @@ library
     OpenSolid.Sign
     OpenSolid.Solve1D
     OpenSolid.Solve2D
+    OpenSolid.Step
+    OpenSolid.Step.EnumValue
+    OpenSolid.Step.Header
+    OpenSolid.Step.TypeName
     OpenSolid.Stl
     OpenSolid.Stream
     OpenSolid.Surface1D
@@ -273,6 +277,10 @@ library
     OpenSolid.Lobatto
     OpenSolid.Quadrature
     OpenSolid.Region2D.BoundaryTree
+    OpenSolid.Step.Binary
+    OpenSolid.Step.Encode
+    OpenSolid.Step.Entities
+    OpenSolid.Step.Types
     OpenSolid.SurfaceFunction1D.Blending
     OpenSolid.SurfaceFunction1D.Desingularization
     OpenSolid.SurfaceFunction1D.HorizontalCurve
