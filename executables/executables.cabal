@@ -190,3 +190,11 @@ executable oblate-spheroid
   build-depends:
     base,
     opensolid-core,
+
+executable simple-step-file
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: simple-step-file
+  build-depends:
+    base,
+    opensolid-core,
