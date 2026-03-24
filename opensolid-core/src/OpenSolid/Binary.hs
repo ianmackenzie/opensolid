@@ -5,6 +5,7 @@ module OpenSolid.Binary
   , empty
   , concat
   , combine
+  , join
   , uint8
   , uint16LE
   , uint32LE
@@ -22,6 +23,7 @@ import Data.ByteString qualified as ByteString
 import Data.ByteString.Builder (Builder)
 import Data.ByteString.Builder qualified as Builder
 import GHC.Float qualified
+import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import Prelude qualified
 
@@ -36,6 +38,9 @@ concat = Prelude.mconcat
 
 combine :: Foldable list => (a -> Builder) -> list a -> Builder
 combine = Prelude.foldMap
+
+join :: Builder -> List Builder -> Builder
+join separator items = concat (List.intersperse separator items)
 
 {-# INLINE uint8 #-}
 uint8 :: Int -> Builder
