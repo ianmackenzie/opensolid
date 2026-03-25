@@ -15,6 +15,7 @@ data ImplicitArgument
   | ToleranceRadians
   | ToleranceMeters
   | ToleranceSquareMeters
+  deriving (Show)
 
 ffiType :: ImplicitArgument -> FFI.Type
 ffiType constraint = case constraint of

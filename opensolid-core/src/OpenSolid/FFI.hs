@@ -61,7 +61,7 @@ data Space deriving (Eq, Show)
 
 newtype Name = Name (NonEmpty Text) deriving (Eq, Ord, Show)
 
-newtype ClassName = ClassName (NonEmpty Text)
+newtype ClassName = ClassName (NonEmpty Text) deriving (Show)
 
 name :: Text -> Name
 name input =
@@ -169,6 +169,7 @@ data Type where
   Maybe :: Type -> Type
   Result :: Type -> Type
   Class :: ClassName -> Type
+  deriving (Show)
 
 className :: forall t -> FFI t => ClassName
 className t = case representation (Proxy @t) of

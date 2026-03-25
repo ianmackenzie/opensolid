@@ -6,7 +6,7 @@ import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
-data Kind = Positional | Named deriving (Eq, Ord)
+data Kind = Positional | Named deriving (Eq, Ord, Show)
 
 kind :: forall t -> FFI t => Name -> Kind
 kind t name =
