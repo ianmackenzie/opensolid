@@ -30,7 +30,7 @@ data Header = Header
 {-| A single entity stored in the data section of a STEP file.
 
 An entity may be a point, a curve, a part, an assembly, or even an entire building.
-Entities may be 'simple' (having a type and a list of attributes, which can themselves be references to other entities)
+Entities may be 'simple' (having a type and a list of attributes)
 or 'complex' (effectively a list of simple entities combined together).
 -}
 data Entity = SimpleEntity TypeName (List Attribute) | ComplexEntity (List SubEntity)
