@@ -10,7 +10,7 @@ main = do
           (#description ["A minimal AP214 example with a single part"])
           (#implementationLevel "2;1")
           (#fileName "demo")
-          (#timeStamp "2003-12-27T11:57:53")
+          (#timestamp "2003-12-27T11:57:53")
           (#author ["Lothar Klein"])
           (#organization ["LKSoft"])
           (#preprocessorVersion " ")

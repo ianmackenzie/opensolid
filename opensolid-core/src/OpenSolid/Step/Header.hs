@@ -3,7 +3,7 @@ module OpenSolid.Step.Header
   , description
   , implementationLevel
   , fileName
-  , timeStamp
+  , timestamp
   , author
   , organization
   , preprocessorVersion
@@ -25,8 +25,8 @@ implementationLevel = (.implementationLevel)
 fileName :: Header -> Text
 fileName = (.fileName)
 
-timeStamp :: Header -> Text
-timeStamp = (.timeStamp)
+timestamp :: Header -> Text
+timestamp = (.timestamp)
 
 author :: Header -> List Text
 author = (.author)

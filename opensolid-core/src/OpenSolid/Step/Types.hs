@@ -17,7 +17,7 @@ data Header = Header
   { description :: List Text
   , implementationLevel :: Text
   , fileName :: Text
-  , timeStamp :: Text
+  , timestamp :: Text
   , author :: List Text
   , organization :: List Text
   , preprocessorVersion :: Text

@@ -71,7 +71,7 @@ encodeHeader givenHeader = do
   let fileNameEntity =
         entity "FILE_NAME" $
           [ text givenHeader.fileName
-          , text givenHeader.timeStamp
+          , text givenHeader.timestamp
           , list text givenHeader.author
           , list text givenHeader.organization
           , text givenHeader.preprocessorVersion
@@ -144,7 +144,7 @@ header ::
   ("description" ::: List Text) ->
   ("implementationLevel" ::: Text) ->
   ("fileName" ::: Text) ->
-  ("timeStamp" ::: Text) ->
+  ("timestamp" ::: Text) ->
   ("author" ::: List Text) ->
   ("organization" ::: List Text) ->
   ("preprocessorVersion" ::: Text) ->
@@ -156,7 +156,7 @@ header
   ("description" ::: givenDescription)
   ("implementationLevel" ::: givenImplementationLevel)
   ("fileName" ::: givenFileName)
-  ("timeStamp" ::: givenTimeStamp)
+  ("timestamp" ::: givenTimestamp)
   ("author" ::: givenAuthor)
   ("organization" ::: givenOrganization)
   ("preprocessorVersion" ::: givenPreprocessorVersion)
@@ -167,7 +167,7 @@ header
       { description = givenDescription
       , implementationLevel = givenImplementationLevel
       , fileName = givenFileName
-      , timeStamp = givenTimeStamp
+      , timestamp = givenTimestamp
       , author = givenAuthor
       , organization = givenOrganization
       , preprocessorVersion = givenPreprocessorVersion
