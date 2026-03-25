@@ -50,6 +50,7 @@ import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.SpurGear (SpurGear)
 import OpenSolid.SpurGear qualified as SpurGear
+import OpenSolid.Step qualified as Step
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
@@ -136,6 +137,7 @@ classes =
   , spurGear
   , camera3D
   , mitsuba
+  , step
   ]
 
 functions :: List Function
@@ -1740,4 +1742,35 @@ spurGear =
     , Class.property "Pitch Diameter" (SpurGear.pitchDiameter) $(docs 'SpurGear.pitchDiameter)
     , Class.property "Outer Diameter" (SpurGear.outerDiameter) $(docs 'SpurGear.outerDiameter)
     , Class.memberM0 "Profile" (SpurGear.profile :: SpurGear -> List Curve2D) $(docs 'SpurGear.profile)
+    ]
+
+data Step = Step Step.Header (List Step.Entity)
+
+instance FFI Step where
+  representation = FFI.classRepresentation "Step"
+
+step :: Class
+step = do
+  let write path (Step header entities) = Step.write path header entities
+  let list values = Step.list id values
+  Class.new @Step "A STEP model that can be written out to a file." $
+    [ Class.nested @Step.Header $(docs ''Step.Header) []
+    , Class.nested @Step.Entity $(docs ''Step.Entity) []
+    , Class.nested @Step.SubEntity $(docs ''Step.SubEntity) []
+    , Class.nested @Step.Attribute $(docs ''Step.Attribute) []
+    , Class.factory2 "Model" "Header" "Entities" Step "Construct a STEP model from a header and a list of entities."
+    , Class.member1 "Write" "Path" write $(docs 'Step.write)
+    , Class.static10 "Header" "Description" "Implementation Level" "File Name" "Timestamp" "Author" "Organization" "Preprocessor Version" "Originating System" "Authorization" "Schema Identifiers" Step.header $(docs 'Step.header)
+    , Class.static2 "Entity" "Type Name" "Attributes" Step.entity $(docs 'Step.entity)
+    , Class.static1 "Complex Entity" "Sub Entities" Step.complexEntity $(docs 'Step.complexEntity)
+    , Class.static2 "Sub Entity" "Type Name" "Attributes" Step.subEntity $(docs 'Step.subEntity)
+    , Class.static1 "Reference To" "Entity" Step.referenceTo $(docs 'Step.referenceTo)
+    , Class.constant "Derived" Step.derived $(docs 'Step.derived)
+    , Class.constant "Null" Step.null $(docs 'Step.null)
+    , Class.static1 "Bool" "Value" Step.bool $(docs 'Step.bool)
+    , Class.static1 "Int" "Value" Step.int $(docs 'Step.int)
+    , Class.static1 "Number" "Value" Step.number $(docs 'Step.number)
+    , Class.static1 "Text" "Value" Step.text $(docs 'Step.text)
+    , Class.static1 "Enum" "Value" Step.enum $(docs 'Step.enum)
+    , Class.static1 "List" "Values" list $(docs 'Step.list)
     ]
