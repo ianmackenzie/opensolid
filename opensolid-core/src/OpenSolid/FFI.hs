@@ -131,6 +131,14 @@ data Representation a where
   Tuple8Rep ::
     (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h) =>
     Representation (a, b, c, d, e, f, g, h)
+  -- A struct with the nine items in order
+  Tuple9Rep ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i) =>
+    Representation (a, b, c, d, e, f, g, h, i)
+  -- A struct with the eight items in order
+  Tuple10Rep ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i, FFI j) =>
+    Representation (a, b, c, d, e, f, g, h, i, j)
   -- A struct with a 64-bit integer tag (0 = Just, 1 = Nothing)
   -- followed by the representation of the value
   MaybeRep :: FFI a => Representation (Maybe a)
@@ -201,6 +209,10 @@ typeOf t = case representation (Proxy @t) of
     Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f, typeOf g]
   Tuple8Rep @a @b @c @d @e @f @g @h ->
     Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f, typeOf g, typeOf h]
+  Tuple9Rep @a @b @c @d @e @f @g @h @i ->
+    Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f, typeOf g, typeOf h, typeOf i]
+  Tuple10Rep @a @b @c @d @e @f @g @h @i @j ->
+    Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f, typeOf g, typeOf h, typeOf i, typeOf j]
   MaybeRep @a -> Maybe (typeOf a)
   ResultRep @_x @a -> Result (typeOf a)
   ClassRep class_ -> Class class_
@@ -350,6 +362,18 @@ instance
   where
   representation _ = Tuple8Rep
 
+instance
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i) =>
+  FFI (a, b, c, d, e, f, g, h, i)
+  where
+  representation _ = Tuple9Rep
+
+instance
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i, FFI j) =>
+  FFI (a, b, c, d, e, f, g, h, i, j)
+  where
+  representation _ = Tuple10Rep
+
 instance FFI a => FFI (Maybe a) where
   representation _ = MaybeRep
 
@@ -468,6 +492,48 @@ store ptr offset value = do
       store ptr offset6 value6
       store ptr offset7 value7
       store ptr offset8 value8
+    Tuple9Rep @a @b @c @d @e @f @g @h @_ -> do
+      let (value1, value2, value3, value4, value5, value6, value7, value8, value9) = value
+      let offset1 = offset
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
+      let offset5 = offset4 + sizeOf d
+      let offset6 = offset5 + sizeOf e
+      let offset7 = offset6 + sizeOf f
+      let offset8 = offset7 + sizeOf g
+      let offset9 = offset8 + sizeOf h
+      store ptr offset1 value1
+      store ptr offset2 value2
+      store ptr offset3 value3
+      store ptr offset4 value4
+      store ptr offset5 value5
+      store ptr offset6 value6
+      store ptr offset7 value7
+      store ptr offset8 value8
+      store ptr offset9 value9
+    Tuple10Rep @a @b @c @d @e @f @g @h @i @_ -> do
+      let (value1, value2, value3, value4, value5, value6, value7, value8, value9, value10) = value
+      let offset1 = offset
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
+      let offset5 = offset4 + sizeOf d
+      let offset6 = offset5 + sizeOf e
+      let offset7 = offset6 + sizeOf f
+      let offset8 = offset7 + sizeOf g
+      let offset9 = offset8 + sizeOf h
+      let offset10 = offset9 + sizeOf i
+      store ptr offset1 value1
+      store ptr offset2 value2
+      store ptr offset3 value3
+      store ptr offset4 value4
+      store ptr offset5 value5
+      store ptr offset6 value6
+      store ptr offset7 value7
+      store ptr offset8 value8
+      store ptr offset9 value9
+      store ptr offset10 value10
     MaybeRep ->
       case value of
         Just item -> do
@@ -601,6 +667,48 @@ load ptr offset = do
       value7 <- load ptr offset7
       value8 <- load ptr offset8
       IO.succeed (value1, value2, value3, value4, value5, value6, value7, value8)
+    Tuple9Rep @a @b @c @d @e @f @g @h @_ -> do
+      let offset1 = offset
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
+      let offset5 = offset4 + sizeOf d
+      let offset6 = offset5 + sizeOf e
+      let offset7 = offset6 + sizeOf f
+      let offset8 = offset7 + sizeOf g
+      let offset9 = offset8 + sizeOf h
+      value1 <- load ptr offset1
+      value2 <- load ptr offset2
+      value3 <- load ptr offset3
+      value4 <- load ptr offset4
+      value5 <- load ptr offset5
+      value6 <- load ptr offset6
+      value7 <- load ptr offset7
+      value8 <- load ptr offset8
+      value9 <- load ptr offset9
+      IO.succeed (value1, value2, value3, value4, value5, value6, value7, value8, value9)
+    Tuple10Rep @a @b @c @d @e @f @g @h @i @_ -> do
+      let offset1 = offset
+      let offset2 = offset1 + sizeOf a
+      let offset3 = offset2 + sizeOf b
+      let offset4 = offset3 + sizeOf c
+      let offset5 = offset4 + sizeOf d
+      let offset6 = offset5 + sizeOf e
+      let offset7 = offset6 + sizeOf f
+      let offset8 = offset7 + sizeOf g
+      let offset9 = offset8 + sizeOf h
+      let offset10 = offset9 + sizeOf i
+      value1 <- load ptr offset1
+      value2 <- load ptr offset2
+      value3 <- load ptr offset3
+      value4 <- load ptr offset4
+      value5 <- load ptr offset5
+      value6 <- load ptr offset6
+      value7 <- load ptr offset7
+      value8 <- load ptr offset8
+      value9 <- load ptr offset9
+      value10 <- load ptr offset10
+      IO.succeed (value1, value2, value3, value4, value5, value6, value7, value8, value9, value10)
     MaybeRep -> do
       tag <- load @Int ptr offset
       if tag == 0
