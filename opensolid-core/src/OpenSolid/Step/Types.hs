@@ -13,6 +13,7 @@ import OpenSolid.Prelude
 import OpenSolid.Step.EnumValue (EnumValue)
 import OpenSolid.Step.TypeName (TypeName)
 
+-- | A header containing metadata about a STEP file.
 data Header = Header
   { description :: List Text
   , implementationLevel :: Text
