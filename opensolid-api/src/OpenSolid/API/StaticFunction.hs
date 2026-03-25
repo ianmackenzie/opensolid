@@ -224,6 +224,21 @@ data StaticFunction where
     (Tolerance Meters => a -> b -> c -> d -> e -> f -> g) ->
     Text ->
     StaticFunction
+  StaticFunction10 ::
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i, FFI j, FFI k) =>
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    Name ->
+    (a -> b -> c -> d -> e -> f -> g -> h -> i -> j -> k) ->
+    Text ->
+    StaticFunction
 
 ffiName :: FFI.ClassName -> Name -> StaticFunction -> Text
 ffiName className functionName staticFunction = do
@@ -334,6 +349,10 @@ invoke function = case function of
     \inputPtr outputPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5 arg6))
+  StaticFunction10 _ _ _ _ _ _ _ _ _ _ f _ ->
+    \inputPtr outputPtr -> do
+      (arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) <- FFI.load inputPtr 0
+      FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10)
 
 type Signature = (Maybe ImplicitArgument, List (Name, FFI.Type, Argument.Kind), FFI.Type)
 
@@ -375,6 +394,7 @@ signature staticFunction = normalizeSignature $ case staticFunction of
   StaticFunctionU6 arg1 arg2 arg3 arg4 arg5 arg6 f _ -> signatureU6 arg1 arg2 arg3 arg4 arg5 arg6 f
   StaticFunctionR6 arg1 arg2 arg3 arg4 arg5 arg6 f _ -> signatureR6 arg1 arg2 arg3 arg4 arg5 arg6 f
   StaticFunctionM6 arg1 arg2 arg3 arg4 arg5 arg6 f _ -> signatureM6 arg1 arg2 arg3 arg4 arg5 arg6 f
+  StaticFunction10 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 f _ -> signature10 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 f
 
 arg :: forall t -> FFI t => Name -> (Name, FFI.Type, Argument.Kind)
 arg t name = (name, FFI.typeOf t, Argument.kind t name)
@@ -655,6 +675,24 @@ signatureM6 ::
 signatureM6 arg1 arg2 arg3 arg4 arg5 arg6 _ =
   (Just ToleranceMeters, [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5, arg f arg6], FFI.typeOf g)
 
+signature10 ::
+  forall a b c d e f g h i j k.
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i, FFI j, FFI k) =>
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  Name ->
+  (a -> b -> c -> d -> e -> f -> g -> h -> i -> j -> k) ->
+  Signature
+signature10 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 _ =
+  (Nothing, [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5, arg f arg6, arg g arg7, arg h arg8, arg i arg9, arg j arg10], FFI.typeOf k)
+
 documentation :: StaticFunction -> Text
 documentation memberFunction = case memberFunction of
   StaticFunction1 _ _ docs -> docs
@@ -681,3 +719,4 @@ documentation memberFunction = case memberFunction of
   StaticFunctionU6 _ _ _ _ _ _ _ docs -> docs
   StaticFunctionR6 _ _ _ _ _ _ _ docs -> docs
   StaticFunctionM6 _ _ _ _ _ _ _ docs -> docs
+  StaticFunction10 _ _ _ _ _ _ _ _ _ _ _ docs -> docs

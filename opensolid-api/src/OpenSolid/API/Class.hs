@@ -37,6 +37,7 @@ module OpenSolid.API.Class
   , static2
   , static3
   , staticM3
+  , static10
   , property
   , member0
   , memberU0
@@ -595,6 +596,38 @@ static6 name arg1 arg2 arg3 arg4 arg5 arg6 f docs =
       (FFI.name arg4)
       (FFI.name arg5)
       (FFI.name arg6)
+      f
+      docs
+
+static10 ::
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i, FFI j, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> e -> f -> g -> h -> i -> j -> result) ->
+  Text ->
+  Member value
+static10 name arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 f docs =
+  Static (FFI.name name) $
+    StaticFunction10
+      (FFI.name arg1)
+      (FFI.name arg2)
+      (FFI.name arg3)
+      (FFI.name arg4)
+      (FFI.name arg5)
+      (FFI.name arg6)
+      (FFI.name arg7)
+      (FFI.name arg8)
+      (FFI.name arg9)
+      (FFI.name arg10)
       f
       docs
 
