@@ -9,6 +9,8 @@ module OpenSolid.Step.Types
 where
 
 import OpenSolid.Binary (ByteString)
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
 import OpenSolid.Step.EnumValue (EnumValue)
 import OpenSolid.Step.TypeName (TypeName)
@@ -27,6 +29,9 @@ data Header = Header
   , schemaIdentifiers :: List Text
   }
 
+instance FFI Header where
+  representation = FFI.nestedClassRepresentation "Step" "Header"
+
 {-| A single entity stored in the data section of a STEP file.
 
 An entity may be a point, a curve, a part, an assembly, or even an entire building.
@@ -35,8 +40,14 @@ or 'complex' (effectively a list of simple entities combined together).
 -}
 data Entity = SimpleEntity TypeName (List Attribute) | ComplexEntity (List SubEntity)
 
+instance FFI Entity where
+  representation = FFI.nestedClassRepresentation "Step" "Entity"
+
 -- | A sub-entity of a complex entity.
 data SubEntity = SubEntity TypeName (List Attribute)
+
+instance FFI SubEntity where
+  representation = FFI.nestedClassRepresentation "Step" "SubEntity"
 
 {-| A single attribute of an entity.
 
@@ -54,3 +65,6 @@ data Attribute
   | ReferenceTo Entity
   | TypedAttribute TypeName Attribute
   | AttributeList (List Attribute)
+
+instance FFI Attribute where
+  representation = FFI.nestedClassRepresentation "Step" "Attribute"
