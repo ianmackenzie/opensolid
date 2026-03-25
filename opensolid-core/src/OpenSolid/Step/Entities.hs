@@ -67,7 +67,7 @@ addAttributes attributes entityMap =
 addAttribute :: Attribute -> EntityMap -> (Builder, EntityMap)
 addAttribute attribute entityMap =
   case attribute of
-    DerivedValue -> (Step.Encode.derivedValue, entityMap)
+    DerivedAttribute -> (Step.Encode.derived, entityMap)
     NullAttribute -> (Step.Encode.null, entityMap)
     BoolAttribute bool -> (Step.Encode.bool bool, entityMap)
     IntAttribute int -> (Step.Encode.int int, entityMap)

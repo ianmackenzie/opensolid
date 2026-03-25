@@ -42,7 +42,7 @@ data SubEntity = SubEntity TypeName (List Attribute)
 This might be  an X coordinate value, a GUID string, or a reference to another entity.
 -}
 data Attribute
-  = DerivedValue
+  = DerivedAttribute
   | NullAttribute
   | BoolAttribute Bool
   | IntAttribute Int

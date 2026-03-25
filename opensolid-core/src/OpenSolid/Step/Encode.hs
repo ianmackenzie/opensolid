@@ -1,5 +1,5 @@
 module OpenSolid.Step.Encode
-  ( derivedValue
+  ( derived
   , null
   , bool
   , int
@@ -67,8 +67,8 @@ number value = do
   if Text.contains "." numberText then encodedNumber else encodedNumber <> char '.'
 
 -- | The special 'derived value' character '*'.
-derivedValue :: Builder
-derivedValue = char '*'
+derived :: Builder
+derived = char '*'
 
 -- | The special 'null value' character '$'.
 null :: Builder

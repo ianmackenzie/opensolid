@@ -9,7 +9,7 @@ module OpenSolid.Step
   , entity
   , complexEntity
   , subEntity
-  , derivedValue
+  , derived
   , null
   , optional
   , bool
@@ -203,8 +203,8 @@ referenceTo :: Entity -> Attribute
 referenceTo = ReferenceTo
 
 -- | The special 'derived value' attribute.
-derivedValue :: Attribute
-derivedValue = DerivedValue
+derived :: Attribute
+derived = DerivedAttribute
 
 -- | The special 'null value' attribute.
 null :: Attribute
