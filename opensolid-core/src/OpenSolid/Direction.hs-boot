@@ -6,6 +6,7 @@ module OpenSolid.Direction
   )
 where
 
+import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import {-# SOURCE #-} OpenSolid.Direction2D (Direction2D)
 import {-# SOURCE #-} OpenSolid.Direction3D (Direction3D)
@@ -16,6 +17,7 @@ type family
   Direction (dimension :: Natural) space =
     direction | direction -> dimension space
   where
+  Direction 1 Void = Sign
   Direction 2 space = Direction2D space
   Direction 3 space = Direction3D space
 

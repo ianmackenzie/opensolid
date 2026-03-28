@@ -8,11 +8,14 @@ module OpenSolid.Direction
   )
 where
 
+import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import {-# SOURCE #-} OpenSolid.Direction2D qualified as Direction2D
 import {-# SOURCE #-} OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Direction2D, Direction3D)
+import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Sign qualified as Sign
 import {-# SOURCE #-} OpenSolid.Vector (Vector)
 import {-# SOURCE #-} OpenSolid.Vector qualified as Vector
 
@@ -20,6 +23,7 @@ type family
   Direction (dimension :: Natural) space =
     direction | direction -> dimension space
   where
+  Direction 1 Void = Sign
   Direction 2 space = Direction2D space
   Direction 3 space = Direction3D space
 
@@ -35,6 +39,12 @@ class
   unwrapImpl :: Direction dimension space -> Vector dimension Unitless space
   parallel :: Direction dimension space -> Direction dimension space -> Bool
   perpendicular :: Direction dimension space -> Direction dimension space -> Bool
+
+instance Exists 1 Void where
+  unsafeImpl = Quantity.sign
+  unwrapImpl = Sign.value
+  parallel _ _ = True
+  perpendicular _ _ = False
 
 instance Exists 2 space where
   {-# INLINEABLE unsafeImpl #-}

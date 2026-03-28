@@ -474,6 +474,8 @@ newtype Sign = Sign_ Number deriving (Eq, Ord, Show)
 
 instance HasUnits Sign Unitless
 
+instance ApproximateEquality Sign () where (~=) = (==)
+
 {-# COMPLETE Sign #-}
 
 {-# INLINEABLE Sign #-}
@@ -510,6 +512,14 @@ instance Negation Sign where
 instance Multiplication Sign Sign Sign where
   {-# INLINE (*) #-}
   Sign_ value1 * Sign_ value2 = Sign_ (value1 * value2)
+
+instance DotMultiplication Sign Sign Number where
+  {-# INLINE dot #-}
+  Sign_ value1 `dot` Sign_ value2 = value1 * value2
+
+instance DotMultiplication Sign (Quantity units) (Quantity units) where dot = (*)
+
+instance DotMultiplication (Quantity units) Sign (Quantity units) where dot = (*)
 
 {-# INLINE fromInteger #-}
 fromInteger :: Prelude.Integer -> Int
