@@ -27,6 +27,7 @@ module OpenSolid.Curve3D
   , bounds
   , overallBounds
   , reverse
+  , arcLengthParameterizationFunction
   , arcLengthParameterization
   , parameterizeByArcLength
   , transformBy
@@ -38,7 +39,6 @@ module OpenSolid.Curve3D
   )
 where
 
-import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
@@ -339,14 +339,14 @@ overallBounds curve = bounds curve Interval.unit
 reverse :: Curve3D space -> Curve3D space
 reverse curve = curve . (1.0 - Curve1D.t)
 
+arcLengthParameterizationFunction :: Tolerance Meters => Curve3D space -> (Number -> Number, Length)
+arcLengthParameterizationFunction = Curve.arcLengthParameterizationFunction
+
 arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Curve1D Unitless, Length)
-arcLengthParameterization curve =
-  ArcLength.parameterization (VectorCurve3D.magnitude curve.derivative)
+arcLengthParameterization = Curve.arcLengthParameterization
 
 parameterizeByArcLength :: Tolerance Meters => Curve3D space -> (Curve3D space, Length)
-parameterizeByArcLength curve = do
-  let (parameterization, length) = arcLengthParameterization curve
-  (curve . parameterization, length)
+parameterizeByArcLength = Curve.parameterizeByArcLength
 
 transformBy :: Transform3D tag space -> Curve3D space -> Curve3D space
 transformBy transform curve = do

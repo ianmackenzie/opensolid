@@ -16,6 +16,7 @@ where
 
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve.Search qualified as Curve.Search
+import OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
@@ -80,6 +81,8 @@ instance
     (Point3D space1)
     (Curve3D space2)
     (VectorCurve3D Meters space1)
+
+instance Composition (Curve3D space) (Curve1D Unitless) (Curve3D space)
 
 instance
   space1 ~ space2 =>

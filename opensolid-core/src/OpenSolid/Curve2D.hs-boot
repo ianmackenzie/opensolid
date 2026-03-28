@@ -95,6 +95,8 @@ instance
     (Curve2D units2 space2)
     (VectorCurve2D units1 space1)
 
+instance Composition (Curve2D units space) (Curve1D Unitless) (Curve2D units space)
+
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition

@@ -32,18 +32,26 @@ module OpenSolid.Curve
   , intersections
   , linearDeviation
   , samplingPoints
+  , arcLengthParameterizationFunction
+  , arcLengthParameterization
+  , parameterizeByArcLength
   )
 where
 
+import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections qualified as Intersections
+import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import {-# SOURCE #-} OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve.Segment (Segment)
 import OpenSolid.Curve.Segment qualified as Curve.Segment
+import OpenSolid.Curve1D (Curve1D)
+import OpenSolid.Curve1D qualified as Curve1D
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
@@ -65,6 +73,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
@@ -76,6 +85,7 @@ import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
+import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 
 type family Curve dimension units space = curve | curve -> dimension units space where
   Curve 2 units space = Curve2D units space
@@ -113,6 +123,10 @@ class
       (Curve dimension units space)
       (Point dimension units space)
       (Tolerance units)
+  , Composition
+      (Curve dimension units space)
+      (Curve1D Unitless)
+      (Curve dimension units space)
   ) =>
   Exists dimension units space
   where
@@ -322,3 +336,45 @@ leftRightError curve t1 t2 p1 p2 = do
   let leftError = Point.linearDeviation p1 p2 (point curve tLeft)
   let rightError = Point.linearDeviation p1 p2 (point curve tRight)
   max leftError rightError
+
+arcLengthParameterizationFunction ::
+  (Exists dimension units space, Tolerance units) =>
+  Curve dimension units space ->
+  (Number -> Number, Quantity units)
+arcLengthParameterizationFunction curve =
+  case nondegenerate curve of
+    Error IsDegenerate -> (id, Quantity.zero)
+    Ok nondegenerateCurve -> do
+      let dsdt t = Vector.magnitude (derivativeValue curve t)
+      let d2sdt2 t =
+            secondDerivativeValue curve t
+              `dot` Curve.Nondegenerate.tangentDirectionValue nondegenerateCurve t
+      ArcLength.parameterization dsdt d2sdt2
+
+arcLengthParameterization ::
+  (Exists dimension units space, Tolerance units) =>
+  Curve dimension units space ->
+  (Curve1D Unitless, Quantity units)
+arcLengthParameterization curve =
+  case nondegenerate curve of
+    Error IsDegenerate -> (Curve1D.t, Quantity.zero)
+    Ok nondegenerateCurve -> do
+      let (parameterizationFunction, length) = arcLengthParameterizationFunction curve
+      let parameterizationBounds (Interval uLow uHigh) =
+            Interval (parameterizationFunction uLow) (parameterizationFunction uHigh)
+      let compiledParameterization =
+            CompiledFunction.abstract parameterizationFunction parameterizationBounds
+      let nondegenerateDerivative = Curve.Nondegenerate.derivative nondegenerateCurve
+      let nondegenerateDerivativeMagnitude = VectorCurve.Nondegenerate.magnitude nondegenerateDerivative
+      let parameterizationCurve = recursive \self -> do
+            let dtdu = Curve1D.constant length / nondegenerateDerivativeMagnitude
+            Curve1D.new compiledParameterization (dtdu . self)
+      (parameterizationCurve, length)
+
+parameterizeByArcLength ::
+  (Exists dimension units space, Tolerance units) =>
+  Curve dimension units space ->
+  (Curve dimension units space, Quantity units)
+parameterizeByArcLength curve = do
+  let (parameterization, length) = arcLengthParameterization curve
+  (curve . parameterization, length)

@@ -73,6 +73,7 @@ module OpenSolid.Curve2D
   , curvature_
   , toPolyline
   , medialAxis
+  , arcLengthParameterizationFunction
   , arcLengthParameterization
   , parameterizeByArcLength
   , piecewise
@@ -84,7 +85,6 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Arc2D (Arc2D)
 import OpenSolid.Arc2D qualified as Arc2D
-import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Axis2D (Axis2D (Axis2D))
@@ -1047,20 +1047,23 @@ medialAxis curve1 curve2 = do
                 }
         Ok (List.map toSegment zeros.crossingCurves)
 
+arcLengthParameterizationFunction ::
+  Tolerance units =>
+  Curve2D units space ->
+  (Number -> Number, Quantity units)
+arcLengthParameterizationFunction = Curve.arcLengthParameterizationFunction
+
 arcLengthParameterization ::
   Tolerance units =>
   Curve2D units space ->
   (Curve1D Unitless, Quantity units)
-arcLengthParameterization curve =
-  ArcLength.parameterization (VectorCurve2D.magnitude curve.derivative)
+arcLengthParameterization = Curve.arcLengthParameterization
 
 parameterizeByArcLength ::
   Tolerance units =>
   Curve2D units space ->
   (Curve2D units space, Quantity units)
-parameterizeByArcLength curve = do
-  let (parameterization, length) = arcLengthParameterization curve
-  (curve . parameterization, length)
+parameterizeByArcLength = Curve.parameterizeByArcLength
 
 makePiecewise :: NonEmpty (Curve2D units space, Quantity units) -> Curve2D units space
 makePiecewise parameterizedSegments = do

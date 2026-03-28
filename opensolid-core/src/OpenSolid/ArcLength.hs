@@ -1,49 +1,41 @@
 module OpenSolid.ArcLength (parameterization) where
 
-import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
-import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Lobatto qualified as Lobatto
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Sign qualified as Sign
 
 data Tree units
   = Node (Tree units) (Quantity units) (Tree units)
   | Leaf (Quantity units) (Curve1D Unitless)
 
-parameterization :: Tolerance units => Curve1D units -> (Curve1D Unitless, Quantity units)
-parameterization derivativeMagnitude = do
-  let dsdt tValue = Curve1D.value derivativeMagnitude tValue
-  let d2sdt2 tValue = Curve1D.derivativeValue derivativeMagnitude tValue
+parameterization ::
+  Tolerance units =>
+  (Number -> Quantity units) ->
+  (Number -> Quantity units) ->
+  (Number -> Number, Quantity units)
+parameterization dsdt d2sdt2 = do
   let dsdt1 = dsdt 0.0
   let dsdt2 = dsdt Lobatto.p2
   let dsdt3 = dsdt Lobatto.p3
   let dsdt4 = dsdt 1.0
   if
-    | isConstant dsdt1 dsdt2 dsdt3 dsdt4 -> (Curve1D.t, dsdt1)
+    | isConstant dsdt1 dsdt2 dsdt3 dsdt4 -> (id, dsdt1)
     | isLinear dsdt1 dsdt2 dsdt3 dsdt4 -> do
         let delta = dsdt4 - dsdt1
         let t0 = -dsdt1 / delta
-        let sqrt = Tolerance.using Quantity.zero do
-              Curve1D.sqrt (t0 * t0 + (1.0 - 2.0 * t0) * Curve1D.t)
-        let curve = if delta > Quantity.zero then t0 + sqrt else t0 - sqrt
+        let sign = Sign.value (Quantity.sign delta)
+        let function t = t0 + sign * Number.sqrt (t0 * t0 + (1.0 - 2.0 * t0) * t)
         let length = 0.5 * (dsdt1 + dsdt4)
-        (curve, length)
+        (function, length)
     | otherwise -> do
         let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
         let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
-        case Curve1D.quotient (Curve1D.constant length) derivativeMagnitude of
-          Ok quotient -> do
-            let value uValue = evaluateIn tree (uValue * length)
-            let bounds (Interval uLow uHigh) = Interval (value uLow) (value uHigh)
-            let compiled = CompiledFunction.abstract value bounds
-            let curve = Curve1D.new compiled (quotient . curve)
-            (curve, length)
-          Error DivisionByZero -> (Curve1D.t, Quantity.zero)
+        let function t = evaluateIn tree (t * length)
+        (function, length)
 
 isConstant ::
   Tolerance units =>
