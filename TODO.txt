@@ -1,8 +1,8 @@
-Update to GHC2024 language standard
-- https://github.com/ianmackenzie/opensolid/issues/24
-
-Reconsider adding Point2D.xy, Line2D.from functions that just mirror constructors?
+Reconsider adding functions that just mirror constructors?
 - sometimes most convenient/consistent to just use qualified functions for everything...
+- Point2D.xy, Vector2D.xy, Bounds2D.xy, VectorBounds2D.xy, Line#D.from
+- Point3D.xyz, Vector3D.xyz, Bounds3D.xyz, VectorBounds3D.xyz that take Convention3D arguments
+- Axis#D.through (and rename Plane3D.fromPointAndNormal to Plane3D.through)
 
 Add enough STEP support to "handcraft" planar/extruded surfaces etc.
 - convert curves to simple B-spline curves (piecewise cubic or quintic)
