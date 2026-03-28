@@ -52,6 +52,7 @@ module OpenSolid.List
   , all
   , any
   , successive
+  , loop
   , count
   , intersperse
   , partition
@@ -253,6 +254,15 @@ any = Prelude.any
 
 successive :: (a -> a -> b) -> List a -> List b
 successive function list = map2 function list (drop 1 list)
+
+loop :: (a -> a -> b) -> List a -> List b
+loop _ [] = []
+loop function (first : rest) = loopImpl function first first rest
+
+loopImpl :: (a -> a -> b) -> a -> a -> List a -> List b
+loopImpl function first last [] = [function last first]
+loopImpl function first current (next : remaining) =
+  function current next : loopImpl function first next remaining
 
 count :: (a -> Bool) -> List a -> Int
 count _ [] = 0

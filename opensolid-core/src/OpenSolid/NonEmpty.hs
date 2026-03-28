@@ -71,6 +71,7 @@ module OpenSolid.NonEmpty
   , all
   , any
   , successive
+  , loop
   , minimum
   , maximum
   , minimumOf
@@ -347,6 +348,16 @@ any = Prelude.any
 
 successive :: (a -> a -> b) -> NonEmpty a -> List b
 successive function nonEmpty = List.successive function (toList nonEmpty)
+
+loop :: (a -> a -> b) -> NonEmpty a -> NonEmpty b
+loop function nonEmpty = do
+  let firstValue = first nonEmpty
+  loopImpl function firstValue firstValue (rest nonEmpty)
+
+loopImpl :: (a -> a -> b) -> a -> a -> List a -> NonEmpty b
+loopImpl function firstValue lastValue [] = one (function lastValue firstValue)
+loopImpl function firstValue current (next : remaining) =
+  push (function current next) (loopImpl function firstValue next remaining)
 
 intersperse :: a -> NonEmpty a -> NonEmpty a
 intersperse = Data.List.NonEmpty.intersperse
