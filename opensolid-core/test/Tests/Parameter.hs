@@ -17,7 +17,7 @@ tests =
 
 check :: (Int -> List Number) -> Int -> List Number -> Test
 check function n expected =
-  Test.verify (Text.int n) Test.do
+  Test.verify (Text.int n) do
     Test.expect (function n == expected)
       & Test.output "expected" expected
       & Test.output "actual" (function n)

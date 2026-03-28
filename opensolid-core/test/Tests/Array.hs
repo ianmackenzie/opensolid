@@ -15,14 +15,14 @@ tests =
 
 reverse :: Test
 reverse =
-  Test.verify "reverse" Test.do
+  Test.verify "reverse" do
     let array :: Array Int = Array.fromNonEmpty (1 :| [2, 3])
     let reversed = Array.reverse array
     Test.expect (Array.toList reversed == [3, 2, 1])
 
 reverseMap :: Test
 reverseMap =
-  Test.verify "reverse" Test.do
+  Test.verify "reverse" do
     let array :: Array Int = Array.fromNonEmpty (1 :| [2, 3])
     let reversed = Array.reverseMap Text.int array
     Test.expect (Array.toList reversed == ["3", "2", "1"])

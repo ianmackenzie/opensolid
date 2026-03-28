@@ -67,6 +67,5 @@ executable opensolid-python
     OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
-    QualifiedDo
     TypeAbstractions
     ViewPatterns

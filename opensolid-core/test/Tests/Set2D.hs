@@ -38,19 +38,19 @@ testSet =
 find :: Tolerance Meters => Test
 find =
   Test.group "find" $
-    [ Test.verify "point" Test.do
+    [ Test.verify "point" do
         let searchBounds = Bounds2D.hull2 (point 0 0) (point 2 2)
         Test.expect (Set2D.find searchBounds testSet == Resolved (Just (point 1 1)))
-    , Test.verify "nothing" Test.do
+    , Test.verify "nothing" do
         let searchBounds = Bounds2D.hull2 (point 4 9) (point 5 10)
         Test.expect (Set2D.find searchBounds testSet == Resolved Nothing)
-    , Test.verify "unresolved" Test.do
+    , Test.verify "unresolved" do
         let searchBounds = Bounds2D.hull2 (point 3 3) (point 6 6)
         Test.expect (Set2D.find searchBounds testSet == Unresolved)
     ]
 
 filter :: Tolerance Meters => Test
-filter = Test.verify "filter" Test.do
+filter = Test.verify "filter" do
   let searchBounds = Bounds2D.hull2 (point 2 2) (point 6 6)
   let filteredPoints = Set2D.filter searchBounds testSet
   let expectedPoints = [point 3 5, point 5 5]

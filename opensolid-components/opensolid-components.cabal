@@ -52,7 +52,6 @@ common config
     OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
-    QualifiedDo
     RebindableSyntax
     StrictData
     TypeFamilies

@@ -57,7 +57,6 @@ common config
     OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
-    QualifiedDo
     StrictData
     TypeFamilies
     TypeFamilyDependencies

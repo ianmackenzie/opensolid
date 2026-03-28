@@ -47,7 +47,6 @@ foreign-library opensolid-ffi
     OverloadedLabels
     OverloadedRecordDot
     OverloadedStrings
-    QualifiedDo
     TemplateHaskell
 
 executable generate-def-file
@@ -70,4 +69,3 @@ executable generate-def-file
     OverloadedLabels
     OverloadedRecordDot
     OverloadedStrings
-    QualifiedDo

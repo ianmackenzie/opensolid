@@ -17,13 +17,13 @@ simpleMap :: Map Int Text
 simpleMap = Map.fromList [(1, "a"), (2, "b"), (3, "c")]
 
 foldl :: Test
-foldl = Test.verify "foldl" Test.do
+foldl = Test.verify "foldl" do
   let actual = Map.foldl (<>) "" simpleMap
   let expected = "abc"
   Test.expect (actual == expected)
 
 foldr :: Test
-foldr = Test.verify "foldr" Test.do
+foldr = Test.verify "foldr" do
   let actual = Map.foldr (<>) "" simpleMap
   let expected = "abc"
   Test.expect (actual == expected)
@@ -31,11 +31,11 @@ foldr = Test.verify "foldr" Test.do
 take :: Test
 take =
   Test.group "take" $
-    [ Test.verify "exists" Test.do
+    [ Test.verify "exists" do
         let actual = Map.take 2 simpleMap
         let expected = (Just "b", Map.fromList [(1, "a"), (3, "c")])
         Test.expect (actual == expected)
-    , Test.verify "does not exist" Test.do
+    , Test.verify "does not exist" do
         let actual = Map.take 4 simpleMap
         let expected = (Nothing, simpleMap)
         Test.expect (actual == expected)

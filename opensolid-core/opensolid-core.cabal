@@ -70,7 +70,6 @@ common config
     OverloadedRecordDot
     OverloadedStrings
     PatternSynonyms
-    QualifiedDo
     RebindableSyntax
     RequiredTypeArguments
     StrictData

@@ -14,7 +14,7 @@ tests =
   ]
 
 mapWithIndex :: Test
-mapWithIndex = Test.verify "mapWithIndex" Test.do
+mapWithIndex = Test.verify "mapWithIndex" do
   let sum =
         Stream.repeat 1
           & Stream.mapWithIndex (\i n -> Int.ratio n (2 ** i))

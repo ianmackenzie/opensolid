@@ -88,14 +88,14 @@ testCount count description = do
   Text.join " " [Text.int count, pluralized, description]
 
 run :: List Test -> IO ()
-run tests = Prelude.do
+run tests = do
   IO.printLine "Running tests..."
   argStrings <- System.Environment.getArgs
   let args = List.map Text.pack argStrings
   results <- IO.collect (runImpl args "") tests
   let (successes, failures) = sum results
   if failures == 0
-    then Prelude.do
+    then do
       System.Console.ANSI.setSGR
         [ System.Console.ANSI.SetColor
             System.Console.ANSI.Foreground
@@ -132,7 +132,7 @@ runImpl args context test = case test of
       | List.isEmpty args ->
           -- No test filter specified, silently run all tests
           runCheck
-      | List.any (\arg -> Text.contains arg fullName) args -> Prelude.do
+      | List.any (\arg -> Text.contains arg fullName) args -> do
           -- Test filter specified, so print out which tests we're running
           -- and how long they took (with an extra emoji to flag slow tests)
           timer <- Timer.start
@@ -145,7 +145,7 @@ runImpl args context test = case test of
       | otherwise ->
           -- Current test didn't match filter, so return 0 successes and 0 failures
           IO.succeed (0, 0)
-  Group label tests -> Prelude.do
+  Group label tests -> do
     successesAndFailuresPerGroup <- IO.collect (runImpl args (appendTo context label)) tests
     IO.succeed (sum successesAndFailuresPerGroup)
 
