@@ -115,9 +115,18 @@ class
       (VectorCurve dimension units space)
       (Nondegenerate (Curve1D units))
       (VectorCurve dimension Unitless space)
-  , DotMultiplication (VectorCurve dimension Unitless space) (VectorCurve dimension units space) (Curve1D units)
-  , DotMultiplication (VectorCurve dimension units space) (VectorCurve dimension Unitless space) (Curve1D units)
-  , DotMultiplication_ (VectorCurve dimension units space) (VectorCurve dimension units space) (Curve1D (units ?*? units))
+  , DotMultiplication
+      (VectorCurve dimension Unitless space)
+      (VectorCurve dimension units space)
+      (Curve1D units)
+  , DotMultiplication
+      (VectorCurve dimension units space)
+      (VectorCurve dimension Unitless space)
+      (Curve1D units)
+  , DotMultiplication_
+      (VectorCurve dimension units space)
+      (VectorCurve dimension units space)
+      (Curve1D (units ?*? units))
   , NewtonRaphson.Curve dimension units space
   ) =>
   Exists dimension units space
