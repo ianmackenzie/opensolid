@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.Curve3D
   ( Curve3D
   , HasDegeneracy (HasDegeneracy)
@@ -45,9 +47,8 @@ import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (HasSingularity)
+import OpenSolid.Curve (Curve, HasSingularity)
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
@@ -60,7 +61,6 @@ import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (IsDegenerate)
 import OpenSolid.Parameter qualified as Parameter
@@ -82,13 +82,7 @@ import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorCurve3D (VectorCurve3D)
 import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 
-data Curve3D space = Curve3D
-  { compiled :: Compiled space
-  , derivative :: ~(VectorCurve3D Meters space)
-  , startPoint :: ~(Point3D space)
-  , endPoint :: ~(Point3D space)
-  , searchTree :: ~(SearchTree space)
-  }
+type Curve3D space = Curve 3 Meters space
 
 type Compiled space =
   CompiledFunction Number (Point3D space) (Interval Unitless) (Bounds3D space)
@@ -108,8 +102,8 @@ instance
   where
   lhs + rhs =
     new
-      (lhs.compiled + VectorCurve3D.compiled rhs)
-      (lhs.derivative + VectorCurve3D.derivative rhs)
+      (compiled lhs + VectorCurve3D.compiled rhs)
+      (derivative lhs + VectorCurve3D.derivative rhs)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -120,8 +114,8 @@ instance
   where
   lhs - rhs =
     new
-      (lhs.compiled - VectorCurve3D.compiled rhs)
-      (lhs.derivative - VectorCurve3D.derivative rhs)
+      (compiled lhs - VectorCurve3D.compiled rhs)
+      (derivative lhs - VectorCurve3D.derivative rhs)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -150,8 +144,8 @@ instance
   where
   lhs - rhs =
     VectorCurve3D.new
-      (lhs.compiled - rhs.compiled)
-      (lhs.derivative - rhs.derivative)
+      (compiled lhs - compiled rhs)
+      (derivative lhs - derivative rhs)
 
 instance
   space1 ~ space2 =>
@@ -171,42 +165,22 @@ instance
   where
   lhs - rhs = constant lhs - rhs
 
-instance Composition (Curve3D space) (Curve1D Unitless) (Curve3D space) where
-  outer . inner =
-    new
-      (outer.compiled . Curve1D.compiled inner)
-      ((outer.derivative . inner) * Curve1D.derivative inner)
-
 instance
   unitless ~ Unitless =>
   Composition (Curve3D space) (SurfaceFunction1D unitless) (SurfaceFunction3D space)
   where
   curve . function =
     SurfaceFunction3D.new
-      (curve.compiled . function.compiled)
-      (\p -> (curve.derivative . function) * SurfaceFunction1D.derivative p function)
+      (compiled curve . function.compiled)
+      (\p -> (derivative curve . function) * SurfaceFunction1D.derivative p function)
 
 instance ApproximateEquality (Curve3D space) (Tolerance Meters) where
   curve1 ~= curve2 = do
     let equalPointsAt t = point curve1 t ~= point curve2 t
     NonEmpty.all equalPointsAt Parameter.samples
 
-instance space1 ~ space2 => Intersects (Point3D space1) (Curve3D space2) (Tolerance Meters) where
-  givenPoint `intersects` curve = not (List.isEmpty (findPoint givenPoint curve))
-
-instance space1 ~ space2 => Intersects (Curve3D space1) (Point3D space2) (Tolerance Meters) where
-  curve `intersects` givenPoint = givenPoint `intersects` curve
-
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
-new givenCompiled givenDerivative =
-  recursive \self ->
-    Curve3D
-      { compiled = givenCompiled
-      , derivative = givenDerivative
-      , startPoint = CompiledFunction.value givenCompiled 0.0
-      , endPoint = CompiledFunction.value givenCompiled 1.0
-      , searchTree = Curve.Search.tree self
-      }
+new = Curve.new
 
 constant :: Point3D space -> Curve3D space
 constant givenPoint = new (CompiledFunction.constant givenPoint) VectorCurve3D.zero
@@ -271,7 +245,10 @@ hermite start startDerivatives end endDerivatives =
   bezier (Bezier.hermite start startDerivatives end endDerivatives)
 
 derivative :: Curve3D space -> VectorCurve3D Meters space
-derivative = (.derivative)
+derivative = Curve.derivative
+
+compiled :: Curve3D space -> Compiled space
+compiled = Curve.compiled
 
 secondDerivative :: Curve3D space -> VectorCurve3D Meters space
 secondDerivative = Curve.secondDerivative
@@ -320,18 +297,16 @@ curvatureVector ::
 curvatureVector curve = Result.map Units.specialize (Curve.curvatureVector_ curve)
 
 startPoint :: Curve3D space -> Point3D space
-startPoint = (.startPoint)
+startPoint = Curve.startPoint
 
 endPoint :: Curve3D space -> Point3D space
-endPoint = (.endPoint)
+endPoint = Curve.endPoint
 
 point :: Curve3D space -> Number -> Point3D space
-point curve 0.0 = curve.startPoint
-point curve 1.0 = curve.endPoint
-point curve tValue = CompiledFunction.value curve.compiled tValue
+point = Curve.point
 
 bounds :: Curve3D space -> Interval Unitless -> Bounds3D space
-bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
+bounds = Curve.bounds
 
 overallBounds :: Curve3D space -> Bounds3D space
 overallBounds curve = bounds curve Interval.unit
@@ -355,8 +330,8 @@ transformBy transform curve = do
           (Expression.transformBy transform)
           (Point3D.transformBy transform)
           (Bounds3D.transformBy transform)
-          curve.compiled
-  new compiledTransformed (VectorCurve3D.transformBy transform curve.derivative)
+          (compiled curve)
+  new compiledTransformed (VectorCurve3D.transformBy transform (derivative curve))
 
 placeIn :: Frame3D global local -> Curve3D local -> Curve3D global
 placeIn frame curve = do
@@ -365,8 +340,8 @@ placeIn frame curve = do
           (Expression.placeIn frame)
           (Point3D.placeIn frame)
           (Bounds3D.placeIn frame)
-          curve.compiled
-  new compiledPlaced (VectorCurve3D.placeIn frame curve.derivative)
+          (compiled curve)
+  new compiledPlaced (VectorCurve3D.placeIn frame (derivative curve))
 
 relativeTo :: Frame3D global local -> Curve3D global -> Curve3D local
 relativeTo frame curve = placeIn (Frame3D.inverse frame) curve
@@ -382,4 +357,4 @@ intersections ::
 intersections = Curve.intersections
 
 searchTree :: Curve3D space -> SearchTree space
-searchTree = (.searchTree)
+searchTree = Curve.searchTree

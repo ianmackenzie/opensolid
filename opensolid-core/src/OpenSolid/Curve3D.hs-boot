@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.Curve3D
   ( Curve3D
   , Compiled
@@ -15,18 +17,15 @@ module OpenSolid.Curve3D
 where
 
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve.Search qualified as Curve.Search
-import OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds3D, Plane3D, Point3D, Vector3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 
-type role Curve3D nominal
-
-type Curve3D :: Type -> Type
-data Curve3D space
+type Curve3D space = Curve 3 Meters space
 
 type Compiled space =
   CompiledFunction Number (Point3D space) (Interval Unitless) (Bounds3D space)
@@ -81,16 +80,6 @@ instance
     (Point3D space1)
     (Curve3D space2)
     (VectorCurve3D Meters space1)
-
-instance Composition (Curve3D space) (Curve1D Unitless) (Curve3D space)
-
-instance
-  space1 ~ space2 =>
-  Intersects (Curve3D space1) (Point3D space2) (Tolerance Meters)
-
-instance
-  space1 ~ space2 =>
-  Intersects (Point3D space1) (Curve3D space2) (Tolerance Meters)
 
 constant :: Point3D space -> Curve3D space
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space

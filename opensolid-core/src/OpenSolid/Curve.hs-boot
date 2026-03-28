@@ -20,8 +20,6 @@ where
 
 import GHC.TypeLits (Natural)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
-import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
-import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Nondegenerate (IsDegenerate)
@@ -32,34 +30,29 @@ import OpenSolid.VectorBounds (VectorBounds)
 import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
-type family Curve dimension units space = curve | curve -> dimension units space where
-  Curve 2 units space = Curve2D units space
-  Curve 3 Meters space = Curve3D space
+type role Curve nominal nominal nominal
+
+data Curve (dimension :: Natural) (units :: Type) (space :: Type)
 
 class Exists (dimension :: Natural) (units :: Type) (space :: Type)
 
 data HasSingularity
 
 point ::
-  Exists dimension units space =>
   Curve dimension units space ->
   Number ->
   Point dimension units space
 bounds ::
-  Exists dimension units space =>
   Curve dimension units space ->
   Interval Unitless ->
   Bounds dimension units space
 startPoint ::
-  Exists dimension units space =>
   Curve dimension units space ->
   Point dimension units space
 endPoint ::
-  Exists dimension units space =>
   Curve dimension units space ->
   Point dimension units space
 derivative ::
-  Exists dimension units space =>
   Curve dimension units space ->
   VectorCurve dimension units space
 derivativeValue ::

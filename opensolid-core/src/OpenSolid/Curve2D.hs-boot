@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.Curve2D
   ( Curve2D
   , Compiled
@@ -23,6 +25,7 @@ module OpenSolid.Curve2D
 where
 
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
+import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve.Search qualified as Curve.Search
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Interval (Interval)
@@ -32,10 +35,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.UvSpace (UvSpace)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 
-type role Curve2D nominal nominal
-
-type Curve2D :: Type -> Type -> Type
-data Curve2D units space
+type Curve2D units space = Curve 2 units space
 
 type Compiled units space =
   CompiledFunction
@@ -95,22 +95,12 @@ instance
     (Curve2D units2 space2)
     (VectorCurve2D units1 space1)
 
-instance Composition (Curve2D units space) (Curve1D Unitless) (Curve2D units space)
-
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
   Composition
     (SurfaceFunction1D units)
     (Curve2D unitless uvSpace)
     (Curve1D units)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Curve2D units1 space1) (Point2D units2 space2) (Tolerance units1)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Point2D units1 space1) (Curve2D units2 space2) (Tolerance units1)
 
 constant :: Point2D units space -> Curve2D units space
 new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space

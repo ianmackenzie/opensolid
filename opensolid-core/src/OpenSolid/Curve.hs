@@ -6,7 +6,9 @@ module OpenSolid.Curve
   , Segment
   , SearchTree
   , HasSingularity (HasSingularity)
+  , new
   , derivative
+  , compiled
   , overallBounds
   , point
   , bounds
@@ -41,6 +43,7 @@ where
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
@@ -52,14 +55,15 @@ import OpenSolid.Curve.Segment (Segment)
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
-import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
-import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
-import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
-import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
+-- TODO remove once all typeclass instances are moved here
+import {-# SOURCE #-} OpenSolid.Curve2D ()
+-- TODO remove once all typeclass instances are moved here
+import {-# SOURCE #-} OpenSolid.Curve3D ()
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
+import OpenSolid.Expression qualified as Expression
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
@@ -72,6 +76,8 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
+import OpenSolid.Point2D (Point2D)
+import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
@@ -79,6 +85,7 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Search qualified as Search
 import OpenSolid.Search.Domain qualified as Search.Domain
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds (VectorBounds)
@@ -87,14 +94,68 @@ import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 
-type family Curve dimension units space = curve | curve -> dimension units space where
-  Curve 2 units space = Curve2D units space
-  Curve 3 Meters space = Curve3D space
+data Curve dimension units space = Curve
+  { compiled :: Compiled dimension units space
+  , derivative :: ~(VectorCurve dimension units space)
+  , startPoint :: ~(Point dimension units space)
+  , endPoint :: ~(Point dimension units space)
+  , searchTree :: ~(Curve.Search.Tree dimension units space)
+  }
+
+type Compiled dimension units space =
+  CompiledFunction
+    Number
+    (Point dimension units space)
+    (Interval Unitless)
+    (Bounds dimension units space)
 
 data HasSingularity = HasSingularity deriving (Eq, Show)
 
 type SearchTree dimension units space =
   Curve.Search.Tree dimension units space
+
+instance
+  space1 ~ space2 =>
+  Units.Coercion (Curve 2 units1 space1) (Curve 2 units2 space2)
+  where
+  coerce curve =
+    Curve
+      { compiled = Units.coerce curve.compiled
+      , derivative = Units.coerce curve.derivative
+      , startPoint = Units.coerce curve.startPoint
+      , endPoint = Units.coerce curve.endPoint
+      , searchTree = Units.coerce curve.searchTree
+      }
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Intersects (Curve 2 units1 space1) (Point2D units2 space2) (Tolerance units1)
+  where
+  curve `intersects` givenPoint = not (List.isEmpty (findPoint givenPoint curve))
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Intersects (Point2D units1 space1) (Curve 2 units2 space2) (Tolerance units1)
+  where
+  givenPoint `intersects` curve = curve `intersects` givenPoint
+
+instance
+  space1 ~ space2 =>
+  Intersects (Curve 3 Meters space1) (Point3D space2) (Tolerance Meters)
+  where
+  curve `intersects` givenPoint = not (List.isEmpty (findPoint givenPoint curve))
+
+instance
+  space1 ~ space2 =>
+  Intersects (Point3D space1) (Curve 3 Meters space2) (Tolerance Meters)
+  where
+  givenPoint `intersects` curve = curve `intersects` givenPoint
+
+instance
+  Exists dimension units space =>
+  Composition (Curve dimension units space) (Curve1D Unitless) (Curve dimension units space)
+  where
+  f . g = new (f.compiled . Curve1D.compiled g) ((f.derivative . g) * Curve1D.derivative g)
 
 class
   ( Point.Exists dimension units space
@@ -104,6 +165,11 @@ class
   , VectorBounds.Exists dimension units space
   , VectorBounds.Exists dimension (Unitless ?/? units) space
   , DirectionBounds.Exists dimension space
+  , Expression.Evaluation
+      Number
+      (Point dimension units space)
+      (Interval Unitless)
+      (Bounds dimension units space)
   , VectorCurve.Exists dimension units space
   , VectorCurve.Exists dimension (Unitless ?/? units) space
   , DirectionCurve.Exists dimension space
@@ -115,40 +181,33 @@ class
       (Point dimension units space)
       (Curve dimension units space)
       (VectorCurve dimension units space)
-  , Intersects
-      (Point dimension units space)
-      (Curve dimension units space)
-      (Tolerance units)
-  , Intersects
-      (Curve dimension units space)
-      (Point dimension units space)
-      (Tolerance units)
-  , Composition
-      (Curve dimension units space)
-      (Curve1D Unitless)
-      (Curve dimension units space)
   ) =>
   Exists dimension units space
-  where
-  derivative :: Curve dimension units space -> VectorCurve dimension units space
-  overallBounds :: Curve dimension units space -> Bounds dimension units space
-  point :: Curve dimension units space -> Number -> Point dimension units space
-  bounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
-  searchTree :: Curve dimension units space -> SearchTree dimension units space
 
-instance Exists 2 units space where
-  derivative = Curve2D.derivative
-  overallBounds = Curve2D.overallBounds
-  point = Curve2D.point
-  bounds = Curve2D.bounds
-  searchTree = Curve2D.searchTree
+instance Exists 2 units space
 
-instance Exists 3 Meters space where
-  derivative = Curve3D.derivative
-  overallBounds = Curve3D.overallBounds
-  point = Curve3D.point
-  bounds = Curve3D.bounds
-  searchTree = Curve3D.searchTree
+instance Exists 3 Meters space
+
+new ::
+  Exists dimension units space =>
+  Compiled dimension units space ->
+  VectorCurve dimension units space ->
+  Curve dimension units space
+new givenCompiled givenDerivative =
+  recursive \self ->
+    Curve
+      { compiled = givenCompiled
+      , derivative = givenDerivative
+      , startPoint = CompiledFunction.value givenCompiled 0.0
+      , endPoint = CompiledFunction.value givenCompiled 1.0
+      , searchTree = Curve.Search.tree self
+      }
+
+derivative :: Curve dimension units space -> VectorCurve dimension units space
+derivative = (.derivative)
+
+compiled :: Curve dimension units space -> Compiled dimension units space
+compiled = (.compiled)
 
 secondDerivative ::
   Exists dimension units space =>
@@ -158,6 +217,26 @@ secondDerivative = VectorCurve.derivative . derivative
 
 isPoint :: (Exists dimension units space, Tolerance units) => Curve dimension units space -> Bool
 isPoint curve = VectorCurve.isZero (derivative curve)
+
+point :: Curve dimension units space -> Number -> Point dimension units space
+point curve 0.0 = curve.startPoint
+point curve 1.0 = curve.endPoint
+point curve tValue = CompiledFunction.value curve.compiled tValue
+
+startPoint :: Curve dimension units space -> Point dimension units space
+startPoint = (.startPoint)
+
+endPoint :: Curve dimension units space -> Point dimension units space
+endPoint = (.endPoint)
+
+bounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
+bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
+
+overallBounds :: Curve dimension units space -> Bounds dimension units space
+overallBounds curve = bounds curve Interval.unit
+
+searchTree :: Curve dimension units space -> Curve.Search.Tree dimension units space
+searchTree = (.searchTree)
 
 singular0 :: Exists dimension units space => Curve dimension units space -> Bool
 singular0 curve = VectorCurve.singular0 (derivative curve)
@@ -195,18 +274,6 @@ curvatureVector_ ::
   Curve dimension units space ->
   Result HasSingularity (VectorCurve dimension (Unitless ?/? units) space)
 curvatureVector_ curve = Result.map Curve.Nonzero.curvatureVector_ (nonzero curve)
-
-startPoint ::
-  Exists dimension units space =>
-  Curve dimension units space ->
-  Point dimension units space
-startPoint curve = point curve 0.0
-
-endPoint ::
-  Exists dimension units space =>
-  Curve dimension units space ->
-  Point dimension units space
-endPoint curve = point curve 1.0
 
 derivativeValue ::
   Exists dimension units space =>

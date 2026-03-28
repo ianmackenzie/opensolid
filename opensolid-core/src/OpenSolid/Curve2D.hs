@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.Curve2D
   ( Curve2D
   , Compiled
@@ -95,7 +97,7 @@ import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (HasSingularity)
+import OpenSolid.Curve (Curve, HasSingularity)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve1D (Curve1D)
@@ -159,13 +161,7 @@ import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
 -- | A parametric curve in 2D space.
-data Curve2D units space = Curve2D
-  { compiled :: Compiled units space
-  , derivative :: ~(VectorCurve2D units space)
-  , startPoint :: ~(Point2D units space)
-  , endPoint :: ~(Point2D units space)
-  , searchTree :: ~(SearchTree units space)
-  }
+type Curve2D units space = Curve 2 units space
 
 type Compiled units space =
   CompiledFunction
@@ -185,31 +181,6 @@ instance FFI (Curve2D Unitless UvSpace) where
   representation = FFI.classRepresentation "UvCurve"
 
 instance HasUnits (Curve2D units space) units
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion (Curve2D unitsA space1) (Curve2D unitsB space2)
-  where
-  coerce curve =
-    Curve2D
-      { compiled = Units.coerce curve.compiled
-      , derivative = Units.coerce curve.derivative
-      , startPoint = Units.coerce curve.startPoint
-      , endPoint = Units.coerce curve.endPoint
-      , searchTree = Units.coerce curve.searchTree
-      }
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Curve2D units1 space1) (Point2D units2 space2) (Tolerance units1)
-  where
-  curve `intersects` givenPoint = not (List.isEmpty (findPoint givenPoint curve))
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Point2D units1 space1) (Curve2D units2 space2) (Tolerance units1)
-  where
-  givenPoint `intersects` curve = curve `intersects` givenPoint
 
 instance ApproximateEquality (Curve2D units space) (Tolerance units) where
   curve1 ~= curve2 = samplePoints curve1 ~= samplePoints curve2
@@ -264,7 +235,7 @@ instance
     (VectorCurve2D units1 space1)
   where
   lhs - rhs =
-    VectorCurve2D.new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
+    VectorCurve2D.new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -284,9 +255,6 @@ instance
   where
   givenPoint - curve = constant givenPoint - curve
 
-instance Composition (Curve2D units space) (Curve1D Unitless) (Curve2D units space) where
-  f . g = new (f.compiled . Curve1D.compiled g) ((f.derivative . g) * Curve1D.derivative g)
-
 instance
   Composition
     (Curve2D units space)
@@ -295,8 +263,8 @@ instance
   where
   curve . function =
     SurfaceFunction2D.new
-      (curve.compiled . function.compiled)
-      (\p -> curve.derivative . function * SurfaceFunction1D.derivative p function)
+      (compiled curve . function.compiled)
+      (\p -> derivative curve . function * SurfaceFunction1D.derivative p function)
 
 instance
   Composition
@@ -314,8 +282,8 @@ instance
     (Curve1D units)
   where
   f . g = do
-    let (dudt, dvdt) = VectorCurve2D.components g.derivative
-    Curve1D.new (f.compiled . g.compiled) (f.du . g * dudt + f.dv . g * dvdt)
+    let (dudt, dvdt) = VectorCurve2D.components (derivative g)
+    Curve1D.new (f.compiled . compiled g) (f.du . g * dudt + f.dv . g * dvdt)
 
 instance
   (uvSpace ~ UvSpace, unitless ~ Unitless) =>
@@ -325,8 +293,8 @@ instance
     (VectorCurve3D units space)
   where
   function . uvCurve = do
-    let (dudt, dvdt) = VectorCurve2D.components uvCurve.derivative
-    let compiledComposed = VectorSurfaceFunction3D.compiled function . uvCurve.compiled
+    let (dudt, dvdt) = VectorCurve2D.components (derivative uvCurve)
+    let compiledComposed = VectorSurfaceFunction3D.compiled function . compiled uvCurve
     let composedDerivative =
           VectorSurfaceFunction3D.derivative U function . uvCurve * dudt
             + VectorSurfaceFunction3D.derivative V function . uvCurve * dvdt
@@ -340,21 +308,13 @@ instance
     (Curve3D space)
   where
   function . uvCurve = do
-    let (dudt, dvdt) = VectorCurve2D.components uvCurve.derivative
+    let (dudt, dvdt) = VectorCurve2D.components (derivative uvCurve)
     Curve3D.new
-      (function.compiled . uvCurve.compiled)
+      (function.compiled . compiled uvCurve)
       (function.du . uvCurve * dudt + function.dv . uvCurve * dvdt)
 
 new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space
-new givenCompiled givenDerivative =
-  recursive \self ->
-    Curve2D
-      { compiled = givenCompiled
-      , derivative = givenDerivative
-      , startPoint = CompiledFunction.value givenCompiled 0.0
-      , endPoint = CompiledFunction.value givenCompiled 1.0
-      , searchTree = Curve.Search.tree self
-      }
+new = Curve.new
 
 -- | Create a degenerate curve that is actually just a single point.
 constant :: Point2D units space -> Curve2D units space
@@ -684,11 +644,11 @@ desingularized start middle end = do
   let compiledDesingularized =
         CompiledFunction.desingularized
           (Curve1D.compiled Curve1D.t)
-          start.compiled
-          middle.compiled
-          end.compiled
+          (compiled start)
+          (compiled middle)
+          (compiled end)
   let desingularizedDerivative =
-        VectorCurve2D.desingularized start.derivative middle.derivative end.derivative
+        VectorCurve2D.desingularized (derivative start) (derivative middle) (derivative end)
   new compiledDesingularized desingularizedDerivative
 
 {-| Get the point on a curve at a given parameter value.
@@ -696,24 +656,22 @@ desingularized start middle end = do
 The parameter value should be between 0 and 1.
 -}
 point :: Curve2D units space -> Number -> Point2D units space
-point curve 0.0 = curve.startPoint
-point curve 1.0 = curve.endPoint
-point curve tValue = CompiledFunction.value curve.compiled tValue
+point = Curve.point
 
 -- | Get the start point of a curve.
 startPoint :: Curve2D units space -> Point2D units space
-startPoint = (.startPoint)
+startPoint = Curve.startPoint
 
 -- | Get the end point of a curve.
 endPoint :: Curve2D units space -> Point2D units space
-endPoint = (.endPoint)
+endPoint = Curve.endPoint
 
 -- | Get the start and end points of a curve.
 endpoints :: Curve2D units space -> (Point2D units space, Point2D units space)
 endpoints curve = (startPoint curve, endPoint curve)
 
 bounds :: Curve2D units space -> Interval Unitless -> Bounds2D units space
-bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
+bounds = Curve.bounds
 
 samplePoints :: Curve2D units space -> NonEmpty (Point2D units space)
 samplePoints curve = NonEmpty.map (point curve) Parameter.samples
@@ -726,10 +684,10 @@ overallBounds :: Curve2D units space -> Bounds2D units space
 overallBounds curve = bounds curve Interval.unit
 
 compiled :: Curve2D units space -> Compiled units space
-compiled = (.compiled)
+compiled = Curve.compiled
 
 derivative :: Curve2D units space -> VectorCurve2D units space
-derivative = (.derivative)
+derivative = Curve.derivative
 
 secondDerivative :: Curve2D units space -> VectorCurve2D units space
 secondDerivative = Curve.secondDerivative
@@ -782,7 +740,7 @@ distanceRightOf :: Axis2D units space -> Curve2D units space -> Curve1D units
 distanceRightOf (Axis2D p0 d) curve = (curve - p0) `dot` Direction2D.rotateRight d
 
 isPoint :: Tolerance units => Curve2D units space -> Bool
-isPoint curve = VectorCurve2D.isZero curve.derivative
+isPoint curve = VectorCurve2D.isZero (derivative curve)
 
 {-| Check if the given curve curve is collinear with (lies on) the given axis.
 
@@ -801,8 +759,8 @@ xCoordinate curve = do
           Expression.xCoordinate
           Point2D.xCoordinate
           Bounds2D.xCoordinate
-          curve.compiled
-  Curve1D.new compiledXCoordinate (VectorCurve2D.xComponent curve.derivative)
+          (compiled curve)
+  Curve1D.new compiledXCoordinate (VectorCurve2D.xComponent (derivative curve))
 
 -- | Get the Y coordinate of a 2D curve as a scalar curve.
 yCoordinate :: Curve2D units space -> Curve1D units
@@ -812,8 +770,8 @@ yCoordinate curve = do
           Expression.yCoordinate
           Point2D.yCoordinate
           Bounds2D.yCoordinate
-          curve.compiled
-  Curve1D.new compiledYCoordinate (VectorCurve2D.yComponent curve.derivative)
+          (compiled curve)
+  Curve1D.new compiledYCoordinate (VectorCurve2D.yComponent (derivative curve))
 
 coordinates :: Curve2D units space -> (Curve1D units, Curve1D units)
 coordinates curve = (xCoordinate curve, yCoordinate curve)
@@ -886,8 +844,8 @@ placeIn frame curve = do
           (Expression.placeIn frame)
           (Point2D.placeIn frame)
           (Bounds2D.placeIn frame)
-          curve.compiled
-  new compiledPlaced (VectorCurve2D.placeIn frame curve.derivative)
+          (compiled curve)
+  new compiledPlaced (VectorCurve2D.placeIn frame (derivative curve))
 
 relativeTo ::
   Frame2D units global local ->
@@ -908,8 +866,8 @@ transformBy transform curve = do
           (Expression.transformBy transform)
           (Point2D.transformBy transform)
           (Bounds2D.transformBy transform)
-          curve.compiled
-  new compiledTransformed (VectorCurve2D.transformBy transform curve.derivative)
+          (compiled curve)
+  new compiledTransformed (VectorCurve2D.transformBy transform (derivative curve))
 
 -- | Translate by the given displacement.
 translateBy ::
@@ -1017,8 +975,8 @@ medialAxis ::
 medialAxis curve1 curve2 = do
   let p1 = curve1 . SurfaceFunction1D.u
   let p2 = curve2 . SurfaceFunction1D.v
-  let v1 = curve1.derivative . SurfaceFunction1D.u
-  let v2 = curve2.derivative . SurfaceFunction1D.v
+  let v1 = derivative curve1 . SurfaceFunction1D.u
+  let v2 = derivative curve2 . SurfaceFunction1D.v
   let d = p2 - p1
   let target =
         v2 `cross_` (2.0 * (v1 `dot_` d) ?*? d - VectorSurfaceFunction2D.squaredMagnitude_ d ?*? v1)
@@ -1162,7 +1120,7 @@ piecewiseTreeDerivative tree length = case tree of
       leftLength
       (piecewiseTreeDerivative rightTree length)
   PiecewiseLeaf curve segmentLength ->
-    PiecewiseDerivativeLeaf ((length / segmentLength) * curve.derivative) segmentLength
+    PiecewiseDerivativeLeaf ((length / segmentLength) * derivative curve) segmentLength
 
 piecewiseDerivativeTreeDerivative ::
   PiecewiseDerivativeTree units space ->
@@ -1213,4 +1171,4 @@ piecewiseDerivativeBounds tree startLength endLength = case tree of
     VectorCurve2D.bounds curve tBounds
 
 searchTree :: Curve2D units space -> SearchTree units space
-searchTree = (.searchTree)
+searchTree = Curve.searchTree
