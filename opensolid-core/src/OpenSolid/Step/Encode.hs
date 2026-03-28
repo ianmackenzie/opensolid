@@ -15,6 +15,8 @@ module OpenSolid.Step.Encode
 where
 
 import Data.ByteString.Builder qualified
+import Data.Text qualified
+import Numeric qualified
 import OpenSolid.Binary (Builder)
 import OpenSolid.Binary qualified as Binary
 import OpenSolid.Prelude hiding (id)
@@ -57,14 +59,20 @@ int = Text.toUtf8 . Text.int
 
 {-| Encode a numeric value.
 
-This will ensure that the encoded value has a trailing decimal point,
+This will ensure that the encoded value has a decimal point
+(and a capital E exponent, if applicable)
 as required by the STEP standard.
 -}
 number :: Number -> Builder
 number value = do
-  let numberText = Text.number value
-  let encodedNumber = Text.toUtf8 numberText
-  if Text.contains "." numberText then encodedNumber else encodedNumber <> char '.'
+  let formatted = Text.pack (Numeric.showGFloatAlt Nothing value "")
+  Text.toUtf8 $
+    case Text.split "e" formatted of
+      [mantissa, exponent] -> removeTrailingZeros mantissa <> "E" <> exponent
+      _ -> removeTrailingZeros formatted
+
+removeTrailingZeros :: Text -> Text
+removeTrailingZeros = Data.Text.dropWhileEnd (== '0')
 
 -- | The special 'derived value' character '*'.
 derived :: Builder
