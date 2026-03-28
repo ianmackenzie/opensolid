@@ -5,7 +5,7 @@ module OpenSolid.Circle2D
   , centerPoint
   , radius
   , diameter
-  , pointOn
+  , point
   )
 where
 
@@ -59,5 +59,5 @@ withDiameter givenDiameter = withRadius (0.5 * givenDiameter)
 
 The angle is measured counterclockwise from the positive X direction.
 -}
-pointOn :: Circle2D units space -> Angle -> Point2D units space
-pointOn circle angle = centerPoint circle + Vector2D.polar (radius circle) angle
+point :: Circle2D units space -> Angle -> Point2D units space
+point circle angle = centerPoint circle + Vector2D.polar (radius circle) angle

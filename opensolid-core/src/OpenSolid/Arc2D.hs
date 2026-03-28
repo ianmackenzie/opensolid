@@ -9,7 +9,7 @@ module OpenSolid.Arc2D
   , startPoint
   , endPoint
   , toCircle
-  , pointOn
+  , point
   , tangentDirection
   , sweptAround
   , reverse
@@ -82,8 +82,8 @@ endPoint arc = centerPoint arc + Vector2D.polar (radius arc) (endAngle arc)
 toCircle :: Arc2D units space -> Circle2D units space
 toCircle arc = Circle2D.withRadius (radius arc) (centerPoint arc)
 
-pointOn :: Arc2D units space -> Number -> Point2D units space
-pointOn arc t = do
+point :: Arc2D units space -> Number -> Point2D units space
+point arc t = do
   let angle = Quantity.interpolateFrom (startAngle arc) (endAngle arc) t
   centerPoint arc + Vector2D.polar (radius arc) angle
 
