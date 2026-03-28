@@ -94,6 +94,7 @@ library
     OpenSolid
     OpenSolid.Angle
     OpenSolid.Arc2D
+    OpenSolid.Arc3D
     OpenSolid.ArcLength
     OpenSolid.Area
     OpenSolid.Array
@@ -110,6 +111,7 @@ library
     OpenSolid.Bytecode.Ast
     OpenSolid.Camera3D
     OpenSolid.Circle2D
+    OpenSolid.Circle3D
     OpenSolid.Color
     OpenSolid.CompiledFunction
     OpenSolid.Convention3D
