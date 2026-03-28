@@ -23,6 +23,7 @@ module OpenSolid.Plane3D
   , translateIn
   , translateAlong
   , rotateAround
+  , mirrorAcross
   )
 where
 
@@ -36,6 +37,8 @@ import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Axis3D (Axis3D), Frame3D, Plane3D (Plane3D, orientation, originPoint))
+import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Vector3D (Vector3D)
 
@@ -138,7 +141,11 @@ The Y direction will remain constant.
 flip :: Plane3D global local -> Plane3D global local
 flip (Plane3D p o) = Plane3D p (PlaneOrientation3D.flip o)
 
-transformBy :: Transform3D.Rigid global -> Plane3D global local -> Plane3D global local
+transformBy ::
+  Transform.IsOrthonormal tag =>
+  Transform3D tag global ->
+  Plane3D global local ->
+  Plane3D global local
 transformBy transform (Plane3D p o) =
   Plane3D (Point3D.transformBy transform p) (PlaneOrientation3D.transformBy transform o)
 
@@ -153,3 +160,6 @@ translateAlong = Transform3D.translateAlongImpl transformBy
 
 rotateAround :: Axis3D global -> Angle -> Plane3D global local -> Plane3D global local
 rotateAround = Transform3D.rotateAroundImpl transformBy
+
+mirrorAcross :: Plane3D global local1 -> Plane3D global local2 -> Plane3D global local2
+mirrorAcross = Transform3D.mirrorAcrossImpl transformBy
