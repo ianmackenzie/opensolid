@@ -1,5 +1,6 @@
 module OpenSolid.Curve.Nondegenerate
-  ( tangentDirection
+  ( derivative
+  , tangentDirection
   , tangentDirectionValue
   )
 where
@@ -11,7 +12,14 @@ import OpenSolid.Direction qualified as Direction
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Prelude
+import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
+
+derivative ::
+  Curve.Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) ->
+  Nondegenerate (VectorCurve dimension units space)
+derivative (Nondegenerate curve) = Nondegenerate (Curve.derivative curve)
 
 tangentDirection ::
   Curve.Exists dimension units space =>
