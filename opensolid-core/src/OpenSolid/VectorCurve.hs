@@ -127,6 +127,10 @@ class
       (VectorCurve dimension units space)
       (VectorCurve dimension units space)
       (Curve1D (units ?*? units))
+  , Composition
+      (VectorCurve dimension units space)
+      (Curve1D Unitless)
+      (VectorCurve dimension units space)
   , NewtonRaphson.Curve dimension units space
   ) =>
   Exists dimension units space
