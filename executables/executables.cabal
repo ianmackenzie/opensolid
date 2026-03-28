@@ -18,7 +18,7 @@ source-repository head
   location: https://github.com/ianmackenzie/opensolid
 
 common config
-  default-language: GHC2021
+  default-language: GHC2024
   ghc-options:
     -Wall
     -Werror
@@ -36,10 +36,6 @@ common config
 
   default-extensions:
     BlockArguments
-    DataKinds
-    DisambiguateRecordFields
-    ExplicitNamespaces
-    GADTs
     LexicalNegation
     OverloadedLabels
     OverloadedRecordDot

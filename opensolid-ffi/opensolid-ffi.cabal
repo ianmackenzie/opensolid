@@ -21,7 +21,7 @@ foreign-library opensolid-ffi
   if os(windows)
     options: standalone
     mod-def-file: opensolid-ffi.def
-  default-language: GHC2021
+  default-language: GHC2024
   build-depends:
     base,
     opensolid-api,
@@ -53,7 +53,7 @@ foreign-library opensolid-ffi
 executable generate-def-file
   main-is: Main.hs
   hs-source-dirs: generate-def-file
-  default-language: GHC2021
+  default-language: GHC2024
   build-depends:
     base,
     opensolid-api,

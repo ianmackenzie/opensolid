@@ -20,7 +20,7 @@ source-repository head
   location: https://github.com/ianmackenzie/opensolid
 
 common config
-  default-language: GHC2021
+  default-language: GHC2024
   build-depends:
     array,
     async,
@@ -56,16 +56,11 @@ common config
   default-extensions:
     BlockArguments
     CApiFFI
-    DataKinds
     DeriveAnyClass
-    DerivingStrategies
     DuplicateRecordFields
-    ExplicitNamespaces
     FunctionalDependencies
-    GADTs
     GHCForeignImportPrim
     ImplicitParams
-    LambdaCase
     LexicalNegation
     MagicHash
     MultiWayIf
@@ -78,7 +73,6 @@ common config
     QualifiedDo
     RebindableSyntax
     RequiredTypeArguments
-    RoleAnnotations
     StrictData
     TypeAbstractions
     TypeFamilies

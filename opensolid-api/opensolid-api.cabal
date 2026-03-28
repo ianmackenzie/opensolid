@@ -18,7 +18,7 @@ source-repository head
   location: https://github.com/ianmackenzie/opensolid
 
 library
-  default-language: GHC2021
+  default-language: GHC2024
   build-depends:
     base,
     hashable,
@@ -53,11 +53,7 @@ library
 
   default-extensions:
     BlockArguments
-    DataKinds
-    DisambiguateRecordFields
-    GADTs
     ImplicitParams
-    LambdaCase
     LexicalNegation
     OverloadedLabels
     OverloadedRecordDot

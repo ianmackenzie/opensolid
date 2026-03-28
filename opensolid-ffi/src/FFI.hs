@@ -1,5 +1,5 @@
 -- Avoid errors when running Fourmolu
-{-# LANGUAGE GHC2021 #-}
+{-# LANGUAGE GHC2024 #-}
 
 module FFI (generateExports) where
 
