@@ -1,6 +1,7 @@
 module OpenSolid.Result
   ( Result (Ok, Error)
   , map
+  , andThen
   , map2
   , orFail
   , collect
@@ -16,6 +17,9 @@ import Prelude qualified
 
 map :: (a -> b) -> Result x a -> Result x b
 map = Prelude.fmap
+
+andThen :: (a -> Result x b) -> Result x a -> Result x b
+andThen function result = result >>= function
 
 map2 :: (a -> b -> c) -> Result x a -> Result x b -> Result x c
 map2 function result1 result = do
