@@ -1,3 +1,7 @@
+Add generic concrete Curve type?
+- remove 'import {-# SOURCE #-} OpenSolid.Curve#D ()' lines from Curve.hs
+  once all typeclass instances have been migrated there
+
 Reconsider adding functions that just mirror constructors?
 - sometimes most convenient/consistent to just use qualified functions for everything...
 - Point2D.xy, Vector2D.xy, Bounds2D.xy, VectorBounds2D.xy, Line#D.from
