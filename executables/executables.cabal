@@ -198,3 +198,17 @@ executable simple-step-file
   build-depends:
     base,
     opensolid-core,
+
+executable phone-holder
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: phone-holder
+  other-modules:
+    Edge2D
+    Edge3D
+    Path2D
+    Path3D
+
+  build-depends:
+    base,
+    opensolid-core,
