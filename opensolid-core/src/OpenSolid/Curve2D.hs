@@ -8,6 +8,7 @@ module OpenSolid.Curve2D
   , xy
   , line
   , lineFrom
+  , arc
   , arcFrom
   , polarArc
   , sweptArc
@@ -81,6 +82,8 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Arc2D (Arc2D)
+import OpenSolid.Arc2D qualified as Arc2D
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
@@ -373,6 +376,14 @@ line (Line2D p1 p2) = lineFrom p1 p2
 -- | Create a line between two points.
 lineFrom :: Point2D units space -> Point2D units space -> Curve2D units space
 lineFrom p1 p2 = bezier (NonEmpty.two p1 p2)
+
+arc :: Arc2D units space -> Curve2D units space
+arc givenArc =
+  polarArc
+    (#centerPoint (Arc2D.centerPoint givenArc))
+    (#radius (Arc2D.radius givenArc))
+    (#startAngle (Arc2D.startAngle givenArc))
+    (#endAngle (Arc2D.endAngle givenArc))
 
 {-| Create an arc from the given start point to the given end point, with the given swept angle.
 
