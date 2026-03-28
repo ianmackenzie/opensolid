@@ -93,6 +93,10 @@ library
   exposed-modules:
     OpenSolid
     OpenSolid.Angle
+    OpenSolid.Ap242
+    OpenSolid.Ap242.Curve
+    OpenSolid.Ap242.Surface
+    OpenSolid.Ap242.EdgeCurve
     OpenSolid.Arc2D
     OpenSolid.Arc3D
     OpenSolid.ArcLength
