@@ -3,6 +3,7 @@ module OpenSolid.Plane3D
   , fromPointAndNormal
   , fromXAxis
   , fromYAxis
+  , fromNormalAxis
   , coerce
   , originPoint
   , orientation
@@ -54,6 +55,13 @@ fromXAxis (Axis3D p0 dx) = Plane3D p0 (PlaneOrientation3D.fromXDirection dx)
 -- | Construct a plane having the given Y axis, with an arbitrarily-chosen X direction.
 fromYAxis :: Axis3D global -> Plane3D global local
 fromYAxis (Axis3D p0 dy) = Plane3D p0 (PlaneOrientation3D.fromYDirection dy)
+
+{-| Construct a plane having the given normal axis, with arbitrary X and Y directions.
+
+(The X and Y directions will, of course, be perpendicular to each other and the normal direction.)
+-}
+fromNormalAxis :: Axis3D global -> Plane3D global local
+fromNormalAxis (Axis3D p0 n) = fromPointAndNormal p0 n
 
 coerce :: Plane3D global1 local1 -> Plane3D global2 local2
 coerce (Plane3D p o) = Plane3D (Point3D.coerce p) (PlaneOrientation3D.coerce o)
