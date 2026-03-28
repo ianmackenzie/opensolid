@@ -19,6 +19,8 @@ module OpenSolid.Direction3D
   , leftwardComponent
   , upwardComponent
   , downwardComponent
+  , zUpComponents
+  , yUpComponents
   , angleFrom
   , parallel
   , perpendicular
@@ -137,6 +139,12 @@ upwardComponent (Unit3D vector) = Vector3D.upwardComponent vector
 
 downwardComponent :: Direction3D space -> Number
 downwardComponent (Unit3D vector) = Vector3D.downwardComponent vector
+
+zUpComponents :: Direction3D space -> (Number, Number, Number)
+zUpComponents (Unit3D vector) = Vector3D.zUpComponents vector
+
+yUpComponents :: Direction3D space -> (Number, Number, Number)
+yUpComponents (Unit3D vector) = Vector3D.yUpComponents vector
 
 {-| Measure the angle from one direction to another.
 
