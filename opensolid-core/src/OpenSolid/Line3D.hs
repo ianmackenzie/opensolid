@@ -1,5 +1,6 @@
 module OpenSolid.Line3D
   ( Line3D (Line3D)
+  , on
   , startPoint
   , endPoint
   , endpoints
@@ -8,19 +9,36 @@ module OpenSolid.Line3D
   , bounds
   , distanceTo
   , distanceTo#
+  , reverse
+  , transformBy
+  , translateBy
+  , translateIn
+  , translateAlong
+  , rotateAround
+  , mirrorAcross
+  , scaleAbout
+  , scaleAlong
   )
 where
 
+import OpenSolid.Angle (Angle)
+import OpenSolid.Axis3D (Axis3D)
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
+import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Length (Length)
+import OpenSolid.Line2D (Line2D (Line2D))
+import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Point3D (Point3D))
 import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Transform3D (Transform3D)
+import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Unboxed.Math
+import OpenSolid.Vector3D (Vector3D)
 
 -- | A line in 3D, with a start point and end point.
 data Line3D space
@@ -29,6 +47,9 @@ data Line3D space
 
 instance FFI (Line3D FFI.Space) where
   representation = FFI.classRepresentation "Line3D"
+
+on :: Plane3D space local -> Line2D Meters local -> Line3D space
+on plane (Line2D p1 p2) = Line3D (Point3D.on plane p1) (Point3D.on plane p2)
 
 -- | Get the start point of a line.
 {-# INLINE startPoint #-}
@@ -88,3 +109,31 @@ distanceTo# p0 (Line3D p1 p2) = do
         let crossY# = vz# *# ux# -# vx# *# uz#
         let crossZ# = vx# *# uy# -# vy# *# ux#
         hypot3# crossX# crossY# crossZ# /# sqrt# lengthSquared#
+
+reverse :: Line3D space -> Line3D space
+reverse (Line3D p1 p2) = Line3D p2 p1
+
+transformBy :: Transform3D tag space -> Line3D space -> Line3D space
+transformBy transform (Line3D p1 p2) =
+  Line3D (Point3D.transformBy transform p1) (Point3D.transformBy transform p2)
+
+translateBy :: Vector3D Meters space -> Line3D space -> Line3D space
+translateBy = Transform3D.translateByImpl transformBy
+
+translateIn :: Direction3D space -> Length -> Line3D space -> Line3D space
+translateIn = Transform3D.translateInImpl transformBy
+
+translateAlong :: Axis3D space -> Length -> Line3D space -> Line3D space
+translateAlong = Transform3D.translateAlongImpl transformBy
+
+rotateAround :: Axis3D space -> Angle -> Line3D space -> Line3D space
+rotateAround = Transform3D.rotateAroundImpl transformBy
+
+mirrorAcross :: Plane3D space local -> Line3D space -> Line3D space
+mirrorAcross = Transform3D.mirrorAcrossImpl transformBy
+
+scaleAbout :: Point3D space -> Number -> Line3D space -> Line3D space
+scaleAbout = Transform3D.scaleAboutImpl transformBy
+
+scaleAlong :: Axis3D space -> Number -> Line3D space -> Line3D space
+scaleAlong = Transform3D.scaleAlongImpl transformBy
