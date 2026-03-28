@@ -52,6 +52,7 @@ where
 import Control.Exception (Exception, assert, throw)
 import Data.Coerce
 import Data.Function ((&))
+import Data.Function qualified
 import Data.Hashable (Hashable)
 import Data.Kind (Type)
 import Data.List.NonEmpty (NonEmpty ((:|)))
@@ -535,4 +536,4 @@ todoImpl = Prelude.error "Not implemented"
 
 {-# INLINE recursive #-}
 recursive :: (a -> a) -> a
-recursive callback = let value = callback value in value
+recursive = Data.Function.fix
