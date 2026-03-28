@@ -1,3 +1,9 @@
+Update to GHC2024 language standard
+- https://github.com/ianmackenzie/opensolid/issues/24
+
+Reconsider adding Point2D.xy, Line2D.from functions that just mirror constructors?
+- sometimes most convenient/consistent to just use qualified functions for everything...
+
 Add enough STEP support to "handcraft" planar/extruded surfaces etc.
 - convert curves to simple B-spline curves (piecewise cubic or quintic)
 - or even just support lines, arcs (and maybe Bezier curves) for now?
@@ -49,8 +55,6 @@ Refactor bisection search to throw during *search*, not during domain *construct
   so that that function can check if the original bounds are atomic
 - maybe go back to the list of children being a Result or 'Maybe NonEmpty'?
 - or have an Atomic or Leaf constructor for Domain...
-
-Refactor involute curve construction to use optimized (simplified) derivatives
 
 Tighten vector bounds normalization
 - add C++ code callable via primop that computes normalized vector bounds
