@@ -39,13 +39,13 @@ magnitude ::
 magnitude = Curve1D.Nonzero.sqrt_ . squaredMagnitude_
 
 direction ::
-  (VectorCurve.Exists dimension units space, DirectionCurve.Exists dimension space) =>
+  VectorCurve.Exists dimension units space =>
   Nonzero (VectorCurve dimension units space) ->
   DirectionCurve dimension space
 direction (Nonzero curve) = DirectionCurve.unsafe (curve / magnitude (Nonzero curve))
 
 directionValue ::
-  (VectorCurve.Exists dimension units space, Direction.Exists dimension space) =>
+  VectorCurve.Exists dimension units space =>
   Nonzero (VectorCurve dimension units space) ->
   Number ->
   Direction dimension space

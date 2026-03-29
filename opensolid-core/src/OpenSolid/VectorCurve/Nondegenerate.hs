@@ -35,9 +35,7 @@ magnitude ::
 magnitude = Curve1D.Nondegenerate.sqrt_ . squaredMagnitude_
 
 direction ::
-  ( VectorCurve.Exists dimension units space
-  , DirectionCurve.Exists dimension space
-  ) =>
+  VectorCurve.Exists dimension units space =>
   Nondegenerate (VectorCurve dimension units space) ->
   DirectionCurve dimension space
 direction (Nondegenerate curve) = DirectionCurve.unsafe (curve / magnitude (Nondegenerate curve))

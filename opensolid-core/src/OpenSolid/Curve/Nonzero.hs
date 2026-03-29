@@ -17,7 +17,6 @@ import OpenSolid.Direction qualified as Direction
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DirectionCurve (DirectionCurve)
-import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Interval (Interval)
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
@@ -30,7 +29,7 @@ import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve.Nonzero qualified as VectorCurve.Nonzero
 
 tangentDirection ::
-  (Curve.Exists dimension units space, DirectionCurve.Exists dimension space) =>
+  Curve.Exists dimension units space =>
   Nonzero (Curve dimension units space) ->
   DirectionCurve dimension space
 tangentDirection (Nonzero curve) =

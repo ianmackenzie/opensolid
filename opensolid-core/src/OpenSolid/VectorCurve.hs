@@ -120,7 +120,9 @@ type Compiled dimension units space =
 class
   ( Vector.Exists dimension units space
   , VectorBounds.Exists dimension units space
+  , DirectionBounds.Exists dimension space
   , Exists dimension Unitless space
+  , DirectionCurve.Exists dimension space
   , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
   , Units.Coercion (VectorCurve dimension Unitless space) (VectorCurve dimension units space)
   , Expression.Constant Number (Vector dimension units space)
@@ -1236,13 +1238,13 @@ secondDerivativeBounds ::
 secondDerivativeBounds curve tBounds = bounds (secondDerivative curve) tBounds
 
 direction ::
-  (Exists dimension units space, DirectionCurve.Exists dimension space, Tolerance units) =>
+  (Exists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsDegenerate (DirectionCurve dimension space)
 direction vectorCurve = Result.map VectorCurve.Nondegenerate.direction (nondegenerate vectorCurve)
 
 directionBounds ::
-  (Exists dimension units space, DirectionBounds.Exists dimension space) =>
+  Exists dimension units space =>
   VectorCurve dimension units space ->
   Interval Unitless ->
   DirectionBounds dimension space
