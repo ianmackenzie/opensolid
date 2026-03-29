@@ -36,5 +36,5 @@ main = Tolerance.using Length.nanometer do
   body <- Result.orFail (Body3D.extruded World3D.frontPlane profile extrusionStart extrusionEnd)
   let resolution = Resolution.maxSize (Length.centimeters 30.0)
   let mesh = Body3D.toPointMesh resolution body
-  let outputPath = "executables/body3D-meshing/mesh.stl"
+  let outputPath = "executables/body3d-meshing/mesh.stl"
   Stl.writeBinary outputPath Convention3D.yUp Length.inMillimeters mesh
