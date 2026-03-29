@@ -28,6 +28,8 @@ Rework arc length parameterization to not require temporary curve construction?
 Optimize findPoint to immediately reject monotonic segments where no solution is possible
 - if segment is monotonic then check if point is definitely "off either end"
 
+Rework VectorCurve.zeros to match Curve.findPoint instead of using Curve1D.zeros
+
 Try to reuse compiled expressions when composing them into larger expressions?
 - in particular: compose UV curve with 3D surface function to make 3D curve
 
