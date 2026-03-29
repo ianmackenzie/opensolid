@@ -6,6 +6,7 @@ module OpenSolid.Vector
   , squaredMagnitude_
   , squaredMagnitude
   , magnitude
+  , crossProductMagnitude_
   , componentIn
   , projectionIn
   , normalize
@@ -30,6 +31,7 @@ import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.Vector2D (Vector2D)
 import {-# SOURCE #-} OpenSolid.Vector3D (Vector3D)
+import {-# SOURCE #-} OpenSolid.Vector3D qualified as Vector3D
 
 type family Vector dimension units space = vector | vector -> dimension units space where
   Vector 1 units Void = Quantity units
@@ -62,6 +64,7 @@ class
   , DotMultiplication (Vector dimension units space) (Direction dimension space) (Quantity units)
   , DotMultiplication_ (Vector dimension units space) (Vector dimension units space) (Quantity (units ?*? units))
   , Exists dimension Unitless space
+  , Direction.Exists dimension space
   ) =>
   Exists dimension units space
   where
@@ -69,20 +72,27 @@ class
   zero = HasZero.zero
 
   squaredMagnitude_ :: Vector dimension units space -> Quantity (units ?*? units)
+  crossProductMagnitude_ ::
+    Vector dimension units space ->
+    Vector dimension units space ->
+    Quantity (units ?*? units)
 
 data IsZero = IsZero deriving (Eq, Show)
 
 instance Exists 1 units Void where
   {-# INLINEABLE squaredMagnitude_ #-}
   squaredMagnitude_ = Quantity.squared_
+  crossProductMagnitude_ _ _ = Quantity.zero
 
 instance Exists 2 units space where
   {-# INLINEABLE squaredMagnitude_ #-}
   squaredMagnitude_ vector = vector `dot_` vector
+  crossProductMagnitude_ v1 v2 = Quantity.abs (v1 `cross_` v2)
 
 instance Exists 3 units space where
   {-# INLINEABLE squaredMagnitude_ #-}
   squaredMagnitude_ vector = vector `dot_` vector
+  crossProductMagnitude_ v1 v2 = Vector3D.magnitude (v1 `cross_` v2)
 
 {-# INLINEABLE squaredMagnitude #-}
 squaredMagnitude ::
