@@ -1,6 +1,7 @@
 module OpenSolid.Curve
   ( Curve
   , Exists
+  , constant
   , point
   , bounds
   , startPoint
@@ -145,6 +146,10 @@ instance
     (Curve 3 Meters space2)
     (VectorCurve3D Meters space1)
 
+constant ::
+  Exists dimension units space =>
+  Point dimension units space ->
+  Curve dimension units space
 point ::
   Curve dimension units space ->
   Number ->
