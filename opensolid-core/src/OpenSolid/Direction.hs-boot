@@ -23,6 +23,8 @@ type family
 
 class Exists (dimension :: Natural) (space :: Type)
 
+instance Exists 1 Void
+
 instance Exists 2 space
 
 instance Exists 3 space
