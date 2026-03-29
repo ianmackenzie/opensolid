@@ -8,6 +8,8 @@ Reconsider adding functions that just mirror constructors?
 - Point3D.xyz, Vector3D.xyz, Bounds3D.xyz, VectorBounds3D.xyz that take Convention3D arguments
 - Axis#D.through (and rename Plane3D.fromPointAndNormal to Plane3D.through)
 
+Replace '$' with 'do', '&' with '|>'?
+
 Add enough STEP support to "handcraft" planar/extruded surfaces etc.
 - convert curves to simple B-spline curves (piecewise cubic or quintic)
 - or even just support lines, arcs (and maybe Bezier curves) for now?
