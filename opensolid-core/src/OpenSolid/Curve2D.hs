@@ -112,8 +112,6 @@ import OpenSolid.DirectionBounds2D (DirectionBounds2D)
 import OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.FFI (FFI)
-import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
@@ -138,15 +136,10 @@ import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction1D.Zeros qualified as SurfaceFunction1D.Zeros
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
-import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
-import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
@@ -154,11 +147,7 @@ import OpenSolid.VectorBounds2D (VectorBounds2D)
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
-import OpenSolid.VectorCurve3D (VectorCurve3D)
-import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
-import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
-import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
 -- | A parametric curve in 2D space.
 type Curve2D units space = Curve 2 units space
@@ -174,151 +163,12 @@ type Segment units space = Curve.Segment 2 units space
 
 type SearchTree units space = Curve.Search.Tree 2 units space
 
-instance FFI (Curve2D Meters FFI.Space) where
-  representation = FFI.classRepresentation "Curve2D"
-
-instance FFI (Curve2D Unitless UvSpace) where
-  representation = FFI.classRepresentation "UvCurve"
-
-instance HasUnits (Curve2D units space) units
-
-instance ApproximateEquality (Curve2D units space) (Tolerance units) where
-  curve1 ~= curve2 = samplePoints curve1 ~= samplePoints curve2
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (Curve2D units1 space1)
-    (VectorCurve2D units2 space2)
-    (Curve2D units1 space1)
-  where
-  lhs + rhs =
-    new
-      (compiled lhs + VectorCurve2D.compiled rhs)
-      (derivative lhs + VectorCurve2D.derivative rhs)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Curve2D units1 space1)
-    (VectorCurve2D units2 space2)
-    (Curve2D units1 space1)
-  where
-  lhs - rhs =
-    new
-      (compiled lhs - VectorCurve2D.compiled rhs)
-      (derivative lhs - VectorCurve2D.derivative rhs)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (Curve2D units1 space1)
-    (Vector2D units2 space2)
-    (Curve2D units1 space1)
-  where
-  lhs + rhs = lhs + VectorCurve2D.constant rhs
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Curve2D units1 space1)
-    (Vector2D units2 space2)
-    (Curve2D units1 space1)
-  where
-  lhs - rhs = lhs - VectorCurve2D.constant rhs
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Curve2D units1 space1)
-    (Curve2D units2 space2)
-    (VectorCurve2D units1 space1)
-  where
-  lhs - rhs =
-    VectorCurve2D.new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Curve2D units1 space1)
-    (Point2D units2 space2)
-    (VectorCurve2D units1 space1)
-  where
-  curve - givenPoint = curve - constant givenPoint
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Point2D units1 space1)
-    (Curve2D units2 space2)
-    (VectorCurve2D units1 space1)
-  where
-  givenPoint - curve = constant givenPoint - curve
-
-instance
-  Composition
-    (Curve2D units space)
-    (SurfaceFunction1D Unitless)
-    (SurfaceFunction2D units space)
-  where
-  curve . function =
-    SurfaceFunction2D.new
-      (compiled curve . function.compiled)
-      (\p -> derivative curve . function * SurfaceFunction1D.derivative p function)
-
-instance
-  Composition
-    (Curve2D units space)
-    SurfaceParameter
-    (SurfaceFunction2D units space)
-  where
-  curve . parameter = curve . SurfaceFunction1D.parameter parameter
-
-instance
-  (uvSpace ~ UvSpace, unitless ~ Unitless) =>
-  Composition
-    (SurfaceFunction1D units)
-    (Curve2D unitless uvSpace)
-    (Curve1D units)
-  where
-  f . g = do
-    let (dudt, dvdt) = VectorCurve2D.components (derivative g)
-    Curve1D.new (f.compiled . compiled g) (f.du . g * dudt + f.dv . g * dvdt)
-
-instance
-  (uvSpace ~ UvSpace, unitless ~ Unitless) =>
-  Composition
-    (VectorSurfaceFunction3D units space)
-    (Curve2D unitless uvSpace)
-    (VectorCurve3D units space)
-  where
-  function . uvCurve = do
-    let (dudt, dvdt) = VectorCurve2D.components (derivative uvCurve)
-    let compiledComposed = VectorSurfaceFunction3D.compiled function . compiled uvCurve
-    let composedDerivative =
-          VectorSurfaceFunction3D.derivative U function . uvCurve * dudt
-            + VectorSurfaceFunction3D.derivative V function . uvCurve * dvdt
-    VectorCurve3D.new compiledComposed composedDerivative
-
-instance
-  (uvSpace ~ UvSpace, unitless ~ Unitless) =>
-  Composition
-    (SurfaceFunction3D space)
-    (Curve2D unitless uvSpace)
-    (Curve3D space)
-  where
-  function . uvCurve = do
-    let (dudt, dvdt) = VectorCurve2D.components (derivative uvCurve)
-    Curve3D.new
-      (function.compiled . compiled uvCurve)
-      (function.du . uvCurve * dudt + function.dv . uvCurve * dvdt)
-
 new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space
 new = Curve.new
 
 -- | Create a degenerate curve that is actually just a single point.
 constant :: Point2D units space -> Curve2D units space
-constant givenPoint = new (CompiledFunction.constant givenPoint) VectorCurve2D.zero
+constant = Curve.constant
 
 -- | Create a curve from its X and Y coordinate curves.
 xy :: Curve1D units -> Curve1D units -> Curve2D units space

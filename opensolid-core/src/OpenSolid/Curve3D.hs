@@ -183,7 +183,7 @@ new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 new = Curve.new
 
 constant :: Point3D space -> Curve3D space
-constant givenPoint = new (CompiledFunction.constant givenPoint) VectorCurve3D.zero
+constant = Curve.constant
 
 on :: Plane3D global local -> Curve2D Meters local -> Curve3D global
 on plane curve2D = do

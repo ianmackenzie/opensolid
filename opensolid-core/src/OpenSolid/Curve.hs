@@ -7,6 +7,7 @@ module OpenSolid.Curve
   , SearchTree
   , HasSingularity (HasSingularity)
   , new
+  , constant
   , derivative
   , compiled
   , overallBounds
@@ -57,14 +58,14 @@ import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 -- TODO remove once all typeclass instances are moved here
-import {-# SOURCE #-} OpenSolid.Curve2D ()
--- TODO remove once all typeclass instances are moved here
 import {-# SOURCE #-} OpenSolid.Curve3D ()
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.FFI (FFI)
+import OpenSolid.FFI qualified as FFI
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
@@ -77,6 +78,7 @@ import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate), Nondegenerate (Nond
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Point2D (Point2D)
@@ -89,14 +91,29 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Search qualified as Search
 import OpenSolid.Search.Domain qualified as Search.Domain
+import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
+import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
+import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
+import OpenSolid.VectorCurve2D (VectorCurve2D)
+import OpenSolid.VectorCurve2D qualified as VectorCurve2D
+import OpenSolid.VectorCurve3D (VectorCurve3D)
+import OpenSolid.VectorCurve3D qualified as VectorCurve3D
+import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
+import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
 data Curve dimension units space = Curve
   { compiled :: Compiled dimension units space
@@ -130,6 +147,145 @@ instance
       , endPoint = Units.coerce curve.endPoint
       , searchTree = Units.coerce curve.searchTree
       }
+
+instance FFI (Curve 2 Meters FFI.Space) where
+  representation = FFI.classRepresentation "Curve2D"
+
+instance FFI (Curve 2 Unitless UvSpace) where
+  representation = FFI.classRepresentation "UvCurve"
+
+instance HasUnits (Curve 2 units space) units
+
+instance ApproximateEquality (Curve 2 units space) (Tolerance units) where
+  curve1 ~= curve2 = testPoints curve1 ~= testPoints curve2
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (Curve 2 units1 space1)
+    (VectorCurve2D units2 space2)
+    (Curve 2 units1 space1)
+  where
+  lhs + rhs =
+    new
+      (compiled lhs + VectorCurve2D.compiled rhs)
+      (derivative lhs + VectorCurve2D.derivative rhs)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve 2 units1 space1)
+    (VectorCurve2D units2 space2)
+    (Curve 2 units1 space1)
+  where
+  lhs - rhs =
+    new
+      (compiled lhs - VectorCurve2D.compiled rhs)
+      (derivative lhs - VectorCurve2D.derivative rhs)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (Curve 2 units1 space1)
+    (Vector2D units2 space2)
+    (Curve 2 units1 space1)
+  where
+  lhs + rhs = lhs + VectorCurve2D.constant rhs
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve 2 units1 space1)
+    (Vector2D units2 space2)
+    (Curve 2 units1 space1)
+  where
+  lhs - rhs = lhs - VectorCurve2D.constant rhs
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve 2 units1 space1)
+    (Curve 2 units2 space2)
+    (VectorCurve2D units1 space1)
+  where
+  lhs - rhs =
+    VectorCurve2D.new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve 2 units1 space1)
+    (Point2D units2 space2)
+    (VectorCurve2D units1 space1)
+  where
+  curve - givenPoint = curve - constant givenPoint
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Point2D units1 space1)
+    (Curve 2 units2 space2)
+    (VectorCurve2D units1 space1)
+  where
+  givenPoint - curve = constant givenPoint - curve
+
+instance
+  Composition
+    (Curve 2 units space)
+    (SurfaceFunction1D Unitless)
+    (SurfaceFunction2D units space)
+  where
+  curve . function =
+    SurfaceFunction2D.new
+      (compiled curve . function.compiled)
+      (\p -> derivative curve . function * SurfaceFunction1D.derivative p function)
+
+instance
+  Composition
+    (Curve 2 units space)
+    SurfaceParameter
+    (SurfaceFunction2D units space)
+  where
+  curve . parameter = curve . SurfaceFunction1D.parameter parameter
+
+instance
+  (uvSpace ~ UvSpace, unitless ~ Unitless) =>
+  Composition
+    (SurfaceFunction1D units)
+    (Curve 2 unitless uvSpace)
+    (Curve1D units)
+  where
+  f . g = do
+    let (dudt, dvdt) = VectorCurve2D.components (derivative g)
+    Curve1D.new (f.compiled . compiled g) (f.du . g * dudt + f.dv . g * dvdt)
+
+instance
+  (uvSpace ~ UvSpace, unitless ~ Unitless) =>
+  Composition
+    (VectorSurfaceFunction3D units space)
+    (Curve 2 unitless uvSpace)
+    (VectorCurve3D units space)
+  where
+  function . uvCurve = do
+    let (dudt, dvdt) = VectorCurve2D.components (derivative uvCurve)
+    let compiledComposed = VectorSurfaceFunction3D.compiled function . compiled uvCurve
+    let composedDerivative =
+          VectorSurfaceFunction3D.derivative U function . uvCurve * dudt
+            + VectorSurfaceFunction3D.derivative V function . uvCurve * dvdt
+    VectorCurve3D.new compiledComposed composedDerivative
+
+instance
+  (uvSpace ~ UvSpace, unitless ~ Unitless) =>
+  Composition
+    (SurfaceFunction3D space)
+    (Curve 2 unitless uvSpace)
+    (Curve 3 Meters space)
+  where
+  function . uvCurve = do
+    let (dudt, dvdt) = VectorCurve2D.components (derivative uvCurve)
+    new
+      (function.compiled . compiled uvCurve)
+      (function.du . uvCurve * dudt + function.dv . uvCurve * dvdt)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -169,6 +325,7 @@ class
   , VectorBounds.Exists dimension units space
   , VectorBounds.Exists dimension (Unitless ?/? units) space
   , DirectionBounds.Exists dimension space
+  , Expression.Constant Number (Point dimension units space)
   , Expression.Evaluation
       Number
       (Point dimension units space)
@@ -207,11 +364,22 @@ new givenCompiled givenDerivative =
       , searchTree = Curve.Search.tree self
       }
 
+constant ::
+  Exists dimension units space =>
+  Point dimension units space -> Curve dimension units space
+constant givenPoint = new (CompiledFunction.constant givenPoint) VectorCurve.zero
+
 derivative :: Curve dimension units space -> VectorCurve dimension units space
 derivative = (.derivative)
 
 compiled :: Curve dimension units space -> Compiled dimension units space
 compiled = (.compiled)
+
+testPoints ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  NonEmpty (Point dimension units space)
+testPoints curve = NonEmpty.map (point curve) Parameter.samples
 
 secondDerivative ::
   Exists dimension units space =>

@@ -20,15 +20,21 @@ where
 
 import GHC.TypeLits (Natural)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
+import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Nondegenerate (IsDegenerate)
 import OpenSolid.Point (Point)
+import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector (Vector)
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.VectorBounds (VectorBounds)
 import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
+import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 
 type role Curve nominal nominal nominal
 
@@ -37,6 +43,55 @@ data Curve (dimension :: Natural) (units :: Type) (space :: Type)
 class Exists (dimension :: Natural) (units :: Type) (space :: Type)
 
 data HasSingularity
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (Curve 2 units1 space1)
+    (VectorCurve2D units2 space2)
+    (Curve 2 units1 space1)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Addition
+    (Curve 2 units1 space1)
+    (Vector2D units2 space2)
+    (Curve 2 units1 space1)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve 2 units1 space1)
+    (VectorCurve2D units2 space2)
+    (Curve 2 units1 space1)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve 2 units1 space1)
+    (Vector2D units2 space2)
+    (Curve 2 units1 space1)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve 2 units1 space1)
+    (Curve 2 units2 space2)
+    (VectorCurve2D units1 space1)
+
+instance
+  (space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Point2D units1 space1)
+    (Curve 2 units2 space2)
+    (VectorCurve2D units1 space1)
+
+instance
+  (uvSpace ~ UvSpace, unitless ~ Unitless) =>
+  Composition
+    (SurfaceFunction1D units)
+    (Curve 2 unitless uvSpace)
+    (Curve1D units)
 
 point ::
   Curve dimension units space ->

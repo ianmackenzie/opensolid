@@ -31,8 +31,6 @@ import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D, Point2D, Transform2D, Vector2D)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
-import OpenSolid.UvSpace (UvSpace)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 
 type Curve2D units space = Curve 2 units space
@@ -45,62 +43,6 @@ type Compiled units space =
     (Bounds2D units space)
 
 type SearchTree units space = Curve.Search.Tree 2 units space
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (Curve2D units1 space1)
-    (VectorCurve2D units2 space2)
-    (Curve2D units1 space1)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (Curve2D units1 space1)
-    (Vector2D units2 space2)
-    (Curve2D units1 space1)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Curve2D units1 space1)
-    (VectorCurve2D units2 space2)
-    (Curve2D units1 space1)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Curve2D units1 space1)
-    (Vector2D units2 space2)
-    (Curve2D units1 space1)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Curve2D units1 space1)
-    (Curve2D units2 space2)
-    (VectorCurve2D units1 space1)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Curve2D units1 space1)
-    (Point2D units2 space2)
-    (VectorCurve2D units1 space1)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Point2D units1 space1)
-    (Curve2D units2 space2)
-    (VectorCurve2D units1 space1)
-
-instance
-  (uvSpace ~ UvSpace, unitless ~ Unitless) =>
-  Composition
-    (SurfaceFunction1D units)
-    (Curve2D unitless uvSpace)
-    (Curve1D units)
 
 constant :: Point2D units space -> Curve2D units space
 new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space
