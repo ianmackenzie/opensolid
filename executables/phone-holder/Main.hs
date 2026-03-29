@@ -11,9 +11,9 @@ import OpenSolid.Axis3D (Axis3D (Axis3D))
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Length qualified as Length
-import OpenSolid.Line2D (Line2D (Line2D))
+import OpenSolid.Line2D (pattern Line2D)
 import OpenSolid.Line2D qualified as Line2D
-import OpenSolid.Line3D (Line3D (Line3D))
+import OpenSolid.Line3D (pattern Line3D)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D

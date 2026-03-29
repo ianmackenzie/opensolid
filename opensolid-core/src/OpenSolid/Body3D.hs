@@ -873,10 +873,7 @@ isValidSteinerPoint edgeSet uvPoint = case edgeSet of
     case Bounds2D.exclusion# uvPoint nodeBounds >=# 0.5## *# Bounds2D.diameter# nodeBounds of
       1# -> True
       _ -> isValidSteinerPoint left uvPoint && isValidSteinerPoint right uvPoint
-  Set2D.Leaf _ edge ->
-    case Line2D.distanceTo# uvPoint edge >=# 0.5## *# Line2D.length# edge of
-      1# -> True
-      _ -> False
+  Set2D.Leaf _ edge -> Line2D.distanceTo uvPoint edge >= 0.5 * Line2D.length edge
 
 surfaces :: Body3D space -> NonEmpty (Surface3D space)
 surfaces (Body3D boundarySurfaces) = NonEmpty.map (.orientedSurface) boundarySurfaces

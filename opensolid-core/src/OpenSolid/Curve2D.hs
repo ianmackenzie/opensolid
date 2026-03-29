@@ -118,7 +118,7 @@ import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.Line2D (Line2D (Line2D))
+import OpenSolid.Line2D (Line2D, pattern Line2D)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
@@ -129,7 +129,7 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Polyline2D (Polyline2D (Polyline2D))
+import OpenSolid.Polyline2D (Polyline2D, pattern Polyline2D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)

@@ -56,7 +56,7 @@ import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.Line2D (Line2D (Line2D))
+import OpenSolid.Line2D (pattern Line2D)
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)

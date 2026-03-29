@@ -7,8 +7,8 @@ import OpenSolid.Circle3D (Circle3D)
 import OpenSolid.Circle3D qualified as Circle3D
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Length (Length)
-import OpenSolid.Line2D (Line2D (Line2D))
-import OpenSolid.Line3D (Line3D (Line3D))
+import OpenSolid.Line2D (Line2D, pattern Line2D)
+import OpenSolid.Line3D (Line3D, pattern Line3D)
 import OpenSolid.Prelude
 import OpenSolid.Step qualified as Step
 

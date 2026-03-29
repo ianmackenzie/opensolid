@@ -67,6 +67,8 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
+import OpenSolid.Line (Line (Line))
+import OpenSolid.Line qualified as Line
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -363,7 +365,7 @@ linearDeviation curve (Interval t1 t2) = do
   let p1 = point curve t1
   let p2 = point curve t2
   let pMid = point curve (Number.midpoint t1 t2)
-  let midError = Point.linearDeviation p1 p2 pMid
+  let midError = Line.distanceTo pMid (Line p1 p2)
   max midError (leftRightError curve t1 t2 p1 p2)
 
 samplingPoints ::
@@ -375,7 +377,7 @@ samplingPoints resolution curve = do
   let collect (Interval t1 t2) p1 p2 accumulated = do
         let tMid = Number.midpoint t1 t2
         let pMid = point curve tMid
-        let midError = Point.linearDeviation p1 p2 pMid
+        let midError = Line.distanceTo pMid (Line p1 p2)
         let error = max midError (leftRightError curve t1 t2 p1 p2)
         let size = Point.distanceFrom p1 p2
         if Resolution.acceptable ("size" ::: size) ("error" ::: error) resolution
@@ -400,8 +402,8 @@ leftRightError curve t1 t2 p1 p2 = do
   let tOffset = 0.5 * tWidth * Number.sqrt (3 / 7)
   let tLeft = tMid + tOffset
   let tRight = tMid - tOffset
-  let leftError = Point.linearDeviation p1 p2 (point curve tLeft)
-  let rightError = Point.linearDeviation p1 p2 (point curve tRight)
+  let leftError = Line.distanceTo (point curve tLeft) (Line p1 p2)
+  let rightError = Line.distanceTo (point curve tRight) (Line p1 p2)
   max leftError rightError
 
 arcLengthParameterizationFunction ::

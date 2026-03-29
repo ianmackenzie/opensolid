@@ -57,7 +57,7 @@ import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
-import OpenSolid.Line2D (Line2D (Line2D))
+import OpenSolid.Line2D (Line2D, pattern Line2D)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2D (Point2D, pattern Point2D)

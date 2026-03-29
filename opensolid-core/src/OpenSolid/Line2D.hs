@@ -1,14 +1,13 @@
 module OpenSolid.Line2D
-  ( Line2D (Line2D)
+  ( Line2D
+  , pattern Line2D
   , startPoint
   , endPoint
   , endpoints
   , length
-  , length#
   , direction
   , bounds
   , distanceTo
-  , distanceTo#
   , reverse
   , transformBy
   , translateBy
@@ -26,63 +25,52 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Bounds2D (Bounds2D)
-import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
-import OpenSolid.FFI (FFI)
-import OpenSolid.FFI qualified as FFI
-import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
-import OpenSolid.Point2D (Point2D (Point2D))
+import OpenSolid.Line (Line (Line))
+import OpenSolid.Line qualified as Line
+import OpenSolid.Nondegenerate (IsDegenerate)
+import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
-import OpenSolid.Unboxed.Math
-import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector2D (Vector2D)
 
 -- | A line in 2D, with a start point and end point.
-data Line2D units space
-  = -- | Construct a line from its start and end points.
-    Line2D (Point2D units space) (Point2D units space)
+type Line2D units space =
+  Line 2 units space
 
-instance FFI (Line2D Meters FFI.Space) where
-  representation = FFI.classRepresentation "Line2D"
+-- | Construct a line from its start and end points.
+{-# INLINE Line2D #-}
+pattern Line2D :: Point2D units space -> Point2D units space -> Line2D units space
+pattern Line2D p1 p2 = Line p1 p2
 
-instance FFI (Line2D Unitless UvSpace) where
-  representation = FFI.classRepresentation "UvLine"
+{-# COMPLETE Line2D #-}
 
 -- | Get the start point of a line.
 {-# INLINE startPoint #-}
 startPoint :: Line2D units space -> Point2D units space
-startPoint (Line2D p1 _) = p1
+startPoint = Line.startPoint
 
 -- | Get the end point of a line.
 {-# INLINE endPoint #-}
 endPoint :: Line2D units space -> Point2D units space
-endPoint (Line2D _ p2) = p2
+endPoint = Line.endPoint
 
 -- | Get the start and end points of a line as a tuple.
 endpoints :: Line2D units space -> (Point2D units space, Point2D units space)
-endpoints (Line2D p1 p2) = (p1, p2)
+endpoints = Line.endpoints
 
 -- | Get the length of a line.
 length :: Line2D units space -> Quantity units
-length line = Quantity# (length# line)
-
-{-# INLINE length# #-}
-length# :: Line2D units space -> Double#
-length# (Line2D p1 p2) = Point2D.distanceFrom# p1 p2
+length = Line.length
 
 direction :: Tolerance units => Line2D units space -> Result IsDegenerate (Direction2D space)
-direction (Line2D p1 p2) =
-  case Direction2D.from p1 p2 of
-    Ok lineDirection -> Ok lineDirection
-    Error Direction2D.PointsAreCoincident -> Error IsDegenerate
+direction = Line.direction
 
 bounds :: Line2D units space -> Bounds2D units space
-bounds (Line2D p1 p2) = Bounds2D.hull2 p1 p2
+bounds = Line.bounds
 
 {-| Get the distance from a line to a point.
 
@@ -92,28 +80,10 @@ or might be one of the line's endpoints,
 so this is not necessarily a *perpendicular* distance).
 -}
 distanceTo :: Point2D units space -> Line2D units space -> Quantity units
-distanceTo p0 line = Quantity# (distanceTo# p0 line)
-
-{-# INLINEABLE distanceTo# #-}
-distanceTo# :: Point2D units space -> Line2D units space -> Double#
-distanceTo# p0 (Line2D p1 p2) = do
-  let !(Point2D (Quantity# x0#) (Quantity# y0#)) = p0
-  let !(Point2D (Quantity# x1#) (Quantity# y1#)) = p1
-  let !(Point2D (Quantity# x2#) (Quantity# y2#)) = p2
-  let ux# = x0# -# x1#
-  let uy# = y0# -# y1#
-  let vx# = x2# -# x1#
-  let vy# = y2# -# y1#
-  let lengthSquared# = vx# *# vx# +# vy# *# vy#
-  let dotProduct# = ux# *# vx# +# uy# *# vy#
-  case dotProduct# <=# 0.0## of
-    1# -> hypot2# ux# uy#
-    _ -> case dotProduct# >=# lengthSquared# of
-      1# -> hypot2# (x0# -# x2#) (y0# -# y2#)
-      _ -> abs# (vx# *# uy# -# vy# *# ux#) /# sqrt# lengthSquared#
+distanceTo = Line.distanceTo
 
 reverse :: Line2D units space -> Line2D units space
-reverse (Line2D p1 p2) = Line2D p2 p1
+reverse = Line.reverse
 
 transformBy :: Transform2D tag units space -> Line2D units space -> Line2D units space
 transformBy transform (Line2D p1 p2) =

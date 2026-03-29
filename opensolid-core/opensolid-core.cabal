@@ -163,6 +163,7 @@ library
     OpenSolid.Interval
     OpenSolid.Json
     OpenSolid.Length
+    OpenSolid.Line
     OpenSolid.Line2D
     OpenSolid.Line3D
     OpenSolid.List
@@ -190,6 +191,7 @@ library
     OpenSolid.Point2D
     OpenSolid.Point3D
     OpenSolid.Polygon2D
+    OpenSolid.Polyline
     OpenSolid.Polyline2D
     OpenSolid.Prelude
     OpenSolid.Primitives

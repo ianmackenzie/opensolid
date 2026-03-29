@@ -17,7 +17,7 @@ import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.InternalError (InternalError (InternalError))
-import OpenSolid.Line2D (Line2D (Line2D))
+import OpenSolid.Line2D (Line2D, pattern Line2D)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number

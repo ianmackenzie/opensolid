@@ -34,7 +34,7 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Polygon2D (Polygon2D (Polygon2D))
-import OpenSolid.Polyline2D (Polyline2D (Polyline2D))
+import OpenSolid.Polyline2D (pattern Polyline2D)
 import OpenSolid.Polyline2D qualified as Polyline2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
