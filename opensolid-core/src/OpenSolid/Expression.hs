@@ -20,7 +20,7 @@ module OpenSolid.Expression
   , cubed
   , sin
   , cos
-  , SquaredMagnitude' (squaredMagnitude_)
+  , SquaredMagnitude_ (squaredMagnitude_)
   , SquaredMagnitude (squaredMagnitude)
   , Magnitude (magnitude)
   , TransformBy (transformBy)
@@ -1294,11 +1294,11 @@ cos :: Expression input Angle -> Expression input Number
 cos (Curve1D ast _) = curve1D (Ast.cos ast)
 cos (Surface1D ast _) = surface1D (Ast.cos ast)
 
-class SquaredMagnitude' expression1 expression2 | expression1 -> expression2 where
+class SquaredMagnitude_ expression1 expression2 | expression1 -> expression2 where
   squaredMagnitude_ :: expression1 -> expression2
 
 instance
-  SquaredMagnitude'
+  SquaredMagnitude_
     (Expression input (Vector2D units space))
     (Expression input (Quantity (units ?*? units)))
   where
@@ -1306,7 +1306,7 @@ instance
   squaredMagnitude_ (VectorSurface2D ast _) = surface1D (Ast.squaredMagnitude2D ast)
 
 instance
-  SquaredMagnitude'
+  SquaredMagnitude_
     (Expression input (Vector3D units space))
     (Expression input (Quantity (units ?*? units)))
   where
