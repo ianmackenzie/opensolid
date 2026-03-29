@@ -3,6 +3,7 @@ module OpenSolid.Bounds
   , Exists
   , constant
   , contains
+  , hull2
   , aggregate2
   , intersection
   , cyclicCoordinate
@@ -38,6 +39,7 @@ class
   where
   constant :: Point dimension units space -> Bounds dimension units space
   contains :: Bounds dimension units space -> Bounds dimension units space -> Bool
+  hull2 :: Point dimension units space -> Point dimension units space -> Bounds dimension units space
   aggregate2 ::
     Bounds dimension units space ->
     Bounds dimension units space ->
@@ -52,6 +54,7 @@ class
 instance Exists 2 units space where
   constant = Bounds2D.constant
   contains = Bounds2D.contains
+  hull2 = Bounds2D.hull2
   aggregate2 = Bounds2D.aggregate2
   intersection = Bounds2D.intersection
   cyclicCoordinate i (Bounds2D x y) = case i % 2 of 0 -> x; _ -> y
@@ -60,6 +63,7 @@ instance Exists 2 units space where
 instance Exists 3 Meters space where
   constant = Bounds3D.constant
   contains = Bounds3D.contains
+  hull2 = Bounds3D.hull2
   aggregate2 = Bounds3D.aggregate2
   intersection = Bounds3D.intersection
   cyclicCoordinate i (Bounds3D x y z) = case i % 3 of 0 -> x; 1 -> y; _ -> z
