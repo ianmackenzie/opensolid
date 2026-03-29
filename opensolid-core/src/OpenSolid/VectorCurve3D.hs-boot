@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 module OpenSolid.VectorCurve3D
   ( VectorCurve3D
   , Compiled
@@ -17,122 +19,22 @@ module OpenSolid.VectorCurve3D
   , squaredMagnitude_
   , magnitude
   , transformBy
-  , desingularized
   )
 where
 
-import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Interval (Interval)
-import OpenSolid.Nondegenerate (Nondegenerate)
-import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Plane3D, Transform3D, Vector3D, VectorBounds3D)
-import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
+import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
+import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 
-type role VectorCurve3D nominal nominal
+type VectorCurve3D units space = VectorCurve 3 units space
 
-type VectorCurve3D :: Type -> Type -> Type
-data VectorCurve3D units space
-
-type Compiled units space =
-  CompiledFunction
-    Number
-    (Vector3D units space)
-    (Interval Unitless)
-    (VectorBounds3D units space)
-
-instance HasUnits (VectorCurve3D units space) units
-
-instance Composition (VectorCurve3D units space) (Curve1D Unitless) (VectorCurve3D units space)
-
-instance Negation (VectorCurve3D units space)
-
-instance Multiplication Sign (VectorCurve3D units space) (VectorCurve3D units space)
-
-instance Multiplication (VectorCurve3D units space) Sign (VectorCurve3D units space)
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion (VectorCurve3D unitsA space1) (VectorCurve3D unitsB space2)
-
-instance HasUnits (Nondegenerate (VectorCurve3D units space)) units
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion
-    (Nondegenerate (VectorCurve3D units1 space1))
-    (Nondegenerate (VectorCurve3D units2 space2))
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (VectorCurve3D units1 space1)
-    (VectorCurve3D units2 space2)
-    (VectorCurve3D units1 space1)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (VectorCurve3D units1 space1)
-    (VectorCurve3D units2 space2)
-    (VectorCurve3D units1 space1)
-
-instance
-  Multiplication_
-    (Curve1D units1)
-    (VectorCurve3D units2 space)
-    (VectorCurve3D (units1 ?*? units2) space)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Curve1D units1) (VectorCurve3D units2 space) (VectorCurve3D units3 space)
-
-instance
-  Multiplication_
-    (VectorCurve3D units1 space)
-    (Curve1D units2)
-    (VectorCurve3D (units1 ?*? units2) space)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve3D units1 space) (Curve1D units2) (VectorCurve3D units3 space)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Quantity units1) (VectorCurve3D units2 space) (VectorCurve3D units3 space)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve3D units1 space) (Quantity units2) (VectorCurve3D units3 space)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (VectorCurve3D units1 space) (Nonzero (Curve1D units2)) (VectorCurve3D units3 space)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division
-    (VectorCurve3D units1 space)
-    (Nondegenerate (Curve1D units2))
-    (VectorCurve3D units3 space)
-
-instance
-  space1 ~ space2 =>
-  DotMultiplication_
-    (VectorCurve3D units1 space1)
-    (VectorCurve3D units2 space2)
-    (Curve1D (units1 ?*? units2))
-
-instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
-  DotMultiplication
-    (VectorCurve3D units1 space1)
-    (VectorCurve3D units2 space2)
-    (Curve1D units3)
+type Compiled units space = VectorCurve.Compiled 3 units space
 
 constant :: Vector3D units space -> VectorCurve3D units space
 new :: Compiled units space -> VectorCurve3D units space -> VectorCurve3D units space
@@ -158,8 +60,3 @@ quotient_ ::
 squaredMagnitude_ :: VectorCurve3D units space -> Curve1D (units ?*? units)
 magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
 transformBy :: Transform3D tag space -> VectorCurve3D units space -> VectorCurve3D units space
-desingularized ::
-  VectorCurve3D units space ->
-  VectorCurve3D units space ->
-  VectorCurve3D units space ->
-  VectorCurve3D units space

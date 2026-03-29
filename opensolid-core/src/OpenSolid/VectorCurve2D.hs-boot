@@ -16,121 +16,22 @@ module OpenSolid.VectorCurve2D
   , quotient
   , quotient_
   , transformBy
-  , desingularized
   )
 where
 
-import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Nondegenerate (Nondegenerate)
-import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Transform2D, Vector2D, VectorBounds2D)
-import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
+import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
+import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
-type role VectorCurve2D nominal nominal
+type VectorCurve2D units space = VectorCurve 2 units space
 
-type VectorCurve2D :: Type -> Type -> Type
-data VectorCurve2D units space
-
-type Compiled units space =
-  CompiledFunction
-    Number
-    (Vector2D units space)
-    (Interval Unitless)
-    (VectorBounds2D units space)
-
-instance HasUnits (VectorCurve2D units space) units
-
-instance Composition (VectorCurve2D units space) (Curve1D Unitless) (VectorCurve2D units space)
-
-instance Negation (VectorCurve2D units space)
-
-instance Multiplication Sign (VectorCurve2D units space) (VectorCurve2D units space)
-
-instance Multiplication (VectorCurve2D units space) Sign (VectorCurve2D units space)
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion (VectorCurve2D unitsA space1) (VectorCurve2D unitsB space2)
-
-instance HasUnits (Nondegenerate (VectorCurve2D units space)) units
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion
-    (Nondegenerate (VectorCurve2D units1 space1))
-    (Nondegenerate (VectorCurve2D units2 space2))
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (VectorCurve2D units1 space1)
-    (VectorCurve2D units2 space2)
-    (VectorCurve2D units1 space1)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (VectorCurve2D units1 space1)
-    (VectorCurve2D units2 space2)
-    (VectorCurve2D units1 space1)
-
-instance
-  Multiplication_
-    (Curve1D units1)
-    (VectorCurve2D units2 space)
-    (VectorCurve2D (units1 ?*? units2) space)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Curve1D units1) (VectorCurve2D units2 space) (VectorCurve2D units3 space)
-
-instance
-  Multiplication_
-    (VectorCurve2D units1 space)
-    (Curve1D units2)
-    (VectorCurve2D (units1 ?*? units2) space)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve2D units1 space) (Curve1D units2) (VectorCurve2D units3 space)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (Quantity units1) (VectorCurve2D units2 space) (VectorCurve2D units3 space)
-
-instance
-  Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve2D units1 space) (Quantity units2) (VectorCurve2D units3 space)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (VectorCurve2D units1 space) (Nonzero (Curve1D units2)) (VectorCurve2D units3 space)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division
-    (VectorCurve2D units1 space)
-    (Nondegenerate (Curve1D units2))
-    (VectorCurve2D units3 space)
-
-instance
-  space1 ~ space2 =>
-  DotMultiplication_
-    (VectorCurve2D units1 space1)
-    (VectorCurve2D units2 space2)
-    (Curve1D (units1 ?*? units2))
-
-instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
-  DotMultiplication
-    (VectorCurve2D units1 space1)
-    (VectorCurve2D units2 space2)
-    (Curve1D units3)
+type Compiled units space = VectorCurve.Compiled 2 units space
 
 constant :: Vector2D units space -> VectorCurve2D units space
 new :: Compiled units space -> VectorCurve2D units space -> VectorCurve2D units space
@@ -155,10 +56,5 @@ quotient_ ::
 squaredMagnitude_ :: VectorCurve2D units space -> Curve1D (units ?*? units)
 transformBy ::
   Transform2D tag translationUnits space ->
-  VectorCurve2D units space ->
-  VectorCurve2D units space
-desingularized ::
-  VectorCurve2D units space ->
-  VectorCurve2D units space ->
   VectorCurve2D units space ->
   VectorCurve2D units space
