@@ -154,9 +154,12 @@ instance FFI (Curve 2 Meters FFI.Space) where
 instance FFI (Curve 2 Unitless UvSpace) where
   representation = FFI.classRepresentation "UvCurve"
 
-instance HasUnits (Curve 2 units space) units
+instance HasUnits (Curve dimension units space) units
 
-instance ApproximateEquality (Curve 2 units space) (Tolerance units) where
+instance
+  Exists dimension units space =>
+  ApproximateEquality (Curve dimension units space) (Tolerance units)
+  where
   curve1 ~= curve2 = testPoints curve1 ~= testPoints curve2
 
 instance
@@ -397,11 +400,6 @@ instance
     SurfaceFunction3D.new
       (compiled curve . function.compiled)
       (\p -> (derivative curve . function) * SurfaceFunction1D.derivative p function)
-
-instance ApproximateEquality (Curve 3 Meters space) (Tolerance Meters) where
-  curve1 ~= curve2 = do
-    let equalPointsAt t = point curve1 t ~= point curve2 t
-    NonEmpty.all equalPointsAt Parameter.samples
 
 class
   ( Point.Exists dimension units space
