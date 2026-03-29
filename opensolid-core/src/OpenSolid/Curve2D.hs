@@ -129,7 +129,7 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Polyline2D (Polyline2D, pattern Polyline2D)
+import OpenSolid.Polyline2D (Polyline2D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
@@ -963,8 +963,7 @@ curvature ::
 curvature curve = Result.map Units.specialize (curvature_ curve)
 
 toPolyline :: Resolution units -> Curve2D units space -> Polyline2D units space
-toPolyline resolution curve =
-  Polyline2D (NonEmpty.map (point curve) (Curve.samplingPoints resolution curve))
+toPolyline = Curve.toPolyline
 
 medialAxis ::
   forall units space.

@@ -33,7 +33,8 @@ module OpenSolid.Curve
   , IntersectionPoint
   , intersections
   , linearDeviation
-  , samplingPoints
+  , linearize
+  , toPolyline
   , arcLengthParameterizationFunction
   , arcLengthParameterization
   , parameterizeByArcLength
@@ -80,6 +81,7 @@ import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point3D (Point3D)
+import OpenSolid.Polyline (Polyline (Polyline))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
@@ -368,12 +370,20 @@ linearDeviation curve (Interval t1 t2) = do
   let midError = Line.distanceTo pMid (Line p1 p2)
   max midError (leftRightError curve t1 t2 p1 p2)
 
-samplingPoints ::
+toPolyline ::
+  Exists dimension units space =>
+  Resolution units ->
+  Curve dimension units space ->
+  Polyline dimension units space
+toPolyline resolution curve =
+  Polyline (NonEmpty.map (point curve) (linearize resolution curve))
+
+linearize ::
   Exists dimension units space =>
   Resolution units ->
   Curve dimension units space ->
   NonEmpty Number
-samplingPoints resolution curve = do
+linearize resolution curve = do
   let collect (Interval t1 t2) p1 p2 accumulated = do
         let tMid = Number.midpoint t1 t2
         let pMid = point curve tMid
