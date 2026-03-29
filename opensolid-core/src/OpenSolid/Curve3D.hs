@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-orphans #-}
-
 module OpenSolid.Curve3D
   ( Curve3D
   , HasDegeneracy (HasDegeneracy)
@@ -63,17 +61,12 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (IsDegenerate)
-import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
-import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
-import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
-import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Units (InverseMeters)
 import OpenSolid.Units qualified as Units
@@ -92,92 +85,6 @@ type Segment space = Curve.Segment 3 Meters space
 type SearchTree space = Curve.SearchTree 3 Meters space
 
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show)
-
-instance
-  (space1 ~ space2, meters ~ Meters) =>
-  Addition
-    (Curve3D space1)
-    (VectorCurve3D meters space2)
-    (Curve3D space1)
-  where
-  lhs + rhs =
-    new
-      (compiled lhs + VectorCurve3D.compiled rhs)
-      (derivative lhs + VectorCurve3D.derivative rhs)
-
-instance
-  (space1 ~ space2, meters ~ Meters) =>
-  Subtraction
-    (Curve3D space1)
-    (VectorCurve3D meters space2)
-    (Curve3D space1)
-  where
-  lhs - rhs =
-    new
-      (compiled lhs - VectorCurve3D.compiled rhs)
-      (derivative lhs - VectorCurve3D.derivative rhs)
-
-instance
-  (space1 ~ space2, meters ~ Meters) =>
-  Addition
-    (Curve3D space1)
-    (Vector3D meters space2)
-    (Curve3D space1)
-  where
-  lhs + rhs = lhs + VectorCurve3D.constant rhs
-
-instance
-  (space1 ~ space2, meters ~ Meters) =>
-  Subtraction
-    (Curve3D space1)
-    (Vector3D meters space2)
-    (Curve3D space1)
-  where
-  lhs - rhs = lhs - VectorCurve3D.constant rhs
-
-instance
-  space1 ~ space2 =>
-  Subtraction
-    (Curve3D space1)
-    (Curve3D space2)
-    (VectorCurve3D Meters space1)
-  where
-  lhs - rhs =
-    VectorCurve3D.new
-      (compiled lhs - compiled rhs)
-      (derivative lhs - derivative rhs)
-
-instance
-  space1 ~ space2 =>
-  Subtraction
-    (Curve3D space1)
-    (Point3D space2)
-    (VectorCurve3D Meters space1)
-  where
-  lhs - rhs = lhs - constant rhs
-
-instance
-  space1 ~ space2 =>
-  Subtraction
-    (Point3D space1)
-    (Curve3D space2)
-    (VectorCurve3D Meters space1)
-  where
-  lhs - rhs = constant lhs - rhs
-
-instance
-  unitless ~ Unitless =>
-  Composition (Curve3D space) (SurfaceFunction1D unitless) (SurfaceFunction3D space)
-  where
-  curve . function =
-    SurfaceFunction3D.new
-      (compiled curve . function.compiled)
-      (\p -> (derivative curve . function) * SurfaceFunction1D.derivative p function)
-
-instance ApproximateEquality (Curve3D space) (Tolerance Meters) where
-  curve1 ~= curve2 = do
-    let equalPointsAt t = point curve1 t ~= point curve2 t
-    NonEmpty.all equalPointsAt Parameter.samples
 
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 new = Curve.new

@@ -57,8 +57,6 @@ import OpenSolid.Curve.Segment (Segment)
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
--- TODO remove once all typeclass instances are moved here
-import {-# SOURCE #-} OpenSolid.Curve3D ()
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DirectionCurve (DirectionCurve)
@@ -96,6 +94,7 @@ import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
+import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
@@ -103,6 +102,7 @@ import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D (Vector2D)
+import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
@@ -316,6 +316,92 @@ instance
   Composition (Curve dimension units space) (Curve1D Unitless) (Curve dimension units space)
   where
   f . g = new (f.compiled . Curve1D.compiled g) ((f.derivative . g) * Curve1D.derivative g)
+
+instance
+  (space1 ~ space2, meters ~ Meters) =>
+  Addition
+    (Curve 3 Meters space1)
+    (VectorCurve3D meters space2)
+    (Curve 3 Meters space1)
+  where
+  lhs + rhs =
+    new
+      (compiled lhs + VectorCurve3D.compiled rhs)
+      (derivative lhs + VectorCurve3D.derivative rhs)
+
+instance
+  (space1 ~ space2, meters ~ Meters) =>
+  Subtraction
+    (Curve 3 Meters space1)
+    (VectorCurve3D meters space2)
+    (Curve 3 Meters space1)
+  where
+  lhs - rhs =
+    new
+      (compiled lhs - VectorCurve3D.compiled rhs)
+      (derivative lhs - VectorCurve3D.derivative rhs)
+
+instance
+  (space1 ~ space2, meters ~ Meters) =>
+  Addition
+    (Curve 3 Meters space1)
+    (Vector3D meters space2)
+    (Curve 3 Meters space1)
+  where
+  lhs + rhs = lhs + VectorCurve3D.constant rhs
+
+instance
+  (space1 ~ space2, meters ~ Meters) =>
+  Subtraction
+    (Curve 3 Meters space1)
+    (Vector3D meters space2)
+    (Curve 3 Meters space1)
+  where
+  lhs - rhs = lhs - VectorCurve3D.constant rhs
+
+instance
+  space1 ~ space2 =>
+  Subtraction
+    (Curve 3 Meters space1)
+    (Curve 3 Meters space2)
+    (VectorCurve3D Meters space1)
+  where
+  lhs - rhs =
+    VectorCurve3D.new
+      (compiled lhs - compiled rhs)
+      (derivative lhs - derivative rhs)
+
+instance
+  space1 ~ space2 =>
+  Subtraction
+    (Curve 3 Meters space1)
+    (Point3D space2)
+    (VectorCurve3D Meters space1)
+  where
+  lhs - rhs = lhs - constant rhs
+
+instance
+  space1 ~ space2 =>
+  Subtraction
+    (Point3D space1)
+    (Curve 3 Meters space2)
+    (VectorCurve3D Meters space1)
+  where
+  lhs - rhs = constant lhs - rhs
+
+instance
+  unitless ~ Unitless =>
+  Composition (Curve 3 Meters space) (SurfaceFunction1D unitless) (SurfaceFunction3D space)
+  where
+  curve . function =
+    SurfaceFunction3D.new
+      (compiled curve . function.compiled)
+      (\p -> (derivative curve . function) * SurfaceFunction1D.derivative p function)
+
+instance ApproximateEquality (Curve 3 Meters space) (Tolerance Meters) where
+  curve1 ~= curve2 = do
+    let equalPointsAt t = point curve1 t ~= point curve2 t
+    NonEmpty.all equalPointsAt Parameter.samples
 
 class
   ( Point.Exists dimension units space

@@ -26,15 +26,18 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Nondegenerate (IsDegenerate)
 import OpenSolid.Point (Point)
 import OpenSolid.Point2D (Point2D)
+import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector2D (Vector2D)
+import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds (VectorBounds)
 import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
+import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 
 type role Curve nominal nominal nominal
 
@@ -92,6 +95,55 @@ instance
     (SurfaceFunction1D units)
     (Curve 2 unitless uvSpace)
     (Curve1D units)
+
+instance
+  (space1 ~ space2, meters ~ Meters) =>
+  Addition
+    (Curve 3 Meters space1)
+    (VectorCurve3D meters space2)
+    (Curve 3 Meters space1)
+
+instance
+  (space1 ~ space2, meters ~ Meters) =>
+  Addition
+    (Curve 3 Meters space1)
+    (Vector3D meters space2)
+    (Curve 3 Meters space1)
+
+instance
+  (space1 ~ space2, meters ~ Meters) =>
+  Subtraction
+    (Curve 3 Meters space1)
+    (VectorCurve3D meters space2)
+    (Curve 3 Meters space1)
+
+instance
+  (space1 ~ space2, meters ~ Meters) =>
+  Subtraction
+    (Curve 3 Meters space1)
+    (Vector3D meters space2)
+    (Curve 3 Meters space1)
+
+instance
+  space1 ~ space2 =>
+  Subtraction
+    (Curve 3 Meters space1)
+    (Curve 3 Meters space2)
+    (VectorCurve3D Meters space1)
+
+instance
+  space1 ~ space2 =>
+  Subtraction
+    (Curve 3 Meters space1)
+    (Point3D space2)
+    (VectorCurve3D Meters space1)
+
+instance
+  space1 ~ space2 =>
+  Subtraction
+    (Point3D space1)
+    (Curve 3 Meters space2)
+    (VectorCurve3D Meters space1)
 
 point ::
   Curve dimension units space ->

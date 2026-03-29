@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-orphans #-}
-
 module OpenSolid.Curve2D
   ( Curve2D
   , Compiled

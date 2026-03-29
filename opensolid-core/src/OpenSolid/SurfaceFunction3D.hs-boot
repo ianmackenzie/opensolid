@@ -1,6 +1,7 @@
 module OpenSolid.SurfaceFunction3D
   ( SurfaceFunction3D
   , Compiled
+  , new
   , constant
   , point
   , bounds
@@ -55,6 +56,10 @@ instance
     (VectorSurfaceFunction3D meters space2)
     (SurfaceFunction3D space1)
 
+new ::
+  Compiled space ->
+  (SurfaceParameter -> VectorSurfaceFunction3D Meters space) ->
+  SurfaceFunction3D space
 constant :: Point3D space -> SurfaceFunction3D space
 point :: SurfaceFunction3D space -> UvPoint -> Point3D space
 bounds :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
