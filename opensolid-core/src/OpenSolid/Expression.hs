@@ -28,6 +28,7 @@ module OpenSolid.Expression
   , RelativeTo (relativeTo)
   , PlaceOn (placeOn)
   , ProjectInto (projectInto)
+  , BezierCurve
   , bezierCurve
   , b00
   , b00d1
