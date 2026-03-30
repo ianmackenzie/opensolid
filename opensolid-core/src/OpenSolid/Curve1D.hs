@@ -64,6 +64,8 @@ import {-# SOURCE #-} OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nonde
 import {-# SOURCE #-} OpenSolid.Curve1D.Nonzero qualified as Curve1D.Nonzero
 import OpenSolid.Curve1D.Zero (Zero)
 import OpenSolid.Curve1D.Zero qualified as Zero
+import OpenSolid.Desingularization qualified as Desingularization
+import OpenSolid.Desingularization.Curve qualified as Desingularization.Curve
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
@@ -98,7 +100,6 @@ import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector3D (Vector3D)
-import OpenSolid.VectorCurve qualified as VectorCurve
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -149,6 +150,13 @@ instance
   where
   quantity `intersects` curve = curve `intersects` quantity
 
+instance Desingularization.Curve (Curve1D units) (Quantity units) (Quantity units) where
+  value = value
+  derivativeValue = derivativeValue
+  secondDerivativeValue = secondDerivativeValue
+  bezier = bezier
+  desingularized = desingularized
+
 new :: Compiled units -> Curve1D units -> Curve1D units
 new = Curve1D
 
@@ -183,6 +191,9 @@ compiled = (.compiled)
 -- | Get the derivative of a curve.
 derivative :: Curve1D units -> Curve1D units
 derivative = (.derivative)
+
+secondDerivative :: Curve1D units -> Curve1D units
+secondDerivative = derivative . derivative
 
 instance Negation (Curve1D units) where
   negate curve = new (negate curve.compiled) (negate curve.derivative)
@@ -383,26 +394,26 @@ endValue curve = value curve 1.0
 
 {-# INLINE derivativeValue #-}
 derivativeValue :: Curve1D units -> Number -> Quantity units
-derivativeValue = VectorCurve.derivativeValue
+derivativeValue curve tValue = value (derivative curve) tValue
 
 {-# INLINE derivativeBounds #-}
 derivativeBounds :: Curve1D units -> Interval Unitless -> Interval units
-derivativeBounds = VectorCurve.derivativeBounds
+derivativeBounds curve tBounds = bounds (derivative curve) tBounds
 
 {-# INLINE secondDerivativeValue #-}
 secondDerivativeValue :: Curve1D units -> Number -> Quantity units
-secondDerivativeValue = VectorCurve.secondDerivativeValue
+secondDerivativeValue curve tValue = value (secondDerivative curve) tValue
 
 {-# INLINE secondDerivativeBounds #-}
 secondDerivativeBounds :: Curve1D units -> Interval Unitless -> Interval units
-secondDerivativeBounds = VectorCurve.secondDerivativeBounds
+secondDerivativeBounds curve tBounds = bounds (secondDerivative curve) tBounds
 
 desingularize ::
   Maybe (Quantity units, Quantity units) ->
   Curve1D units ->
   Maybe (Quantity units, Quantity units) ->
   Curve1D units
-desingularize = VectorCurve.desingularize
+desingularize = Desingularization.curve
 
 desingularized :: Curve1D units -> Curve1D units -> Curve1D units -> Curve1D units
 desingularized start middle end =
@@ -457,7 +468,7 @@ instance
     (Nondegenerate (Curve1D units2))
     (Curve1D (units1 ?/? units2))
   where
-  (?/?) = VectorCurve.desingularizedQuotient
+  (?/?) = Desingularization.curveQuotient_
 
 instance
   Units.Quotient units1 units2 units3 =>

@@ -32,7 +32,6 @@ module OpenSolid.VectorCurve
   )
 where
 
-import Data.Void (Void)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Zero qualified
@@ -68,7 +67,6 @@ type family
   VectorCurve dimension units space =
     vectorCurve | vectorCurve -> dimension units space
   where
-  VectorCurve 1 units Void = Curve1D units
   VectorCurve 2 units space = VectorCurve2D units space
   VectorCurve 3 units space = VectorCurve3D units space
 
@@ -148,22 +146,6 @@ class
     VectorCurve dimension units space ->
     VectorCurve dimension units space ->
     VectorCurve dimension units space
-
-instance Exists 1 units Void where
-  constant = Curve1D.constant
-  isZero curve = curve ~= Curve1D.constant Quantity.zero
-  singular0 curve =
-    Tolerance.using (Curve1D.singularityTolerance curve) do
-      Curve1D.value curve 0.0 ~= Quantity.zero
-  singular1 curve =
-    Tolerance.using (Curve1D.singularityTolerance curve) do
-      Curve1D.value curve 1.0 ~= Quantity.zero
-  derivative = Curve1D.derivative
-  value = Curve1D.value
-  bounds = Curve1D.bounds
-  bezier = Curve1D.bezier
-  desingularized = Curve1D.desingularized
-  squaredMagnitude_ = Curve1D.squared_
 
 instance Exists 2 units space where
   constant = VectorCurve2D.constant
@@ -322,8 +304,8 @@ lHopital ::
 lHopital lhs rhs tValue = do
   let lhs' = Vector.erase (derivativeValue lhs tValue)
   let lhs'' = Vector.erase (secondDerivativeValue lhs tValue)
-  let rhs' = Vector.erase (derivativeValue rhs tValue)
-  let rhs'' = Vector.erase (secondDerivativeValue rhs tValue)
+  let rhs' = Vector.erase (Curve1D.derivativeValue rhs tValue)
+  let rhs'' = Vector.erase (Curve1D.secondDerivativeValue rhs tValue)
   let value_ = lhs' / rhs'
   let firstDerivative_ = (lhs'' * rhs' - lhs' * rhs'') / (2.0 * Quantity.squared rhs')
   (Vector.unerase value_, Vector.unerase firstDerivative_)
