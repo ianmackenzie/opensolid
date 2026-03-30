@@ -133,6 +133,7 @@ library
     OpenSolid.Debug
     OpenSolid.Debug.Plot
     OpenSolid.Desingularization
+    OpenSolid.Desingularization.Curve
     OpenSolid.Direction
     OpenSolid.Direction2D
     OpenSolid.Direction3D

@@ -461,7 +461,7 @@ desingularize startSingularity curve endSingularity = do
           let firstDerivativeT0 = derivativeValue curve t0
           let secondDerivativeT0 = secondDerivativeValue curve t0
           bezier $
-            Bezier.syntheticStart
+            Desingularization.syntheticStart
               value0
               firstDerivative0
               valueT0
@@ -475,7 +475,7 @@ desingularize startSingularity curve endSingularity = do
           let firstDerivativeT1 = derivativeValue curve t1
           let secondDerivativeT1 = secondDerivativeValue curve t1
           bezier $
-            Bezier.syntheticEnd
+            Desingularization.syntheticEnd
               valueT1
               firstDerivativeT1
               secondDerivativeT1

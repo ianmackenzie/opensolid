@@ -3,12 +3,10 @@ module OpenSolid.Bezier
   , Constraints
   , derivative
   , hermite
-  , syntheticStart
-  , syntheticEnd
+  , segment
   )
 where
 
-import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.HasZero (HasZero (zero))
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
@@ -95,32 +93,3 @@ deCasteljau first rest t = case rest of
 
 lerp :: Constraints point vector => point -> point -> Number -> point
 lerp p1 p2 t = p1 + t * (p2 - p1)
-
-syntheticStart ::
-  Constraints point vector =>
-  point ->
-  vector ->
-  point ->
-  vector ->
-  vector ->
-  NonEmpty point
-syntheticStart point0 firstDerivative0 pointT0 firstDerivativeT0 secondDerivativeT0 = do
-  let t0 = Desingularization.t0
-  let segmentDerivatives0 = [t0 * firstDerivative0]
-  let segmentDerivativesT0 = [t0 * firstDerivativeT0, t0 * t0 * secondDerivativeT0]
-  hermite point0 segmentDerivatives0 pointT0 segmentDerivativesT0 & segment 0.0 (1.0 / t0)
-
-syntheticEnd ::
-  Constraints point vector =>
-  point ->
-  vector ->
-  vector ->
-  point ->
-  vector ->
-  NonEmpty point
-syntheticEnd pointT1 firstDerivativeT1 secondDerivativeT1 point1 firstDerivative1 = do
-  let t0 = Desingularization.t0
-  let t1 = Desingularization.t1
-  let segmentDerivativesT1 = [t0 * firstDerivativeT1, t0 * t0 * secondDerivativeT1]
-  let segmentDerivatives1 = [t0 * firstDerivative1]
-  hermite pointT1 segmentDerivativesT1 point1 segmentDerivatives1 & segment -(t1 / t0) 1.0
