@@ -8,14 +8,21 @@ module OpenSolid.Desingularization
   , curve
   , syntheticStart
   , syntheticEnd
+  , curveQuotient_
   )
 where
 
 import OpenSolid.Bezier qualified as Bezier
+import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
+import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Desingularization.Curve (Curve)
 import OpenSolid.Desingularization.Curve qualified as Desingularization.Curve
 import OpenSolid.Interval (Interval)
+import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
+import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Tolerance qualified as Tolerance
 
 t0 :: Number
 -- Should be kept in sync with T0 in bytecode.cpp
@@ -81,3 +88,38 @@ curve startSingularity givenCurve endSingularity = do
               value1
               firstDerivative1
   Desingularization.Curve.desingularized startCurve givenCurve endCurve
+
+curveQuotient_ ::
+  ( Curve c1 v1 v1
+  , Division_ c1 (Nonzero (Curve1D units)) c2
+  , Division_ v1 (Quantity units) v2
+  , Curve c2 v2 v2
+  ) =>
+  c1 ->
+  Nondegenerate (Curve1D units) ->
+  c2
+curveQuotient_ numerator (Nondegenerate denominator) = do
+  let singularityTolerance = Curve1D.singularityTolerance denominator
+  let maybeSingularity tValue =
+        if Tolerance.using singularityTolerance (Curve1D.value denominator tValue ~= Quantity.zero)
+          then Just (lHopital_ numerator denominator tValue)
+          else Nothing
+  let interiorQuotient = numerator ?/? Nonzero denominator
+  curve (maybeSingularity 0.0) interiorQuotient (maybeSingularity 1.0)
+
+lHopital_ ::
+  (Curve c1 v1 v1, Division_ v1 (Quantity units) v2, Bezier.Vector v2) =>
+  c1 ->
+  Curve1D units ->
+  Number ->
+  (v2, v2)
+lHopital_ numerator denominator tValue = do
+  let numerator' = Desingularization.Curve.derivativeValue numerator tValue
+  let numerator'' = Desingularization.Curve.secondDerivativeValue numerator tValue
+  let denominator' = Curve1D.derivativeValue denominator tValue
+  let denominator'' = Curve1D.secondDerivativeValue denominator tValue
+  let value_ = numerator' ?/? denominator'
+  let normalizedNumerator''_ = numerator'' ?/? denominator'
+  let normalizedDenominator'' = denominator'' / denominator'
+  let firstDerivative_ = 0.5 * (normalizedNumerator''_ - value_ * normalizedDenominator'')
+  (value_, firstDerivative_)
