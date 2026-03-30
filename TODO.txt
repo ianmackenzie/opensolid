@@ -1,6 +1,5 @@
-Add generic concrete Curve type?
-- remove 'import {-# SOURCE #-} OpenSolid.Curve#D ()' lines from Curve.hs
-  once all typeclass instances have been migrated there
+Add generic concrete VectorCurve type
+- then can require DirectionCurve.Exists from VectorCurve.Exists?
 
 Reconsider adding functions that just mirror constructors?
 - sometimes most convenient/consistent to just use qualified functions for everything...
