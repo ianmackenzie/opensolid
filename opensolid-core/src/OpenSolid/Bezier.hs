@@ -19,6 +19,7 @@ type Vector vector =
   , Addition vector vector vector
   , Subtraction vector vector vector
   , Multiplication vector Number vector
+  , Multiplication Number vector vector
   )
 
 type Constraints point vector =
