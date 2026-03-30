@@ -31,7 +31,6 @@ module OpenSolid.Region2D
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
@@ -219,12 +218,8 @@ addFillet radius curves point = do
       let secondStartDirection = DirectionCurve2D.startValue secondTangent
       let cornerAngle = Direction2D.angleFrom firstEndDirection secondStartDirection
       let offset = Quantity.sign cornerAngle * Quantity.abs radius
-      let firstOffsetDisplacement =
-            VectorCurve2D.rotateBy Angle.quarterTurn (offset * firstTangent)
-      let secondOffsetDisplacement =
-            VectorCurve2D.rotateBy Angle.quarterTurn (offset * secondTangent)
-      let firstOffsetCurve = firstCurve + firstOffsetDisplacement
-      let secondOffsetCurve = secondCurve + secondOffsetDisplacement
+      firstOffsetCurve <- Result.orFail (Curve2D.offsetLeftwardBy offset firstCurve)
+      secondOffsetCurve <- Result.orFail (Curve2D.offsetLeftwardBy offset secondCurve)
       maybeIntersections <- Result.orFail (Curve2D.intersections firstOffsetCurve secondOffsetCurve)
       case maybeIntersections of
         Nothing -> couldNotSolveForFilletLocation
