@@ -46,6 +46,10 @@ data Curve (dimension :: Natural) (units :: Type) (space :: Type)
 
 class Exists (dimension :: Natural) (units :: Type) (space :: Type)
 
+instance Exists 2 units space
+
+instance Exists 3 Meters space
+
 data HasSingularity
 
 instance
