@@ -96,6 +96,7 @@ library
     OpenSolid.Area
     OpenSolid.Array
     OpenSolid.Array2D
+    OpenSolid.Axis
     OpenSolid.Axis2D
     OpenSolid.Axis3D
     OpenSolid.Bezier
