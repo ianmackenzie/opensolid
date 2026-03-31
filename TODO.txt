@@ -1,13 +1,12 @@
-Add generic concrete VectorCurve type
-- then can require DirectionCurve.Exists from VectorCurve.Exists?
+Rename Curve types to CurveFunction
+
+Add new piecewise Curve types
 
 Reconsider adding functions that just mirror constructors?
 - sometimes most convenient/consistent to just use qualified functions for everything...
 - Point2D.xy, Vector2D.xy, Bounds2D.xy, VectorBounds2D.xy, Line#D.from
 - Point3D.xyz, Vector3D.xyz, Bounds3D.xyz, VectorBounds3D.xyz that take Convention3D arguments
 - Axis#D.through (and rename Plane3D.fromPointAndNormal to Plane3D.through)
-
-Replace '$' with 'do', '&' with '|>'?
 
 Add enough STEP support to "handcraft" planar/extruded surfaces etc.
 - convert curves to simple B-spline curves (piecewise cubic or quintic)
@@ -20,11 +19,6 @@ Optimize curve segment bounds computation using tangent bounds
 
 Remove Resolution.predicate
 
-Rework arc length parameterization to not require temporary curve construction?
-- work direction on generic VectorCurve, compute magnitude on the fly
-- just return a generic (Number -> Number)
-  - have a separate function like parameterizationCurve that actually constructs a curve
-
 Optimize findPoint to immediately reject monotonic segments where no solution is possible
 - if segment is monotonic then check if point is definitely "off either end"
 
@@ -32,6 +26,8 @@ Rework VectorCurve.zeros to match Curve.findPoint instead of using Curve1D.zeros
 
 Try to reuse compiled expressions when composing them into larger expressions?
 - in particular: compose UV curve with 3D surface function to make 3D curve
+  - but UV curve and 3D surface function might have common subexpressions...
+    - recompile 3D surface function "on top of" precompiled UV curve?
 
 Add Region2D.unsafe?
 - take correct, preconstructed loops directly
@@ -48,11 +44,6 @@ Move directionBounds, tangentDirectionBounds, normalDirectionBounds into Nondege
 - *can* be evaluated for degenerate geometries but it's not very meaningful to do so
 - allowing evaluation for degenerate geometries makes it easier to cache in Segment types though...
 
-Add generic Curve.samplingPoints and update Curve2D to use it
-- check overall bounds size and first derivative bounds size as well as second derivative
-- maybe implement via search tree! then can use tangent bounds if that helps...
-  - have positional check, first derivative check, tangent check *and* second derivative check?
-
 Refactor Curve.Segment construction to use L'Hopital for tangents where appropriate
 - normalize second derivative (or negated second derivative) if subdomain includes a singular endpoint
 
@@ -62,6 +53,12 @@ Refactor bisection search to throw during *search*, not during domain *construct
   so that that function can check if the original bounds are atomic
 - maybe go back to the list of children being a Result or 'Maybe NonEmpty'?
 - or have an Atomic or Leaf constructor for Domain...
+
+Move remaining generic functionality from Curve#D modules into Curve module
+- g2? (rework to use tangent direction and curvature vector)
+- rework curvature functions to use curvature vector
+
+Remove support for inheritance in target language API?
 
 Tighten vector bounds normalization
 - add C++ code callable via primop that computes normalized vector bounds
@@ -77,18 +74,10 @@ Update Curve2D.curvature_ to be based on curvatureVector_
 
 Add Bounds#D.expandBy?
 
-Move arc length parameterization to generic Curve module
-
 Add Curve#D.steps etc. functions
 - then search for uses of Parameter.steps etc. that can be replaced
 
 Try to remove unsafeQuotient and unsafeSqrt functions in favour of using Nonzero/Nondegenerate machinery?
-
-Try moving e.g. Curve type family into Curve.Exists typeclass?
-
-Try using involute profile directly in SpurGear module, instead of spline approximation
-
-Switch to using |> and <| instead of & and $
 
 Add Fuzzy to Prelude?
 
@@ -107,8 +96,6 @@ Optimize Region2d.contains
 
 Deduplicate code from Tests.Curve2D and Tests.Curve3D into Tests.Curve?
 
-Remove "Test." prefix from Test.group calls in test/Main.hs?
-
 Rename OpenSolid.Search to OpenSolid.Bisection?
 - rename 'exclusive' to just 'search'
 - add 'find' that just attempts to find a *single* solution
@@ -116,11 +103,7 @@ Rename OpenSolid.Search to OpenSolid.Bisection?
 Add generic Curve.g2 that uses curvature vector
 - then switch Curve2D.g2 to use it
 
-Cache e.g. search trees in curve values, but provide function for stripping cached values?
-- possible names:
-  - Curve2D.strip
-  - Curve2D.clean
-  - Curve2D.compact
+Add Curve.clean for stripping cached values from Curve value?
 
 Switch to Vector, VectorBounds purely *forwarding* to Vector2D, VectorBounds2D etc.?
 - don't call back into e.g. Vector from Vector2D
@@ -129,12 +112,6 @@ Switch to Vector, VectorBounds purely *forwarding* to Vector2D, VectorBounds2D e
 
 Get rid of fields other than internally in modules
 
-Add generic VectorCurve.arc
-
-Maybe have Curve.intersections that returns slightly simplified IntersectionPoint type, with no sign?
-- crossing or tangent indicator only
-- Curve2D (and maybe SurfaceCurve3D) can add crossing sign if desired
-
 Add 3D types to check_operators script
 
 Rule for properties/fields in target languages: O(1) and guaranteed to succeed?
@@ -142,6 +119,7 @@ Rule for properties/fields in target languages: O(1) and guaranteed to succeed?
 Refactor Polygon2D.edges to filter out (approximately) zero-length edges?
 - useful for removing duplicate last edge if last vertex is equal to first vertex
 - often have polygons in UV space though...maybe just use *exact* equality?
+  - or UvPolygon.edges uses default 1e-9 tolerance
 
 Refactor curve construction from line segments?
 - maybe also rename Curve2D.arc to Curve2D.arcFrom, add Arc2D type?
@@ -230,8 +208,6 @@ Switch back to 'normal' (non-recursive) form of quotient derivatives
 -> e.g. VectorSurfaceFunction3D
 -> search for 'recursive' calls in general?
 
-Rename 'interpolationParameter' to 'unterpolate'?
-
 Rework Curve2D.medialAxis to use tangent directions instead of derivative vectors
 
 Remove 'unconvert' functions
@@ -276,10 +252,6 @@ Ensure target language bindings gracefully handle exceptions such as higher-orde
 Try adding -fexcess-precision as an optimization
 -> in general, try: https://wiki.haskell.org/Performance/GHC#Crank_up_the_gcc_flags
 
-Add way to represent arc length parameterization in bytecode?
--> pack tree structure into opcodes, then Bezier curve control points into constants?
--> or if curves move into C++, then have C++ function that takes list of segments (with endpoint values/derivatives) and constructs a piecewise curve directly in C++...
-
 Combine computeValue and computeBounds into single templated function?
 -> call out to generic or overloaded helper functions as needed
 
@@ -291,17 +263,9 @@ Add hasZero functions that do simple check to see if a zero exists (plain bisect
 
 Turn C++ hull2, hull3 etc. functions into just overloads of a 'hull' function
 
-Ensure all fields are also available as normal functions
--> and those functions are the *primary* implementation
--> probably means we can avoid HasField instances in all .hs-boot files, expose functions instead
-
 Split bytecode.h/bytecode.cpp into a few more files
 -> e.g. helper functions for Bezier/Hermite evaluation
 -> allow calling non-bytecode-specific functions from Haskell without having to use 'bytecode.h'...
 
 Add DirectionCurve2D.[rotateLeft,rotateRight] and use in Curve2D.offsetBy, Region2D.fillet
 -> best to implement right down to bytecode level...
-
-Normalize HasField instances:
-- move to top of file just under type definition
-- always match a corresponding accessor function (usually just forward to that function)
