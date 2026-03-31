@@ -8,6 +8,7 @@ module OpenSolid.Curve3D
   , constant
   , on
   , line
+  , lineFrom
   , bezier
   , quadraticBezier
   , cubicBezier
@@ -23,6 +24,7 @@ module OpenSolid.Curve3D
   , curvatureVector
   , startPoint
   , endPoint
+  , endpoints
   , point
   , bounds
   , overallBounds
@@ -39,16 +41,13 @@ module OpenSolid.Curve3D
   )
 where
 
-import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
-import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve, HasSingularity)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
-import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
@@ -57,9 +56,8 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
-import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
-import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Line3D (Line3D)
 import OpenSolid.Nondegenerate (IsDegenerate)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D qualified as Point2D
@@ -77,8 +75,7 @@ import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 
 type Curve3D space = Curve 3 Meters space
 
-type Compiled space =
-  CompiledFunction Number (Point3D space) (Interval Unitless) (Bounds3D space)
+type Compiled space = Curve.Compiled 3 Meters space
 
 type Segment space = Curve.Segment 3 Meters space
 
@@ -102,8 +99,11 @@ on plane curve2D = do
           (Curve2D.compiled curve2D)
   new compiledPlaced (VectorCurve3D.on plane (Curve2D.derivative curve2D))
 
-line :: Point3D space -> Point3D space -> Curve3D space
-line p1 p2 = constant p1 + Curve1D.t * (p2 - p1)
+line :: Line3D space -> Curve3D space
+line = Curve.line
+
+lineFrom :: Point3D space -> Point3D space -> Curve3D space
+lineFrom = Curve.lineFrom
 
 {-| Construct a Bezier curve from its control points. For example,
 
@@ -112,18 +112,15 @@ line p1 p2 = constant p1 + Curve1D.t * (p2 - p1)
 will return a cubic Bezier curve with the given four control points.
 -}
 bezier :: NonEmpty (Point3D space) -> Curve3D space
-bezier controlPoints =
-  new
-    (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
-    (VectorCurve3D.bezier (Bezier.derivative controlPoints))
+bezier = Curve.bezier
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier :: Point3D space -> Point3D space -> Point3D space -> Curve3D space
-quadraticBezier p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
+quadraticBezier = Curve.quadraticBezier
 
 -- | Construct a cubic Bezier curve from the given control points.
 cubicBezier :: Point3D space -> Point3D space -> Point3D space -> Point3D space -> Curve3D space
-cubicBezier p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
+cubicBezier = Curve.cubicBezier
 
 {-| Construct a Bezier curve with the given start point, start derivatives, end point and end
 derivatives. For example,
@@ -148,8 +145,7 @@ hermite ::
   Point3D space ->
   List (Vector3D Meters space) ->
   Curve3D space
-hermite start startDerivatives end endDerivatives =
-  bezier (Bezier.hermite start startDerivatives end endDerivatives)
+hermite = Curve.hermite
 
 derivative :: Curve3D space -> VectorCurve3D Meters space
 derivative = Curve.derivative
@@ -209,6 +205,9 @@ startPoint = Curve.startPoint
 endPoint :: Curve3D space -> Point3D space
 endPoint = Curve.endPoint
 
+endpoints :: Curve3D space -> (Point3D space, Point3D space)
+endpoints = Curve.endpoints
+
 point :: Curve3D space -> Number -> Point3D space
 point = Curve.point
 
@@ -216,10 +215,10 @@ bounds :: Curve3D space -> Interval Unitless -> Bounds3D space
 bounds = Curve.bounds
 
 overallBounds :: Curve3D space -> Bounds3D space
-overallBounds curve = bounds curve Interval.unit
+overallBounds = Curve.overallBounds
 
 reverse :: Curve3D space -> Curve3D space
-reverse curve = curve . (1.0 - Curve1D.t)
+reverse = Curve.reverse
 
 arcLengthParameterizationFunction :: Tolerance Meters => Curve3D space -> (Number -> Number, Length)
 arcLengthParameterizationFunction = Curve.arcLengthParameterizationFunction

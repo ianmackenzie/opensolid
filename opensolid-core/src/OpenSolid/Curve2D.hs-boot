@@ -22,8 +22,8 @@ module OpenSolid.Curve2D
   )
 where
 
-import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
+import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve.Search qualified as Curve.Search
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Interval (Interval)
@@ -33,12 +33,7 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 
 type Curve2D units space = Curve 2 units space
 
-type Compiled units space =
-  CompiledFunction
-    Number
-    (Point2D units space)
-    (Interval Unitless)
-    (Bounds2D units space)
+type Compiled units space = Curve.Compiled 2 units space
 
 type SearchTree units space = Curve.Search.Tree 2 units space
 

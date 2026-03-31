@@ -3,11 +3,18 @@
 module OpenSolid.Curve
   ( Curve
   , Exists
+  , Compiled
   , Segment
   , SearchTree
   , HasSingularity (HasSingularity)
   , new
   , constant
+  , line
+  , lineFrom
+  , bezier
+  , quadraticBezier
+  , cubicBezier
+  , hermite
   , derivative
   , compiled
   , overallBounds
@@ -15,20 +22,25 @@ module OpenSolid.Curve
   , bounds
   , startPoint
   , endPoint
+  , endpoints
   , secondDerivative
   , derivativeValue
   , derivativeBounds
   , secondDerivativeValue
   , secondDerivativeBounds
   , tangentDirectionBounds
+  , reverse
   , isPoint
   , singular0
   , singular1
+  , isOnAxis
   , nondegenerate
   , nonzero
   , tangentDirection
   , curvatureVector_
   , distanceAlong
+  , desingularize
+  , desingularized
   , findPoint
   , searchTree
   , Intersections (IntersectionPoints, OverlappingSegments)
@@ -46,6 +58,7 @@ where
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Axis (Axis)
 import OpenSolid.Axis qualified as Axis
+import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.CompiledFunction (CompiledFunction)
@@ -60,6 +73,8 @@ import OpenSolid.Curve.Segment (Segment)
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
+import OpenSolid.Desingularization qualified as Desingularization
+import OpenSolid.Desingularization.Curve qualified as Desingularization.Curve
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DirectionCurve (DirectionCurve)
@@ -379,6 +394,7 @@ class
   , DirectionBounds.Exists dimension space
   , Axis.Exists dimension units space
   , Expression.Constant Number (Point dimension units space)
+  , Expression.BezierCurve (Point dimension units space)
   , Expression.Evaluation
       Number
       (Point dimension units space)
@@ -407,8 +423,36 @@ class
       (Point dimension units space)
       (Curve dimension units space)
       (VectorCurve dimension units space)
+  , Desingularization.Curve
+      (Curve dimension units space)
+      (Point dimension units space)
+      (Vector dimension units space)
   ) =>
   Exists dimension units space
+
+instance
+  Desingularization.Curve
+    (Curve 2 units space)
+    (Point2D units space)
+    (Vector2D units space)
+  where
+  value = point
+  derivativeValue = derivativeValue
+  secondDerivativeValue = secondDerivativeValue
+  bezier = bezier
+  desingularized = desingularized
+
+instance
+  Desingularization.Curve
+    (Curve 3 Meters space)
+    (Point3D space)
+    (Vector3D Meters space)
+  where
+  value = point
+  derivativeValue = derivativeValue
+  secondDerivativeValue = secondDerivativeValue
+  bezier = bezier
+  desingularized = desingularized
 
 instance Exists 2 units space
 
@@ -433,6 +477,55 @@ constant ::
   Exists dimension units space =>
   Point dimension units space -> Curve dimension units space
 constant givenPoint = new (CompiledFunction.constant givenPoint) VectorCurve.zero
+
+line ::
+  Exists dimension units space =>
+  Line dimension units space ->
+  Curve dimension units space
+line (Line p1 p2) = lineFrom p1 p2
+
+lineFrom ::
+  Exists dimension units space =>
+  Point dimension units space ->
+  Point dimension units space ->
+  Curve dimension units space
+lineFrom p1 p2 = bezier (NonEmpty.two p1 p2)
+
+bezier ::
+  Exists dimension units space =>
+  NonEmpty (Point dimension units space) ->
+  Curve dimension units space
+bezier controlPoints = do
+  let compiledBezier = CompiledFunction.concrete (Expression.bezierCurve controlPoints)
+  let bezierDerivative = VectorCurve.bezier (Bezier.derivative controlPoints)
+  new compiledBezier bezierDerivative
+
+quadraticBezier ::
+  Exists dimension units space =>
+  Point dimension units space ->
+  Point dimension units space ->
+  Point dimension units space ->
+  Curve dimension units space
+quadraticBezier p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
+
+cubicBezier ::
+  Exists dimension units space =>
+  Point dimension units space ->
+  Point dimension units space ->
+  Point dimension units space ->
+  Point dimension units space ->
+  Curve dimension units space
+cubicBezier p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
+
+hermite ::
+  Exists dimension units space =>
+  Point dimension units space ->
+  List (Vector dimension units space) ->
+  Point dimension units space ->
+  List (Vector dimension units space) ->
+  Curve dimension units space
+hermite start startDerivatives end endDerivatives =
+  bezier (Bezier.hermite start startDerivatives end endDerivatives)
 
 derivative :: Curve dimension units space -> VectorCurve dimension units space
 derivative = (.derivative)
@@ -466,6 +559,11 @@ startPoint = (.startPoint)
 endPoint :: Curve dimension units space -> Point dimension units space
 endPoint = (.endPoint)
 
+endpoints ::
+  Curve dimension units space ->
+  (Point dimension units space, Point dimension units space)
+endpoints curve = (startPoint curve, endPoint curve)
+
 bounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
 bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
 
@@ -480,6 +578,13 @@ singular0 curve = VectorCurve.singular0 (derivative curve)
 
 singular1 :: Exists dimension units space => Curve dimension units space -> Bool
 singular1 curve = VectorCurve.singular1 (derivative curve)
+
+isOnAxis ::
+  (Exists dimension units space, Tolerance units) =>
+  Axis dimension units space ->
+  Curve dimension units space ->
+  Bool
+isOnAxis axis curve = NonEmpty.all (intersects axis) (testPoints curve)
 
 nondegenerate ::
   (Exists dimension units space, Tolerance units) =>
@@ -547,12 +652,43 @@ tangentDirectionBounds ::
   DirectionBounds dimension space
 tangentDirectionBounds curve tBounds = VectorCurve.directionBounds (derivative curve) tBounds
 
+reverse ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Curve dimension units space
+reverse curve = curve . (1.0 - Curve1D.t)
+
 distanceAlong ::
   Exists dimension units space =>
   Axis dimension units space ->
   Curve dimension units space ->
   Curve1D units
 distanceAlong axis curve = (curve - Axis.originPoint axis) `dot` Axis.direction axis
+
+desingularize ::
+  Exists dimension units space =>
+  Maybe (Point dimension units space, Vector dimension units space) ->
+  Curve dimension units space ->
+  Maybe (Point dimension units space, Vector dimension units space) ->
+  Curve dimension units space
+desingularize = Desingularization.curve
+
+desingularized ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Curve dimension units space ->
+  Curve dimension units space ->
+  Curve dimension units space
+desingularized start middle end = do
+  let compiledDesingularized =
+        CompiledFunction.desingularized
+          (Curve1D.compiled Curve1D.t)
+          start.compiled
+          middle.compiled
+          end.compiled
+  let desingularizedDerivative =
+        VectorCurve.desingularized start.derivative middle.derivative end.derivative
+  new compiledDesingularized desingularizedDerivative
 
 findPoint ::
   (Exists dimension units space, Tolerance units) =>

@@ -88,12 +88,10 @@ import OpenSolid.Arc2D qualified as Arc2D
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Axis2D (Axis2D (Axis2D))
-import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
-import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve, HasSingularity)
 import OpenSolid.Curve qualified as Curve
@@ -103,7 +101,6 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
-import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
@@ -113,15 +110,13 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
-import OpenSolid.Interval qualified as Interval
-import OpenSolid.Line2D (Line2D, pattern Line2D)
+import OpenSolid.Line2D (Line2D)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Orientation2D (Orientation2D)
 import OpenSolid.Orientation2D qualified as Orientation2D
-import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
@@ -150,12 +145,7 @@ import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 -- | A parametric curve in 2D space.
 type Curve2D units space = Curve 2 units space
 
-type Compiled units space =
-  CompiledFunction
-    Number
-    (Point2D units space)
-    (Interval Unitless)
-    (Bounds2D units space)
+type Compiled units space = Curve.Compiled 2 units space
 
 type Segment units space = Curve.Segment 2 units space
 
@@ -179,11 +169,11 @@ xy x y = do
 
 -- | Convert a line to a curve.
 line :: Line2D units space -> Curve2D units space
-line (Line2D p1 p2) = lineFrom p1 p2
+line = Curve.line
 
 -- | Create a line between two points.
 lineFrom :: Point2D units space -> Point2D units space -> Curve2D units space
-lineFrom p1 p2 = bezier (NonEmpty.two p1 p2)
+lineFrom = Curve.lineFrom
 
 arc :: Arc2D units space -> Curve2D units space
 arc givenArc =
@@ -369,10 +359,7 @@ For example,
 will return a cubic Bezier curve with the given four control points.
 -}
 bezier :: NonEmpty (Point2D units space) -> Curve2D units space
-bezier controlPoints =
-  new
-    (CompiledFunction.concrete (Expression.bezierCurve controlPoints))
-    (VectorCurve2D.bezier (Bezier.derivative controlPoints))
+bezier = Curve.bezier
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
@@ -380,7 +367,7 @@ quadraticBezier ::
   Point2D units space ->
   Point2D units space ->
   Curve2D units space
-quadraticBezier p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
+quadraticBezier = Curve.quadraticBezier
 
 -- | Construct a cubic Bezier curve from the given control points.
 cubicBezier ::
@@ -389,7 +376,7 @@ cubicBezier ::
   Point2D units space ->
   Point2D units space ->
   Curve2D units space
-cubicBezier p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
+cubicBezier = Curve.cubicBezier
 
 {-| Construct a Bezier curve with the given endpoints and derivatives at those endpoints.
 
@@ -415,8 +402,7 @@ hermite ::
   Point2D units space ->
   List (Vector2D units space) ->
   Curve2D units space
-hermite start startDerivatives end endDerivatives =
-  bezier (Bezier.hermite start startDerivatives end endDerivatives)
+hermite = Curve.hermite
 
 {-# INLINE derivativeValue #-}
 derivativeValue ::
@@ -451,53 +437,14 @@ desingularize ::
   Curve2D units space ->
   Maybe (Point2D units space, Vector2D units space) ->
   Curve2D units space
-desingularize Nothing curve Nothing = curve
-desingularize startSingularity curve endSingularity = do
-  let startCurve = case startSingularity of
-        Nothing -> curve
-        Just (value0, firstDerivative0) -> do
-          let t0 = Desingularization.t0
-          let valueT0 = point curve t0
-          let firstDerivativeT0 = derivativeValue curve t0
-          let secondDerivativeT0 = secondDerivativeValue curve t0
-          bezier $
-            Desingularization.syntheticStart
-              value0
-              firstDerivative0
-              valueT0
-              firstDerivativeT0
-              secondDerivativeT0
-  let endCurve = case endSingularity of
-        Nothing -> curve
-        Just (value1, firstDerivative1) -> do
-          let t1 = Desingularization.t1
-          let valueT1 = point curve t1
-          let firstDerivativeT1 = derivativeValue curve t1
-          let secondDerivativeT1 = secondDerivativeValue curve t1
-          bezier $
-            Desingularization.syntheticEnd
-              valueT1
-              firstDerivativeT1
-              secondDerivativeT1
-              value1
-              firstDerivative1
-  desingularized startCurve curve endCurve
+desingularize = Curve.desingularize
 
 desingularized ::
   Curve2D units space ->
   Curve2D units space ->
   Curve2D units space ->
   Curve2D units space
-desingularized start middle end = do
-  let compiledDesingularized =
-        CompiledFunction.desingularized
-          (Curve1D.compiled Curve1D.t)
-          (compiled start)
-          (compiled middle)
-          (compiled end)
-  let desingularizedDerivative =
-        VectorCurve2D.desingularized (derivative start) (derivative middle) (derivative end)
-  new compiledDesingularized desingularizedDerivative
+desingularized = Curve.desingularized
 
 {-| Get the point on a curve at a given parameter value.
 
@@ -516,20 +463,17 @@ endPoint = Curve.endPoint
 
 -- | Get the start and end points of a curve.
 endpoints :: Curve2D units space -> (Point2D units space, Point2D units space)
-endpoints curve = (startPoint curve, endPoint curve)
+endpoints = Curve.endpoints
 
 bounds :: Curve2D units space -> Interval Unitless -> Bounds2D units space
 bounds = Curve.bounds
 
-samplePoints :: Curve2D units space -> NonEmpty (Point2D units space)
-samplePoints curve = NonEmpty.map (point curve) Parameter.samples
-
 -- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2D units space -> Curve2D units space
-reverse curve = curve . (1.0 - Curve1D.t)
+reverse = Curve.reverse
 
 overallBounds :: Curve2D units space -> Bounds2D units space
-overallBounds curve = bounds curve Interval.unit
+overallBounds = Curve.overallBounds
 
 compiled :: Curve2D units space -> Compiled units space
 compiled = Curve.compiled
@@ -588,7 +532,7 @@ distanceRightOf :: Axis2D units space -> Curve2D units space -> Curve1D units
 distanceRightOf (Axis2D p0 d) curve = (curve - p0) `dot` Direction2D.rotateRight d
 
 isPoint :: Tolerance units => Curve2D units space -> Bool
-isPoint curve = VectorCurve2D.isZero (derivative curve)
+isPoint = Curve.isPoint
 
 {-| Check if the given curve curve is collinear with (lies on) the given axis.
 
@@ -597,7 +541,7 @@ then it is not considered to lie on the axis;
 it is only considered to lie on the axis if every point on the curve is also on the axis.
 -}
 isOnAxis :: Tolerance units => Axis2D units space -> Curve2D units space -> Bool
-isOnAxis axis curve = NonEmpty.all (intersects axis) (samplePoints curve)
+isOnAxis = Curve.isOnAxis
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xCoordinate :: Curve2D units space -> Curve1D units

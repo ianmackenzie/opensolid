@@ -1,6 +1,7 @@
 module OpenSolid.Curve
   ( Curve
   , Exists
+  , Compiled
   , constant
   , point
   , bounds
@@ -21,6 +22,7 @@ where
 
 import GHC.TypeLits (Natural)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
+import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.Interval (Interval)
@@ -49,6 +51,13 @@ class Exists (dimension :: Natural) (units :: Type) (space :: Type)
 instance Exists 2 units space
 
 instance Exists 3 Meters space
+
+type Compiled dimension units space =
+  CompiledFunction
+    Number
+    (Point dimension units space)
+    (Interval Unitless)
+    (Bounds dimension units space)
 
 data HasSingularity
 
