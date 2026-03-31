@@ -53,11 +53,25 @@ instance Exists 3 Meters space
 data HasSingularity
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Curve 2 units1 space1)
-    (VectorCurve2D units2 space2)
-    (Curve 2 units1 space1)
+    (Curve dimension1 units1 space1)
+    (VectorCurve dimension2 units2 space2)
+    (Curve dimension1 units1 space1)
+
+instance
+  (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve dimension1 units1 space1)
+    (VectorCurve dimension2 units2 space2)
+    (Curve dimension1 units1 space1)
+
+instance
+  (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve dimension1 units1 space1)
+    (Curve dimension2 units2 space2)
+    (VectorCurve dimension1 units1 space1)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -70,22 +84,8 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Curve 2 units1 space1)
-    (VectorCurve2D units2 space2)
-    (Curve 2 units1 space1)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Curve 2 units1 space1)
     (Vector2D units2 space2)
     (Curve 2 units1 space1)
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Curve 2 units1 space1)
-    (Curve 2 units2 space2)
-    (VectorCurve2D units1 space1)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -105,21 +105,7 @@ instance
   (space1 ~ space2, meters ~ Meters) =>
   Addition
     (Curve 3 Meters space1)
-    (VectorCurve3D meters space2)
-    (Curve 3 Meters space1)
-
-instance
-  (space1 ~ space2, meters ~ Meters) =>
-  Addition
-    (Curve 3 Meters space1)
     (Vector3D meters space2)
-    (Curve 3 Meters space1)
-
-instance
-  (space1 ~ space2, meters ~ Meters) =>
-  Subtraction
-    (Curve 3 Meters space1)
-    (VectorCurve3D meters space2)
     (Curve 3 Meters space1)
 
 instance
@@ -128,13 +114,6 @@ instance
     (Curve 3 Meters space1)
     (Vector3D meters space2)
     (Curve 3 Meters space1)
-
-instance
-  space1 ~ space2 =>
-  Subtraction
-    (Curve 3 Meters space1)
-    (Curve 3 Meters space2)
-    (VectorCurve3D Meters space1)
 
 instance
   space1 ~ space2 =>

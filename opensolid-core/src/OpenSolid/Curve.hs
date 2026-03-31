@@ -61,6 +61,7 @@ import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.DirectionCurve qualified as DirectionCurve
+import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -163,28 +164,38 @@ instance
   curve1 ~= curve2 = testPoints curve1 ~= testPoints curve2
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
   Addition
-    (Curve 2 units1 space1)
-    (VectorCurve2D units2 space2)
-    (Curve 2 units1 space1)
+    (Curve dimension1 units1 space1)
+    (VectorCurve dimension2 units2 space2)
+    (Curve dimension1 units1 space1)
   where
   lhs + rhs =
     new
-      (compiled lhs + VectorCurve2D.compiled rhs)
-      (derivative lhs + VectorCurve2D.derivative rhs)
+      (compiled lhs + VectorCurve.compiled rhs)
+      (derivative lhs + VectorCurve.derivative rhs)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
   Subtraction
-    (Curve 2 units1 space1)
-    (VectorCurve2D units2 space2)
-    (Curve 2 units1 space1)
+    (Curve dimension1 units1 space1)
+    (VectorCurve dimension2 units2 space2)
+    (Curve dimension1 units1 space1)
   where
   lhs - rhs =
     new
-      (compiled lhs - VectorCurve2D.compiled rhs)
-      (derivative lhs - VectorCurve2D.derivative rhs)
+      (compiled lhs - VectorCurve.compiled rhs)
+      (derivative lhs - VectorCurve.derivative rhs)
+
+instance
+  (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
+  Subtraction
+    (Curve dimension1 units1 space1)
+    (Curve dimension2 units2 space2)
+    (VectorCurve dimension1 units1 space1)
+  where
+  lhs - rhs =
+    VectorCurve.new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -203,16 +214,6 @@ instance
     (Curve 2 units1 space1)
   where
   lhs - rhs = lhs - VectorCurve2D.constant rhs
-
-instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Curve 2 units1 space1)
-    (Curve 2 units2 space2)
-    (VectorCurve2D units1 space1)
-  where
-  lhs - rhs =
-    VectorCurve2D.new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
@@ -324,30 +325,6 @@ instance
   (space1 ~ space2, meters ~ Meters) =>
   Addition
     (Curve 3 Meters space1)
-    (VectorCurve3D meters space2)
-    (Curve 3 Meters space1)
-  where
-  lhs + rhs =
-    new
-      (compiled lhs + VectorCurve3D.compiled rhs)
-      (derivative lhs + VectorCurve3D.derivative rhs)
-
-instance
-  (space1 ~ space2, meters ~ Meters) =>
-  Subtraction
-    (Curve 3 Meters space1)
-    (VectorCurve3D meters space2)
-    (Curve 3 Meters space1)
-  where
-  lhs - rhs =
-    new
-      (compiled lhs - VectorCurve3D.compiled rhs)
-      (derivative lhs - VectorCurve3D.derivative rhs)
-
-instance
-  (space1 ~ space2, meters ~ Meters) =>
-  Addition
-    (Curve 3 Meters space1)
     (Vector3D meters space2)
     (Curve 3 Meters space1)
   where
@@ -361,18 +338,6 @@ instance
     (Curve 3 Meters space1)
   where
   lhs - rhs = lhs - VectorCurve3D.constant rhs
-
-instance
-  space1 ~ space2 =>
-  Subtraction
-    (Curve 3 Meters space1)
-    (Curve 3 Meters space2)
-    (VectorCurve3D Meters space1)
-  where
-  lhs - rhs =
-    VectorCurve3D.new
-      (compiled lhs - compiled rhs)
-      (derivative lhs - derivative rhs)
 
 instance
   space1 ~ space2 =>
@@ -415,6 +380,18 @@ class
       (Point dimension units space)
       (Interval Unitless)
       (Bounds dimension units space)
+  , Addition
+      (Expression Number (Point dimension units space))
+      (Expression Number (Vector dimension units space))
+      (Expression Number (Point dimension units space))
+  , Subtraction
+      (Expression Number (Point dimension units space))
+      (Expression Number (Vector dimension units space))
+      (Expression Number (Point dimension units space))
+  , Subtraction
+      (Expression Number (Point dimension units space))
+      (Expression Number (Point dimension units space))
+      (Expression Number (Vector dimension units space))
   , VectorCurve.Exists dimension units space
   , VectorCurve.Exists dimension (Unitless ?/? units) space
   , DirectionCurve.Exists dimension space
