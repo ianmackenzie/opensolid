@@ -32,8 +32,11 @@ class
   , Intersects (Point dimension units space) (Bounds dimension units space) (Tolerance units)
   , Intersects (Bounds dimension units space) (Point dimension units space) (Tolerance units)
   , Intersects (Bounds dimension units space) (Bounds dimension units space) (Tolerance units)
+  , Addition (Bounds dimension units space) (VectorBounds dimension units space) (Bounds dimension units space)
   , Addition (Point dimension units space) (VectorBounds dimension units space) (Bounds dimension units space)
+  , Subtraction (Bounds dimension units space) (VectorBounds dimension units space) (Bounds dimension units space)
   , Subtraction (Point dimension units space) (VectorBounds dimension units space) (Bounds dimension units space)
+  , Subtraction (Bounds dimension units space) (Bounds dimension units space) (VectorBounds dimension units space)
   ) =>
   Exists dimension units space
   where

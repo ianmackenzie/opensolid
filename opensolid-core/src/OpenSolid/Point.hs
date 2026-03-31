@@ -33,6 +33,10 @@ class
       (Point dimension units space)
   , Subtraction
       (Point dimension units space)
+      (Vector dimension units space)
+      (Point dimension units space)
+  , Subtraction
+      (Point dimension units space)
       (Point dimension units space)
       (Vector dimension units space)
   ) =>
