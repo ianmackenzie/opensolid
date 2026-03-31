@@ -56,6 +56,7 @@ import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Desingularization.Curve qualified as Desingularization.Curve
+import OpenSolid.Direction (Direction)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DirectionBounds (DirectionBounds)
@@ -190,6 +191,22 @@ class
       (VectorCurve dimension units space)
       (VectorCurve dimension units space)
       (Curve1D (units ?*? units))
+  , DotMultiplication
+      (VectorCurve dimension units space)
+      (Vector dimension Unitless space)
+      (Curve1D units)
+  , DotMultiplication
+      (Vector dimension Unitless space)
+      (VectorCurve dimension units space)
+      (Curve1D units)
+  , DotMultiplication
+      (VectorCurve dimension units space)
+      (Direction dimension space)
+      (Curve1D units)
+  , DotMultiplication
+      (Direction dimension space)
+      (VectorCurve dimension units space)
+      (Curve1D units)
   , NewtonRaphson.Curve dimension units space
   , Desingularization.Curve
       (VectorCurve dimension units space)
