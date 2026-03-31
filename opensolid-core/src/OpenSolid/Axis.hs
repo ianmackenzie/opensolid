@@ -26,6 +26,8 @@ type family
 class
   ( Point.Exists dimension units space
   , Direction.Exists dimension space
+  , Intersects (Point dimension units space) (Axis dimension units space) (Tolerance units)
+  , Intersects (Axis dimension units space) (Point dimension units space) (Tolerance units)
   , Show (Axis dimension units space)
   ) =>
   Exists dimension units space
