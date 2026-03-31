@@ -28,6 +28,7 @@ module OpenSolid.Curve
   , nonzero
   , tangentDirection
   , curvatureVector_
+  , distanceAlong
   , findPoint
   , searchTree
   , Intersections (IntersectionPoints, OverlappingSegments)
@@ -43,6 +44,8 @@ module OpenSolid.Curve
 where
 
 import OpenSolid.ArcLength qualified as ArcLength
+import OpenSolid.Axis (Axis)
+import OpenSolid.Axis qualified as Axis
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.CompiledFunction (CompiledFunction)
@@ -374,6 +377,7 @@ class
   , VectorBounds.Exists dimension units space
   , VectorBounds.Exists dimension (Unitless ?/? units) space
   , DirectionBounds.Exists dimension space
+  , Axis.Exists dimension units space
   , Expression.Constant Number (Point dimension units space)
   , Expression.Evaluation
       Number
@@ -542,6 +546,13 @@ tangentDirectionBounds ::
   Interval Unitless ->
   DirectionBounds dimension space
 tangentDirectionBounds curve tBounds = VectorCurve.directionBounds (derivative curve) tBounds
+
+distanceAlong ::
+  Exists dimension units space =>
+  Axis dimension units space ->
+  Curve dimension units space ->
+  Curve1D units
+distanceAlong axis curve = (curve - Axis.originPoint axis) `dot` Axis.direction axis
 
 findPoint ::
   (Exists dimension units space, Tolerance units) =>
