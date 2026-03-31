@@ -1484,6 +1484,18 @@ instance
 instance ApproximateEquality (Point3D space) (Tolerance Meters) where
   Position3D p1 ~= Position3D p2 = p1 ~= p2
 
+instance
+  space1 ~ space2 =>
+  Intersects (Point3D space1) (Axis3D space2) (Tolerance Meters)
+  where
+  p `intersects` (Axis3D p0 d) = (p - p0) `cross` d ~= HasZero.zero
+
+instance
+  space1 ~ space2 =>
+  Intersects (Axis3D space2) (Point3D space1) (Tolerance Meters)
+  where
+  axis `intersects` point = point `intersects` axis
+
 ----- VectorBounds3D -----
 
 type role VectorBounds3D phantom phantom
