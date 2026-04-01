@@ -8,6 +8,7 @@ module OpenSolid.DirectionBounds
   )
 where
 
+import Data.Void (Void)
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
 import OpenSolid.DirectionBounds2D qualified as DirectionBounds2D
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
@@ -21,6 +22,7 @@ type family
   DirectionBounds dimension space =
     directionBounds | directionBounds -> dimension space
   where
+  DirectionBounds 1 Void = Interval Unitless
   DirectionBounds 2 space = DirectionBounds2D space
   DirectionBounds 3 space = DirectionBounds3D space
 
@@ -37,6 +39,10 @@ class
   where
   unsafeImpl :: VectorBounds dimension Unitless space -> DirectionBounds dimension space
   unwrapImpl :: DirectionBounds dimension space -> VectorBounds dimension Unitless space
+
+instance Exists 1 Void where
+  unsafeImpl = id
+  unwrapImpl = id
 
 instance Exists 2 space where
   {-# INLINEABLE unsafeImpl #-}
