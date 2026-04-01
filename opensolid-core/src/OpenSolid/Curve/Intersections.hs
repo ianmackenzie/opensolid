@@ -14,7 +14,6 @@ import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.DirectionBounds qualified as DirectionBounds
-import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List

@@ -36,7 +36,6 @@ import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
-import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)

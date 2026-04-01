@@ -1,7 +1,6 @@
 module Tests.Set2D (tests) where
 
 import OpenSolid.Bounds2D qualified as Bounds2D
-import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number

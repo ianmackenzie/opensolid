@@ -12,7 +12,6 @@ module OpenSolid.Search
   )
 where
 
-import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List

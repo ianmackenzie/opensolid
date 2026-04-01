@@ -46,7 +46,6 @@ import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.Domain2D (Domain2D (Domain2D))
 import OpenSolid.Domain2D qualified as Domain2D
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.Interval (Interval)

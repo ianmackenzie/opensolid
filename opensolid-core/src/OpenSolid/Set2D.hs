@@ -16,7 +16,6 @@ module OpenSolid.Set2D
 where
 
 import OpenSolid.Bounds2D (Bounds2D)
-import OpenSolid.Fuzzy (Fuzzy)
 import OpenSolid.Prelude
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set

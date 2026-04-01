@@ -71,7 +71,6 @@ import GHC.Records (HasField)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number

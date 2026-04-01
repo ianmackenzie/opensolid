@@ -4,6 +4,7 @@ module OpenSolid.Prelude
   , List
   , NonEmpty ((:|))
   , Text
+  , Fuzzy (Resolved, Unresolved)
   , Result (Ok, Error)
   , Exception
   , pattern NonEmpty
@@ -344,6 +345,25 @@ type List a = [a]
 
 pattern NonEmpty :: NonEmpty a -> List a
 pattern NonEmpty nonEmpty <- (Data.List.NonEmpty.nonEmpty -> Just nonEmpty)
+
+----- Fuzzy -----
+
+data Fuzzy a = Resolved a | Unresolved deriving (Eq, Show)
+
+instance Functor Fuzzy where
+  fmap function (Resolved value) = Resolved (function value)
+  fmap _ Unresolved = Unresolved
+
+instance Applicative Fuzzy where
+  pure = Resolved
+
+  Resolved function <*> Resolved value = Resolved (function value)
+  Unresolved <*> _ = Unresolved
+  Resolved _ <*> Unresolved = Unresolved
+
+instance Monad Fuzzy where
+  Resolved value >>= function = function value
+  Unresolved >>= _ = Unresolved
 
 ----- Result -----
 

@@ -15,7 +15,6 @@ where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Fuzzy (Fuzzy (Resolved, Unresolved))
 import OpenSolid.InternalError (InternalError (InternalError))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.NonEmpty qualified as NonEmpty
