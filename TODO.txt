@@ -37,9 +37,6 @@ Remove last uses of Linearization.error
 Replace uses of tangentDirection etc. curves/functions with direct tangentDirectionBounds etc.?
 - *might* be able to avoid funky desingularization logic entirely
 
-Add VectorBounds.direction
-- replace existing uses of DirectionBounds.unsafe and VectorBounds.normalize
-
 Move directionBounds, tangentDirectionBounds, normalDirectionBounds into Nondegenerate modules?
 - *can* be evaluated for degenerate geometries but it's not very meaningful to do so
 - allowing evaluation for degenerate geometries makes it easier to cache in Segment types though...
@@ -78,8 +75,7 @@ Add Curve#D.steps etc. functions
 - then search for uses of Parameter.steps etc. that can be replaced
 
 Try to remove unsafeQuotient and unsafeSqrt functions in favour of using Nonzero/Nondegenerate machinery?
-
-Add Fuzzy to Prelude?
+- maybe after implementing generic SurfaceFunction and VectorSurfaceFunction...
 
 Add ParameterInterval module and move 'includes' and 'isInterior' functions there
 - also move Bounds2D.includes and Domain.isInterior to UvBounds.[includes,iInterior]
