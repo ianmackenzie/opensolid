@@ -37,6 +37,7 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Convention3D (Convention3D)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Length (Length)
+import {-# SOURCE #-} OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D (Point2D, pattern Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -50,7 +51,6 @@ import OpenSolid.Primitives
   , Transform3D (Transform3D)
   , Vector3D
   )
-import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Unboxed.Math
@@ -168,7 +168,7 @@ relativeTo (Frame3D p0 (Orientation3D i j k)) p =
 -- | Project a point onto a plane.
 projectOnto :: Plane3D global local -> Point3D global -> Point3D global
 projectOnto plane point =
-  point - Vector3D.projectionIn plane.normalDirection (point - plane.originPoint)
+  point - Vector3D.projectionIn (Plane3D.normalDirection plane) (point - Plane3D.originPoint plane)
 
 {-| Project a point *into* a plane.
 

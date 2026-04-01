@@ -28,7 +28,7 @@ module OpenSolid.Plane3D
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Axis3D (Axis3D)
+import OpenSolid.Axis3D (Axis3D (Axis3D))
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Length (Length)
 import OpenSolid.PlaneOrientation3D (PlaneOrientation3D)
@@ -36,7 +36,7 @@ import OpenSolid.PlaneOrientation3D qualified as PlaneOrientation3D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Axis3D (Axis3D), Frame3D, Plane3D (Plane3D, orientation, originPoint))
+import OpenSolid.Primitives (Frame3D, Plane3D (Plane3D, orientation, originPoint))
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
@@ -81,7 +81,7 @@ orientation = (.orientation)
 
 -- | Get the normal direction of a plane.
 normalDirection :: Plane3D global local -> Direction3D global
-normalDirection = (.normalDirection)
+normalDirection plane = PlaneOrientation3D.normalDirection (orientation plane)
 
 {-| Construct an axis normal (perpendicular) to a plane.
 
@@ -89,29 +89,29 @@ The origin point of the axis will be the origin point of the plane,
 and the direction of the axis will be the normal direction of the plane.
 -}
 normalAxis :: Plane3D global local -> Axis3D global
-normalAxis = (.normalAxis)
+normalAxis plane = Axis3D (originPoint plane) (normalDirection plane)
 
 -- | Get the X direction of a plane.
 xDirection :: Plane3D global local -> Direction3D global
-xDirection = (.xDirection)
+xDirection plane = PlaneOrientation3D.xDirection (orientation plane)
 
 -- | Get the Y direction of a plane.
 yDirection :: Plane3D global local -> Direction3D global
-yDirection = (.yDirection)
+yDirection plane = PlaneOrientation3D.yDirection (orientation plane)
 
 {-| Get the X axis of a plane.
 
 This is an axis formed from the plane's origin point and X direction.
 -}
 xAxis :: Plane3D global local -> Axis3D global
-xAxis = (.xAxis)
+xAxis plane = Axis3D (originPoint plane) (xDirection plane)
 
 {-| Get the Y axis of a plane.
 
 This is an axis formed from the plane's origin point and Y direction.
 -}
 yAxis :: Plane3D global local -> Axis3D global
-yAxis = (.yAxis)
+yAxis plane = Axis3D (originPoint plane) (yDirection plane)
 
 {-| Move a plane so that its origin point is the given point.
 

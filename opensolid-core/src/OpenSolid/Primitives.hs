@@ -1290,15 +1290,6 @@ deriving instance Show (PlaneOrientation3D space)
 instance FFI (PlaneOrientation3D FFI.Space) where
   representation = FFI.classRepresentation "PlaneOrientation3D"
 
-instance HasField "xDirection" (PlaneOrientation3D space) (Direction3D space) where
-  getField (PlaneOrientation3D dx _) = dx
-
-instance HasField "yDirection" (PlaneOrientation3D space) (Direction3D space) where
-  getField (PlaneOrientation3D _ dy) = dy
-
-instance HasField "normalDirection" (PlaneOrientation3D space) (Direction3D space) where
-  getField (PlaneOrientation3D dx dy) = Unit3D (dx `cross` dy)
-
 ----- Orientation3D -----
 
 type role Orientation3D phantom
@@ -2080,24 +2071,6 @@ deriving instance Show (Plane3D global local)
 
 instance (global ~ FFI.Space, local ~ FFI.Space) => FFI (Plane3D global local) where
   representation = FFI.classRepresentation "Plane3D"
-
-instance HasField "xDirection" (Plane3D global local) (Direction3D global) where
-  getField = (.orientation.xDirection)
-
-instance HasField "yDirection" (Plane3D global local) (Direction3D global) where
-  getField = (.orientation.yDirection)
-
-instance HasField "normalDirection" (Plane3D global local) (Direction3D global) where
-  getField = (.orientation.normalDirection)
-
-instance HasField "xAxis" (Plane3D global local) (Axis3D global) where
-  getField plane = Axis3D plane.originPoint plane.xDirection
-
-instance HasField "yAxis" (Plane3D global local) (Axis3D global) where
-  getField plane = Axis3D plane.originPoint plane.yDirection
-
-instance HasField "normalAxis" (Plane3D global local) (Axis3D global) where
-  getField plane = Axis3D plane.originPoint plane.normalDirection
 
 ----- Frame3D -----
 
