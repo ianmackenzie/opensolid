@@ -311,12 +311,6 @@ type role Orientation2D phantom
 data Orientation2D space
   = Orientation2D (Direction2D space) (Direction2D space)
 
-instance HasField "xDirection" (Orientation2D space) (Direction2D space) where
-  getField (Orientation2D dx _) = dx
-
-instance HasField "yDirection" (Orientation2D space) (Direction2D space) where
-  getField (Orientation2D _ dy) = dy
-
 deriving instance Eq (Orientation2D space)
 
 deriving instance Show (Orientation2D space)
@@ -918,12 +912,6 @@ data Frame2D units global local
   { originPoint :: Point2D units global
   , orientation :: Orientation2D global
   }
-
-instance HasField "xDirection" (Frame2D units global local) (Direction2D global) where
-  getField = (.orientation.xDirection)
-
-instance HasField "yDirection" (Frame2D units global local) (Direction2D global) where
-  getField = (.orientation.yDirection)
 
 deriving instance Eq (Frame2D units global local)
 

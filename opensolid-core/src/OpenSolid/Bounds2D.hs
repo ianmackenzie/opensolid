@@ -53,6 +53,7 @@ import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Direction2D (Direction2D (Direction2D))
 import OpenSolid.Frame2D (Frame2D)
+import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Maybe qualified as Maybe
@@ -245,8 +246,8 @@ placeIn frame (Bounds2D x y) = do
   let xWidth = Interval.width x
   let yWidth = Interval.width y
   let Point2D x0 y0 = Point2D.placeIn frame (Point2D xMid yMid)
-  let Direction2D ix iy = frame.xDirection
-  let Direction2D jx jy = frame.yDirection
+  let Direction2D ix iy = Frame2D.xDirection frame
+  let Direction2D jx jy = Frame2D.yDirection frame
   let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
   let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
   Bounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
@@ -258,8 +259,8 @@ relativeTo frame (Bounds2D x y) = do
   let xWidth = Interval.width x
   let yWidth = Interval.width y
   let Point2D x0 y0 = Point2D.relativeTo frame (Point2D xMid yMid)
-  let Direction2D ix iy = frame.xDirection
-  let Direction2D jx jy = frame.yDirection
+  let Direction2D ix iy = Frame2D.xDirection frame
+  let Direction2D jx jy = Frame2D.yDirection frame
   let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs iy
   let ry = 0.5 * xWidth * Number.abs jx + 0.5 * yWidth * Number.abs jy
   Bounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
