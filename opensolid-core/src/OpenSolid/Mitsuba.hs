@@ -327,7 +327,7 @@ cameraNode camera = do
   let samplerNode =
         XmlNode "sampler" [("type", "multijitter")] $
           [typedNode "integer" "sample_count" "$spp"]
-  case camera.projection of
+  case Camera3D.projection camera of
     Camera3D.Orthographic fovHeight -> do
       let scale = Length.inMeters fovHeight / 2.0
       XmlNode "sensor" [("type", "orthographic")] $
@@ -361,12 +361,12 @@ stringNode name value = typedNode "string" name value
 
 cameraTransformationNode :: Camera3D space -> XmlNode
 cameraTransformationNode camera = do
-  let (x0, y0, z0) = Point3D.coordinates convention camera.eyePoint
+  let (x0, y0, z0) = Point3D.coordinates convention (Camera3D.eyePoint camera)
   let px = Length.inMeters x0
   let py = Length.inMeters y0
   let pz = Length.inMeters z0
-  let (ix, iy, iz) = Direction3D.components convention camera.leftwardDirection
-  let (jx, jy, jz) = Direction3D.components convention camera.upwardDirection
-  let (kx, ky, kz) = Direction3D.components convention camera.forwardDirection
+  let (ix, iy, iz) = Direction3D.components convention (Camera3D.leftwardDirection camera)
+  let (jx, jy, jz) = Direction3D.components convention (Camera3D.upwardDirection camera)
+  let (kx, ky, kz) = Direction3D.components convention (Camera3D.forwardDirection camera)
   let matrixComponents = [ix, jx, kx, px, iy, jy, ky, py, iz, jz, kz, pz, 0.0, 0.0, 0.0, 1.0]
   XmlNode "matrix" [("value", Text.join " " (List.map Text.number matrixComponents))] []

@@ -1,5 +1,5 @@
 module OpenSolid.Camera3D
-  ( Camera3D (frame, focalDistance, projection)
+  ( Camera3D
   , CameraSpace
   , ScreenSpace
   , Projection (Perspective, Orthographic)
@@ -11,6 +11,18 @@ module OpenSolid.Camera3D
   , isometric
   , isometricElevation
   , moveTo
+  , frame
+  , focalDistance
+  , projection
+  , eyePoint
+  , forwardDirection
+  , backwardDirection
+  , leftwardDirection
+  , rightwardDirection
+  , upwardDirection
+  , downwardDirection
+  , focalPoint
+  , viewPlane
   , placeIn
   , relativeTo
   , transformBy
@@ -21,7 +33,6 @@ module OpenSolid.Camera3D
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis3D (Axis3D)
@@ -57,38 +68,6 @@ data Camera3D space = Camera3D
   , projection :: Projection
   }
 
-instance HasField "eyePoint" (Camera3D space) (Point3D space) where
-  getField camera = camera.frame.originPoint
-
-instance HasField "forwardDirection" (Camera3D space) (Direction3D space) where
-  getField camera = camera.frame.forwardDirection
-
-instance HasField "backwardDirection" (Camera3D space) (Direction3D space) where
-  getField camera = camera.frame.backwardDirection
-
-instance HasField "leftwardDirection" (Camera3D space) (Direction3D space) where
-  getField camera = camera.frame.leftwardDirection
-
-instance HasField "rightwardDirection" (Camera3D space) (Direction3D space) where
-  getField camera = camera.frame.rightwardDirection
-
-instance HasField "upwardDirection" (Camera3D space) (Direction3D space) where
-  getField camera = camera.frame.upwardDirection
-
-instance HasField "downwardDirection" (Camera3D space) (Direction3D space) where
-  getField camera = camera.frame.downwardDirection
-
-instance HasField "focalPoint" (Camera3D space) (Point3D space) where
-  getField camera = camera.eyePoint + camera.focalDistance * camera.forwardDirection
-
-instance
-  HasField
-    "viewPlane"
-    (Camera3D space)
-    (Plane3D space ScreenSpace)
-  where
-  getField camera = Frame3D.backPlane camera.frame
-
 instance FFI (Camera3D FFI.Space) where
   representation = FFI.classRepresentation "Camera3D"
 
@@ -109,11 +88,11 @@ orthographic :: "viewportHeight" ::: Length -> Projection
 orthographic ("viewportHeight" ::: viewportHeight) = Orthographic viewportHeight
 
 new :: Frame3D space CameraSpace -> Length -> Projection -> Camera3D space
-new givenFrame givenFocalDistance projection =
+new givenFrame givenFocalDistance givenProjection =
   Camera3D
     { frame = givenFrame
     , focalDistance = givenFocalDistance
-    , projection = projection
+    , projection = givenProjection
     }
 
 {-| Construct a camera at a given point, looking at a given focal point.
@@ -126,24 +105,27 @@ lookAt ::
   "focalPoint" ::: Point3D space ->
   "projection" ::: Projection ->
   Camera3D space
-lookAt ("eyePoint" ::: eyePoint) ("focalPoint" ::: focalPoint) ("projection" ::: projection) = do
-  let computedFocalDistance = Point3D.distanceFrom eyePoint focalPoint
-  let computedFrame =
-        case Tolerance.using Quantity.zero (Vector3D.direction (focalPoint - eyePoint)) of
-          Ok computedForwardDirection -> do
-            case PlaneOrientation3D.fromDirections computedForwardDirection World3D.upwardDirection of
-              Just rightPlaneOrientation ->
-                Frame3D.fromRightPlane (Plane3D eyePoint rightPlaneOrientation)
-              Nothing -- View direction is either straight up or straight down
-                | Direction3D.upwardComponent computedForwardDirection > 0.0 ->
-                    Frame3D eyePoint World3D.upwardOrientation
-                | otherwise ->
-                    Frame3D eyePoint World3D.downwardOrientation
-          Error Vector.IsZero ->
-            -- Given eye and focal points are coincident,
-            -- so just look straight forward
-            Frame3D eyePoint World3D.forwardOrientation
-  new computedFrame computedFocalDistance projection
+lookAt
+  ("eyePoint" ::: givenEyePoint)
+  ("focalPoint" ::: givenFocalPoint)
+  ("projection" ::: givenProjection) = do
+    let computedFocalDistance = Point3D.distanceFrom givenEyePoint givenFocalPoint
+    let computedFrame =
+          case Tolerance.using Quantity.zero (Vector3D.direction (givenFocalPoint - givenEyePoint)) of
+            Ok computedForwardDirection -> do
+              case PlaneOrientation3D.fromDirections computedForwardDirection World3D.upwardDirection of
+                Just rightPlaneOrientation ->
+                  Frame3D.fromRightPlane (Plane3D givenEyePoint rightPlaneOrientation)
+                Nothing -- View direction is either straight up or straight down
+                  | Direction3D.upwardComponent computedForwardDirection > 0.0 ->
+                      Frame3D givenEyePoint World3D.upwardOrientation
+                  | otherwise ->
+                      Frame3D givenEyePoint World3D.downwardOrientation
+            Error Vector.IsZero ->
+              -- Given eye and focal points are coincident,
+              -- so just look straight forward
+              Frame3D givenEyePoint World3D.forwardOrientation
+    new computedFrame computedFocalDistance givenProjection
 
 {-| Construct a camera orbiting around a given focal point, a given distance away.
 
@@ -160,17 +142,17 @@ orbit ::
   "projection" ::: Projection ->
   Camera3D space
 orbit
-  ("focalPoint" ::: focalPoint)
+  ("focalPoint" ::: givenFocalPoint)
   ("azimuth" ::: azimuth)
   ("elevation" ::: elevation)
   ("distance" ::: distance)
-  ("projection" ::: projection) = do
+  ("projection" ::: givenProjection) = do
     let computedFrame =
-          Frame3D focalPoint World3D.backwardOrientation
+          Frame3D givenFocalPoint World3D.backwardOrientation
             & Frame3D.turnRightBy azimuth
             & Frame3D.tiltDownBy elevation
             & Frame3D.offsetBackwardBy distance
-    new computedFrame distance projection
+    new computedFrame distance givenProjection
 
 isometricElevation :: Angle
 isometricElevation = Angle.atan2 1.0 (Number.sqrt 2.0)
@@ -184,20 +166,68 @@ isometric givenFocalPoint distance givenProjection =
     (#distance distance)
     (#projection givenProjection)
 
+frame :: Camera3D space -> Frame3D space CameraSpace
+frame = (.frame)
+
+focalDistance :: Camera3D space -> Length
+focalDistance = (.focalDistance)
+
+projection :: Camera3D space -> Projection
+projection = (.projection)
+
+eyePoint :: Camera3D space -> Point3D space
+eyePoint camera = Frame3D.originPoint (frame camera)
+
+forwardDirection :: Camera3D space -> Direction3D space
+forwardDirection camera = Frame3D.forwardDirection (frame camera)
+
+backwardDirection :: Camera3D space -> Direction3D space
+backwardDirection camera = Frame3D.backwardDirection (frame camera)
+
+leftwardDirection :: Camera3D space -> Direction3D space
+leftwardDirection camera = Frame3D.leftwardDirection (frame camera)
+
+rightwardDirection :: Camera3D space -> Direction3D space
+rightwardDirection camera = Frame3D.rightwardDirection (frame camera)
+
+upwardDirection :: Camera3D space -> Direction3D space
+upwardDirection camera = Frame3D.upwardDirection (frame camera)
+
+downwardDirection :: Camera3D space -> Direction3D space
+downwardDirection camera = Frame3D.downwardDirection (frame camera)
+
+focalPoint :: Camera3D space -> Point3D space
+focalPoint camera = eyePoint camera + focalDistance camera * forwardDirection camera
+
+viewPlane :: Camera3D space -> Plane3D space ScreenSpace
+viewPlane camera = Frame3D.backPlane (frame camera)
+
 moveTo :: Point3D space -> Camera3D space -> Camera3D space
-moveTo newEyePoint Camera3D{frame, focalDistance, projection} =
-  Camera3D{frame = Frame3D.moveTo newEyePoint frame, focalDistance, projection}
+moveTo newEyePoint camera =
+  Camera3D
+    { frame = Frame3D.moveTo newEyePoint camera.frame
+    , focalDistance = camera.focalDistance
+    , projection = camera.projection
+    }
 
 placeIn :: Frame3D global local -> Camera3D local -> Camera3D global
-placeIn givenFrame Camera3D{frame, focalDistance, projection} =
-  Camera3D{frame = Frame3D.placeIn givenFrame frame, focalDistance, projection}
+placeIn givenFrame camera =
+  Camera3D
+    { frame = Frame3D.placeIn givenFrame camera.frame
+    , focalDistance = camera.focalDistance
+    , projection = camera.projection
+    }
 
 relativeTo :: Frame3D global local -> Camera3D global -> Camera3D local
 relativeTo givenFrame = placeIn (Frame3D.inverse givenFrame)
 
 transformBy :: Transform3D.Rigid space -> Camera3D space -> Camera3D space
-transformBy transform Camera3D{frame, focalDistance, projection} =
-  Camera3D{frame = Frame3D.transformBy transform frame, focalDistance, projection}
+transformBy transform camera =
+  Camera3D
+    { frame = Frame3D.transformBy transform camera.frame
+    , focalDistance = camera.focalDistance
+    , projection = camera.projection
+    }
 
 translateBy :: Vector3D Meters space -> Camera3D space -> Camera3D space
 translateBy = Transform3D.translateByImpl transformBy
