@@ -49,9 +49,8 @@ tangentDirectionBounds ::
   Nonzero (Curve dimension units space) ->
   Interval Unitless ->
   DirectionBounds dimension space
-tangentDirectionBounds (Nonzero curve) tBounds = do
-  let derivativeBounds = Curve.derivativeBounds curve tBounds
-  DirectionBounds.unsafe (derivativeBounds / VectorBounds.magnitude derivativeBounds)
+tangentDirectionBounds (Nonzero curve) tBounds =
+  VectorBounds.direction (Curve.derivativeBounds curve tBounds)
 
 curvatureVector_ ::
   (Curve.Exists dimension units space, VectorCurve.Exists dimension (Unitless ?/? units) space) =>

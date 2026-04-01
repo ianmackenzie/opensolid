@@ -6,6 +6,7 @@ module OpenSolid.VectorBounds
   , squaredMagnitude_
   , magnitude
   , normalize
+  , direction
   , diameter
   , isResolved
   , areDistinct
@@ -17,6 +18,8 @@ module OpenSolid.VectorBounds
 where
 
 import Data.Void (Void)
+import {-# SOURCE #-} OpenSolid.DirectionBounds (DirectionBounds)
+import {-# SOURCE #-} OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Prelude
@@ -41,6 +44,7 @@ type family
 class
   ( Vector.Exists dimension units space
   , Exists dimension Unitless space
+  , DirectionBounds.Exists dimension space
   , HasUnits (VectorBounds dimension units space) units
   , Units.Coercion (VectorBounds dimension units space) (VectorBounds dimension Unitless space)
   , Units.Coercion (VectorBounds dimension Unitless space) (VectorBounds dimension units space)
@@ -142,6 +146,12 @@ instance Exists 3 units space where
   isResolved = VectorBounds3D.isResolved
   areDistinct = VectorBounds3D.areDistinct
   areIndependent = VectorBounds3D.areIndependent
+
+direction ::
+  Exists dimension units space =>
+  VectorBounds dimension units space ->
+  DirectionBounds dimension space
+direction = DirectionBounds.unsafe . normalize
 
 {-# INLINE erase #-}
 erase ::

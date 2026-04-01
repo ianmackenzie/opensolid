@@ -19,10 +19,7 @@ bounds ::
   VectorBounds dimension units space ->
   VectorBounds dimension units space ->
   DirectionBounds dimension space
-bounds curve (Interval tLow tHigh) curveBounds derivativeBounds =
-  DirectionBounds.unsafe $
-    VectorBounds.normalize $
-      if
-        | tLow == 0.0 && VectorCurve.singular0 curve -> derivativeBounds
-        | tHigh == 1.0 && VectorCurve.singular1 curve -> negate derivativeBounds
-        | otherwise -> curveBounds
+bounds curve (Interval tLow tHigh) curveBounds derivativeBounds
+  | tLow == 0.0 && VectorCurve.singular0 curve = VectorBounds.direction derivativeBounds
+  | tHigh == 1.0 && VectorCurve.singular1 curve = VectorBounds.direction -derivativeBounds
+  | otherwise = VectorBounds.direction curveBounds
