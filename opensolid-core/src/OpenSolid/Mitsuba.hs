@@ -211,20 +211,12 @@ meshDataBuilder mesh name = do
 pointBuilder :: SurfaceVertex3D space -> Builder
 pointBuilder vertex = do
   let (px, py, pz) = Point3D.coordinates convention (SurfaceVertex3D.position vertex)
-  Binary.concat
-    [ Binary.float64LE (Length.inMeters px)
-    , Binary.float64LE (Length.inMeters py)
-    , Binary.float64LE (Length.inMeters pz)
-    ]
+  Binary.combine (Binary.float64LE . Length.inMeters) [px, py, pz]
 
 normalBuilder :: SurfaceVertex3D space -> Builder
 normalBuilder vertex = do
   let (nx, ny, nz) = Direction3D.components convention (SurfaceVertex3D.normal vertex)
-  Binary.concat
-    [ Binary.float64LE nx
-    , Binary.float64LE ny
-    , Binary.float64LE nz
-    ]
+  Binary.combine Binary.float64LE [nx, ny, nz]
 
 faceIndicesBuilder :: (Int, Int, Int) -> Builder
 faceIndicesBuilder (i, j, k) = Binary.uint32LE i <> Binary.uint32LE j <> Binary.uint32LE k
