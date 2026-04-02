@@ -207,3 +207,11 @@ executable phone-holder
   build-depends:
     base,
     opensolid-core,
+
+executable sphere
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: sphere
+  build-depends:
+    base,
+    opensolid-core,
