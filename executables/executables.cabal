@@ -215,3 +215,11 @@ executable sphere
   build-depends:
     base,
     opensolid-core,
+
+executable revolved-normals
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: revolved-normals
+  build-depends:
+    base,
+    opensolid-core,
