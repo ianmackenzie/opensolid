@@ -6,6 +6,7 @@ module OpenSolid.Map
   , singleton
   , fromList
   , toList
+  , member
   , get
   , take
   , set
@@ -53,6 +54,9 @@ fromList = Data.Map.Strict.fromList
 
 toList :: Map k v -> List (k, v)
 toList = Data.Map.Strict.toList
+
+member :: Ord k => k -> Map k v -> Bool
+member = Data.Map.Strict.member
 
 get :: Ord k => k -> Map k v -> Maybe v
 get = Data.Map.Strict.lookup
