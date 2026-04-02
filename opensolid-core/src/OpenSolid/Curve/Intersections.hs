@@ -27,7 +27,8 @@ import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Search qualified as Search
-import OpenSolid.Search.Domain qualified as Search.Domain
+import OpenSolid.SearchDomain qualified as SearchDomain
+import OpenSolid.SearchTree qualified as SearchTree
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (pattern UvPoint)
 import OpenSolid.Vector qualified as Vector
@@ -138,7 +139,7 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
   let nondegenerate2 = Nondegenerate.exterior nonzero2
   let curve1 = Nondegenerate.unwrap nondegenerate1
   let curve2 = Nondegenerate.unwrap nondegenerate2
-  let searchTree = Search.pairwise (,) (Curve.searchTree curve1) (Curve.searchTree curve2)
+  let searchTree = SearchTree.pairwise (,) (Curve.searchTree curve1) (Curve.searchTree curve2)
   let evaluateCrossing (UvPoint t1 t2) = do
         let displacement = Curve.point curve2 t2 - Curve.point curve1 t1
         let uDerivative = negate (Curve.derivativeValue curve1 t1)
@@ -199,7 +200,7 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
             let hasDegenerateEndpointSolution = case singleEndpointSolution of
                   Just EndpointSolution{isDegenerate} -> isDegenerate
                   Nothing -> False
-            let isSmall = Search.Domain.isSmall tBounds1
+            let isSmall = SearchDomain.isSmall tBounds1
             if
               | hasContinuation -> Resolved Nothing
               | isCrossing && hasCrossingEndpointSolution -> Resolved Nothing
@@ -223,7 +224,7 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
                           | otherwise -> Unresolved
                     Nothing -> Unresolved
               | otherwise -> Unresolved
-  let isDuplicate (tBounds1, _) (tBounds2, _) = Search.Domain.overlapping tBounds1 tBounds2
+  let isDuplicate (tBounds1, _) (tBounds2, _) = SearchDomain.overlapping tBounds1 tBounds2
   List.map Pair.second (Search.exclusive interiorIntersectionPoint isDuplicate searchTree)
 
 findOverlappingSegments ::

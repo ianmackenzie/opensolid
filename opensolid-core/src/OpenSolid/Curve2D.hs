@@ -96,7 +96,6 @@ import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve2D, HasSingularity)
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
@@ -147,7 +146,7 @@ type Compiled units = Curve.Compiled 2 units Void
 
 type Segment units = Curve.Segment 2 units Void
 
-type SearchTree units = Curve.Search.Tree 2 units Void
+type SearchTree units = Curve.SearchTree 2 units Void
 
 new :: Compiled units -> VectorCurve2D units -> Curve2D units
 new = Curve.new

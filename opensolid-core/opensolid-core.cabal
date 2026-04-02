@@ -119,7 +119,6 @@ library
     OpenSolid.Curve.Intersections
     OpenSolid.Curve.Nondegenerate
     OpenSolid.Curve.Nonzero
-    OpenSolid.Curve.Search
     OpenSolid.Curve.Segment
     OpenSolid.Curve1D
     OpenSolid.Curve1D.Nondegenerate
@@ -207,7 +206,8 @@ library
     OpenSolid.Resolution
     OpenSolid.Result
     OpenSolid.Search
-    OpenSolid.Search.Domain
+    OpenSolid.SearchDomain
+    OpenSolid.SearchTree
     OpenSolid.Set
     OpenSolid.Set2D
     OpenSolid.Set3D

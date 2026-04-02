@@ -1,12 +1,5 @@
 module OpenSolid.Search
-  ( Domain (Domain)
-  , Tree (Tree)
-  , InfiniteRecursion (InfiniteRecursion)
-  , curveDomain
-  , surfaceDomain
-  , tree
-  , pairwise
-  , primary
+  ( primary
   , exclusive
   , isInterior
   )
@@ -16,113 +9,88 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
-import OpenSolid.Search.Domain (Domain (Domain), InfiniteRecursion (InfiniteRecursion))
-import OpenSolid.Search.Domain qualified as Domain
-import OpenSolid.Units (HasUnits)
-import OpenSolid.Units qualified as Units
-import OpenSolid.UvBounds (UvBounds, pattern UvBounds)
-
-data Tree bounds value where
-  Tree ::
-    Domain.Bounds bounds =>
-    bounds ->
-    value ->
-    ~(List (Tree bounds value)) ->
-    Tree bounds value
-
-instance HasUnits value units => HasUnits (Tree bounds value) units
-
-instance
-  (bounds1 ~ bounds2, Units.Coercion value1 value2) =>
-  Units.Coercion (Tree bounds1 value1) (Tree bounds2 value2)
-  where
-  coerce (Tree domainBounds value children) =
-    Tree domainBounds (Units.coerce value) (List.map Units.coerce children)
-
-curveDomain :: Domain (Interval Unitless)
-curveDomain = Domain.unitInterval
-
-surfaceDomain :: Domain UvBounds
-surfaceDomain = Domain.pairwise UvBounds Domain.unitInterval Domain.unitInterval
-
-tree :: (bounds -> value) -> Domain bounds -> Tree bounds value
-tree function (Domain domainBounds subdomains) =
-  Tree domainBounds (function domainBounds) (List.map (tree function) subdomains)
-
-pairwise ::
-  (value1 -> value2 -> value3) ->
-  Tree bounds1 value1 ->
-  Tree bounds2 value2 ->
-  Tree (bounds1, bounds2) value3
-pairwise function (Tree domainBounds1 value1 children1) (Tree domainBounds2 value2 children2) =
-  Tree (domainBounds1, domainBounds2) (function value1 value2) $
-    [pairwise function child1 child2 | child1 <- children1, child2 <- children2]
+import OpenSolid.SearchDomain qualified as SearchDomain
+import OpenSolid.SearchTree (SearchTree)
+import OpenSolid.SearchTree qualified as SearchTree
 
 primary ::
+  SearchDomain.Bounds bounds =>
   (bounds -> value -> Fuzzy (Maybe solution)) ->
-  Tree bounds value ->
+  SearchTree bounds value ->
   List (bounds, solution)
 primary callback searchTree = collectPrimary callback searchTree []
 
 collectPrimary ::
+  SearchDomain.Bounds bounds =>
   (bounds -> value -> Fuzzy (Maybe solution)) ->
-  Tree bounds value ->
+  SearchTree bounds value ->
   List (bounds, solution) ->
   List (bounds, solution)
-collectPrimary callback (Tree bounds value children) accumulated =
-  if Domain.isPrimary bounds
-    then case callback bounds value of
+collectPrimary callback searchTree accumulated = do
+  let domainBounds = SearchTree.domainBounds searchTree
+  if SearchDomain.isPrimary domainBounds
+    then case callback domainBounds (SearchTree.value searchTree) of
       Resolved Nothing -> accumulated
-      Resolved (Just solution) -> (bounds, solution) : accumulated
-      Unresolved -> List.foldr (collectPrimary callback) accumulated children
+      Resolved (Just solution) -> (domainBounds, solution) : accumulated
+      Unresolved ->
+        List.foldr (collectPrimary callback) accumulated (SearchTree.children searchTree)
     else accumulated
 
 data SolutionTree bounds solution
   = Leaf bounds (Maybe solution)
   | Node bounds ~(List (SolutionTree bounds solution))
 
-excluded :: Domain.Bounds bounds => Int -> bounds -> SolutionTree bounds solution -> Bool
-excluded _ bounds (Leaf leafBounds _) = Domain.contains bounds leafBounds
+excluded :: SearchDomain.Bounds bounds => Int -> bounds -> SolutionTree bounds solution -> Bool
+excluded _ bounds (Leaf leafBounds _) = SearchDomain.contains bounds leafBounds
 excluded maxDepthIndex bounds (Node nodeBounds children)
   | maxDepthIndex == 0 = False -- Ensure we don't cause infinite recursion
-  | not (Domain.contains bounds nodeBounds) = False -- Stop early if possible
+  | not (SearchDomain.contains bounds nodeBounds) = False -- Stop early if possible
   | otherwise = List.any (excluded (maxDepthIndex - 1) bounds) children
 
 exclusive ::
+  SearchDomain.Bounds bounds =>
   (bounds -> value -> Fuzzy (Maybe solution)) ->
   ((bounds, solution) -> (bounds, solution) -> Bool) ->
-  Tree bounds value ->
+  SearchTree bounds value ->
   List (bounds, solution)
-exclusive callback duplicateCallback (Tree bounds value children) =
-  case callback bounds value of
+exclusive callback duplicateCallback searchTree = do
+  let domainBounds = SearchTree.domainBounds searchTree
+  case callback domainBounds (SearchTree.value searchTree) of
     Resolved Nothing -> []
-    Resolved (Just solution) -> [(bounds, solution)]
+    Resolved (Just solution) -> [(domainBounds, solution)]
     Unresolved -> do
-      let solutionTree = buildNode 0 callback bounds children solutionTree
+      let children = SearchTree.children searchTree
+      let solutionTree = buildNode 0 callback domainBounds children solutionTree
       collectSolutions solutionTree [] & deduplicate duplicateCallback
 
 buildNode ::
-  Domain.Bounds bounds =>
+  SearchDomain.Bounds bounds =>
   Int -> -- always >= 0
   (bounds -> value -> Fuzzy (Maybe solution)) ->
   bounds ->
-  List (Tree bounds value) ->
+  List (SearchTree bounds value) ->
   SolutionTree bounds solution ->
   SolutionTree bounds solution
-buildNode depthIndex callback bounds children builtSolutionTree =
-  Node bounds (List.filterMap (buildSubtree (depthIndex + 1) callback builtSolutionTree) children)
+buildNode depthIndex callback domainBounds children builtSolutionTree =
+  Node domainBounds $
+    List.filterMap (buildSubtree (depthIndex + 1) callback builtSolutionTree) children
 
 buildSubtree ::
+  SearchDomain.Bounds bounds =>
   Int -> -- always >= 1
   (bounds -> value -> Fuzzy (Maybe solution)) ->
   SolutionTree bounds solution ->
-  Tree bounds value ->
+  SearchTree bounds value ->
   Maybe (SolutionTree bounds solution)
-buildSubtree depthIndex callback builtSolutionTree (Tree bounds value children)
-  | excluded (depthIndex - 1) bounds builtSolutionTree = Nothing
-  | otherwise = case callback bounds value of
-      Resolved maybeSolution -> Just (Leaf bounds maybeSolution)
-      Unresolved -> Just (buildNode depthIndex callback bounds children builtSolutionTree)
+buildSubtree depthIndex callback builtSolutionTree searchTree = do
+  let domainBounds = SearchTree.domainBounds searchTree
+  if excluded (depthIndex - 1) domainBounds builtSolutionTree
+    then Nothing
+    else case callback domainBounds (SearchTree.value searchTree) of
+      Resolved maybeSolution -> Just (Leaf domainBounds maybeSolution)
+      Unresolved -> do
+        let children = SearchTree.children searchTree
+        Just (buildNode depthIndex callback domainBounds children builtSolutionTree)
 
 collectSolutions ::
   SolutionTree bounds solution ->

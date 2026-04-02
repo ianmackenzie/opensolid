@@ -1,12 +1,15 @@
-module OpenSolid.Search.Domain
-  ( Domain (Domain)
+module OpenSolid.SearchDomain
+  ( SearchDomain
   , InfiniteRecursion (InfiniteRecursion)
   , Bounds
+  , bounds
+  , children
   , contains
   , overlapping
   , isSmall
   , isPrimary
-  , unitInterval
+  , curve
+  , surface
   , pairwise
   , Size (..)
   , Classification (..)
@@ -22,8 +25,10 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.UvBounds (UvBounds, pattern UvBounds)
 
-data Domain bounds where
-  Domain :: Bounds bounds => bounds -> ~(List (Domain bounds)) -> Domain bounds
+data SearchDomain bounds = SearchDomain
+  { bounds :: bounds
+  , children :: ~(List (SearchDomain bounds))
+  }
 
 data InfiniteRecursion = InfiniteRecursion deriving (Show, Exception)
 
@@ -53,22 +58,34 @@ instance (Bounds bounds1, Bounds bounds2) => Bounds (bounds1, bounds2) where
   isSmall (b1, b2) = isSmall b1 && isSmall b2
   isPrimary (b1, b2) = isPrimary b1 && isPrimary b2
 
-unitInterval :: Domain (Interval Unitless)
+bounds :: forall bounds. SearchDomain bounds -> bounds
+bounds = (.bounds)
+
+children :: forall bounds. SearchDomain bounds -> List (SearchDomain bounds)
+children = (.children)
+
+unitInterval :: SearchDomain (Interval Unitless)
 unitInterval = split Interval.unit
 
-split :: Interval Unitless -> Domain (Interval Unitless)
+curve :: SearchDomain (Interval Unitless)
+curve = unitInterval
+
+surface :: SearchDomain UvBounds
+surface = pairwise UvBounds unitInterval unitInterval
+
+split :: Interval Unitless -> SearchDomain (Interval Unitless)
 split interval = do
   let (low, lowMid, mid, highMid, high) = quadrisect interval
-  Domain interval $
+  SearchDomain interval $
     [ split (Interval low mid)
     , shrink (Interval lowMid highMid)
     , split (Interval mid high)
     ]
 
-shrink :: Interval Unitless -> Domain (Interval Unitless)
+shrink :: Interval Unitless -> SearchDomain (Interval Unitless)
 shrink interval = do
   let (_, lowMid, _, highMid, _) = quadrisect interval
-  Domain interval [shrink (Interval lowMid highMid)]
+  SearchDomain interval [shrink (Interval lowMid highMid)]
 
 {-# INLINE quadrisect #-}
 quadrisect :: Interval Unitless -> (Number, Number, Number, Number, Number)
@@ -80,9 +97,9 @@ quadrisect (Interval low high) = do
     then (low, lowMid, mid, highMid, high)
     else throw InfiniteRecursion
 
-pairwise :: Bounds c => (a -> b -> c) -> Domain a -> Domain b -> Domain c
-pairwise function (Domain bounds1 children1) (Domain bounds2 children2) =
-  Domain (function bounds1 bounds2) $
+pairwise :: (a -> b -> c) -> SearchDomain a -> SearchDomain b -> SearchDomain c
+pairwise function (SearchDomain bounds1 children1) (SearchDomain bounds2 children2) =
+  SearchDomain (function bounds1 bounds2) $
     [pairwise function child1 child2 | child1 <- children1, child2 <- children2]
 
 data Size = Small | Large deriving (Eq, Ord, Show)

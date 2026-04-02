@@ -71,7 +71,6 @@ import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections qualified as Intersections
 import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import {-# SOURCE #-} OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
-import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve.Segment (Segment)
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Curve1D (Curve1D)
@@ -110,7 +109,8 @@ import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Search qualified as Search
-import OpenSolid.Search.Domain qualified as Search.Domain
+import OpenSolid.SearchDomain qualified as SearchDomain
+import OpenSolid.SearchTree qualified as SearchTree
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
@@ -141,7 +141,7 @@ data Curve dimension units space = Curve
   , derivative :: ~(VectorCurve dimension units space)
   , startPoint :: ~(Point dimension units space)
   , endPoint :: ~(Point dimension units space)
-  , searchTree :: ~(Curve.Search.Tree dimension units space)
+  , searchTree :: ~(SearchTree dimension units space)
   }
 
 -- | A parametric curve in 2D space.
@@ -160,7 +160,7 @@ type Compiled dimension units space =
 data HasSingularity = HasSingularity deriving (Eq, Show)
 
 type SearchTree dimension units space =
-  Curve.Search.Tree dimension units space
+  SearchTree.SearchTree (Interval Unitless) (Segment dimension units space)
 
 instance Units.Coercion (Curve2D units1) (Curve2D units2) where
   coerce curve =
@@ -415,7 +415,7 @@ new givenCompiled givenDerivative =
       , derivative = givenDerivative
       , startPoint = CompiledFunction.value givenCompiled 0.0
       , endPoint = CompiledFunction.value givenCompiled 1.0
-      , searchTree = Curve.Search.tree self
+      , searchTree = SearchTree.build (Curve.Segment.new self) SearchDomain.curve
       }
 
 constant ::
@@ -515,7 +515,7 @@ bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
 overallBounds :: Curve dimension units space -> Bounds dimension units space
 overallBounds curve = bounds curve Interval.unit
 
-searchTree :: Curve dimension units space -> Curve.Search.Tree dimension units space
+searchTree :: Curve dimension units space -> SearchTree dimension units space
 searchTree = (.searchTree)
 
 singular0 :: Exists dimension units space => Curve dimension units space -> Bool
@@ -655,7 +655,7 @@ findPoint givenPoint curve = do
         | not (givenPoint `intersects` Curve.Segment.bounds segment) = Resolved Nothing
         | otherwise = do
             let isMonotonic = Curve.Segment.monotonic segment
-            let isSmall = Search.Domain.isSmall tBounds
+            let isSmall = SearchDomain.isSmall tBounds
             let endpointSolution = List.find (Number.includedIn tBounds) endpointSolutions
             let hasEndpointSolution = endpointSolution /= Nothing
             if
@@ -663,7 +663,7 @@ findPoint givenPoint curve = do
               | isSmall, Just tValue <- endpointSolution, isDegenerate tValue -> Resolved Nothing
               | isMonotonic -> solveMonotonic tBounds
               | otherwise -> Unresolved
-  let isDuplicate (tBounds1, _) (tBounds2, _) = Search.Domain.overlapping tBounds1 tBounds2
+  let isDuplicate (tBounds1, _) (tBounds2, _) = SearchDomain.overlapping tBounds1 tBounds2
   let interiorSolutions =
         Search.exclusive interiorSolution isDuplicate (searchTree curve)
           & List.map Pair.second
