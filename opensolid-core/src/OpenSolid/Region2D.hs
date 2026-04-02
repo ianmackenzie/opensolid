@@ -33,7 +33,6 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
-import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CDT qualified as CDT
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
@@ -469,7 +468,7 @@ boundaryIsInside outer inner = do
     Just sweptAngle -> sweptAngle > Angle.pi
 
 bounds :: Region2D units -> Bounds2D units
-bounds region = Bounds2D.aggregateOf Curve2D.overallBounds (outerLoop region)
+bounds region = Boundary.bounds region.outerBoundary
 
 area :: Units.Squared units1 units2 => Region2D units1 -> Estimate units2
 area region = do

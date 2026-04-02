@@ -1,6 +1,7 @@
 module OpenSolid.Region2D.BoundaryTree
   ( BoundaryTree
   , build
+  , bounds
   , pointSweptAngle
   , boundsSweptAngle
   )
@@ -84,6 +85,9 @@ buildCurveImpl curve tBounds startPoint endPoint = do
     , right = buildCurveImpl curve (Interval tMid tHigh) midpoint endPoint
     }
 
+bounds :: BoundaryTree units -> Bounds2D units
+bounds = (.bounds)
+
 distinctSweptAngle :: Point2D units -> BoundaryTree units -> Angle
 distinctSweptAngle point tree =
   Vector2D.angleFrom (tree.startPoint - point) (tree.endPoint - point)
@@ -94,8 +98,10 @@ pointSweptAngle point tree
   | otherwise = pointSweptAngle point tree.left + pointSweptAngle point tree.right
 
 boundsSweptAngle :: Bounds2D units -> BoundaryTree units -> Fuzzy Angle
-boundsSweptAngle bounds tree =
-  boundsSweptAngleImpl bounds (Bounds2D.centerPoint bounds) (Bounds2D.diameter bounds) tree
+boundsSweptAngle givenBounds tree = do
+  let centerPoint = Bounds2D.centerPoint givenBounds
+  let diameter = Bounds2D.diameter givenBounds
+  boundsSweptAngleImpl givenBounds centerPoint diameter tree
 
 boundsSweptAngleImpl ::
   Bounds2D units ->
@@ -103,10 +109,10 @@ boundsSweptAngleImpl ::
   Quantity units ->
   BoundaryTree units ->
   Fuzzy Angle
-boundsSweptAngleImpl bounds centerPoint diameter tree
-  | Bounds2D.areDistinct bounds tree.bounds = Resolved (distinctSweptAngle centerPoint tree)
+boundsSweptAngleImpl givenBounds centerPoint diameter tree
+  | Bounds2D.areDistinct givenBounds tree.bounds = Resolved (distinctSweptAngle centerPoint tree)
   | Bounds2D.diameter tree.bounds < diameter = Unresolved
   | otherwise = do
-      resolvedLeftSweptAngle <- boundsSweptAngleImpl bounds centerPoint diameter tree.left
-      resolvedRightSweptAngle <- boundsSweptAngleImpl bounds centerPoint diameter tree.right
+      resolvedLeftSweptAngle <- boundsSweptAngleImpl givenBounds centerPoint diameter tree.left
+      resolvedRightSweptAngle <- boundsSweptAngleImpl givenBounds centerPoint diameter tree.right
       Resolved (resolvedLeftSweptAngle + resolvedRightSweptAngle)

@@ -1,6 +1,7 @@
 module OpenSolid.Region2D.Boundary
   ( Boundary
   , new
+  , bounds
   , curves
   , transformBy
   , placeIn
@@ -12,6 +13,7 @@ module OpenSolid.Region2D.Boundary
 where
 
 import OpenSolid.Angle (Angle)
+import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Frame2D (Frame2D)
@@ -43,6 +45,9 @@ new givenCurves =
     { curves = givenCurves
     , tree = Region2D.BoundaryTree.build givenCurves
     }
+
+bounds :: Boundary units -> Bounds2D units
+bounds boundary = Region2D.BoundaryTree.bounds boundary.tree
 
 curves :: Boundary units -> NonEmpty (Curve2D units)
 curves = (.curves)
