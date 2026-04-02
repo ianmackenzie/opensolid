@@ -82,6 +82,7 @@ import OpenSolid.Surface3D.Revolved qualified as Surface3D.Revolved
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceFunction3D.Nondegenerate qualified as SurfaceFunction3D.Nondegenerate
+import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D, normal, position))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
@@ -619,13 +620,15 @@ boundarySurfaceSegmentSet resolution function uvBounds p11 p21 p12 p22 = do
   let d1 = p21 - p12
   let d2 = p22 - p11
   let size = max (Vector3D.magnitude d1) (Vector3D.magnitude d2)
-  let n = Vector3D.normalize (d1 `cross_` d2)
   let UvBounds uBounds vBounds = uvBounds
   let uMid = Interval.midpoint uBounds
   let vMid = Interval.midpoint vBounds
   let uvCenter = UvPoint uMid vMid
   let pCenter = SurfaceFunction3D.point function uvCenter
-  let error point = Quantity.abs ((point - pCenter) `dot` n)
+  let duCenter = SurfaceFunction3D.derivativeValue U function uvCenter
+  let dvCenter = SurfaceFunction3D.derivativeValue V function uvCenter
+  let nCenter = Vector3D.normalize (duCenter `cross_` dvCenter)
+  let error point = Quantity.abs ((point - pCenter) `dot` nCenter)
   let maxCornerError = error p11 `max` error p12 `max` error p21 `max` error p22
   let uWidth = Interval.width uBounds
   let vWidth = Interval.width vBounds
