@@ -699,7 +699,7 @@ directionBounds function uvBounds = do
     VectorBounds3D.normalize $
       if
         | uLow == 0.0 && function.singularU0 -> bounds function.du uvBounds
-        | uHigh == 0.0 && function.singularU1 -> negate (bounds function.du uvBounds)
+        | uHigh == 1.0 && function.singularU1 -> negate (bounds function.du uvBounds)
         | vLow == 0.0 && function.singularV0 -> bounds function.dv uvBounds
         | vHigh == 1.0 && function.singularV1 -> negate (bounds function.dv uvBounds)
         | otherwise -> bounds function uvBounds
