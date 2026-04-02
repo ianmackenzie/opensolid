@@ -107,10 +107,10 @@ axis2D = Random.map2 Axis2D point2D Direction2D.random
 axis3D :: Generator (Axis3D space)
 axis3D = Random.map2 Axis3D point3D Direction3D.random
 
-orientation2D :: Generator (Orientation2D global)
+orientation2D :: Generator (Orientation2D space)
 orientation2D = Random.map Orientation2D.fromXDirection Direction2D.random
 
-planeOrientation3D :: Generator (PlaneOrientation3D global)
+planeOrientation3D :: Generator (PlaneOrientation3D space)
 planeOrientation3D =
   Random.retry $
     Random.map2
@@ -118,7 +118,7 @@ planeOrientation3D =
       Direction3D.random
       Direction3D.random
 
-orientation3D :: Generator (Orientation3D global)
+orientation3D :: Generator (Orientation3D space)
 orientation3D = Random.map Frame3D.orientation frame3D
 
 plane3D :: Generator (Plane3D global local)
