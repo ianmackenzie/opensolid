@@ -236,7 +236,7 @@ cylinder startPoint endPoint ("diameter" ::: diameter) =
   case Vector3D.magnitudeAndDirection (endPoint - startPoint) of
     Error Vector.IsZero -> Error EmptyBody
     Ok (length, direction) ->
-      cylinderAlong (Axis3D startPoint direction) Quantity.zero length (#diameter diameter)
+      cylinderAlong (Axis3D startPoint direction) Length.zero length (#diameter diameter)
 
 {-| Create a cylindrical body along a given axis.
 
@@ -417,7 +417,7 @@ toHalfEdge surfaceId loopId surfaceFunction curveIndex uvCurve = do
   let curveId = CurveId curveIndex
   let halfEdgeId = HalfEdgeId{surfaceId, loopId, curveId}
   let (parameterization, length) = Curve3D.arcLengthParameterization curve3D
-  if length == Quantity.zero
+  if length == Length.zero
     then DegenerateHalfEdge{halfEdgeId, uvCurve, point = Curve3D.startPoint curve3D}
     else
       HalfEdge
