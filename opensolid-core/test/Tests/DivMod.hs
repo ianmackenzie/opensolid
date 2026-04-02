@@ -36,8 +36,7 @@ numberDiv =
 
 numberMod :: Test
 numberMod =
-  Tolerance.using 1e-12 do
-    Test.group "Number %" $
-      [ Test.verify "1.7 % 0.5" (Test.expect (1.7 % 0.5 ~= 0.2))
-      , Test.verify "-1.7 % 0.5" (Test.expect (-1.7 % 0.5 ~= 0.3))
-      ]
+  Test.group "Number %" $
+    [ Test.verifyWith Tolerance.unitless "1.7 % 0.5" (Test.expect (1.7 % 0.5 ~= 0.2))
+    , Test.verifyWith Tolerance.unitless "-1.7 % 0.5" (Test.expect (-1.7 % 0.5 ~= 0.3))
+    ]

@@ -63,7 +63,7 @@ simpleSurface2D = Test.verify "Simple 2D surface" do
   let surface = VectorSurfaceFunction2D.xy x y
   surface2D surface (UvPoint 1.0 0.0) (UvPoint (Number.sqrt 2.0) 1.0)
 
-pointOnSphere3D :: Tolerance Meters => Test
+pointOnSphere3D :: Test
 pointOnSphere3D = Test.verify "Point on sphere" do
   let radius = Length.meters 1.0
   let profileCurve =

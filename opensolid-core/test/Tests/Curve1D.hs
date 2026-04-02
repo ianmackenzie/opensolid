@@ -11,14 +11,13 @@ import Test qualified
 
 tests :: List Test
 tests =
-  Tolerance.using 1e-12 $
-    [ crossingZeros
-    , tangentZeros
-    , approximateEquality
-    ]
+  [ crossingZeros
+  , tangentZeros
+  , approximateEquality
+  ]
 
-crossingZeros :: Tolerance Unitless => Test
-crossingZeros = Test.verify "crossingZeros" do
+crossingZeros :: Test
+crossingZeros = Test.verifyWith Tolerance.unitless "crossingZeros" do
   let x = 3.0 * Curve1D.t
   let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
   let expectedZeros = [Zero 0.0 0 Positive, Zero (1 / 3) 0 Negative, Zero (2 / 3) 0 Positive]
@@ -27,8 +26,8 @@ crossingZeros = Test.verify "crossingZeros" do
     & Test.output "zeros" zeros
     & Test.output "expectedZeros" expectedZeros
 
-tangentZeros :: Tolerance Unitless => Test
-tangentZeros = Test.verify "tangentZeros" do
+tangentZeros :: Test
+tangentZeros = Test.verifyWith Tolerance.unitless "tangentZeros" do
   let theta = Angle.twoPi * Curve1D.t
   let expression = Curve1D.squared (Curve1D.sin theta)
   let expectedZeros = [Zero t 1 Positive | t <- [0.0, 0.5, 1.0]]
@@ -37,8 +36,8 @@ tangentZeros = Test.verify "tangentZeros" do
     & Test.output "zeros" zeros
     & Test.output "expectedZeros" expectedZeros
 
-approximateEquality :: Tolerance Unitless => Test
-approximateEquality = Test.verify "approximateEquality" do
+approximateEquality :: Test
+approximateEquality = Test.verifyWith Tolerance.unitless "approximateEquality" do
   let theta = Angle.twoPi * Curve1D.t
   let sinTheta = Curve1D.sin theta
   let cosTheta = Curve1D.cos theta

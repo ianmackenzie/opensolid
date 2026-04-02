@@ -12,7 +12,7 @@ import OpenSolid.Set2D qualified as Set2D
 import Test (Test)
 import Test qualified
 
-tests :: Tolerance Meters => List Test
+tests :: List Test
 tests =
   [ find
   , filter
@@ -34,7 +34,7 @@ testSet =
       (point 2 9)
       (point 7 3)
 
-find :: Tolerance Meters => Test
+find :: Test
 find =
   Test.group "find" $
     [ Test.verify "point" do
@@ -48,7 +48,7 @@ find =
         Test.expect (Set2D.find searchBounds testSet == Unresolved)
     ]
 
-filter :: Tolerance Meters => Test
+filter :: Test
 filter = Test.verify "filter" do
   let searchBounds = Bounds2D.hull2 (point 2 2) (point 6 6)
   let filteredPoints = Set2D.filter searchBounds testSet

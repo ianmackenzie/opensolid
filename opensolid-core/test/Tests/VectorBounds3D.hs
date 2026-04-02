@@ -14,7 +14,7 @@ import Test (Test)
 import Test qualified
 import Tests.Random qualified
 
-tests :: Tolerance Meters => List Test
+tests :: List Test
 tests =
   [ magnitude
   , placeIn
@@ -23,7 +23,7 @@ tests =
   , tripleProduct
   ]
 
-magnitude :: Tolerance Meters => Test
+magnitude :: Test
 magnitude = Test.check 100 "magnitude" do
   vectorBounds <- Test.generate Tests.Random.vectorBounds3D
   tx <- Test.generate Parameter.random
@@ -43,7 +43,7 @@ boundsAndContainedVector = do
   let vector = VectorBounds3D.interpolate bounds u v w
   Random.return (bounds, vector)
 
-placeIn :: Tolerance Meters => Test
+placeIn :: Test
 placeIn = Test.check 100 "placeIn" do
   (localBounds, localVector) <- Test.generate boundsAndContainedVector
   frame <- Test.generate Tests.Random.frame3D
@@ -51,7 +51,7 @@ placeIn = Test.check 100 "placeIn" do
   let globalVector = Vector3D.placeIn frame localVector
   Test.expect (globalVector `intersects` globalBounds)
 
-relativeTo :: Tolerance Meters => Test
+relativeTo :: Test
 relativeTo = Test.check 100 "relativeTo" do
   (globalBounds, globalVector) <- Test.generate boundsAndContainedVector
   frame <- Test.generate Tests.Random.frame3D
@@ -59,7 +59,7 @@ relativeTo = Test.check 100 "relativeTo" do
   let localVector = Vector3D.relativeTo frame globalVector
   Test.expect (localVector `intersects` localBounds)
 
-transformBy :: Tolerance Meters => Test
+transformBy :: Test
 transformBy = Test.check 100 "transformBy" do
   (originalBounds, originalVector) <- Test.generate boundsAndContainedVector
   transform <- Test.generate Tests.Random.affineTransform3D

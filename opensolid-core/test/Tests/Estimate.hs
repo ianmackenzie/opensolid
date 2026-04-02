@@ -27,7 +27,7 @@ import Test (Test)
 import Test qualified
 import Tests.Random qualified as Random
 
-tests :: Tolerance Meters => List Test
+tests :: List Test
 tests =
   [ area
   , minimumBy
@@ -73,7 +73,7 @@ resolvesTo value estimate
         then resolvesTo value refinedEstimate
         else Error "Refined bounds are not narrower than original bounds"
 
-area :: Tolerance Meters => Test
+area :: Test
 area = Test.verify "area" do
   let curve =
         Curve2D.polarArc
@@ -89,21 +89,21 @@ area = Test.verify "area" do
       Result.orFail (resolvesTo expectedArea areaEstimate)
   Test.expect areaIsCorrect
 
-minimumBy :: Tolerance Meters => Test
+minimumBy :: Test
 minimumBy = Test.check 100 "minimumBy" do
   valuesAndEstimates <- Test.generate dummyEstimates
   let minimumValue = NonEmpty.minimumOf Pair.first valuesAndEstimates
   let minimumValueFromEstimates = Pair.first (Estimate.minimumBy Pair.second valuesAndEstimates)
   Test.expect (minimumValueFromEstimates == minimumValue)
 
-maximumBy :: Tolerance Meters => Test
+maximumBy :: Test
 maximumBy = Test.check 100 "maximumBy" do
   valuesAndEstimates <- Test.generate dummyEstimates
   let maximumValue = NonEmpty.maximumOf Pair.first valuesAndEstimates
   let maximumValueFromEstimates = Pair.first (Estimate.maximumBy Pair.second valuesAndEstimates)
   Test.expect (maximumValueFromEstimates == maximumValue)
 
-pickMinimumBy :: Tolerance Meters => Test
+pickMinimumBy :: Test
 pickMinimumBy = Test.check 100 "pickMinimumBy" do
   valuesAndEstimates <- Test.generate dummyEstimates
   let (minPair, remainingPairs) = Estimate.pickMinimumBy Pair.second valuesAndEstimates
@@ -115,7 +115,7 @@ pickMinimumBy = Test.check 100 "pickMinimumBy" do
         NonEmpty.sort originalValues == NonEmpty.sort (minValue :| remainingValues)
   Test.expect (minValueIsCorrect && allValuesArePresent)
 
-pickMaximumBy :: Tolerance Meters => Test
+pickMaximumBy :: Test
 pickMaximumBy = Test.check 100 "pickMaximumBy" do
   valuesAndEstimates <- Test.generate dummyEstimates
   let (maxPair, remainingPairs) = Estimate.pickMaximumBy Pair.second valuesAndEstimates

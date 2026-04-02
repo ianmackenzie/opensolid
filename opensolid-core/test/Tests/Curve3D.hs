@@ -18,7 +18,7 @@ import OpenSolid.World3D qualified as World3D
 import Test (Test)
 import Test qualified
 
-tests :: Tolerance Meters => List Test
+tests :: List Test
 tests =
   [ curveOverlap1
   , curveOverlap2
@@ -57,7 +57,7 @@ equalOverlapSegmentLists actualSegments expectedSegments =
   NonEmpty.length actualSegments == NonEmpty.length expectedSegments
     && NonEmpty.all equalOverlapSegments (NonEmpty.zip2 actualSegments expectedSegments)
 
-curveOverlap1 :: Tolerance Meters => Test
+curveOverlap1 :: Test
 curveOverlap1 = Test.verify "curveOverlap1" do
   let arc1 =
         Curve3D.on World3D.topPlane $
@@ -72,7 +72,7 @@ curveOverlap1 = Test.verify "curveOverlap1" do
     , Test.expect (sign == Positive)
     ]
 
-curveOverlap2 :: Tolerance Meters => Test
+curveOverlap2 :: Test
 curveOverlap2 = Test.verify "curveOverlap2" do
   let arc1 =
         Curve3D.on World3D.topPlane $
@@ -98,7 +98,7 @@ curveOverlap2 = Test.verify "curveOverlap2" do
     , Test.expect (sign == Negative)
     ]
 
-crossingIntersection :: Tolerance Meters => Test
+crossingIntersection :: Test
 crossingIntersection = Test.verify "crossingIntersection" do
   let arc1 =
         Curve3D.on World3D.topPlane $
@@ -118,7 +118,7 @@ crossingIntersection = Test.verify "crossingIntersection" do
     Just Curve.OverlappingSegments{} ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
 
-tangentIntersection :: Tolerance Meters => Test
+tangentIntersection :: Test
 tangentIntersection = Test.verify "tangentIntersection" do
   let arc1 =
         Curve3D.on World3D.topPlane $

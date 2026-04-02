@@ -5,7 +5,9 @@ module Test
   , generate
   , abort
   , verify
+  , verifyWith
   , check
+  , checkWith
   , group
   , run
   , expect
@@ -28,6 +30,7 @@ import OpenSolid.Random qualified as Random
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
+import OpenSolid.Tolerance qualified as Tolerance
 import System.Console.ANSI qualified
 import System.Environment
 import Text.Printf qualified
@@ -73,11 +76,18 @@ data Test
 abort :: Text -> Test
 abort = Abort
 
-verify :: Text -> Expectation -> Test
-verify = check 1
+verifyWith :: Quantity units -> Text -> (Tolerance units => Expectation) -> Test
+verifyWith tolerance = checkWith tolerance 1
 
-check :: Int -> Text -> Expectation -> Test
-check = Check
+verify :: Text -> (Tolerance Meters => Expectation) -> Test
+verify = verifyWith Tolerance.length
+
+checkWith :: Quantity units -> Int -> Text -> (Tolerance units => Expectation) -> Test
+checkWith tolerance count label expectation =
+  Check count label (Tolerance.using tolerance expectation)
+
+check :: Int -> Text -> (Tolerance Meters => Expectation) -> Test
+check = checkWith Tolerance.length
 
 group :: Text -> List Test -> Test
 group = Group

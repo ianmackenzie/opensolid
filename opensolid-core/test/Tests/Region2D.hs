@@ -20,7 +20,7 @@ import OpenSolid.Result qualified as Result
 import Test (Test)
 import Test qualified
 
-tests :: Tolerance Meters => List Test
+tests :: List Test
 tests =
   [ square
   , quarterCircle
@@ -35,7 +35,7 @@ areaIsApproximately expectedArea region = do
   let measuredArea = Estimate.within (Area.squareMeters 1e-4) (Region2D.area region)
   Interval.includes expectedArea measuredArea
 
-square :: Tolerance Meters => Test
+square :: Test
 square = Test.verify "square" do
   let width = Length.meters 2.0
   let p1 = Point2D.origin
@@ -49,7 +49,7 @@ square = Test.verify "square" do
   region <- Result.orFail (Region2D.boundedBy [line1, line3, line2, line4])
   Test.expect (areaIsApproximately (width * width) region)
 
-quarterCircle :: Tolerance Meters => Test
+quarterCircle :: Test
 quarterCircle = Test.verify "quarterCircle" do
   let radius = Length.meters 1.0
   let p1 = Point2D.origin
@@ -62,7 +62,7 @@ quarterCircle = Test.verify "quarterCircle" do
   let expectedArea = 0.25 * Number.pi * radius * radius
   Test.expect (areaIsApproximately expectedArea region)
 
-squareWithHole :: Tolerance Meters => Test
+squareWithHole :: Test
 squareWithHole = Test.verify "squareWithHole" do
   let width = Length.meters 2.0
   let p1 = Point2D.origin
@@ -81,7 +81,7 @@ squareWithHole = Test.verify "squareWithHole" do
   let expectedArea = width * width - Number.pi * holeRadius * holeRadius
   Test.expect (areaIsApproximately expectedArea region)
 
-incompleteSquare :: Tolerance Meters => Test
+incompleteSquare :: Test
 incompleteSquare = Test.verify "incompleteSquare" do
   let width = Length.meters 2.0
   let p1 = Point2D.origin
@@ -95,7 +95,7 @@ incompleteSquare = Test.verify "incompleteSquare" do
     Ok _ -> Test.fail "Expected region construction to fail on incomplete boundary"
     Error error -> Test.expect (error == Region2D.BoundedBy.BoundaryHasGaps)
 
-squareWithTangentHole :: Tolerance Meters => Test
+squareWithTangentHole :: Test
 squareWithTangentHole = Test.verify "squareWithTangentHole" do
   let width = Length.meters 2.0
   let p1 = Point2D.origin
@@ -112,7 +112,7 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" do
     Ok _ -> Test.fail "Expected non-manifold region construction to fail"
     Error error -> Test.expect (error == Region2D.BoundedBy.BoundaryIntersectsItself)
 
-twoCircles :: Tolerance Meters => Test
+twoCircles :: Test
 twoCircles = Test.verify "twoCircles" do
   let circle1 = Curve2D.circle (Circle2D.withDiameter (Length.meters 2.0) (Point2D.meters -2.0 0.0))
   let circle2 = Curve2D.circle (Circle2D.withDiameter (Length.meters 1.0) (Point2D.meters 1.0 0.0))

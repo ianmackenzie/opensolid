@@ -12,7 +12,7 @@ import Test (Test)
 import Test qualified
 import Tests.Random qualified
 
-tests :: Tolerance Meters => List Test
+tests :: List Test
 tests =
   [ placeIn
   , relativeTo
@@ -30,7 +30,7 @@ boundsAndContainedPoint = do
   let point = Bounds3D.interpolate bounds u v w
   Random.return (bounds, point)
 
-placeIn :: Tolerance Meters => Test
+placeIn :: Test
 placeIn = Test.check 100 "placeIn" do
   (localBounds, localPoint) <- Test.generate boundsAndContainedPoint
   frame <- Test.generate Tests.Random.frame3D
@@ -38,7 +38,7 @@ placeIn = Test.check 100 "placeIn" do
   let globalPoint = Point3D.placeIn frame localPoint
   Test.expect (globalPoint `intersects` globalBounds)
 
-relativeTo :: Tolerance Meters => Test
+relativeTo :: Test
 relativeTo = Test.check 100 "relativeTo" do
   (globalBounds, globalPoint) <- Test.generate boundsAndContainedPoint
   frame <- Test.generate Tests.Random.frame3D
@@ -46,7 +46,7 @@ relativeTo = Test.check 100 "relativeTo" do
   let localPoint = Point3D.relativeTo frame globalPoint
   Test.expect (localPoint `intersects` localBounds)
 
-projectInto :: Tolerance Meters => Test
+projectInto :: Test
 projectInto = Test.check 100 "projectInto" do
   (bounds3D, point3D) <- Test.generate boundsAndContainedPoint
   plane <- Test.generate Tests.Random.plane3D
@@ -54,7 +54,7 @@ projectInto = Test.check 100 "projectInto" do
   let point2D = Point3D.projectInto plane point3D
   Test.expect (point2D `intersects` bounds2D)
 
-distanceAlong :: Tolerance Meters => Test
+distanceAlong :: Test
 distanceAlong = Test.check 100 "distanceAlong" do
   (bounds3D, point3D) <- Test.generate boundsAndContainedPoint
   axis <- Test.generate Tests.Random.axis3D
@@ -62,7 +62,7 @@ distanceAlong = Test.check 100 "distanceAlong" do
   let distance = Point3D.distanceAlong axis point3D
   Test.expect (distance `intersects` distanceBounds)
 
-transformBy :: Tolerance Meters => Test
+transformBy :: Test
 transformBy = Test.check 100 "transformBy" do
   (originalBounds, originalPoint) <- Test.generate boundsAndContainedPoint
   transform <- Test.generate Tests.Random.affineTransform3D
