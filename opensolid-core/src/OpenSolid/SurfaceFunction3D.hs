@@ -6,6 +6,8 @@ module OpenSolid.SurfaceFunction3D
   , point
   , bounds
   , derivative
+  , derivativeValue
+  , derivativeBounds
   , nondegenerate
   , normalDirection
   , normalDirectionBounds
@@ -41,6 +43,7 @@ import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector3D (Vector3D)
+import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
@@ -190,6 +193,14 @@ point function uvPoint = CompiledFunction.value function.compiled uvPoint
 
 bounds :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
 bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
+
+derivativeValue :: SurfaceParameter -> SurfaceFunction3D space -> UvPoint -> Vector3D Meters space
+derivativeValue U function uvPoint = VectorSurfaceFunction3D.value function.du uvPoint
+derivativeValue V function uvPoint = VectorSurfaceFunction3D.value function.dv uvPoint
+
+derivativeBounds :: SurfaceParameter -> SurfaceFunction3D space -> UvBounds -> VectorBounds3D Meters space
+derivativeBounds U function uvBounds = VectorSurfaceFunction3D.bounds function.du uvBounds
+derivativeBounds V function uvBounds = VectorSurfaceFunction3D.bounds function.dv uvBounds
 
 derivative ::
   SurfaceParameter ->
