@@ -26,7 +26,7 @@ module OpenSolid.FFI
   )
 where
 
-import Data.ByteString.Unsafe qualified
+import Data.ByteString qualified
 import Data.Char qualified
 import Data.Int (Int64)
 import Data.Proxy (Proxy (Proxy))
@@ -569,7 +569,7 @@ load ptr offset = do
     SignRep -> IO.map Int.sign (load @Int ptr offset)
     TextRep -> do
       dataPtr <- Foreign.peekByteOff ptr offset
-      byteString <- Data.ByteString.Unsafe.unsafePackCString dataPtr
+      byteString <- Data.ByteString.packCString dataPtr
       IO.succeed (Data.Text.Encoding.decodeUtf8 byteString)
     ListRep @item -> do
       let itemSize = sizeOf item
