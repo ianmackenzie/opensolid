@@ -1,3 +1,10 @@
+Maybe do away with 'space' type in 2D entirely?
+- 2D coordinates usually more implicit...
+- 2D: units, no space
+- 3D: space, no units
+
+Switch from Segment to SearchNode?
+
 Rename Curve types to CurveFunction
 
 Add new piecewise Curve types
@@ -36,6 +43,9 @@ Remove last uses of Linearization.error
 
 Replace uses of tangentDirection etc. curves/functions with direct tangentDirectionBounds etc.?
 - *might* be able to avoid funky desingularization logic entirely
+
+Add a few functions like Surface3D.asPlane :: Surface3D space -> Maybe (Plane3D space local)
+- useful for feature detection etc.
 
 Move directionBounds, tangentDirectionBounds, normalDirectionBounds into Nondegenerate modules?
 - *can* be evaluated for degenerate geometries but it's not very meaningful to do so
