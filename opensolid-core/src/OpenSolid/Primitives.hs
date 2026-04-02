@@ -72,7 +72,7 @@ instance FFI (Vector2D SquareMeters) where
 
 instance HasUnits (Vector2D units) units
 
-instance Units.Coercion (Vector2D unitsA) (Vector2D unitsB) where
+instance Units.Coercion (Vector2D units1) (Vector2D units2) where
   coerce = Data.Coerce.coerce
 
 instance ApproximateEquality (Vector2D units) (Tolerance units) where
@@ -287,7 +287,7 @@ instance FFI (Point2D Unitless) where
 
 instance HasUnits (Point2D units) units
 
-instance Units.Coercion (Point2D unitsA) (Point2D unitsB) where
+instance Units.Coercion (Point2D units1) (Point2D units2) where
   coerce = Data.Coerce.coerce
 
 instance
@@ -336,7 +336,7 @@ deriving instance Show (VectorBounds2D units)
 
 instance HasUnits (VectorBounds2D units) units
 
-instance Units.Coercion (VectorBounds2D unitsA) (VectorBounds2D unitsB) where
+instance Units.Coercion (VectorBounds2D units1) (VectorBounds2D units2) where
   coerce = Data.Coerce.coerce
 
 instance
@@ -607,7 +607,7 @@ deriving instance Show (Bounds2D units)
 
 instance HasUnits (Bounds2D units) units
 
-instance Units.Coercion (Bounds2D unitsA) (Bounds2D unitsB) where
+instance Units.Coercion (Bounds2D units1) (Bounds2D units2) where
   coerce = Data.Coerce.coerce
 
 instance FFI (Bounds2D Meters) where
@@ -751,7 +751,7 @@ instance HasUnits (Transform2D tag units) units
 
 instance
   tag1 ~ tag2 =>
-  Units.Coercion (Transform2D tag1 unitsA) (Transform2D tag2 unitsB)
+  Units.Coercion (Transform2D tag1 units1) (Transform2D tag2 units2)
   where
   coerce = Data.Coerce.coerce
 
@@ -820,9 +820,7 @@ instance HasUnits (Vector3D units space) units
 
 instance
   space1 ~ space2 =>
-  Units.Coercion
-    (Vector3D unitsA space1)
-    (Vector3D unitsB space2)
+  Units.Coercion (Vector3D units1 space1) (Vector3D units2 space2)
   where
   coerce = Data.Coerce.coerce
 
@@ -1301,7 +1299,7 @@ instance HasUnits (VectorBounds3D units space) units
 
 instance
   space1 ~ space2 =>
-  Units.Coercion (VectorBounds3D unitsA space1) (VectorBounds3D unitsB space2)
+  Units.Coercion (VectorBounds3D units1 space1) (VectorBounds3D units2 space2)
   where
   coerce = Data.Coerce.coerce
 

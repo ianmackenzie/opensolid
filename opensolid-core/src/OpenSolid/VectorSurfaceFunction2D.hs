@@ -118,11 +118,7 @@ type Compiled units =
 
 instance HasUnits (VectorSurfaceFunction2D units) units
 
-instance
-  Units.Coercion
-    (VectorSurfaceFunction2D unitsA)
-    (VectorSurfaceFunction2D unitsB)
-  where
+instance Units.Coercion (VectorSurfaceFunction2D units1) (VectorSurfaceFunction2D units2) where
   coerce (VectorSurfaceFunction2D c du dv) =
     VectorSurfaceFunction2D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 

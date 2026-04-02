@@ -97,9 +97,7 @@ instance HasUnits (VectorSurfaceFunction3D units space) units
 
 instance
   space1 ~ space2 =>
-  Units.Coercion
-    (VectorSurfaceFunction3D unitsA space1)
-    (VectorSurfaceFunction3D unitsB space2)
+  Units.Coercion (VectorSurfaceFunction3D units1 space1) (VectorSurfaceFunction3D units2 space2)
   where
   coerce function =
     VectorSurfaceFunction3D

@@ -101,7 +101,7 @@ type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interv
 
 instance HasUnits (SurfaceFunction1D units) units
 
-instance Units.Coercion (SurfaceFunction1D unitsA) (SurfaceFunction1D unitsB) where
+instance Units.Coercion (SurfaceFunction1D units1) (SurfaceFunction1D units2) where
   coerce (SurfaceFunction1D c du dv) =
     SurfaceFunction1D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
 

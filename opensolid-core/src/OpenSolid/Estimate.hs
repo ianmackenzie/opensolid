@@ -45,7 +45,7 @@ data Estimate units where
 
 instance HasUnits (Estimate units) units
 
-instance Units.Coercion (Estimate unitsA) (Estimate unitsB) where
+instance Units.Coercion (Estimate units1) (Estimate units2) where
   coerce (Coerce estimate) = Coerce estimate
   coerce estimate = Coerce estimate
 

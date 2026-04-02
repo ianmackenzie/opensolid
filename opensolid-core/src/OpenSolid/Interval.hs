@@ -149,7 +149,7 @@ instance FFI (Interval SquareMeters) where
 
 instance HasUnits (Interval units) units
 
-instance Units.Coercion (Interval unitsA) (Interval unitsB) where
+instance Units.Coercion (Interval units1) (Interval units2) where
   coerce = Data.Coerce.coerce
 
 instance units1 ~ units2 => Intersects (Quantity units1) (Interval units2) (Tolerance units1) where
