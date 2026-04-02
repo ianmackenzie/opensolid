@@ -852,11 +852,6 @@ unitlessCurve1D =
     , Class.times @AngleCurve1D Self
     , Class.divByNumber
     , Class.divByU Curve1D.quotient
-    , Class.nested @Curve1D.Zero "A point where a given curve is equal to zero." $
-        [ Class.property "Location" (.location) "The parameter value at which the curve is zero."
-        , Class.property "Order" (.order) "The order of the solution: 0 for crossing, 1 for tangent, etc."
-        , Class.property "Sign" (.sign) "The sign of the solution: the sign of the curve to the right of the solution."
-        ]
     ]
 
 type AngleCurve1D = Curve1D.Curve1D Radians
@@ -914,6 +909,11 @@ curve1D =
     , Class.divByM Curve1D.quotient
     , Class.divBy @Length Self
     , Class.divByU Curve1D.quotient
+    , Class.nested @Curve1D.Zero "A point where a given curve is equal to zero." $
+        [ Class.property "Location" (.location) "The parameter value at which the curve is zero."
+        , Class.property "Order" (.order) "The order of the solution: 0 for crossing, 1 for tangent, etc."
+        , Class.property "Sign" (.sign) "The sign of the solution: the sign of the curve to the right of the solution."
+        ]
     ]
 
 type AreaCurve1D = Curve1D.Curve1D SquareMeters

@@ -38,4 +38,4 @@ instance ApproximateEquality Zero () where
       location1 ~= location2 && order1 == order2 && sign1 == sign2
 
 instance FFI Zero where
-  representation = FFI.nestedClassRepresentation "Curve" "Zero"
+  representation = FFI.nestedClassRepresentation "Curve1D" "Zero"
