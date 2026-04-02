@@ -214,10 +214,9 @@ transformBy transform function = do
   new compiledTransformed transformedDerivative
 
 instance
-  unitless ~ Unitless =>
   Composition
     (SurfaceFunction2D units)
-    (Curve2D unitless)
+    (Curve2D Unitless)
     (Curve2D units)
   where
   function . curve = do
@@ -227,10 +226,9 @@ instance
       ((function.du . curve) * dudt + (function.dv . curve) * dvdt)
 
 instance
-  unitless ~ Unitless =>
   Composition
     (SurfaceFunction1D units)
-    (SurfaceFunction2D unitless)
+    (SurfaceFunction2D Unitless)
     (SurfaceFunction1D units)
   where
   f . g = do
@@ -242,10 +240,9 @@ instance
     SurfaceFunction1D.new (f.compiled . g.compiled) composedDerivative
 
 instance
-  unitless ~ Unitless =>
   Composition
     (VectorSurfaceFunction2D units)
-    (SurfaceFunction2D unitless)
+    (SurfaceFunction2D Unitless)
     (VectorSurfaceFunction2D units)
   where
   f . g = do
@@ -257,10 +254,9 @@ instance
     VectorSurfaceFunction2D.new (f.compiled . g.compiled) composedDerivative
 
 instance
-  unitless ~ Unitless =>
   Composition
     (VectorSurfaceFunction3D units space)
-    (SurfaceFunction2D unitless)
+    (SurfaceFunction2D Unitless)
     (VectorSurfaceFunction3D units space)
   where
   f . g = do
@@ -273,19 +269,17 @@ instance
     VectorSurfaceFunction3D.new compiledComposed composedDerivative
 
 instance
-  unitless ~ Unitless =>
   Composition
     DirectionSurfaceFunction2D
-    (SurfaceFunction2D unitless)
+    (SurfaceFunction2D Unitless)
     DirectionSurfaceFunction2D
   where
   f . g = DirectionSurfaceFunction2D.unsafe (DirectionSurfaceFunction2D.unwrap f . g)
 
 instance
-  unitless ~ Unitless =>
   Composition
     (DirectionSurfaceFunction3D space)
-    (SurfaceFunction2D unitless)
+    (SurfaceFunction2D Unitless)
     (DirectionSurfaceFunction3D space)
   where
   f . g = DirectionSurfaceFunction3D.unsafe (DirectionSurfaceFunction3D.unwrap f . g)

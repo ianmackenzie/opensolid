@@ -43,26 +43,24 @@ instance
     (SurfaceFunction2D units2)
     (VectorSurfaceFunction2D units1)
 
-instance
-  unitless ~ Unitless =>
-  Composition (SurfaceFunction2D units) (Curve2D unitless) (Curve2D units)
+instance Composition (SurfaceFunction2D units) (Curve2D Unitless) (Curve2D units)
 
 instance
-  unitless ~ Unitless =>
-  Composition (SurfaceFunction1D units) (SurfaceFunction2D unitless) (SurfaceFunction1D units)
+  Composition
+    (SurfaceFunction1D units)
+    (SurfaceFunction2D Unitless)
+    (SurfaceFunction1D units)
 
 instance
-  unitless ~ Unitless =>
   Composition
     (VectorSurfaceFunction2D units)
-    (SurfaceFunction2D unitless)
+    (SurfaceFunction2D Unitless)
     (VectorSurfaceFunction2D units)
 
 instance
-  unitless ~ Unitless =>
   Composition
     (VectorSurfaceFunction3D units space)
-    (SurfaceFunction2D unitless)
+    (SurfaceFunction2D Unitless)
     (VectorSurfaceFunction3D units space)
 
 new ::

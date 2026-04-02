@@ -93,10 +93,9 @@ instance
   Subtraction (Point2D units1) (Curve 2 units2 Void) (VectorCurve 2 units1 Void)
 
 instance
-  unitless ~ Unitless =>
   Composition
     (SurfaceFunction1D units)
-    (Curve 2 unitless Void)
+    (Curve 2 Unitless Void)
     (Curve1D units)
 
 instance

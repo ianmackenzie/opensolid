@@ -142,19 +142,17 @@ instance
   givenPoint - function = constant givenPoint - function
 
 instance
-  unitless ~ Unitless =>
   Composition
     (SurfaceFunction3D space)
-    (Region2D unitless)
+    (Region2D Unitless)
     (Surface3D space)
   where
   function . domain = Surface3D.parametric function domain
 
 instance
-  unitless ~ Unitless =>
   Composition
     (SurfaceFunction3D space)
-    (SurfaceFunction2D unitless)
+    (SurfaceFunction2D Unitless)
     (SurfaceFunction3D space)
   where
   outer . inner = do

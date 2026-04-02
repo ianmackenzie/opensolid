@@ -429,10 +429,9 @@ instance
   lhs `dot` rhs = Vector2D.unit lhs `dot` rhs
 
 instance
-  unitless ~ Unitless =>
   Composition
     (VectorSurfaceFunction2D units)
-    (Curve2D unitless)
+    (Curve2D Unitless)
     (VectorCurve2D units)
   where
   function . curve = do

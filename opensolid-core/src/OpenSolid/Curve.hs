@@ -266,10 +266,9 @@ instance
   curve . parameter = curve . SurfaceFunction1D.parameter parameter
 
 instance
-  unitless ~ Unitless =>
   Composition
     (SurfaceFunction1D units)
-    (Curve 2 unitless Void)
+    (Curve 2 Unitless Void)
     (Curve1D units)
   where
   f . g = do
@@ -277,10 +276,9 @@ instance
     Curve1D.new (f.compiled . compiled g) (f.du . g * dudt + f.dv . g * dvdt)
 
 instance
-  unitless ~ Unitless =>
   Composition
     (VectorSurfaceFunction3D units space)
-    (Curve 2 unitless Void)
+    (Curve 2 Unitless Void)
     (VectorCurve3D units space)
   where
   function . uvCurve = do
@@ -292,10 +290,9 @@ instance
     VectorCurve3D.new compiledComposed composedDerivative
 
 instance
-  unitless ~ Unitless =>
   Composition
     (SurfaceFunction3D space)
-    (Curve 2 unitless Void)
+    (Curve 2 Unitless Void)
     (Curve 3 Meters space)
   where
   function . uvCurve = do
@@ -371,8 +368,10 @@ instance
   lhs - rhs = constant lhs - rhs
 
 instance
-  unitless ~ Unitless =>
-  Composition (Curve 3 Meters space) (SurfaceFunction1D unitless) (SurfaceFunction3D space)
+  Composition
+    (Curve 3 Meters space)
+    (SurfaceFunction1D Unitless)
+    (SurfaceFunction3D space)
   where
   curve . function =
     SurfaceFunction3D.new
