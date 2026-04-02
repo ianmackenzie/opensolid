@@ -18,6 +18,7 @@ data Resolution units = Resolution
   { maxError :: Quantity units
   , maxSize :: Quantity units
   }
+  deriving (Show)
 
 instance FFI (Resolution Unitless) where
   representation = FFI.classRepresentation "UnitlessResolution"
