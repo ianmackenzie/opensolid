@@ -197,8 +197,8 @@ addFillet radius curves point = do
   let otherCurves = List.filterMap nonIncidentCurve curveIncidences
   case incidentCurves of
     [] -> couldNotFindPointToFillet
-    List.One{} -> couldNotFindPointToFillet
-    List.ThreeOrMore{} -> couldNotFindPointToFillet
+    List.One _ -> couldNotFindPointToFillet
+    List.ThreeOrMore -> couldNotFindPointToFillet
     List.Two firstCurve secondCurve -> do
       firstTangent <- Result.orFail (Curve2D.tangentDirection firstCurve)
       secondTangent <- Result.orFail (Curve2D.tangentDirection secondCurve)
