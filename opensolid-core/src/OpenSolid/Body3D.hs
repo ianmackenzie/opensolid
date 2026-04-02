@@ -285,19 +285,20 @@ translational ::
   Region2D Meters ->
   VectorCurve3D Meters space ->
   Result BoundedBy.Error (Body3D space)
-translational sketchPlane profile displacement = do
-  let v0 = VectorCurve3D.startValue displacement
-  let v1 = VectorCurve3D.endValue displacement
-  let startPlane = Plane3D.translateBy v0 sketchPlane
-  let endPlane = Plane3D.translateBy v1 sketchPlane
-  let startCap = Surface3D.on startPlane profile
+translational sketchPlane profile givenDisplacement = do
+  -- Fix displacement curve so that extrusion is upwards from plane
+  let startDerivative = VectorCurve3D.derivativeValue givenDisplacement 0.0
+  let displacement =
+        case Quantity.sign (startDerivative `dot` Plane3D.normalDirection sketchPlane) of
+          Positive -> givenDisplacement
+          Negative -> VectorCurve3D.reverse givenDisplacement
+  let startPlane = Plane3D.translateBy (VectorCurve3D.startValue displacement) sketchPlane
+  let endPlane = Plane3D.translateBy (VectorCurve3D.endValue displacement) sketchPlane
+  let startCap = Surface3D.flip (Surface3D.on startPlane profile)
   let endCap = Surface3D.on endPlane profile
   let sideSurface curve = Surface3D.translational (Curve2D.placeOn sketchPlane curve) displacement
   let sideSurfaces = List.map sideSurface (NonEmpty.toList (Region2D.boundaryCurves profile))
-  let initialDerivative = VectorCurve3D.derivativeValue displacement 0.0
-  case Quantity.sign (initialDerivative `dot` Plane3D.normalDirection sketchPlane) of
-    Positive -> boundedBy (endCap : startCap : sideSurfaces)
-    Negative -> boundedBy (startCap : endCap : sideSurfaces)
+  boundedBy (startCap : endCap : sideSurfaces)
 
 {-| Create a revolved body from a sketch plane and profile.
 
@@ -314,11 +315,12 @@ revolved ::
   Axis2D Meters ->
   Angle ->
   Result BoundedBy.Error (Body3D space)
-revolved startPlane profile axis2D angle = do
-  let axis3D = Axis2D.placeOn startPlane axis2D
+revolved sketchPlane profile givenAxis givenSweptAngle = do
   let profileCurves = Region2D.boundaryCurves profile
-  let offAxisCurves = NonEmpty.filter (not . Curve2D.isOnAxis axis2D) profileCurves
-  let signedDistanceCurves = List.map (Curve2D.distanceRightOf axis2D) offAxisCurves
+  let offAxisCurves = NonEmpty.filter (not . Curve2D.isOnAxis givenAxis) profileCurves
+  let signedDistanceCurves = List.map (Curve2D.distanceLeftOf givenAxis) offAxisCurves
+  -- Check if the given profile is to the left of the given axis ('positive')
+  -- or to the right ('negative')
   profileSign <-
     case Result.collect Curve1D.sign signedDistanceCurves of
       Error Curve1D.CrossesZero -> Error BoundedBy.BoundaryIntersectsItself
@@ -326,21 +328,23 @@ revolved startPlane profile axis2D angle = do
         | List.all (== Positive) curveSigns -> Ok Positive
         | List.all (== Negative) curveSigns -> Ok Negative
         | otherwise -> Error BoundedBy.BoundaryIntersectsItself
-
-  let endPlane = Plane3D.rotateAround axis3D angle startPlane
-  let unflippedStartCap = Surface3D.on startPlane profile
-  let unflippedEndCap = Surface3D.on endPlane profile
-  let sideSurface profileCurve = Surface3D.revolved startPlane profileCurve axis2D angle
+  let planeRotationAxis = Axis2D.placeOn sketchPlane givenAxis
+  let rotatedPlane = Plane3D.rotateAround planeRotationAxis givenSweptAngle sketchPlane
+  let (startPlane, endPlane) =
+        case profileSign * Quantity.sign givenSweptAngle of
+          Positive -> (sketchPlane, rotatedPlane)
+          Negative -> (rotatedPlane, sketchPlane)
+  let sweptAngle = Quantity.abs givenSweptAngle
+  let startCap = Surface3D.flip (Surface3D.on startPlane profile)
+  let endCap = Surface3D.on endPlane profile
+  let isFullRevolution = Tolerance.using Tolerance.angle (sweptAngle ~= Angle.twoPi)
+  let endSurfaces = if isFullRevolution then [] else [startCap, endCap]
+  -- A 2D axis such that the profile is to the *left* of the axis
+  -- (such that it comes "out of the page" when revolved,
+  -- in turn meaning that the side surfaces have the correct normal orientation)
+  let axis2D = profileSign * givenAxis
+  let sideSurface profileCurve = Surface3D.revolved startPlane profileCurve axis2D sweptAngle
   let sideSurfaces = List.map sideSurface offAxisCurves
-  let startBoundaryCurves = Surface3D.boundaryCurves unflippedStartCap
-  let endBoundaryCurves = Surface3D.boundaryCurves unflippedEndCap
-  let isFullRevolution = startBoundaryCurves ~= endBoundaryCurves
-  let endSurfaces =
-        if isFullRevolution
-          then []
-          else case profileSign of
-            Positive -> [unflippedStartCap, Surface3D.flip unflippedEndCap]
-            Negative -> [Surface3D.flip unflippedStartCap, unflippedEndCap]
   boundedBy (endSurfaces <> sideSurfaces)
 
 {-| Create a body bounded by the given surfaces.
