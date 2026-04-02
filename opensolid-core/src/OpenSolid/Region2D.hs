@@ -85,7 +85,10 @@ import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 type role Region2D nominal
 
 -- | A closed 2D region (possibly with holes), defined by a set of boundary curves.
-data Region2D units = Region2D (Loop units) (List (Loop units))
+data Region2D units = Region2D
+  { outerLoop :: Loop units
+  , innerLoops :: List (Loop units)
+  }
 
 type Loop units = NonEmpty (Curve2D units)
 
@@ -338,7 +341,7 @@ The curves will be in counterclockwise order around the region,
 and each curve will be in the counterclockwise direction.
 -}
 outerLoop :: Region2D units -> NonEmpty (Curve2D units)
-outerLoop (Region2D loop _) = loop
+outerLoop = (.outerLoop)
 
 {-| The lists of curves (if any) forming the holes within the region.
 
@@ -346,7 +349,7 @@ The curves will be in clockwise order around each hole,
 and each curve will be in the clockwise direction.
 -}
 innerLoops :: Region2D units -> List (NonEmpty (Curve2D units))
-innerLoops (Region2D _ loops) = loops
+innerLoops = (.innerLoops)
 
 boundaryLoops :: Region2D units -> NonEmpty (NonEmpty (Curve2D units))
 boundaryLoops region = outerLoop region :| innerLoops region
