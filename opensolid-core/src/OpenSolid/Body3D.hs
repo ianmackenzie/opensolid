@@ -382,9 +382,8 @@ boundedBy (NonEmpty givenSurfaces) = do
 surfaceWithHalfEdgesMapEntry ::
   SurfaceWithHalfEdges space ->
   (SurfaceId, SurfaceWithHalfEdges space)
-surfaceWithHalfEdgesMapEntry surfaceWithHalfEdges = do
-  let SurfaceWithHalfEdges{surfaceId} = surfaceWithHalfEdges
-  (surfaceId, surfaceWithHalfEdges)
+surfaceWithHalfEdgesMapEntry surfaceWithHalfEdges =
+  (surfaceWithHalfEdges.surfaceId, surfaceWithHalfEdges)
 
 toSurfaceWithHalfEdges :: Tolerance Meters => Int -> Surface3D space -> SurfaceWithHalfEdges space
 toSurfaceWithHalfEdges surfaceIndex surface = do
