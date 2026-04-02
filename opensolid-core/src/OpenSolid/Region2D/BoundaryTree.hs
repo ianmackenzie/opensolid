@@ -17,6 +17,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D qualified as Vector2D
 
 data BoundaryTree units = BoundaryTree
@@ -26,6 +27,16 @@ data BoundaryTree units = BoundaryTree
   , left :: ~(BoundaryTree units)
   , right :: ~(BoundaryTree units)
   }
+
+instance Units.Coercion (BoundaryTree units1) (BoundaryTree units2) where
+  coerce tree =
+    BoundaryTree
+      { bounds = Units.coerce tree.bounds
+      , startPoint = Units.coerce tree.startPoint
+      , endPoint = Units.coerce tree.endPoint
+      , left = Units.coerce tree.left
+      , right = Units.coerce tree.right
+      }
 
 build :: NonEmpty (Curve2D units) -> BoundaryTree units
 build loop = assembleLoop (NonEmpty.map buildCurve loop)
