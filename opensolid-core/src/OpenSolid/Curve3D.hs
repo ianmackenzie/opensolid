@@ -45,7 +45,7 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve, HasSingularity)
+import OpenSolid.Curve (Curve3D, HasSingularity)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve2D (Curve2D)
@@ -72,8 +72,6 @@ import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorCurve3D (VectorCurve3D)
 import OpenSolid.VectorCurve3D qualified as VectorCurve3D
-
-type Curve3D space = Curve 3 Meters space
 
 type Compiled space = Curve.Compiled 3 Meters space
 

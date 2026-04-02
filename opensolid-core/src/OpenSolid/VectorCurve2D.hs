@@ -77,12 +77,10 @@ import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
-import OpenSolid.VectorCurve (VectorCurve)
+import OpenSolid.VectorCurve (VectorCurve2D)
 import OpenSolid.VectorCurve qualified as VectorCurve
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
-
-type VectorCurve2D units = VectorCurve 2 units Void
 
 type Compiled units = VectorCurve.Compiled 2 units Void
 

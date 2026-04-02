@@ -1,5 +1,7 @@
 module OpenSolid.Curve
   ( Curve
+  , Curve2D
+  , Curve3D
   , Exists
   , Compiled
   , constant
@@ -37,12 +39,16 @@ import OpenSolid.Vector (Vector)
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds (VectorBounds)
-import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
+import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve, VectorCurve2D, VectorCurve3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
 type role Curve nominal nominal nominal
 
 data Curve (dimension :: Natural) (units :: Type) (space :: Type)
+
+type Curve2D units = Curve 2 units Void
+
+type Curve3D space = Curve 3 Meters space
 
 class Exists (dimension :: Natural) (units :: Type) (space :: Type)
 
@@ -82,49 +88,33 @@ instance
 
 instance
   units1 ~ units2 =>
-  Addition (Curve 2 units1 Void) (Vector2D units2) (Curve 2 units1 Void)
+  Addition (Curve2D units1) (Vector2D units2) (Curve2D units1)
 
 instance
   units1 ~ units2 =>
-  Subtraction (Curve 2 units1 Void) (Vector2D units2) (Curve 2 units1 Void)
+  Subtraction (Curve2D units1) (Vector2D units2) (Curve2D units1)
 
 instance
   units1 ~ units2 =>
-  Subtraction (Point2D units1) (Curve 2 units2 Void) (VectorCurve 2 units1 Void)
+  Subtraction (Point2D units1) (Curve2D units2) (VectorCurve2D units1)
 
-instance
-  Composition
-    (SurfaceFunction1D units)
-    (Curve 2 Unitless Void)
-    (Curve1D units)
+instance Composition (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
-  Addition
-    (Curve 3 Meters space1)
-    (Vector3D meters space2)
-    (Curve 3 Meters space1)
+  Addition (Curve3D space1) (Vector3D meters space2) (Curve3D space1)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
-  Subtraction
-    (Curve 3 Meters space1)
-    (Vector3D meters space2)
-    (Curve 3 Meters space1)
+  Subtraction (Curve3D space1) (Vector3D meters space2) (Curve3D space1)
 
 instance
   space1 ~ space2 =>
-  Subtraction
-    (Curve 3 Meters space1)
-    (Point3D space2)
-    (VectorCurve 3 Meters space1)
+  Subtraction (Curve3D space1) (Point3D space2) (VectorCurve3D Meters space1)
 
 instance
   space1 ~ space2 =>
-  Subtraction
-    (Point3D space1)
-    (Curve 3 Meters space2)
-    (VectorCurve 3 Meters space1)
+  Subtraction (Point3D space1) (Curve3D space2) (VectorCurve3D Meters space1)
 
 constant ::
   Exists dimension units space =>

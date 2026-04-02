@@ -23,7 +23,7 @@ module OpenSolid.Curve2D
 where
 
 import Data.Void (Void)
-import {-# SOURCE #-} OpenSolid.Curve (Curve)
+import {-# SOURCE #-} OpenSolid.Curve (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve.Search qualified as Curve.Search
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
@@ -31,8 +31,6 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D, Point2D, Transform2D, Vector2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
-
-type Curve2D units = Curve 2 units Void
 
 type Compiled units = Curve.Compiled 2 units Void
 

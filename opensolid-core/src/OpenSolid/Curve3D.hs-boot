@@ -14,7 +14,7 @@ module OpenSolid.Curve3D
   )
 where
 
-import {-# SOURCE #-} OpenSolid.Curve (Curve)
+import {-# SOURCE #-} OpenSolid.Curve (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve.Search qualified as Curve.Search
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
@@ -22,8 +22,6 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds3D, Plane3D, Point3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
-
-type Curve3D space = Curve 3 Meters space
 
 type Compiled space = Curve.Compiled 3 Meters space
 

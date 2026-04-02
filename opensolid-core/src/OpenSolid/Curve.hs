@@ -2,6 +2,8 @@
 
 module OpenSolid.Curve
   ( Curve
+  , Curve2D
+  , Curve3D
   , Exists
   , Compiled
   , Segment
@@ -126,6 +128,7 @@ import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
+import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.VectorCurve3D (VectorCurve3D)
 import OpenSolid.VectorCurve3D qualified as VectorCurve3D
@@ -140,6 +143,12 @@ data Curve dimension units space = Curve
   , searchTree :: ~(Curve.Search.Tree dimension units space)
   }
 
+-- | A parametric curve in 2D space.
+type Curve2D units = Curve 2 units Void
+
+-- | A parametric curve in 3D space.
+type Curve3D space = Curve 3 Meters space
+
 type Compiled dimension units space =
   CompiledFunction
     Number
@@ -152,7 +161,7 @@ data HasSingularity = HasSingularity deriving (Eq, Show)
 type SearchTree dimension units space =
   Curve.Search.Tree dimension units space
 
-instance Units.Coercion (Curve 2 units1 Void) (Curve 2 units2 Void) where
+instance Units.Coercion (Curve2D units1) (Curve2D units2) where
   coerce curve =
     Curve
       { compiled = Units.coerce curve.compiled
@@ -162,10 +171,10 @@ instance Units.Coercion (Curve 2 units1 Void) (Curve 2 units2 Void) where
       , searchTree = Units.coerce curve.searchTree
       }
 
-instance FFI (Curve 2 Meters Void) where
+instance FFI (Curve2D Meters) where
   representation = FFI.classRepresentation "Curve2D"
 
-instance FFI (Curve 2 Unitless Void) where
+instance FFI (Curve2D Unitless) where
   representation = FFI.classRepresentation "UvCurve"
 
 instance HasUnits (Curve dimension units space) units
@@ -212,65 +221,38 @@ instance
 
 instance
   units1 ~ units2 =>
-  Addition
-    (Curve 2 units1 Void)
-    (Vector2D units2)
-    (Curve 2 units1 Void)
+  Addition (Curve2D units1) (Vector2D units2) (Curve2D units1)
   where
   lhs + rhs = lhs + VectorCurve2D.constant rhs
 
 instance
   units1 ~ units2 =>
-  Subtraction
-    (Curve 2 units1 Void)
-    (Vector2D units2)
-    (Curve 2 units1 Void)
+  Subtraction (Curve2D units1) (Vector2D units2) (Curve2D units1)
   where
   lhs - rhs = lhs - VectorCurve2D.constant rhs
 
 instance
   units1 ~ units2 =>
-  Subtraction
-    (Curve 2 units1 Void)
-    (Point2D units2)
-    (VectorCurve 2 units1 Void)
+  Subtraction (Curve2D units1) (Point2D units2) (VectorCurve2D units1)
   where
   curve - givenPoint = curve - constant givenPoint
 
 instance
   units1 ~ units2 =>
-  Subtraction
-    (Point2D units1)
-    (Curve 2 units2 Void)
-    (VectorCurve 2 units1 Void)
+  Subtraction (Point2D units1) (Curve2D units2) (VectorCurve2D units1)
   where
   givenPoint - curve = constant givenPoint - curve
 
-instance
-  Composition
-    (Curve 2 units Void)
-    (SurfaceFunction1D Unitless)
-    (SurfaceFunction2D units)
-  where
+instance Composition (Curve2D units) (SurfaceFunction1D Unitless) (SurfaceFunction2D units) where
   curve . function =
     SurfaceFunction2D.new
       (compiled curve . function.compiled)
       (\p -> derivative curve . function * SurfaceFunction1D.derivative p function)
 
-instance
-  Composition
-    (Curve 2 units Void)
-    SurfaceParameter
-    (SurfaceFunction2D units)
-  where
+instance Composition (Curve2D units) SurfaceParameter (SurfaceFunction2D units) where
   curve . parameter = curve . SurfaceFunction1D.parameter parameter
 
-instance
-  Composition
-    (SurfaceFunction1D units)
-    (Curve 2 Unitless Void)
-    (Curve1D units)
-  where
+instance Composition (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units) where
   f . g = do
     let (dudt, dvdt) = VectorCurve2D.components (derivative g)
     Curve1D.new (f.compiled . compiled g) (f.du . g * dudt + f.dv . g * dvdt)
@@ -278,7 +260,7 @@ instance
 instance
   Composition
     (VectorSurfaceFunction3D units space)
-    (Curve 2 Unitless Void)
+    (Curve2D Unitless)
     (VectorCurve3D units space)
   where
   function . uvCurve = do
@@ -289,12 +271,7 @@ instance
             + VectorSurfaceFunction3D.derivative V function . uvCurve * dvdt
     VectorCurve3D.new compiledComposed composedDerivative
 
-instance
-  Composition
-    (SurfaceFunction3D space)
-    (Curve 2 Unitless Void)
-    (Curve 3 Meters space)
-  where
+instance Composition (SurfaceFunction3D space) (Curve2D Unitless) (Curve3D space) where
   function . uvCurve = do
     let (dudt, dvdt) = VectorCurve2D.components (derivative uvCurve)
     new
@@ -303,25 +280,25 @@ instance
 
 instance
   units1 ~ units2 =>
-  Intersects (Curve 2 units1 Void) (Point2D units2) (Tolerance units1)
+  Intersects (Curve2D units1) (Point2D units2) (Tolerance units1)
   where
   curve `intersects` givenPoint = not (List.isEmpty (findPoint givenPoint curve))
 
 instance
   units1 ~ units2 =>
-  Intersects (Point2D units1) (Curve 2 units2 Void) (Tolerance units1)
+  Intersects (Point2D units1) (Curve2D units2) (Tolerance units1)
   where
   givenPoint `intersects` curve = curve `intersects` givenPoint
 
 instance
   space1 ~ space2 =>
-  Intersects (Curve 3 Meters space1) (Point3D space2) (Tolerance Meters)
+  Intersects (Curve3D space1) (Point3D space2) (Tolerance Meters)
   where
   curve `intersects` givenPoint = not (List.isEmpty (findPoint givenPoint curve))
 
 instance
   space1 ~ space2 =>
-  Intersects (Point3D space1) (Curve 3 Meters space2) (Tolerance Meters)
+  Intersects (Point3D space1) (Curve3D space2) (Tolerance Meters)
   where
   givenPoint `intersects` curve = curve `intersects` givenPoint
 
@@ -333,46 +310,29 @@ instance
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
-  Addition
-    (Curve 3 Meters space1)
-    (Vector3D meters space2)
-    (Curve 3 Meters space1)
+  Addition (Curve3D space1) (Vector3D meters space2) (Curve3D space1)
   where
   lhs + rhs = lhs + VectorCurve3D.constant rhs
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
-  Subtraction
-    (Curve 3 Meters space1)
-    (Vector3D meters space2)
-    (Curve 3 Meters space1)
+  Subtraction (Curve3D space1) (Vector3D meters space2) (Curve3D space1)
   where
   lhs - rhs = lhs - VectorCurve3D.constant rhs
 
 instance
   space1 ~ space2 =>
-  Subtraction
-    (Curve 3 Meters space1)
-    (Point3D space2)
-    (VectorCurve3D Meters space1)
+  Subtraction (Curve3D space1) (Point3D space2) (VectorCurve3D Meters space1)
   where
   lhs - rhs = lhs - constant rhs
 
 instance
   space1 ~ space2 =>
-  Subtraction
-    (Point3D space1)
-    (Curve 3 Meters space2)
-    (VectorCurve3D Meters space1)
+  Subtraction (Point3D space1) (Curve3D space2) (VectorCurve3D Meters space1)
   where
   lhs - rhs = constant lhs - rhs
 
-instance
-  Composition
-    (Curve 3 Meters space)
-    (SurfaceFunction1D Unitless)
-    (SurfaceFunction3D space)
-  where
+instance Composition (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
   curve . function =
     SurfaceFunction3D.new
       (compiled curve . function.compiled)
@@ -424,24 +384,14 @@ class
   ) =>
   Exists dimension units space
 
-instance
-  Desingularization.Curve
-    (Curve 2 units Void)
-    (Point2D units)
-    (Vector2D units)
-  where
+instance Desingularization.Curve (Curve2D units) (Point2D units) (Vector2D units) where
   value = point
   derivativeValue = derivativeValue
   secondDerivativeValue = secondDerivativeValue
   bezier = bezier
   desingularized = desingularized
 
-instance
-  Desingularization.Curve
-    (Curve 3 Meters space)
-    (Point3D space)
-    (Vector3D Meters space)
-  where
+instance Desingularization.Curve (Curve3D space) (Point3D space) (Vector3D Meters space) where
   value = point
   derivativeValue = derivativeValue
   secondDerivativeValue = secondDerivativeValue

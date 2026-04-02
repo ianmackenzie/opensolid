@@ -94,7 +94,7 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve, HasSingularity)
+import OpenSolid.Curve (Curve2D, HasSingularity)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Search qualified as Curve.Search
 import OpenSolid.Curve1D (Curve1D)
@@ -142,9 +142,6 @@ import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
-
--- | A parametric curve in 2D space.
-type Curve2D units = Curve 2 units Void
 
 type Compiled units = Curve.Compiled 2 units Void
 

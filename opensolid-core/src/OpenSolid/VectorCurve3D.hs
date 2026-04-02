@@ -62,12 +62,10 @@ import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
-import OpenSolid.VectorCurve (VectorCurve)
+import OpenSolid.VectorCurve (VectorCurve3D)
 import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
-
-type VectorCurve3D units space = VectorCurve 3 units space
 
 type Compiled units space = VectorCurve.Compiled 3 units space
 
