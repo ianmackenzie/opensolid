@@ -700,7 +700,7 @@ point2D =
     , Class.property "Y Coordinate" Point2D.yCoordinate $(docs 'Point2D.yCoordinate)
     , Class.member1 "Distance To" "Other" Point2D.distanceFrom $(docs 'Point2D.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point2D.midpoint $(docs 'Point2D.midpoint)
-    , Class.member1 "Place On" "Plane" Point2D.placeOn $(docs 'Point2D.placeOn)
+    , Class.member1 "Place On" "Plane" (Point2D.placeOn @FFI.Space @FFI.Space) $(docs 'Point2D.placeOn)
     , Class.minusSelf
     , Class.minus @Displacement2D Self
     , Class.plus @Displacement2D Self
@@ -1235,7 +1235,7 @@ point3D =
     , Class.member1 "Distance To" "Other" Point3D.distanceFrom $(docs 'Point3D.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point3D.midpoint $(docs 'Point3D.midpoint)
     , Class.member1 "Project Onto" "Plane" Point3D.projectOnto $(docs 'Point3D.projectOnto)
-    , Class.member1 "Project Into" "Plane" Point3D.projectInto $(docs 'Point3D.projectInto)
+    , Class.member1 "Project Into" "Plane" (Point3D.projectInto @FFI.Space @FFI.Space) $(docs 'Point3D.projectInto)
     , Class.minusSelf
     , Class.minus @Displacement3D Self
     , Class.plus @Displacement3D Self
@@ -1290,7 +1290,7 @@ planeOrientation3D =
     , Class.member1 "Relative To" "Frame" (PlaneOrientation3D.relativeTo :: Frame3D -> PlaneOrientation3D -> PlaneOrientation3D) $(docs 'PlaneOrientation3D.relativeTo)
     ]
 
-type Plane3D = Plane3D.Plane3D FFI.Space FFI.Space
+type Plane3D = Plane3D.Plane3D FFI.Space
 
 plane3D :: Class
 plane3D =

@@ -41,10 +41,14 @@ import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Vector3D (Vector3D)
 
-data Arc3D space where
-  Arc3D :: Plane3D space local -> Length -> Angle -> Angle -> Arc3D space
+data Arc3D space = Arc3D
+  { plane :: Plane3D space
+  , radius :: Length
+  , startAngle :: Angle
+  , endAngle :: Angle
+  }
 
-on :: Plane3D space local -> Arc2D Meters local -> Arc3D space
+on :: Plane3D global -> Arc2D Meters local -> Arc3D global
 on givenPlane givenArc = do
   let originPoint = Point3D.on givenPlane (Arc2D.centerPoint givenArc)
   Arc3D
@@ -53,20 +57,20 @@ on givenPlane givenArc = do
     (Arc2D.startAngle givenArc)
     (Arc2D.endAngle givenArc)
 
-plane :: Arc3D space -> Plane3D space local
-plane (Arc3D p _ _ _) = Plane3D.coerce p
+plane :: Arc3D space -> Plane3D space
+plane = (.plane)
 
 centerPoint :: Arc3D space -> Point3D space
 centerPoint arc = Plane3D.originPoint (plane arc)
 
 radius :: Arc3D space -> Length
-radius (Arc3D _ r _ _) = r
+radius = (.radius)
 
 startAngle :: Arc3D space -> Angle
-startAngle (Arc3D _ _ a _) = a
+startAngle = (.startAngle)
 
 endAngle :: Arc3D space -> Angle
-endAngle (Arc3D _ _ _ b) = b
+endAngle = (.endAngle)
 
 sweptAngle :: Arc3D space -> Angle
 sweptAngle arc = endAngle arc - startAngle arc
@@ -101,5 +105,5 @@ translateAlong = Transform3D.translateAlongImpl transformBy
 rotateAround :: Axis3D space -> Angle -> Arc3D space -> Arc3D space
 rotateAround = Transform3D.rotateAroundImpl transformBy
 
-mirrorAcross :: Plane3D space local -> Arc3D space -> Arc3D space
+mirrorAcross :: Plane3D space -> Arc3D space -> Arc3D space
 mirrorAcross = Transform3D.mirrorAcrossImpl transformBy

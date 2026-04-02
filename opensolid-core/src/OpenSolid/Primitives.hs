@@ -2049,27 +2049,27 @@ instance FFI (Axis3D FFI.Space) where
 
 ----- Plane3D -----
 
-type role Plane3D phantom phantom
+type role Plane3D phantom
 
-type Plane3D :: Type -> Type -> Type
+type Plane3D :: Type -> Type
 
 {-| A plane in 3D, defined by an origin point and two perpendicular X and Y directions.
 
 The normal direction  of the plane is then defined as
 the cross product of its X and Y directions.
 -}
-data Plane3D global local = Plane3D
-  { originPoint :: Point3D global
-  , orientation :: PlaneOrientation3D global
+data Plane3D space = Plane3D
+  { originPoint :: Point3D space
+  , orientation :: PlaneOrientation3D space
   }
 
-deriving instance Eq (Plane3D global local)
+deriving instance Eq (Plane3D space)
 
-deriving instance Ord (Plane3D global local)
+deriving instance Ord (Plane3D space)
 
-deriving instance Show (Plane3D global local)
+deriving instance Show (Plane3D space)
 
-instance (global ~ FFI.Space, local ~ FFI.Space) => FFI (Plane3D global local) where
+instance FFI (Plane3D FFI.Space) where
   representation = FFI.classRepresentation "Plane3D"
 
 ----- Frame3D -----

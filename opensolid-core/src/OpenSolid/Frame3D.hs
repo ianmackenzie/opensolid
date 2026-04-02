@@ -146,7 +146,7 @@ its normal direction will be the frame's forward direction,
 its X direction will be the frame's leftward direction
 and its Y direction will be frame's upward direction.
 -}
-frontPlane :: Frame3D global local1 -> Plane3D global local2
+frontPlane :: Frame3D global local -> Plane3D global
 frontPlane frame = Plane3D frame.originPoint frame.orientation.frontPlaneOrientation
 
 {-| Construct a locally backward-facing plane from a frame.
@@ -156,7 +156,7 @@ its normal direction will be the frame's backward direction,
 its X direction will be the frame's rightward direction
 and its Y direction will be frame's upward direction.
 -}
-backPlane :: Frame3D global local1 -> Plane3D global local2
+backPlane :: Frame3D global local -> Plane3D global
 backPlane frame = Plane3D frame.originPoint frame.orientation.backPlaneOrientation
 
 {-| Construct a locally leftward-facing plane from a frame.
@@ -166,7 +166,7 @@ its normal direction will be the frame's leftward direction,
 its X direction will be the frame's backward direction
 and its Y direction will be frame's upward direction.
 -}
-leftPlane :: Frame3D global local1 -> Plane3D global local2
+leftPlane :: Frame3D global local -> Plane3D global
 leftPlane frame = Plane3D frame.originPoint frame.orientation.leftPlaneOrientation
 
 {-| Construct a locally rightward-facing plane from a frame.
@@ -176,7 +176,7 @@ its normal direction will be the frame's rightward direction,
 its X direction will be the frame's forward direction
 and its Y direction will be frame's upward direction.
 -}
-rightPlane :: Frame3D global local1 -> Plane3D global local2
+rightPlane :: Frame3D global local -> Plane3D global
 rightPlane frame = Plane3D frame.originPoint frame.orientation.rightPlaneOrientation
 
 {-| Construct a locally upward-facing plane from a frame.
@@ -186,7 +186,7 @@ its normal direction will be the frame's upward direction,
 its X direction will be the frame's rightward direction
 and its Y direction will be frame's forward direction.
 -}
-topPlane :: Frame3D global local1 -> Plane3D global local2
+topPlane :: Frame3D global local -> Plane3D global
 topPlane frame = Plane3D frame.originPoint frame.orientation.topPlaneOrientation
 
 {-| Construct a locally downward-facing plane from a frame.
@@ -196,31 +196,31 @@ its normal direction will be the frame's downward direction,
 its X direction will be the frame's leftward direction
 and its Y direction will be frame's forward direction.
 -}
-bottomPlane :: Frame3D global local1 -> Plane3D global local2
+bottomPlane :: Frame3D global local -> Plane3D global
 bottomPlane frame = Plane3D frame.originPoint frame.orientation.bottomPlaneOrientation
 
 -- | Construct a plane from its front plane.
-fromFrontPlane :: Plane3D global local1 -> Frame3D global local2
+fromFrontPlane :: Plane3D global -> Frame3D global local
 fromFrontPlane (Plane3D p o) = Frame3D p (Orientation3D.fromFrontPlaneOrientation o)
 
 -- | Construct a plane from its back plane.
-fromBackPlane :: Plane3D global local1 -> Frame3D global local2
+fromBackPlane :: Plane3D global -> Frame3D global local
 fromBackPlane (Plane3D p o) = Frame3D p (Orientation3D.fromBackPlaneOrientation o)
 
 -- | Construct a plane from its left plane.
-fromLeftPlane :: Plane3D global local1 -> Frame3D global local2
+fromLeftPlane :: Plane3D global -> Frame3D global local
 fromLeftPlane (Plane3D p o) = Frame3D p (Orientation3D.fromLeftPlaneOrientation o)
 
 -- | Construct a plane from its right plane.
-fromRightPlane :: Plane3D global local1 -> Frame3D global local2
+fromRightPlane :: Plane3D global -> Frame3D global local
 fromRightPlane (Plane3D p o) = Frame3D p (Orientation3D.fromRightPlaneOrientation o)
 
 -- | Construct a plane from its top plane.
-fromTopPlane :: Plane3D global local1 -> Frame3D global local2
+fromTopPlane :: Plane3D global -> Frame3D global local
 fromTopPlane (Plane3D p o) = Frame3D p (Orientation3D.fromTopPlaneOrientation o)
 
 -- | Construct a plane from its bottom plane.
-fromBottomPlane :: Plane3D global local1 -> Frame3D global local2
+fromBottomPlane :: Plane3D global -> Frame3D global local
 fromBottomPlane (Plane3D p o) = Frame3D p (Orientation3D.fromBottomPlaneOrientation o)
 
 {-| Construct a forward-facing frame relative to a parent/reference frame.

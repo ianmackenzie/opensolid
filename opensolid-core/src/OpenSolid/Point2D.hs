@@ -177,7 +177,7 @@ relativeTo (Frame2D p0 (Orientation2D i j)) p = let d = p - p0 in Point2D (d `do
 Given a 2D point defined within a plane's coordinate system,
 this returns the corresponding 3D point.
 -}
-placeOn :: Plane3D global local -> Point2D Meters local -> Point3D global
+placeOn :: Plane3D global -> Point2D Meters local -> Point3D global
 placeOn (Plane3D originPoint (PlaneOrientation3D i j)) (Point2D px py) =
   originPoint + px * i + py * j
 

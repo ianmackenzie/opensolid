@@ -19,10 +19,12 @@ import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 
-data Circle3D space where
-  Circle3D :: Plane3D space local -> Length -> Circle3D space
+data Circle3D space = Circle3D
+  { plane :: Plane3D space
+  , radius :: Length
+  }
 
-on :: Plane3D space local -> Circle2D Meters local -> Circle3D space
+on :: Plane3D global -> Circle2D Meters local -> Circle3D global
 on givenPlane givenCircle = do
   let originPoint = Point3D.on givenPlane (Circle2D.centerPoint givenCircle)
   Circle3D (Plane3D.moveTo originPoint givenPlane) (Circle2D.radius givenCircle)
@@ -31,7 +33,7 @@ centerPoint :: Circle3D space -> Point3D space
 centerPoint circle = Plane3D.originPoint (plane circle)
 
 radius :: Circle3D space -> Length
-radius (Circle3D _ r) = r
+radius = (.radius)
 
 diameter :: Circle3D space -> Length
 diameter circle = 2.0 * radius circle
@@ -39,5 +41,5 @@ diameter circle = 2.0 * radius circle
 normalDirection :: Circle3D space -> Direction3D space
 normalDirection circle = Plane3D.normalDirection (plane circle)
 
-plane :: Circle3D space -> Plane3D space local
-plane (Circle3D p _) = Plane3D.coerce p
+plane :: Circle3D space -> Plane3D space
+plane = (.plane)

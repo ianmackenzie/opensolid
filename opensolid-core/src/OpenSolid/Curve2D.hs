@@ -645,7 +645,7 @@ relativeTo ::
   Curve2D units local
 relativeTo frame = placeIn (Frame2D.inverse frame)
 
-placeOn :: Plane3D global local -> Curve2D Meters local -> Curve3D global
+placeOn :: Plane3D global -> Curve2D Meters local -> Curve3D global
 placeOn plane curve = Curve3D.on plane curve
 
 transformBy ::

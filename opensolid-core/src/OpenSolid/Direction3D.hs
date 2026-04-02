@@ -98,10 +98,10 @@ rightward = Orientation3D.rightwardDirection
 leftward :: Orientation3D space -> Direction3D space
 leftward = Orientation3D.leftwardDirection
 
-on :: Plane3D global local -> Direction2D local -> Direction3D global
+on :: Plane3D global -> Direction2D local -> Direction3D global
 on (Plane3D _ (PlaneOrientation3D i j)) (Direction2D x y) = Unit3D (x * i + y * j)
 
-polar :: Plane3D global local -> Angle -> Direction3D global
+polar :: Plane3D space -> Angle -> Direction3D space
 polar (Plane3D _ (PlaneOrientation3D i j)) angle =
   Unit3D (Angle.cos angle * i + Angle.sin angle * j)
 
@@ -193,7 +193,7 @@ rotateAround :: Axis3D space -> Angle -> Direction3D space -> Direction3D space
 rotateAround axis angle = lift (Vector3D.rotateAround axis angle)
 
 -- | Mirror across the given plane.
-mirrorAcross :: Plane3D global local -> Direction3D global -> Direction3D global
+mirrorAcross :: Plane3D space -> Direction3D space -> Direction3D space
 mirrorAcross plane = lift (Vector3D.mirrorAcross plane)
 
 -- | Generate a random direction.

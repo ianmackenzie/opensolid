@@ -108,7 +108,7 @@ parametric givenFunction givenDomain = do
     , innerLoops = List.map boundaryLoop (Region2D.innerLoops givenDomain)
     }
 
-on :: Plane3D global local -> Region2D Meters local -> Surface3D global
+on :: Plane3D global -> Region2D Meters local -> Surface3D global
 on plane region = do
   let regionBounds = Region2D.bounds region
   let (width, height) = Bounds2D.dimensions regionBounds
@@ -143,7 +143,7 @@ ruled bottom top = do
 
 revolved ::
   Tolerance Meters =>
-  Plane3D global local ->
+  Plane3D global ->
   Curve2D Meters local ->
   Axis2D Meters local ->
   Angle ->

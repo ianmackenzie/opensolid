@@ -263,7 +263,7 @@ Given a 2D vector defined within a plane's coordinate system,
 this returns the corresponding 3D vector.
 -}
 {-# INLINE placeOn #-}
-placeOn :: Plane3D global local -> Vector2D units local -> Vector3D units global
+placeOn :: Plane3D global -> Vector2D units local -> Vector3D units global
 placeOn plane = placeOnOrientation plane.orientation
 
 placeOnOrientation :: PlaneOrientation3D global -> Vector2D units local -> Vector3D units global

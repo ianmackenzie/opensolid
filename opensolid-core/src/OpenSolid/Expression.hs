@@ -1500,43 +1500,41 @@ class PlaceOn plane expression1 expression2 | plane expression1 -> expression2 w
   placeOn :: plane -> expression1 -> expression2
 
 instance
-  local1 ~ local2 =>
   PlaceOn
-    (Plane3D global local1)
-    (Expression input (Vector2D units local2))
+    (Plane3D global)
+    (Expression input (Vector2D units local))
     (Expression input (Vector3D units global))
   where
   placeOn plane (VectorCurve2D ast _) = vectorCurve3D (Ast.placeVector2DOn plane ast)
   placeOn plane (VectorSurface2D ast _) = vectorSurface3D (Ast.placeVector2DOn plane ast)
 
 instance
-  (local1 ~ local2, meters ~ Meters) =>
+  meters ~ Meters =>
   PlaceOn
-    (Plane3D global local1)
-    (Expression input (Point2D meters local2))
+    (Plane3D global)
+    (Expression input (Point2D meters local))
     (Expression input (Point3D global))
   where
   placeOn plane (Curve2D ast _) = curve3D (Ast.placePoint2DOn plane ast)
   placeOn plane (Surface2D ast _) = surface3D (Ast.placePoint2DOn plane ast)
 
-class ProjectInto plane expression1 expression2 | plane expression1 -> expression2 where
+class ProjectInto plane expression1 expression2 where
   projectInto :: plane -> expression1 -> expression2
 
 instance
-  global1 ~ global2 =>
   ProjectInto
-    (Plane3D global1 local)
-    (Expression input (Vector3D units global2))
+    (Plane3D global)
+    (Expression input (Vector3D units global))
     (Expression input (Vector2D units local))
   where
   projectInto plane (VectorCurve3D ast _) = vectorCurve2D (Ast.projectVector3dInto plane ast)
   projectInto plane (VectorSurface3D ast _) = vectorSurface2D (Ast.projectVector3dInto plane ast)
 
 instance
-  (global1 ~ global2, meters ~ Meters) =>
+  meters ~ Meters =>
   ProjectInto
-    (Plane3D global1 local)
-    (Expression input (Point3D global2))
+    (Plane3D global)
+    (Expression input (Point3D global))
     (Expression input (Point2D meters local))
   where
   projectInto plane (Curve3D ast _) = curve2D (Ast.projectPoint3dInto plane ast)

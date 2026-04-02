@@ -227,10 +227,7 @@ relativeToOrientation orientation = lift (VectorBounds2D.relativeToOrientation o
 Given a 2D direction defined within a plane's coordinate system,
 this returns the corresponding 3D direction.
 -}
-placeOn ::
-  Plane3D global local ->
-  DirectionBounds2D local ->
-  DirectionBounds3D global
+placeOn :: Plane3D global -> DirectionBounds2D local -> DirectionBounds3D global
 placeOn plane = placeOnOrientation plane.orientation
 
 placeOnOrientation ::

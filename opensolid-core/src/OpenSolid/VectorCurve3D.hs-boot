@@ -8,4 +8,4 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 type VectorCurve3D units space = VectorCurve 3 units space
 
 constant :: Vector3D units space -> VectorCurve3D units space
-on :: Plane3D global local -> VectorCurve2D units local -> VectorCurve3D units global
+on :: Plane3D global -> VectorCurve2D units local -> VectorCurve3D units global

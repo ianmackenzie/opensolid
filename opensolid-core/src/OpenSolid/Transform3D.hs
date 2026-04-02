@@ -133,7 +133,7 @@ scaleAlong axis scale = do
   let vz = unitZ + (scale - 1.0) * dz * d
   withFixedPoint axis.originPoint vx vy vz
 
-mirrorAcross :: Plane3D global local -> Orthonormal global
+mirrorAcross :: Plane3D space -> Orthonormal space
 mirrorAcross plane = do
   let PlaneOrientation3D i j = plane.orientation
   let Vector3D nx ny nz = i `cross` j
@@ -219,7 +219,7 @@ translateAlongImpl transformBy axis distance = transformBy (translateAlong axis 
 rotateAroundImpl :: (Rigid space -> a -> b) -> Axis3D space -> Angle -> a -> b
 rotateAroundImpl transformBy axis angle = transformBy (rotateAround axis angle)
 
-mirrorAcrossImpl :: (Orthonormal global -> a -> b) -> Plane3D global local -> a -> b
+mirrorAcrossImpl :: (Orthonormal space -> a -> b) -> Plane3D space -> a -> b
 mirrorAcrossImpl transformBy plane = transformBy (mirrorAcross plane)
 
 scaleAboutImpl :: (Uniform space -> a -> b) -> Point3D space -> Number -> a -> b

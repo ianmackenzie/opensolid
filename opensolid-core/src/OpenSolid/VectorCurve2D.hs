@@ -310,10 +310,7 @@ relativeTo ::
   VectorCurve2D units local
 relativeTo frame = placeIn (Frame2D.inverse frame)
 
-placeOn ::
-  Plane3D global local ->
-  VectorCurve2D units local ->
-  VectorCurve3D units global
+placeOn :: Plane3D global -> VectorCurve2D units local -> VectorCurve3D units global
 placeOn plane curve = VectorCurve3D.on plane curve
 
 convert ::

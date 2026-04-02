@@ -1,7 +1,6 @@
 module OpenSolid.Camera3D
   ( Camera3D
   , CameraSpace
-  , ScreenSpace
   , Projection (Perspective, Orthographic)
   , perspective
   , orthographic
@@ -58,8 +57,6 @@ import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.World3D qualified as World3D
 
 data CameraSpace
-
-data ScreenSpace
 
 -- | A perspective or orthographic camera in 3D.
 data Camera3D space = Camera3D
@@ -199,7 +196,7 @@ downwardDirection camera = Frame3D.downwardDirection (frame camera)
 focalPoint :: Camera3D space -> Point3D space
 focalPoint camera = eyePoint camera + focalDistance camera * forwardDirection camera
 
-viewPlane :: Camera3D space -> Plane3D space ScreenSpace
+viewPlane :: Camera3D space -> Plane3D space
 viewPlane camera = Frame3D.backPlane (frame camera)
 
 moveTo :: Point3D space -> Camera3D space -> Camera3D space

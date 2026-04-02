@@ -87,7 +87,7 @@ relativeTo globalFrame frame =
     (Point2D.relativeTo globalFrame (originPoint frame))
     (Orientation2D.relativeTo globalFrame (orientation frame))
 
-placeOn :: Plane3D space1 space2 -> Frame2D Meters space2 space3 -> Plane3D space1 space3
+placeOn :: Plane3D space -> Frame2D Meters global local -> Plane3D space
 placeOn plane (Frame2D p0 (Orientation2D i j)) =
   Plane3D (Point2D.placeOn plane p0) $
     PlaneOrientation3D (Direction2D.placeOn plane i) (Direction2D.placeOn plane j)

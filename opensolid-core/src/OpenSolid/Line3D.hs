@@ -47,7 +47,7 @@ pattern Line3D p1 p2 = Line p1 p2
 
 {-# COMPLETE Line3D #-}
 
-on :: Plane3D space local -> Line2D Meters local -> Line3D space
+on :: Plane3D global -> Line2D Meters local -> Line3D global
 on plane (Line2D p1 p2) = Line3D (Point3D.on plane p1) (Point3D.on plane p2)
 
 -- | Get the start point of a line.
@@ -100,7 +100,7 @@ translateAlong = Transform3D.translateAlongImpl transformBy
 rotateAround :: Axis3D space -> Angle -> Line3D space -> Line3D space
 rotateAround = Transform3D.rotateAroundImpl transformBy
 
-mirrorAcross :: Plane3D space local -> Line3D space -> Line3D space
+mirrorAcross :: Plane3D space -> Line3D space -> Line3D space
 mirrorAcross = Transform3D.mirrorAcrossImpl transformBy
 
 scaleAbout :: Point3D space -> Number -> Line3D space -> Line3D space

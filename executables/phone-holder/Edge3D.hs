@@ -47,7 +47,7 @@ endPoint (Line Negative l) = Line3D.startPoint l
 endPoint (Arc Positive a) = Arc3D.endPoint a
 endPoint (Arc Negative a) = Arc3D.startPoint a
 
-on :: Plane3D space local -> Edge2D local -> Edge3D space
+on :: Plane3D global -> Edge2D local -> Edge3D global
 on plane (Edge2D.Line line2D) = line (Line3D.on plane line2D)
 on plane (Edge2D.Arc arc2D) = arc (Arc3D.on plane arc2D)
 
@@ -63,7 +63,7 @@ transformBy ::
 transformBy transform (Line sign l) = Line sign (Line3D.transformBy transform l)
 transformBy transform (Arc sign a) = Arc sign (Arc3D.transformBy transform a)
 
-mirrorAcross :: Plane3D space local -> Edge3D space -> Edge3D space
+mirrorAcross :: Plane3D space -> Edge3D space -> Edge3D space
 mirrorAcross = Transform3D.mirrorAcrossImpl transformBy
 
 entity :: Tolerance Meters => Edge3D space -> Step.Entity

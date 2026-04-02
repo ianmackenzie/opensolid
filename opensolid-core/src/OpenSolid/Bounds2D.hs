@@ -265,7 +265,7 @@ relativeTo frame (Bounds2D x y) = do
   let ry = 0.5 * xWidth * Number.abs jx + 0.5 * yWidth * Number.abs jy
   Bounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
 
-placeOn :: Plane3D global local -> Bounds2D Meters local -> Bounds3D global
+placeOn :: Plane3D global -> Bounds2D Meters local -> Bounds3D global
 placeOn plane (Bounds2D x y) = do
   let Plane3D _ (PlaneOrientation3D i j) = plane
   let Direction3D ix iy iz = i

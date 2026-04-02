@@ -23,9 +23,9 @@ rightwardAxis :: Frame3D global local -> Axis3D global
 leftwardAxis :: Frame3D global local -> Axis3D global
 upwardAxis :: Frame3D global local -> Axis3D global
 downwardAxis :: Frame3D global local -> Axis3D global
-frontPlane :: Frame3D global local1 -> Plane3D global local2
-backPlane :: Frame3D global local1 -> Plane3D global local2
-topPlane :: Frame3D global local1 -> Plane3D global local2
-bottomPlane :: Frame3D global local1 -> Plane3D global local2
-leftPlane :: Frame3D global local1 -> Plane3D global local2
-rightPlane :: Frame3D global local1 -> Plane3D global local2
+frontPlane :: Frame3D global local -> Plane3D global
+backPlane :: Frame3D global local -> Plane3D global
+topPlane :: Frame3D global local -> Plane3D global
+bottomPlane :: Frame3D global local -> Plane3D global
+leftPlane :: Frame3D global local -> Plane3D global
+rightPlane :: Frame3D global local -> Plane3D global

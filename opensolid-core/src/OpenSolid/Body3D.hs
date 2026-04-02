@@ -275,7 +275,7 @@ cylinderAlong axis d1 d2 ("diameter" ::: diameter) =
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::
   Tolerance Meters =>
-  Plane3D global local ->
+  Plane3D global ->
   Region2D Meters local ->
   Length ->
   Length ->
@@ -288,7 +288,7 @@ extruded sketchPlane profile d1 d2 = do
 
 translational ::
   Tolerance Meters =>
-  Plane3D global local ->
+  Plane3D global ->
   Region2D Meters local ->
   VectorCurve3D Meters global ->
   Result BoundedBy.Error (Body3D global)
@@ -316,7 +316,7 @@ and a negative angle will result in a clockwise revolution.
 -}
 revolved ::
   Tolerance Meters =>
-  Plane3D global local ->
+  Plane3D global ->
   Region2D Meters local ->
   Axis2D Meters local ->
   Angle ->

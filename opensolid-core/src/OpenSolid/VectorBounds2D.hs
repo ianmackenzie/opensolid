@@ -361,7 +361,7 @@ relativeToOrientation orientation (VectorBounds2D x y) = do
   let ry = 0.5 * xWidth * Number.abs jx + 0.5 * yWidth * Number.abs jy
   VectorBounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
 
-placeOn :: Plane3D global local -> VectorBounds2D units local -> VectorBounds3D units global
+placeOn :: Plane3D global -> VectorBounds2D units local -> VectorBounds3D units global
 placeOn plane = placeOnOrientation plane.orientation
 
 placeOnOrientation ::

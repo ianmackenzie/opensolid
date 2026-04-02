@@ -114,7 +114,7 @@ import OpenSolid.Vector3D qualified as Vector3D
 
 data Space
 
-type Plane = Plane3D Space Space
+type Plane = Plane3D Space
 
 data Ast1D input where
   Constant1D :: Number -> Ast1D input
@@ -1173,12 +1173,12 @@ placeVector3dIn frame ast = transformVector3D (placementTransform3D frame) ast
 placePoint3dIn :: Frame3D global local -> Ast3D input -> Ast3D input
 placePoint3dIn frame ast = transformPoint3D (placementTransform3D frame) ast
 
-placeVector2DOn :: Plane3D global local -> Ast2D input -> Ast3D input
+placeVector2DOn :: Plane3D space -> Ast2D input -> Ast3D input
 placeVector2DOn plane ast = case ast of
   Constant2D val -> Constant3D (Vector2D.placeOn (Plane3D.coerce plane) val)
   Variable2D var -> Variable3D (PlaceVector2D (Plane3D.coerce plane) var)
 
-placePoint2DOn :: Plane3D global local -> Ast2D input -> Ast3D input
+placePoint2DOn :: Plane3D space -> Ast2D input -> Ast3D input
 placePoint2DOn plane ast = case ast of
   Constant2D val -> do
     let point = Position2D (Vector2D.coerce val)
@@ -1186,12 +1186,12 @@ placePoint2DOn plane ast = case ast of
     Constant3D (Vector3D.coerce placed)
   Variable2D var -> Variable3D (PlacePoint2D (Plane3D.coerce plane) var)
 
-projectVector3dInto :: Plane3D global local -> Ast3D input -> Ast2D input
+projectVector3dInto :: Plane3D space -> Ast3D input -> Ast2D input
 projectVector3dInto plane ast = case ast of
   Constant3D val -> Constant2D (Vector3D.projectInto (Plane3D.coerce plane) val)
   Variable3D var -> Variable2D (ProjectVector3D (Plane3D.coerce plane) var)
 
-projectPoint3dInto :: Plane3D global local -> Ast3D input -> Ast2D input
+projectPoint3dInto :: Plane3D space -> Ast3D input -> Ast2D input
 projectPoint3dInto plane ast = case ast of
   Constant3D val -> do
     let point = Position3D (Vector3D.coerce val)

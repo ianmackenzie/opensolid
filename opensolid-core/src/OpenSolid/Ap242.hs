@@ -88,7 +88,7 @@ axisPlacement2D frame =
     , Step.referenceTo (direction2D (Frame2D.xDirection frame))
     ]
 
-axisPlacement3D :: Plane3D global local -> Step.Entity
+axisPlacement3D :: Plane3D space -> Step.Entity
 axisPlacement3D plane =
   Step.entity "AXIS2_PLACEMENT_3D" $
     [ Step.text ""

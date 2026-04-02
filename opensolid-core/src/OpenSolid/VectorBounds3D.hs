@@ -378,7 +378,7 @@ interpolate ::
 interpolate (VectorBounds3D x y z) u v w =
   Vector3D (Interval.interpolate x u) (Interval.interpolate y v) (Interval.interpolate z w)
 
-on :: Plane3D global local -> VectorBounds2D units local -> VectorBounds3D units global
+on :: Plane3D global -> VectorBounds2D units local -> VectorBounds3D units global
 on plane bounds2D = do
   let VectorBounds2D bX bY = bounds2D
   let cX = Interval.midpoint bX

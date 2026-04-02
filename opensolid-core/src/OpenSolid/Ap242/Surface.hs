@@ -8,7 +8,7 @@ import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Prelude
 import OpenSolid.Step qualified as Step
 
-plane3D :: Plane3D space local -> Step.Entity
+plane3D :: Plane3D space -> Step.Entity
 plane3D plane = Step.entity "PLANE" [Step.text "", Step.referenceTo (Ap242.axisPlacement3D plane)]
 
 cylinder3D :: Axis3D space -> ("radius" ::: Length) -> Step.Entity
