@@ -356,7 +356,6 @@ boundedBy :: Tolerance Meters => List (Surface3D space) -> Result BoundedBy.Erro
 boundedBy [] = Error BoundedBy.EmptyBody
 boundedBy (NonEmpty givenSurfaces) = do
   let surfacesWithHalfEdges = NonEmpty.mapWithIndex toSurfaceWithHalfEdges givenSurfaces
-  let firstSurfaceWithHalfEdges = NonEmpty.first surfacesWithHalfEdges
   let halfEdges = NonEmpty.combine getAllHalfEdges surfacesWithHalfEdges
   let halfEdgeSet = Set3D.partitionBy halfEdgeBounds halfEdges
   let initialSurfaceRegistry =
@@ -372,7 +371,7 @@ boundedBy (NonEmpty givenSurfaces) = do
     registerSurfaceWithHalfEdges
       halfEdgeSet
       initialSurfaceRegistry
-      firstSurfaceWithHalfEdges
+      (NonEmpty.first surfacesWithHalfEdges)
   let SurfaceRegistry{unprocessed, processed, edges} = finalSurfaceRegistry
   case (Map.values unprocessed, Map.values processed) of
     (NonEmpty _, _) -> Error BoundedBy.BoundaryHasGaps
