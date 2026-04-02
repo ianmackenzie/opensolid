@@ -712,6 +712,17 @@ instance FFI (Axis2D Meters) where
 instance FFI (Axis2D Unitless) where
   representation = FFI.classRepresentation "UvAxis"
 
+instance Multiplication Sign (Axis2D space) (Axis2D space) where
+  Positive * axis = axis
+  Negative * axis = -axis
+
+instance Multiplication (Axis2D space) Sign (Axis2D space) where
+  axis * Positive = axis
+  axis * Negative = -axis
+
+instance Negation (Axis2D space) where
+  negate (Axis2D p0 d) = Axis2D p0 (negate d)
+
 ----- Frame2D -----
 
 type role Frame2D phantom
@@ -1837,6 +1848,17 @@ deriving instance Show (Axis3D space)
 
 instance FFI (Axis3D FFI.Space) where
   representation = FFI.classRepresentation "Axis3D"
+
+instance Multiplication Sign (Axis3D space) (Axis3D space) where
+  Positive * axis = axis
+  Negative * axis = -axis
+
+instance Multiplication (Axis3D space) Sign (Axis3D space) where
+  axis * Positive = axis
+  axis * Negative = -axis
+
+instance Negation (Axis3D space) where
+  negate (Axis3D p0 d) = Axis3D p0 (negate d)
 
 ----- Plane3D -----
 
