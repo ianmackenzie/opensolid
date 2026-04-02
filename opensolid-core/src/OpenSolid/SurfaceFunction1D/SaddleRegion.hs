@@ -33,24 +33,21 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as Ver
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
-import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 
 data SaddleRegion units = SaddleRegion
   { subproblem :: Subproblem units
   , frame :: Frame
-  , d1 :: Direction2D UvSpace
-  , d2 :: Direction2D UvSpace
+  , d1 :: Direction2D
+  , d2 :: Direction2D
   }
 
-data PrincipalAxisSpace
-
-type Frame = Frame2D Unitless UvSpace PrincipalAxisSpace
+type Frame = Frame2D Unitless
 
 data JoiningCurve
-  = Incoming (Curve2D Unitless UvSpace)
-  | Outgoing (Curve2D Unitless UvSpace)
+  = Incoming (Curve2D Unitless)
+  | Outgoing (Curve2D Unitless)
 
 joiningPoint :: JoiningCurve -> UvPoint
 joiningPoint (Incoming curve) = Curve2D.endPoint curve
@@ -98,7 +95,7 @@ secondDerivative ::
   Quantity units ->
   Quantity units ->
   Quantity units ->
-  Direction2D UvSpace ->
+  Direction2D ->
   Quantity units
 secondDerivative fuu fuv fvv direction = do
   let Direction2D du dv = direction
@@ -108,7 +105,7 @@ connectingCurve ::
   Tolerance units =>
   JoiningCurve ->
   SaddleRegion units ->
-  Curve2D Unitless UvSpace
+  Curve2D Unitless
 connectingCurve joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
   let Point2D x y = Point2D.relativeTo frame (joiningPoint joiningCurve)
   let saddlePoint = Frame2D.originPoint frame
@@ -128,11 +125,11 @@ connectingCurve joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
 connect ::
   Tolerance units =>
   Subproblem units ->
-  Frame2D Unitless UvSpace PrincipalAxisSpace ->
-  Direction2D UvSpace ->
+  Frame2D Unitless ->
+  Direction2D ->
   JoiningCurve ->
-  List (Axis2D Unitless UvSpace) ->
-  Curve2D Unitless UvSpace
+  List (Axis2D Unitless) ->
+  Curve2D Unitless
 connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
   let saddlePoint = Frame2D.originPoint frame
   let Subproblem{f, dvdu, dudv, uvBounds} = subproblem

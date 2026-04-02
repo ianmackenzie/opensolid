@@ -38,34 +38,34 @@ import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Vector2D (Vector2D)
 
 -- | Get the origin point of an axis.
-originPoint :: Axis2D units space -> Point2D units space
+originPoint :: Axis2D units -> Point2D units
 originPoint (Axis2D p0 _) = p0
 
 -- | Get the direction of an axis.
-direction :: Axis2D units space -> Direction2D space
+direction :: Axis2D units -> Direction2D
 direction (Axis2D _ d) = d
 
-leftwardDirection :: Axis2D units space -> Direction2D space
+leftwardDirection :: Axis2D units -> Direction2D
 leftwardDirection axis = Direction2D.rotateLeft (direction axis)
 
-rightwardDirection :: Axis2D units space -> Direction2D space
+rightwardDirection :: Axis2D units -> Direction2D
 rightwardDirection axis = Direction2D.rotateRight (direction axis)
 
 -- | The X axis.
-x :: Axis2D units space
+x :: Axis2D units
 x = Axis2D Point2D.origin Direction2D.x
 
 -- | The Y axis.
-y :: Axis2D units space
+y :: Axis2D units
 y = Axis2D Point2D.origin Direction2D.y
 
-through :: Point2D units space -> Direction2D space -> Axis2D units space
+through :: Point2D units -> Direction2D -> Axis2D units
 through = Axis2D
 
-moveTo :: Point2D units space -> Axis2D units space -> Axis2D units space
+moveTo :: Point2D units -> Axis2D units -> Axis2D units
 moveTo newOriginPoint axis = Axis2D newOriginPoint (direction axis)
 
-reverse :: Axis2D units space -> Axis2D units space
+reverse :: Axis2D units -> Axis2D units
 reverse (Axis2D p0 d) = Axis2D p0 -d
 
 {-| Convert a 2D axis to 3D axis by placing it on a plane.
@@ -73,54 +73,32 @@ reverse (Axis2D p0 d) = Axis2D p0 -d
 Given a 2D axis defined within a plane's coordinate system,
 this returns the corresponding 3D axis.
 -}
-placeOn :: Plane3D global -> Axis2D Meters local -> Axis3D global
+placeOn :: Plane3D space -> Axis2D Meters -> Axis3D space
 placeOn plane (Axis2D p0 d) = Axis3D (Point2D.placeOn plane p0) (Direction2D.placeOn plane d)
 
-transformBy ::
-  Transform.IsOrthonormal tag =>
-  Transform2D tag units space ->
-  Axis2D units space ->
-  Axis2D units space
+transformBy :: Transform.IsOrthonormal tag => Transform2D tag units -> Axis2D units -> Axis2D units
 transformBy transform axis = do
   let transformedOriginPoint = Point2D.transformBy transform (originPoint axis)
   let transformedDirection = Direction2D.transformBy transform (direction axis)
   Axis2D transformedOriginPoint transformedDirection
 
-offsetLeftwardBy :: Quantity units -> Axis2D units space -> Axis2D units space
+offsetLeftwardBy :: Quantity units -> Axis2D units -> Axis2D units
 offsetLeftwardBy distance axis = translateIn (leftwardDirection axis) distance axis
 
-offsetRightwardBy :: Quantity units -> Axis2D units space -> Axis2D units space
+offsetRightwardBy :: Quantity units -> Axis2D units -> Axis2D units
 offsetRightwardBy distance axis = translateIn (rightwardDirection axis) distance axis
 
-translateBy ::
-  Vector2D units space ->
-  Axis2D units space ->
-  Axis2D units space
+translateBy :: Vector2D units -> Axis2D units -> Axis2D units
 translateBy = Transform2D.translateByImpl transformBy
 
-translateIn ::
-  Direction2D space ->
-  Quantity units ->
-  Axis2D units space ->
-  Axis2D units space
+translateIn :: Direction2D -> Quantity units -> Axis2D units -> Axis2D units
 translateIn = Transform2D.translateInImpl transformBy
 
-translateAlong ::
-  Axis2D units space ->
-  Quantity units ->
-  Axis2D units space ->
-  Axis2D units space
+translateAlong :: Axis2D units -> Quantity units -> Axis2D units -> Axis2D units
 translateAlong = Transform2D.translateAlongImpl transformBy
 
-rotateAround ::
-  Point2D units space ->
-  Angle ->
-  Axis2D units space ->
-  Axis2D units space
+rotateAround :: Point2D units -> Angle -> Axis2D units -> Axis2D units
 rotateAround = Transform2D.rotateAroundImpl transformBy
 
-mirrorAcross ::
-  Axis2D units space ->
-  Axis2D units space ->
-  Axis2D units space
+mirrorAcross :: Axis2D units -> Axis2D units -> Axis2D units
 mirrorAcross = Transform2D.mirrorAcrossImpl transformBy

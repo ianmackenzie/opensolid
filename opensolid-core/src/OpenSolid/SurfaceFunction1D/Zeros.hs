@@ -7,11 +7,10 @@ where
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Prelude
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.UvSpace (UvSpace)
 
 data Zeros = Zeros
-  { crossingCurves :: ~(List (Curve2D Unitless UvSpace))
-  , crossingLoops :: ~(List (Curve2D Unitless UvSpace))
+  { crossingCurves :: ~(List (Curve2D Unitless))
+  , crossingLoops :: ~(List (Curve2D Unitless))
   , tangentPoints :: List (UvPoint, Sign)
   , saddlePoints :: List UvPoint
   }

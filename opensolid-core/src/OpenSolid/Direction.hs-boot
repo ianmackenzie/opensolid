@@ -18,14 +18,14 @@ type family
     direction | direction -> dimension space
   where
   Direction 1 Void = Sign
-  Direction 2 space = Direction2D space
+  Direction 2 Void = Direction2D
   Direction 3 space = Direction3D space
 
 class Exists (dimension :: Natural) (space :: Type)
 
 instance Exists 1 Void
 
-instance Exists 2 space
+instance Exists 2 Void
 
 instance Exists 3 space
 

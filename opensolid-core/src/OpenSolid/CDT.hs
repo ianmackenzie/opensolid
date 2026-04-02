@@ -13,10 +13,7 @@ import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Prelude
 import System.IO.Unsafe qualified
 
-unsafe ::
-  NonEmpty (NonEmpty (Point2D units space)) ->
-  List (Point2D units space) ->
-  Mesh (Point2D units space)
+unsafe :: NonEmpty (NonEmpty (Point2D units)) -> List (Point2D units) -> Mesh (Point2D units)
 unsafe boundaryLoops steinerVertices = do
   let boundaryVertices = NonEmpty.concat boundaryLoops
   let inputVertices = NonEmpty.extend boundaryVertices steinerVertices

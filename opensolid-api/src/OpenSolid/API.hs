@@ -66,7 +66,6 @@ import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.UvRegion (UvRegion)
 import OpenSolid.UvRegion qualified as UvRegion
-import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -78,17 +77,15 @@ classes =
   [ length
   , area
   , angle
+  , unitlessInterval
   , interval
-  , lengthInterval
   , areaInterval
   , angleInterval
   , color
+  , unitlessVector2D
   , vector2D
-  , displacement2D
   , areaVector2D
-  , uvVector
   , direction2D
-  , uvDirection
   , point2D
   , uvPoint
   , bounds2D
@@ -102,16 +99,16 @@ classes =
   , uvPolyline
   , polygon2D
   , uvPolygon
-  , curve
-  , lengthCurve
-  , areaCurve
-  , angleCurve
+  , unitlessCurve1D
+  , curve1D
+  , areaCurve1D
+  , angleCurve1D
   , svg
   , axis2D
   , uvAxis
   , convention3D
+  , unitlessVector3D
   , vector3D
-  , displacement3D
   , areaVector3D
   , direction3D
   , point3D
@@ -122,9 +119,8 @@ classes =
   , orientation3D
   , frame3D
   , world3D
+  , unitlessVectorCurve2D
   , vectorCurve2D
-  , displacementCurve2D
-  , uvVectorCurve
   , curve2D
   , uvCurve
   , region2D
@@ -176,24 +172,24 @@ length =
     , Class.absSelf Quantity.abs
     , Class.numberTimes
     , Class.plusSelf
-    , Class.plus @LengthInterval Self
-    , Class.plus @LengthCurve Self
+    , Class.plus @Interval Self
+    , Class.plus @Curve1D Self
     , Class.minusSelf
-    , Class.minus @LengthInterval Self
-    , Class.minus @LengthCurve Self
+    , Class.minus @Interval Self
+    , Class.minus @Curve1D Self
     , Class.timesNumber
     , Class.timesSelf
+    , Class.times @UnitlessInterval Self
     , Class.times @Interval Self
-    , Class.times @LengthInterval Self
-    , Class.times @Curve Self
-    , Class.times @LengthCurve Self
+    , Class.times @UnitlessCurve1D Self
+    , Class.times @Curve1D Self
     , Class.times @Direction2D Self
+    , Class.times @UnitlessVector2D Self
     , Class.times @Vector2D Self
-    , Class.times @Displacement2D Self
     , Class.divByNumber
     , Class.divBySelf
+    , Class.divBy @UnitlessInterval Self
     , Class.divBy @Interval Self
-    , Class.divBy @LengthInterval Self
     , Class.divByU (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.divByM (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.floorDivBySelf
@@ -222,20 +218,20 @@ area =
     , Class.numberTimes
     , Class.plusSelf
     , Class.plus @AreaInterval Self
-    , Class.plus @AreaCurve Self
+    , Class.plus @AreaCurve1D Self
     , Class.minusSelf
     , Class.minus @AreaInterval Self
-    , Class.minus @AreaCurve Self
+    , Class.minus @AreaCurve1D Self
     , Class.timesNumber
-    , Class.times @Interval Self
-    , Class.times @Curve Self
+    , Class.times @UnitlessInterval Self
+    , Class.times @UnitlessCurve1D Self
     , Class.times @Direction2D Self
-    , Class.times @Vector2D Self
+    , Class.times @UnitlessVector2D Self
     , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Length Self
+    , Class.divBy @UnitlessInterval Self
     , Class.divBy @Interval Self
-    , Class.divBy @LengthInterval Self
     , Class.divBy @AreaInterval Self
     , Class.divByU (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.divByM (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
@@ -281,16 +277,16 @@ angle =
     , Class.numberTimes
     , Class.plusSelf
     , Class.plus @AngleInterval Self
-    , Class.plus @AngleCurve Self
+    , Class.plus @AngleCurve1D Self
     , Class.minusSelf
     , Class.minus @AngleInterval Self
-    , Class.minus @AngleCurve Self
+    , Class.minus @AngleCurve1D Self
     , Class.timesNumber
-    , Class.times @Interval Self
-    , Class.times @Curve Self
+    , Class.times @UnitlessInterval Self
+    , Class.times @UnitlessCurve1D Self
     , Class.divByNumber
     , Class.divBySelf
-    , Class.divBy @Interval Self
+    , Class.divBy @UnitlessInterval Self
     , Class.divBy @AngleInterval Self
     , Class.divByU (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.divByR (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
@@ -298,13 +294,12 @@ angle =
     , Class.modBySelf
     ]
 
-type Interval = Interval.Interval Unitless
+type UnitlessInterval = Interval.Interval Unitless
 
-interval :: Class
-interval =
-  Class.new @Interval "A range of unitless values, with a lower bound and upper bound." $
-    [ Class.constant "Unit" Interval.unit $(docs 'Interval.unit)
-    , Class.constructor2 "First Value" "Second Value" Interval.Interval $(docs 'Interval.Interval)
+unitlessInterval :: Class
+unitlessInterval =
+  Class.new @UnitlessInterval "A range of unitless values, with a lower bound and upper bound." $
+    [ Class.constructor2 "First Value" "Second Value" Interval.Interval $(docs 'Interval.Interval)
     , Class.factory1 "Constant" "Value" Interval.constant $(docs 'Interval.constant)
     , Class.factory1 "Zero To" "Value" Interval.zeroTo $(docs 'Interval.zeroTo)
     , Class.factory1 "Symmetric" "Width" Interval.symmetric $(docs 'Interval.symmetric)
@@ -331,18 +326,18 @@ interval =
     , Class.times @Length Self
     , Class.times @Area Self
     , Class.times @Angle Self
-    , Class.times @LengthInterval Self
+    , Class.times @Interval Self
     , Class.times @AreaInterval Self
     , Class.times @AngleInterval Self
     , Class.divByNumber
     , Class.divBySelf
     ]
 
-type LengthInterval = Interval.Interval Meters
+type Interval = Interval.Interval Meters
 
-lengthInterval :: Class
-lengthInterval =
-  Class.new @LengthInterval "A range of length values, with a lower bound and upper bound." $
+interval :: Class
+interval =
+  Class.new @Interval "A range of length values, with a lower bound and upper bound." $
     [ Class.constructor2 "First Value" "Second Value" Interval.Interval $(docs 'Interval.Interval)
     , Class.factory1 "Constant" "Value" Interval.constant $(docs 'Interval.constant)
     , Class.factory1 "Zero To" "Value" Interval.zeroTo $(docs 'Interval.zeroTo)
@@ -365,11 +360,11 @@ lengthInterval =
     , Class.timesNumber
     , Class.timesSelf
     , Class.times @Length Self
-    , Class.times @Interval Self
+    , Class.times @UnitlessInterval Self
     , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Length Self
-    , Class.divBy @Interval Self
+    , Class.divBy @UnitlessInterval Self
     ]
 
 type AreaInterval = Interval.Interval SquareMeters
@@ -397,13 +392,13 @@ areaInterval =
     , Class.minusSelf
     , Class.minus @Area Self
     , Class.timesNumber
-    , Class.times @Interval Self
+    , Class.times @UnitlessInterval Self
     , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Length Self
     , Class.divBy @Area Self
+    , Class.divBy @UnitlessInterval Self
     , Class.divBy @Interval Self
-    , Class.divBy @LengthInterval Self
     ]
 
 type AngleInterval = Interval.Interval Radians
@@ -431,11 +426,11 @@ angleInterval =
     , Class.minusSelf
     , Class.minus @Angle Self
     , Class.timesNumber
-    , Class.times @Interval Self
+    , Class.times @UnitlessInterval Self
     , Class.divByNumber
     , Class.divBySelf
     , Class.divBy @Angle Self
-    , Class.divBy @Interval Self
+    , Class.divBy @UnitlessInterval Self
     ]
 
 color :: Class
@@ -484,8 +479,8 @@ color =
 
 vectorTransformations2D ::
   forall units.
-  FFI (Vector2D.Vector2D units FFI.Space) =>
-  List (Class.Member (Vector2D.Vector2D units FFI.Space))
+  FFI (Vector2D.Vector2D units) =>
+  List (Class.Member (Vector2D.Vector2D units))
 vectorTransformations2D =
   [ Class.member0 "Rotate Left" Vector2D.rotateLeft $(docs 'Vector2D.rotateLeft)
   , Class.member0 "Rotate Right" Vector2D.rotateRight $(docs 'Vector2D.rotateRight)
@@ -494,16 +489,16 @@ vectorTransformations2D =
   , Class.member1
       "Mirror Across"
       "Axis"
-      (Vector2D.mirrorAcross :: Axis2D -> Vector2D.Vector2D units FFI.Space -> Vector2D.Vector2D units FFI.Space)
+      (Vector2D.mirrorAcross :: Axis2D -> Vector2D.Vector2D units -> Vector2D.Vector2D units)
       $(docs 'Vector2D.mirrorAcross)
   ]
 
-type Vector2D = Vector2D.Vector2D Unitless FFI.Space
+type UnitlessVector2D = Vector2D.Vector2D Unitless
 
-vector2D :: Class
-vector2D =
-  Class.new @Vector2D "A unitless vector in 2D." $
-    [ Class.constant "Zero" (Vector2D.zero :: Vector2D) $(docs 'Vector2D.zero)
+unitlessVector2D :: Class
+unitlessVector2D =
+  Class.new @UnitlessVector2D "A unitless vector in 2D." $
+    [ Class.constant "Zero" (Vector2D.zero @Unitless) $(docs 'Vector2D.zero)
     , Class.factory1 "Unit" "Direction" Vector2D.unit $(docs 'Vector2D.unit)
     , Class.constructor2 "X Component" "Y Component" Vector2D.Vector2D $(docs 'Vector2D.Vector2D)
     , Class.factory1 "Y" "Y Component" Vector2D.y $(docs 'Vector2D.y)
@@ -517,7 +512,7 @@ vector2D =
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
     , Class.memberU0 "Is Zero" (~= Vector2D.zero) "Check if a vector is zero, within the current tolerance."
-    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> Vector2D -> Vector3D) $(docs 'Vector2D.placeOn)
+    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> UnitlessVector2D -> UnitlessVector3D) $(docs 'Vector2D.placeOn)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -527,20 +522,20 @@ vector2D =
     , Class.times @Area Self
     , Class.divByNumber
     , Class.dotSelf
-    , Class.dotProduct @Displacement2D Self
+    , Class.dotProduct @Vector2D Self
     , Class.dotProduct @AreaVector2D Self
     , Class.crossSelf
-    , Class.crossProduct @Displacement2D Self
+    , Class.crossProduct @Vector2D Self
     , Class.crossProduct @AreaVector2D Self
     ]
       <> vectorTransformations2D
 
-type Displacement2D = Vector2D.Vector2D Meters FFI.Space
+type Vector2D = Vector2D.Vector2D Meters
 
-displacement2D :: Class
-displacement2D =
-  Class.new @Displacement2D "A displacement vector in 2D." $
-    [ Class.constant "Zero" (Vector2D.zero :: Displacement2D) $(docs 'Vector2D.zero)
+vector2D :: Class
+vector2D =
+  Class.new @Vector2D "A displacement vector in 2D." $
+    [ Class.constant "Zero" (Vector2D.zero @Meters) $(docs 'Vector2D.zero)
     , Class.constructor2 "X Component" "Y Component" Vector2D.Vector2D $(docs 'Vector2D.Vector2D)
     , Class.factory1 "X" "X Component" Vector2D.x $(docs 'Vector2D.x)
     , Class.factory1 "Y" "Y Component" Vector2D.y $(docs 'Vector2D.y)
@@ -559,7 +554,7 @@ displacement2D =
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
     , Class.memberM0 "Is Zero" (~= Vector2D.zero) "Check if a displacement is zero, within the current tolerance."
-    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> Displacement2D -> Displacement3D) $(docs 'Vector2D.placeOn)
+    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> Vector2D -> Vector3D) $(docs 'Vector2D.placeOn)
     , Class.negateSelf
     , Class.numberTimes
     , Class.plusSelf
@@ -569,18 +564,18 @@ displacement2D =
     , Class.divByNumber
     , Class.divBy @Length Self
     , Class.dotSelf
-    , Class.dotProduct @Vector2D Self
+    , Class.dotProduct @UnitlessVector2D Self
     , Class.crossSelf
-    , Class.crossProduct @Vector2D Self
+    , Class.crossProduct @UnitlessVector2D Self
     ]
       <> vectorTransformations2D
 
-type AreaVector2D = Vector2D.Vector2D SquareMeters FFI.Space
+type AreaVector2D = Vector2D.Vector2D SquareMeters
 
 areaVector2D :: Class
 areaVector2D =
   Class.new @AreaVector2D "A vector in 2D with units of area." $
-    [ Class.constant "Zero" (Vector2D.zero :: AreaVector2D) $(docs 'Vector2D.zero)
+    [ Class.constant "Zero" (Vector2D.zero @SquareMeters) $(docs 'Vector2D.zero)
     , Class.constructor2 "X Component" "Y Component" Vector2D.Vector2D $(docs 'Vector2D.Vector2D)
     , Class.factory1 "X" "X Component" Vector2D.x $(docs 'Vector2D.x)
     , Class.factory1 "Y" "Y Component" Vector2D.y $(docs 'Vector2D.y)
@@ -603,51 +598,19 @@ areaVector2D =
     , Class.divByNumber
     , Class.divBy @Length Self
     , Class.divBy @Area Self
-    , Class.dotProduct @Vector2D Self
-    , Class.crossProduct @Vector2D Self
+    , Class.dotProduct @UnitlessVector2D Self
+    , Class.crossProduct @UnitlessVector2D Self
     ]
       <> vectorTransformations2D
 
-type UvVector = Vector2D.Vector2D Unitless UvSpace
-
-uvVector :: Class
-uvVector =
-  Class.new @UvVector "A vector in UV parameter space." $
-    [ Class.constant "Zero" (Vector2D.zero :: UvVector) $(docs 'Vector2D.zero)
-    , Class.factory1 "Unit" "Direction" Vector2D.unit $(docs 'Vector2D.unit)
-    , Class.constructor2 "U Component" "V Component" Vector2D.Vector2D "Construct a vector from its U and V components."
-    , Class.factory2 "Polar" "Magnitude" "Angle" Vector2D.polar $(docs 'Vector2D.polar)
-    , Class.property "Components" Vector2D.components $(docs 'Vector2D.components)
-    , Class.property "U Component" Vector2D.xComponent "Get the U component of a vector."
-    , Class.property "V Component" Vector2D.yComponent "Get the V component of a vector."
-    , Class.memberU0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
-    , Class.memberU0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
-    , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
-    , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
-    , Class.memberU0 "Is Zero" (~= Vector2D.zero) "Check if a vector is zero, within the current tolerance."
-    , Class.member0 "Rotate Left" Vector2D.rotateLeft $(docs 'Vector2D.rotateLeft)
-    , Class.member0 "Rotate Right" Vector2D.rotateRight $(docs 'Vector2D.rotateRight)
-    , Class.member1 "Rotate By" "Angle" Vector2D.rotateBy $(docs 'Vector2D.rotateBy)
-    , Class.member1 "Mirror In" "Direction" Vector2D.mirrorIn $(docs 'Vector2D.mirrorIn)
-    , Class.member1 "Mirror Across" "Axis" (Vector2D.mirrorAcross :: UvAxis -> UvVector -> UvVector) $(docs 'Vector2D.mirrorAcross)
-    , Class.negateSelf
-    , Class.numberTimes
-    , Class.plusSelf
-    , Class.minusSelf
-    , Class.timesNumber
-    , Class.divByNumber
-    , Class.dotSelf
-    , Class.crossSelf
-    ]
-
-type Direction2D = Direction2D.Direction2D FFI.Space
+type Direction2D = Direction2D.Direction2D
 
 direction2D :: Class
 direction2D =
   Class.new @Direction2D $(docs ''Direction2D.Direction2D) $
     [ Class.upcast Vector2D.unit
-    , Class.constant "X" (Direction2D.x :: Direction2D) $(docs 'Direction2D.x)
-    , Class.constant "Y" (Direction2D.y :: Direction2D) $(docs 'Direction2D.y)
+    , Class.constant "X" Direction2D.x $(docs 'Direction2D.x)
+    , Class.constant "Y" Direction2D.y $(docs 'Direction2D.y)
     , Class.factory1 "From Angle" "Angle" Direction2D.fromAngle $(docs 'Direction2D.fromAngle)
     , Class.factory1 "Degrees" "Value" Direction2D.degrees $(docs 'Direction2D.degrees)
     , Class.factory1 "Radians" "Value" Direction2D.radians $(docs 'Direction2D.radians)
@@ -660,31 +623,12 @@ direction2D =
     , Class.negateSelf
     ]
 
-type UvDirection = Direction2D.Direction2D UvSpace
-
-uvDirection :: Class
-uvDirection =
-  Class.new @UvDirection "A direction in UV parameter space." $
-    [ Class.upcast Vector2D.unit
-    , Class.constant "U" (Direction2D.x :: UvDirection) "The U direction."
-    , Class.constant "V" (Direction2D.y :: UvDirection) "The V direction."
-    , Class.factory1 "From Angle" "Angle" Direction2D.fromAngle $(docs 'Direction2D.fromAngle)
-    , Class.factory1 "Degrees" "Value" Direction2D.degrees $(docs 'Direction2D.degrees)
-    , Class.factory1 "Radians" "Value" Direction2D.radians $(docs 'Direction2D.radians)
-    , Class.member0 "Rotate Left" Direction2D.rotateLeft $(docs 'Direction2D.rotateLeft)
-    , Class.member0 "Rotate Right" Direction2D.rotateRight $(docs 'Direction2D.rotateRight)
-    , Class.member1 "Rotate By" "Angle" Direction2D.rotateBy $(docs 'Direction2D.rotateBy)
-    , Class.member1 "Mirror In" "Direction" Direction2D.mirrorIn $(docs 'Direction2D.mirrorIn)
-    , Class.member1 "Mirror Across" "Axis" (Direction2D.mirrorAcross :: UvAxis -> UvDirection -> UvDirection) $(docs 'Direction2D.mirrorAcross)
-    , Class.negateSelf
-    ]
-
-type Point2D = Point2D.Point2D Meters FFI.Space
+type Point2D = Point2D.Point2D Meters
 
 point2D :: Class
 point2D =
   Class.new @Point2D "A point in 2D, defined by its X and Y coordinates." $
-    [ Class.constant "Origin" (Point2D.origin @Meters @FFI.Space) $(docs 'Point2D.origin)
+    [ Class.constant "Origin" (Point2D.origin @Meters) $(docs 'Point2D.origin)
     , Class.constructor2 "X Coordinate" "Y Coordinate" Point2D.Point2D $(docs 'Point2D.Point2D)
     , Class.factory1 "X" "X Coordinate" Point2D.x $(docs 'Point2D.x)
     , Class.factory1 "Y" "Y Coordinate" Point2D.y $(docs 'Point2D.y)
@@ -700,10 +644,10 @@ point2D =
     , Class.property "Y Coordinate" Point2D.yCoordinate $(docs 'Point2D.yCoordinate)
     , Class.member1 "Distance To" "Other" Point2D.distanceFrom $(docs 'Point2D.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point2D.midpoint $(docs 'Point2D.midpoint)
-    , Class.member1 "Place On" "Plane" (Point2D.placeOn @FFI.Space @FFI.Space) $(docs 'Point2D.placeOn)
+    , Class.member1 "Place On" "Plane" (Point2D.placeOn @FFI.Space) $(docs 'Point2D.placeOn)
     , Class.minusSelf
-    , Class.minus @Displacement2D Self
-    , Class.plus @Displacement2D Self
+    , Class.minus @Vector2D Self
+    , Class.plus @Vector2D Self
     , Class.minus @Curve2D Self
     ]
       <> affineTransformations2D Point2D.transformBy
@@ -711,7 +655,7 @@ point2D =
 uvPoint :: Class
 uvPoint =
   Class.new @UvPoint $(docs ''UvPoint.UvPoint) $
-    [ Class.constant "Origin" (Point2D.origin @Unitless @UvSpace) $(docs 'Point2D.origin)
+    [ Class.constant "Origin" (Point2D.origin @Unitless) $(docs 'Point2D.origin)
     , Class.constructor2 "U Coordinate" "V Coordinate" Point2D.Point2D $(docs 'Point2D.Point2D)
     , Class.property "Coordinates" Point2D.coordinates $(docs 'Point2D.coordinates)
     , Class.property "U Coordinate" Point2D.xCoordinate $(docs 'Point2D.xCoordinate)
@@ -719,11 +663,11 @@ uvPoint =
     , Class.member1 "Distance To" "Other" Point2D.distanceFrom $(docs 'Point2D.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point2D.midpoint $(docs 'Point2D.midpoint)
     , Class.minusSelf
-    , Class.minus @UvVector Self
-    , Class.plus @UvVector Self
+    , Class.minus @UnitlessVector2D Self
+    , Class.plus @UnitlessVector2D Self
     ]
 
-type Bounds2D = Bounds2D.Bounds2D Meters FFI.Space
+type Bounds2D = Bounds2D.Bounds2D Meters
 
 bounds2D :: Class
 bounds2D =
@@ -736,8 +680,8 @@ bounds2D =
     , Class.property "Coordinates" Bounds2D.coordinates $(docs 'Bounds2D.coordinates)
     , Class.property "X Coordinate" Bounds2D.xCoordinate $(docs 'Bounds2D.xCoordinate)
     , Class.property "Y Coordinate" Bounds2D.yCoordinate $(docs 'Bounds2D.yCoordinate)
-    , Class.plus @Displacement2D Self
-    , Class.minus @Displacement2D Self
+    , Class.plus @Vector2D Self
+    , Class.minus @Vector2D Self
     ]
       <> affineTransformations2D Bounds2D.transformBy
 
@@ -752,11 +696,11 @@ uvBounds =
     , Class.property "Coordinates" Bounds2D.coordinates $(docs 'Bounds2D.coordinates)
     , Class.property "U Coordinate" Bounds2D.xCoordinate "Get the U coordinate bounds of a bounding box."
     , Class.property "V Coordinate" Bounds2D.yCoordinate "Get the V coordinate bounds of a bounding box."
-    , Class.plus @UvVector Self
-    , Class.minus @UvVector Self
+    , Class.plus @UnitlessVector2D Self
+    , Class.minus @UnitlessVector2D Self
     ]
 
-type Line2D = Line2D.Line2D Meters FFI.Space
+type Line2D = Line2D.Line2D Meters
 
 line2D :: Class
 line2D =
@@ -768,7 +712,7 @@ line2D =
     , Class.member1 "Distance To" "Point" Line2D.distanceTo $(docs 'Line2D.distanceTo)
     ]
 
-type UvLine = Line2D.Line2D Unitless UvSpace
+type UvLine = Line2D.Line2D Unitless
 
 uvLine :: Class
 uvLine =
@@ -780,7 +724,7 @@ uvLine =
     , Class.member1 "Distance To" "Point" Line2D.distanceTo $(docs 'Line2D.distanceTo)
     ]
 
-type Triangle2D = Triangle2D.Triangle2D Meters FFI.Space
+type Triangle2D = Triangle2D.Triangle2D Meters
 
 triangle2D :: Class
 triangle2D =
@@ -790,7 +734,7 @@ triangle2D =
     , Class.member0 "Signed Area" Triangle2D.signedArea $(docs 'Triangle2D.signedArea)
     ]
 
-type Circle2D = Circle2D.Circle2D Meters FFI.Space
+type Circle2D = Circle2D.Circle2D Meters
 
 circle2D :: Class
 circle2D =
@@ -803,7 +747,7 @@ circle2D =
     , Class.member1 "Point" "Angle" (flip Circle2D.point) $(docs 'Circle2D.point)
     ]
 
-type UvCircle = Circle2D.Circle2D Unitless UvSpace
+type UvCircle = Circle2D.Circle2D Unitless
 
 uvCircle :: Class
 uvCircle =
@@ -816,7 +760,7 @@ uvCircle =
     , Class.member1 "Point" "Angle" (flip Circle2D.point) $(docs 'Circle2D.point)
     ]
 
-type Polyline2D = Polyline2D.Polyline2D Meters FFI.Space
+type Polyline2D = Polyline2D.Polyline2D Meters
 
 polyline2D :: Class
 polyline2D =
@@ -830,7 +774,7 @@ polyline2D =
     , Class.member0 "Length" Polyline2D.length $(docs 'Polyline2D.length)
     ]
 
-type UvPolyline = Polyline2D.Polyline2D Unitless UvSpace
+type UvPolyline = Polyline2D.Polyline2D Unitless
 
 uvPolyline :: Class
 uvPolyline =
@@ -844,7 +788,7 @@ uvPolyline =
     , Class.member0 "Length" Polyline2D.length $(docs 'Polyline2D.length)
     ]
 
-type Polygon2D = Polygon2D.Polygon2D Meters FFI.Space
+type Polygon2D = Polygon2D.Polygon2D Meters
 
 polygon2D :: Class
 polygon2D =
@@ -858,7 +802,7 @@ polygon2D =
     , Class.member0 "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
     ]
 
-type UvPolygon = Polygon2D.Polygon2D Unitless UvSpace
+type UvPolygon = Polygon2D.Polygon2D Unitless
 
 uvPolygon :: Class
 uvPolygon =
@@ -872,11 +816,11 @@ uvPolygon =
     , Class.member0 "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
     ]
 
-type Curve = Curve1D.Curve1D Unitless
+type UnitlessCurve1D = Curve1D.Curve1D Unitless
 
-curve :: Class
-curve =
-  Class.new @Curve "A parametric curve definining a unitless value in terms of a parameter value." $
+unitlessCurve1D :: Class
+unitlessCurve1D =
+  Class.new @UnitlessCurve1D "A parametric curve definining a unitless value in terms of a parameter value." $
     [ Class.constant "Zero" (Curve1D.zero @Unitless) $(docs 'Curve1D.zero)
     , Class.constant "T" Curve1D.t $(docs 'Curve1D.t)
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
@@ -904,9 +848,9 @@ curve =
     , Class.times @Length Self
     , Class.times @Area Self
     , Class.times @Angle Self
-    , Class.times @LengthCurve Self
-    , Class.times @AreaCurve Self
-    , Class.times @AngleCurve Self
+    , Class.times @Curve1D Self
+    , Class.times @AreaCurve1D Self
+    , Class.times @AngleCurve1D Self
     , Class.divByNumber
     , Class.divByU Curve1D.quotient
     , Class.nested @Curve1D.Zero "A point where a given curve is equal to zero." $
@@ -916,11 +860,11 @@ curve =
         ]
     ]
 
-type AngleCurve = Curve1D.Curve1D Radians
+type AngleCurve1D = Curve1D.Curve1D Radians
 
-angleCurve :: Class
-angleCurve =
-  Class.new @AngleCurve "A parametric curve definining an angle in terms of a parameter value." $
+angleCurve1D :: Class
+angleCurve1D =
+  Class.new @AngleCurve1D "A parametric curve definining an angle in terms of a parameter value." $
     [ Class.constant "Zero" (Curve1D.zero @Radians) $(docs 'Curve1D.zero)
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
@@ -937,18 +881,18 @@ angleCurve =
     , Class.minusSelf
     , Class.minus @Angle Self
     , Class.timesNumber
-    , Class.times @Curve Self
+    , Class.times @UnitlessCurve1D Self
     , Class.divByNumber
     , Class.divByR Curve1D.quotient
     , Class.divBy @Angle Self
     , Class.divByU Curve1D.quotient
     ]
 
-type LengthCurve = Curve1D.Curve1D Meters
+type Curve1D = Curve1D.Curve1D Meters
 
-lengthCurve :: Class
-lengthCurve =
-  Class.new @LengthCurve "A parametric curve definining a length in terms of a parameter value." $
+curve1D :: Class
+curve1D =
+  Class.new @Curve1D "A parametric curve definining a length in terms of a parameter value." $
     [ Class.constant "Zero" (Curve1D.zero @Meters) $(docs 'Curve1D.zero)
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
@@ -966,18 +910,18 @@ lengthCurve =
     , Class.timesNumber
     , Class.timesSelf
     , Class.times @Length Self
-    , Class.times @Curve Self
+    , Class.times @UnitlessCurve1D Self
     , Class.divByNumber
     , Class.divByM Curve1D.quotient
     , Class.divBy @Length Self
     , Class.divByU Curve1D.quotient
     ]
 
-type AreaCurve = Curve1D.Curve1D SquareMeters
+type AreaCurve1D = Curve1D.Curve1D SquareMeters
 
-areaCurve :: Class
-areaCurve =
-  Class.new @AreaCurve "A parametric curve definining an area in terms of a parameter value." $
+areaCurve1D :: Class
+areaCurve1D =
+  Class.new @AreaCurve1D "A parametric curve definining an area in terms of a parameter value." $
     [ Class.constant "Zero" (Curve1D.zero @SquareMeters) $(docs 'Curve1D.zero)
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
@@ -993,7 +937,7 @@ areaCurve =
     , Class.minusSelf
     , Class.minus @Area Self
     , Class.timesNumber
-    , Class.times @Curve Self
+    , Class.times @UnitlessCurve1D Self
     , Class.divByNumber
     , Class.divByS Curve1D.quotient
     , Class.divBy @Length Self
@@ -1002,7 +946,7 @@ areaCurve =
     , Class.divByM Curve1D.quotient
     ]
 
-type Svg = Svg.Svg FFI.Space
+type Svg = Svg.Svg
 
 svg :: Class
 svg =
@@ -1023,14 +967,14 @@ svg =
     , Class.factory3 "Circle With" "Attributes" "Center Point" "Diameter" Svg.circleWith $(docs 'Svg.circleWith)
     , Class.factory2 "Curve" "Resolution" "Curve" Svg.curve $(docs 'Svg.curve)
     , Class.factory3 "Curve With" "Attributes" "Resolution" "Curve" Svg.curveWith $(docs 'Svg.curveWith)
-    , Class.constant "Black Stroke" (Svg.blackStroke @FFI.Space) $(docs 'Svg.blackStroke)
-    , Class.static1 "Stroke Color" "Color" (Svg.strokeColor @FFI.Space) $(docs 'Svg.strokeColor)
-    , Class.constant "No Fill" (Svg.noFill @FFI.Space) $(docs 'Svg.noFill)
-    , Class.static1 "Fill Color" "Color" (Svg.fillColor @FFI.Space) $(docs 'Svg.fillColor)
-    , Class.nested @(Svg.Attribute FFI.Space) $(docs ''Svg.Attribute) []
+    , Class.constant "Black Stroke" Svg.blackStroke $(docs 'Svg.blackStroke)
+    , Class.static1 "Stroke Color" "Color" Svg.strokeColor $(docs 'Svg.strokeColor)
+    , Class.constant "No Fill" Svg.noFill $(docs 'Svg.noFill)
+    , Class.static1 "Fill Color" "Color" Svg.fillColor $(docs 'Svg.fillColor)
+    , Class.nested @Svg.Attribute $(docs ''Svg.Attribute) []
     ]
 
-type Axis2D = Axis2D.Axis2D Meters FFI.Space
+type Axis2D = Axis2D.Axis2D Meters
 
 axis2D :: Class
 axis2D =
@@ -1038,13 +982,13 @@ axis2D =
     [ Class.constructor2 "Origin Point" "Direction" Axis2D.Axis2D $(docs 'Axis2D.Axis2D)
     , Class.property "Origin Point" Axis2D.originPoint $(docs 'Axis2D.originPoint)
     , Class.property "Direction" Axis2D.direction $(docs 'Axis2D.direction)
-    , Class.constant "X" (Axis2D.x :: Axis2D) $(docs 'Axis2D.x)
-    , Class.constant "Y" (Axis2D.y :: Axis2D) $(docs 'Axis2D.y)
+    , Class.constant "X" (Axis2D.x @Meters) $(docs 'Axis2D.x)
+    , Class.constant "Y" (Axis2D.y @Meters) $(docs 'Axis2D.y)
     , Class.member1 "Place On" "Plane" (Axis2D.placeOn :: Plane3D -> Axis2D -> Axis3D) $(docs 'Axis2D.placeOn)
     ]
       <> orthonormalTransformations2D Axis2D.transformBy
 
-type UvAxis = Axis2D.Axis2D Unitless UvSpace
+type UvAxis = Axis2D.Axis2D Unitless
 
 uvAxis :: Class
 uvAxis =
@@ -1052,39 +996,39 @@ uvAxis =
     [ Class.constructor2 "Origin Point" "Direction" Axis2D.Axis2D $(docs 'Axis2D.Axis2D)
     , Class.property "Origin Point" Axis2D.originPoint $(docs 'Axis2D.originPoint)
     , Class.property "Direction" Axis2D.direction $(docs 'Axis2D.direction)
-    , Class.constant "U" (Axis2D.x :: UvAxis) "The U axis."
-    , Class.constant "V" (Axis2D.y :: UvAxis) "The V axis."
+    , Class.constant "U" (Axis2D.x @Unitless) "The U axis."
+    , Class.constant "V" (Axis2D.y @Unitless) "The V axis."
     ]
 
 world3D :: Class
 world3D =
   Class.static "World3D" "A collection of global datums." $
-    [ Class.constant "Origin Point" (World3D.originPoint :: Point3D) $(docs 'World3D.originPoint)
-    , Class.constant "Forward Direction" (World3D.forwardDirection :: Direction3D) $(docs 'World3D.forwardDirection)
-    , Class.constant "Backward Direction" (World3D.backwardDirection :: Direction3D) $(docs 'World3D.backwardDirection)
-    , Class.constant "Leftward Direction" (World3D.leftwardDirection :: Direction3D) $(docs 'World3D.leftwardDirection)
-    , Class.constant "Rightward Direction" (World3D.rightwardDirection :: Direction3D) $(docs 'World3D.rightwardDirection)
-    , Class.constant "Upward Direction" (World3D.upwardDirection :: Direction3D) $(docs 'World3D.upwardDirection)
-    , Class.constant "Downward Direction" (World3D.downwardDirection :: Direction3D) $(docs 'World3D.downwardDirection)
-    , Class.constant "Forward Orientation" (World3D.forwardOrientation :: Orientation3D) $(docs 'World3D.forwardOrientation)
-    , Class.constant "Backward Orientation" (World3D.backwardOrientation :: Orientation3D) $(docs 'World3D.backwardOrientation)
-    , Class.constant "Leftward Orientation" (World3D.leftwardOrientation :: Orientation3D) $(docs 'World3D.leftwardOrientation)
-    , Class.constant "Rightward Orientation" (World3D.rightwardOrientation :: Orientation3D) $(docs 'World3D.rightwardOrientation)
-    , Class.constant "Upward Orientation" (World3D.upwardOrientation :: Orientation3D) $(docs 'World3D.upwardOrientation)
-    , Class.constant "Downward Orientation" (World3D.downwardOrientation :: Orientation3D) $(docs 'World3D.downwardOrientation)
-    , Class.constant "Frame" (World3D.frame :: Frame3D) $(docs 'World3D.frame)
-    , Class.constant "Forward Axis" (World3D.forwardAxis :: Axis3D) $(docs 'World3D.forwardAxis)
-    , Class.constant "Backward Axis" (World3D.backwardAxis :: Axis3D) $(docs 'World3D.backwardAxis)
-    , Class.constant "Leftward Axis" (World3D.leftwardAxis :: Axis3D) $(docs 'World3D.leftwardAxis)
-    , Class.constant "Rightward Axis" (World3D.rightwardAxis :: Axis3D) $(docs 'World3D.rightwardAxis)
-    , Class.constant "Upward Axis" (World3D.upwardAxis :: Axis3D) $(docs 'World3D.upwardAxis)
-    , Class.constant "Downward Axis" (World3D.downwardAxis :: Axis3D) $(docs 'World3D.downwardAxis)
-    , Class.constant "Front Plane" (World3D.frontPlane :: Plane3D) $(docs 'World3D.frontPlane)
-    , Class.constant "Back Plane" (World3D.backPlane :: Plane3D) $(docs 'World3D.backPlane)
-    , Class.constant "Left Plane" (World3D.leftPlane :: Plane3D) $(docs 'World3D.leftPlane)
-    , Class.constant "Right Plane" (World3D.rightPlane :: Plane3D) $(docs 'World3D.rightPlane)
-    , Class.constant "Top Plane" (World3D.topPlane :: Plane3D) $(docs 'World3D.topPlane)
-    , Class.constant "Bottom Plane" (World3D.bottomPlane :: Plane3D) $(docs 'World3D.bottomPlane)
+    [ Class.constant "Origin Point" (World3D.originPoint @FFI.Space) $(docs 'World3D.originPoint)
+    , Class.constant "Forward Direction" (World3D.forwardDirection @FFI.Space) $(docs 'World3D.forwardDirection)
+    , Class.constant "Backward Direction" (World3D.backwardDirection @FFI.Space) $(docs 'World3D.backwardDirection)
+    , Class.constant "Leftward Direction" (World3D.leftwardDirection @FFI.Space) $(docs 'World3D.leftwardDirection)
+    , Class.constant "Rightward Direction" (World3D.rightwardDirection @FFI.Space) $(docs 'World3D.rightwardDirection)
+    , Class.constant "Upward Direction" (World3D.upwardDirection @FFI.Space) $(docs 'World3D.upwardDirection)
+    , Class.constant "Downward Direction" (World3D.downwardDirection @FFI.Space) $(docs 'World3D.downwardDirection)
+    , Class.constant "Forward Orientation" (World3D.forwardOrientation @FFI.Space) $(docs 'World3D.forwardOrientation)
+    , Class.constant "Backward Orientation" (World3D.backwardOrientation @FFI.Space) $(docs 'World3D.backwardOrientation)
+    , Class.constant "Leftward Orientation" (World3D.leftwardOrientation @FFI.Space) $(docs 'World3D.leftwardOrientation)
+    , Class.constant "Rightward Orientation" (World3D.rightwardOrientation @FFI.Space) $(docs 'World3D.rightwardOrientation)
+    , Class.constant "Upward Orientation" (World3D.upwardOrientation @FFI.Space) $(docs 'World3D.upwardOrientation)
+    , Class.constant "Downward Orientation" (World3D.downwardOrientation @FFI.Space) $(docs 'World3D.downwardOrientation)
+    , Class.constant "Frame" (World3D.frame @FFI.Space) $(docs 'World3D.frame)
+    , Class.constant "Forward Axis" (World3D.forwardAxis @FFI.Space) $(docs 'World3D.forwardAxis)
+    , Class.constant "Backward Axis" (World3D.backwardAxis @FFI.Space) $(docs 'World3D.backwardAxis)
+    , Class.constant "Leftward Axis" (World3D.leftwardAxis @FFI.Space) $(docs 'World3D.leftwardAxis)
+    , Class.constant "Rightward Axis" (World3D.rightwardAxis @FFI.Space) $(docs 'World3D.rightwardAxis)
+    , Class.constant "Upward Axis" (World3D.upwardAxis @FFI.Space) $(docs 'World3D.upwardAxis)
+    , Class.constant "Downward Axis" (World3D.downwardAxis @FFI.Space) $(docs 'World3D.downwardAxis)
+    , Class.constant "Front Plane" (World3D.frontPlane @FFI.Space) $(docs 'World3D.frontPlane)
+    , Class.constant "Back Plane" (World3D.backPlane @FFI.Space) $(docs 'World3D.backPlane)
+    , Class.constant "Left Plane" (World3D.leftPlane @FFI.Space) $(docs 'World3D.leftPlane)
+    , Class.constant "Right Plane" (World3D.rightPlane @FFI.Space) $(docs 'World3D.rightPlane)
+    , Class.constant "Top Plane" (World3D.topPlane @FFI.Space) $(docs 'World3D.topPlane)
+    , Class.constant "Bottom Plane" (World3D.bottomPlane @FFI.Space) $(docs 'World3D.bottomPlane)
     ]
 
 convention3D :: Class
@@ -1094,12 +1038,12 @@ convention3D =
     , Class.constant "Z Up" Convention3D.zUp $(docs 'Convention3D.zUp)
     ]
 
-type Vector3D = Vector3D.Vector3D Unitless FFI.Space
+type UnitlessVector3D = Vector3D.Vector3D Unitless FFI.Space
 
-vector3D :: Class
-vector3D =
-  Class.new @Vector3D "A unitless vector in 3D." $
-    [ Class.constant "Zero" (Vector3D.zero :: Vector3D) $(docs 'Vector3D.zero)
+unitlessVector3D :: Class
+unitlessVector3D =
+  Class.new @UnitlessVector3D "A unitless vector in 3D." $
+    [ Class.constant "Zero" (Vector3D.zero @Unitless @FFI.Space) $(docs 'Vector3D.zero)
     , Class.factory1 "Unit" "Direction" Vector3D.unit $(docs 'Vector3D.unit)
     , Class.factory2 "XYZ" "Convention" "Components" Vector3D.xyz $(docs 'Vector3D.xyz)
     , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3D.zUp $(docs 'Vector3D.zUp)
@@ -1109,6 +1053,44 @@ vector3D =
     , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
     , Class.memberU0 "Direction" Vector3D.direction $(docs 'Vector3D.direction)
     , Class.memberU0 "Is Zero" (~= Vector3D.zero) "Check if a vector is zero, within the current tolerance."
+    , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
+    , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> UnitlessVector3D -> UnitlessVector3D) $(docs 'Vector3D.rotateAround)
+    , Class.member1 "Mirror In" "Direction" Vector3D.mirrorIn $(docs 'Vector3D.mirrorIn)
+    , Class.member1 "Mirror Across" "Plane" (Vector3D.mirrorAcross :: Plane3D -> UnitlessVector3D -> UnitlessVector3D) $(docs 'Vector3D.mirrorAcross)
+    , Class.member2 "Scale In" "Direction" "Scale" Vector3D.scaleIn $(docs 'Vector3D.scaleIn)
+    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3D.scaleAlong :: Axis3D -> Number -> UnitlessVector3D -> UnitlessVector3D) $(docs 'Vector3D.scaleAlong)
+    , Class.member1 "Place In" "Frame" (Vector3D.placeIn :: Frame3D -> UnitlessVector3D -> UnitlessVector3D) $(docs 'Vector3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (Vector3D.relativeTo :: Frame3D -> UnitlessVector3D -> UnitlessVector3D) $(docs 'Vector3D.relativeTo)
+    , Class.negateSelf
+    , Class.numberTimes
+    , Class.plusSelf
+    , Class.minusSelf
+    , Class.timesNumber
+    , Class.times @Length Self
+    , Class.times @Area Self
+    , Class.divByNumber
+    , Class.dotSelf
+    , Class.dotProduct @Vector3D Self
+    , Class.dotProduct @AreaVector3D Self
+    , Class.crossSelf
+    , Class.crossProduct @Vector3D Self
+    , Class.crossProduct @AreaVector3D Self
+    ]
+
+type Vector3D = Vector3D.Vector3D Meters FFI.Space
+
+vector3D :: Class
+vector3D =
+  Class.new @Vector3D "A displacement vector in 3D." $
+    [ Class.constant "Zero" (Vector3D.zero @Meters @FFI.Space) $(docs 'Vector3D.zero)
+    , Class.factory2 "XYZ" "Convention" "Components" Vector3D.xyz $(docs 'Vector3D.xyz)
+    , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3D.zUp $(docs 'Vector3D.zUp)
+    , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3D.yUp $(docs 'Vector3D.yUp)
+    , Class.member1 "Components" "Convention" Vector3D.components $(docs 'Vector3D.components)
+    , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
+    , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
+    , Class.memberM0 "Direction" Vector3D.direction $(docs 'Vector3D.direction)
+    , Class.memberM0 "Is Zero" (~= Vector3D.zero) "Check if a displacement is zero, within the current tolerance."
     , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
     , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> Vector3D -> Vector3D) $(docs 'Vector3D.rotateAround)
     , Class.member1 "Mirror In" "Direction" Vector3D.mirrorIn $(docs 'Vector3D.mirrorIn)
@@ -1123,50 +1105,12 @@ vector3D =
     , Class.minusSelf
     , Class.timesNumber
     , Class.times @Length Self
-    , Class.times @Area Self
-    , Class.divByNumber
-    , Class.dotSelf
-    , Class.dotProduct @Displacement3D Self
-    , Class.dotProduct @AreaVector3D Self
-    , Class.crossSelf
-    , Class.crossProduct @Displacement3D Self
-    , Class.crossProduct @AreaVector3D Self
-    ]
-
-type Displacement3D = Vector3D.Vector3D Meters FFI.Space
-
-displacement3D :: Class
-displacement3D =
-  Class.new @Displacement3D "A displacement vector in 3D." $
-    [ Class.constant "Zero" (Vector3D.zero :: Displacement3D) $(docs 'Vector3D.zero)
-    , Class.factory2 "XYZ" "Convention" "Components" Vector3D.xyz $(docs 'Vector3D.xyz)
-    , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3D.zUp $(docs 'Vector3D.zUp)
-    , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3D.yUp $(docs 'Vector3D.yUp)
-    , Class.member1 "Components" "Convention" Vector3D.components $(docs 'Vector3D.components)
-    , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
-    , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
-    , Class.memberM0 "Direction" Vector3D.direction $(docs 'Vector3D.direction)
-    , Class.memberM0 "Is Zero" (~= Vector3D.zero) "Check if a displacement is zero, within the current tolerance."
-    , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
-    , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> Displacement3D -> Displacement3D) $(docs 'Vector3D.rotateAround)
-    , Class.member1 "Mirror In" "Direction" Vector3D.mirrorIn $(docs 'Vector3D.mirrorIn)
-    , Class.member1 "Mirror Across" "Plane" (Vector3D.mirrorAcross :: Plane3D -> Displacement3D -> Displacement3D) $(docs 'Vector3D.mirrorAcross)
-    , Class.member2 "Scale In" "Direction" "Scale" Vector3D.scaleIn $(docs 'Vector3D.scaleIn)
-    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3D.scaleAlong :: Axis3D -> Number -> Displacement3D -> Displacement3D) $(docs 'Vector3D.scaleAlong)
-    , Class.member1 "Place In" "Frame" (Vector3D.placeIn :: Frame3D -> Displacement3D -> Displacement3D) $(docs 'Vector3D.placeIn)
-    , Class.member1 "Relative To" "Frame" (Vector3D.relativeTo :: Frame3D -> Displacement3D -> Displacement3D) $(docs 'Vector3D.relativeTo)
-    , Class.negateSelf
-    , Class.numberTimes
-    , Class.plusSelf
-    , Class.minusSelf
-    , Class.timesNumber
-    , Class.times @Length Self
     , Class.divByNumber
     , Class.divBy @Length Self
     , Class.dotSelf
-    , Class.dotProduct @Vector3D Self
+    , Class.dotProduct @UnitlessVector3D Self
     , Class.crossSelf
-    , Class.crossProduct @Vector3D Self
+    , Class.crossProduct @UnitlessVector3D Self
     ]
 
 type AreaVector3D = Vector3D.Vector3D SquareMeters FFI.Space
@@ -1174,7 +1118,7 @@ type AreaVector3D = Vector3D.Vector3D SquareMeters FFI.Space
 areaVector3D :: Class
 areaVector3D =
   Class.new @AreaVector3D "A vector in 3D with units of area." $
-    [ Class.constant "Zero" (Vector3D.zero :: AreaVector3D) $(docs 'Vector3D.zero)
+    [ Class.constant "Zero" (Vector3D.zero @SquareMeters @FFI.Space) $(docs 'Vector3D.zero)
     , Class.factory2 "XYZ" "Convention" "Components" Vector3D.xyz $(docs 'Vector3D.xyz)
     , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3D.zUp $(docs 'Vector3D.zUp)
     , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3D.yUp $(docs 'Vector3D.yUp)
@@ -1199,8 +1143,8 @@ areaVector3D =
     , Class.divByNumber
     , Class.divBy @Length Self
     , Class.divBy @Area Self
-    , Class.dotProduct @Vector3D Self
-    , Class.crossProduct @Vector3D Self
+    , Class.dotProduct @UnitlessVector3D Self
+    , Class.crossProduct @UnitlessVector3D Self
     ]
 
 type Direction3D = Direction3D.Direction3D FFI.Space
@@ -1235,10 +1179,10 @@ point3D =
     , Class.member1 "Distance To" "Other" Point3D.distanceFrom $(docs 'Point3D.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point3D.midpoint $(docs 'Point3D.midpoint)
     , Class.member1 "Project Onto" "Plane" Point3D.projectOnto $(docs 'Point3D.projectOnto)
-    , Class.member1 "Project Into" "Plane" (Point3D.projectInto @FFI.Space @FFI.Space) $(docs 'Point3D.projectInto)
+    , Class.member1 "Project Into" "Plane" (Point3D.projectInto @FFI.Space) $(docs 'Point3D.projectInto)
     , Class.minusSelf
-    , Class.minus @Displacement3D Self
-    , Class.plus @Displacement3D Self
+    , Class.minus @Vector3D Self
+    , Class.plus @Vector3D Self
     , Class.member1 "Place In" "Frame" (Point3D.placeIn :: Frame3D -> Point3D -> Point3D) $(docs 'Point3D.placeIn)
     , Class.member1 "Relative To" "Frame" (Point3D.relativeTo :: Frame3D -> Point3D -> Point3D) $(docs 'Point3D.relativeTo)
     ]
@@ -1254,8 +1198,8 @@ bounds3D =
     , Class.factory1 @(NonEmpty Point3D) "Hull" "Points" Bounds3D.hull $(docs 'Bounds3D.hull)
     , Class.factory1 "Aggregate" "Bounds" Bounds3D.aggregate $(docs 'Bounds3D.aggregate)
     , Class.member1 "Coordinates" "Convention" Bounds3D.coordinates $(docs 'Bounds3D.coordinates)
-    , Class.plus @Displacement3D Self
-    , Class.minus @Displacement3D Self
+    , Class.plus @Vector3D Self
+    , Class.minus @Vector3D Self
     ]
       <> affineTransformations3D Bounds3D.transformBy
 
@@ -1401,42 +1345,31 @@ frame3D =
     ]
       <> rigidTransformations3D Frame3D.transformBy
 
-type VectorCurve2D = VectorCurve2D.VectorCurve2D Unitless FFI.Space
+type UnitlessVectorCurve2D = VectorCurve2D.VectorCurve2D Unitless
+
+unitlessVectorCurve2D :: Class
+unitlessVectorCurve2D =
+  Class.new @UnitlessVectorCurve2D "A parametric curve defining a 2D unitless vector in terms of a parameter value." $
+    [ Class.constant "Zero" (VectorCurve2D.zero @Unitless) $(docs 'VectorCurve2D.zero)
+    , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
+    , Class.factory2 "XY" "X Component" "Y Component" VectorCurve2D.xy $(docs 'VectorCurve2D.xy)
+    , Class.member1 "Value" "Parameter Value" (flip VectorCurve2D.value) $(docs 'VectorCurve2D.value)
+    ]
+
+type VectorCurve2D = VectorCurve2D.VectorCurve2D Meters
 
 vectorCurve2D :: Class
 vectorCurve2D =
-  Class.new @VectorCurve2D "A parametric curve defining a 2D unitless vector in terms of a parameter value." $
-    [ Class.constant "Zero" (VectorCurve2D.zero :: VectorCurve2D) $(docs 'VectorCurve2D.zero)
+  Class.new @VectorCurve2D "A parametric curve defining a 2D displacement vector in terms of a parameter value." $
+    [ Class.constant "Zero" (VectorCurve2D.zero @Meters) $(docs 'VectorCurve2D.zero)
     , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
     , Class.factory2 "XY" "X Component" "Y Component" VectorCurve2D.xy $(docs 'VectorCurve2D.xy)
-    , Class.member1 "Value" "Parameter Value" (flip VectorCurve2D.value) $(docs 'VectorCurve2D.value)
-    ]
-
-type DisplacementCurve2D = VectorCurve2D.VectorCurve2D Meters FFI.Space
-
-displacementCurve2D :: Class
-displacementCurve2D =
-  Class.new @DisplacementCurve2D "A parametric curve defining a 2D displacement vector in terms of a parameter value." $
-    [ Class.constant "Zero" (VectorCurve2D.zero :: DisplacementCurve2D) $(docs 'VectorCurve2D.zero)
-    , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
-    , Class.factory2 "XY" "X Component" "Y Component" VectorCurve2D.xy $(docs 'VectorCurve2D.xy)
-    , Class.member1 "Value" "Parameter Value" (flip VectorCurve2D.value) $(docs 'VectorCurve2D.value)
-    ]
-
-type UvVectorCurve = VectorCurve2D.VectorCurve2D Unitless UvSpace
-
-uvVectorCurve :: Class
-uvVectorCurve =
-  Class.new @UvVectorCurve "A parametric vector curve in UV parameter space." $
-    [ Class.constant "Zero" (VectorCurve2D.zero :: UvVectorCurve) $(docs 'VectorCurve2D.zero)
-    , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
-    , Class.factory2 "UV" "U Component" "V Component" VectorCurve2D.xy "Construct a UV vector curve from its U and V components."
     , Class.member1 "Value" "Parameter Value" (flip VectorCurve2D.value) $(docs 'VectorCurve2D.value)
     ]
 
 rigidTransformations2D ::
   FFI value =>
-  (Transform2D.Rigid Meters FFI.Space -> value -> value) ->
+  (Transform2D.Rigid Meters -> value -> value) ->
   List (Class.Member value)
 rigidTransformations2D transformBy =
   [ Class.member1 "Translate By" "Displacement" (Transform2D.translateByImpl transformBy) "Translate by the given displacement."
@@ -1447,7 +1380,7 @@ rigidTransformations2D transformBy =
 
 orthonormalTransformations2D ::
   FFI value =>
-  (forall tag. Transform.IsOrthonormal tag => Transform2D tag Meters FFI.Space -> value -> value) ->
+  (forall tag. Transform.IsOrthonormal tag => Transform2D tag Meters -> value -> value) ->
   List (Class.Member value)
 orthonormalTransformations2D transformBy =
   Class.member1 "Mirror Across" "Axis" (Transform2D.mirrorAcrossImpl transformBy) "Mirror across the given axis."
@@ -1455,7 +1388,7 @@ orthonormalTransformations2D transformBy =
 
 uniformTransformations2D ::
   FFI value =>
-  (forall tag. Transform.IsUniform tag => Transform2D tag Meters FFI.Space -> value -> value) ->
+  (forall tag. Transform.IsUniform tag => Transform2D tag Meters -> value -> value) ->
   List (Class.Member value)
 uniformTransformations2D transformBy =
   Class.member2 "Scale About" "Point" "Scale" (Transform2D.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."
@@ -1463,7 +1396,7 @@ uniformTransformations2D transformBy =
 
 affineTransformations2D ::
   FFI value =>
-  (forall tag. Transform2D tag Meters FFI.Space -> value -> value) ->
+  (forall tag. Transform2D tag Meters -> value -> value) ->
   List (Class.Member value)
 affineTransformations2D transformBy =
   Class.member2 "Scale Along" "Axis" "Scale" (Transform2D.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
@@ -1505,7 +1438,7 @@ affineTransformations3D transformBy =
   Class.member2 "Scale Along" "Axis" "Scale" (Transform3D.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
     : uniformTransformations3D transformBy
 
-type Curve2D = Curve2D.Curve2D Meters FFI.Space
+type Curve2D = Curve2D.Curve2D Meters
 
 curve2D :: Class
 curve2D =
@@ -1528,14 +1461,14 @@ curve2D =
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "X Coordinate" (Curve2D.xCoordinate) $(docs 'Curve2D.xCoordinate)
     , Class.property "Y Coordinate" (Curve2D.yCoordinate) $(docs 'Curve2D.yCoordinate)
-    , Class.plus @DisplacementCurve2D Self
-    , Class.minus @DisplacementCurve2D Self
+    , Class.plus @VectorCurve2D Self
+    , Class.minus @VectorCurve2D Self
     , Class.minusSelf
     , Class.minus @Point2D Self
     ]
       <> affineTransformations2D Curve2D.transformBy
 
-type UvCurve = Curve2D.Curve2D Unitless UvSpace
+type UvCurve = Curve2D.Curve2D Unitless
 
 uvCurve :: Class
 uvCurve =
@@ -1558,8 +1491,8 @@ uvCurve =
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "U Coordinate" (Curve2D.xCoordinate) "Get the U coordinate of a UV curve as a scalar curve."
     , Class.property "V Coordinate" (Curve2D.yCoordinate) "Get the V coordinate of a UV curve as a scalar curve."
-    , Class.plus @UvVectorCurve Self
-    , Class.minus @UvVectorCurve Self
+    , Class.plus @UnitlessVectorCurve2D Self
+    , Class.minus @UnitlessVectorCurve2D Self
     , Class.minusSelf
     , Class.minus @UvPoint Self
     ]
@@ -1585,7 +1518,7 @@ region2dInnerLoopsDocs =
 region2dBoundaryCurvesDocs :: Text
 region2dBoundaryCurvesDocs = "The list of all (outer and inner) boundary curves of a region."
 
-type Region2D = Region2D.Region2D Meters FFI.Space
+type Region2D = Region2D.Region2D Meters
 
 region2D :: Class
 region2D =
@@ -1624,8 +1557,8 @@ body3D = do
         let mesh = Body3D.toSurfaceMesh givenResolution body
         Mitsuba.writeMeshes path [(mesh, #name "")]
   Class.new @Body3D $(docs ''Body3D.Body3D) $
-    [ Class.factoryM4R "Extruded" "Sketch Plane" "Profile" "Start" "End" (Body3D.extruded @FFI.Space @FFI.Space) $(docs 'Body3D.extruded)
-    , Class.factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3D.revolved @FFI.Space @FFI.Space) $(docs 'Body3D.revolved)
+    [ Class.factoryM4R "Extruded" "Sketch Plane" "Profile" "Start" "End" (Body3D.extruded @FFI.Space) $(docs 'Body3D.extruded)
+    , Class.factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3D.revolved @FFI.Space) $(docs 'Body3D.revolved)
     , Class.factoryM1R "Block" "Bounding Box" Body3D.block $(docs 'Body3D.block)
     , Class.factoryM2R "Sphere" "Center Point" "Diameter" Body3D.sphere $(docs 'Body3D.sphere)
     , Class.factoryM3R "Cylinder" "Start Point" "End Point" "Diameter" Body3D.cylinder $(docs 'Body3D.cylinder)
@@ -1668,7 +1601,7 @@ type Model3D = Model3D.Model3D FFI.Space
 model3D :: Class
 model3D =
   Class.new @Model3D $(docs ''Model3D.Model3D) $
-    [ Class.constant "Nothing" (Model3D.nothing :: Model3D) $(docs 'Model3D.nothing)
+    [ Class.constant "Nothing" (Model3D.nothing @FFI.Space) $(docs 'Model3D.nothing)
     , Class.factoryM1 "Body" "Body" Model3D.body $(docs 'Model3D.body)
     , Class.factoryM2 "Body With" "Attributes" "Body" Model3D.bodyWith $(docs 'Model3D.bodyWith)
     , Class.factory1 "Group" "Children" Model3D.group $(docs 'Model3D.group)

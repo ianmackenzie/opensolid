@@ -15,42 +15,42 @@ import OpenSolid.Primitives (Axis2D, Direction2D, Point2D, Transform2D, Vector2D
 import OpenSolid.Transform (Affine, Orthonormal, Rigid, Uniform)
 
 translateByImpl ::
-  (Transform2D Rigid units space -> a -> b) ->
-  Vector2D units space ->
+  (Transform2D Rigid units -> a -> b) ->
+  Vector2D units ->
   a ->
   b
 translateInImpl ::
-  (Transform2D Rigid units space -> a -> b) ->
-  Direction2D space ->
+  (Transform2D Rigid units -> a -> b) ->
+  Direction2D ->
   Quantity units ->
   a ->
   b
 translateAlongImpl ::
-  (Transform2D Rigid units space -> a -> b) ->
-  Axis2D units space ->
+  (Transform2D Rigid units -> a -> b) ->
+  Axis2D units ->
   Quantity units ->
   a ->
   b
 rotateAroundImpl ::
-  (Transform2D Rigid units space -> a -> b) ->
-  Point2D units space ->
+  (Transform2D Rigid units -> a -> b) ->
+  Point2D units ->
   Angle ->
   a ->
   b
 mirrorAcrossImpl ::
-  (Transform2D Orthonormal units space -> a -> b) ->
-  Axis2D units space ->
+  (Transform2D Orthonormal units -> a -> b) ->
+  Axis2D units ->
   a ->
   b
 scaleAboutImpl ::
-  (Transform2D Uniform units space -> a -> b) ->
-  Point2D units space ->
+  (Transform2D Uniform units -> a -> b) ->
+  Point2D units ->
   Number ->
   a ->
   b
 scaleAlongImpl ::
-  (Transform2D Affine units space -> a -> b) ->
-  Axis2D units space ->
+  (Transform2D Affine units -> a -> b) ->
+  Axis2D units ->
   Number ->
   a ->
   b

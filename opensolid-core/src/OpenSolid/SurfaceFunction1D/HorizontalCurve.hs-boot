@@ -11,7 +11,6 @@ import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvSpace (UvSpace)
 
 new ::
   Tolerance units =>
@@ -20,7 +19,7 @@ new ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Curve2D Unitless UvSpace
+  Curve2D Unitless
 monotonic ::
   Tolerance units =>
   SurfaceFunction1D units ->
@@ -28,7 +27,7 @@ monotonic ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Curve2D Unitless UvSpace
+  Curve2D Unitless
 bounded ::
   Tolerance units =>
   SurfaceFunction1D units ->
@@ -36,6 +35,6 @@ bounded ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Frame2D Unitless UvSpace local ->
-  List (Axis2D Unitless UvSpace) ->
-  Curve2D Unitless UvSpace
+  Frame2D Unitless ->
+  List (Axis2D Unitless) ->
+  Curve2D Unitless

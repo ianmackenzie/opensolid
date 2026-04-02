@@ -19,7 +19,7 @@ tests =
   , transformBy
   ]
 
-boundsAndContainedPoint :: Generator (Bounds2D Meters space, Point2D Meters space)
+boundsAndContainedPoint :: Generator (Bounds2D Meters, Point2D Meters)
 boundsAndContainedPoint = do
   bounds <- Random.bounds2D
   u <- Parameter.random

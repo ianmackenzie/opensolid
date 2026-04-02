@@ -22,7 +22,7 @@ import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Step qualified as Step
 
-vertex2D :: Point2D Meters space -> Step.Entity
+vertex2D :: Point2D Meters -> Step.Entity
 vertex2D point = Step.entity "VERTEX_POINT" [Step.text "", Step.referenceTo (Ap242.point2D point)]
 
 vertex3D :: Point3D space -> Step.Entity
@@ -38,7 +38,7 @@ edgeCurve startVertex endVertex curve sameSense =
     , Step.bool sameSense
     ]
 
-line2D :: Tolerance Meters => Line2D Meters space -> Step.Entity
+line2D :: Tolerance Meters => Line2D Meters -> Step.Entity
 line2D line =
   edgeCurve
     (vertex2D (Line2D.startPoint line))
@@ -54,7 +54,7 @@ line3D line =
     (Ap242.Curve.line3D line)
     True
 
-arc2D :: Arc2D Meters space -> Step.Entity
+arc2D :: Arc2D Meters -> Step.Entity
 arc2D arc =
   edgeCurve
     (vertex2D (Arc2D.startPoint arc))

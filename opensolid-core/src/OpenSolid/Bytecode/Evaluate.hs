@@ -68,17 +68,14 @@ curve1dBounds (Bytecode bytecode) (Interval# tLow# tHigh#) =
     let !(# xLow#, xHigh# #) = opensolid_cmm_curve1d_bounds f# tLow# tHigh#
     IO.succeed (Interval# xLow# xHigh#)
 
-curve2dValue :: Compiled Number (Vector2D units1 space1) -> Number -> Vector2D units2 space2
+curve2dValue :: Compiled Number (Vector2D units1) -> Number -> Vector2D units2
 curve2dValue (Constant value) _ = Vector2D.coerce value
 curve2dValue (Bytecode bytecode) (Quantity# t#) =
   callFunction bytecode \f# -> do
     let !(# x#, y# #) = opensolid_cmm_curve2d_value f# t#
     IO.succeed (Vector2D# x# y#)
 
-curve2dBounds ::
-  Compiled Number (Vector2D units1 space1) ->
-  Interval Unitless ->
-  VectorBounds2D units2 space2
+curve2dBounds :: Compiled Number (Vector2D units1) -> Interval Unitless -> VectorBounds2D units2
 curve2dBounds (Constant value) _ = VectorBounds2D.constant (Vector2D.coerce value)
 curve2dBounds (Bytecode bytecode) (Interval# tLow# tHigh#) =
   callFunction bytecode \f# -> do
@@ -117,20 +114,14 @@ surface1dBounds (Bytecode bytecode) (Bounds2D (Interval# uLow# uHigh#) (Interval
     let !(# xLow#, xHigh# #) = opensolid_cmm_surface1d_bounds f# uLow# uHigh# vLow# vHigh#
     IO.succeed (Interval# xLow# xHigh#)
 
-surface2dValue ::
-  Compiled UvPoint (Vector2D units1 space1) ->
-  UvPoint ->
-  Vector2D units2 space2
+surface2dValue :: Compiled UvPoint (Vector2D units1) -> UvPoint -> Vector2D units2
 surface2dValue (Constant value) _ = Vector2D.coerce value
 surface2dValue (Bytecode bytecode) (Point2D (Quantity# u#) (Quantity# v#)) =
   callFunction bytecode \f# -> do
     let !(# x#, y# #) = opensolid_cmm_surface2d_value f# u# v#
     IO.succeed (Vector2D# x# y#)
 
-surface2dBounds ::
-  Compiled UvPoint (Vector2D units1 space1) ->
-  UvBounds ->
-  VectorBounds2D units2 space2
+surface2dBounds :: Compiled UvPoint (Vector2D units1) -> UvBounds -> VectorBounds2D units2
 surface2dBounds (Constant value) _ = VectorBounds2D.constant (Vector2D.coerce value)
 surface2dBounds (Bytecode bytecode) (Bounds2D (Interval# uLow# uHigh#) (Interval# vLow# vHigh#)) =
   callFunction bytecode \f# -> do

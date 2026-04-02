@@ -136,13 +136,13 @@ pattern Interval# low# high# <- Ordered# low# high#
 {-# COMPLETE Interval# #-}
 
 instance FFI (Interval Unitless) where
-  representation = FFI.classRepresentation "Interval"
+  representation = FFI.classRepresentation "UnitlessInterval"
 
 instance FFI (Interval Radians) where
   representation = FFI.classRepresentation "AngleInterval"
 
 instance FFI (Interval Meters) where
-  representation = FFI.classRepresentation "LengthInterval"
+  representation = FFI.classRepresentation "Interval"
 
 instance FFI (Interval SquareMeters) where
   representation = FFI.classRepresentation "AreaInterval"

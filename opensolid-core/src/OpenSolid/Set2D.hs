@@ -15,51 +15,48 @@ module OpenSolid.Set2D
   )
 where
 
+import Data.Void (Void)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Prelude
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
 
-type Set2D units space item = Set 2 units space item
+type Set2D units item = Set 2 units Void item
 
-pattern Leaf :: Bounds2D units space -> item -> Set2D units space item
+pattern Leaf :: Bounds2D units -> item -> Set2D units item
 pattern Leaf leafBounds item = Set.Leaf leafBounds item
 
-pattern Node ::
-  Bounds2D units space ->
-  Set2D units space item ->
-  Set2D units space item ->
-  Set2D units space item
+pattern Node :: Bounds2D units -> Set2D units item -> Set2D units item -> Set2D units item
 pattern Node nodeBounds leftChild rightChild = Set.Node nodeBounds leftChild rightChild
 
 {-# COMPLETE Node, Leaf #-}
 
-bounds :: Set2D units space item -> Bounds2D units space
+bounds :: Set2D units item -> Bounds2D units
 bounds = Set.bounds
 
-one :: (item, Bounds2D units space) -> Set2D units space item
+one :: (item, Bounds2D units) -> Set2D units item
 one = Set.one
 
-two :: (item, Bounds2D units space) -> (item, Bounds2D units space) -> Set2D units space item
+two :: (item, Bounds2D units) -> (item, Bounds2D units) -> Set2D units item
 two = Set.two
 
-partition :: NonEmpty (item, Bounds2D units space) -> Set2D units space item
+partition :: NonEmpty (item, Bounds2D units) -> Set2D units item
 partition = Set.partition
 
-partitionBy :: (item -> Bounds2D units space) -> NonEmpty item -> Set2D units space item
+partitionBy :: (item -> Bounds2D units) -> NonEmpty item -> Set2D units item
 partitionBy = Set.partitionBy
 
-toNonEmpty :: Set2D units space item -> NonEmpty item
+toNonEmpty :: Set2D units item -> NonEmpty item
 toNonEmpty = Set.toNonEmpty
 
-toList :: Set2D units space item -> List item
+toList :: Set2D units item -> List item
 toList = Set.toList
 
-union :: Set2D units space item -> Set2D units space item -> Set2D units space item
+union :: Set2D units item -> Set2D units item -> Set2D units item
 union = Set.union
 
-find :: Tolerance units => Bounds2D units space -> Set2D units space item -> Fuzzy (Maybe item)
+find :: Tolerance units => Bounds2D units -> Set2D units item -> Fuzzy (Maybe item)
 find = Set.find
 
-filter :: Tolerance units => Bounds2D units space -> Set2D units space item -> List item
+filter :: Tolerance units => Bounds2D units -> Set2D units item -> List item
 filter = Set.filter

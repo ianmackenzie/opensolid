@@ -39,7 +39,6 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
@@ -143,19 +142,19 @@ instance
   givenPoint - function = constant givenPoint - function
 
 instance
-  (uvSpace ~ UvSpace, unitless ~ Unitless) =>
+  unitless ~ Unitless =>
   Composition
     (SurfaceFunction3D space)
-    (Region2D unitless uvSpace)
+    (Region2D unitless)
     (Surface3D space)
   where
   function . domain = Surface3D.parametric function domain
 
 instance
-  (uvSpace ~ UvSpace, unitless ~ Unitless) =>
+  unitless ~ Unitless =>
   Composition
     (SurfaceFunction3D space)
-    (SurfaceFunction2D unitless uvSpace)
+    (SurfaceFunction2D unitless)
     (SurfaceFunction3D space)
   where
   outer . inner = do

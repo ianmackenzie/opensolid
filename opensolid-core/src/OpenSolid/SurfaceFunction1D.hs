@@ -81,7 +81,6 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
-import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D (Vector3D)
@@ -235,49 +234,49 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (SurfaceFunction1D units1)
-    (Vector2D units2 space)
-    (VectorSurfaceFunction2D units3 space)
+    (Vector2D units2)
+    (VectorSurfaceFunction2D units3)
   where
   lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
     (SurfaceFunction1D units1)
-    (Vector2D units2 space)
-    (VectorSurfaceFunction2D (units1 ?*? units2) space)
+    (Vector2D units2)
+    (VectorSurfaceFunction2D (units1 ?*? units2))
   where
   function ?*? vector = function ?*? VectorSurfaceFunction2D.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (Vector2D units1 space)
+    (Vector2D units1)
     (SurfaceFunction1D units2)
-    (VectorSurfaceFunction2D units3 space)
+    (VectorSurfaceFunction2D units3)
   where
   lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
-    (Vector2D units1 space)
+    (Vector2D units1)
     (SurfaceFunction1D units2)
-    (VectorSurfaceFunction2D (units1 ?*? units2) space)
+    (VectorSurfaceFunction2D (units1 ?*? units2))
   where
   vector ?*? function = VectorSurfaceFunction2D.constant vector ?*? function
 
 instance
   Multiplication
     (SurfaceFunction1D units)
-    (Direction2D space)
-    (VectorSurfaceFunction2D units space)
+    Direction2D
+    (VectorSurfaceFunction2D units)
   where
   lhs * rhs = lhs * Vector2D.unit rhs
 
 instance
   Multiplication
-    (Direction2D space)
+    Direction2D
     (SurfaceFunction1D units)
-    (VectorSurfaceFunction2D units space)
+    (VectorSurfaceFunction2D units)
   where
   lhs * rhs = Vector2D.unit lhs * rhs
 
@@ -361,7 +360,7 @@ derivative :: SurfaceParameter -> SurfaceFunction1D units -> SurfaceFunction1D u
 derivative U = (.du)
 derivative V = (.dv)
 
-derivativeIn :: Direction2D UvSpace -> SurfaceFunction1D units -> SurfaceFunction1D units
+derivativeIn :: Direction2D -> SurfaceFunction1D units -> SurfaceFunction1D units
 derivativeIn (Direction2D dx dy) function =
   dx * function.du + dy * function.dv
 

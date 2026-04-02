@@ -5,6 +5,7 @@ module OpenSolid.Point
   )
 where
 
+import Data.Void (Void)
 import {-# SOURCE #-} OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
@@ -18,7 +19,7 @@ type family
   Point dimension units space =
     point | point -> dimension units space
   where
-  Point 2 units space = Point2D units space
+  Point 2 units Void = Point2D units
   Point 3 Meters space = Point3D space
 
 class
@@ -44,7 +45,7 @@ class
   where
   distanceFrom :: Point dimension units space -> Point dimension units space -> Quantity units
 
-instance Exists 2 units space where
+instance Exists 2 units Void where
   {-# INLINE distanceFrom #-}
   distanceFrom = Point2D.distanceFrom
 

@@ -40,10 +40,10 @@ operations you can do::
     Length.meters(0.5385164807134505)
 
     # Build up a parametric curve (expression);
-    # 'Curve.t' is the curve parameter, which
+    # 'UnitlessCurve1D.t' is the curve parameter, which
     # ranges from 0 to 1, so here x will range
     # from 0 to 5.
-    >>> x = 5 * Curve.t
+    >>> x = 5 * UnitlessCurve1D.t
     >>> y = x.squared() - 5 * x + 1
 
     # Evaluate the curve at t=0.5
@@ -74,9 +74,9 @@ operations you can do::
     >>> [y.value(root) for root in roots]
     [0.0, 0.0]
 
-    # Construct a displacement (vector with length units)
+    # Construct a vector (with length units)
     # from its components in meters
-    >>> d = Displacement2D.meters(1, 2)
+    >>> d = Vector2D.meters(1, 2)
 
     # To get the direction of a vector, we also need to
     # define a tolerance (any vector with magnitude

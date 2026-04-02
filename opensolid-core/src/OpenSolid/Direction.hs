@@ -24,7 +24,7 @@ type family
     direction | direction -> dimension space
   where
   Direction 1 Void = Sign
-  Direction 2 space = Direction2D space
+  Direction 2 Void = Direction2D
   Direction 3 space = Direction3D space
 
 class
@@ -46,7 +46,7 @@ instance Exists 1 Void where
   parallel _ _ = True
   perpendicular _ _ = False
 
-instance Exists 2 space where
+instance Exists 2 Void where
   {-# INLINEABLE unsafeImpl #-}
   unsafeImpl = Direction2D.unsafe
   {-# INLINEABLE unwrapImpl #-}

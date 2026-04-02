@@ -8,11 +8,11 @@ where
 import OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import OpenSolid.UvRegion (UvRegion)
 
-data Surface2D units space where
-  Parametric :: SurfaceFunction2D units space -> UvRegion -> Surface2D units space
+data Surface2D units where
+  Parametric :: SurfaceFunction2D units -> UvRegion -> Surface2D units
 
-parametric :: SurfaceFunction2D units space -> UvRegion -> Surface2D units space
+parametric :: SurfaceFunction2D units -> UvRegion -> Surface2D units
 parametric = Parametric
 
-function :: Surface2D units space -> SurfaceFunction2D units space
+function :: Surface2D units -> SurfaceFunction2D units
 function (Parametric f _) = f

@@ -151,9 +151,9 @@ data Variable1D input where
   Magnitude2D :: Variable2D input -> Variable1D input
   Magnitude3D :: Variable3D input -> Variable1D input
   Dot2D :: Variable2D input -> Variable2D input -> Variable1D input
-  DotVariableConstant2D :: Variable2D input -> Vector2D Unitless Space -> Variable1D input
+  DotVariableConstant2D :: Variable2D input -> Vector2D Unitless -> Variable1D input
   Cross2D :: Variable2D input -> Variable2D input -> Variable1D input
-  CrossVariableConstant2D :: Variable2D input -> Vector2D Unitless Space -> Variable1D input
+  CrossVariableConstant2D :: Variable2D input -> Vector2D Unitless -> Variable1D input
   Dot3D :: Variable3D input -> Variable3D input -> Variable1D input
   DotVariableConstant3D :: Variable3D input -> Vector3D Unitless Space -> Variable1D input
   Desingularized1D ::
@@ -190,7 +190,7 @@ deriving instance Ord (Variable1D input)
 deriving instance Show (Variable1D input)
 
 data Ast2D input where
-  Constant2D :: Vector2D Unitless Space -> Ast2D input
+  Constant2D :: Vector2D Unitless -> Ast2D input
   Variable2D :: Variable2D input -> Ast2D input
 
 deriving instance Eq (Ast2D input)
@@ -206,17 +206,17 @@ data Variable2D input where
   CY :: Number -> Variable1D input -> Variable2D input
   Negated2D :: Variable2D input -> Variable2D input
   Sum2D :: Variable2D input -> Variable2D input -> Variable2D input
-  SumVariableConstant2D :: Variable2D input -> Vector2D Unitless Space -> Variable2D input
+  SumVariableConstant2D :: Variable2D input -> Vector2D Unitless -> Variable2D input
   Difference2D :: Variable2D input -> Variable2D input -> Variable2D input
-  DifferenceConstantVariable2D :: Vector2D Unitless Space -> Variable2D input -> Variable2D input
+  DifferenceConstantVariable2D :: Vector2D Unitless -> Variable2D input -> Variable2D input
   Product2D :: Variable2D input -> Variable1D input -> Variable2D input
   ProductVariableConstant2D :: Variable2D input -> Number -> Variable2D input
-  ProductConstantVariable2D :: Vector2D Unitless Space -> Variable1D input -> Variable2D input
+  ProductConstantVariable2D :: Vector2D Unitless -> Variable1D input -> Variable2D input
   Quotient2D :: Variable2D input -> Variable1D input -> Variable2D input
-  QuotientConstantVariable2D :: Vector2D Unitless Space -> Variable1D input -> Variable2D input
-  BezierCurve2D :: NonEmpty (Vector2D Unitless Space) -> Variable1D input -> Variable2D input
-  TransformVector2D :: Transform2D.Affine Unitless Space -> Variable2D input -> Variable2D input
-  TransformPoint2D :: Transform2D.Affine Unitless Space -> Variable2D input -> Variable2D input
+  QuotientConstantVariable2D :: Vector2D Unitless -> Variable1D input -> Variable2D input
+  BezierCurve2D :: NonEmpty (Vector2D Unitless) -> Variable1D input -> Variable2D input
+  TransformVector2D :: Transform2D.Affine Unitless -> Variable2D input -> Variable2D input
+  TransformPoint2D :: Transform2D.Affine Unitless -> Variable2D input -> Variable2D input
   ProjectVector3D :: Plane -> Variable3D input -> Variable2D input
   ProjectPoint3D :: Plane -> Variable3D input -> Variable2D input
   Desingularized2D ::
@@ -273,7 +273,7 @@ deriving instance Ord (Variable3D input)
 
 deriving instance Show (Variable3D input)
 
-uvPoint :: Vector2D Unitless Space -> UvPoint
+uvPoint :: Vector2D Unitless -> UvPoint
 uvPoint position = Point2D.coerce (Position2D position)
 
 instance Composition (Ast1D Number) (Ast1D input) (Ast1D input) where
@@ -611,7 +611,7 @@ instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
 constant1D :: Quantity units -> Ast1D input
 constant1D value = Constant1D (Quantity.coerce value)
 
-constant2D :: Vector2D units space -> Ast2D input
+constant2D :: Vector2D units -> Ast2D input
 constant2D = Constant2D . Vector2D.coerce
 
 constant3D :: Vector3D units space -> Ast3D input
@@ -803,10 +803,10 @@ instance
   where
   lhs + rhs = if lhs <= rhs then Sum2D lhs rhs else Sum2D rhs lhs
 
-instance Addition (Vector2D units space) (Ast2D input) (Ast2D input) where
+instance Addition (Vector2D units) (Ast2D input) (Ast2D input) where
   lhs + rhs = constant2D lhs + rhs
 
-instance Addition (Ast2D input1) (Vector2D units space) (Ast2D input1) where
+instance Addition (Ast2D input1) (Vector2D units) (Ast2D input1) where
   lhs + rhs = lhs + constant2D rhs
 
 instance input1 ~ input2 => Subtraction (Ast2D input1) (Ast2D input2) (Ast2D input1) where
@@ -823,10 +823,10 @@ instance
   where
   lhs - rhs = Difference2D lhs rhs
 
-instance Subtraction (Vector2D units space) (Ast2D input) (Ast2D input) where
+instance Subtraction (Vector2D units) (Ast2D input) (Ast2D input) where
   lhs - rhs = constant2D lhs - rhs
 
-instance Subtraction (Ast2D input1) (Vector2D units space) (Ast2D input1) where
+instance Subtraction (Ast2D input1) (Vector2D units) (Ast2D input1) where
   lhs - rhs = lhs - constant2D rhs
 
 instance input1 ~ input2 => Multiplication (Ast2D input1) (Ast1D input2) (Ast2D input1) where
@@ -861,7 +861,7 @@ instance input1 ~ input2 => Division (Ast2D input1) (Ast1D input2) (Ast2D input1
   Constant2D lhs / Variable1D rhs = Variable2D (QuotientConstantVariable2D lhs rhs)
   Variable2D lhs / Variable1D rhs = Variable2D (Quotient2D lhs rhs)
 
-instance Division (Vector2D units space) (Ast1D input) (Ast2D input) where
+instance Division (Vector2D units) (Ast1D input) (Ast2D input) where
   lhs / rhs = constant2D lhs / rhs
 
 instance Division (Ast2D input) (Quantity units) (Ast2D input) where
@@ -982,10 +982,10 @@ instance
   where
   lhs `dot` rhs = if lhs <= rhs then Dot2D lhs rhs else Dot2D rhs lhs
 
-instance DotMultiplication (Vector2D units space) (Ast2D input) (Ast1D input) where
+instance DotMultiplication (Vector2D units) (Ast2D input) (Ast1D input) where
   lhs `dot` rhs = constant2D lhs `dot` rhs
 
-instance DotMultiplication (Ast2D input) (Vector2D units space) (Ast1D input) where
+instance DotMultiplication (Ast2D input) (Vector2D units) (Ast1D input) where
   lhs `dot` rhs = lhs `dot` constant2D rhs
 
 instance input1 ~ input2 => CrossMultiplication (Ast2D input1) (Ast2D input2) (Ast1D input1) where
@@ -996,10 +996,10 @@ instance input1 ~ input2 => CrossMultiplication (Ast2D input1) (Ast2D input2) (A
   Constant2D lhs `cross` Variable2D rhs = Variable1D (CrossVariableConstant2D rhs -lhs)
   Variable2D lhs `cross` Variable2D rhs = Variable1D (Cross2D lhs rhs)
 
-instance CrossMultiplication (Vector2D units space) (Ast2D input) (Ast1D input) where
+instance CrossMultiplication (Vector2D units) (Ast2D input) (Ast1D input) where
   lhs `cross` rhs = constant2D lhs `cross` rhs
 
-instance CrossMultiplication (Ast2D input) (Vector2D units space) (Ast1D input) where
+instance CrossMultiplication (Ast2D input) (Vector2D units) (Ast1D input) where
   lhs `cross` rhs = lhs `cross` constant2D rhs
 
 instance input1 ~ input2 => DotMultiplication (Ast3D input1) (Ast3D input2) (Ast1D input1) where
@@ -1083,7 +1083,7 @@ magnitude3D ast = case ast of
   Variable3D (Negated3D arg) -> Variable1D (Magnitude3D arg)
   Variable3D var -> Variable1D (Magnitude3D var)
 
-transformVector2D :: Transform2D tag units space -> Ast2D input -> Ast2D input
+transformVector2D :: Transform2D tag units -> Ast2D input -> Ast2D input
 transformVector2D transform ast = do
   let erasedTransform = Transform2D.coerce transform
   case ast of
@@ -1109,7 +1109,7 @@ transformVector3D transform ast = do
       Variable3D (BezierCurve3D transformedControlPoints param)
     Variable3D var -> Variable3D (TransformVector3D erasedTransform var)
 
-transformPoint2D :: Transform2D tag units space -> Ast2D input -> Ast2D input
+transformPoint2D :: Transform2D tag units -> Ast2D input -> Ast2D input
 transformPoint2D transform ast = do
   let erasedTransform = Transform2D.coerce transform
   case ast of
@@ -1146,7 +1146,7 @@ transformPoint3D transform ast = do
       Variable3D (BezierCurve3D transformedControlPoints param)
     Variable3D var -> Variable3D (TransformPoint3D coercedTransform var)
 
-placementTransform2D :: Frame2D units global local -> Transform2D.Affine Unitless Space
+placementTransform2D :: Frame2D units -> Transform2D.Affine Unitless
 placementTransform2D frame =
   Transform2D
     (Point2D.coerce (Frame2D.originPoint frame))
@@ -1161,10 +1161,10 @@ placementTransform3D frame =
     (Vector3D.coerce (Vector3D.unit (Frame3D.forwardDirection frame)))
     (Vector3D.coerce (Vector3D.unit (Frame3D.upwardDirection frame)))
 
-placeVector2DIn :: Frame2D frameUnits global local -> Ast2D input -> Ast2D input
+placeVector2DIn :: Frame2D frameUnits -> Ast2D input -> Ast2D input
 placeVector2DIn frame ast = transformVector2D (placementTransform2D frame) ast
 
-placePoint2DIn :: Frame2D units global local -> Ast2D input -> Ast2D input
+placePoint2DIn :: Frame2D units -> Ast2D input -> Ast2D input
 placePoint2DIn frame ast = transformPoint2D (placementTransform2D frame) ast
 
 placeVector3dIn :: Frame3D global local -> Ast3D input -> Ast3D input
@@ -1210,7 +1210,7 @@ bezierCurve1D (NonEmpty.One value) = constant1D value
 bezierCurve1D controlPoints =
   Variable1D (BezierCurve1D (NonEmpty.map Quantity.coerce controlPoints) CurveParameter)
 
-bezierCurve2D :: NonEmpty (Vector2D units space) -> Ast2D Number
+bezierCurve2D :: NonEmpty (Vector2D units) -> Ast2D Number
 bezierCurve2D (NonEmpty.One value) = constant2D value
 bezierCurve2D controlPoints =
   Variable2D (BezierCurve2D (NonEmpty.map Vector2D.coerce controlPoints) CurveParameter)
@@ -1307,7 +1307,7 @@ desingularized3D _ _ _ (Constant3D right) = Constant3D right
 desingularized3D (Variable1D parameter) (Variable3D left) (Variable3D middle) (Variable3D right) =
   Variable3D (Desingularized3D parameter left middle right)
 
-addTransform2D :: Transform2D.Affine Unitless Space -> Compile.Step ConstantIndex
+addTransform2D :: Transform2D.Affine Unitless -> Compile.Step ConstantIndex
 addTransform2D (Transform2D origin i j) = do
   let Vector2D iX iY = i
   let Vector2D jX jY = j
@@ -1500,7 +1500,7 @@ compileVariable1D variable = case variable of
     argIndex <- compileVariable1D arg
     Compile.addVariable1D (Instruction.B11d3 argIndex)
 
-coordinates2D :: Vector2D Unitless Space -> NonEmpty Number
+coordinates2D :: Vector2D Unitless -> NonEmpty Number
 coordinates2D (Vector2D x y) = NonEmpty.two x y
 
 coordinates3D :: Vector3D Unitless Space -> NonEmpty Number
@@ -1673,7 +1673,7 @@ compileCurve1D :: Ast1D Number -> Compiled Number Number
 compileCurve1D (Constant1D val) = Evaluate.Constant val
 compileCurve1D (Variable1D var) = Evaluate.Bytecode (Compile.curve1D (compileVariable1D var))
 
-compileCurve2D :: Ast2D Number -> Compiled Number (Vector2D Unitless Space)
+compileCurve2D :: Ast2D Number -> Compiled Number (Vector2D Unitless)
 compileCurve2D (Constant2D val) = Evaluate.Constant val
 compileCurve2D (Variable2D var) = Evaluate.Bytecode (Compile.curve2D (compileVariable2D var))
 
@@ -1685,7 +1685,7 @@ compileSurface1D :: Ast1D UvPoint -> Compiled UvPoint Number
 compileSurface1D (Constant1D val) = Evaluate.Constant val
 compileSurface1D (Variable1D var) = Evaluate.Bytecode (Compile.surface1D (compileVariable1D var))
 
-compileSurface2D :: Ast2D UvPoint -> Compiled UvPoint (Vector2D Unitless Space)
+compileSurface2D :: Ast2D UvPoint -> Compiled UvPoint (Vector2D Unitless)
 compileSurface2D (Constant2D val) = Evaluate.Constant val
 compileSurface2D (Variable2D var) = Evaluate.Bytecode (Compile.surface2D (compileVariable2D var))
 
@@ -1696,7 +1696,7 @@ compileSurface3D (Variable3D var) = Evaluate.Bytecode (Compile.surface3D (compil
 evaluateCurve1D :: Ast1D Number -> Number -> Number
 evaluateCurve1D ast input = Evaluate.curve1dValue (compileCurve1D ast) input
 
-evaluateCurve2D :: Ast2D Number -> Number -> Vector2D Unitless Space
+evaluateCurve2D :: Ast2D Number -> Number -> Vector2D Unitless
 evaluateCurve2D ast input = Evaluate.curve2dValue (compileCurve2D ast) input
 
 evaluateCurve3D :: Ast3D Number -> Number -> Vector3D Unitless Space
@@ -1705,7 +1705,7 @@ evaluateCurve3D ast input = Evaluate.curve3dValue (compileCurve3D ast) input
 evaluateSurface1D :: Ast1D UvPoint -> UvPoint -> Number
 evaluateSurface1D ast input = Evaluate.surface1dValue (compileSurface1D ast) input
 
-evaluateSurface2D :: Ast2D UvPoint -> UvPoint -> Vector2D Unitless Space
+evaluateSurface2D :: Ast2D UvPoint -> UvPoint -> Vector2D Unitless
 evaluateSurface2D ast input = Evaluate.surface2dValue (compileSurface2D ast) input
 
 evaluateSurface3D :: Ast3D UvPoint -> UvPoint -> Vector3D Unitless Space

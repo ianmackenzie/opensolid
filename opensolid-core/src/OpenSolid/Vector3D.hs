@@ -84,7 +84,7 @@ unit :: Direction3D space -> Vector3D Unitless space
 unit (Unit3D vector) = vector
 
 -- | Construct a 3D vector on the given plane, given a 2D vector within the plane.
-on :: Plane3D global -> Vector2D units local -> Vector3D units global
+on :: Plane3D space -> Vector2D units -> Vector3D units space
 on (Plane3D _ (PlaneOrientation3D i j)) (Vector2D vX vY) = do
   let Direction3D iR iF iU = i
   let Direction3D jR jF jU = j
@@ -226,7 +226,7 @@ relativeTo :: Frame3D global local -> Vector3D units global -> Vector3D units lo
 relativeTo (Frame3D _ (Orientation3D i j k)) vector =
   Vector3D (vector `dot` i) (vector `dot` j) (vector `dot` k)
 
-projectInto :: Plane3D global -> Vector3D units global -> Vector2D units local
+projectInto :: Plane3D space -> Vector3D units space -> Vector2D units
 projectInto (Plane3D _ (PlaneOrientation3D i j)) v = Vector2D (v `dot` i) (v `dot` j)
 
 sum :: List (Vector3D units space) -> Vector3D units space

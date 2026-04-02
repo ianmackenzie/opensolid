@@ -23,7 +23,7 @@ type family
     directionBounds | directionBounds -> dimension space
   where
   DirectionBounds 1 Void = Interval Unitless
-  DirectionBounds 2 space = DirectionBounds2D space
+  DirectionBounds 2 Void = DirectionBounds2D
   DirectionBounds 3 space = DirectionBounds3D space
 
 class
@@ -44,7 +44,7 @@ instance Exists 1 Void where
   unsafeImpl = id
   unwrapImpl = id
 
-instance Exists 2 space where
+instance Exists 2 Void where
   {-# INLINEABLE unsafeImpl #-}
   unsafeImpl = DirectionBounds2D.unsafe
   {-# INLINEABLE unwrapImpl #-}

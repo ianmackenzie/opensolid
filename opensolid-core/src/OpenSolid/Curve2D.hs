@@ -81,6 +81,7 @@ module OpenSolid.Curve2D
   )
 where
 
+import Data.Void (Void)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Arc2D (Arc2D)
@@ -143,23 +144,23 @@ import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 
 -- | A parametric curve in 2D space.
-type Curve2D units space = Curve 2 units space
+type Curve2D units = Curve 2 units Void
 
-type Compiled units space = Curve.Compiled 2 units space
+type Compiled units = Curve.Compiled 2 units Void
 
-type Segment units space = Curve.Segment 2 units space
+type Segment units = Curve.Segment 2 units Void
 
-type SearchTree units space = Curve.Search.Tree 2 units space
+type SearchTree units = Curve.Search.Tree 2 units Void
 
-new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space
+new :: Compiled units -> VectorCurve2D units -> Curve2D units
 new = Curve.new
 
 -- | Create a degenerate curve that is actually just a single point.
-constant :: Point2D units space -> Curve2D units space
+constant :: Point2D units -> Curve2D units
 constant = Curve.constant
 
 -- | Create a curve from its X and Y coordinate curves.
-xy :: Curve1D units -> Curve1D units -> Curve2D units space
+xy :: Curve1D units -> Curve1D units -> Curve2D units
 xy x y = do
   let compiledX = Curve1D.compiled x
   let compiledY = Curve1D.compiled y
@@ -168,14 +169,14 @@ xy x y = do
   new compiledXY xyDerivative
 
 -- | Convert a line to a curve.
-line :: Line2D units space -> Curve2D units space
+line :: Line2D units -> Curve2D units
 line = Curve.line
 
 -- | Create a line between two points.
-lineFrom :: Point2D units space -> Point2D units space -> Curve2D units space
+lineFrom :: Point2D units -> Point2D units -> Curve2D units
 lineFrom = Curve.lineFrom
 
-arc :: Arc2D units space -> Curve2D units space
+arc :: Arc2D units -> Curve2D units
 arc givenArc =
   polarArc
     (#centerPoint (Arc2D.centerPoint givenArc))
@@ -190,12 +191,7 @@ and a negative swept angle means it turns clockwise (turns to the right).
 For example, an arc with a swept angle of positive 90 degrees
 is quarter circle that turns to the left.
 -}
-arcFrom ::
-  Tolerance units =>
-  Point2D units space ->
-  Point2D units space ->
-  Angle ->
-  Curve2D units space
+arcFrom :: Tolerance units => Point2D units -> Point2D units -> Angle -> Curve2D units
 arcFrom givenStartPoint givenEndPoint sweptAngle =
   case Vector2D.magnitudeAndDirection (givenEndPoint - givenStartPoint) of
     Error Vector.IsZero -> lineFrom givenStartPoint givenEndPoint
@@ -217,11 +213,11 @@ arcFrom givenStartPoint givenEndPoint sweptAngle =
 
 -- | Create an arc with the given center point, radius, start angle and end angle.
 polarArc ::
-  ("centerPoint" ::: Point2D units space) ->
+  ("centerPoint" ::: Point2D units) ->
   ("radius" ::: Quantity units) ->
   ("startAngle" ::: Angle) ->
   ("endAngle" ::: Angle) ->
-  Curve2D units space
+  Curve2D units
 polarArc
   ("centerPoint" ::: centerPoint)
   ("radius" ::: radius)
@@ -233,7 +229,7 @@ polarArc
 
 The start point will be swept around the center point by the given angle.
 -}
-sweptArc :: Point2D units space -> Point2D units space -> Angle -> Curve2D units space
+sweptArc :: Point2D units -> Point2D units -> Angle -> Curve2D units
 sweptArc centerPoint givenStartPoint sweptAngle = do
   let radius = Point2D.distanceFrom centerPoint givenStartPoint
   let startAngle = Point2D.angleFrom centerPoint givenStartPoint
@@ -246,11 +242,11 @@ sweptArc centerPoint givenStartPoint sweptAngle = do
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
   Tolerance units =>
-  Point2D units space ->
-  "incoming" ::: Direction2D space ->
-  "outgoing" ::: Direction2D space ->
+  Point2D units ->
+  "incoming" ::: Direction2D ->
+  "outgoing" ::: Direction2D ->
   "radius" ::: Quantity units ->
-  Curve2D units space
+  Curve2D units
 cornerArc
   cornerPoint
   ("incoming" ::: incomingDirection)
@@ -275,10 +271,10 @@ data WhichArc
 radiusArc ::
   Tolerance units =>
   Quantity units ->
-  Point2D units space ->
-  Point2D units space ->
+  Point2D units ->
+  Point2D units ->
   WhichArc ->
-  Curve2D units space
+  Curve2D units
 radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
   case Direction2D.from givenStartPoint givenEndPoint of
     Ok chordDirection -> do
@@ -307,12 +303,12 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
       lineFrom givenStartPoint givenEndPoint
 
 ellipticalArc ::
-  Frame2D units global local ->
+  Frame2D units ->
   Quantity units ->
   Quantity units ->
   Angle ->
   Angle ->
-  Curve2D units global
+  Curve2D units
 ellipticalArc axes xRadius yRadius startAngle endAngle = do
   let centerPoint = Frame2D.originPoint axes
   let xVector = xRadius * Frame2D.xDirection axes
@@ -320,18 +316,18 @@ ellipticalArc axes xRadius yRadius startAngle endAngle = do
   customArc centerPoint xVector yVector startAngle endAngle
 
 customArc ::
-  Point2D units space ->
-  Vector2D units space ->
-  Vector2D units space ->
+  Point2D units ->
+  Vector2D units ->
+  Vector2D units ->
   Angle ->
   Angle ->
-  Curve2D units space
+  Curve2D units
 customArc p0 v1 v2 a b = do
   let angle = Curve1D.interpolateFrom a b
   p0 + v1 * Curve1D.cos angle + v2 * Curve1D.sin angle
 
 -- | Create a curve from the given circle.
-circle :: Circle2D units space -> Curve2D units space
+circle :: Circle2D units -> Curve2D units
 circle givenCircle =
   polarArc
     (#centerPoint (Circle2D.centerPoint givenCircle))
@@ -343,11 +339,7 @@ circle givenCircle =
 The first radius given will be the radius along the X axis,
 and the second radius will be the radius along the Y axis.
 -}
-ellipse ::
-  Frame2D units global local ->
-  Quantity units ->
-  Quantity units ->
-  Curve2D units global
+ellipse :: Frame2D units -> Quantity units -> Quantity units -> Curve2D units
 ellipse axes xRadius yRadius = ellipticalArc axes xRadius yRadius Angle.zero Angle.twoPi
 
 {-| Construct a Bezier curve from its control points.
@@ -358,24 +350,24 @@ For example,
 
 will return a cubic Bezier curve with the given four control points.
 -}
-bezier :: NonEmpty (Point2D units space) -> Curve2D units space
+bezier :: NonEmpty (Point2D units) -> Curve2D units
 bezier = Curve.bezier
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
-  Point2D units space ->
-  Point2D units space ->
-  Point2D units space ->
-  Curve2D units space
+  Point2D units ->
+  Point2D units ->
+  Point2D units ->
+  Curve2D units
 quadraticBezier = Curve.quadraticBezier
 
 -- | Construct a cubic Bezier curve from the given control points.
 cubicBezier ::
-  Point2D units space ->
-  Point2D units space ->
-  Point2D units space ->
-  Point2D units space ->
-  Curve2D units space
+  Point2D units ->
+  Point2D units ->
+  Point2D units ->
+  Point2D units ->
+  Curve2D units
 cubicBezier = Curve.cubicBezier
 
 {-| Construct a Bezier curve with the given endpoints and derivatives at those endpoints.
@@ -397,119 +389,100 @@ In general, the degree of the resulting spline will be equal to 1 plus the total
 derivatives given.
 -}
 hermite ::
-  Point2D units space ->
-  List (Vector2D units space) ->
-  Point2D units space ->
-  List (Vector2D units space) ->
-  Curve2D units space
+  Point2D units ->
+  List (Vector2D units) ->
+  Point2D units ->
+  List (Vector2D units) ->
+  Curve2D units
 hermite = Curve.hermite
 
 {-# INLINE derivativeValue #-}
-derivativeValue ::
-  Curve2D units space ->
-  Number ->
-  Vector2D units space
+derivativeValue :: Curve2D units -> Number -> Vector2D units
 derivativeValue = Curve.derivativeValue
 
 {-# INLINE derivativeBounds #-}
-derivativeBounds ::
-  Curve2D units space ->
-  Interval Unitless ->
-  VectorBounds2D units space
+derivativeBounds :: Curve2D units -> Interval Unitless -> VectorBounds2D units
 derivativeBounds = Curve.derivativeBounds
 
 {-# INLINE secondDerivativeValue #-}
-secondDerivativeValue ::
-  Curve2D units space ->
-  Number ->
-  Vector2D units space
+secondDerivativeValue :: Curve2D units -> Number -> Vector2D units
 secondDerivativeValue = Curve.secondDerivativeValue
 
 {-# INLINE secondDerivativeBounds #-}
-secondDerivativeBounds ::
-  Curve2D units space ->
-  Interval Unitless ->
-  VectorBounds2D units space
+secondDerivativeBounds :: Curve2D units -> Interval Unitless -> VectorBounds2D units
 secondDerivativeBounds = Curve.secondDerivativeBounds
 
 desingularize ::
-  Maybe (Point2D units space, Vector2D units space) ->
-  Curve2D units space ->
-  Maybe (Point2D units space, Vector2D units space) ->
-  Curve2D units space
+  Maybe (Point2D units, Vector2D units) ->
+  Curve2D units ->
+  Maybe (Point2D units, Vector2D units) ->
+  Curve2D units
 desingularize = Curve.desingularize
 
-desingularized ::
-  Curve2D units space ->
-  Curve2D units space ->
-  Curve2D units space ->
-  Curve2D units space
+desingularized :: Curve2D units -> Curve2D units -> Curve2D units -> Curve2D units
 desingularized = Curve.desingularized
 
 {-| Get the point on a curve at a given parameter value.
 
 The parameter value should be between 0 and 1.
 -}
-point :: Curve2D units space -> Number -> Point2D units space
+point :: Curve2D units -> Number -> Point2D units
 point = Curve.point
 
 -- | Get the start point of a curve.
-startPoint :: Curve2D units space -> Point2D units space
+startPoint :: Curve2D units -> Point2D units
 startPoint = Curve.startPoint
 
 -- | Get the end point of a curve.
-endPoint :: Curve2D units space -> Point2D units space
+endPoint :: Curve2D units -> Point2D units
 endPoint = Curve.endPoint
 
 -- | Get the start and end points of a curve.
-endpoints :: Curve2D units space -> (Point2D units space, Point2D units space)
+endpoints :: Curve2D units -> (Point2D units, Point2D units)
 endpoints = Curve.endpoints
 
-bounds :: Curve2D units space -> Interval Unitless -> Bounds2D units space
+bounds :: Curve2D units -> Interval Unitless -> Bounds2D units
 bounds = Curve.bounds
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.
-reverse :: Curve2D units space -> Curve2D units space
+reverse :: Curve2D units -> Curve2D units
 reverse = Curve.reverse
 
-overallBounds :: Curve2D units space -> Bounds2D units space
+overallBounds :: Curve2D units -> Bounds2D units
 overallBounds = Curve.overallBounds
 
-compiled :: Curve2D units space -> Compiled units space
+compiled :: Curve2D units -> Compiled units
 compiled = Curve.compiled
 
-derivative :: Curve2D units space -> VectorCurve2D units space
+derivative :: Curve2D units -> VectorCurve2D units
 derivative = Curve.derivative
 
-secondDerivative :: Curve2D units space -> VectorCurve2D units space
+secondDerivative :: Curve2D units -> VectorCurve2D units
 secondDerivative = Curve.secondDerivative
 
-tangentDirection ::
-  Tolerance units =>
-  Curve2D units space ->
-  Result IsDegenerate (DirectionCurve2D space)
+tangentDirection :: Tolerance units => Curve2D units -> Result IsDegenerate DirectionCurve2D
 tangentDirection = Curve.tangentDirection
 
-tangentDirectionBounds :: Curve2D units space -> Interval Unitless -> DirectionBounds2D space
+tangentDirectionBounds :: Curve2D units -> Interval Unitless -> DirectionBounds2D
 tangentDirectionBounds = Curve.tangentDirectionBounds
 
 curvatureVector_ ::
   Tolerance units =>
-  Curve2D units space ->
-  Result HasSingularity (VectorCurve2D (Unitless ?/? units) space)
+  Curve2D units ->
+  Result HasSingularity (VectorCurve2D (Unitless ?/? units))
 curvatureVector_ = Curve.curvatureVector_
 
 curvatureVector ::
   (Tolerance units1, Units.Inverse units1 units2) =>
-  Curve2D units1 space ->
-  Result HasSingularity (VectorCurve2D units2 space)
+  Curve2D units1 ->
+  Result HasSingularity (VectorCurve2D units2)
 curvatureVector curve = Result.map Units.specialize (curvatureVector_ curve)
 
 offsetLeftwardBy ::
   Tolerance units =>
   Quantity units ->
-  Curve2D units space ->
-  Result IsDegenerate (Curve2D units space)
+  Curve2D units ->
+  Result IsDegenerate (Curve2D units)
 offsetLeftwardBy offset curve = do
   tangentCurve <- tangentDirection curve
   let offsetCurve = VectorCurve2D.rotateBy Angle.quarterTurn (offset * tangentCurve)
@@ -518,20 +491,20 @@ offsetLeftwardBy offset curve = do
 offsetRightwardBy ::
   Tolerance units =>
   Quantity units ->
-  Curve2D units space ->
-  Result IsDegenerate (Curve2D units space)
+  Curve2D units ->
+  Result IsDegenerate (Curve2D units)
 offsetRightwardBy distance = offsetLeftwardBy -distance
 
-distanceAlong :: Axis2D units space -> Curve2D units space -> Curve1D units
+distanceAlong :: Axis2D units -> Curve2D units -> Curve1D units
 distanceAlong (Axis2D p0 d) curve = (curve - p0) `dot` d
 
-distanceLeftOf :: Axis2D units space -> Curve2D units space -> Curve1D units
+distanceLeftOf :: Axis2D units -> Curve2D units -> Curve1D units
 distanceLeftOf (Axis2D p0 d) curve = (curve - p0) `dot` Direction2D.rotateLeft d
 
-distanceRightOf :: Axis2D units space -> Curve2D units space -> Curve1D units
+distanceRightOf :: Axis2D units -> Curve2D units -> Curve1D units
 distanceRightOf (Axis2D p0 d) curve = (curve - p0) `dot` Direction2D.rotateRight d
 
-isPoint :: Tolerance units => Curve2D units space -> Bool
+isPoint :: Tolerance units => Curve2D units -> Bool
 isPoint = Curve.isPoint
 
 {-| Check if the given curve curve is collinear with (lies on) the given axis.
@@ -540,11 +513,11 @@ If the curve merely intersects/touches the axis at one or more points,
 then it is not considered to lie on the axis;
 it is only considered to lie on the axis if every point on the curve is also on the axis.
 -}
-isOnAxis :: Tolerance units => Axis2D units space -> Curve2D units space -> Bool
+isOnAxis :: Tolerance units => Axis2D units -> Curve2D units -> Bool
 isOnAxis = Curve.isOnAxis
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
-xCoordinate :: Curve2D units space -> Curve1D units
+xCoordinate :: Curve2D units -> Curve1D units
 xCoordinate curve = do
   let compiledXCoordinate =
         CompiledFunction.map
@@ -555,7 +528,7 @@ xCoordinate curve = do
   Curve1D.new compiledXCoordinate (VectorCurve2D.xComponent (derivative curve))
 
 -- | Get the Y coordinate of a 2D curve as a scalar curve.
-yCoordinate :: Curve2D units space -> Curve1D units
+yCoordinate :: Curve2D units -> Curve1D units
 yCoordinate curve = do
   let compiledYCoordinate =
         CompiledFunction.map
@@ -565,23 +538,23 @@ yCoordinate curve = do
           (compiled curve)
   Curve1D.new compiledYCoordinate (VectorCurve2D.yComponent (derivative curve))
 
-coordinates :: Curve2D units space -> (Curve1D units, Curve1D units)
+coordinates :: Curve2D units -> (Curve1D units, Curve1D units)
 coordinates curve = (xCoordinate curve, yCoordinate curve)
 
-findPoint :: Tolerance units => Point2D units space -> Curve2D units space -> List Number
+findPoint :: Tolerance units => Point2D units -> Curve2D units -> List Number
 findPoint = Curve.findPoint
 
 intersections ::
   Tolerance units =>
-  Curve2D units space ->
-  Curve2D units space ->
+  Curve2D units ->
+  Curve2D units ->
   Result IsDegenerate (Maybe Curve.Intersections)
 intersections = Curve.intersections
 
 g2 ::
   Tolerance units =>
-  (Curve2D units space, Number) ->
-  (Curve2D units space, Number) ->
+  (Curve2D units, Number) ->
+  (Curve2D units, Number) ->
   Quantity units ->
   Bool
 g2 (curve1, t1) (curve2, t2) radius =
@@ -600,8 +573,8 @@ g2 (curve1, t1) (curve2, t2) radius =
 
 signature ::
   Tolerance units =>
-  Orientation2D space ->
-  Curve2D units space ->
+  Orientation2D ->
+  Curve2D units ->
   Number ->
   Quantity units ->
   (Quantity units, Quantity units)
@@ -626,10 +599,7 @@ signature orientation curve tValue radius = do
   let secondOrder = Units.simplify (0.5 * d2ydx2 ?*? Quantity.squared_ radius)
   (firstOrder, secondOrder)
 
-placeIn ::
-  Frame2D units global local ->
-  Curve2D units local ->
-  Curve2D units global
+placeIn :: Frame2D units -> Curve2D units -> Curve2D units
 placeIn frame curve = do
   let compiledPlaced =
         CompiledFunction.map
@@ -639,19 +609,13 @@ placeIn frame curve = do
           (compiled curve)
   new compiledPlaced (VectorCurve2D.placeIn frame (derivative curve))
 
-relativeTo ::
-  Frame2D units global local ->
-  Curve2D units global ->
-  Curve2D units local
+relativeTo :: Frame2D units -> Curve2D units -> Curve2D units
 relativeTo frame = placeIn (Frame2D.inverse frame)
 
-placeOn :: Plane3D global -> Curve2D Meters local -> Curve3D global
+placeOn :: Plane3D space -> Curve2D Meters -> Curve3D space
 placeOn plane curve = Curve3D.on plane curve
 
-transformBy ::
-  Transform2D tag units space ->
-  Curve2D units space ->
-  Curve2D units space
+transformBy :: Transform2D tag units -> Curve2D units -> Curve2D units
 transformBy transform curve = do
   let compiledTransformed =
         CompiledFunction.map
@@ -662,74 +626,42 @@ transformBy transform curve = do
   new compiledTransformed (VectorCurve2D.transformBy transform (derivative curve))
 
 -- | Translate by the given displacement.
-translateBy ::
-  Vector2D units space ->
-  Curve2D units space ->
-  Curve2D units space
+translateBy :: Vector2D units -> Curve2D units -> Curve2D units
 translateBy = Transform2D.translateByImpl transformBy
 
 -- | Translate in the given direction by the given distance.
-translateIn ::
-  Direction2D space ->
-  Quantity units ->
-  Curve2D units space ->
-  Curve2D units space
+translateIn :: Direction2D -> Quantity units -> Curve2D units -> Curve2D units
 translateIn = Transform2D.translateInImpl transformBy
 
 -- | Translate along the given axis by the given distance.
-translateAlong ::
-  Axis2D units space ->
-  Quantity units ->
-  Curve2D units space ->
-  Curve2D units space
+translateAlong :: Axis2D units -> Quantity units -> Curve2D units -> Curve2D units
 translateAlong = Transform2D.translateAlongImpl transformBy
 
 -- | Rotate around the given point by the given angle.
-rotateAround ::
-  Point2D units space ->
-  Angle ->
-  Curve2D units space ->
-  Curve2D units space
+rotateAround :: Point2D units -> Angle -> Curve2D units -> Curve2D units
 rotateAround = Transform2D.rotateAroundImpl transformBy
 
 -- | Mirror across the given axis.
-mirrorAcross ::
-  Axis2D units space ->
-  Curve2D units space ->
-  Curve2D units space
+mirrorAcross :: Axis2D units -> Curve2D units -> Curve2D units
 mirrorAcross = Transform2D.mirrorAcrossImpl transformBy
 
 -- | Scale uniformly about the given point by the given scaling factor.
-scaleAbout ::
-  Point2D units space ->
-  Number ->
-  Curve2D units space ->
-  Curve2D units space
+scaleAbout :: Point2D units -> Number -> Curve2D units -> Curve2D units
 scaleAbout = Transform2D.scaleAboutImpl transformBy
 
 -- | Scale (stretch) along the given axis by the given scaling factor.
-scaleAlong ::
-  Axis2D units space ->
-  Number ->
-  Curve2D units space ->
-  Curve2D units space
+scaleAlong :: Axis2D units -> Number -> Curve2D units -> Curve2D units
 scaleAlong = Transform2D.scaleAlongImpl transformBy
 
-convert ::
-  Quantity (units2 ?/? units1) ->
-  Curve2D units1 space ->
-  Curve2D units2 space
+convert :: Quantity (units2 ?/? units1) -> Curve2D units1 -> Curve2D units2
 convert factor curve = Units.coerce (scaleAbout Point2D.origin (Units.erase factor) curve)
 
-unconvert ::
-  Quantity (units2 ?/? units1) ->
-  Curve2D units2 space ->
-  Curve2D units1 space
+unconvert :: Quantity (units2 ?/? units1) -> Curve2D units2 -> Curve2D units1
 unconvert factor curve = convert (Units.simplify (1.0 ?/? factor)) curve
 
 curvature_ ::
   Tolerance units =>
-  Curve2D units space ->
+  Curve2D units ->
   Result IsDegenerate (Curve1D (Unitless ?/? units))
 curvature_ curve = do
   tangent <- tangentDirection curve
@@ -750,19 +682,19 @@ Positive curvature is defined as curving to the left (relative to the curve's ta
 -}
 curvature ::
   (Tolerance units1, Units.Inverse units1 units2) =>
-  Curve2D units1 space ->
+  Curve2D units1 ->
   Result IsDegenerate (Curve1D units2)
 curvature curve = Result.map Units.specialize (curvature_ curve)
 
-toPolyline :: Resolution units -> Curve2D units space -> Polyline2D units space
+toPolyline :: Resolution units -> Curve2D units -> Polyline2D units
 toPolyline = Curve.toPolyline
 
 medialAxis ::
-  forall units space.
+  forall units.
   Tolerance units =>
-  Curve2D units space ->
-  Curve2D units space ->
-  Result IsDegenerate (List (MedialAxis.Segment units space))
+  Curve2D units ->
+  Curve2D units ->
+  Result IsDegenerate (List (MedialAxis.Segment units))
 medialAxis curve1 curve2 = do
   let p1 = curve1 . SurfaceFunction1D.u
   let p2 = curve2 . SurfaceFunction1D.v
@@ -784,7 +716,7 @@ medialAxis curve1 curve2 = do
                 SurfaceFunction1D.unsafeQuotient_
                   (d `dot_` d)
                   (2.0 * (tangentVector1 . SurfaceFunction1D.u) `cross` d)
-        let curve :: SurfaceFunction2D units space =
+        let curve :: SurfaceFunction2D units =
               (curve1 . SurfaceFunction1D.u) + radius * (normal1 . SurfaceFunction1D.u)
         let toSegment solutionCurve =
               MedialAxis.Segment
@@ -798,23 +730,17 @@ medialAxis curve1 curve2 = do
 
 arcLengthParameterizationFunction ::
   Tolerance units =>
-  Curve2D units space ->
+  Curve2D units ->
   (Number -> Number, Quantity units)
 arcLengthParameterizationFunction = Curve.arcLengthParameterizationFunction
 
-arcLengthParameterization ::
-  Tolerance units =>
-  Curve2D units space ->
-  (Curve1D Unitless, Quantity units)
+arcLengthParameterization :: Tolerance units => Curve2D units -> (Curve1D Unitless, Quantity units)
 arcLengthParameterization = Curve.arcLengthParameterization
 
-parameterizeByArcLength ::
-  Tolerance units =>
-  Curve2D units space ->
-  (Curve2D units space, Quantity units)
+parameterizeByArcLength :: Tolerance units => Curve2D units -> (Curve2D units, Quantity units)
 parameterizeByArcLength = Curve.parameterizeByArcLength
 
-makePiecewise :: NonEmpty (Curve2D units space, Quantity units) -> Curve2D units space
+makePiecewise :: NonEmpty (Curve2D units, Quantity units) -> Curve2D units
 makePiecewise parameterizedSegments = do
   let segmentArray = Array.fromNonEmpty parameterizedSegments
   let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
@@ -824,11 +750,11 @@ makePiecewise parameterizedSegments = do
     (CompiledFunction.abstract pointImpl boundsImpl)
     (piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength)
 
-piecewise :: Tolerance units => NonEmpty (Curve2D units space) -> Curve2D units space
+piecewise :: Tolerance units => NonEmpty (Curve2D units) -> Curve2D units
 piecewise segments = makePiecewise (NonEmpty.map parameterizeByArcLength segments)
 
 buildPiecewiseTree ::
-  Array (Curve2D units space, Quantity units) ->
+  Array (Curve2D units, Quantity units) ->
   Int ->
   Int ->
   (PiecewiseTree units space, Quantity units)
@@ -849,11 +775,11 @@ data PiecewiseTree units space where
     PiecewiseTree units space ->
     PiecewiseTree units space
   PiecewiseLeaf ::
-    Curve2D units space ->
+    Curve2D units ->
     Quantity units ->
     PiecewiseTree units space
 
-piecewisePoint :: PiecewiseTree units space -> Quantity units -> Point2D units space
+piecewisePoint :: PiecewiseTree units space -> Quantity units -> Point2D units
 piecewisePoint tree length = case tree of
   PiecewiseNode leftTree leftLength rightTree
     | length < leftLength -> piecewisePoint leftTree length
@@ -864,7 +790,7 @@ piecewiseBounds ::
   PiecewiseTree units space ->
   Quantity units ->
   Quantity units ->
-  Bounds2D units space
+  Bounds2D units
 piecewiseBounds tree startLength endLength = case tree of
   PiecewiseNode leftTree leftLength rightTree
     | endLength <= leftLength ->
@@ -881,7 +807,7 @@ piecewiseBounds tree startLength endLength = case tree of
 piecewiseDerivative ::
   PiecewiseDerivativeTree units space ->
   Quantity units ->
-  VectorCurve2D units space
+  VectorCurve2D units
 piecewiseDerivative tree length = do
   let valueImpl t = piecewiseDerivativeValue tree (length * t)
   let boundsImpl (Interval t1 t2) = piecewiseDerivativeBounds tree (length * t1) (length * t2)
@@ -896,7 +822,7 @@ data PiecewiseDerivativeTree units space where
     PiecewiseDerivativeTree units space ->
     PiecewiseDerivativeTree units space
   PiecewiseDerivativeLeaf ::
-    VectorCurve2D units space ->
+    VectorCurve2D units ->
     Quantity units ->
     PiecewiseDerivativeTree units space
 
@@ -931,7 +857,7 @@ piecewiseDerivativeTreeDerivative tree length = case tree of
 piecewiseDerivativeValue ::
   PiecewiseDerivativeTree units space ->
   Quantity units ->
-  Vector2D units space
+  Vector2D units
 piecewiseDerivativeValue tree length = case tree of
   PiecewiseDerivativeNode leftTree leftLength rightTree
     | length < leftLength -> piecewiseDerivativeValue leftTree length
@@ -943,7 +869,7 @@ piecewiseDerivativeBounds ::
   PiecewiseDerivativeTree units space ->
   Quantity units ->
   Quantity units ->
-  VectorBounds2D units space
+  VectorBounds2D units
 piecewiseDerivativeBounds tree startLength endLength = case tree of
   PiecewiseDerivativeNode leftTree leftLength rightTree
     | endLength <= leftLength ->
@@ -961,5 +887,5 @@ piecewiseDerivativeBounds tree startLength endLength = case tree of
     let tBounds = Interval (startLength / segmentLength) (endLength / segmentLength)
     VectorCurve2D.bounds curve tBounds
 
-searchTree :: Curve2D units space -> SearchTree units space
+searchTree :: Curve2D units -> SearchTree units
 searchTree = Curve.searchTree

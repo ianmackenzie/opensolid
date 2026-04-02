@@ -48,7 +48,7 @@ data Arc3D space = Arc3D
   , endAngle :: Angle
   }
 
-on :: Plane3D global -> Arc2D Meters local -> Arc3D global
+on :: Plane3D space -> Arc2D Meters -> Arc3D space
 on givenPlane givenArc = do
   let originPoint = Point3D.on givenPlane (Arc2D.centerPoint givenArc)
   Arc3D

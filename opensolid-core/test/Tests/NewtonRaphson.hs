@@ -88,7 +88,7 @@ curve1D name curve t0 tExpected =
       & Test.output "Expected solution" tExpected
       & Test.output "Actual solution" tSolution
 
-curve2D :: Text -> VectorCurve2D Unitless Space -> Number -> Number -> Test
+curve2D :: Text -> VectorCurve2D Unitless -> Number -> Number -> Test
 curve2D name curve t0 tExpected =
   Test.verify name do
     let tSolution = VectorCurve2D.newtonRaphson curve t0
@@ -97,7 +97,7 @@ curve2D name curve t0 tExpected =
       & Test.output "Actual solution" tSolution
 
 surface2D ::
-  VectorSurfaceFunction2D Unitless Space ->
+  VectorSurfaceFunction2D Unitless ->
   UvPoint ->
   UvPoint ->
   Test.Expectation

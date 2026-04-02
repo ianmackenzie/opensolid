@@ -9,6 +9,7 @@ module OpenSolid.DirectionCurve
   )
 where
 
+import Data.Void (Void)
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.DirectionBounds (DirectionBounds)
@@ -26,7 +27,7 @@ type family
   DirectionCurve dimension space =
     directionCurve | directionCurve -> dimension space
   where
-  DirectionCurve 2 space = DirectionCurve2D space
+  DirectionCurve 2 Void = DirectionCurve2D
   DirectionCurve 3 space = DirectionCurve3D space
 
 class
@@ -42,7 +43,7 @@ class
   bounds :: DirectionCurve dimension space -> Interval Unitless -> DirectionBounds dimension space
   derivative :: DirectionCurve dimension space -> VectorCurve dimension Unitless space
 
-instance Exists 2 space where
+instance Exists 2 Void where
   unsafeImpl = DirectionCurve2D.unsafe
   unwrapImpl = DirectionCurve2D.unwrap
   value = DirectionCurve2D.value

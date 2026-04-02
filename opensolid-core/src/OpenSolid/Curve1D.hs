@@ -109,16 +109,16 @@ data Curve1D units = Curve1D {compiled :: Compiled units, derivative :: ~(Curve1
 type Compiled units = CompiledFunction Number (Quantity units) (Interval Unitless) (Interval units)
 
 instance FFI (Curve1D Unitless) where
-  representation = FFI.classRepresentation "Curve"
+  representation = FFI.classRepresentation "UnitlessCurve1D"
 
 instance FFI (Curve1D Meters) where
-  representation = FFI.classRepresentation "LengthCurve"
+  representation = FFI.classRepresentation "Curve1D"
 
 instance FFI (Curve1D SquareMeters) where
-  representation = FFI.classRepresentation "AreaCurve"
+  representation = FFI.classRepresentation "AreaCurve1D"
 
 instance FFI (Curve1D Radians) where
-  representation = FFI.classRepresentation "AngleCurve"
+  representation = FFI.classRepresentation "AngleCurve1D"
 
 instance HasUnits (Curve1D units) units
 
@@ -268,29 +268,29 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve1D units1) (Vector2D units2 space) (VectorCurve2D units3 space)
+  Multiplication (Curve1D units1) (Vector2D units2) (VectorCurve2D units3)
   where
   lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
     (Curve1D units1)
-    (Vector2D units2 space)
-    (VectorCurve2D (units1 ?*? units2) space)
+    (Vector2D units2)
+    (VectorCurve2D (units1 ?*? units2))
   where
   curve ?*? vector = curve ?*? VectorCurve2D.constant vector
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Vector2D units1 space) (Curve1D units2) (VectorCurve2D units3 space)
+  Multiplication (Vector2D units1) (Curve1D units2) (VectorCurve2D units3)
   where
   lhs * rhs = Units.specialize (lhs ?*? rhs)
 
 instance
   Multiplication_
-    (Vector2D units1 space)
+    (Vector2D units1)
     (Curve1D units2)
-    (VectorCurve2D (units1 ?*? units2) space)
+    (VectorCurve2D (units1 ?*? units2))
   where
   vector ?*? curve = VectorCurve2D.constant vector ?*? curve
 

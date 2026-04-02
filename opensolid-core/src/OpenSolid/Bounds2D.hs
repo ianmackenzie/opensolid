@@ -79,101 +79,101 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 
-coerce :: Bounds2D units1 space1 -> Bounds2D units2 space2
+coerce :: Bounds2D units1 -> Bounds2D units2
 coerce (Bounds2D x y) = Bounds2D (Interval.coerce x) (Interval.coerce y)
 
 -- | Get the X coordinate bounds of a bounding box.
-xCoordinate :: Bounds2D units space -> Interval units
+xCoordinate :: Bounds2D units -> Interval units
 xCoordinate (PositionBounds2D pb) = VectorBounds2D.xComponent pb
 
 -- | Get the Y coordinate bounds of a bounding box.
-yCoordinate :: Bounds2D units space -> Interval units
+yCoordinate :: Bounds2D units -> Interval units
 yCoordinate (PositionBounds2D pb) = VectorBounds2D.yComponent pb
 
 -- | Get the X and Y coordinate bounds of a bounding box.
 {-# INLINE coordinates #-}
-coordinates :: Bounds2D units space -> (Interval units, Interval units)
+coordinates :: Bounds2D units -> (Interval units, Interval units)
 coordinates (PositionBounds2D pb) = VectorBounds2D.components pb
 
-dimensions :: Bounds2D units space -> (Quantity units, Quantity units)
+dimensions :: Bounds2D units -> (Quantity units, Quantity units)
 dimensions (Bounds2D x y) = (Interval.width x, Interval.width y)
 
-centerPoint :: Bounds2D units space -> Point2D units space
+centerPoint :: Bounds2D units -> Point2D units
 centerPoint (Bounds2D x y) = Point2D (Interval.midpoint x) (Interval.midpoint y)
 
 -- | Construct a zero-size bounding box containing a single point.
-constant :: Point2D units space -> Bounds2D units space
+constant :: Point2D units -> Bounds2D units
 constant (Point2D x y) = Bounds2D (Interval.constant x) (Interval.constant y)
 
-aggregate2 :: Bounds2D units space -> Bounds2D units space -> Bounds2D units space
+aggregate2 :: Bounds2D units -> Bounds2D units -> Bounds2D units
 aggregate2 (PositionBounds2D pb1) (PositionBounds2D pb2) =
   PositionBounds2D (VectorBounds2D.aggregate2 pb1 pb2)
 
 -- | Construct a bounding box containing all bounding boxes in the given non-empty list.
-aggregate :: NonEmpty (Bounds2D units space) -> Bounds2D units space
+aggregate :: NonEmpty (Bounds2D units) -> Bounds2D units
 aggregate list = PositionBounds2D (VectorBounds2D.aggregate (Data.Coerce.coerce list))
 
-aggregateOf :: (a -> Bounds2D units space) -> NonEmpty a -> Bounds2D units space
+aggregateOf :: (a -> Bounds2D units) -> NonEmpty a -> Bounds2D units
 aggregateOf function nonEmpty = aggregate (NonEmpty.map function nonEmpty)
 
-exclusion :: Point2D units space -> Bounds2D units space -> Quantity units
+exclusion :: Point2D units -> Bounds2D units -> Quantity units
 exclusion (Position2D p) (PositionBounds2D pb) = VectorBounds2D.exclusion p pb
 
 {-# INLINE exclusion# #-}
-exclusion# :: Point2D units space -> Bounds2D units space -> Double#
+exclusion# :: Point2D units -> Bounds2D units -> Double#
 exclusion# (Position2D p) (PositionBounds2D pb) = VectorBounds2D.exclusion# p pb
 
-inclusion :: Point2D units space -> Bounds2D units space -> Quantity units
+inclusion :: Point2D units -> Bounds2D units -> Quantity units
 inclusion (Position2D p) (PositionBounds2D pb) = VectorBounds2D.inclusion p pb
 
 {-# INLINE inclusion# #-}
-inclusion# :: Point2D units space -> Bounds2D units space -> Double#
+inclusion# :: Point2D units -> Bounds2D units -> Double#
 inclusion# (Position2D p) (PositionBounds2D pb) = VectorBounds2D.inclusion# p pb
 
-includes :: Point2D units space -> Bounds2D units space -> Bool
+includes :: Point2D units -> Bounds2D units -> Bool
 includes (Position2D p) (PositionBounds2D pb) = VectorBounds2D.includes p pb
 
-contains :: Bounds2D units space -> Bounds2D units space -> Bool
+contains :: Bounds2D units -> Bounds2D units -> Bool
 contains (PositionBounds2D pb2) (PositionBounds2D pb1) = VectorBounds2D.contains pb2 pb1
 
-isContainedIn :: Bounds2D units space -> Bounds2D units space -> Bool
+isContainedIn :: Bounds2D units -> Bounds2D units -> Bool
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
 {-# INLINE separation #-}
-separation :: Bounds2D units space -> Bounds2D units space -> Quantity units
+separation :: Bounds2D units -> Bounds2D units -> Quantity units
 separation (PositionBounds2D pb1) (PositionBounds2D pb2) = VectorBounds2D.separation pb1 pb2
 
 {-# INLINE separation# #-}
-separation# :: Bounds2D units space -> Bounds2D units space -> Double#
+separation# :: Bounds2D units -> Bounds2D units -> Double#
 separation# (PositionBounds2D pb1) (PositionBounds2D pb2) = VectorBounds2D.separation# pb1 pb2
 
 {-# INLINE overlap #-}
-overlap :: Bounds2D units space -> Bounds2D units space -> Quantity units
+overlap :: Bounds2D units -> Bounds2D units -> Quantity units
 overlap (PositionBounds2D pb1) (PositionBounds2D pb2) = VectorBounds2D.overlap pb1 pb2
 
 {-# INLINE overlap# #-}
-overlap# :: Bounds2D units space -> Bounds2D units space -> Double#
+overlap# :: Bounds2D units -> Bounds2D units -> Double#
 overlap# (PositionBounds2D pb1) (PositionBounds2D pb2) = VectorBounds2D.overlap# pb1 pb2
 
 intersection ::
-  Bounds2D units space ->
-  Bounds2D units space ->
-  Maybe (Bounds2D units space)
+  Bounds2D units ->
+  Bounds2D units ->
+  Maybe (Bounds2D units)
 intersection (PositionBounds2D pb1) (PositionBounds2D pb2) =
   Maybe.map PositionBounds2D (VectorBounds2D.intersection pb1 pb2)
 
 -- | Construct a bounding box from two corner points.
 hull2 ::
-  Point2D units space ->
-  Point2D units space ->
-  Bounds2D units space
+  Point2D units ->
+  Point2D units ->
+  Bounds2D units
 hull2 (Point2D x1 y1) (Point2D x2 y2) = Bounds2D (Interval x1 x2) (Interval y1 y2)
 
 hull3 ::
-  Point2D units space ->
-  Point2D units space ->
-  Point2D units space ->
-  Bounds2D units space
+  Point2D units ->
+  Point2D units ->
+  Point2D units ->
+  Bounds2D units
 hull3 (Point2D x1 y1) (Point2D x2 y2) (Point2D x3 y3) = do
   let minX = min (min x1 x2) x3
   let maxX = max (max x1 x2) x3
@@ -182,11 +182,11 @@ hull3 (Point2D x1 y1) (Point2D x2 y2) (Point2D x3 y3) = do
   Bounds2D (Interval minX maxX) (Interval minY maxY)
 
 hull4 ::
-  Point2D units space ->
-  Point2D units space ->
-  Point2D units space ->
-  Point2D units space ->
-  Bounds2D units space
+  Point2D units ->
+  Point2D units ->
+  Point2D units ->
+  Point2D units ->
+  Bounds2D units
 hull4 (Point2D x1 y1) (Point2D x2 y2) (Point2D x3 y3) (Point2D x4 y4) = do
   let minX = min (min (min x1 x2) x3) x4
   let maxX = max (max (max x1 x2) x3) x4
@@ -195,26 +195,26 @@ hull4 (Point2D x1 y1) (Point2D x2 y2) (Point2D x3 y3) (Point2D x4 y4) = do
   Bounds2D (Interval minX maxX) (Interval minY maxY)
 
 -- | Construct a bounding box containing all vertices in the given non-empty list.
-hull :: NonEmpty (Point2D units space) -> Bounds2D units space
+hull :: NonEmpty (Point2D units) -> Bounds2D units
 hull (Point2D x0 y0 :| rest) = do
   let go xLow xHigh yLow yHigh [] = Bounds2D (Interval xLow xHigh) (Interval yLow yHigh)
       go xLow xHigh yLow yHigh (Point2D x y : remaining) =
         go (min xLow x) (max xHigh x) (min yLow y) (max yHigh y) remaining
   go x0 x0 y0 y0 rest
 
-lowerLeftCorner :: Bounds2D units space -> Point2D units space
+lowerLeftCorner :: Bounds2D units -> Point2D units
 lowerLeftCorner (Bounds2D x y) = Point2D (Interval.lower x) (Interval.lower y)
 
-lowerRightCorner :: Bounds2D units space -> Point2D units space
+lowerRightCorner :: Bounds2D units -> Point2D units
 lowerRightCorner (Bounds2D x y) = Point2D (Interval.upper x) (Interval.lower y)
 
-upperLeftCorner :: Bounds2D units space -> Point2D units space
+upperLeftCorner :: Bounds2D units -> Point2D units
 upperLeftCorner (Bounds2D x y) = Point2D (Interval.lower x) (Interval.upper y)
 
-upperRightCorner :: Bounds2D units space -> Point2D units space
+upperRightCorner :: Bounds2D units -> Point2D units
 upperRightCorner (Bounds2D x y) = Point2D (Interval.upper x) (Interval.upper y)
 
-corners :: Bounds2D units space -> List (Point2D units space)
+corners :: Bounds2D units -> List (Point2D units)
 corners box =
   [ lowerLeftCorner box
   , lowerRightCorner box
@@ -223,23 +223,23 @@ corners box =
   ]
 
 {-# INLINE diameter #-}
-diameter :: Bounds2D units space -> Quantity units
+diameter :: Bounds2D units -> Quantity units
 diameter bounds = Quantity# (diameter# bounds)
 
 {-# INLINE diameter# #-}
-diameter# :: Bounds2D units space -> Double#
+diameter# :: Bounds2D units -> Double#
 diameter# (Bounds2D x y) = hypot2# (Interval.width# x) (Interval.width# y)
 
-area_ :: Bounds2D units space -> Quantity (units ?*? units)
+area_ :: Bounds2D units -> Quantity (units ?*? units)
 area_ (Bounds2D x y) = Interval.width x ?*? Interval.width y
 
-area :: Units.Squared units1 units2 => Bounds2D units1 space -> Quantity units2
+area :: Units.Squared units1 units2 => Bounds2D units1 -> Quantity units2
 area (Bounds2D x y) = Interval.width x * Interval.width y
 
-interpolate :: Bounds2D units space -> Number -> Number -> Point2D units space
+interpolate :: Bounds2D units -> Number -> Number -> Point2D units
 interpolate (PositionBounds2D pb) u v = Position2D (VectorBounds2D.interpolate pb u v)
 
-placeIn :: Frame2D units global local -> Bounds2D units local -> Bounds2D units global
+placeIn :: Frame2D units -> Bounds2D units -> Bounds2D units
 placeIn frame (Bounds2D x y) = do
   let xMid = Interval.midpoint x
   let yMid = Interval.midpoint y
@@ -252,7 +252,7 @@ placeIn frame (Bounds2D x y) = do
   let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
   Bounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
 
-relativeTo :: Frame2D units global local -> Bounds2D units global -> Bounds2D units local
+relativeTo :: Frame2D units -> Bounds2D units -> Bounds2D units
 relativeTo frame (Bounds2D x y) = do
   let xMid = Interval.midpoint x
   let yMid = Interval.midpoint y
@@ -265,7 +265,7 @@ relativeTo frame (Bounds2D x y) = do
   let ry = 0.5 * xWidth * Number.abs jx + 0.5 * yWidth * Number.abs jy
   Bounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
 
-placeOn :: Plane3D global -> Bounds2D Meters local -> Bounds3D global
+placeOn :: Plane3D space -> Bounds2D Meters -> Bounds3D space
 placeOn plane (Bounds2D x y) = do
   let Plane3D _ (PlaneOrientation3D i j) = plane
   let Direction3D ix iy iz = i
@@ -283,10 +283,7 @@ placeOn plane (Bounds2D x y) = do
   let bz = Interval (z0 - rz) (z0 + rz)
   Bounds3D bx by bz
 
-transformBy ::
-  Transform2D tag units space ->
-  Bounds2D units space ->
-  Bounds2D units space
+transformBy :: Transform2D tag units -> Bounds2D units -> Bounds2D units
 transformBy transform (Bounds2D x y) = do
   let xMid = Interval.midpoint x
   let yMid = Interval.midpoint y
@@ -300,7 +297,7 @@ transformBy transform (Bounds2D x y) = do
   let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
   Bounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
 
-distanceAlong :: Axis2D units space -> Bounds2D units space -> Interval units
+distanceAlong :: Axis2D units -> Bounds2D units -> Interval units
 distanceAlong axis (Bounds2D x y) = do
   let xMid = Interval.midpoint x
   let yMid = Interval.midpoint y
@@ -311,16 +308,16 @@ distanceAlong axis (Bounds2D x y) = do
   let r = 0.5 * xWidth * Number.abs ax + 0.5 * yWidth * Number.abs ay
   Interval (d0 - r) (d0 + r)
 
-convert :: Quantity (units2 ?/? units1) -> Bounds2D units1 space -> Bounds2D units2 space
+convert :: Quantity (units2 ?/? units1) -> Bounds2D units1 -> Bounds2D units2
 convert factor (PositionBounds2D pb) = PositionBounds2D (VectorBounds2D.convert factor pb)
 
-unconvert :: Quantity (units2 ?/? units1) -> Bounds2D units2 space -> Bounds2D units1 space
+unconvert :: Quantity (units2 ?/? units1) -> Bounds2D units2 -> Bounds2D units1
 unconvert factor (PositionBounds2D pb) = PositionBounds2D (VectorBounds2D.unconvert factor pb)
 
-areDistinct :: Bounds2D units space -> Bounds2D units space -> Bool
+areDistinct :: Bounds2D units -> Bounds2D units -> Bool
 areDistinct (Bounds2D x1 y1) (Bounds2D x2 y2) =
   Interval.areDistinct x1 x2 || Interval.areDistinct y1 y2
 
-isDistinctFrom :: Point2D units space -> Bounds2D units space -> Bool
+isDistinctFrom :: Point2D units -> Bounds2D units -> Bool
 isDistinctFrom (Point2D px py) (Bounds2D bx by) =
   Interval.isDistinctFrom px bx || Interval.isDistinctFrom py by

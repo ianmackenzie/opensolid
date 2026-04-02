@@ -89,7 +89,7 @@ new = Curve.new
 constant :: Point3D space -> Curve3D space
 constant = Curve.constant
 
-on :: Plane3D global -> Curve2D Meters local -> Curve3D global
+on :: Plane3D space -> Curve2D Meters -> Curve3D space
 on plane curve2D = do
   let compiledPlaced =
         CompiledFunction.map

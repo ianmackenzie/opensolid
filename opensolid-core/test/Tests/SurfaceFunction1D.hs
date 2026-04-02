@@ -16,7 +16,6 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
-import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.World3D qualified as World3D
 import Test (Expectation, Test)
@@ -47,7 +46,7 @@ firstDerivativeConsistency = Test.check 100 "firstDerivativeConsistency" do
   parameter <- Test.generate Random.surfaceParameter
   firstDerivativeIsConsistent planeTorusSurface uvPoint parameter
 
-withIntersectionCurves :: Tolerance Meters => (NonEmpty (Curve2D Unitless UvSpace) -> Test) -> Test
+withIntersectionCurves :: Tolerance Meters => (NonEmpty (Curve2D Unitless) -> Test) -> Test
 withIntersectionCurves callback =
   case SurfaceFunction1D.zeros planeTorusSurface of
     Error error -> Test.abort (Text.show error)

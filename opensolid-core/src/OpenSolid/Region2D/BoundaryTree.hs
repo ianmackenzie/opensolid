@@ -19,30 +19,30 @@ import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Vector2D qualified as Vector2D
 
-data BoundaryTree units space = BoundaryTree
-  { bounds :: Bounds2D units space
-  , startPoint :: Point2D units space
-  , endPoint :: Point2D units space
-  , left :: ~(BoundaryTree units space)
-  , right :: ~(BoundaryTree units space)
+data BoundaryTree units = BoundaryTree
+  { bounds :: Bounds2D units
+  , startPoint :: Point2D units
+  , endPoint :: Point2D units
+  , left :: ~(BoundaryTree units)
+  , right :: ~(BoundaryTree units)
   }
 
-build :: NonEmpty (Curve2D units space) -> BoundaryTree units space
+build :: NonEmpty (Curve2D units) -> BoundaryTree units
 build loop = assembleLoop (NonEmpty.map buildCurve loop)
 
-assembleLoop :: NonEmpty (BoundaryTree units space) -> BoundaryTree units space
+assembleLoop :: NonEmpty (BoundaryTree units) -> BoundaryTree units
 assembleLoop subtrees =
   case reduceLoop subtrees of
     NonEmpty.One tree -> tree
     reduced -> assembleLoop reduced
 
-reduceLoop :: NonEmpty (BoundaryTree units space) -> NonEmpty (BoundaryTree units space)
+reduceLoop :: NonEmpty (BoundaryTree units) -> NonEmpty (BoundaryTree units)
 reduceLoop (first :| []) = NonEmpty.one first
 reduceLoop (first :| second : []) = NonEmpty.one (join first second)
 reduceLoop (first :| second : third : rest) =
   NonEmpty.push (join first second) (reduceLoop (third :| rest))
 
-join :: BoundaryTree units space -> BoundaryTree units space -> BoundaryTree units space
+join :: BoundaryTree units -> BoundaryTree units -> BoundaryTree units
 join left right =
   BoundaryTree
     { bounds = Bounds2D.aggregate2 left.bounds right.bounds
@@ -52,16 +52,16 @@ join left right =
     , right
     }
 
-buildCurve :: Curve2D units space -> BoundaryTree units space
+buildCurve :: Curve2D units -> BoundaryTree units
 buildCurve curve =
   buildCurveImpl curve Interval.unit (Curve2D.startPoint curve) (Curve2D.endPoint curve)
 
 buildCurveImpl ::
-  Curve2D units space ->
+  Curve2D units ->
   Interval Unitless ->
-  Point2D units space ->
-  Point2D units space ->
-  BoundaryTree units space
+  Point2D units ->
+  Point2D units ->
+  BoundaryTree units
 buildCurveImpl curve tBounds startPoint endPoint = do
   let Interval tLow tHigh = tBounds
   let tMid = Number.midpoint tLow tHigh
@@ -74,24 +74,24 @@ buildCurveImpl curve tBounds startPoint endPoint = do
     , right = buildCurveImpl curve (Interval tMid tHigh) midpoint endPoint
     }
 
-distinctSweptAngle :: Point2D units space -> BoundaryTree units space -> Angle
+distinctSweptAngle :: Point2D units -> BoundaryTree units -> Angle
 distinctSweptAngle point tree =
   Vector2D.angleFrom (tree.startPoint - point) (tree.endPoint - point)
 
-pointSweptAngle :: Point2D units space -> BoundaryTree units space -> Angle
+pointSweptAngle :: Point2D units -> BoundaryTree units -> Angle
 pointSweptAngle point tree
   | Bounds2D.isDistinctFrom point tree.bounds = distinctSweptAngle point tree
   | otherwise = pointSweptAngle point tree.left + pointSweptAngle point tree.right
 
-boundsSweptAngle :: Bounds2D units space -> BoundaryTree units space -> Fuzzy Angle
+boundsSweptAngle :: Bounds2D units -> BoundaryTree units -> Fuzzy Angle
 boundsSweptAngle bounds tree =
   boundsSweptAngleImpl bounds (Bounds2D.centerPoint bounds) (Bounds2D.diameter bounds) tree
 
 boundsSweptAngleImpl ::
-  Bounds2D units space ->
-  Point2D units space ->
+  Bounds2D units ->
+  Point2D units ->
   Quantity units ->
-  BoundaryTree units space ->
+  BoundaryTree units ->
   Fuzzy Angle
 boundsSweptAngleImpl bounds centerPoint diameter tree
   | Bounds2D.areDistinct bounds tree.bounds = Resolved (distinctSweptAngle centerPoint tree)

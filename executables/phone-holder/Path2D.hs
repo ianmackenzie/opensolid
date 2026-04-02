@@ -29,42 +29,30 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Result qualified as Result
 
-type Path2D space = NonEmpty (Edge2D space)
+type Path2D = NonEmpty Edge2D
 
-startPoint :: Path2D space -> Point2D Meters space
+startPoint :: Path2D -> Point2D Meters
 startPoint path = Edge2D.startPoint (NonEmpty.first path)
 
-endPoint :: Path2D space -> Point2D Meters space
+endPoint :: Path2D -> Point2D Meters
 endPoint path = Edge2D.endPoint (NonEmpty.last path)
 
-startTangent :: Tolerance Meters => Path2D space -> Result IsDegenerate (Direction2D space)
+startTangent :: Tolerance Meters => Path2D -> Result IsDegenerate Direction2D
 startTangent path = Edge2D.startTangent (NonEmpty.first path)
 
-endTangent :: Tolerance Meters => Path2D space -> Result IsDegenerate (Direction2D space)
+endTangent :: Tolerance Meters => Path2D -> Result IsDegenerate Direction2D
 endTangent path = Edge2D.endTangent (NonEmpty.last path)
 
-reverse :: Path2D space -> Path2D space
+reverse :: Path2D -> Path2D
 reverse = NonEmpty.reverseMap Edge2D.reverse
 
-offsetLeftwardBy ::
-  Tolerance Meters =>
-  Length ->
-  Path2D space ->
-  Result IsDegenerate (Path2D space)
+offsetLeftwardBy :: Tolerance Meters => Length -> Path2D -> Result IsDegenerate Path2D
 offsetLeftwardBy distance path = Result.collect (Edge2D.offsetLeftwardBy distance) path
 
-offsetRightwardBy ::
-  Tolerance Meters =>
-  Length ->
-  Path2D space ->
-  Result IsDegenerate (Path2D space)
+offsetRightwardBy :: Tolerance Meters => Length -> Path2D -> Result IsDegenerate Path2D
 offsetRightwardBy distance = offsetLeftwardBy -distance
 
-thickenLeftwardBy ::
-  Tolerance Meters =>
-  Length ->
-  Path2D space ->
-  Result IsDegenerate (Path2D space)
+thickenLeftwardBy :: Tolerance Meters => Length -> Path2D -> Result IsDegenerate Path2D
 thickenLeftwardBy distance path = do
   offsetPath <- offsetLeftwardBy distance path & Result.map reverse
   Ok $
@@ -75,14 +63,10 @@ thickenLeftwardBy distance path = do
         offsetPath
         (NonEmpty.one (Edge2D.Line (Line2D (endPoint offsetPath) (startPoint path))))
 
-thickenRightwardBy ::
-  Tolerance Meters =>
-  Length ->
-  Path2D space ->
-  Result IsDegenerate (Path2D space)
+thickenRightwardBy :: Tolerance Meters => Length -> Path2D -> Result IsDegenerate Path2D
 thickenRightwardBy distance path = thickenLeftwardBy distance (reverse path)
 
-addArc :: Tolerance Meters => Length -> Angle -> Path2D space -> Result IsDegenerate (Path2D space)
+addArc :: Tolerance Meters => Length -> Angle -> Path2D -> Result IsDegenerate Path2D
 addArc radius sweptAngle path = do
   arcStartTangent <- endTangent path
   let arcStartPoint = endPoint path
@@ -91,12 +75,12 @@ addArc radius sweptAngle path = do
   let arc = Arc2D.sweptAround arcCenterPoint arcStartPoint sweptAngle
   Ok (add (Edge2D.Arc arc) path)
 
-addLine :: Tolerance Meters => Length -> Path2D space -> Result IsDegenerate (Path2D space)
+addLine :: Tolerance Meters => Length -> Path2D -> Result IsDegenerate Path2D
 addLine length path = do
   lineDirection <- endTangent path
   let lineStartPoint = endPoint path
   let line = Line2D lineStartPoint (lineStartPoint + length * lineDirection)
   Ok (add (Edge2D.Line line) path)
 
-add :: Edge2D space -> Path2D space -> Path2D space
+add :: Edge2D -> Path2D -> Path2D
 add edge path = path <> NonEmpty.one edge

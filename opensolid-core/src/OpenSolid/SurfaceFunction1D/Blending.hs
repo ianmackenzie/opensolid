@@ -8,7 +8,6 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
-import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.VectorSurfaceFunction (VectorSurfaceFunction)
 import OpenSolid.VectorSurfaceFunction qualified as VectorSurfaceFunction
 import Prelude qualified
@@ -177,34 +176,34 @@ d ::
   VectorSurfaceFunction dimension units space
 d = VectorSurfaceFunction.derivative
 
-v :: Number -> SurfaceFunction2D Unitless UvSpace
+v :: Number -> SurfaceFunction2D Unitless
 v vValue =
   SurfaceFunction2D.xy SurfaceFunction1D.u (SurfaceFunction1D.constant vValue)
 
-v0 :: SurfaceFunction2D Unitless UvSpace
+v0 :: SurfaceFunction2D Unitless
 v0 = v 0.0
 
-vT0 :: SurfaceFunction2D Unitless UvSpace
+vT0 :: SurfaceFunction2D Unitless
 vT0 = v t0
 
-vT1 :: SurfaceFunction2D Unitless UvSpace
+vT1 :: SurfaceFunction2D Unitless
 vT1 = v t1
 
-v1 :: SurfaceFunction2D Unitless UvSpace
+v1 :: SurfaceFunction2D Unitless
 v1 = v 1.0
 
-u :: Number -> SurfaceFunction2D Unitless UvSpace
+u :: Number -> SurfaceFunction2D Unitless
 u uValue =
   SurfaceFunction2D.xy (SurfaceFunction1D.constant uValue) SurfaceFunction1D.v
 
-u0 :: SurfaceFunction2D Unitless UvSpace
+u0 :: SurfaceFunction2D Unitless
 u0 = u 0.0
 
-uT0 :: SurfaceFunction2D Unitless UvSpace
+uT0 :: SurfaceFunction2D Unitless
 uT0 = u t0
 
-uT1 :: SurfaceFunction2D Unitless UvSpace
+uT1 :: SurfaceFunction2D Unitless
 uT1 = u t1
 
-u1 :: SurfaceFunction2D Unitless UvSpace
+u1 :: SurfaceFunction2D Unitless
 u1 = u 1.0

@@ -47,50 +47,46 @@ import OpenSolid.Primitives
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Vector2D qualified as Vector2D
 
-type Rigid units space = Transform2D Transform.Rigid units space
+type Rigid units = Transform2D Transform.Rigid units
 
-type Orthonormal units space = Transform2D Transform.Orthonormal units space
+type Orthonormal units = Transform2D Transform.Orthonormal units
 
-type Uniform units space = Transform2D Transform.Uniform units space
+type Uniform units = Transform2D Transform.Uniform units
 
-type Affine units space = Transform2D Transform.Affine units space
+type Affine units = Transform2D Transform.Affine units
 
-unitX :: Vector2D Unitless space
+unitX :: Vector2D Unitless
 unitX = Vector2D 1.0 0.0
 
-unitY :: Vector2D Unitless space
+unitY :: Vector2D Unitless
 unitY = Vector2D 0.0 1.0
 
-identity :: Rigid units space
+identity :: Rigid units
 identity = Transform2D Point2D.origin unitX unitY
 
-coerce :: Transform2D tag1 units1 space1 -> Transform2D tag2 units2 space2
+coerce :: Transform2D tag1 units1 -> Transform2D tag2 units2
 coerce (Transform2D p0 i j) =
   Transform2D (Point2D.coerce p0) (Vector2D.coerce i) (Vector2D.coerce j)
 
-handedness :: Transform2D tag units space -> Sign
+handedness :: Transform2D tag units -> Sign
 handedness (Transform2D _ vx vy) = Number.sign (vx `cross` vy)
 
-withFixedPoint ::
-  Point2D units space ->
-  Vector2D Unitless space ->
-  Vector2D Unitless space ->
-  Transform2D tag units space
+withFixedPoint :: Point2D units -> Vector2D Unitless -> Vector2D Unitless -> Transform2D tag units
 withFixedPoint fixedPoint vx vy = do
   let Point2D fixedX fixedY = fixedPoint
   let originPoint = fixedPoint - fixedX * vx - fixedY * vy
   Transform2D originPoint vx vy
 
-translateBy :: Vector2D units space -> Rigid units space
+translateBy :: Vector2D units -> Rigid units
 translateBy vector = Transform2D (Point2D.origin + vector) unitX unitY
 
-translateIn :: Direction2D space -> Quantity units -> Rigid units space
+translateIn :: Direction2D -> Quantity units -> Rigid units
 translateIn direction distance = translateBy (direction * distance)
 
-translateAlong :: Axis2D units space -> Quantity units -> Rigid units space
+translateAlong :: Axis2D units -> Quantity units -> Rigid units
 translateAlong (Axis2D _ direction) distance = translateIn direction distance
 
-rotateAround :: Point2D units space -> Angle -> Rigid units space
+rotateAround :: Point2D units -> Angle -> Rigid units
 rotateAround centerPoint angle = do
   let cos = Angle.cos angle
   let sin = Angle.sin angle
@@ -98,20 +94,20 @@ rotateAround centerPoint angle = do
   let vy = Vector2D -sin cos
   withFixedPoint centerPoint vx vy
 
-mirrorAcross :: Axis2D units space -> Orthonormal units space
+mirrorAcross :: Axis2D units -> Orthonormal units
 mirrorAcross (Axis2D originPoint direction) = do
   let Direction2D dx dy = direction
   let vx = Vector2D (1.0 - 2.0 * dy * dy) (2.0 * dx * dy)
   let vy = Vector2D (2.0 * dx * dy) (1.0 - 2.0 * dx * dx)
   withFixedPoint originPoint vx vy
 
-scaleAbout :: Point2D units space -> Number -> Uniform units space
+scaleAbout :: Point2D units -> Number -> Uniform units
 scaleAbout point scale = do
   let vx = Vector2D scale 0.0
   let vy = Vector2D 0.0 scale
   withFixedPoint point vx vy
 
-scaleAlong :: Axis2D units space -> Number -> Affine units space
+scaleAlong :: Axis2D units -> Number -> Affine units
 scaleAlong (Axis2D originPoint direction) scale = do
   let Direction2D dx dy = direction
   let dx2 = dx * dx
@@ -121,10 +117,7 @@ scaleAlong (Axis2D originPoint direction) scale = do
   let vy = Vector2D xy (scale * dy2 + dx2)
   withFixedPoint originPoint vx vy
 
-placeIn ::
-  Frame2D units global local ->
-  Transform2D tag units local ->
-  Transform2D tag units global
+placeIn :: Frame2D units -> Transform2D tag units -> Transform2D tag units
 placeIn frame transform = do
   let p0 =
         Point2D.origin
@@ -143,10 +136,7 @@ placeIn frame transform = do
           & Vector2D.placeIn frame
   Transform2D p0 vx vy
 
-relativeTo ::
-  Frame2D units global local ->
-  Transform2D tag units global ->
-  Transform2D tag units local
+relativeTo :: Frame2D units -> Transform2D tag units -> Transform2D tag units
 relativeTo frame transform = do
   let p0 =
         Point2D.origin
@@ -165,72 +155,66 @@ relativeTo frame transform = do
           & Vector2D.relativeTo frame
   Transform2D p0 vx vy
 
-toOrthonormal ::
-  Transform.IsOrthonormal tag =>
-  Transform2D tag units space ->
-  Orthonormal units space
+toOrthonormal :: Transform.IsOrthonormal tag => Transform2D tag units -> Orthonormal units
 toOrthonormal = Data.Coerce.coerce
 
-toUniform ::
-  Transform.IsUniform tag =>
-  Transform2D tag units space ->
-  Uniform units space
+toUniform :: Transform.IsUniform tag => Transform2D tag units -> Uniform units
 toUniform = Data.Coerce.coerce
 
-toAffine :: Transform2D tag units space -> Affine units space
+toAffine :: Transform2D tag units -> Affine units
 toAffine = Data.Coerce.coerce
 
 -- Helper functions to define specific/concrete transformation functions
 
 translateByImpl ::
-  (Rigid units space -> a -> b) ->
-  Vector2D units space ->
+  (Rigid units -> a -> b) ->
+  Vector2D units ->
   a ->
   b
 translateByImpl transformBy vector = transformBy (translateBy vector)
 
 translateInImpl ::
-  (Rigid units space -> a -> b) ->
-  Direction2D space ->
+  (Rigid units -> a -> b) ->
+  Direction2D ->
   Quantity units ->
   a ->
   b
 translateInImpl transformBy direction distance = transformBy (translateIn direction distance)
 
 translateAlongImpl ::
-  (Rigid units space -> a -> b) ->
-  Axis2D units space ->
+  (Rigid units -> a -> b) ->
+  Axis2D units ->
   Quantity units ->
   a ->
   b
 translateAlongImpl transformBy axis distance = transformBy (translateAlong axis distance)
 
 rotateAroundImpl ::
-  (Rigid units space -> a -> b) ->
-  Point2D units space ->
+  (Rigid units -> a -> b) ->
+  Point2D units ->
   Angle ->
   a ->
   b
 rotateAroundImpl transformBy centerPoint angle = transformBy (rotateAround centerPoint angle)
 
 mirrorAcrossImpl ::
-  (Orthonormal units space -> a -> b) ->
-  Axis2D units space ->
+  (Orthonormal units -> a -> b) ->
+  Axis2D units ->
   a ->
   b
 mirrorAcrossImpl transformBy axis = transformBy (mirrorAcross axis)
 
 scaleAboutImpl ::
-  (Uniform units space -> a -> b) ->
-  Point2D units space ->
+  (Uniform units -> a -> b) ->
+  Point2D units ->
   Number ->
   a ->
   b
 scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoint scale)
 
 scaleAlongImpl ::
-  (Affine units space -> a -> b) ->
-  Axis2D units space ->
+  (Affine units -> a -> b) ->
+  Axis2D units ->
   Number ->
   a ->
   b

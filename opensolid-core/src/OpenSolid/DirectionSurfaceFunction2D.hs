@@ -28,43 +28,40 @@ import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 
-newtype DirectionSurfaceFunction2D space
-  = DirectionSurfaceFunction2D (VectorSurfaceFunction2D Unitless space)
+newtype DirectionSurfaceFunction2D
+  = DirectionSurfaceFunction2D (VectorSurfaceFunction2D Unitless)
 
-unsafe :: VectorSurfaceFunction2D Unitless space -> DirectionSurfaceFunction2D space
+unsafe :: VectorSurfaceFunction2D Unitless -> DirectionSurfaceFunction2D
 unsafe = DirectionSurfaceFunction2D
 
-unwrap :: DirectionSurfaceFunction2D space -> VectorSurfaceFunction2D Unitless space
+unwrap :: DirectionSurfaceFunction2D -> VectorSurfaceFunction2D Unitless
 unwrap (DirectionSurfaceFunction2D vectorSurfaceFunction) = vectorSurfaceFunction
 
-value :: DirectionSurfaceFunction2D space -> UvPoint -> Direction2D space
+value :: DirectionSurfaceFunction2D -> UvPoint -> Direction2D
 value (DirectionSurfaceFunction2D vectorSurfaceFunction) uvPoint =
   Direction2D.unsafe (VectorSurfaceFunction2D.value vectorSurfaceFunction uvPoint)
 
-bounds :: DirectionSurfaceFunction2D space -> UvBounds -> DirectionBounds2D space
+bounds :: DirectionSurfaceFunction2D -> UvBounds -> DirectionBounds2D
 bounds (DirectionSurfaceFunction2D vectorSurfaceFunction) uvBounds =
   DirectionBounds2D.unsafe (VectorSurfaceFunction2D.bounds vectorSurfaceFunction uvBounds)
 
-derivative ::
-  SurfaceParameter ->
-  DirectionSurfaceFunction2D space ->
-  VectorSurfaceFunction2D Unitless space
+derivative :: SurfaceParameter -> DirectionSurfaceFunction2D -> VectorSurfaceFunction2D Unitless
 derivative parameter (DirectionSurfaceFunction2D vectorSurfaceFunction) =
   VectorSurfaceFunction2D.derivative parameter vectorSurfaceFunction
 
-constant :: Direction2D space -> DirectionSurfaceFunction2D space
+constant :: Direction2D -> DirectionSurfaceFunction2D
 constant direction =
   DirectionSurfaceFunction2D (VectorSurfaceFunction2D.constant (Vector2D.unit direction))
 
-instance Negation (DirectionSurfaceFunction2D space) where
+instance Negation DirectionSurfaceFunction2D where
   negate (DirectionSurfaceFunction2D vectorSurfaceFunction) =
     DirectionSurfaceFunction2D (negate vectorSurfaceFunction)
 
 instance
   Multiplication
     Sign
-    (DirectionSurfaceFunction2D space)
-    (DirectionSurfaceFunction2D space)
+    DirectionSurfaceFunction2D
+    DirectionSurfaceFunction2D
   where
   Positive * function = function
   Negative * function = -function
@@ -72,26 +69,26 @@ instance
 instance
   Multiplication_
     Sign
-    (DirectionSurfaceFunction2D space)
-    (DirectionSurfaceFunction2D space)
+    DirectionSurfaceFunction2D
+    DirectionSurfaceFunction2D
   where
   Positive ?*? function = function
   Negative ?*? function = -function
 
 instance
   Multiplication
-    (DirectionSurfaceFunction2D space)
+    DirectionSurfaceFunction2D
     Sign
-    (DirectionSurfaceFunction2D space)
+    DirectionSurfaceFunction2D
   where
   function * Positive = function
   function * Negative = -function
 
 instance
   Multiplication_
-    (DirectionSurfaceFunction2D space)
+    DirectionSurfaceFunction2D
     Sign
-    (DirectionSurfaceFunction2D space)
+    DirectionSurfaceFunction2D
   where
   function ?*? Positive = function
   function ?*? Negative = -function
@@ -99,178 +96,158 @@ instance
 instance
   Multiplication
     (Quantity units)
-    (DirectionSurfaceFunction2D space)
-    (VectorSurfaceFunction2D units space)
+    DirectionSurfaceFunction2D
+    (VectorSurfaceFunction2D units)
   where
   quantity * DirectionSurfaceFunction2D vectorSurfaceFunction = quantity * vectorSurfaceFunction
 
 instance
   Multiplication
-    (DirectionSurfaceFunction2D space)
+    DirectionSurfaceFunction2D
     (Quantity units)
-    (VectorSurfaceFunction2D units space)
+    (VectorSurfaceFunction2D units)
   where
   DirectionSurfaceFunction2D vectorSurfaceFunction * quantity = vectorSurfaceFunction * quantity
 
 instance
   Multiplication
     (SurfaceFunction1D units)
-    (DirectionSurfaceFunction2D space)
-    (VectorSurfaceFunction2D units space)
+    DirectionSurfaceFunction2D
+    (VectorSurfaceFunction2D units)
   where
   scalarSurfaceFunction * DirectionSurfaceFunction2D vectorSurfaceFunction =
     scalarSurfaceFunction * vectorSurfaceFunction
 
 instance
   Multiplication
-    (DirectionSurfaceFunction2D space)
+    DirectionSurfaceFunction2D
     (SurfaceFunction1D units)
-    (VectorSurfaceFunction2D units space)
+    (VectorSurfaceFunction2D units)
   where
   DirectionSurfaceFunction2D vectorSurfaceFunction * scalarSurfaceFunction =
     vectorSurfaceFunction * scalarSurfaceFunction
 
 instance
-  space1 ~ space2 =>
   DotMultiplication
-    (DirectionSurfaceFunction2D space1)
-    (DirectionSurfaceFunction2D space2)
+    DirectionSurfaceFunction2D
+    DirectionSurfaceFunction2D
     (SurfaceFunction1D Unitless)
   where
   DirectionSurfaceFunction2D lhs `dot` DirectionSurfaceFunction2D rhs = lhs `dot` rhs
 
 instance
-  space1 ~ space2 =>
   DotMultiplication
-    (DirectionSurfaceFunction2D space1)
-    (VectorSurfaceFunction2D units space2)
+    DirectionSurfaceFunction2D
+    (VectorSurfaceFunction2D units)
     (SurfaceFunction1D units)
   where
   DirectionSurfaceFunction2D lhs `dot` rhs = lhs `dot` rhs
 
 instance
-  space1 ~ space2 =>
   DotMultiplication
-    (VectorSurfaceFunction2D units space1)
-    (DirectionSurfaceFunction2D space2)
+    (VectorSurfaceFunction2D units)
+    DirectionSurfaceFunction2D
     (SurfaceFunction1D units)
   where
   lhs `dot` DirectionSurfaceFunction2D rhs = lhs `dot` rhs
 
 instance
-  space1 ~ space2 =>
   DotMultiplication
-    (DirectionSurfaceFunction2D space1)
-    (Direction2D space2)
+    DirectionSurfaceFunction2D
+    Direction2D
     (SurfaceFunction1D Unitless)
   where
   DirectionSurfaceFunction2D lhs `dot` rhs = lhs `dot` rhs
 
 instance
-  space1 ~ space2 =>
   DotMultiplication
-    (Direction2D space1)
-    (DirectionSurfaceFunction2D space2)
+    Direction2D
+    DirectionSurfaceFunction2D
     (SurfaceFunction1D Unitless)
   where
   lhs `dot` DirectionSurfaceFunction2D rhs = lhs `dot` rhs
 
 instance
-  space1 ~ space2 =>
   DotMultiplication
-    (DirectionSurfaceFunction2D space1)
-    (Vector2D units space2)
+    DirectionSurfaceFunction2D
+    (Vector2D units)
     (SurfaceFunction1D units)
   where
   DirectionSurfaceFunction2D lhs `dot` rhs = lhs `dot` rhs
 
 instance
-  space1 ~ space2 =>
   DotMultiplication
-    (Vector2D units space1)
-    (DirectionSurfaceFunction2D space2)
+    (Vector2D units)
+    DirectionSurfaceFunction2D
     (SurfaceFunction1D units)
   where
   lhs `dot` DirectionSurfaceFunction2D rhs = lhs `dot` rhs
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication
-    (DirectionSurfaceFunction2D space1)
-    (DirectionSurfaceFunction2D space2)
+    DirectionSurfaceFunction2D
+    DirectionSurfaceFunction2D
     (SurfaceFunction1D Unitless)
   where
   DirectionSurfaceFunction2D lhs `cross` DirectionSurfaceFunction2D rhs = lhs `cross` rhs
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication
-    (DirectionSurfaceFunction2D space1)
-    (VectorSurfaceFunction2D units space2)
+    DirectionSurfaceFunction2D
+    (VectorSurfaceFunction2D units)
     (SurfaceFunction1D units)
   where
   DirectionSurfaceFunction2D lhs `cross` rhs = lhs `cross` rhs
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication
-    (VectorSurfaceFunction2D units space1)
-    (DirectionSurfaceFunction2D space2)
+    (VectorSurfaceFunction2D units)
+    DirectionSurfaceFunction2D
     (SurfaceFunction1D units)
   where
   lhs `cross` DirectionSurfaceFunction2D rhs = lhs `cross` rhs
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication
-    (DirectionSurfaceFunction2D space1)
-    (Direction2D space2)
+    DirectionSurfaceFunction2D
+    Direction2D
     (SurfaceFunction1D Unitless)
   where
   DirectionSurfaceFunction2D lhs `cross` rhs = lhs `cross` rhs
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication
-    (Direction2D space1)
-    (DirectionSurfaceFunction2D space2)
+    Direction2D
+    DirectionSurfaceFunction2D
     (SurfaceFunction1D Unitless)
   where
   lhs `cross` DirectionSurfaceFunction2D rhs = lhs `cross` rhs
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication
-    (DirectionSurfaceFunction2D space1)
-    (Vector2D units space2)
+    DirectionSurfaceFunction2D
+    (Vector2D units)
     (SurfaceFunction1D units)
   where
   DirectionSurfaceFunction2D lhs `cross` rhs = lhs `cross` rhs
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication
-    (Vector2D units space1)
-    (DirectionSurfaceFunction2D space2)
+    (Vector2D units)
+    DirectionSurfaceFunction2D
     (SurfaceFunction1D units)
   where
   lhs `cross` DirectionSurfaceFunction2D rhs = lhs `cross` rhs
 
-instance HasField "xComponent" (DirectionSurfaceFunction2D space) (SurfaceFunction1D Unitless) where
+instance HasField "xComponent" DirectionSurfaceFunction2D (SurfaceFunction1D Unitless) where
   getField (DirectionSurfaceFunction2D function) = function.xComponent
 
-instance HasField "yComponent" (DirectionSurfaceFunction2D space) (SurfaceFunction1D Unitless) where
+instance HasField "yComponent" DirectionSurfaceFunction2D (SurfaceFunction1D Unitless) where
   getField (DirectionSurfaceFunction2D function) = function.yComponent
 
-placeIn ::
-  Frame2D frameUnits global local ->
-  DirectionSurfaceFunction2D local ->
-  DirectionSurfaceFunction2D global
+placeIn :: Frame2D frameUnits -> DirectionSurfaceFunction2D -> DirectionSurfaceFunction2D
 placeIn frame (DirectionSurfaceFunction2D function) =
   DirectionSurfaceFunction2D (VectorSurfaceFunction2D.placeIn frame function)
 
-relativeTo ::
-  Frame2D frameUnits global local ->
-  DirectionSurfaceFunction2D global ->
-  DirectionSurfaceFunction2D local
+relativeTo :: Frame2D frameUnits -> DirectionSurfaceFunction2D -> DirectionSurfaceFunction2D
 relativeTo frame = placeIn (Frame2D.inverse frame)

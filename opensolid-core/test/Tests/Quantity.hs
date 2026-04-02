@@ -17,10 +17,10 @@ tests =
   , largestBy
   ]
 
-randomPointList :: Generator (NonEmpty (Point2D Meters space))
+randomPointList :: Generator (NonEmpty (Point2D Meters))
 randomPointList = NonEmpty.random 10 Random.point2D
 
-xMagnitude :: Point2D Meters space -> Length
+xMagnitude :: Point2D Meters -> Length
 xMagnitude point = Quantity.abs (Point2D.xCoordinate point)
 
 smallestBy :: Test

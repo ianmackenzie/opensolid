@@ -11,6 +11,7 @@ module OpenSolid.Bounds
   )
 where
 
+import Data.Void (Void)
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Interval (Interval)
@@ -22,7 +23,7 @@ import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 
 type family Bounds dimension units space = bounds | bounds -> dimension units space where
-  Bounds 2 units space = Bounds2D units space
+  Bounds 2 units Void = Bounds2D units
   Bounds 3 Meters space = Bounds3D space
 
 class
@@ -54,7 +55,7 @@ class
   cyclicCoordinate :: Int -> Bounds dimension units space -> Interval units
   diameter :: Bounds dimension units space -> Quantity units
 
-instance Exists 2 units space where
+instance Exists 2 units Void where
   constant = Bounds2D.constant
   contains = Bounds2D.contains
   hull2 = Bounds2D.hull2

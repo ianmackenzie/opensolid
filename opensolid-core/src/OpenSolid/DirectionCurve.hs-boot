@@ -8,6 +8,7 @@ module OpenSolid.DirectionCurve
   )
 where
 
+import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import OpenSolid.Direction (Direction)
 import OpenSolid.DirectionBounds (DirectionBounds)
@@ -21,12 +22,12 @@ type family
   DirectionCurve dimension space =
     directionCurve | directionCurve -> dimension space
   where
-  DirectionCurve 2 space = DirectionCurve2D space
+  DirectionCurve 2 Void = DirectionCurve2D
   DirectionCurve 3 space = DirectionCurve3D space
 
 class Exists (dimension :: Natural) (space :: Type)
 
-instance Exists 2 space
+instance Exists 2 Void
 
 instance Exists 3 space
 

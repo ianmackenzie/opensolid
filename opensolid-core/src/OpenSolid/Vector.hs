@@ -35,7 +35,7 @@ import {-# SOURCE #-} OpenSolid.Vector3D qualified as Vector3D
 
 type family Vector dimension units space = vector | vector -> dimension units space where
   Vector 1 units Void = Quantity units
-  Vector 2 units space = Vector2D units space
+  Vector 2 units Void = Vector2D units
   Vector 3 units space = Vector3D units space
 
 class
@@ -85,7 +85,7 @@ instance Exists 1 units Void where
   squaredMagnitude_ = Quantity.squared_
   crossProductMagnitude_ _ _ = Quantity.zero
 
-instance Exists 2 units space where
+instance Exists 2 units Void where
   {-# INLINEABLE squaredMagnitude_ #-}
   squaredMagnitude_ vector = vector `dot_` vector
   crossProductMagnitude_ v1 v2 = Quantity.abs (v1 `cross_` v2)

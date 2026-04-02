@@ -19,6 +19,9 @@ data Resolution units = Resolution
   , maxSize :: Quantity units
   }
 
+instance FFI (Resolution Unitless) where
+  representation = FFI.classRepresentation "UnitlessResolution"
+
 instance FFI (Resolution Meters) where
   representation = FFI.classRepresentation "Resolution"
 

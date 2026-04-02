@@ -111,7 +111,7 @@ zero = VectorCurve.zero
 constant :: Vector3D units space -> VectorCurve3D units space
 constant = VectorCurve.constant
 
-on :: Plane3D global -> VectorCurve2D units local -> VectorCurve3D units global
+on :: Plane3D space -> VectorCurve2D units -> VectorCurve3D units space
 on plane vectorCurve2D = do
   let compiledPlanar =
         CompiledFunction.map

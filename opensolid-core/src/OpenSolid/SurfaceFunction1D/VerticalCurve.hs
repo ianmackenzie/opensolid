@@ -1,6 +1,5 @@
 module OpenSolid.SurfaceFunction1D.VerticalCurve
-  ( MonotonicSpace
-  , new
+  ( new
   , monotonic
   , bounded
   )
@@ -31,14 +30,11 @@ import OpenSolid.SurfaceFunction1D.ImplicitCurveBounds qualified as ImplicitCurv
 import OpenSolid.SurfaceFunction1D.Internal qualified as Internal
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (pattern UvPoint)
-import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
-
-data MonotonicSpace
 
 data Monotonicity
   = Monotonic
-  | MonotonicIn (Frame2D Unitless UvSpace MonotonicSpace)
+  | MonotonicIn (Frame2D Unitless)
   | NotMonotonic
   deriving (Eq, Show)
 
@@ -53,7 +49,7 @@ new ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Curve2D Unitless UvSpace
+  Curve2D Unitless
 new derivatives dudv vStart vEnd boxes =
   verticalCurve derivatives dudv vStart vEnd boxes NotMonotonic []
 
@@ -64,7 +60,7 @@ monotonic ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Curve2D Unitless UvSpace
+  Curve2D Unitless
 monotonic derivatives dudv vStart vEnd boxes =
   verticalCurve derivatives dudv vStart vEnd boxes Monotonic []
 
@@ -75,9 +71,9 @@ bounded ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Frame2D Unitless UvSpace local ->
-  List (Axis2D Unitless UvSpace) ->
-  Curve2D Unitless UvSpace
+  Frame2D Unitless ->
+  List (Axis2D Unitless) ->
+  Curve2D Unitless
 bounded derivatives dudv vStart vEnd boxes monotonicFrame boundingAxes = do
   let monotonicity = MonotonicIn (Frame2D.coerce monotonicFrame)
   verticalCurve derivatives dudv vStart vEnd boxes monotonicity boundingAxes
@@ -90,8 +86,8 @@ verticalCurve ::
   Number ->
   NonEmpty UvBounds ->
   Monotonicity ->
-  List (Axis2D Unitless UvSpace) ->
-  Curve2D Unitless UvSpace
+  List (Axis2D Unitless) ->
+  Curve2D Unitless
 verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
   let curveBounds = implicitCurveBounds boxes
   let clampedUBounds vValue =
@@ -128,7 +124,7 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
     let dudt = dvdt * dudv . self
     Curve2D.new (CompiledFunction.abstract value bounds) (VectorCurve2D.xy dudt dvdt)
 
-clamp :: Number -> Interval Unitless -> Axis2D Unitless UvSpace -> Interval Unitless
+clamp :: Number -> Interval Unitless -> Axis2D Unitless -> Interval Unitless
 clamp v (Interval uLow uHigh) axis = do
   let UvPoint u0 v0 = Axis2D.originPoint axis
   let Direction2D du dv = Axis2D.direction axis

@@ -16,7 +16,7 @@ line :: Step.Entity -> Step.Entity -> Step.Entity
 line givenPoint givenVector =
   Step.entity "LINE" [Step.text "", Step.referenceTo givenPoint, Step.referenceTo givenVector]
 
-line2D :: Tolerance Meters => Line2D Meters space -> Step.Entity
+line2D :: Tolerance Meters => Line2D Meters -> Step.Entity
 line2D (Line2D p1 p2) = line (Ap242.point2D p1) (Ap242.vector2D (p2 - p1))
 
 line3D :: Tolerance Meters => Line3D space -> Step.Entity
@@ -26,7 +26,7 @@ circle :: Step.Entity -> Length -> Step.Entity
 circle placement radius =
   Step.entity "CIRCLE" [Step.text "", Step.referenceTo placement, Ap242.length radius]
 
-circle2D :: Circle2D Meters space -> Step.Entity
+circle2D :: Circle2D Meters -> Step.Entity
 circle2D givenCircle = do
   let frame = Frame2D.atPoint (Circle2D.centerPoint givenCircle)
   circle (Ap242.axisPlacement2D frame) (Circle2D.radius givenCircle)

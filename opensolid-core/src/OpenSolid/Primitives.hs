@@ -39,956 +39,746 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
-import OpenSolid.UvSpace (UvSpace)
 
 ----- Vector2D -----
 
-type role Vector2D phantom phantom
+type role Vector2D phantom
 
-type Vector2D :: Type -> Type -> Type
-data Vector2D units space = Vector2D# Double# Double#
+type Vector2D :: Type -> Type
+data Vector2D units = Vector2D# Double# Double#
   deriving (Eq, Ord, Show)
 
 -- | Construct a vector from its X and Y components.
 {-# INLINE Vector2D #-}
-pattern Vector2D :: Quantity units -> Quantity units -> Vector2D units space
+pattern Vector2D :: Quantity units -> Quantity units -> Vector2D units
 pattern Vector2D vx vy <- (viewVector2D -> (# vx, vy #))
   where
     Vector2D (Quantity# vx#) (Quantity# vy#) = Vector2D# vx# vy#
 
 {-# INLINE viewVector2D #-}
-viewVector2D :: Vector2D units space -> (# Quantity units, Quantity units #)
+viewVector2D :: Vector2D units -> (# Quantity units, Quantity units #)
 viewVector2D (Vector2D# vx# vy#) = (# Quantity# vx#, Quantity# vy# #)
 
 {-# COMPLETE Vector2D #-}
 
-instance FFI (Vector2D Unitless FFI.Space) where
+instance FFI (Vector2D Unitless) where
+  representation = FFI.classRepresentation "UnitlessVector2D"
+
+instance FFI (Vector2D Meters) where
   representation = FFI.classRepresentation "Vector2D"
 
-instance FFI (Vector2D Meters FFI.Space) where
-  representation = FFI.classRepresentation "Displacement2D"
-
-instance FFI (Vector2D SquareMeters FFI.Space) where
+instance FFI (Vector2D SquareMeters) where
   representation = FFI.classRepresentation "AreaVector2D"
 
-instance FFI (Vector2D Unitless UvSpace) where
-  representation = FFI.classRepresentation "UvVector"
+instance HasUnits (Vector2D units) units
 
-instance HasUnits (Vector2D units space) units
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion
-    (Vector2D unitsA space1)
-    (Vector2D unitsB space2)
-  where
+instance Units.Coercion (Vector2D unitsA) (Vector2D unitsB) where
   coerce = Data.Coerce.coerce
 
-instance ApproximateEquality (Vector2D units space) (Tolerance units) where
+instance ApproximateEquality (Vector2D units) (Tolerance units) where
   Vector2D# x1# y1# ~= Vector2D# x2# y2# =
     case hypot2# (x2# -# x1#) (y2# -# y1#) ~=# 0.0## of 1# -> True; _ -> False
 
-instance HasZero (Vector2D units space) where
+instance HasZero (Vector2D units) where
   zero = Vector2D# 0.0## 0.0##
 
-instance Negation (Vector2D units space) where
+instance Negation (Vector2D units) where
   negate (Vector2D# vx# vy#) = Vector2D# (negate# vx#) (negate# vy#)
 
-instance Multiplication Sign (Vector2D units space) (Vector2D units space) where
+instance Multiplication Sign (Vector2D units) (Vector2D units) where
   Positive * vector = vector
   Negative * vector = -vector
 
-instance Multiplication (Vector2D units space) Sign (Vector2D units space) where
+instance Multiplication (Vector2D units) Sign (Vector2D units) where
   vector * Positive = vector
   vector * Negative = -vector
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (Vector2D units1 space1)
-    (Vector2D units2 space2)
-    (Vector2D units1 space1)
+  units1 ~ units2 =>
+  Addition (Vector2D units1) (Vector2D units2) (Vector2D units1)
   where
   Vector2D# x1# y1# + Vector2D# x2# y2# = Vector2D# (x1# +# x2#) (y1# +# y2#)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Vector2D units1 space1)
-    (Vector2D units2 space2)
-    (Vector2D units1 space1)
+  units1 ~ units2 =>
+  Subtraction (Vector2D units1) (Vector2D units2) (Vector2D units1)
   where
   Vector2D# x1# y1# - Vector2D# x2# y2# = Vector2D# (x1# -# x2#) (y1# -# y2#)
 
-instance
-  Multiplication_
-    (Quantity units1)
-    (Vector2D units2 space)
-    (Vector2D (units1 ?*? units2) space)
-  where
+instance Multiplication_ (Quantity units1) (Vector2D units2) (Vector2D (units1 ?*? units2)) where
   Quantity# scale# ?*? Vector2D# vx# vy# = Vector2D# (scale# *# vx#) (scale# *# vy#)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Quantity units1) (Vector2D units2 space) (Vector2D units3 space)
+  Multiplication (Quantity units1) (Vector2D units2) (Vector2D units3)
   where
   Quantity# scale# * Vector2D# vx# vy# = Vector2D# (scale# *# vx#) (scale# *# vy#)
 
-instance
-  Multiplication_
-    (Vector2D units1 space)
-    (Quantity units2)
-    (Vector2D (units1 ?*? units2) space)
-  where
+instance Multiplication_ (Vector2D units1) (Quantity units2) (Vector2D (units1 ?*? units2)) where
   Vector2D# vx# vy# ?*? Quantity# scale# = Vector2D# (vx# *# scale#) (vy# *# scale#)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Vector2D units1 space) (Quantity units2) (Vector2D units3 space)
+  Multiplication (Vector2D units1) (Quantity units2) (Vector2D units3)
   where
   Vector2D# vx# vy# * Quantity# scale# = Vector2D# (vx# *# scale#) (vy# *# scale#)
 
 instance
   Multiplication_
     (Interval units1)
-    (Vector2D units2 space)
-    (VectorBounds2D (units1 ?*? units2) space)
+    (Vector2D units2)
+    (VectorBounds2D (units1 ?*? units2))
   where
   interval ?*? Vector2D vx vy = VectorBounds2D (interval ?*? vx) (interval ?*? vy)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Interval units1) (Vector2D units2 space) (VectorBounds2D units3 space)
+  Multiplication (Interval units1) (Vector2D units2) (VectorBounds2D units3)
   where
   interval * Vector2D vx vy = VectorBounds2D (interval * vx) (interval * vy)
 
 instance
   Multiplication_
-    (Vector2D units1 space)
+    (Vector2D units1)
     (Interval units2)
-    (VectorBounds2D (units1 ?*? units2) space)
+    (VectorBounds2D (units1 ?*? units2))
   where
   Vector2D vx vy ?*? interval = VectorBounds2D (vx ?*? interval) (vy ?*? interval)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Vector2D units1 space) (Interval units2) (VectorBounds2D units3 space)
+  Multiplication (Vector2D units1) (Interval units2) (VectorBounds2D units3)
   where
   Vector2D vx vy * interval = VectorBounds2D (vx * interval) (vy * interval)
 
-instance
-  Division_
-    (Vector2D units1 space)
-    (Quantity units2)
-    (Vector2D (units1 ?/? units2) space)
-  where
+instance Division_ (Vector2D units1) (Quantity units2) (Vector2D (units1 ?/? units2)) where
   Vector2D vx vy ?/? scale = Vector2D (vx ?/? scale) (vy ?/? scale)
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (Vector2D units1 space) (Quantity units2) (Vector2D units3 space)
+  Division (Vector2D units1) (Quantity units2) (Vector2D units3)
   where
   Vector2D vx vy / scale = Vector2D (vx / scale) (vy / scale)
 
 instance
-  space1 ~ space2 =>
   DotMultiplication_
-    (Vector2D units1 space1)
-    (Vector2D units2 space2)
+    (Vector2D units1)
+    (Vector2D units2)
     (Quantity (units1 ?*? units2))
   where
   Vector2D x1 y1 `dot_` Vector2D x2 y2 = x1 ?*? x2 + y1 ?*? y2
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
-  DotMultiplication (Vector2D units1 space1) (Vector2D units2 space2) (Quantity units3)
+  Units.Product units1 units2 units3 =>
+  DotMultiplication (Vector2D units1) (Vector2D units2) (Quantity units3)
   where
   Vector2D x1 y1 `dot` Vector2D x2 y2 = x1 * x2 + y1 * y2
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (Vector2D units space1) (Direction2D space2) (Quantity units)
-  where
+instance DotMultiplication (Vector2D units) Direction2D (Quantity units) where
   v `dot` Unit2D d = v `dot` d
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (Direction2D space1) (Vector2D units space2) (Quantity units)
-  where
+instance DotMultiplication Direction2D (Vector2D units) (Quantity units) where
   Unit2D d `dot` v = d `dot` v
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication_
-    (Vector2D units1 space1)
-    (Vector2D units2 space2)
+    (Vector2D units1)
+    (Vector2D units2)
     (Quantity (units1 ?*? units2))
   where
   Vector2D x1 y1 `cross_` Vector2D x2 y2 = x1 ?*? y2 - y1 ?*? x2
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
-  CrossMultiplication (Vector2D units1 space1) (Vector2D units2 space2) (Quantity units3)
+  Units.Product units1 units2 units3 =>
+  CrossMultiplication (Vector2D units1) (Vector2D units2) (Quantity units3)
   where
   Vector2D x1 y1 `cross` Vector2D x2 y2 = x1 * y2 - y1 * x2
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (Vector2D units space1) (Direction2D space2) (Quantity units)
-  where
+instance CrossMultiplication (Vector2D units) Direction2D (Quantity units) where
   v1 `cross` Unit2D v2 = v1 `cross` v2
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (Direction2D space1) (Vector2D units space2) (Quantity units)
-  where
+instance CrossMultiplication Direction2D (Vector2D units) (Quantity units) where
   Unit2D v1 `cross` v2 = v1 `cross` v2
 
 ----- Direction2D -----
-
-type role Direction2D phantom
 
 {-| A direction in 2D.
 
 This is effectively a type-safe unit vector.
 -}
-newtype Direction2D space = Unit2D (Vector2D Unitless space)
+newtype Direction2D = Unit2D (Vector2D Unitless)
   deriving (Eq, Ord, Show)
 
 {-# COMPLETE Direction2D #-}
 
 {-# INLINE Direction2D #-}
-pattern Direction2D :: Number -> Number -> Direction2D space
+pattern Direction2D :: Number -> Number -> Direction2D
 pattern Direction2D dX dY = Unit2D (Vector2D dX dY)
 
-instance FFI (Direction2D FFI.Space) where
+instance FFI Direction2D where
   representation = FFI.classRepresentation "Direction2D"
 
-instance FFI (Direction2D UvSpace) where
-  representation = FFI.classRepresentation "UvDirection"
-
-instance ApproximateEquality (Direction2D space) () where
+instance ApproximateEquality Direction2D () where
   Unit2D v1 ~= Unit2D v2 = Tolerance.using Tolerance.unitless (v1 ~= v2)
 
-instance Negation (Direction2D space) where
+instance Negation Direction2D where
   negate (Unit2D v) = Unit2D (negate v)
 
-instance Multiplication_ Sign (Direction2D space) (Direction2D space) where
+instance Multiplication_ Sign Direction2D Direction2D where
   Positive ?*? direction = direction
   Negative ?*? direction = -direction
 
-instance Multiplication Sign (Direction2D space) (Direction2D space) where
+instance Multiplication Sign Direction2D Direction2D where
   Positive * direction = direction
   Negative * direction = -direction
 
-instance Multiplication_ (Direction2D space) Sign (Direction2D space) where
+instance Multiplication_ Direction2D Sign Direction2D where
   direction ?*? Positive = direction
   direction ?*? Negative = -direction
 
-instance Multiplication (Direction2D space) Sign (Direction2D space) where
+instance Multiplication Direction2D Sign Direction2D where
   direction * Positive = direction
   direction * Negative = -direction
 
-instance Multiplication (Quantity units) (Direction2D space) (Vector2D units space) where
+instance Multiplication (Quantity units) Direction2D (Vector2D units) where
   scale * Unit2D v = scale * v
 
-instance Multiplication (Direction2D space) (Quantity units) (Vector2D units space) where
+instance Multiplication Direction2D (Quantity units) (Vector2D units) where
   Unit2D v * scale = v * scale
 
-instance space1 ~ space2 => DotMultiplication (Direction2D space1) (Direction2D space2) Number where
+instance DotMultiplication Direction2D Direction2D Number where
   Unit2D v1 `dot` Unit2D v2 = v1 `dot` v2
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (Direction2D space1) (Direction2D space2) Number
-  where
+instance CrossMultiplication Direction2D Direction2D Number where
   Unit2D v1 `cross` Unit2D v2 = v1 `cross` v2
 
 ----- Orientation2D -----
 
-type role Orientation2D phantom
-
-data Orientation2D space
-  = Orientation2D (Direction2D space) (Direction2D space)
-
-deriving instance Eq (Orientation2D space)
-
-deriving instance Show (Orientation2D space)
+data Orientation2D = Orientation2D Direction2D Direction2D
+  deriving (Eq, Show)
 
 ----- Point2D -----
 
-type role Point2D phantom phantom
+type role Point2D phantom
 
-newtype Point2D units space = Position2D (Vector2D units space)
+newtype Point2D units = Position2D (Vector2D units)
 
 {-# COMPLETE Point2D #-}
 
 {-# INLINE Point2D #-}
 
 -- | Construct a point from its X and Y coordinates.
-pattern Point2D :: Quantity units -> Quantity units -> Point2D units space
+pattern Point2D :: Quantity units -> Quantity units -> Point2D units
 pattern Point2D px py <- Position2D (Vector2D px py)
   where
     Point2D px py = Position2D (Vector2D px py)
 
-deriving instance Eq (Point2D units space)
+deriving instance Eq (Point2D units)
 
-deriving instance Ord (Point2D units space)
+deriving instance Ord (Point2D units)
 
-deriving instance Show (Point2D units space)
+deriving instance Show (Point2D units)
 
-instance FFI (Point2D Meters FFI.Space) where
+instance FFI (Point2D Meters) where
   representation = FFI.classRepresentation "Point2D"
 
-instance FFI (Point2D Unitless UvSpace) where
+instance FFI (Point2D Unitless) where
   representation = FFI.classRepresentation "UvPoint"
 
-instance HasUnits (Point2D units space) units
+instance HasUnits (Point2D units) units
 
-instance
-  space1 ~ space2 =>
-  Units.Coercion (Point2D unitsA space1) (Point2D unitsB space2)
-  where
+instance Units.Coercion (Point2D unitsA) (Point2D unitsB) where
   coerce = Data.Coerce.coerce
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Addition
-    (Point2D units1 space1)
-    (Vector2D units2 space2)
-    (Point2D units1 space1)
+  units1 ~ units2 =>
+  Addition (Point2D units1) (Vector2D units2) (Point2D units1)
   where
   Position2D p + v = Position2D (p + v)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Point2D units1 space1)
-    (Vector2D units2 space2)
-    (Point2D units1 space1)
+  units1 ~ units2 =>
+  Subtraction (Point2D units1) (Vector2D units2) (Point2D units1)
   where
   Position2D p - v = Position2D (p - v)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Point2D units1 space1)
-    (Point2D units2 space2)
-    (Vector2D units1 space1)
+  units1 ~ units2 =>
+  Subtraction (Point2D units1) (Point2D units2) (Vector2D units1)
   where
   Position2D p1 - Position2D p2 = p1 - p2
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Addition
-    (Point2D units1 space1)
-    (VectorBounds2D units2 space2)
-    (Bounds2D units1 space1)
+  units1 ~ units2 =>
+  Addition (Point2D units1) (VectorBounds2D units2) (Bounds2D units1)
   where
   Position2D p + vb = PositionBounds2D (p + vb)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Point2D units1 space1)
-    (VectorBounds2D units2 space2)
-    (Bounds2D units1 space1)
+  units1 ~ units2 =>
+  Subtraction (Point2D units1) (VectorBounds2D units2) (Bounds2D units1)
   where
   Position2D p - vb = PositionBounds2D (p - vb)
 
-instance ApproximateEquality (Point2D units space) (Tolerance units) where
+instance ApproximateEquality (Point2D units) (Tolerance units) where
   Position2D p1 ~= Position2D p2 = p1 ~= p2
 
 ----- VectorBounds2D -----
 
-type role VectorBounds2D phantom phantom
+type role VectorBounds2D phantom
 
-type VectorBounds2D :: Type -> Type -> Type
-data VectorBounds2D units space
+type VectorBounds2D :: Type -> Type
+data VectorBounds2D units
   = -- | Construct a vector bounding box from its X and Y coordinate bounds.
     VectorBounds2D (Interval units) (Interval units)
 
-deriving instance Show (VectorBounds2D units space)
+deriving instance Show (VectorBounds2D units)
 
-instance HasUnits (VectorBounds2D units space) units
+instance HasUnits (VectorBounds2D units) units
 
-instance
-  space1 ~ space2 =>
-  Units.Coercion (VectorBounds2D unitsA space1) (VectorBounds2D unitsB space2)
-  where
+instance Units.Coercion (VectorBounds2D unitsA) (VectorBounds2D unitsB) where
   coerce = Data.Coerce.coerce
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (Vector2D units1 space1) (VectorBounds2D units2 space2) (Tolerance units1)
+  units1 ~ units2 =>
+  Intersects (Vector2D units1) (VectorBounds2D units2) (Tolerance units1)
   where
   Vector2D vx vy `intersects` VectorBounds2D bx by = vx `intersects` bx && vy `intersects` by
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (VectorBounds2D units1 space1) (Vector2D units2 space2) (Tolerance units1)
+  units1 ~ units2 =>
+  Intersects (VectorBounds2D units1) (Vector2D units2) (Tolerance units1)
   where
   box `intersects` point = point `intersects` box
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Intersects (VectorBounds2D units1 space1) (VectorBounds2D units2 space2) (Tolerance units1)
+  units1 ~ units2 =>
+  Intersects (VectorBounds2D units1) (VectorBounds2D units2) (Tolerance units1)
   where
   VectorBounds2D x1 y1 `intersects` VectorBounds2D x2 y2 =
     x1 `intersects` x2 && y1 `intersects` y2
 
-instance Negation (VectorBounds2D units space) where
+instance Negation (VectorBounds2D units) where
   negate (VectorBounds2D x y) = VectorBounds2D (negate x) (negate y)
 
-instance Multiplication Sign (VectorBounds2D units space) (VectorBounds2D units space) where
+instance Multiplication Sign (VectorBounds2D units) (VectorBounds2D units) where
   Positive * vectorBounds = vectorBounds
   Negative * vectorBounds = -vectorBounds
 
-instance Multiplication (VectorBounds2D units space) Sign (VectorBounds2D units space) where
+instance Multiplication (VectorBounds2D units) Sign (VectorBounds2D units) where
   vectorBounds * Positive = vectorBounds
   vectorBounds * Negative = -vectorBounds
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Addition
-    (VectorBounds2D units1 space1)
-    (VectorBounds2D units2 space2)
-    (VectorBounds2D units1 space1)
+  units1 ~ units2 =>
+  Addition (VectorBounds2D units1) (VectorBounds2D units2) (VectorBounds2D units1)
   where
   VectorBounds2D x1 y1 + VectorBounds2D x2 y2 = VectorBounds2D (x1 + x2) (y1 + y2)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Addition
-    (VectorBounds2D units1 space1)
-    (Vector2D units2 space2)
-    (VectorBounds2D units1 space1)
+  units1 ~ units2 =>
+  Addition (VectorBounds2D units1) (Vector2D units2) (VectorBounds2D units1)
   where
   VectorBounds2D x1 y1 + Vector2D x2 y2 = VectorBounds2D (x1 + x2) (y1 + y2)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Addition
-    (Vector2D units1 space1)
-    (VectorBounds2D units2 space2)
-    (VectorBounds2D units1 space1)
+  units1 ~ units2 =>
+  Addition (Vector2D units1) (VectorBounds2D units2) (VectorBounds2D units1)
   where
   Vector2D x1 y1 + VectorBounds2D x2 y2 = VectorBounds2D (x1 + x2) (y1 + y2)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (VectorBounds2D units1 space1)
-    (VectorBounds2D units2 space2)
-    (VectorBounds2D units1 space1)
+  units1 ~ units2 =>
+  Subtraction (VectorBounds2D units1) (VectorBounds2D units2) (VectorBounds2D units1)
   where
   VectorBounds2D x1 y1 - VectorBounds2D x2 y2 = VectorBounds2D (x1 - x2) (y1 - y2)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (VectorBounds2D units1 space1)
-    (Vector2D units2 space2)
-    (VectorBounds2D units1 space1)
+  units1 ~ units2 =>
+  Subtraction (VectorBounds2D units1) (Vector2D units2) (VectorBounds2D units1)
   where
   VectorBounds2D x1 y1 - Vector2D x2 y2 = VectorBounds2D (x1 - x2) (y1 - y2)
 
 instance
-  ( space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Vector2D units1 space1)
-    (VectorBounds2D units2 space2)
-    (VectorBounds2D units1 space1)
+  units1 ~ units2 =>
+  Subtraction (Vector2D units1) (VectorBounds2D units2) (VectorBounds2D units1)
   where
   Vector2D x1 y1 - VectorBounds2D x2 y2 = VectorBounds2D (x1 - x2) (y1 - y2)
 
 instance
   Multiplication_
     (Quantity units1)
-    (VectorBounds2D units2 space)
-    (VectorBounds2D (units1 ?*? units2) space)
+    (VectorBounds2D units2)
+    ( VectorBounds2D
+        (units1 ?*? units2)
+    )
   where
   value ?*? VectorBounds2D x y = VectorBounds2D (value ?*? x) (value ?*? y)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (Quantity units1)
-    (VectorBounds2D units2 space)
-    (VectorBounds2D units3 space)
+  Multiplication (Quantity units1) (VectorBounds2D units2) (VectorBounds2D units3)
   where
   value * VectorBounds2D x y = VectorBounds2D (value * x) (value * y)
 
 instance
   Multiplication_
-    (VectorBounds2D units1 space)
+    (VectorBounds2D units1)
     (Quantity units2)
-    (VectorBounds2D (units1 ?*? units2) space)
+    (VectorBounds2D (units1 ?*? units2))
   where
   VectorBounds2D x y ?*? value = VectorBounds2D (x ?*? value) (y ?*? value)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (VectorBounds2D units1 space)
-    (Quantity units2)
-    (VectorBounds2D units3 space)
+  Multiplication (VectorBounds2D units1) (Quantity units2) (VectorBounds2D units3)
   where
   VectorBounds2D x y * value = VectorBounds2D (x * value) (y * value)
 
 instance
   Multiplication_
     (Interval units1)
-    (VectorBounds2D units2 space)
-    (VectorBounds2D (units1 ?*? units2) space)
+    (VectorBounds2D units2)
+    (VectorBounds2D (units1 ?*? units2))
   where
   interval ?*? VectorBounds2D x y = VectorBounds2D (interval ?*? x) (interval ?*? y)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (Interval units1)
-    (VectorBounds2D units2 space)
-    (VectorBounds2D units3 space)
+  Multiplication (Interval units1) (VectorBounds2D units2) (VectorBounds2D units3)
   where
   interval * VectorBounds2D x y = VectorBounds2D (interval * x) (interval * y)
 
 instance
   Multiplication_
-    (VectorBounds2D units1 space)
+    (VectorBounds2D units1)
     (Interval units2)
-    (VectorBounds2D (units1 ?*? units2) space)
+    (VectorBounds2D (units1 ?*? units2))
   where
   VectorBounds2D x y ?*? interval = VectorBounds2D (x ?*? interval) (y ?*? interval)
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication
-    (VectorBounds2D units1 space)
-    (Interval units2)
-    (VectorBounds2D units3 space)
+  Multiplication (VectorBounds2D units1) (Interval units2) (VectorBounds2D units3)
   where
   VectorBounds2D x y * interval = VectorBounds2D (x * interval) (y * interval)
 
 instance
   Division_
-    (VectorBounds2D units1 space)
+    (VectorBounds2D units1)
     (Quantity units2)
-    (VectorBounds2D (units1 ?/? units2) space)
+    (VectorBounds2D (units1 ?/? units2))
   where
   VectorBounds2D x y ?/? value = VectorBounds2D (x ?/? value) (y ?/? value)
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (VectorBounds2D units1 space) (Quantity units2) (VectorBounds2D units3 space)
+  Division (VectorBounds2D units1) (Quantity units2) (VectorBounds2D units3)
   where
   VectorBounds2D x y / value = VectorBounds2D (x / value) (y / value)
 
 instance
   Division_
-    (VectorBounds2D units1 space)
+    (VectorBounds2D units1)
     (Interval units2)
-    (VectorBounds2D (units1 ?/? units2) space)
+    (VectorBounds2D (units1 ?/? units2))
   where
   VectorBounds2D x y ?/? interval = VectorBounds2D (x ?/? interval) (y ?/? interval)
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (VectorBounds2D units1 space) (Interval units2) (VectorBounds2D units3 space)
+  Division (VectorBounds2D units1) (Interval units2) (VectorBounds2D units3)
   where
   VectorBounds2D x y / interval = VectorBounds2D (x / interval) (y / interval)
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
-  DotMultiplication (Vector2D units1 space1) (VectorBounds2D units2 space2) (Interval units3)
+  Units.Product units1 units2 units3 =>
+  DotMultiplication (Vector2D units1) (VectorBounds2D units2) (Interval units3)
   where
   Vector2D x1 y1 `dot` VectorBounds2D x2 y2 = x1 * x2 + y1 * y2
 
 instance
-  space1 ~ space2 =>
   DotMultiplication_
-    (Vector2D units1 space1)
-    (VectorBounds2D units2 space2)
+    (Vector2D units1)
+    (VectorBounds2D units2)
     (Interval (units1 ?*? units2))
   where
   Vector2D x1 y1 `dot_` VectorBounds2D x2 y2 = x1 ?*? x2 + y1 ?*? y2
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
-  DotMultiplication (VectorBounds2D units1 space1) (Vector2D units2 space2) (Interval units3)
+  Units.Product units1 units2 units3 =>
+  DotMultiplication (VectorBounds2D units1) (Vector2D units2) (Interval units3)
   where
   VectorBounds2D x1 y1 `dot` Vector2D x2 y2 = x1 * x2 + y1 * y2
 
 instance
-  space1 ~ space2 =>
   DotMultiplication_
-    (VectorBounds2D units1 space1)
-    (Vector2D units2 space2)
+    (VectorBounds2D units1)
+    (Vector2D units2)
     (Interval (units1 ?*? units2))
   where
   VectorBounds2D x1 y1 `dot_` Vector2D x2 y2 = x1 ?*? x2 + y1 ?*? y2
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (Direction2D space1) (VectorBounds2D units space2) (Interval units)
-  where
+instance DotMultiplication Direction2D (VectorBounds2D units) (Interval units) where
   Unit2D vector `dot` vectorBounds = vector `dot` vectorBounds
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (VectorBounds2D units space1) (Direction2D space2) (Interval units)
-  where
+instance DotMultiplication (VectorBounds2D units) Direction2D (Interval units) where
   vectorBounds `dot` Unit2D vector = vectorBounds `dot` vector
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
-  DotMultiplication
-    (VectorBounds2D units1 space1)
-    (VectorBounds2D units2 space2)
-    (Interval units3)
+  Units.Product units1 units2 units3 =>
+  DotMultiplication (VectorBounds2D units1) (VectorBounds2D units2) (Interval units3)
   where
   VectorBounds2D x1 y1 `dot` VectorBounds2D x2 y2 = x1 * x2 + y1 * y2
 
 instance
-  space1 ~ space2 =>
   DotMultiplication_
-    (VectorBounds2D units1 space1)
-    (VectorBounds2D units2 space2)
+    (VectorBounds2D units1)
+    (VectorBounds2D units2)
     (Interval (units1 ?*? units2))
   where
   VectorBounds2D x1 y1 `dot_` VectorBounds2D x2 y2 = x1 ?*? x2 + y1 ?*? y2
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
-  CrossMultiplication
-    (Vector2D units1 space1)
-    (VectorBounds2D units2 space2)
-    (Interval units3)
+  Units.Product units1 units2 units3 =>
+  CrossMultiplication (Vector2D units1) (VectorBounds2D units2) (Interval units3)
   where
   Vector2D x1 y1 `cross` VectorBounds2D x2 y2 = x1 * y2 - y1 * x2
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication_
-    (Vector2D units1 space1)
-    (VectorBounds2D units2 space2)
+    (Vector2D units1)
+    (VectorBounds2D units2)
     (Interval (units1 ?*? units2))
   where
   Vector2D x1 y1 `cross_` VectorBounds2D x2 y2 = x1 ?*? y2 - y1 ?*? x2
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
-  CrossMultiplication
-    (VectorBounds2D units1 space1)
-    (Vector2D units2 space2)
-    (Interval units3)
+  Units.Product units1 units2 units3 =>
+  CrossMultiplication (VectorBounds2D units1) (Vector2D units2) (Interval units3)
   where
   VectorBounds2D x1 y1 `cross` Vector2D x2 y2 = x1 * y2 - y1 * x2
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication_
-    (VectorBounds2D units1 space1)
-    (Vector2D units2 space2)
+    (VectorBounds2D units1)
+    (Vector2D units2)
     (Interval (units1 ?*? units2))
   where
   VectorBounds2D x1 y1 `cross_` Vector2D x2 y2 = x1 ?*? y2 - y1 ?*? x2
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (Direction2D space1) (VectorBounds2D units space2) (Interval units)
-  where
+instance CrossMultiplication Direction2D (VectorBounds2D units) (Interval units) where
   Unit2D vector `cross` vectorBounds = vector `cross` vectorBounds
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (VectorBounds2D units space1) (Direction2D space2) (Interval units)
-  where
+instance CrossMultiplication (VectorBounds2D units) Direction2D (Interval units) where
   vectorBounds `cross` Unit2D vector = vectorBounds `cross` vector
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
-  CrossMultiplication
-    (VectorBounds2D units1 space1)
-    (VectorBounds2D units2 space2)
-    (Interval units3)
+  Units.Product units1 units2 units3 =>
+  CrossMultiplication (VectorBounds2D units1) (VectorBounds2D units2) (Interval units3)
   where
   VectorBounds2D x1 y1 `cross` VectorBounds2D x2 y2 = x1 * y2 - y1 * x2
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication_
-    (VectorBounds2D units1 space1)
-    (VectorBounds2D units2 space2)
+    (VectorBounds2D units1)
+    (VectorBounds2D units2)
     (Interval (units1 ?*? units2))
   where
   VectorBounds2D x1 y1 `cross_` VectorBounds2D x2 y2 = x1 ?*? y2 - y1 ?*? x2
 
 ----- Bounds2D -----
 
-type role Bounds2D phantom phantom
+type role Bounds2D phantom
 
-newtype Bounds2D units space
-  = PositionBounds2D (VectorBounds2D units space)
+newtype Bounds2D units = PositionBounds2D (VectorBounds2D units)
 
 {-# COMPLETE Bounds2D #-}
 
 {-# INLINE Bounds2D #-}
 
 -- | Construct a bounding box from its X and Y coordinate bounds.
-pattern Bounds2D :: Interval units -> Interval units -> Bounds2D units space
+pattern Bounds2D :: Interval units -> Interval units -> Bounds2D units
 pattern Bounds2D bx by <- PositionBounds2D (VectorBounds2D bx by)
   where
     Bounds2D bx by = PositionBounds2D (VectorBounds2D bx by)
 
-deriving instance Show (Bounds2D units space)
+deriving instance Show (Bounds2D units)
 
-instance HasUnits (Bounds2D units space) units
+instance HasUnits (Bounds2D units) units
 
-instance
-  space1 ~ space2 =>
-  Units.Coercion (Bounds2D unitsA space1) (Bounds2D unitsB space2)
-  where
+instance Units.Coercion (Bounds2D unitsA) (Bounds2D unitsB) where
   coerce = Data.Coerce.coerce
 
-instance FFI (Bounds2D Meters FFI.Space) where
+instance FFI (Bounds2D Meters) where
   representation = FFI.classRepresentation "Bounds2D"
 
-instance FFI (Bounds2D Unitless UvSpace) where
+instance FFI (Bounds2D Unitless) where
   representation = FFI.classRepresentation "UvBounds"
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Point2D units1 space1)
-    (Bounds2D units2 space2)
-    (VectorBounds2D units1 space1)
+  units1 ~ units2 =>
+  Subtraction (Point2D units1) (Bounds2D units2) (VectorBounds2D units1)
   where
   Position2D p - PositionBounds2D pb = p - pb
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Bounds2D units1 space1)
-    (Point2D units2 space2)
-    (VectorBounds2D units1 space1)
+  units1 ~ units2 =>
+  Subtraction (Bounds2D units1) (Point2D units2) (VectorBounds2D units1)
   where
   PositionBounds2D pb - Position2D p = pb - p
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Bounds2D units1 space1)
-    (Bounds2D units2 space2)
-    (VectorBounds2D units1 space1)
+  units1 ~ units2 =>
+  Subtraction (Bounds2D units1) (Bounds2D units2) (VectorBounds2D units1)
   where
   PositionBounds2D pb1 - PositionBounds2D pb2 = pb1 - pb2
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (Bounds2D units1 space1)
-    (Vector2D units2 space2)
-    (Bounds2D units1 space1)
+  units1 ~ units2 =>
+  Addition (Bounds2D units1) (Vector2D units2) (Bounds2D units1)
   where
   PositionBounds2D pb + v = PositionBounds2D (pb + v)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (Bounds2D units1 space1)
-    (VectorBounds2D units2 space2)
-    (Bounds2D units1 space1)
+  units1 ~ units2 =>
+  Addition (Bounds2D units1) (VectorBounds2D units2) (Bounds2D units1)
   where
   PositionBounds2D pb + vb = PositionBounds2D (pb + vb)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Bounds2D units1 space1)
-    (Vector2D units2 space2)
-    (Bounds2D units1 space1)
+  units1 ~ units2 =>
+  Subtraction (Bounds2D units1) (Vector2D units2) (Bounds2D units1)
   where
   PositionBounds2D pb - v = PositionBounds2D (pb - v)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Bounds2D units1 space1)
-    (VectorBounds2D units2 space2)
-    (Bounds2D units1 space1)
+  units1 ~ units2 =>
+  Subtraction (Bounds2D units1) (VectorBounds2D units2) (Bounds2D units1)
   where
   PositionBounds2D pb - vb = PositionBounds2D (pb - vb)
 
 instance
-  (units1 ~ units2, space1 ~ space2) =>
-  Intersects (Point2D units1 space1) (Axis2D units2 space2) (Tolerance units1)
+  units1 ~ units2 =>
+  Intersects (Point2D units1) (Axis2D units2) (Tolerance units1)
   where
   p `intersects` (Axis2D p0 d) = (p - p0) `cross` d ~= Quantity.zero
 
 instance
-  (units1 ~ units2, space1 ~ space2) =>
-  Intersects (Axis2D units2 space2) (Point2D units1 space1) (Tolerance units1)
+  units1 ~ units2 =>
+  Intersects (Axis2D units2) (Point2D units1) (Tolerance units1)
   where
   axis `intersects` point = point `intersects` axis
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Point2D units1 space1) (Bounds2D units2 space2) (Tolerance units1)
+  units1 ~ units2 =>
+  Intersects (Point2D units1) (Bounds2D units2) (Tolerance units1)
   where
   Position2D p `intersects` PositionBounds2D pb = p `intersects` pb
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Bounds2D units1 space1) (Point2D units2 space2) (Tolerance units1)
+  units1 ~ units2 =>
+  Intersects (Bounds2D units1) (Point2D units2) (Tolerance units1)
   where
   box `intersects` point = point `intersects` box
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Bounds2D units1 space1) (Bounds2D units2 space2) (Tolerance units1)
+  units1 ~ units2 =>
+  Intersects (Bounds2D units1) (Bounds2D units2) (Tolerance units1)
   where
   PositionBounds2D pb1 `intersects` PositionBounds2D pb2 = pb1 `intersects` pb2
 
 ----- Axis2D -----
 
-type role Axis2D phantom phantom
+type role Axis2D phantom
 
 -- | An axis in 2D, defined by an origin point and direction.
-data Axis2D units space
+data Axis2D units
   = -- | Construct an axis from its origin point and direction.
     Axis2D
-    { originPoint :: Point2D units space
-    , direction :: Direction2D space
+    { originPoint :: Point2D units
+    , direction :: Direction2D
     }
 
-deriving instance Eq (Axis2D units space)
+deriving instance Eq (Axis2D units)
 
-deriving instance Show (Axis2D units space)
+deriving instance Show (Axis2D units)
 
-instance HasUnits (Axis2D units space) units
+instance HasUnits (Axis2D units) units
 
-instance FFI (Axis2D Meters FFI.Space) where
+instance FFI (Axis2D Meters) where
   representation = FFI.classRepresentation "Axis2D"
 
-instance FFI (Axis2D Unitless UvSpace) where
+instance FFI (Axis2D Unitless) where
   representation = FFI.classRepresentation "UvAxis"
 
 ----- Frame2D -----
 
-type role Frame2D phantom phantom phantom
+type role Frame2D phantom
 
-type Frame2D :: Type -> Type -> Type -> Type
-data Frame2D units global local
+type Frame2D :: Type -> Type
+data Frame2D units
   = Frame2D
-  { originPoint :: Point2D units global
-  , orientation :: Orientation2D global
+  { originPoint :: Point2D units
+  , orientation :: Orientation2D
   }
 
-deriving instance Eq (Frame2D units global local)
+deriving instance Eq (Frame2D units)
 
-deriving instance Show (Frame2D units global local)
+deriving instance Show (Frame2D units)
 
-instance FFI (Frame2D Meters FFI.Space local) where
+instance FFI (Frame2D Meters) where
   representation = FFI.classRepresentation "Frame2D"
 
-instance FFI (Frame2D Unitless UvSpace local) where
+instance FFI (Frame2D Unitless) where
   representation = FFI.classRepresentation "UvFrame"
 
 ----- Transform2D -----
 
-type role Transform2D phantom phantom phantom
+type role Transform2D phantom phantom
 
-type Transform2D :: Type -> Type -> Type -> Type
-data Transform2D tag units space
-  = Transform2D (Point2D units space) (Vector2D Unitless space) (Vector2D Unitless space)
+type Transform2D :: Type -> Type -> Type
+data Transform2D tag units
+  = Transform2D (Point2D units) (Vector2D Unitless) (Vector2D Unitless)
 
-deriving instance Eq (Transform2D tag units space)
+deriving instance Eq (Transform2D tag units)
 
-deriving instance Ord (Transform2D tag units space)
+deriving instance Ord (Transform2D tag units)
 
-deriving instance Show (Transform2D tag units space)
+deriving instance Show (Transform2D tag units)
 
-instance HasUnits (Transform2D tag units space) units
+instance HasUnits (Transform2D tag units) units
 
 instance
-  (tag1 ~ tag2, space1 ~ space2) =>
-  Units.Coercion
-    (Transform2D tag1 unitsA space1)
-    (Transform2D tag2 unitsB space2)
+  tag1 ~ tag2 =>
+  Units.Coercion (Transform2D tag1 unitsA) (Transform2D tag2 unitsB)
   where
   coerce = Data.Coerce.coerce
 
-instance
-  space1 ~ space2 =>
-  Multiplication
-    (Transform2D tag translationUnits space1)
-    (Vector2D units space2)
-    (Vector2D units space1)
-  where
+instance Multiplication (Transform2D tag translationUnits) (Vector2D units) (Vector2D units) where
   transform * vector = vector * transform
 
-instance
-  space1 ~ space2 =>
-  Multiplication
-    (Vector2D units space1)
-    (Transform2D tag translationUnits space2)
-    (Vector2D units space1)
-  where
+instance Multiplication (Vector2D units) (Transform2D tag translationUnits) (Vector2D units) where
   Vector2D vx vy * Transform2D _ i j = vx * i + vy * j
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Multiplication
-    (Point2D units1 space1)
-    (Transform2D tag units2 space2)
-    (Point2D units1 space1)
+  units1 ~ units2 =>
+  Multiplication (Point2D units1) (Transform2D tag units2) (Point2D units1)
   where
   Point2D px py * Transform2D p0 i j = p0 + px * i + py * j
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
-  Multiplication
-    (Transform2D tag units1 space1)
-    (Point2D units2 space2)
-    (Point2D units1 space1)
+  units1 ~ units2 =>
+  Multiplication (Transform2D tag units1) (Point2D units2) (Point2D units1)
   where
   transform * point = point * transform
 
 instance
-  (Composition outer inner composed, space1 ~ space2, units1 ~ units2) =>
+  (Composition outer inner composed, units1 ~ units2) =>
   Composition
-    (Transform2D outer units1 space1)
-    (Transform2D inner units2 space2)
-    (Transform2D composed units1 space1)
+    (Transform2D outer units1)
+    (Transform2D inner units2)
+    (Transform2D composed units1)
   where
   outer . inner =
     Transform2D
@@ -1018,10 +808,10 @@ viewVector3D (Vector3D# vx# vy# vz#) = (# Quantity# vx#, Quantity# vy#, Quantity
 {-# COMPLETE Vector3D #-}
 
 instance FFI (Vector3D Unitless FFI.Space) where
-  representation = FFI.classRepresentation "Vector3D"
+  representation = FFI.classRepresentation "UnitlessVector3D"
 
 instance FFI (Vector3D Meters FFI.Space) where
-  representation = FFI.classRepresentation "Displacement3D"
+  representation = FFI.classRepresentation "Vector3D"
 
 instance FFI (Vector3D SquareMeters FFI.Space) where
   representation = FFI.classRepresentation "AreaVector3D"
@@ -1265,7 +1055,10 @@ instance Multiplication (Interval units) (Direction3D space) (VectorBounds3D uni
 instance Multiplication (Direction3D space) (Interval units) (VectorBounds3D units space) where
   Unit3D vector * interval = vector * interval
 
-instance space1 ~ space2 => DotMultiplication (Direction3D space1) (Direction3D space2) Number where
+instance
+  space1 ~ space2 =>
+  DotMultiplication (Direction3D space1) (Direction3D space2) Number
+  where
   Unit3D vector1 `dot` Unit3D vector2 = vector1 `dot` vector2
 
 instance
@@ -2138,7 +1931,7 @@ deriving instance Eq (Frame3D global local)
 
 deriving instance Show (Frame3D global local)
 
-instance FFI (Frame3D FFI.Space local) where
+instance FFI (Frame3D FFI.Space FFI.Space) where
   representation = FFI.classRepresentation "Frame3D"
 
 ----- Transform3D -----

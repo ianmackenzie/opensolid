@@ -41,16 +41,16 @@ module OpenSolid.VectorCurve
   )
 where
 
+import Data.Void (Void)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import {-# SOURCE #-} OpenSolid.Curve ()
+import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Nonzero qualified as Curve1D.Nonzero
 import OpenSolid.Curve1D.Zero qualified
-import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
@@ -87,7 +87,6 @@ import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D (Vector2D)
@@ -215,27 +214,21 @@ class
   ) =>
   Exists dimension units space
 
-instance FFI (VectorCurve 2 Unitless FFI.Space) where
+instance FFI (VectorCurve 2 Unitless Void) where
+  representation = FFI.classRepresentation "UnitlessVectorCurve2D"
+
+instance FFI (VectorCurve 2 Meters Void) where
   representation = FFI.classRepresentation "VectorCurve2D"
 
-instance FFI (VectorCurve 2 Meters FFI.Space) where
-  representation = FFI.classRepresentation "DisplacementCurve2D"
-
-instance FFI (VectorCurve 2 Unitless UvSpace) where
-  representation = FFI.classRepresentation "UvVectorCurve"
-
 instance FFI (VectorCurve 3 Unitless FFI.Space) where
-  representation = FFI.classRepresentation "VectorCurve3D"
+  representation = FFI.classRepresentation "UnitlessVectorCurve3D"
 
 instance FFI (VectorCurve 3 Meters FFI.Space) where
-  representation = FFI.classRepresentation "DisplacementCurve3D"
+  representation = FFI.classRepresentation "VectorCurve3D"
 
 instance HasUnits (VectorCurve dimension units space) units
 
-instance
-  space1 ~ space2 =>
-  Units.Coercion (VectorCurve 2 units1 space1) (VectorCurve 2 units2 space2)
-  where
+instance Units.Coercion (VectorCurve 2 units1 Void) (VectorCurve 2 units2 Void) where
   coerce curve =
     VectorCurve
       { compiled = Units.coerce curve.compiled
@@ -261,10 +254,9 @@ instance
 instance HasUnits (Nondegenerate (VectorCurve dimension units space)) units
 
 instance
-  space1 ~ space2 =>
   Units.Coercion
-    (Nondegenerate (VectorCurve 2 units1 space1))
-    (Nondegenerate (VectorCurve 2 units2 space2))
+    (Nondegenerate (VectorCurve 2 units1 Void))
+    (Nondegenerate (VectorCurve 2 units2 Void))
   where
   coerce (Nondegenerate curve) = Nondegenerate (Units.coerce curve)
 
@@ -279,10 +271,9 @@ instance
 instance HasUnits (Nonzero (VectorCurve dimension units space)) units
 
 instance
-  space1 ~ space2 =>
   Units.Coercion
-    (Nonzero (VectorCurve 2 units1 space1))
-    (Nonzero (VectorCurve 2 units2 space2))
+    (Nonzero (VectorCurve 2 units1 Void))
+    (Nonzero (VectorCurve 2 units2 Void))
   where
   coerce (Nonzero curve) = Nonzero (Units.coerce curve)
 
@@ -303,10 +294,10 @@ instance
     NonEmpty.all equalValuesAt Parameter.samples
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Intersects
-    (VectorCurve 2 units1 space1)
-    (Vector2D units2 space2)
+    (VectorCurve 2 units1 Void)
+    (Vector2D units2)
     (Tolerance units1)
   where
   curve `intersects` vector = Tolerance.using (Quantity.squared_ ?tolerance) do
@@ -323,10 +314,10 @@ instance
     squaredMagnitude_ (curve - vector) `intersects` Quantity.zero
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Intersects
-    (Vector2D units1 space1)
-    (VectorCurve 2 units2 space2)
+    (Vector2D units1)
+    (VectorCurve 2 units2 Void)
     (Tolerance units1)
   where
   vector `intersects` curve = curve `intersects` vector
@@ -380,11 +371,11 @@ instance
   lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Addition
-    (VectorCurve 2 units1 space1)
-    (Vector2D units2 space2)
-    (VectorCurve 2 units1 space1)
+    (VectorCurve 2 units1 Void)
+    (Vector2D units2)
+    (VectorCurve 2 units1 Void)
   where
   curve + vector = curve + constant vector
 
@@ -398,11 +389,11 @@ instance
   curve + vector = curve + constant vector
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Addition
-    (Vector2D units1 space1)
-    (VectorCurve 2 units2 space2)
-    (VectorCurve 2 units1 space1)
+    (Vector2D units1)
+    (VectorCurve 2 units2 Void)
+    (VectorCurve 2 units1 Void)
   where
   vector + curve = constant vector + curve
 
@@ -429,11 +420,11 @@ instance
   lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Subtraction
-    (VectorCurve 2 units1 space1)
-    (Vector2D units2 space2)
-    (VectorCurve 2 units1 space1)
+    (VectorCurve 2 units1 Void)
+    (Vector2D units2)
+    (VectorCurve 2 units1 Void)
   where
   curve - vector = curve - constant vector
 
@@ -447,11 +438,11 @@ instance
   curve - vector = curve - constant vector
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Subtraction
-    (Vector2D units1 space1)
-    (VectorCurve 2 units2 space2)
-    (VectorCurve 2 units1 space1)
+    (Vector2D units1)
+    (VectorCurve 2 units2 Void)
+    (VectorCurve 2 units1 Void)
   where
   vector - curve = constant vector - curve
 
@@ -468,8 +459,8 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Curve1D units1)
-    (VectorCurve 2 units2 space)
-    (VectorCurve 2 units3 space)
+    (VectorCurve 2 units2 Void)
+    (VectorCurve 2 units3 Void)
   where
   lhs * rhs = Units.specialize (lhs ?*? rhs)
 
@@ -485,8 +476,8 @@ instance
 instance
   Multiplication_
     (Curve1D units1)
-    (VectorCurve 2 units2 space)
-    (VectorCurve 2 (units1 ?*? units2) space)
+    (VectorCurve 2 units2 Void)
+    (VectorCurve 2 (units1 ?*? units2) Void)
   where
   lhs ?*? rhs =
     new
@@ -508,8 +499,8 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication
     (Quantity units1)
-    (VectorCurve 2 units2 space)
-    (VectorCurve 2 units3 space)
+    (VectorCurve 2 units2 Void)
+    (VectorCurve 2 units3 Void)
   where
   lhs * rhs = Units.specialize (lhs ?*? rhs)
 
@@ -525,8 +516,8 @@ instance
 instance
   Multiplication_
     (Quantity units1)
-    (VectorCurve 2 units2 space)
-    (VectorCurve 2 (units1 ?*? units2) space)
+    (VectorCurve 2 units2 Void)
+    (VectorCurve 2 (units1 ?*? units2) Void)
   where
   c1 ?*? c2 = Curve1D.constant c1 ?*? c2
 
@@ -541,9 +532,9 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (VectorCurve 2 units1 space)
+    (VectorCurve 2 units1 Void)
     (Curve1D units2)
-    (VectorCurve 2 units3 space)
+    (VectorCurve 2 units3 Void)
   where
   lhs * rhs = Units.specialize (lhs ?*? rhs)
 
@@ -558,9 +549,9 @@ instance
 
 instance
   Multiplication_
-    (VectorCurve 2 units1 space)
+    (VectorCurve 2 units1 Void)
     (Curve1D units2)
-    (VectorCurve 2 (units1 ?*? units2) space)
+    (VectorCurve 2 (units1 ?*? units2) Void)
   where
   lhs ?*? rhs =
     new
@@ -581,9 +572,9 @@ instance
 instance
   Units.Product units1 units2 units3 =>
   Multiplication
-    (VectorCurve 2 units1 space)
+    (VectorCurve 2 units1 Void)
     (Quantity units2)
-    (VectorCurve 2 units3 space)
+    (VectorCurve 2 units3 Void)
   where
   lhs * rhs = Units.specialize (lhs ?*? rhs)
 
@@ -599,9 +590,9 @@ instance
 instance
   Units.Quotient units1 units2 units3 =>
   Division
-    (VectorCurve 2 units1 space)
+    (VectorCurve 2 units1 Void)
     (Quantity units2)
-    (VectorCurve 2 units3 space)
+    (VectorCurve 2 units3 Void)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
@@ -616,9 +607,9 @@ instance
 
 instance
   Division_
-    (VectorCurve 2 units1 space)
+    (VectorCurve 2 units1 Void)
     (Quantity units2)
-    (VectorCurve 2 (units1 ?/? units2) space)
+    (VectorCurve 2 (units1 ?/? units2) Void)
   where
   curve ?/? quantity = Units.simplify (curve ?*? (1.0 ?/? quantity))
 
@@ -632,9 +623,9 @@ instance
 
 instance
   Multiplication_
-    (VectorCurve 2 units1 space)
+    (VectorCurve 2 units1 Void)
     (Quantity units2)
-    (VectorCurve 2 (units1 ?*? units2) space)
+    (VectorCurve 2 (units1 ?*? units2) Void)
   where
   curve ?*? quantity = curve ?*? Curve1D.constant quantity
 
@@ -647,10 +638,10 @@ instance
   curve ?*? quantity = curve ?*? Curve1D.constant quantity
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
+  Units.Product units1 units2 units3 =>
   DotMultiplication
-    (VectorCurve 2 units1 space1)
-    (VectorCurve 2 units2 space2)
+    (VectorCurve 2 units1 Void)
+    (VectorCurve 2 units2 Void)
     (Curve1D units3)
   where
   lhs `dot` rhs = Units.specialize (lhs `dot_` rhs)
@@ -665,10 +656,9 @@ instance
   lhs `dot` rhs = Units.specialize (lhs `dot_` rhs)
 
 instance
-  space1 ~ space2 =>
   DotMultiplication_
-    (VectorCurve 2 units1 space1)
-    (VectorCurve 2 units2 space2)
+    (VectorCurve 2 units1 Void)
+    (VectorCurve 2 units2 Void)
     (Curve1D (units1 ?*? units2))
   where
   lhs `dot_` rhs =
@@ -689,10 +679,10 @@ instance
       (lhs.derivative `dot_` rhs + lhs `dot_` rhs.derivative)
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
+  Units.Product units1 units2 units3 =>
   DotMultiplication
-    (VectorCurve 2 units1 space1)
-    (Vector2D units2 space2)
+    (VectorCurve 2 units1 Void)
+    (Vector2D units2)
     (Curve1D units3)
   where
   lhs `dot` rhs = Units.specialize (lhs `dot_` rhs)
@@ -707,10 +697,9 @@ instance
   lhs `dot` rhs = Units.specialize (lhs `dot_` rhs)
 
 instance
-  space1 ~ space2 =>
   DotMultiplication_
-    (VectorCurve 2 units1 space1)
-    (Vector2D units2 space2)
+    (VectorCurve 2 units1 Void)
+    (Vector2D units2)
     (Curve1D (units1 ?*? units2))
   where
   curve `dot_` vector = curve `dot_` constant vector
@@ -725,8 +714,8 @@ instance
   curve `dot_` vector = curve `dot_` constant vector
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
-  DotMultiplication (Vector2D units1 space1) (VectorCurve 2 units2 space2) (Curve1D units3)
+  Units.Product units1 units2 units3 =>
+  DotMultiplication (Vector2D units1) (VectorCurve 2 units2 Void) (Curve1D units3)
   where
   lhs `dot` rhs = Units.specialize (lhs `dot_` rhs)
 
@@ -737,10 +726,9 @@ instance
   lhs `dot` rhs = Units.specialize (lhs `dot_` rhs)
 
 instance
-  space1 ~ space2 =>
   DotMultiplication_
-    (Vector2D units1 space1)
-    (VectorCurve 2 units2 space2)
+    (Vector2D units1)
+    (VectorCurve 2 units2 Void)
     (Curve1D (units1 ?*? units2))
   where
   vector `dot_` curve = constant vector `dot_` curve
@@ -754,10 +742,7 @@ instance
   where
   vector `dot_` curve = constant vector `dot_` curve
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (VectorCurve 2 units space1) (Direction2D space2) (Curve1D units)
-  where
+instance DotMultiplication (VectorCurve 2 units Void) Direction2D (Curve1D units) where
   lhs `dot` rhs = lhs `dot` Vector2D.unit rhs
 
 instance
@@ -766,10 +751,7 @@ instance
   where
   lhs `dot` rhs = lhs `dot` Vector3D.unit rhs
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (Direction2D space1) (VectorCurve 2 units space2) (Curve1D units)
-  where
+instance DotMultiplication Direction2D (VectorCurve 2 units Void) (Curve1D units) where
   lhs `dot` rhs = Vector2D.unit lhs `dot` rhs
 
 instance
@@ -779,10 +761,10 @@ instance
   lhs `dot` rhs = Vector3D.unit lhs `dot` rhs
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
+  Units.Product units1 units2 units3 =>
   CrossMultiplication
-    (VectorCurve 2 units1 space1)
-    (VectorCurve 2 units2 space2)
+    (VectorCurve 2 units1 Void)
+    (VectorCurve 2 units2 Void)
     (Curve1D units3)
   where
   lhs `cross` rhs = Units.specialize (lhs `cross_` rhs)
@@ -797,10 +779,9 @@ instance
   lhs `cross` rhs = Units.specialize (lhs `cross_` rhs)
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication_
-    (VectorCurve 2 units1 space1)
-    (VectorCurve 2 units2 space2)
+    (VectorCurve 2 units1 Void)
+    (VectorCurve 2 units2 Void)
     (Curve1D (units1 ?*? units2))
   where
   lhs `cross_` rhs =
@@ -821,10 +802,10 @@ instance
       (lhs.derivative `cross_` rhs + lhs `cross_` rhs.derivative)
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
+  Units.Product units1 units2 units3 =>
   CrossMultiplication
-    (VectorCurve 2 units1 space1)
-    (Vector2D units2 space2)
+    (VectorCurve 2 units1 Void)
+    (Vector2D units2)
     (Curve1D units3)
   where
   lhs `cross` rhs = Units.specialize (lhs `cross_` rhs)
@@ -839,10 +820,9 @@ instance
   lhs `cross` rhs = Units.specialize (lhs `cross_` rhs)
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication_
-    (VectorCurve 2 units1 space1)
-    (Vector2D units2 space2)
+    (VectorCurve 2 units1 Void)
+    (Vector2D units2)
     (Curve1D (units1 ?*? units2))
   where
   curve `cross_` vector = curve `cross_` constant vector
@@ -857,10 +837,10 @@ instance
   curve `cross_` vector = curve `cross_` constant vector
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
+  Units.Product units1 units2 units3 =>
   CrossMultiplication
-    (Vector2D units1 space1)
-    (VectorCurve 2 units2 space2)
+    (Vector2D units1)
+    (VectorCurve 2 units2 Void)
     (Curve1D units3)
   where
   lhs `cross` rhs = Units.specialize (lhs `cross_` rhs)
@@ -875,10 +855,9 @@ instance
   lhs `cross` rhs = Units.specialize (lhs `cross_` rhs)
 
 instance
-  space1 ~ space2 =>
   CrossMultiplication_
-    (Vector2D units1 space1)
-    (VectorCurve 2 units2 space2)
+    (Vector2D units1)
+    (VectorCurve 2 units2 Void)
     (Curve1D (units1 ?*? units2))
   where
   vector `cross_` curve = constant vector `cross_` curve
@@ -892,10 +871,7 @@ instance
   where
   vector `cross_` curve = constant vector `cross_` curve
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (VectorCurve 2 units space1) (Direction2D space2) (Curve1D units)
-  where
+instance CrossMultiplication (VectorCurve 2 units Void) Direction2D (Curve1D units) where
   lhs `cross` rhs = lhs `cross` Vector2D.unit rhs
 
 instance
@@ -907,10 +883,7 @@ instance
   where
   lhs `cross` rhs = lhs `cross` Vector3D.unit rhs
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (Direction2D space1) (VectorCurve 2 units space2) (Curve1D units)
-  where
+instance CrossMultiplication Direction2D (VectorCurve 2 units Void) (Curve1D units) where
   lhs `cross` rhs = Vector2D.unit lhs `cross` rhs
 
 instance
@@ -923,11 +896,11 @@ instance
   lhs `cross` rhs = Vector3D.unit lhs `cross` rhs
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Addition
-    (Point2D units1 space1)
-    (VectorCurve 2 units2 space2)
-    (Curve2D units1 space1)
+    (Point2D units1)
+    (VectorCurve 2 units2 Void)
+    (Curve 2 units1 Void)
   where
   point + curve = Curve2D.constant point + curve
 
@@ -938,11 +911,11 @@ instance
   point + curve = Curve3D.constant point + curve
 
 instance
-  (space1 ~ space2, units1 ~ units2) =>
+  units1 ~ units2 =>
   Subtraction
-    (Point2D units1 space1)
-    (VectorCurve 2 units2 space2)
-    (Curve2D units1 space1)
+    (Point2D units1)
+    (VectorCurve 2 units2 Void)
+    (Curve 2 units1 Void)
   where
   point - curve = Curve2D.constant point - curve
 
@@ -966,9 +939,9 @@ instance
 
 instance
   Composition
-    (VectorCurve 2 units space)
+    (VectorCurve 2 units Void)
     (SurfaceFunction1D Unitless)
-    (VectorSurfaceFunction2D units space)
+    (VectorSurfaceFunction2D units)
   where
   curve . function =
     VectorSurfaceFunction2D.new
@@ -988,9 +961,9 @@ instance
 
 instance
   Composition
-    (VectorCurve 2 units space)
+    (VectorCurve 2 units Void)
     SurfaceParameter
-    (VectorSurfaceFunction2D units space)
+    (VectorSurfaceFunction2D units)
   where
   curve . parameter = curve . SurfaceFunction1D.parameter parameter
 
@@ -1004,9 +977,9 @@ instance
 
 instance
   Division_
-    (VectorCurve 2 units1 space)
+    (VectorCurve 2 units1 Void)
     (Nonzero (Curve1D units2))
-    (VectorCurve 2 (units1 ?/? units2) space)
+    (VectorCurve 2 (units1 ?/? units2) Void)
   where
   lhs ?/? Nonzero rhs = do
     let compiledQuotient = compiled lhs ?/? Curve1D.compiled rhs
@@ -1031,9 +1004,9 @@ instance
 instance
   Units.Quotient units1 units2 units3 =>
   Division
-    (VectorCurve 2 units1 space)
+    (VectorCurve 2 units1 Void)
     (Nonzero (Curve1D units2))
-    (VectorCurve 2 units3 space)
+    (VectorCurve 2 units3 Void)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
@@ -1048,9 +1021,9 @@ instance
 
 instance
   Division_
-    (VectorCurve 2 units1 space)
+    (VectorCurve 2 units1 Void)
     (Nondegenerate (Curve1D units2))
-    (VectorCurve 2 (units1 ?/? units2) space)
+    (VectorCurve 2 (units1 ?/? units2) Void)
   where
   (?/?) = Desingularization.curveQuotient_
 
@@ -1065,9 +1038,9 @@ instance
 instance
   Units.Quotient units1 units2 units3 =>
   Division
-    (VectorCurve 2 units1 space)
+    (VectorCurve 2 units1 Void)
     (Nondegenerate (Curve1D units2))
-    (VectorCurve 2 units3 space)
+    (VectorCurve 2 units3 Void)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
@@ -1082,9 +1055,9 @@ instance
 
 instance
   Desingularization.Curve
-    (VectorCurve 2 units space)
-    (Vector2D units space)
-    (Vector2D units space)
+    (VectorCurve 2 units Void)
+    (Vector2D units)
+    (Vector2D units)
   where
   value = value
   derivativeValue = derivativeValue
@@ -1104,7 +1077,7 @@ instance
   bezier = bezier
   desingularized = desingularized
 
-instance Exists 2 units space
+instance Exists 2 units Void
 
 instance Exists 3 units space
 

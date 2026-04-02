@@ -22,6 +22,7 @@ module OpenSolid.Curve2D
   )
 where
 
+import Data.Void (Void)
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve.Search qualified as Curve.Search
@@ -31,41 +32,35 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D, Point2D, Transform2D, Vector2D)
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 
-type Curve2D units space = Curve 2 units space
+type Curve2D units = Curve 2 units Void
 
-type Compiled units space = Curve.Compiled 2 units space
+type Compiled units = Curve.Compiled 2 units Void
 
-type SearchTree units space = Curve.Search.Tree 2 units space
+type SearchTree units = Curve.Search.Tree 2 units Void
 
-constant :: Point2D units space -> Curve2D units space
-new :: Compiled units space -> VectorCurve2D units space -> Curve2D units space
-startPoint :: Curve2D units space -> Point2D units space
-endPoint :: Curve2D units space -> Point2D units space
-point :: Curve2D units space -> Number -> Point2D units space
-bounds :: Curve2D units space -> Interval Unitless -> Bounds2D units space
-overallBounds :: Curve2D units space -> Bounds2D units space
-compiled :: Curve2D units space -> Compiled units space
-derivative :: Curve2D units space -> VectorCurve2D units space
-reverse :: Curve2D units space -> Curve2D units space
-xy :: Curve1D units -> Curve1D units -> Curve2D units space
-lineFrom :: Point2D units space -> Point2D units space -> Curve2D units space
+constant :: Point2D units -> Curve2D units
+new :: Compiled units -> VectorCurve2D units -> Curve2D units
+startPoint :: Curve2D units -> Point2D units
+endPoint :: Curve2D units -> Point2D units
+point :: Curve2D units -> Number -> Point2D units
+bounds :: Curve2D units -> Interval Unitless -> Bounds2D units
+overallBounds :: Curve2D units -> Bounds2D units
+compiled :: Curve2D units -> Compiled units
+derivative :: Curve2D units -> VectorCurve2D units
+reverse :: Curve2D units -> Curve2D units
+xy :: Curve1D units -> Curve1D units -> Curve2D units
+lineFrom :: Point2D units -> Point2D units -> Curve2D units
 hermite ::
-  Point2D units space ->
-  List (Vector2D units space) ->
-  Point2D units space ->
-  List (Vector2D units space) ->
-  Curve2D units space
+  Point2D units ->
+  List (Vector2D units) ->
+  Point2D units ->
+  List (Vector2D units) ->
+  Curve2D units
 desingularize ::
-  Maybe (Point2D units space, Vector2D units space) ->
-  Curve2D units space ->
-  Maybe (Point2D units space, Vector2D units space) ->
-  Curve2D units space
-transformBy ::
-  Transform2D tag units space ->
-  Curve2D units space ->
-  Curve2D units space
-piecewise ::
-  Tolerance units =>
-  NonEmpty (Curve2D units space) ->
-  Curve2D units space
-searchTree :: Curve2D units space -> SearchTree units space
+  Maybe (Point2D units, Vector2D units) ->
+  Curve2D units ->
+  Maybe (Point2D units, Vector2D units) ->
+  Curve2D units
+transformBy :: Transform2D tag units -> Curve2D units -> Curve2D units
+piecewise :: Tolerance units => NonEmpty (Curve2D units) -> Curve2D units
+searchTree :: Curve2D units -> SearchTree units

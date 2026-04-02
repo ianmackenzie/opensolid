@@ -12,7 +12,7 @@ type family
     vectorBounds | vectorBounds -> dimension units space
   where
   VectorBounds 1 units Void = Interval units
-  VectorBounds 2 units space = VectorBounds2D units space
+  VectorBounds 2 units Void = VectorBounds2D units
   VectorBounds 3 units space = VectorBounds3D units space
 
 class Exists (dimension :: Natural) (units :: Type) (space :: Type)

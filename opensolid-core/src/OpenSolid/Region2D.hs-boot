@@ -3,11 +3,11 @@ module OpenSolid.Region2D (Region2D, outerLoop, innerLoops, boundaryCurves) wher
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Prelude
 
-type role Region2D nominal nominal
+type role Region2D nominal
 
-type Region2D :: Type -> Type -> Type
-data Region2D units space
+type Region2D :: Type -> Type
+data Region2D units
 
-outerLoop :: Region2D units space -> NonEmpty (Curve2D units space)
-innerLoops :: Region2D units space -> List (NonEmpty (Curve2D units space))
-boundaryCurves :: Region2D units space -> NonEmpty (Curve2D units space)
+outerLoop :: Region2D units -> NonEmpty (Curve2D units)
+innerLoops :: Region2D units -> List (NonEmpty (Curve2D units))
+boundaryCurves :: Region2D units -> NonEmpty (Curve2D units)

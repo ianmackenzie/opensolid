@@ -98,7 +98,7 @@ rightward = Orientation3D.rightwardDirection
 leftward :: Orientation3D space -> Direction3D space
 leftward = Orientation3D.leftwardDirection
 
-on :: Plane3D global -> Direction2D local -> Direction3D global
+on :: Plane3D space -> Direction2D -> Direction3D space
 on (Plane3D _ (PlaneOrientation3D i j)) (Direction2D x y) = Unit3D (x * i + y * j)
 
 polar :: Plane3D space -> Angle -> Direction3D space

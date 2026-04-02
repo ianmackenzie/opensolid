@@ -47,7 +47,7 @@ endPoint (Line Negative l) = Line3D.startPoint l
 endPoint (Arc Positive a) = Arc3D.endPoint a
 endPoint (Arc Negative a) = Arc3D.startPoint a
 
-on :: Plane3D global -> Edge2D local -> Edge3D global
+on :: Plane3D space -> Edge2D -> Edge3D space
 on plane (Edge2D.Line line2D) = line (Line3D.on plane line2D)
 on plane (Edge2D.Arc arc2D) = arc (Arc3D.on plane arc2D)
 

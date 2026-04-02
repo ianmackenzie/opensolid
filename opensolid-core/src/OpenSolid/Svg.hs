@@ -76,22 +76,22 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Triangle2D (Triangle2D (Triangle2D))
 
 -- | Some SVG drawing content such as a shape with attributes.
-data Svg space = Empty | Node Text (List (Attribute space)) (List (Svg space))
+data Svg = Empty | Node Text (List Attribute) (List Svg)
 
 -- | An SVG attribute such as fill color or stroke width.
-data Attribute space = Attribute Text Text deriving (Show)
+data Attribute = Attribute Text Text deriving (Show)
 
-instance FFI (Svg FFI.Space) where
+instance FFI Svg where
   representation = FFI.classRepresentation "Svg"
 
-instance FFI (Attribute FFI.Space) where
+instance FFI Attribute where
   representation = FFI.nestedClassRepresentation "Svg" "Attribute"
 
-svgText :: Text -> Svg space -> Maybe Text
+svgText :: Text -> Svg -> Maybe Text
 svgText _ Empty = Nothing
 svgText indent (Node name attributes children) = Just (nodeText indent name attributes children)
 
-nodeText :: Text -> Text -> List (Attribute space) -> List (Svg space) -> Text
+nodeText :: Text -> Text -> List Attribute -> List Svg -> Text
 nodeText indent name attributes children = do
   let attributeLines = List.map (attributeText ("\n" <> indent <> "   ")) attributes
   let openingTag = indent <> "<" <> name <> Text.concat attributeLines <> ">"
@@ -99,7 +99,7 @@ nodeText indent name attributes children = do
   let closingTag = indent <> "</" <> name <> ">"
   Text.multiline (openingTag : childLines) <> "\n" <> closingTag
 
-attributeText :: Text -> Attribute space -> Text
+attributeText :: Text -> Attribute -> Text
 attributeText indent (Attribute name value) = indent <> name <> "=\"" <> value <> "\""
 
 {-| Convert an SVG drawing to text.
@@ -110,7 +110,7 @@ anything outside of this will be cropped.
 In most cases it's more convenient to write a file directly using 'write',
 but 'toText' can be useful if you want to e.g. return the SVG text as part of an HTTP response.
 -}
-toText :: Bounds2D Meters space -> Svg space -> Text
+toText :: Bounds2D Meters -> Svg -> Text
 toText viewBox entity = do
   let Bounds2D xBounds yBounds = viewBox
   let Interval x1 x2 = xBounds
@@ -144,33 +144,33 @@ toText viewBox entity = do
 The given bounding box defines the overall size of the drawing;
 anything outside of this will be cropped.
 -}
-write :: Text -> Bounds2D Meters space -> Svg space -> IO ()
+write :: Text -> Bounds2D Meters -> Svg -> IO ()
 write path viewBox entity = IO.writeUtf8 path (toText viewBox entity)
 
 {-| Don't draw anything at all.
 
 Can be useful if you want to conditionally render some content.
 -}
-nothing :: Svg space
+nothing :: Svg
 nothing = Empty
 
 -- | Group several SVG entities into a single entity, applying the given attributes to the group.
-groupWith :: List (Attribute space) -> List (Svg space) -> Svg space
+groupWith :: List Attribute -> List Svg -> Svg
 groupWith = Node "g"
 
 -- | Group several SVG entities into a single entity.
-group :: List (Svg space) -> Svg space
+group :: List Svg -> Svg
 group = groupWith []
 
-combine :: (a -> Svg space) -> List a -> Svg space
+combine :: (a -> Svg) -> List a -> Svg
 combine = combineWith []
 
-combineWith :: List (Attribute space) -> (a -> Svg space) -> List a -> Svg space
+combineWith :: List Attribute -> (a -> Svg) -> List a -> Svg
 combineWith attributes function list =
   groupWith attributes (List.map function list)
 
 -- | Draw a line with the given attributes.
-lineWith :: List (Attribute space) -> Line2D Meters space -> Svg space
+lineWith :: List Attribute -> Line2D Meters -> Svg
 lineWith attributes (Line2D p1 p2) = do
   let Point2D x1 y1 = p1
   let Point2D x2 y2 = p2
@@ -181,43 +181,43 @@ lineWith attributes (Line2D p1 p2) = do
   Node "line" (x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes) []
 
 -- | Draw a line.
-line :: Line2D Meters space -> Svg space
+line :: Line2D Meters -> Svg
 line = lineWith []
 
 -- | Draw a polyline with the given attributes.
-polylineWith :: List (Attribute space) -> Polyline2D Meters space -> Svg space
+polylineWith :: List Attribute -> Polyline2D Meters -> Svg
 polylineWith attributes givenPolyline = do
   let points = NonEmpty.toList (Polyline2D.vertices givenPolyline)
   Node "polyline" (noFill : pointsAttribute points : attributes) []
 
 -- | Draw a polyline.
-polyline :: Polyline2D Meters space -> Svg space
+polyline :: Polyline2D Meters -> Svg
 polyline = polylineWith []
 
 -- | Draw a polygon with the given attributes.
-polygonWith :: List (Attribute space) -> Polygon2D Meters space -> Svg space
+polygonWith :: List Attribute -> Polygon2D Meters -> Svg
 polygonWith attributes givenPolygon = do
   let points = NonEmpty.toList (Polygon2D.vertices givenPolygon)
   Node "polygon" (pointsAttribute points : attributes) []
 
 -- | Draw a polygon.
-polygon :: Polygon2D Meters space -> Svg space
+polygon :: Polygon2D Meters -> Svg
 polygon = polygonWith []
 
 -- | Draw a triangle with the given attributes.
-triangleWith :: List (Attribute space) -> Triangle2D Meters space -> Svg space
+triangleWith :: List Attribute -> Triangle2D Meters -> Svg
 triangleWith attributes (Triangle2D p1 p2 p3) = do
   let vertices = NonEmpty.three p1 p2 p3
   polygonWith attributes (Polygon2D vertices)
 
 -- | Draw a triangle.
-triangle :: Triangle2D Meters space -> Svg space
+triangle :: Triangle2D Meters -> Svg
 triangle = triangleWith []
 
-bounds :: Bounds2D Meters space -> Svg space
+bounds :: Bounds2D Meters -> Svg
 bounds = boundsWith []
 
-boundsWith :: List (Attribute space) -> Bounds2D Meters space -> Svg space
+boundsWith :: List Attribute -> Bounds2D Meters -> Svg
 boundsWith attributes (Bounds2D xInterval yInterval) = do
   let xAttribute = Attribute "x" (lengthText (Interval.lower xInterval))
   let yAttribute = Attribute "y" (lengthText (negate (Interval.upper yInterval)))
@@ -226,11 +226,7 @@ boundsWith attributes (Bounds2D xInterval yInterval) = do
   Node "rect" (xAttribute : yAttribute : widthAttribute : heightAttribute : attributes) []
 
 -- | Draw a circle with the given attributes, center point and diameter.
-circleWith ::
-  List (Attribute space) ->
-  "centerPoint" ::: Point2D Meters space ->
-  "diameter" ::: Length ->
-  Svg space
+circleWith :: List Attribute -> "centerPoint" ::: Point2D Meters -> "diameter" ::: Length -> Svg
 circleWith attributes ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) = do
   let Point2D cx cy = centerPoint
   let cxAttribute = Attribute "cx" (lengthText cx)
@@ -239,28 +235,28 @@ circleWith attributes ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) 
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
 -- | Draw a circle with the given center point and diameter.
-circle :: "centerPoint" ::: Point2D Meters space -> "diameter" ::: Length -> Svg space
+circle :: "centerPoint" ::: Point2D Meters -> "diameter" ::: Length -> Svg
 circle = circleWith []
 
 -- | Draw a curve with the given attributes and resolution.
-curveWith :: List (Attribute space) -> Resolution Meters -> Curve2D Meters space -> Svg space
+curveWith :: List Attribute -> Resolution Meters -> Curve2D Meters -> Svg
 curveWith attributes resolution givenCurve =
   polylineWith attributes (Curve2D.toPolyline resolution givenCurve)
 
 -- | Draw a curve with the given resolution.
-curve :: Resolution Meters -> Curve2D Meters space -> Svg space
+curve :: Resolution Meters -> Curve2D Meters -> Svg
 curve = curveWith []
 
-region :: Resolution Meters -> Region2D Meters space -> Svg space
+region :: Resolution Meters -> Region2D Meters -> Svg
 region = regionWith []
 
-regionWith :: List (Attribute space) -> Resolution Meters -> Region2D Meters space -> Svg space
+regionWith :: List Attribute -> Resolution Meters -> Region2D Meters -> Svg
 regionWith attributes resolution givenRegion = do
   let loops = NonEmpty.toList (Region2D.boundaryLoops givenRegion)
   let dAttribute = Attribute "d" (Text.join " " (List.map (loopCommands resolution) loops))
   Node "path" (dAttribute : attributes) []
 
-loopCommands :: Resolution Meters -> NonEmpty (Curve2D Meters space) -> Text
+loopCommands :: Resolution Meters -> NonEmpty (Curve2D Meters) -> Text
 loopCommands resolution curves = do
   let startPoint = Curve2D.startPoint (NonEmpty.first curves)
   let numCurves = NonEmpty.length curves
@@ -278,27 +274,27 @@ loopCommands resolution curves = do
         Text.join " " pointCommands
   Text.join " " (moveTo startPoint : List.mapWithIndex drawCurve (NonEmpty.toList curves))
 
-moveTo :: Point2D Meters space -> Text
+moveTo :: Point2D Meters -> Text
 moveTo (Point2D x y) = Text.join " " ["M", lengthText x, lengthText -y]
 
-lineTo :: Point2D Meters space -> Text
+lineTo :: Point2D Meters -> Text
 lineTo (Point2D x y) = Text.join " " ["L", lengthText x, lengthText -y]
 
 arrow ::
-  "start" ::: Point2D Meters space ->
-  "end" ::: Point2D Meters space ->
+  "start" ::: Point2D Meters ->
+  "end" ::: Point2D Meters ->
   "headLength" ::: Length ->
   "headWidth" ::: Length ->
-  Svg space
+  Svg
 arrow = arrowWith []
 
 arrowWith ::
-  List (Attribute space) ->
-  "start" ::: Point2D Meters space ->
-  "end" ::: Point2D Meters space ->
+  List Attribute ->
+  "start" ::: Point2D Meters ->
+  "end" ::: Point2D Meters ->
   "headLength" ::: Length ->
   "headWidth" ::: Length ->
-  Svg space
+  Svg
 arrowWith
   attributes
   ("start" ::: start)
@@ -319,56 +315,56 @@ arrowWith
         let tip = triangle (Triangle2D leftPoint rightPoint end)
         groupWith attributes [stem, tip]
 
-pointsAttribute :: List (Point2D Meters space) -> Attribute space
+pointsAttribute :: List (Point2D Meters) -> Attribute
 pointsAttribute givenPoints =
   Attribute "points" (Text.join " " (List.map coordinatesText givenPoints))
 
-coordinatesText :: Point2D Meters space -> Text
+coordinatesText :: Point2D Meters -> Text
 coordinatesText (Point2D x y) = lengthText x <> "," <> lengthText -y
 
 lengthText :: Length -> Text
 lengthText givenLength = Text.number (Length.inMillimeters givenLength)
 
 -- | Black stroke for curves and borders.
-blackStroke :: Attribute space
+blackStroke :: Attribute
 blackStroke = Attribute "stroke" "black"
 
 -- | Set the stroke color for curves and borders.
-strokeColor :: Color -> Attribute space
+strokeColor :: Color -> Attribute
 strokeColor color = Attribute "stroke" (Color.toHex color)
 
-strokeWidth :: Length -> Attribute space
+strokeWidth :: Length -> Attribute
 strokeWidth givenWidth = Attribute "stroke-width" (lengthText givenWidth)
 
 -- | Set shapes to have no fill.
-noFill :: Attribute space
+noFill :: Attribute
 noFill = Attribute "fill" "none"
 
 -- | Set shapes to have white fill.
-whiteFill :: Attribute space
+whiteFill :: Attribute
 whiteFill = Attribute "fill" "white"
 
 -- | Set the fill color for shapes.
-fillColor :: Color -> Attribute space
+fillColor :: Color -> Attribute
 fillColor color = Attribute "fill" (Color.toHex color)
 
-opacity :: Number -> Attribute space
+opacity :: Number -> Attribute
 opacity value = Attribute "opacity" (Text.number value)
 
-miterStrokeJoins :: Attribute space
+miterStrokeJoins :: Attribute
 miterStrokeJoins = Attribute "stroke-linejoin" "miter"
 
-roundStrokeJoins :: Attribute space
+roundStrokeJoins :: Attribute
 roundStrokeJoins = Attribute "stroke-linejoin" "round"
 
-bevelStrokeJoins :: Attribute space
+bevelStrokeJoins :: Attribute
 bevelStrokeJoins = Attribute "stroke-linejoin" "bevel"
 
-noStrokeCaps :: Attribute space
+noStrokeCaps :: Attribute
 noStrokeCaps = Attribute "stroke-linecap" "butt"
 
-roundStrokeCaps :: Attribute space
+roundStrokeCaps :: Attribute
 roundStrokeCaps = Attribute "stroke-linecap" "round"
 
-squareStrokeCaps :: Attribute space
+squareStrokeCaps :: Attribute
 squareStrokeCaps = Attribute "stroke-linecap" "square"

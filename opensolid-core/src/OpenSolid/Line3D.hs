@@ -47,7 +47,7 @@ pattern Line3D p1 p2 = Line p1 p2
 
 {-# COMPLETE Line3D #-}
 
-on :: Plane3D global -> Line2D Meters local -> Line3D global
+on :: Plane3D space -> Line2D Meters -> Line3D space
 on plane (Line2D p1 p2) = Line3D (Point3D.on plane p1) (Point3D.on plane p2)
 
 -- | Get the start point of a line.

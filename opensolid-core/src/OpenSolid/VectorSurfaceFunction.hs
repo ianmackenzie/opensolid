@@ -11,7 +11,6 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
-import OpenSolid.UvSpace (UvSpace)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
@@ -22,7 +21,7 @@ type family
     vectorSurfaceFunction | vectorSurfaceFunction -> dimension units space
   where
   VectorSurfaceFunction 1 units Void = SurfaceFunction1D units
-  VectorSurfaceFunction 2 units space = VectorSurfaceFunction2D units space
+  VectorSurfaceFunction 2 units Void = VectorSurfaceFunction2D units
   VectorSurfaceFunction 3 units space = VectorSurfaceFunction3D units space
 
 class
@@ -48,7 +47,7 @@ class
       (VectorSurfaceFunction dimension units space)
   , Composition
       (VectorSurfaceFunction dimension units space)
-      (SurfaceFunction2D Unitless UvSpace)
+      (SurfaceFunction2D Unitless)
       (VectorSurfaceFunction dimension units space)
   ) =>
   Exists dimension units space
@@ -61,7 +60,7 @@ class
 instance Exists 1 units Void where
   derivative = SurfaceFunction1D.derivative
 
-instance Exists 2 units space where
+instance Exists 2 units Void where
   derivative = VectorSurfaceFunction2D.derivative
 
 instance Exists 3 units space where

@@ -35,213 +35,145 @@ import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
-newtype DirectionCurve2D space = DirectionCurve2D (VectorCurve2D Unitless space)
+newtype DirectionCurve2D = DirectionCurve2D (VectorCurve2D Unitless)
 
-instance HasField "derivative" (DirectionCurve2D space) (VectorCurve2D Unitless space) where
+instance HasField "derivative" DirectionCurve2D (VectorCurve2D Unitless) where
   getField = derivative
 
-unsafe :: VectorCurve2D Unitless space -> DirectionCurve2D space
+unsafe :: VectorCurve2D Unitless -> DirectionCurve2D
 unsafe = DirectionCurve2D
 
-unwrap :: DirectionCurve2D space -> VectorCurve2D Unitless space
+unwrap :: DirectionCurve2D -> VectorCurve2D Unitless
 unwrap (DirectionCurve2D vectorCurve) = vectorCurve
 
-startValue :: DirectionCurve2D space -> Direction2D space
+startValue :: DirectionCurve2D -> Direction2D
 startValue curve = value curve 0.0
 
-endValue :: DirectionCurve2D space -> Direction2D space
+endValue :: DirectionCurve2D -> Direction2D
 endValue curve = value curve 1.0
 
-value :: DirectionCurve2D space -> Number -> Direction2D space
+value :: DirectionCurve2D -> Number -> Direction2D
 value (DirectionCurve2D vectorCurve) tValue =
   Direction2D.unsafe (VectorCurve2D.value vectorCurve tValue)
 
-bounds :: DirectionCurve2D space -> Interval Unitless -> DirectionBounds2D space
+bounds :: DirectionCurve2D -> Interval Unitless -> DirectionBounds2D
 bounds (DirectionCurve2D vectorCurve) tBounds =
   DirectionBounds2D.unsafe (VectorCurve2D.bounds vectorCurve tBounds)
 
-derivative :: DirectionCurve2D space -> VectorCurve2D Unitless space
+derivative :: DirectionCurve2D -> VectorCurve2D Unitless
 derivative (DirectionCurve2D vectorCurve) = VectorCurve2D.derivative vectorCurve
 
-constant :: Direction2D space -> DirectionCurve2D space
+constant :: Direction2D -> DirectionCurve2D
 constant direction = DirectionCurve2D (VectorCurve2D.constant (Vector2D.unit direction))
 
-arc :: Angle -> Angle -> DirectionCurve2D space
+arc :: Angle -> Angle -> DirectionCurve2D
 arc a b = DirectionCurve2D (VectorCurve2D.arc (Vector2D 1.0 0.0) (Vector2D 0.0 1.0) a b)
 
-reverse :: DirectionCurve2D space -> DirectionCurve2D space
+reverse :: DirectionCurve2D -> DirectionCurve2D
 reverse (DirectionCurve2D vectorCurve) = DirectionCurve2D (VectorCurve2D.reverse vectorCurve)
 
-instance Negation (DirectionCurve2D space) where
+instance Negation DirectionCurve2D where
   negate (DirectionCurve2D vectorCurve) = DirectionCurve2D (negate vectorCurve)
 
-instance Multiplication Sign (DirectionCurve2D space) (DirectionCurve2D space) where
+instance Multiplication Sign DirectionCurve2D DirectionCurve2D where
   Positive * curve = curve
   Negative * curve = -curve
 
-instance Multiplication_ Sign (DirectionCurve2D space) (DirectionCurve2D space) where
+instance Multiplication_ Sign DirectionCurve2D DirectionCurve2D where
   Positive ?*? curve = curve
   Negative ?*? curve = -curve
 
-instance Multiplication (DirectionCurve2D space) Sign (DirectionCurve2D space) where
+instance Multiplication DirectionCurve2D Sign DirectionCurve2D where
   curve * Positive = curve
   curve * Negative = -curve
 
-instance Multiplication_ (DirectionCurve2D space) Sign (DirectionCurve2D space) where
+instance Multiplication_ DirectionCurve2D Sign DirectionCurve2D where
   curve ?*? Positive = curve
   curve ?*? Negative = -curve
 
-instance
-  Multiplication
-    (Quantity units)
-    (DirectionCurve2D space)
-    (VectorCurve2D units space)
-  where
+instance Multiplication (Quantity units) DirectionCurve2D (VectorCurve2D units) where
   quantity * DirectionCurve2D vectorCurve = quantity * vectorCurve
 
-instance
-  Multiplication
-    (DirectionCurve2D space)
-    (Quantity units)
-    (VectorCurve2D units space)
-  where
+instance Multiplication DirectionCurve2D (Quantity units) (VectorCurve2D units) where
   DirectionCurve2D vectorCurve * quantity = vectorCurve * quantity
 
-instance
-  Multiplication
-    (Curve1D units)
-    (DirectionCurve2D space)
-    (VectorCurve2D units space)
-  where
+instance Multiplication (Curve1D units) DirectionCurve2D (VectorCurve2D units) where
   scalarCurve * DirectionCurve2D vectorCurve = scalarCurve * vectorCurve
 
-instance
-  Multiplication
-    (DirectionCurve2D space)
-    (Curve1D units)
-    (VectorCurve2D units space)
-  where
+instance Multiplication DirectionCurve2D (Curve1D units) (VectorCurve2D units) where
   DirectionCurve2D vectorCurve * scalarCurve = vectorCurve * scalarCurve
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (DirectionCurve2D space1) (DirectionCurve2D space2) (Curve1D Unitless)
-  where
+instance DotMultiplication DirectionCurve2D DirectionCurve2D (Curve1D Unitless) where
   DirectionCurve2D lhs `dot` DirectionCurve2D rhs = lhs `dot` rhs
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (DirectionCurve2D space1) (VectorCurve2D units space2) (Curve1D units)
-  where
+instance DotMultiplication DirectionCurve2D (VectorCurve2D units) (Curve1D units) where
   DirectionCurve2D lhs `dot` rhs = lhs `dot` rhs
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (VectorCurve2D units space1) (DirectionCurve2D space2) (Curve1D units)
-  where
+instance DotMultiplication (VectorCurve2D units) DirectionCurve2D (Curve1D units) where
   lhs `dot` DirectionCurve2D rhs = lhs `dot` rhs
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (DirectionCurve2D space1) (Direction2D space2) (Curve1D Unitless)
-  where
+instance DotMultiplication DirectionCurve2D Direction2D (Curve1D Unitless) where
   DirectionCurve2D lhs `dot` rhs = lhs `dot` rhs
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (Direction2D space1) (DirectionCurve2D space2) (Curve1D Unitless)
-  where
+instance DotMultiplication Direction2D DirectionCurve2D (Curve1D Unitless) where
   lhs `dot` DirectionCurve2D rhs = lhs `dot` rhs
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (DirectionCurve2D space1) (Vector2D units space2) (Curve1D units)
-  where
+instance DotMultiplication DirectionCurve2D (Vector2D units) (Curve1D units) where
   DirectionCurve2D lhs `dot` rhs = lhs `dot` rhs
 
-instance
-  space1 ~ space2 =>
-  DotMultiplication (Vector2D units space1) (DirectionCurve2D space2) (Curve1D units)
-  where
+instance DotMultiplication (Vector2D units) DirectionCurve2D (Curve1D units) where
   lhs `dot` DirectionCurve2D rhs = lhs `dot` rhs
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (DirectionCurve2D space1) (DirectionCurve2D space2) (Curve1D Unitless)
-  where
+instance CrossMultiplication DirectionCurve2D DirectionCurve2D (Curve1D Unitless) where
   DirectionCurve2D lhs `cross` DirectionCurve2D rhs = lhs `cross` rhs
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (DirectionCurve2D space1) (VectorCurve2D units space2) (Curve1D units)
-  where
+instance CrossMultiplication DirectionCurve2D (VectorCurve2D units) (Curve1D units) where
   DirectionCurve2D lhs `cross` rhs = lhs `cross` rhs
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (VectorCurve2D units space1) (DirectionCurve2D space2) (Curve1D units)
-  where
+instance CrossMultiplication (VectorCurve2D units) DirectionCurve2D (Curve1D units) where
   lhs `cross` DirectionCurve2D rhs = lhs `cross` rhs
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (DirectionCurve2D space1) (Direction2D space2) (Curve1D Unitless)
-  where
+instance CrossMultiplication DirectionCurve2D Direction2D (Curve1D Unitless) where
   DirectionCurve2D lhs `cross` rhs = lhs `cross` rhs
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (Direction2D space1) (DirectionCurve2D space2) (Curve1D Unitless)
-  where
+instance CrossMultiplication Direction2D DirectionCurve2D (Curve1D Unitless) where
   lhs `cross` DirectionCurve2D rhs = lhs `cross` rhs
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (DirectionCurve2D space1) (Vector2D units space2) (Curve1D units)
-  where
+instance CrossMultiplication DirectionCurve2D (Vector2D units) (Curve1D units) where
   DirectionCurve2D lhs `cross` rhs = lhs `cross` rhs
 
-instance
-  space1 ~ space2 =>
-  CrossMultiplication (Vector2D units space1) (DirectionCurve2D space2) (Curve1D units)
-  where
+instance CrossMultiplication (Vector2D units) DirectionCurve2D (Curve1D units) where
   lhs `cross` DirectionCurve2D rhs = lhs `cross` rhs
 
-instance Composition (DirectionCurve2D space) (Curve1D Unitless) (DirectionCurve2D space) where
+instance Composition DirectionCurve2D (Curve1D Unitless) DirectionCurve2D where
   DirectionCurve2D curve . curve1D = DirectionCurve2D (curve . curve1D)
 
 instance
   Composition
-    (DirectionCurve2D space)
+    DirectionCurve2D
     (SurfaceFunction1D Unitless)
-    (DirectionSurfaceFunction2D space)
+    DirectionSurfaceFunction2D
   where
   DirectionCurve2D curve . surfaceFunction =
     DirectionSurfaceFunction2D.unsafe (curve . surfaceFunction)
 
 instance
   Composition
-    (DirectionCurve2D space)
+    DirectionCurve2D
     SurfaceParameter
-    (DirectionSurfaceFunction2D space)
+    DirectionSurfaceFunction2D
   where
   DirectionCurve2D curve . surfaceParameter =
     DirectionSurfaceFunction2D.unsafe (curve . surfaceParameter)
 
-instance HasField "xComponent" (DirectionCurve2D space) (Curve1D Unitless) where
+instance HasField "xComponent" DirectionCurve2D (Curve1D Unitless) where
   getField (DirectionCurve2D curve) = VectorCurve2D.xComponent curve
 
-instance HasField "yComponent" (DirectionCurve2D space) (Curve1D Unitless) where
+instance HasField "yComponent" DirectionCurve2D (Curve1D Unitless) where
   getField (DirectionCurve2D curve) = VectorCurve2D.yComponent curve
 
-placeIn ::
-  Frame2D frameUnits global local ->
-  DirectionCurve2D local ->
-  DirectionCurve2D global
+placeIn :: Frame2D frameUnits -> DirectionCurve2D -> DirectionCurve2D
 placeIn frame (DirectionCurve2D curve) = DirectionCurve2D (VectorCurve2D.placeIn frame curve)
 
-relativeTo ::
-  Frame2D frameUnits global local ->
-  DirectionCurve2D global ->
-  DirectionCurve2D local
+relativeTo :: Frame2D frameUnits -> DirectionCurve2D -> DirectionCurve2D
 relativeTo frame = placeIn (Frame2D.inverse frame)

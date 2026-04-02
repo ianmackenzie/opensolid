@@ -24,8 +24,6 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
 
-data Global
-
 formatDuration :: Duration -> Text
 formatDuration duration = Text.int (Number.round (Duration.inMilliseconds duration)) <> " ms"
 
@@ -58,16 +56,11 @@ testSplineAndLine = do
   let line = Curve2D.lineFrom Point2D.origin (Point2D.centimeters 20.0 0.0)
   testCurveMedialAxis "testSplineAndLine" spline line
 
-testCurveMedialAxis ::
-  Tolerance Meters =>
-  Text ->
-  Curve2D Meters Global ->
-  Curve2D Meters Global ->
-  IO ()
+testCurveMedialAxis :: Tolerance Meters => Text -> Curve2D Meters -> Curve2D Meters -> IO ()
 testCurveMedialAxis label curve1 curve2 = do
   timer <- Timer.start
   segments <- Result.orFail (Curve2D.medialAxis curve1 curve2)
-  let drawTangentCircles (segment :: Curve2D.MedialAxis.Segment Meters Global) = do
+  let drawTangentCircles (segment :: Curve2D.MedialAxis.Segment Meters) = do
         let (parameterization, _) = Curve2D.arcLengthParameterization segment.curve
         let drawTangentCircle u = do
               let t = Curve1D.value parameterization u

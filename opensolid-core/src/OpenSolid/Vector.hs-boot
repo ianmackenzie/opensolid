@@ -11,13 +11,13 @@ type family
     (vector :: Type) | vector -> dimension units space
   where
   Vector 1 units Void = Quantity units
-  Vector 2 units space = Vector2D units space
+  Vector 2 units Void = Vector2D units
   Vector 3 units space = Vector3D units space
 
 class Exists (dimension :: Natural) (units :: Type) (space :: Type)
 
 instance Exists 1 units Void
 
-instance Exists 2 units space
+instance Exists 2 units Void
 
 instance Exists 3 units space

@@ -24,7 +24,7 @@ data Circle3D space = Circle3D
   , radius :: Length
   }
 
-on :: Plane3D global -> Circle2D Meters local -> Circle3D global
+on :: Plane3D space -> Circle2D Meters -> Circle3D space
 on givenPlane givenCircle = do
   let originPoint = Point3D.on givenPlane (Circle2D.centerPoint givenCircle)
   Circle3D (Plane3D.moveTo originPoint givenPlane) (Circle2D.radius givenCircle)

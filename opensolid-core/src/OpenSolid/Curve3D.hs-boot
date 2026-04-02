@@ -31,7 +31,7 @@ type SearchTree space = Curve.Search.Tree 3 Meters space
 
 constant :: Point3D space -> Curve3D space
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
-on :: Plane3D global -> Curve2D Meters local -> Curve3D global
+on :: Plane3D space -> Curve2D Meters -> Curve3D space
 derivative :: Curve3D space -> VectorCurve3D Meters space
 point :: Curve3D space -> Number -> Point3D space
 bounds :: Curve3D space -> Interval Unitless -> Bounds3D space

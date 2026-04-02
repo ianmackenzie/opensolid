@@ -14,10 +14,10 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 
-newtype DirectionCurve2D space = DirectionCurve2D (VectorCurve2D Unitless space)
+newtype DirectionCurve2D = DirectionCurve2D (VectorCurve2D Unitless)
 
-unsafe :: VectorCurve2D Unitless space -> DirectionCurve2D space
-unwrap :: DirectionCurve2D space -> VectorCurve2D Unitless space
-value :: DirectionCurve2D space -> Number -> Direction2D space
-bounds :: DirectionCurve2D space -> Interval Unitless -> DirectionBounds2D space
-derivative :: DirectionCurve2D space -> VectorCurve2D Unitless space
+unsafe :: VectorCurve2D Unitless -> DirectionCurve2D
+unwrap :: DirectionCurve2D -> VectorCurve2D Unitless
+value :: DirectionCurve2D -> Number -> Direction2D
+bounds :: DirectionCurve2D -> Interval Unitless -> DirectionBounds2D
+derivative :: DirectionCurve2D -> VectorCurve2D Unitless

@@ -245,7 +245,6 @@ library
     OpenSolid.UvBounds
     OpenSolid.UvPoint
     OpenSolid.UvRegion
-    OpenSolid.UvSpace
     OpenSolid.Vector
     OpenSolid.Vector2D
     OpenSolid.Vector3D

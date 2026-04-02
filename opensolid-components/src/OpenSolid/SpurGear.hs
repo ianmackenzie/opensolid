@@ -64,7 +64,7 @@ any additional curves you want
 and then construct a profile region from the combined set of curves
 that you can then extrude to form a gear body.
 -}
-profile :: Tolerance Meters => SpurGear -> List (Curve2D Meters space)
+profile :: Tolerance Meters => SpurGear -> List (Curve2D Meters)
 profile gear = do
   -- Dimensions
   let n = numTeeth gear

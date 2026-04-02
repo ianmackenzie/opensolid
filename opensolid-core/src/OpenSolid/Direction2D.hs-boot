@@ -11,8 +11,8 @@ where
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Direction2D, Vector2D)
 
-unsafe :: Vector2D Unitless space -> Direction2D space
-unwrap :: Direction2D space -> Vector2D Unitless space
-rotateLeft :: Direction2D space -> Direction2D space
-parallel :: Direction2D space -> Direction2D space -> Bool
-perpendicular :: Direction2D space -> Direction2D space -> Bool
+unsafe :: Vector2D Unitless -> Direction2D
+unwrap :: Direction2D -> Vector2D Unitless
+rotateLeft :: Direction2D -> Direction2D
+parallel :: Direction2D -> Direction2D -> Bool
+perpendicular :: Direction2D -> Direction2D -> Bool

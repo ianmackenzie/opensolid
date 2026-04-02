@@ -161,7 +161,7 @@ diameter (Bounds3D x y z) = Quantity.hypot3 (Interval.width x) (Interval.width y
 interpolate :: Bounds3D space -> Number -> Number -> Number -> Point3D space
 interpolate (PositionBounds3D pb) u v w = Position3D (VectorBounds3D.interpolate pb u v w)
 
-on :: Plane3D global -> Bounds2D Meters local -> Bounds3D global
+on :: Plane3D space -> Bounds2D Meters -> Bounds3D space
 on plane bounds2D = do
   let Bounds2D bX bY = bounds2D
   let rX = 0.5 * Interval.width bX
@@ -220,7 +220,7 @@ relativeTo frame (Bounds3D pR pF pU) = do
     (Interval (cF' - rF') (cF' + rF'))
     (Interval (cU' - rU') (cU' + rU'))
 
-projectInto :: Plane3D global -> Bounds3D global -> Bounds2D Meters local
+projectInto :: Plane3D space -> Bounds3D space -> Bounds2D Meters
 projectInto plane (Bounds3D pR pF pU) = do
   let Plane3D _ (PlaneOrientation3D i j) = plane
   let Direction3D iR iF iU = i

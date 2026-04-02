@@ -11,6 +11,7 @@ module OpenSolid.Line
   )
 where
 
+import Data.Void (Void)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction (Direction)
@@ -22,16 +23,15 @@ import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units qualified as Units
-import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector qualified as Vector
 
 data Line dimension units space
   = Line (Point dimension units space) (Point dimension units space)
 
-instance FFI (Line 2 Meters FFI.Space) where
+instance FFI (Line 2 Meters Void) where
   representation = FFI.classRepresentation "Line2D"
 
-instance FFI (Line 2 Unitless UvSpace) where
+instance FFI (Line 2 Unitless Void) where
   representation = FFI.classRepresentation "UvLine"
 
 -- | Get the start point of a line.

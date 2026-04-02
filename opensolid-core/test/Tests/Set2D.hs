@@ -18,10 +18,10 @@ tests =
   , filter
   ]
 
-point :: Int -> Int -> Point2D Meters space
+point :: Int -> Int -> Point2D Meters
 point x y = Point2D.centimeters (Number.fromInt x) (Number.fromInt y)
 
-testSet :: Set2D Meters space (Point2D Meters space)
+testSet :: Set2D Meters (Point2D Meters)
 testSet =
   Set2D.partitionBy Bounds2D.constant $
     NonEmpty.eight

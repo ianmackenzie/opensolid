@@ -24,35 +24,35 @@ import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 
-data Edge2D space = Line (Line2D Meters space) | Arc (Arc2D Meters space)
+data Edge2D = Line (Line2D Meters) | Arc (Arc2D Meters)
 
-startPoint :: Edge2D space -> Point2D Meters space
+startPoint :: Edge2D -> Point2D Meters
 startPoint (Line line) = Line2D.startPoint line
 startPoint (Arc arc) = Arc2D.startPoint arc
 
-endPoint :: Edge2D space -> Point2D Meters space
+endPoint :: Edge2D -> Point2D Meters
 endPoint (Line line) = Line2D.endPoint line
 endPoint (Arc arc) = Arc2D.endPoint arc
 
-startTangent :: Tolerance Meters => Edge2D space -> Result IsDegenerate (Direction2D space)
+startTangent :: Tolerance Meters => Edge2D -> Result IsDegenerate Direction2D
 startTangent (Line line) = Line2D.direction line
 startTangent (Arc arc) = Ok (Arc2D.tangentDirection arc 0.0)
 
-endTangent :: Tolerance Meters => Edge2D space -> Result IsDegenerate (Direction2D space)
+endTangent :: Tolerance Meters => Edge2D -> Result IsDegenerate Direction2D
 endTangent (Line line) = Line2D.direction line
 endTangent (Arc arc) = Ok (Arc2D.tangentDirection arc 1.0)
 
-reverse :: Edge2D space -> Edge2D space
+reverse :: Edge2D -> Edge2D
 reverse (Line line) = Line (Line2D.reverse line)
 reverse (Arc arc) = Arc (Arc2D.reverse arc)
 
-offsetLeftwardBy :: Tolerance Meters => Length -> Edge2D space -> Result IsDegenerate (Edge2D space)
+offsetLeftwardBy :: Tolerance Meters => Length -> Edge2D -> Result IsDegenerate (Edge2D)
 offsetLeftwardBy distance (Line line) = Result.map Line (Line2D.offsetLeftwardBy distance line)
 offsetLeftwardBy distance (Arc arc) = Ok (Arc (Arc2D.offsetLeftwardBy distance arc))
 
-offsetRightwardBy :: Tolerance Meters => Length -> Edge2D space -> Result IsDegenerate (Edge2D space)
+offsetRightwardBy :: Tolerance Meters => Length -> Edge2D -> Result IsDegenerate (Edge2D)
 offsetRightwardBy distance = offsetLeftwardBy -distance
 
-toCurve :: Edge2D space -> Curve2D Meters space
+toCurve :: Edge2D -> Curve2D Meters
 toCurve (Line line) = Curve2D.line line
 toCurve (Arc arc) = Curve2D.arc arc

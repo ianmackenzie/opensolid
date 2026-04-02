@@ -31,7 +31,6 @@ import OpenSolid.SurfaceFunction1D.Zeros qualified as Zeros
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
-import OpenSolid.UvSpace (UvSpace)
 
 data PartialZeros units = PartialZeros
   { crossingSegments :: List CrossingSegment
@@ -135,7 +134,7 @@ addSaddleRegion saddleRegion partialZeros = do
   partialZeros{saddleRegions = saddleRegion : saddleRegions}
 
 data PiecewiseCurve
-  = PiecewiseCurve Domain2D.Boundary Domain2D.Boundary (NonEmpty (Curve2D Unitless UvSpace))
+  = PiecewiseCurve Domain2D.Boundary Domain2D.Boundary (NonEmpty (Curve2D Unitless))
 
 piecewiseCurve ::
   Tolerance units =>
@@ -153,7 +152,7 @@ piecewiseCurve function dvdu dudv (CrossingSegment parameterization start end bo
         Diagonal -> HorizontalCurve.new function dvdu uStart uEnd boxes
   PiecewiseCurve startBoundary endBoundary (NonEmpty.one curve)
 
-type PartialCurves = (List PiecewiseCurve, List (NonEmpty (Curve2D Unitless UvSpace)))
+type PartialCurves = (List PiecewiseCurve, List (NonEmpty (Curve2D Unitless)))
 
 insertPiecewiseCurve :: PiecewiseCurve -> PartialCurves -> PartialCurves
 insertPiecewiseCurve newPiecewiseCurve (piecewiseCurves, crossingLoops) =
@@ -171,7 +170,7 @@ insertPiecewiseCurve newPiecewiseCurve (piecewiseCurves, crossingLoops) =
 
 data JoinPiecewiseCurveResult
   = JoinedPiecewiseCurve PiecewiseCurve
-  | NewCrossingLoop (NonEmpty (Curve2D Unitless UvSpace))
+  | NewCrossingLoop (NonEmpty (Curve2D Unitless))
 
 joinPiecewiseCurves :: PiecewiseCurve -> PiecewiseCurve -> Maybe JoinPiecewiseCurveResult
 joinPiecewiseCurves (PiecewiseCurve start1 end1 segments1) (PiecewiseCurve start2 end2 segments2)

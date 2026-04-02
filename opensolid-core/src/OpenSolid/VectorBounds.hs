@@ -38,7 +38,7 @@ type family
     vectorBounds | vectorBounds -> dimension units space
   where
   VectorBounds 1 units Void = Interval units
-  VectorBounds 2 units space = VectorBounds2D units space
+  VectorBounds 2 units Void = VectorBounds2D units
   VectorBounds 3 units space = VectorBounds3D units space
 
 class
@@ -125,7 +125,7 @@ instance Exists 1 units Void where
   areDistinct = Interval.areDistinct
   areIndependent _ _ = False
 
-instance Exists 2 units space where
+instance Exists 2 units Void where
   includes = VectorBounds2D.includes
   center = VectorBounds2D.center
   squaredMagnitude_ = VectorBounds2D.squaredMagnitude_

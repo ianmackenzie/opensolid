@@ -23,8 +23,6 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Svg (Svg)
 import OpenSolid.Svg qualified as Svg
 
-data Space
-
 resolution :: Resolution Meters
 resolution = Resolution.maxError (Length.millimeters 0.1)
 
@@ -37,25 +35,25 @@ axisHeadLength = Length.millimeters 3.0
 axisHeadWidth :: Length
 axisHeadWidth = Length.millimeters 2.0
 
-viewBox :: Point2D Unitless Space -> Point2D Unitless Space -> Bounds2D Meters Space
+viewBox :: Point2D Unitless -> Point2D Unitless -> Bounds2D Meters
 viewBox p1 p2 = Bounds2D.hull2 (Point2D.convert scale p1) (Point2D.convert scale p2)
 
-xAxis :: Number -> Number -> Svg Space
+xAxis :: Number -> Number -> Svg
 xAxis x1 x2 = do
   let p1 = Point2D.x (Quantity.convert scale x1)
   let p2 = Point2D.x (Quantity.convert scale x2 + axisHeadLength)
   Svg.arrow (#start p1) (#end p2) (#headLength axisHeadLength) (#headWidth axisHeadWidth)
 
-yAxis :: Number -> Number -> Svg Space
+yAxis :: Number -> Number -> Svg
 yAxis y1 y2 = do
   let p1 = Point2D.y (Quantity.convert scale y1)
   let p2 = Point2D.y (Quantity.convert scale y2 + axisHeadLength)
   Svg.arrow (#start p1) (#end p2) (#headLength axisHeadLength) (#headWidth axisHeadWidth)
 
-curve :: Curve1D Unitless -> Svg Space
+curve :: Curve1D Unitless -> Svg
 curve = curveWith []
 
-curveWith :: List (Svg.Attribute Space) -> Curve1D Unitless -> Svg Space
+curveWith :: List Svg.Attribute -> Curve1D Unitless -> Svg
 curveWith attributes givenCurve = do
   let curve2D = Curve2D.xy Curve1D.t givenCurve
   Svg.curveWith attributes resolution (Curve2D.convert scale curve2D)

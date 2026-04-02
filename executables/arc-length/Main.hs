@@ -18,13 +18,11 @@ import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 
-data Space
-
 formatLength :: Length -> Text
 formatLength length =
   Text.number (Length.inMeters length) <> "m"
 
-testCurve :: Text -> Curve2D Meters Space -> IO ()
+testCurve :: Text -> Curve2D Meters -> IO ()
 testCurve label curve = Tolerance.using (Length.meters 1e-12) do
   let (_, length) = Curve2D.arcLengthParameterization curve
   IO.printLine (label <> ": " <> formatLength length)
@@ -42,7 +40,7 @@ testQuadraticSplineLength = do
   testCurve "Quadratic spline" spline
   IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
 
-analyticalLength :: Point2D Meters space -> Point2D Meters space -> Point2D Meters space -> Length
+analyticalLength :: Point2D Meters -> Point2D Meters -> Point2D Meters -> Length
 analyticalLength (Point2D x0 y0) (Point2D x1 y1) (Point2D x2 y2) = do
   let ax = x0 - 2.0 * x1 + x2
   let ay = y0 - 2.0 * y1 + y2

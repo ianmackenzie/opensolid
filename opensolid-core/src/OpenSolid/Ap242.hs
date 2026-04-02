@@ -44,7 +44,7 @@ length value = Step.number (Length.inMeters value)
 direction :: List Number -> Step.Entity
 direction components = Step.entity "DIRECTION" [Step.text "", Step.list Step.number components]
 
-direction2D :: Direction2D space -> Step.Entity
+direction2D :: Direction2D -> Step.Entity
 direction2D (Direction2D x y) = direction [x, y]
 
 direction3D :: Direction3D space -> Step.Entity
@@ -56,7 +56,7 @@ vector :: Step.Entity -> Length -> Step.Entity
 vector givenDirection givenLength =
   Step.entity "VECTOR" [Step.text "", Step.referenceTo givenDirection, length givenLength]
 
-vector2D :: Tolerance Meters => Vector2D Meters space -> Step.Entity
+vector2D :: Tolerance Meters => Vector2D Meters -> Step.Entity
 vector2D givenVector =
   case Vector2D.magnitudeAndDirection givenVector of
     Ok (vectorLength, vectorDirection) -> vector (direction2D vectorDirection) vectorLength
@@ -72,7 +72,7 @@ cartesianPoint :: List Length -> Step.Entity
 cartesianPoint coordinates =
   Step.entity "CARTESIAN_POINT" [Step.text "", Step.list length coordinates]
 
-point2D :: Point2D Meters space -> Step.Entity
+point2D :: Point2D Meters -> Step.Entity
 point2D (Point2D x y) = cartesianPoint [x, y]
 
 point3D :: Point3D space -> Step.Entity
@@ -80,7 +80,7 @@ point3D point = do
   let (x, y, z) = Point3D.coordinates convention3D point
   cartesianPoint [x, y, z]
 
-axisPlacement2D :: Frame2D Meters global local -> Step.Entity
+axisPlacement2D :: Frame2D Meters -> Step.Entity
 axisPlacement2D frame =
   Step.entity "AXIS2_PLACEMENT_2D" $
     [ Step.text ""

@@ -1,5 +1,3 @@
--- {-# OPTIONS_GHC -Wno-unused-imports -Wno-unused-local-binds -Wno-unused-matches -Wno-unused-top-binds #-}
-
 module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
@@ -52,14 +50,11 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.UvSpace (UvSpace)
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import OpenSolid.Volume qualified as Volume
 import OpenSolid.World3D qualified as World3D
-
-data Global deriving (Eq, Show)
 
 log :: Show a => Text -> a -> IO ()
 log label value = IO.printLine (label <> ": " <> Text.show value)
@@ -117,12 +112,7 @@ testTransformation = do
   let rotatedPoints = List.map rotationFunction originalPoints
   log "Rotated points" rotatedPoints
 
-offsetPoint ::
-  Tolerance Meters =>
-  Point2D Meters space ->
-  Point2D Meters space ->
-  Length ->
-  Point2D Meters space
+offsetPoint :: Tolerance Meters => Point2D Meters -> Point2D Meters -> Length -> Point2D Meters
 offsetPoint startPoint endPoint distance =
   case Direction2D.from startPoint endPoint of
     Error Direction2D.PointsAreCoincident -> startPoint
@@ -231,13 +221,13 @@ drawZeros path zeros = do
       , Svg.combine (drawDot Color.orange) zeros.saddlePoints
       ]
 
-drawBounds :: Bounds2D Meters space -> Svg space
+drawBounds :: Bounds2D Meters -> Svg
 drawBounds bounds = do
   let corner x y = Bounds2D.interpolate bounds x y
   let vertices = NonEmpty.four (corner 0.0 0.0) (corner 1.0 0.0) (corner 1.0 1.0) (corner 0.0 1.0)
   Svg.polygon (Polygon2D vertices)
 
-drawCrossingCurve :: Int -> Curve2D Unitless UvSpace -> Svg UvSpace
+drawCrossingCurve :: Int -> Curve2D Unitless -> Svg
 drawCrossingCurve index curve = do
   let hue = (Number.fromInt index * Angle.goldenAngle) % Angle.twoPi
   let color = Color.hsl1 hue 0.5 0.5
@@ -246,13 +236,13 @@ drawCrossingCurve index curve = do
 toDrawing :: Quantity (Meters ?/? Unitless)
 toDrawing = Length.centimeters 10.0 ?/? 1.0
 
-drawUvCurve :: [Svg.Attribute UvSpace] -> Curve2D Unitless UvSpace -> Svg UvSpace
+drawUvCurve :: List Svg.Attribute -> Curve2D Unitless -> Svg
 drawUvCurve attributes curve = do
   let resolution = Resolution.maxError 0.0002
   let polyline = Curve2D.toPolyline resolution curve
   Svg.polylineWith attributes (Polyline2D.map (Point2D.convert toDrawing) polyline)
 
-drawDot :: Color -> UvPoint -> Svg UvSpace
+drawDot :: Color -> UvPoint -> Svg
 drawDot color point = do
   let centerPoint = Point2D.convert toDrawing point
   let diameter = Length.millimeters 1.0
@@ -289,10 +279,10 @@ testIOParallel = do
 drawBezier ::
   Tolerance Meters =>
   Color ->
-  Point2D Unitless space ->
-  [Point2D Unitless space] ->
-  Point2D Unitless space ->
-  Svg space
+  Point2D Unitless ->
+  List (Point2D Unitless) ->
+  Point2D Unitless ->
+  Svg
 drawBezier color startPoint innerControlPoints endPoint = do
   let drawingStartPoint = Point2D.convert toDrawing startPoint
   let drawingEndPoint = Point2D.convert toDrawing endPoint
@@ -318,7 +308,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
 
 testBezierSegment :: Tolerance Meters => IO ()
 testBezierSegment = do
-  let p1 = Point2D.origin @Unitless @Global
+  let p1 = Point2D.origin @Unitless
   let p2 = Point2D 0.0 5.0
   let p3 = Point2D 2.5 10.0
   let p4 = Point2D 5.0 0.0
@@ -331,7 +321,7 @@ testBezierSegment = do
 
 testHermiteBezier :: IO ()
 testHermiteBezier = do
-  let startPoint = Point2D.origin @Meters @Global
+  let startPoint = Point2D.origin @Meters
   let startDerivatives = [Vector2D.centimeters 10.0 10.0]
   let endDerivatives = [Vector2D.centimeters 0.0 -10.0, Vector2D.zero]
   let endPoint = Point2D.centimeters 10.0 0.0
@@ -404,7 +394,7 @@ testCurve2dExpression :: IO ()
 testCurve2dExpression = do
   let x = Expression.constant @Number @Number 10.0 * Expression.t
   let y = Expression.sqrt Expression.t
-  let curve = Expression.xy x y :: Expression Number (Point2D Unitless Global)
+  let curve = Expression.xy x y :: Expression Number (Point2D Unitless)
   log "Evaluated 2D curve" (Expression.value curve 3.0)
 
 testQuotientDesingularization :: IO ()

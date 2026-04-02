@@ -13,6 +13,7 @@ module OpenSolid.VectorCurve
   )
 where
 
+import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
@@ -40,9 +41,7 @@ type Compiled dimension units space =
 
 instance HasUnits (VectorCurve dimension units space) units
 
-instance
-  space1 ~ space2 =>
-  Units.Coercion (VectorCurve 2 units1 space1) (VectorCurve 2 units2 space2)
+instance Units.Coercion (VectorCurve 2 units1 Void) (VectorCurve 2 units2 Void)
 
 instance
   space1 ~ space2 =>
@@ -51,10 +50,9 @@ instance
 instance HasUnits (Nondegenerate (VectorCurve dimension units space)) units
 
 instance
-  space1 ~ space2 =>
   Units.Coercion
-    (Nondegenerate (VectorCurve 2 units1 space1))
-    (Nondegenerate (VectorCurve 2 units2 space2))
+    (Nondegenerate (VectorCurve 2 units1 Void))
+    (Nondegenerate (VectorCurve 2 units2 Void))
 
 instance
   space1 ~ space2 =>
@@ -104,8 +102,8 @@ instance
 instance
   Multiplication_
     (Curve1D units1)
-    (VectorCurve 2 units2 space)
-    (VectorCurve 2 (units1 ?*? units2) space)
+    (VectorCurve 2 units2 Void)
+    (VectorCurve 2 (units1 ?*? units2) Void)
 
 instance
   Multiplication_
@@ -115,7 +113,7 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Curve1D units1) (VectorCurve 2 units2 space) (VectorCurve 2 units3 space)
+  Multiplication (Curve1D units1) (VectorCurve 2 units2 Void) (VectorCurve 2 units3 Void)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -123,9 +121,9 @@ instance
 
 instance
   Multiplication_
-    (VectorCurve 2 units1 space)
+    (VectorCurve 2 units1 Void)
     (Curve1D units2)
-    (VectorCurve 2 (units1 ?*? units2) space)
+    (VectorCurve 2 (units1 ?*? units2) Void)
 
 instance
   Multiplication_
@@ -135,7 +133,7 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve 2 units1 space) (Curve1D units2) (VectorCurve 2 units3 space)
+  Multiplication (VectorCurve 2 units1 Void) (Curve1D units2) (VectorCurve 2 units3 Void)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -143,7 +141,7 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (Quantity units1) (VectorCurve 2 units2 space) (VectorCurve 2 units3 space)
+  Multiplication (Quantity units1) (VectorCurve 2 units2 Void) (VectorCurve 2 units3 Void)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -151,7 +149,7 @@ instance
 
 instance
   Units.Product units1 units2 units3 =>
-  Multiplication (VectorCurve 2 units1 space) (Quantity units2) (VectorCurve 2 units3 space)
+  Multiplication (VectorCurve 2 units1 Void) (Quantity units2) (VectorCurve 2 units3 Void)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -159,7 +157,7 @@ instance
 
 instance
   Units.Quotient units1 units2 units3 =>
-  Division (VectorCurve 2 units1 space) (Nonzero (Curve1D units2)) (VectorCurve 2 units3 space)
+  Division (VectorCurve 2 units1 Void) (Nonzero (Curve1D units2)) (VectorCurve 2 units3 Void)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -168,9 +166,9 @@ instance
 instance
   Units.Quotient units1 units2 units3 =>
   Division
-    (VectorCurve 2 units1 space)
+    (VectorCurve 2 units1 Void)
     (Nondegenerate (Curve1D units2))
-    (VectorCurve 2 units3 space)
+    (VectorCurve 2 units3 Void)
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -180,10 +178,9 @@ instance
     (VectorCurve 3 units3 space)
 
 instance
-  space1 ~ space2 =>
   DotMultiplication_
-    (VectorCurve 2 units1 space1)
-    (VectorCurve 2 units2 space2)
+    (VectorCurve 2 units1 Void)
+    (VectorCurve 2 units2 Void)
     (Curve1D (units1 ?*? units2))
 
 instance
@@ -194,10 +191,10 @@ instance
     (Curve1D (units1 ?*? units2))
 
 instance
-  (Units.Product units1 units2 units3, space1 ~ space2) =>
+  Units.Product units1 units2 units3 =>
   DotMultiplication
-    (VectorCurve 2 units1 space1)
-    (VectorCurve 2 units2 space2)
+    (VectorCurve 2 units1 Void)
+    (VectorCurve 2 units2 Void)
     (Curve1D units3)
 
 instance
@@ -207,7 +204,7 @@ instance
     (VectorCurve 3 units2 space2)
     (Curve1D units3)
 
-instance Exists 2 units space
+instance Exists 2 units Void
 
 instance Exists 3 units space
 

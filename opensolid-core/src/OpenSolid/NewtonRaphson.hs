@@ -27,7 +27,7 @@ class Curve dimension units space where
 instance Curve 1 units Void where
   curve = NewtonRaphson1D.curve
 
-instance Curve 2 units space where
+instance Curve 2 units Void where
   curve = NewtonRaphson2D.curve
 
 instance Curve 3 units space where
@@ -40,7 +40,7 @@ type EvaluateSurface dimension units space =
 class Surface dimension units space where
   surface :: EvaluateSurface dimension units space -> UvPoint -> UvPoint
 
-instance Surface 2 units space where
+instance Surface 2 units Void where
   surface = NewtonRaphson2D.surface
 
 instance Surface 3 units space where

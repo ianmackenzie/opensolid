@@ -6,6 +6,7 @@ module OpenSolid.Axis
   )
 where
 
+import Data.Void (Void)
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Axis3D (Axis3D)
@@ -20,7 +21,7 @@ type family
   Axis dimension units space =
     axis | axis -> dimension units space
   where
-  Axis 2 units space = Axis2D units space
+  Axis 2 units Void = Axis2D units
   Axis 3 Meters space = Axis3D space
 
 class
@@ -35,7 +36,7 @@ class
   originPoint :: Axis dimension units space -> Point dimension units space
   direction :: Axis dimension units space -> Direction dimension space
 
-instance Exists 2 units space where
+instance Exists 2 units Void where
   originPoint = Axis2D.originPoint
   direction = Axis2D.direction
 

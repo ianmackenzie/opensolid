@@ -27,24 +27,23 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Triangle2D (Triangle2D (Triangle2D))
 import OpenSolid.Triangle2D qualified as Triangle2D
 import OpenSolid.Units qualified as Units
-import OpenSolid.UvSpace (UvSpace)
 
 {-| A non-empty list of points joined by lines.
 
 The last point will be joined back to the first.
 -}
-newtype Polygon2D units space
+newtype Polygon2D units
   = {-| Construct a polygon from its boundary vertices.
 
     These should generally be in counterclockwise order
     (clockwise order will be interpreted as a 'negative' polygon or hole).
     -}
-    Polygon2D {vertices :: NonEmpty (Point2D units space)}
+    Polygon2D {vertices :: NonEmpty (Point2D units)}
 
-instance FFI (Polygon2D Meters FFI.Space) where
+instance FFI (Polygon2D Meters) where
   representation = FFI.classRepresentation "Polygon2D"
 
-instance FFI (Polygon2D Unitless UvSpace) where
+instance FFI (Polygon2D Unitless) where
   representation = FFI.classRepresentation "UvPolygon"
 
 data IsEmpty = IsEmpty deriving (Eq, Show)
@@ -55,7 +54,7 @@ The polygon will be sized to fit within the given circle
 (each polygon vertex will lie on the circle).
 The polygon will be oriented such that its bottom-most edge is horizontal.
 -}
-inscribed :: Int -> Circle2D units space -> Result IsEmpty (Polygon2D units space)
+inscribed :: Int -> Circle2D units -> Result IsEmpty (Polygon2D units)
 inscribed n circle
   | n >= 3 = case Quantity.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n of
       NonEmpty vertexAngles -> Ok (Polygon2D (NonEmpty.map (Circle2D.point circle) vertexAngles))
@@ -70,7 +69,7 @@ For a polygon with an even number of sides (square, hexagon, octagon etc.),
 this means that the "height" or "width across flats" will be equal to the given circle's diameter.
 The polygon will be oriented such that its bottom-most edge is horizontal.
 -}
-circumscribed :: Int -> Circle2D units space -> Result IsEmpty (Polygon2D units space)
+circumscribed :: Int -> Circle2D units -> Result IsEmpty (Polygon2D units)
 circumscribed n circle = do
   let outerDiameter = Circle2D.diameter circle / Angle.cos (Angle.pi / Number.fromInt n)
   let outerCircle = Circle2D.withDiameter outerDiameter (Circle2D.centerPoint circle)
@@ -81,23 +80,23 @@ circumscribed n circle = do
 The hexagon will be oriented such that its top and bottom edges are horizontal.
 -}
 hexagon ::
-  "centerPoint" ::: Point2D units space ->
+  "centerPoint" ::: Point2D units ->
   "height" ::: Quantity units ->
-  Result IsEmpty (Polygon2D units space)
+  Result IsEmpty (Polygon2D units)
 hexagon ("centerPoint" ::: centerPoint) ("height" ::: height) =
   circumscribed 6 (Circle2D.withDiameter height centerPoint)
 
 -- | Get the vertices of a polygon.
-vertices :: Polygon2D units space -> NonEmpty (Point2D units space)
+vertices :: Polygon2D units -> NonEmpty (Point2D units)
 vertices = (.vertices)
 
 -- | Get the edges of a polygon.
-edges :: Polygon2D units space -> NonEmpty (Line2D units space)
+edges :: Polygon2D units -> NonEmpty (Line2D units)
 edges polygon = do
   let v0 :| vs = vertices polygon
   collectEdges v0 v0 vs
 
-signedArea_ :: Polygon2D units space -> Quantity (units ?*? units)
+signedArea_ :: Polygon2D units -> Quantity (units ?*? units)
 signedArea_ polygon = do
   let v0 :| vs = vertices polygon
   let triangleSignedArea_ v1 v2 = Triangle2D.signedArea_ (Triangle2D v0 v1 v2)
@@ -108,20 +107,13 @@ signedArea_ polygon = do
 This will be positive if the polygon has counterclockwise orientation,
 and negative otherwise.
 -}
-signedArea :: Units.Squared units1 units2 => Polygon2D units1 space -> Quantity units2
+signedArea :: Units.Squared units1 units2 => Polygon2D units1 -> Quantity units2
 signedArea = Units.specialize . signedArea_
 
-collectEdges ::
-  Point2D units space ->
-  Point2D units space ->
-  List (Point2D units space) ->
-  NonEmpty (Line2D units space)
+collectEdges :: Point2D units -> Point2D units -> List (Point2D units) -> NonEmpty (Line2D units)
 collectEdges first current remaining = case remaining of
   [] -> NonEmpty.one (Line2D current first)
   next : following -> NonEmpty.push (Line2D current next) (collectEdges first next following)
 
-map ::
-  (Point2D units1 space1 -> Point2D units2 space2) ->
-  Polygon2D units1 space1 ->
-  Polygon2D units2 space2
+map :: (Point2D units1 -> Point2D units2) -> Polygon2D units1 -> Polygon2D units2
 map function polyline = Polygon2D (NonEmpty.map function (vertices polyline))
