@@ -689,10 +689,7 @@ direction function = case quotient function (magnitude function) of
   Error DivisionByZero -> Error IsDegenerate
   Ok normalizedFunction -> Ok (DirectionSurfaceFunction3D.unsafe normalizedFunction)
 
-directionBounds ::
-  VectorSurfaceFunction3D units space ->
-  UvBounds ->
-  DirectionBounds3D space
+directionBounds :: VectorSurfaceFunction3D units space -> UvBounds -> DirectionBounds3D space
 directionBounds function uvBounds = do
   let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvBounds
   DirectionBounds3D.unsafe $
