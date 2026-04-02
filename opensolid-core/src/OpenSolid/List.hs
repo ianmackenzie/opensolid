@@ -116,9 +116,8 @@ pattern ThreeOrMore <- _ : _ : _ : _
 pattern FourOrMore :: List a
 pattern FourOrMore <- _ : _ : _ : _ : _
 
-pattern FiveOrMore :: a -> a -> a -> a -> a -> List a -> List a
-pattern FiveOrMore first second third fourth fifth rest =
-  first : second : third : fourth : fifth : rest
+pattern FiveOrMore :: List a
+pattern FiveOrMore <- _ : _ : _ : _ : _ : _
 
 map :: (a -> b) -> List a -> List b
 map = Data.List.map
