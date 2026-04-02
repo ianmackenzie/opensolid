@@ -1,13 +1,31 @@
-Maybe do away with 'space' type in 2D entirely?
-- 2D coordinates usually more implicit...
-- 2D: units, no space
-- 3D: space, no units
+Simplify Body3D 'stitching'
+- should be able to avoid iterative construction if surfaces are assumed to be oriented properly
+  - independently compare every surface to every other surface...
 
-Switch from Segment to SearchNode?
+Have World3D.forwardAxis etc. take an origin point argument?
+- could of course be World3D.originPoint to get "the" forward axis...
 
-Rename Curve types to CurveFunction
+Add default tolerances to Python library
+- and allow setting separate tolerances separately
 
-Add new piecewise Curve types
+Try having type-safe exponentiation operator that takes exponent as *type* argument?
+
+Add 'division' of objects by Frame2D/Frame3D values to mean 'relativeTo'?
+
+Refactor Surface3D to be composed of a list of patches
+
+Implement Surface3D.findPoint
+
+Implement Curve3D-Surface3D intersection
+
+Implement Surfac3D-Surface3D intersection...
+
+Rework Region2D sign-fixing to use overall signed rotation angle instead of signed area?
+- seems a bit simpler and more efficient
+
+Add Parameter class to target language API with Parameter.t, Parameter.u, Parameter.v?
+- or Curve.t, Surface.u, Surface.v
+- avoid UnitlessCurve1D.t, UnitlessSurfaceFunction1D.u, UnitlessSurfaceFunction1D.v
 
 Reconsider adding functions that just mirror constructors?
 - sometimes most convenient/consistent to just use qualified functions for everything...
@@ -66,6 +84,7 @@ Move remaining generic functionality from Curve#D modules into Curve module
 - rework curvature functions to use curvature vector
 
 Remove support for inheritance in target language API?
+- only used for directions, should be OK for those to be separate from vectors...
 
 Tighten vector bounds normalization
 - add C++ code callable via primop that computes normalized vector bounds
@@ -93,12 +112,6 @@ Add ParameterInterval module and move 'includes' and 'isInterior' functions ther
 - maybe also move 'overlapping' functions from Search.Domain into ParameterInterval and UvBounds
 
 Have Nondegenerate.normalize return a NonZero value
-
-Optimize Region2d.contains
-- instead of existing flux integral code, rely on optimization:
-  if a curve segment bounds doesn't include the test point,
-  can calculate "swept angle around point" by just looking at the two endpoints!
-  Then take sum of swept angles for each segment
 
 Deduplicate code from Tests.Curve2D and Tests.Curve3D into Tests.Curve?
 
