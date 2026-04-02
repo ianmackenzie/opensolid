@@ -332,15 +332,26 @@ startLoop :: Curve2D units -> PartialLoop units
 startLoop curve =
   PartialLoop (Curve2D.startPoint curve) (NonEmpty.one curve) (Curve2D.endPoint curve)
 
+{-| The list of curves forming the outer boundary of the region.
+
+The curves will be in counterclockwise order around the region,
+and each curve will be in the counterclockwise direction.
+-}
 outerLoop :: Region2D units -> NonEmpty (Curve2D units)
 outerLoop (Region2D loop _) = loop
 
+{-| The lists of curves (if any) forming the holes within the region.
+
+The curves will be in clockwise order around each hole,
+and each curve will be in the clockwise direction.
+-}
 innerLoops :: Region2D units -> List (NonEmpty (Curve2D units))
 innerLoops (Region2D _ loops) = loops
 
 boundaryLoops :: Region2D units -> NonEmpty (NonEmpty (Curve2D units))
 boundaryLoops region = outerLoop region :| innerLoops region
 
+-- | The list of all (outer and inner) boundary curves of a region.
 boundaryCurves :: Region2D units -> NonEmpty (Curve2D units)
 boundaryCurves region = NonEmpty.concat (boundaryLoops region)
 

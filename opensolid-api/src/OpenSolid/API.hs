@@ -53,7 +53,6 @@ import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Step qualified as Step
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Svg qualified as Svg
-import OpenSolid.Text qualified as Text
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
@@ -1497,27 +1496,6 @@ uvCurve =
     , Class.minus @UvPoint Self
     ]
 
-region2dOuterLoopDocs :: Text
-region2dOuterLoopDocs =
-  Text.multiline
-    [ "The list of curves forming the outer boundary of the region."
-    , ""
-    , "The curves will be in counterclockwise order around the region,"
-    , "and will each be in the counterclockwise direction."
-    ]
-
-region2dInnerLoopsDocs :: Text
-region2dInnerLoopsDocs =
-  Text.multiline
-    [ "The lists of curves (if any) forming the holes within the region."
-    , ""
-    , "The curves will be in clockwise order around each hole,"
-    , "and each curve will be in the clockwise direction."
-    ]
-
-region2dBoundaryCurvesDocs :: Text
-region2dBoundaryCurvesDocs = "The list of all (outer and inner) boundary curves of a region."
-
 type Region2D = Region2D.Region2D Meters
 
 region2D :: Class
@@ -1526,9 +1504,9 @@ region2D =
     [ Class.factoryM1R "Bounded By" "Curves" Region2D.boundedBy $(docs 'Region2D.boundedBy)
     , Class.factoryM1R "Rectangle" "Bounding Box" Region2D.rectangle $(docs 'Region2D.rectangle)
     , Class.factoryM1R "Circle" "Circle" Region2D.circle $(docs 'Region2D.circle)
-    , Class.property "Outer Loop" Region2D.outerLoop region2dOuterLoopDocs
-    , Class.property "Inner Loops" Region2D.innerLoops region2dInnerLoopsDocs
-    , Class.property "Boundary Curves" Region2D.boundaryCurves region2dBoundaryCurvesDocs
+    , Class.property "Outer Loop" Region2D.outerLoop $(docs 'Region2D.outerLoop)
+    , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
+    , Class.property "Boundary Curves" Region2D.boundaryCurves $(docs 'Region2D.boundaryCurves)
     , Class.factoryM1R "Polygon" "Polygon" Region2D.polygon $(docs 'Region2D.polygon)
     , Class.memberM2 "Fillet" "Points" "Radius" Region2D.fillet $(docs 'Region2D.fillet)
     ]
@@ -1541,9 +1519,9 @@ uvRegion =
     , Class.factoryU1R "Bounded By" "Curves" Region2D.boundedBy $(docs 'Region2D.boundedBy)
     , Class.factoryU1R "Rectangle" "Bounding Box" Region2D.rectangle $(docs 'Region2D.rectangle)
     , Class.factoryU1R "Circle" "Circle" Region2D.circle $(docs 'Region2D.circle)
-    , Class.property "Outer Loop" Region2D.outerLoop region2dOuterLoopDocs
-    , Class.property "Inner Loops" Region2D.innerLoops region2dInnerLoopsDocs
-    , Class.property "Boundary Curves" Region2D.boundaryCurves region2dBoundaryCurvesDocs
+    , Class.property "Outer Loop" Region2D.outerLoop $(docs 'Region2D.outerLoop)
+    , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
+    , Class.property "Boundary Curves" Region2D.boundaryCurves $(docs 'Region2D.boundaryCurves)
     ]
 
 type Body3D = Body3D.Body3D FFI.Space
