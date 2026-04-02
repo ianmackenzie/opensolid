@@ -127,9 +127,7 @@ extruded curve displacement = translational curve (displacement * Curve1D.t)
 
 translational :: Curve3D space -> VectorCurve3D Meters space -> Surface3D space
 translational uCurve vCurve =
-  parametric
-    (uCurve . SurfaceFunction1D.u + vCurve . SurfaceFunction1D.v)
-    UvRegion.unitSquare
+  parametric (uCurve . SurfaceFunction1D.u + vCurve . SurfaceFunction1D.v) UvRegion.unitSquare
 
 ruled :: Curve3D space -> Curve3D space -> Surface3D space
 ruled bottom top = do
