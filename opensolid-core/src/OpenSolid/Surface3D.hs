@@ -123,10 +123,7 @@ on plane region = do
   parametric planeFunction normalizedRegion
 
 extruded :: Curve3D space -> Vector3D Meters space -> Surface3D space
-extruded curve displacement =
-  parametric
-    (curve . SurfaceFunction1D.u + SurfaceFunction1D.v * displacement)
-    UvRegion.unitSquare
+extruded curve displacement = translational curve (displacement * Curve1D.t)
 
 translational :: Curve3D space -> VectorCurve3D Meters space -> Surface3D space
 translational uCurve vCurve =
