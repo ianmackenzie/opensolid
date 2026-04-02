@@ -6,6 +6,7 @@ module OpenSolid.DirectionBounds3D
   , xComponent
   , yComponent
   , zComponent
+  , isResolved
   )
 where
 
@@ -203,3 +204,6 @@ yComponent (UnitBounds3D vectorBounds) = VectorBounds3D.yComponent vectorBounds
 
 zComponent :: DirectionBounds3D space -> Interval Unitless
 zComponent (UnitBounds3D vectorBounds) = VectorBounds3D.zComponent vectorBounds
+
+isResolved :: DirectionBounds3D space -> Bool
+isResolved (UnitBounds3D vectorBounds) = VectorBounds3D.isResolved vectorBounds
