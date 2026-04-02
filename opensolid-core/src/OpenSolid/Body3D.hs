@@ -188,8 +188,7 @@ data EmptyBody = EmptyBody deriving (Eq, Show)
 
 {-| Create a rectangular block body.
 
-Fails if the given bounds are empty
-(the length, width, or height is zero).
+Fails if the given bounds are empty (the length, width, or height is zero).
 -}
 block :: Tolerance Meters => Bounds3D space -> Result EmptyBody (Body3D space)
 block bounds =
@@ -206,7 +205,7 @@ block bounds =
 
 {-| Create a sphere with the given center point and diameter.
 
-Fails if the diameter is zero.
+Fails if the given diameter is zero.
 -}
 sphere ::
   Tolerance Meters =>
