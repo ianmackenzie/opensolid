@@ -40,7 +40,6 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
-import OpenSolid.DirectionBounds3D qualified as DirectionBounds3D
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3D qualified as DirectionSurfaceFunction3D
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
@@ -692,14 +691,13 @@ direction function = case quotient function (magnitude function) of
 directionBounds :: VectorSurfaceFunction3D units space -> UvBounds -> DirectionBounds3D space
 directionBounds function uvBounds = do
   let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvBounds
-  DirectionBounds3D.unsafe $
-    VectorBounds3D.normalize $
-      if
-        | uLow == 0.0 && function.singularU0 -> bounds function.du uvBounds
-        | uHigh == 1.0 && function.singularU1 -> negate (bounds function.du uvBounds)
-        | vLow == 0.0 && function.singularV0 -> bounds function.dv uvBounds
-        | vHigh == 1.0 && function.singularV1 -> negate (bounds function.dv uvBounds)
-        | otherwise -> bounds function uvBounds
+  VectorBounds3D.direction $
+    if
+      | uLow == 0.0 && function.singularU0 -> bounds function.du uvBounds
+      | uHigh == 1.0 && function.singularU1 -> negate (bounds function.du uvBounds)
+      | vLow == 0.0 && function.singularV0 -> bounds function.dv uvBounds
+      | vHigh == 1.0 && function.singularV1 -> negate (bounds function.dv uvBounds)
+      | otherwise -> bounds function uvBounds
 
 newtonRaphson :: VectorSurfaceFunction3D units space -> UvPoint -> UvPoint
 newtonRaphson function uvPoint0 = do
