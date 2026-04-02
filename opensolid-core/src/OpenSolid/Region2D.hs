@@ -22,7 +22,6 @@ module OpenSolid.Region2D
   , convert
   , unconvert
   , classify
-  , contains
   , bounds
   , area
   , toMesh
@@ -31,6 +30,7 @@ module OpenSolid.Region2D
 where
 
 import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
@@ -61,8 +61,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nonzero (Nonzero (Nonzero))
-import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D (Point2D))
@@ -71,6 +69,8 @@ import OpenSolid.Polygon2D qualified as Polygon2D
 import OpenSolid.Polyline2D qualified as Polyline2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Region2D.Boundary (Boundary)
+import OpenSolid.Region2D.Boundary qualified as Boundary
 import OpenSolid.Region2D.BoundedBy qualified as BoundedBy
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Result qualified as Result
@@ -86,8 +86,8 @@ type role Region2D nominal
 
 -- | A closed 2D region (possibly with holes), defined by a set of boundary curves.
 data Region2D units = Region2D
-  { outerLoop :: Loop units
-  , innerLoops :: List (Loop units)
+  { outerBoundary :: Boundary units
+  , innerBoundaries :: List (Boundary units)
   }
 
 type Loop units = NonEmpty (Curve2D units)
@@ -101,10 +101,21 @@ instance FFI (Region2D Unitless) where
 instance HasUnits (Region2D units) units
 
 instance Units.Coercion (Region2D units1) (Region2D units2) where
-  coerce (Region2D outer inners) =
+  coerce region =
     Region2D
-      (NonEmpty.map Units.coerce outer)
-      (List.map (NonEmpty.map Units.coerce) inners)
+      { outerBoundary = Units.coerce region.outerBoundary
+      , innerBoundaries = List.map Units.coerce region.innerBoundaries
+      }
+
+instance Intersects (Point2D units) (Region2D units) (Tolerance units) where
+  intersects point region =
+    case classify point region of
+      Nothing -> True -- Point on boundary is considered contained
+      Just Positive -> True
+      Just Negative -> False
+
+instance Intersects (Region2D units) (Point2D units) (Tolerance units) where
+  intersects region point = intersects point region
 
 {-| Create a region bounded by the given curves.
 
@@ -144,14 +155,14 @@ rectangle (Bounds2D xBounds yBounds) =
               (Curve2D.lineFrom p21 p22)
               (Curve2D.lineFrom p22 p12)
               (Curve2D.lineFrom p12 p11)
-      Region2D edges []
+      Region2D (Boundary.new edges) []
 
 -- | Create a region from the given circle.
 circle :: Tolerance units => Circle2D units -> Result EmptyRegion (Region2D units)
 circle givenCircle =
   if Circle2D.diameter givenCircle ~= Quantity.zero
     then Error EmptyRegion
-    else Ok (Region2D (NonEmpty.one (Curve2D.circle givenCircle)) [])
+    else Ok (Region2D (Boundary.new (NonEmpty.one (Curve2D.circle givenCircle))) [])
 
 -- | Create a region from the given polygon.
 polygon :: Tolerance units => Polygon2D units -> Result BoundedBy.Error (Region2D units)
@@ -341,7 +352,7 @@ The curves will be in counterclockwise order around the region,
 and each curve will be in the counterclockwise direction.
 -}
 outerLoop :: Region2D units -> NonEmpty (Curve2D units)
-outerLoop = (.outerLoop)
+outerLoop region = Boundary.curves region.outerBoundary
 
 {-| The lists of curves (if any) forming the holes within the region.
 
@@ -349,7 +360,7 @@ The curves will be in clockwise order around each hole,
 and each curve will be in the clockwise direction.
 -}
 innerLoops :: Region2D units -> List (NonEmpty (Curve2D units))
-innerLoops = (.innerLoops)
+innerLoops region = List.map Boundary.curves region.innerBoundaries
 
 boundaryLoops :: Region2D units -> NonEmpty (NonEmpty (Curve2D units))
 boundaryLoops region = outerLoop region :| innerLoops region
@@ -359,20 +370,21 @@ boundaryCurves :: Region2D units -> NonEmpty (Curve2D units)
 boundaryCurves region = NonEmpty.concat (boundaryLoops region)
 
 placeIn :: Frame2D units -> Region2D units -> Region2D units
-placeIn frame (Region2D outer inners) = do
-  let transformLoop = NonEmpty.map (Curve2D.placeIn frame)
-  Region2D (transformLoop outer) (List.map transformLoop inners)
+placeIn frame region =
+  Region2D
+    { outerBoundary = Boundary.placeIn frame region.outerBoundary
+    , innerBoundaries = List.map (Boundary.placeIn frame) region.innerBoundaries
+    }
 
 relativeTo :: Frame2D units -> Region2D units -> Region2D units
 relativeTo frame region = placeIn (Frame2D.inverse frame) region
 
 transformBy :: Transform2D tag units -> Region2D units -> Region2D units
-transformBy transform (Region2D outer inners) = do
-  let transformLoop =
-        case Transform2D.handedness transform of
-          Positive -> NonEmpty.map (Curve2D.transformBy transform)
-          Negative -> NonEmpty.reverseMap (Curve2D.reverse . Curve2D.transformBy transform)
-  Region2D (transformLoop outer) (List.map transformLoop inners)
+transformBy transform region =
+  Region2D
+    { outerBoundary = Boundary.transformBy transform region.outerBoundary
+    , innerBoundaries = List.map (Boundary.transformBy transform) region.innerBoundaries
+    }
 
 translateBy :: Vector2D units -> Region2D units -> Region2D units
 translateBy = Transform2D.translateByImpl transformBy
@@ -396,61 +408,29 @@ scaleAlong :: Axis2D units -> Number -> Region2D units -> Region2D units
 scaleAlong = Transform2D.scaleAlongImpl transformBy
 
 convert :: Quantity (units2 ?/? units1) -> Region2D units1 -> Region2D units2
-convert factor (Region2D outer inners) = do
-  let transform =
-        case Quantity.sign factor of
-          Positive -> NonEmpty.map (Curve2D.convert factor)
-          Negative -> NonEmpty.reverseMap (Curve2D.reverse . Curve2D.convert factor)
-  Region2D (transform outer) (List.map transform inners)
+convert factor region =
+  Region2D
+    { outerBoundary = Boundary.convert factor region.outerBoundary
+    , innerBoundaries = List.map (Boundary.convert factor) region.innerBoundaries
+    }
 
 unconvert :: Quantity (units2 ?/? units1) -> Region2D units2 -> Region2D units1
 unconvert factor region = convert (Units.simplify (1.0 ?/? factor)) region
 
-contains :: Tolerance units => Point2D units -> Region2D units -> Bool
-contains point region =
-  case classify point (boundaryCurves region) of
-    Nothing -> True -- Point on boundary is considered contained
-    Just Positive -> True
-    Just Negative -> False
-
-classify :: Tolerance units => Point2D units -> NonEmpty (Curve2D units) -> Maybe Sign
-classify point curves =
-  if NonEmpty.any (intersects point) curves
-    then Nothing
-    else Just (classifyNonBoundary point curves)
-
-fluxIntegral :: Tolerance units => Point2D units -> Curve2D units -> Estimate Unitless
-fluxIntegral point curve = do
-  let displacement = point - curve
-  -- By this point we've already checked whether the point is *on* the curve,
-  -- so (since it's not) the displacement will always be non-zero
-  let integrand =
-        (Curve2D.derivative curve `cross_` displacement)
-          / Nonzero (VectorCurve2D.squaredMagnitude_ displacement)
-  Curve1D.integrate integrand
-
-totalFlux :: Tolerance units => Point2D units -> Loop units -> Estimate Unitless
-totalFlux point loop = Estimate.sum (NonEmpty.map (fluxIntegral point) loop)
-
-classifyNonBoundary :: Tolerance units => Point2D units -> Loop units -> Sign
-classifyNonBoundary point loop = do
-  let flux = Estimate.satisfy containmentIsDeterminate (totalFlux point loop)
-  if Interval.includes Quantity.zero flux then Negative else Positive
-
-bothPossibleFluxValues :: Interval Unitless
-bothPossibleFluxValues = Interval 0.0 Number.twoPi
-
-containmentIsDeterminate :: Interval Unitless -> Bool
-containmentIsDeterminate flux = not (Interval.contains bothPossibleFluxValues flux)
+classify :: Tolerance units => Point2D units -> Region2D units -> Maybe Sign
+classify point region = do
+  let boundaries = region.outerBoundary :| region.innerBoundaries
+  sweptAngles <- Maybe.collect (Boundary.pointSweptAngle point) boundaries
+  Just (Quantity.sign (NonEmpty.sum sweptAngles - Angle.pi))
 
 classifyLoops :: Tolerance units => List (Loop units) -> Result BoundedBy.Error (Region2D units)
 classifyLoops [] = Error BoundedBy.EmptyRegion
 classifyLoops (NonEmpty loops) = do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
-  let outerLoopCandidate = fixSign Positive largestLoop
-  let innerLoopCandidates = List.map (fixSign Negative) smallerLoops
-  if List.all (loopIsInside outerLoopCandidate) innerLoopCandidates
-    then Ok (Region2D outerLoopCandidate innerLoopCandidates)
+  let outerBoundaryCandidate = Boundary.new (fixSign Positive largestLoop)
+  let innerBoundaryCandidates = List.map (Boundary.new . fixSign Negative) smallerLoops
+  if List.all (boundaryIsInside outerBoundaryCandidate) innerBoundaryCandidates
+    then Ok (Region2D outerBoundaryCandidate innerBoundaryCandidates)
     else Error BoundedBy.MultipleDisjointRegions
 
 fixSign :: Tolerance units => Sign -> Loop units -> Loop units
@@ -481,13 +461,12 @@ areaIntegral_ referencePoint curve = do
   let (x, y) = VectorCurve2D.components (curve - referencePoint)
   negate (Curve1D.integrate (y ?*? Curve1D.derivative x))
 
-loopIsInside :: Tolerance units => Loop units -> Loop units -> Bool
-loopIsInside outer inner = do
-  let testPoint = Curve2D.startPoint (NonEmpty.first inner)
-  case classify testPoint outer of
+boundaryIsInside :: Tolerance units => Boundary units -> Boundary units -> Bool
+boundaryIsInside outer inner = do
+  let testPoint = Curve2D.startPoint (NonEmpty.first (Boundary.curves inner))
+  case Boundary.pointSweptAngle testPoint outer of
     Nothing -> True -- Shouldn't happen, loops should be guaranteed not to be touching by this point
-    Just Positive -> True
-    Just Negative -> False
+    Just sweptAngle -> sweptAngle > Angle.pi
 
 bounds :: Region2D units -> Bounds2D units
 bounds region = Bounds2D.aggregateOf Curve2D.overallBounds (outerLoop region)

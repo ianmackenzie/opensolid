@@ -8,6 +8,7 @@ import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length qualified as Length
+import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (pattern Point2D)
 import OpenSolid.Point2D qualified as Point2D
@@ -22,12 +23,13 @@ import Test qualified
 
 tests :: List Test
 tests =
-  [ square
-  , quarterCircle
-  , squareWithHole
+  [ squareArea
+  , quarterCircleArea
+  , squareWithHoleArea
   , incompleteSquare
   , squareWithTangentHole
   , twoCircles
+  , pointContainment
   ]
 
 areaIsApproximately :: Area -> Region2D Meters -> Bool
@@ -35,8 +37,8 @@ areaIsApproximately expectedArea region = do
   let measuredArea = Estimate.within (Area.squareMeters 1e-4) (Region2D.area region)
   Interval.includes expectedArea measuredArea
 
-square :: Test
-square = Test.verify "square" do
+squareArea :: Test
+squareArea = Test.verify "squareArea" do
   let width = Length.meters 2.0
   let p1 = Point2D.origin
   let p2 = Point2D width zero
@@ -49,8 +51,8 @@ square = Test.verify "square" do
   region <- Result.orFail (Region2D.boundedBy [line1, line3, line2, line4])
   Test.expect (areaIsApproximately (width * width) region)
 
-quarterCircle :: Test
-quarterCircle = Test.verify "quarterCircle" do
+quarterCircleArea :: Test
+quarterCircleArea = Test.verify "quarterCircleArea" do
   let radius = Length.meters 1.0
   let p1 = Point2D.origin
   let p2 = Point2D radius zero
@@ -62,8 +64,8 @@ quarterCircle = Test.verify "quarterCircle" do
   let expectedArea = 0.25 * Number.pi * radius * radius
   Test.expect (areaIsApproximately expectedArea region)
 
-squareWithHole :: Test
-squareWithHole = Test.verify "squareWithHole" do
+squareWithHoleArea :: Test
+squareWithHoleArea = Test.verify "squareWithHoleArea" do
   let width = Length.meters 2.0
   let p1 = Point2D.origin
   let p2 = Point2D width zero
@@ -119,3 +121,58 @@ twoCircles = Test.verify "twoCircles" do
   case Region2D.boundedBy [circle1, circle2] of
     Ok _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
     Error error -> Test.expect (error == Region2D.BoundedBy.MultipleDisjointRegions)
+
+pointContainment :: Test
+pointContainment = Test.verify "pointContainment" do
+  let d = Length.centimeters 10.0
+  let r = Length.centimeters 2.5
+  let point i j = Point2D (i * d) (j * d)
+  let circle i j = [Curve2D.circle (Circle2D.withRadius r (point i j))]
+  let square i j = do
+        let cx = i * d
+        let cy = j * d
+        let p1 = Point2D (cx - r) (cy - r)
+        let p2 = Point2D (cx + r) (cy - r)
+        let p3 = Point2D (cx + r) (cy + r)
+        let p4 = Point2D (cx - r) (cy + r)
+        let line12 = Curve2D.lineFrom p1 p2
+        let line23 = Curve2D.lineFrom p2 p3
+        let line34 = Curve2D.lineFrom p3 p4
+        let line41 = Curve2D.lineFrom p4 p1
+        [line12, line23, line34, line41]
+  let outerLoopPoints =
+        [ point 0.0 0.0
+        , point 3.0 0.0
+        , point 3.0 2.0
+        , point 2.0 2.0
+        , point 2.0 1.0
+        , point 1.0 1.0
+        , point 1.0 2.0
+        , point 0.0 2.0
+        ]
+  let boundaryCurves =
+        List.concat
+          [ List.loop Curve2D.lineFrom outerLoopPoints
+          , square 0.5 1.5
+          , circle 0.5 0.5
+          , square 1.5 0.5
+          , circle 2.5 0.5
+          , square 2.5 1.5
+          ]
+  region <- Result.orFail (Region2D.boundedBy boundaryCurves)
+  let expectInside points = Test.combine (Test.expect . intersects region) points
+  let expectOutside points = Test.combine (Test.expect . not . intersects region) points
+  Test.all
+    [ expectInside outerLoopPoints
+    , expectInside
+        [ point 1.0 0.5
+        , point 1.5 0.75
+        , point 2.75 1.75
+        ]
+    , expectOutside
+        [ point -0.5 0.5
+        , point 0.5 0.5
+        , point 0.5 1.5
+        , point 1.25 1.25
+        ]
+    ]

@@ -280,6 +280,7 @@ library
     OpenSolid.Linearization
     OpenSolid.Lobatto
     OpenSolid.Quadrature
+    OpenSolid.Region2D.Boundary
     OpenSolid.Region2D.BoundaryTree
     OpenSolid.Step.Binary
     OpenSolid.Step.Encode
