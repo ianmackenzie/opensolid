@@ -1,7 +1,5 @@
 module OpenSolid.Curve.Segment
   ( Segment
-  , startPoint
-  , endPoint
   , bounds
   , derivativeBounds
   , secondDerivativeBounds
@@ -34,9 +32,7 @@ import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve.Direction qualified as VectorCurve.Direction
 
 data Segment dimension units space = Segment
-  { startPoint :: ~(Point dimension units space)
-  , endPoint :: ~(Point dimension units space)
-  , bounds :: ~(Bounds dimension units space)
+  { bounds :: ~(Bounds dimension units space)
   , derivativeBounds :: ~(VectorBounds dimension units space)
   , secondDerivativeBounds :: ~(VectorBounds dimension units space)
   , tangentDirectionBounds :: ~(DirectionBounds dimension space)
@@ -61,20 +57,12 @@ instance
   where
   coerce segment =
     Segment
-      { startPoint = Units.coerce segment.startPoint
-      , endPoint = Units.coerce segment.endPoint
-      , bounds = Units.coerce segment.bounds
+      { bounds = Units.coerce segment.bounds
       , derivativeBounds = VectorBounds.coerce segment.derivativeBounds
       , secondDerivativeBounds = VectorBounds.coerce segment.secondDerivativeBounds
       , tangentDirectionBounds = segment.tangentDirectionBounds
       , curvatureVectorBounds_ = VectorBounds.coerce segment.curvatureVectorBounds_
       }
-
-startPoint :: Segment dimension units space -> Point dimension units space
-startPoint = (.startPoint)
-
-endPoint :: Segment dimension units space -> Point dimension units space
-endPoint = (.endPoint)
 
 bounds :: Segment dimension units space -> Bounds dimension units space
 bounds = (.bounds)
@@ -165,9 +153,7 @@ new givenCurve tBounds = do
           segmentDerivativeBounds
           segmentSecondDerivativeBounds
   Segment
-    { startPoint = p1
-    , endPoint = p2
-    , bounds = segmentBounds
+    { bounds = segmentBounds
     , derivativeBounds = segmentDerivativeBounds
     , secondDerivativeBounds = segmentSecondDerivativeBounds
     , tangentDirectionBounds = segmentTangentDirectionBounds
