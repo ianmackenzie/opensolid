@@ -39,8 +39,7 @@ assembleLoop subtrees =
 reduceLoop :: NonEmpty (BoundaryTree units) -> NonEmpty (BoundaryTree units)
 reduceLoop (first :| []) = NonEmpty.one first
 reduceLoop (first :| second : []) = NonEmpty.one (join first second)
-reduceLoop (first :| second : third : rest) =
-  NonEmpty.push (join first second) (reduceLoop (third :| rest))
+reduceLoop (first :| second : NonEmpty rest) = NonEmpty.push (join first second) (reduceLoop rest)
 
 join :: BoundaryTree units -> BoundaryTree units -> BoundaryTree units
 join left right =
