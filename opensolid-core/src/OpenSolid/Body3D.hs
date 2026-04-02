@@ -43,6 +43,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
@@ -201,7 +202,7 @@ block bounds =
         else case extruded World3D.topPlane profile h1 h2 of
           Ok body -> Ok body
           Error _ ->
-            throw (InternalError "Constructing block body from non-empty bounds should not fail")
+            InternalError.throw "Constructing block body from non-empty bounds should not fail"
 
 {-| Create a sphere with the given center point and diameter.
 
@@ -270,7 +271,7 @@ cylinderAlong axis d1 d2 ("diameter" ::: diameter) =
         then Error EmptyBody
         else case extruded (Axis3D.normalPlane axis) profile d1 d2 of
           Ok body -> Ok body
-          Error _ -> throw (InternalError "Constructing non-empty cylinder body should not fail")
+          Error _ -> InternalError.throw "Constructing non-empty cylinder body should not fail"
 
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::
@@ -385,7 +386,7 @@ boundedBy (NonEmpty givenSurfaces) = do
   let SurfaceRegistry{unprocessed, processed, edges} = finalSurfaceRegistry
   case (Map.values unprocessed, Map.values processed) of
     (NonEmpty _, _) -> Error BoundedBy.BoundaryHasGaps
-    ([], []) -> throw (InternalError "Should always have at least one processed surface")
+    ([], []) -> InternalError.throw "Should always have at least one processed surface"
     ([], NonEmpty processedSurfaces) ->
       Ok (Body3D (NonEmpty.map (toBoundarySurface edges) processedSurfaces))
 
@@ -809,7 +810,7 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById toVertex boundaryS
       let boundarySegments = NonEmpty.combine Polygon2D.edges boundaryPolygons
       let boundarySegmentSet = Set2D.partitionBy Line2D.bounds boundarySegments
       case Map.get surfaceId surfaceSegmentsById of
-        Nothing -> throw (InternalError "Should always be able to look up surface segments by ID")
+        Nothing -> InternalError.throw "Should always be able to look up surface segments by ID"
         Just surfaceSegments -> do
           let steinerPoints =
                 case surfaceSegments of
@@ -856,7 +857,7 @@ leadingEdgeVerticesImpl ::
 leadingEdgeVerticesImpl innerEdgeVerticesById edgeId uvStartPoint =
   case Map.get edgeId innerEdgeVerticesById of
     Just innerEdgeVertices -> uvStartPoint :| innerEdgeVertices
-    Nothing -> throw (InternalError "Should always be able to look up internal edge vertices by ID")
+    Nothing -> InternalError.throw "Should always be able to look up internal edge vertices by ID"
 
 steinerPoint :: Set2D Unitless (Line2D Unitless) -> UvBounds -> Maybe UvPoint
 steinerPoint boundarySegmentSet uvBounds = do

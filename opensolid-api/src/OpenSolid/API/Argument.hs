@@ -2,7 +2,7 @@ module OpenSolid.API.Argument (Kind (Positional, Named), kind) where
 
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
@@ -20,4 +20,4 @@ kind t name =
         then Named
         else do
           let message = "Argument name mismatch: " <> Text.show name <> " /= " <> Text.show argName
-          throw (InternalError message)
+          InternalError.throw message

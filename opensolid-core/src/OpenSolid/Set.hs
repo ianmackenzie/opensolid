@@ -15,7 +15,7 @@ where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
@@ -92,8 +92,8 @@ build count boundedItems index
       Node nodeBounds leftChild rightChild
 
 splitAtIndex :: Int -> NonEmpty a -> (NonEmpty a, NonEmpty a)
-splitAtIndex 0 _ = throw (InternalError "Bad split index in Set.build")
-splitAtIndex _ (_ :| []) = throw (InternalError "Bad split index in Set.build")
+splitAtIndex 0 _ = InternalError.throw "Bad split index in Set.build"
+splitAtIndex _ (_ :| []) = InternalError.throw "Bad split index in Set.build"
 splitAtIndex 1 (first :| NonEmpty rest) = (NonEmpty.one first, rest)
 splitAtIndex n (first :| NonEmpty rest) =
   Pair.mapFirst (NonEmpty.push first) (splitAtIndex (n - 1) rest)

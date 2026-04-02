@@ -9,7 +9,7 @@ import OpenSolid.API qualified as API
 import OpenSolid.API.Function qualified as Function
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
-import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
@@ -19,7 +19,7 @@ type Function = Ptr () -> Ptr () -> IO ()
 
 functionArray :: Array Function
 functionArray = case API.functions of
-  [] -> throw (InternalError "API somehow has no functions")
+  [] -> InternalError.throw "API somehow has no functions"
   NonEmpty nonEmpty -> Array.fromNonEmpty (NonEmpty.map Function.invoke nonEmpty)
 
 invoke :: Int -> Ptr () -> Ptr () -> IO ()

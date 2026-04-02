@@ -26,7 +26,7 @@ module OpenSolid.Domain1D
 where
 
 import GHC.Records (HasField)
-import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Number qualified as Number
@@ -145,13 +145,13 @@ trailingSamplingPoints predicate =
     NonEmpty points -> points
     [] -> do
       let message = "collectSamplingPoints should always return at least the point it was given"
-      throw (InternalError message)
+      InternalError.throw message
 
 collectSamplingPoints :: (Interval Unitless -> Bool) -> Interval Unitless -> List Number -> List Number
 collectSamplingPoints predicate subdomain accumulated
   | predicate subdomain = accumulated
   | Interval.isAtomic subdomain =
-      throw (InternalError "Infinite recursion in Domain1D.samplingPoints")
+      InternalError.throw "Infinite recursion in Domain1D.samplingPoints"
   | otherwise = do
       let (left, right) = Interval.bisect subdomain
       let subdomainMidpoint = Interval.midpoint subdomain

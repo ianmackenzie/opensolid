@@ -71,7 +71,7 @@ import GHC.Records (HasField)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
@@ -512,7 +512,7 @@ bisect (Interval low high) = do
         | high == Quantity.zero = -Quantity.unit
         | low > Quantity.zero = 2.0 * low
         | high < Quantity.zero = 2.0 * high
-        | otherwise = throw (InternalError "'Impossible' case hit in Interval.bisect")
+        | otherwise = InternalError.throw "'Impossible' case hit in Interval.bisect"
   (Interval low mid, Interval mid high)
 
 {-# INLINE isAtomic #-}

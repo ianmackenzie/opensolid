@@ -52,7 +52,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
-import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Line2D (pattern Line2D)
@@ -489,4 +489,4 @@ toVertexLoop resolution loop = do
   let allVertices = List.combine trailingVertices (NonEmpty.toList loop)
   case allVertices of
     NonEmpty vertices -> vertices
-    [] -> throw (InternalError "Should always have at least one vertex")
+    [] -> InternalError.throw "Should always have at least one vertex"

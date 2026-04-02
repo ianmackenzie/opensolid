@@ -16,7 +16,7 @@ import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Line2D (Line2D, pattern Line2D)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -58,7 +58,7 @@ inscribed :: Int -> Circle2D units -> Result IsEmpty (Polygon2D units)
 inscribed n circle
   | n >= 3 = case Quantity.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n of
       NonEmpty vertexAngles -> Ok (Polygon2D (NonEmpty.map (Circle2D.point circle) vertexAngles))
-      [] -> throw (InternalError "Should have at least three vertex angles")
+      [] -> InternalError.throw "Should have at least three vertex angles"
   | otherwise = Error IsEmpty
 
 {-| Create a regular polygon with the given number of vertices/sides.

@@ -9,7 +9,7 @@ module Python.FFI
 where
 
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.InternalError (InternalError (InternalError))
+import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -161,7 +161,7 @@ singleArgument varName ffiType = case ffiType of
   FFI.Array itemType -> nonEmptyArgumentValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
-  FFI.Result{} -> throw (InternalError "Should never have Result as input argument")
+  FFI.Result{} -> InternalError.throw "Should never have Result as input argument"
   FFI.Class classId -> varName <> "." <> Python.Class.pointerFieldName classId
 
 fieldArgumentValue :: Text -> FFI.Type -> Text
@@ -177,7 +177,7 @@ fieldArgumentValue varName ffiType = case ffiType of
   FFI.Array itemType -> nonEmptyArgumentValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
-  FFI.Result{} -> throw (InternalError "Should never have Result as input argument")
+  FFI.Result{} -> InternalError.throw "Should never have Result as input argument"
   FFI.Class classId -> varName <> "." <> Python.Class.pointerFieldName classId
 
 listArgumentValue :: FFI.Type -> FFI.Type -> Text -> Text
