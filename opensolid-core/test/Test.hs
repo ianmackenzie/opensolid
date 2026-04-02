@@ -12,6 +12,7 @@ module Test
   , run
   , expect
   , all
+  , combine
   , output
   , lines
   , pass
@@ -204,6 +205,9 @@ combineTestResults (Error messages : rest) = case combineTestResults rest of
 all :: List Expectation -> Expectation
 all expectations =
   Generator (Random.map combineTestResults (Random.collect unwrap expectations))
+
+combine :: (a -> Expectation) -> List a -> Expectation
+combine function values = all (List.map function values)
 
 output :: Show a => Text -> a -> Expectation -> Expectation
 output label value (Generator generator) =
