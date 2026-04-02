@@ -102,6 +102,7 @@ classes =
   , curve1D
   , areaCurve1D
   , angleCurve1D
+  , curve
   , svg
   , axis2D
   , uvAxis
@@ -815,13 +816,18 @@ uvPolygon =
     , Class.member0 "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
     ]
 
+curve :: Class
+curve =
+  Class.static "Curve" "Functionality common to all curve types." $
+    [ Class.constant "T" Curve1D.t $(docs 'Curve1D.t)
+    ]
+
 type UnitlessCurve1D = Curve1D.Curve1D Unitless
 
 unitlessCurve1D :: Class
 unitlessCurve1D =
   Class.new @UnitlessCurve1D "A parametric curve definining a unitless value in terms of a parameter value." $
     [ Class.constant "Zero" (Curve1D.zero @Unitless) $(docs 'Curve1D.zero)
-    , Class.constant "T" Curve1D.t $(docs 'Curve1D.t)
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
