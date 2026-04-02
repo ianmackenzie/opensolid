@@ -16,10 +16,10 @@ import OpenSolid.Arc2D qualified as Arc2D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D)
+import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Length (Length)
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.Line2D qualified as Line2D
-import OpenSolid.Nondegenerate (IsDegenerate)
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result

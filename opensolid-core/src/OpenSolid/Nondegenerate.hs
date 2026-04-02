@@ -1,6 +1,5 @@
 module OpenSolid.Nondegenerate
   ( Nondegenerate (Nondegenerate)
-  , IsDegenerate (IsDegenerate)
   , unwrap
   , interior
   , exterior
@@ -8,11 +7,8 @@ module OpenSolid.Nondegenerate
 where
 
 import OpenSolid.Nonzero (Nonzero (Nonzero))
-import OpenSolid.Prelude
 
 newtype Nondegenerate a = Nondegenerate a
-
-data IsDegenerate = IsDegenerate deriving (Eq, Show)
 
 {-# INLINE unwrap #-}
 unwrap :: Nondegenerate a -> a

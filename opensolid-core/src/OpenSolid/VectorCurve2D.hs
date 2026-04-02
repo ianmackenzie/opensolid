@@ -60,12 +60,13 @@ import OpenSolid.Curve1D qualified as Curve1D
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import {-# SOURCE #-} OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import OpenSolid.DivisionByZero (DivisionByZero)
+import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson2D qualified as NewtonRaphson2D
-import OpenSolid.Nondegenerate (IsDegenerate, Nondegenerate)
+import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude

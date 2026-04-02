@@ -14,13 +14,14 @@ import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.DirectionBounds qualified as DirectionBounds
+import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (IsDegenerate, Nondegenerate)
+import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Pair qualified as Pair

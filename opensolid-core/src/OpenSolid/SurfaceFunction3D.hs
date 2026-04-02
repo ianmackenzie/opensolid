@@ -22,10 +22,11 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
+import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
-import OpenSolid.Nondegenerate (IsDegenerate, Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude

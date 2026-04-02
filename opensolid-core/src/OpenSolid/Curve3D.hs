@@ -52,13 +52,13 @@ import OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionCurve3D (DirectionCurve3D)
+import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.Length (Length)
 import OpenSolid.Line3D (Line3D)
-import OpenSolid.Nondegenerate (IsDegenerate)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)

@@ -44,13 +44,14 @@ import OpenSolid.DirectionBounds3D qualified as DirectionBounds3D
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3D qualified as DirectionSurfaceFunction3D
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
+import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.NewtonRaphson3D qualified as NewtonRaphson3D
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate), Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude

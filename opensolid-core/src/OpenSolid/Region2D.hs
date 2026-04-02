@@ -46,6 +46,7 @@ import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
+import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.FFI (FFI)
@@ -60,7 +61,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair

@@ -150,6 +150,7 @@ library
     OpenSolid.Domain1D
     OpenSolid.Domain2D
     OpenSolid.Duration
+    OpenSolid.Error
     OpenSolid.Estimate
     OpenSolid.Expression
     OpenSolid.FFI

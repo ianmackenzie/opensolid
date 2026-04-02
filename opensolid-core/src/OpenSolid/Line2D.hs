@@ -28,9 +28,9 @@ import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
+import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Line (Line (Line))
 import OpenSolid.Line qualified as Line
-import OpenSolid.Nondegenerate (IsDegenerate)
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude

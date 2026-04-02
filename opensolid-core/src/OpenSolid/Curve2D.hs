@@ -107,6 +107,7 @@ import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
 import OpenSolid.DirectionCurve2D (DirectionCurve2D)
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
+import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
@@ -114,7 +115,6 @@ import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Orientation2D (Orientation2D)
 import OpenSolid.Orientation2D qualified as Orientation2D

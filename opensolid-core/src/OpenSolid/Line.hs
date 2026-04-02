@@ -15,9 +15,9 @@ import Data.Void (Void)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction (Direction)
+import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude

@@ -7,9 +7,9 @@ where
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
+import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
-import OpenSolid.Nondegenerate (IsDegenerate)
 import OpenSolid.Prelude
 
 data Intersections

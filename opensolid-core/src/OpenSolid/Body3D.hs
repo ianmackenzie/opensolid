@@ -37,6 +37,7 @@ import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Domain1D qualified as Domain1D
+import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3D (Frame3D)
@@ -53,7 +54,7 @@ import OpenSolid.Map qualified as Map
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (IsDegenerate (IsDegenerate), Nondegenerate)
+import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D (Plane3D))
