@@ -2,20 +2,20 @@ from dataclasses import dataclass
 
 from opensolid import (
     Angle,
-    AngleCurve,
+    AngleCurve1D,
     AngleInterval,
     Area,
-    AreaCurve,
+    AreaCurve1D,
     AreaInterval,
     AreaVector2D,
     Bounds2D,
-    Curve,
+    Curve1D,
     Direction2D,
     Interval,
     Length,
-    LengthCurve,
     Point2D,
     Tolerance,
+    UnitlessCurve1D,
     UnitlessInterval,
     UnitlessVector2D,
     UvBounds,
@@ -40,10 +40,10 @@ types = [
     UvPoint,
     Bounds2D,
     UvBounds,
-    Curve,
-    LengthCurve,
-    AreaCurve,
-    AngleCurve,
+    UnitlessCurve1D,
+    Curve1D,
+    AreaCurve1D,
+    AngleCurve1D,
 ]
 
 dimension = {
@@ -63,10 +63,10 @@ dimension = {
     UvPoint: 2,
     Bounds2D: 2,
     UvBounds: 2,
-    Curve: 1,
-    LengthCurve: 1,
-    AreaCurve: 1,
-    AngleCurve: 1,
+    UnitlessCurve1D: 1,
+    Curve1D: 1,
+    AreaCurve1D: 1,
+    AngleCurve1D: 1,
 }
 
 space = {
@@ -86,10 +86,10 @@ space = {
     UvPoint: "Space",
     Bounds2D: "Space",
     UvBounds: "Space",
-    Curve: None,
-    LengthCurve: None,
-    AreaCurve: None,
-    AngleCurve: None,
+    UnitlessCurve1D: None,
+    Curve1D: None,
+    AreaCurve1D: None,
+    AngleCurve1D: None,
 }
 
 behaviour = {
@@ -109,10 +109,10 @@ behaviour = {
     UvPoint: "point",
     Bounds2D: "point",
     UvBounds: "point",
-    Curve: "scalar",
-    LengthCurve: "scalar",
-    AreaCurve: "scalar",
-    AngleCurve: "scalar",
+    UnitlessCurve1D: "scalar",
+    Curve1D: "scalar",
+    AreaCurve1D: "scalar",
+    AngleCurve1D: "scalar",
 }
 
 
@@ -150,10 +150,10 @@ units = {
     UvPoint: unitless,
     Bounds2D: length_units,
     UvBounds: unitless,
-    Curve: unitless,
-    LengthCurve: length_units,
-    AreaCurve: area_units,
-    AngleCurve: angle_units,
+    UnitlessCurve1D: unitless,
+    Curve1D: length_units,
+    AreaCurve1D: area_units,
+    AngleCurve1D: angle_units,
 }
 
 topology = {
@@ -173,10 +173,10 @@ topology = {
     UvPoint: "value",
     Bounds2D: "bounds",
     UvBounds: "bounds",
-    Curve: "curve",
-    LengthCurve: "curve",
-    AreaCurve: "curve",
-    AngleCurve: "curve",
+    UnitlessCurve1D: "curve",
+    Curve1D: "curve",
+    AreaCurve1D: "curve",
+    AngleCurve1D: "curve",
 }
 
 dummy_value = {
@@ -196,10 +196,10 @@ dummy_value = {
     UvPoint: UvPoint.origin,
     Bounds2D: Bounds2D.constant(Point2D.origin),
     UvBounds: UvBounds.constant(UvPoint.origin),
-    Curve: Curve.constant(1),
-    LengthCurve: LengthCurve.constant(Length.meters(1)),
-    AreaCurve: AreaCurve.constant(Area.square_meters(1)),
-    AngleCurve: AngleCurve.constant(Angle.radian),
+    UnitlessCurve1D: UnitlessCurve1D.constant(1),
+    Curve1D: Curve1D.constant(Length.meters(1)),
+    AreaCurve1D: AreaCurve1D.constant(Area.square_meters(1)),
+    AngleCurve1D: AngleCurve1D.constant(Angle.radian),
 }
 
 
