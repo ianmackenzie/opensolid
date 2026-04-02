@@ -95,8 +95,7 @@ import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 import OpenSolid.World3D qualified as World3D
 
 -- | A solid body in 3D, defined by a set of boundary surfaces.
-newtype Body3D space
-  = Body3D (NonEmpty (BoundarySurface space))
+newtype Body3D space = Body3D (NonEmpty (BoundarySurface space))
 
 instance FFI (Body3D FFI.Space) where
   representation = FFI.classRepresentation "Body3D"
