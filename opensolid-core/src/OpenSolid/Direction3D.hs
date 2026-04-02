@@ -199,18 +199,8 @@ mirrorAcross plane = lift (Vector3D.mirrorAcross plane)
 -- | Generate a random direction.
 random :: Random.Generator (Direction3D space)
 random = do
-  -- Generate a random vector to normalize
-  vector <- randomVector
-  let magnitude = Vector3D.magnitude vector
-  -- Reject very small vectors
-  -- (to avoid roundoff error during normalization),
-  -- and only accept vectors inside the unit sphere
-  -- (otherwise we'll get a non-uniform distribution)
-  if magnitude > 0.1 && magnitude <= 1.0
-    then Random.return (Unit3D (vector / magnitude))
-    else random -- Generated a 'bad' vector, try again
-
-randomVector :: Random.Generator (Vector3D Unitless space)
-randomVector = do
-  let randomComponent = Random.number -1.0 1.0
-  Random.map3 Vector3D randomComponent randomComponent randomComponent
+  theta <- Random.quantity -Angle.pi Angle.pi
+  phi <- Random.map Angle.asin (Random.number -1.0 1.0)
+  let cosPhi = Angle.cos phi
+  let vector = Vector3D (cosPhi * Angle.cos theta) (cosPhi * Angle.sin theta) (Angle.sin phi)
+  Random.return (Unit3D vector)
