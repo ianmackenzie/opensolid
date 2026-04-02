@@ -513,7 +513,7 @@ bounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension u
 bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
 
 overallBounds :: Curve dimension units space -> Bounds dimension units space
-overallBounds curve = bounds curve Interval.unit
+overallBounds curve = Curve.Segment.bounds (SearchTree.value (searchTree curve))
 
 searchTree :: Curve dimension units space -> SearchTree dimension units space
 searchTree = (.searchTree)
