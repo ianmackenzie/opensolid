@@ -185,7 +185,7 @@ testPlaneTorusIntersection = do
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
   let crossSection = Curve2D.circle (Circle2D.withRadius minorRadius (Point2D.x majorRadius))
-  surface <- Result.orFail (Surface3D.revolved World3D.frontPlane crossSection Axis2D.y Angle.twoPi)
+  let surface = Surface3D.revolved World3D.frontPlane crossSection Axis2D.y Angle.twoPi
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3D.xy (Angle.degrees 45), Direction3D.z
   let planeNormal = Direction3D.polar World3D.frontPlane (alpha + Angle.halfPi)

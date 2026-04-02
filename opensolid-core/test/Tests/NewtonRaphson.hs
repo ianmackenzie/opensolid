@@ -13,7 +13,6 @@ import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
-import OpenSolid.Result qualified as Result
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Tolerance qualified as Tolerance
@@ -72,13 +71,13 @@ pointOnSphere3D = Test.verify "Point on sphere" do
           (#radius radius)
           (#startAngle Angle.zero)
           (#endAngle Angle.halfPi)
-  surface <- Result.orFail (Surface3D.revolved World3D.rightPlane profileCurve Axis2D.y Angle.twoPi)
+  let surface = Surface3D.revolved World3D.rightPlane profileCurve Axis2D.y Angle.twoPi
   let point =
         Point2D.polar radius (Angle.degrees 45.0)
           & Point2D.placeOn World3D.rightPlane
           & Point3D.rotateAround World3D.upwardAxis (Angle.degrees 45.0)
   let displacement = point - Surface3D.function surface
-  surface3D displacement (UvPoint 0.1 0.4) (UvPoint 0.125 0.5)
+  surface3D displacement (UvPoint 0.4 0.1) (UvPoint 0.5 0.125)
 
 curve1D :: Text -> Curve1D Unitless -> Number -> Number -> Test
 curve1D name curve t0 tExpected =

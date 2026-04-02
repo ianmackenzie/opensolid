@@ -47,6 +47,7 @@ import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
+import OpenSolid.Length qualified as Length
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.Line2D qualified as Line2D
 import OpenSolid.List qualified as List
@@ -58,7 +59,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Plane3D (Plane3D (Plane3D))
+import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
@@ -78,7 +79,6 @@ import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
 import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
-import OpenSolid.Surface3D.Revolved qualified as Surface3D.Revolved
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceFunction3D.Nondegenerate qualified as SurfaceFunction3D.Nondegenerate
@@ -212,22 +212,15 @@ sphere ::
   "centerPoint" ::: Point3D space ->
   "diameter" ::: Length ->
   Result EmptyBody (Body3D space)
-sphere ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) =
-  if diameter ~= Quantity.zero
-    then Error EmptyBody
-    else do
-      let sketchPlane = Plane3D centerPoint World3D.frontPlane.orientation
-      let radius = 0.5 * diameter
-      let p1 = Point2D.y -radius
-      let p2 = Point2D.y radius
-      let profileCurves = [Curve2D.arcFrom p1 p2 Angle.pi, Curve2D.lineFrom p2 p1]
-      case Region2D.boundedBy profileCurves of
-        Error _ -> throw (InternalError "Semicircle profile construction should always succeed")
-        Ok profile ->
-          case revolved sketchPlane profile Axis2D.y Angle.twoPi of
-            Ok body -> Ok body
-            Error _ ->
-              throw (InternalError "Constructing sphere from non-zero radius should not fail")
+sphere ("centerPoint" ::: centerPoint) ("diameter" ::: diameter)
+  | diameter ~= Length.zero = Error EmptyBody
+  | otherwise = do
+      let r = 0.5 * diameter
+      let arc = Curve2D.arcFrom (Point2D.y r) (Point2D.y -r) -Angle.pi
+      let plane = World3D.forwardPlane centerPoint
+      case boundedBy [Surface3D.revolved plane arc Axis2D.y Angle.twoPi] of
+        Ok body -> Ok body
+        Error _ -> InternalError.throw "Constructing sphere from non-zero diameter should not fail"
 
 {-| Create a cylindrical body from a start point, end point and diameter.
 
@@ -338,13 +331,7 @@ revolved startPlane profile axis2D angle = do
   let unflippedStartCap = Surface3D.on startPlane profile
   let unflippedEndCap = Surface3D.on endPlane profile
   let sideSurface profileCurve = Surface3D.revolved startPlane profileCurve axis2D angle
-  sideSurfaces <-
-    case Result.collect sideSurface offAxisCurves of
-      Error Surface3D.Revolved.ProfileIsOnAxis ->
-        throw (InternalError "Should have already filtered out all on-axis curves")
-      Error Surface3D.Revolved.ProfileCrossesAxis ->
-        throw (InternalError "Should have already failed computing profileSign if any profile curve crosses the revolution axis")
-      Ok surface -> Ok surface
+  let sideSurfaces = List.map sideSurface offAxisCurves
   let startBoundaryCurves = Surface3D.boundaryCurves unflippedStartCap
   let endBoundaryCurves = Surface3D.boundaryCurves unflippedEndCap
   let isFullRevolution = startBoundaryCurves ~= endBoundaryCurves

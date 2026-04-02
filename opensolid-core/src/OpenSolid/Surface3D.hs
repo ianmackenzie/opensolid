@@ -58,7 +58,6 @@ import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Set2D (Set2D)
 import OpenSolid.Set2D qualified as Set2D
-import OpenSolid.Surface3D.Revolved qualified as Revolved
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
@@ -141,29 +140,21 @@ revolved ::
   Curve2D Meters ->
   Axis2D Meters ->
   Angle ->
-  Result Revolved.Error (Surface3D space)
-revolved sketchPlane curve axis angle = do
+  Surface3D space
+revolved plane curve axis angle = do
   let frame2D = Frame2D.fromYAxis axis
   let localCurve = Curve2D.relativeTo frame2D curve
-  let xCoordinate = Curve2D.xCoordinate localCurve
-  if xCoordinate ~= Curve1D.zero
-    then Error Revolved.ProfileIsOnAxis
-    else case Curve1D.sign xCoordinate of
-      Error Curve1D.CrossesZero -> Error Revolved.ProfileCrossesAxis
-      Ok profileSign -> do
-        let frame3D = Frame3D.fromBackPlane (Frame2D.placeOn sketchPlane frame2D)
-        let (revolutionParameter, curveParameter) = case profileSign of
-              Positive -> (SurfaceFunction1D.u, SurfaceFunction1D.v)
-              Negative -> (SurfaceFunction1D.v, SurfaceFunction1D.u)
-        let theta = angle * revolutionParameter
-        let radius = xCoordinate . curveParameter
-        let height = Curve2D.yCoordinate localCurve . curveParameter
-        let surfaceFunction =
-              frame3D.originPoint
-                + radius * SurfaceFunction1D.cos theta * frame3D.rightwardDirection
-                + radius * SurfaceFunction1D.sin theta * frame3D.forwardDirection
-                + height * frame3D.upwardDirection
-        Ok (parametric surfaceFunction UvRegion.unitSquare)
+  let (xCoordinate, yCoordinate) = Curve2D.coordinates localCurve
+  let frame3D = Frame3D.fromBackPlane (Frame2D.placeOn plane frame2D)
+  let radius = xCoordinate . SurfaceFunction1D.u
+  let height = yCoordinate . SurfaceFunction1D.u
+  let theta = angle * SurfaceFunction1D.v
+  let surfaceFunction =
+        frame3D.originPoint
+          + radius * SurfaceFunction1D.cos theta * frame3D.rightwardDirection
+          + radius * SurfaceFunction1D.sin theta * frame3D.forwardDirection
+          + height * frame3D.upwardDirection
+  parametric surfaceFunction UvRegion.unitSquare
 
 overallBounds :: Surface3D space -> Bounds3D space
 overallBounds surface = SurfaceFunction3D.bounds surface.function (Region2D.bounds surface.domain)
