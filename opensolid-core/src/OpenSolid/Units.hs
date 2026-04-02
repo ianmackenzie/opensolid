@@ -8,9 +8,6 @@ module OpenSolid.Units
   , Specialize
   , specialize
   , unspecialize
-  , commute
-  , leftAssociate
-  , rightAssociate
   , simplify
   , Simplification
   , Product
@@ -94,42 +91,6 @@ unspecialize ::
   b ->
   a
 unspecialize = coerce
-
-{-# INLINE commute #-}
-commute ::
-  ( Coercion a b
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , unitsA ~ units1 ?*? units2
-  , unitsB ~ units2 ?*? units1
-  ) =>
-  a ->
-  b
-commute = coerce
-
-{-# INLINE leftAssociate #-}
-leftAssociate ::
-  ( Coercion a b
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , unitsA ~ units1 ?*? (units2 ?*? units3)
-  , unitsB ~ (units1 ?*? units2) ?*? units3
-  ) =>
-  a ->
-  b
-leftAssociate = coerce
-
-{-# INLINE rightAssociate #-}
-rightAssociate ::
-  ( Coercion a b
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , unitsA ~ (units1 ?*? units2) ?*? units3
-  , unitsB ~ units1 ?*? (units2 ?*? units3)
-  ) =>
-  a ->
-  b
-rightAssociate = coerce
 
 {-# INLINE simplify #-}
 simplify ::
