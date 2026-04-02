@@ -308,7 +308,7 @@ unitlessInterval =
     , Class.property "Lower" Interval.lower $(docs 'Interval.lower)
     , Class.property "Upper" Interval.upper $(docs 'Interval.upper)
     , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
-    , Class.member1 "Includes" "Value" Interval.includes $(docs 'Interval.includes)
+    , Class.member1 "Member" "Value" Interval.member $(docs 'Interval.member)
     , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
     , Class.negateSelf
     , Class.absSelf Interval.abs
@@ -347,7 +347,7 @@ interval =
     , Class.property "Lower" Interval.lower $(docs 'Interval.lower)
     , Class.property "Upper" Interval.upper $(docs 'Interval.upper)
     , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
-    , Class.member1 "Includes" "Value" Interval.includes $(docs 'Interval.includes)
+    , Class.member1 "Member" "Value" Interval.member $(docs 'Interval.member)
     , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
     , Class.negateSelf
     , Class.absSelf Interval.abs
@@ -381,7 +381,7 @@ areaInterval =
     , Class.property "Lower" Interval.lower $(docs 'Interval.lower)
     , Class.property "Upper" Interval.upper $(docs 'Interval.upper)
     , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
-    , Class.member1 "Includes" "Value" Interval.includes $(docs 'Interval.includes)
+    , Class.member1 "Member" "Value" Interval.member $(docs 'Interval.member)
     , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
     , Class.negateSelf
     , Class.absSelf Interval.abs
@@ -415,7 +415,7 @@ angleInterval =
     , Class.property "Lower" Interval.lower $(docs 'Interval.lower)
     , Class.property "Upper" Interval.upper $(docs 'Interval.upper)
     , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
-    , Class.member1 "Includes" "Value" Interval.includes $(docs 'Interval.includes)
+    , Class.member1 "Member" "Value" Interval.member $(docs 'Interval.member)
     , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
     , Class.negateSelf
     , Class.absSelf Interval.abs

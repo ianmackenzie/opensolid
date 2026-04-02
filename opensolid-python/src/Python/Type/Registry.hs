@@ -1,7 +1,7 @@
 module Python.Type.Registry
   ( Registry
   , empty
-  , contains
+  , member
   , add
   , typeDeclarations
   )
@@ -19,12 +19,12 @@ data Registry = Registry (Set Text) (List (Text, Text))
 empty :: Registry
 empty = Registry Set.empty []
 
-contains :: Text -> Registry -> Bool
-contains typeName (Registry registered _) = Set.member typeName registered
+member :: Text -> Registry -> Bool
+member typeName (Registry registered _) = Set.member typeName registered
 
 add :: Text -> Text -> Registry -> Registry
 add typeName typeDeclaration registry
-  | contains typeName registry = registry
+  | member typeName registry = registry
   | otherwise = do
       let Registry registered tuples = registry
       Registry (Set.insert typeName registered) ((typeName, typeDeclaration) : tuples)

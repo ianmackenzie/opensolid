@@ -209,7 +209,7 @@ maybeArgumentValue maybeType valueType varName = do
 registerType :: FFI.Type -> Registry -> Registry
 registerType ffiType registry = do
   let name = typeName ffiType
-  if Python.Type.Registry.contains name registry
+  if Python.Type.Registry.member name registry
     then registry
     else case ffiType of
       FFI.Unit -> registry

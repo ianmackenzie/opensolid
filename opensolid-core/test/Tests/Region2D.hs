@@ -35,7 +35,7 @@ tests =
 areaIsApproximately :: Area -> Region2D Meters -> Bool
 areaIsApproximately expectedArea region = do
   let measuredArea = Estimate.within (Area.squareMeters 1e-4) (Region2D.area region)
-  Interval.includes expectedArea measuredArea
+  Interval.member expectedArea measuredArea
 
 squareArea :: Test
 squareArea = Test.verify "squareArea" do

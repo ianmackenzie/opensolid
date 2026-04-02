@@ -23,7 +23,7 @@ module OpenSolid.Interval
   , minAbs
   , squared
   , squared_
-  , includes
+  , member
   , inclusion
   , inclusion#
   , exclusion
@@ -461,8 +461,8 @@ Note that this does *not* use a tolerance, so use with care -
 for example, a value *just* outside the range (due to numerical roundoff)
 will be reported as not included.
 -}
-includes :: Quantity units -> Interval units -> Bool
-includes value (Interval low high) = low <= value && value <= high
+member :: Quantity units -> Interval units -> Bool
+member value (Interval low high) = low <= value && value <= high
 
 exclusion :: Quantity units -> Interval units -> Quantity units
 exclusion (Quantity# value#) interval = Quantity# (exclusion# value# interval)

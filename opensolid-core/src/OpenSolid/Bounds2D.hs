@@ -18,7 +18,7 @@ module OpenSolid.Bounds2D
   , exclusion#
   , inclusion
   , inclusion#
-  , includes
+  , member
   , contains
   , isContainedIn
   , overlap
@@ -130,8 +130,8 @@ inclusion (Position2D p) (PositionBounds2D pb) = VectorBounds2D.inclusion p pb
 inclusion# :: Point2D units -> Bounds2D units -> Double#
 inclusion# (Position2D p) (PositionBounds2D pb) = VectorBounds2D.inclusion# p pb
 
-includes :: Point2D units -> Bounds2D units -> Bool
-includes (Position2D p) (PositionBounds2D pb) = VectorBounds2D.includes p pb
+member :: Point2D units -> Bounds2D units -> Bool
+member (Position2D p) (PositionBounds2D pb) = VectorBounds2D.member p pb
 
 contains :: Bounds2D units -> Bounds2D units -> Bool
 contains (PositionBounds2D pb2) (PositionBounds2D pb1) = VectorBounds2D.contains pb2 pb1

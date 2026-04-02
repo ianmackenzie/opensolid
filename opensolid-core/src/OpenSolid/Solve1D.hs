@@ -243,7 +243,7 @@ newtonRaphson function derivative interval x y iterations =
         else do
           let xStepped = x - y / dy
           x2 <-
-            if Interval.includes xStepped interval
+            if Interval.member xStepped interval
               then Ok xStepped -- Newton step stayed within interval
               else do
                 -- Newton step went outside interval,
@@ -256,7 +256,7 @@ newtonRaphson function derivative interval x y iterations =
                   then Error Divergence
                   else do
                     let xStepped2 = xClamped - yClamped / dyClamped
-                    if Interval.includes xStepped2 interval
+                    if Interval.member xStepped2 interval
                       then Ok xStepped2
                       else Error Divergence
           let y2 = function x2

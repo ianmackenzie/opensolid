@@ -31,7 +31,7 @@ module OpenSolid.VectorBounds3D
   , normalize
   , exclusion
   , inclusion
-  , includes
+  , member
   , contains
   , isContainedIn
   , separation
@@ -327,9 +327,9 @@ exclusion (Vector3D x y z) (VectorBounds3D bx by bz) = do
 inclusion :: Vector3D units space -> VectorBounds3D units space -> Quantity units
 inclusion point box = negate (exclusion point box)
 
-includes :: Vector3D units space -> VectorBounds3D units space -> Bool
-includes (Vector3D vx vy vz) (VectorBounds3D x y z) =
-  Interval.includes vx x && Interval.includes vy y && Interval.includes vz z
+member :: Vector3D units space -> VectorBounds3D units space -> Bool
+member (Vector3D vx vy vz) (VectorBounds3D x y z) =
+  Interval.member vx x && Interval.member vy y && Interval.member vz z
 
 contains :: VectorBounds3D units space -> VectorBounds3D units space -> Bool
 contains (VectorBounds3D x2 y2 z2) (VectorBounds3D x1 y1 z1) =

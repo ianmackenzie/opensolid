@@ -266,7 +266,7 @@ solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
 
 boundedStep :: UvBounds -> UvPoint -> UvPoint -> UvPoint
 boundedStep uvBounds p1 p2 =
-  if Bounds2D.includes p2 uvBounds
+  if Bounds2D.member p2 uvBounds
     then p2 -- Stepped point is still within the given bounds, so we can use it
     else do
       -- Stepped point is outside the given bounds,

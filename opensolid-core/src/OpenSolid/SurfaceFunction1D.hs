@@ -657,7 +657,7 @@ findTangentSolutions subproblem = do
       case maybePoint of
         Nothing -> Solve2D.recurse CrossingCurvesOnly
         Just point ->
-          if Bounds2D.includes point (Domain2D.interior subdomain)
+          if Bounds2D.member point (Domain2D.interior subdomain)
             && value f point ~= Quantity.zero
             then case determinantSign of
               Positive -> do

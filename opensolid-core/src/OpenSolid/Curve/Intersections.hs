@@ -172,7 +172,7 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
             let curvatureVectorsAreDistinct =
                   VectorBounds.areDistinct curvatureVectorBounds1_ curvatureVectorBounds2_
             let isLocal EndpointSolution{t1, t2} =
-                  Interval.includes t1 tBounds1 && Interval.includes t2 tBounds2
+                  Interval.member t1 tBounds1 && Interval.member t2 tBounds2
             let singleEndpointSolution =
                   case List.filter isLocal endpointSolutions of
                     List.One endpointSolution -> Just endpointSolution

@@ -30,7 +30,7 @@ module OpenSolid.List
   , unzip4
   , filter
   , find
-  , contains
+  , member
   , indexOf
   , combine
   , concat
@@ -173,8 +173,8 @@ filterMap = Data.Maybe.mapMaybe
 find :: (a -> Bool) -> List a -> Maybe a
 find = Data.List.find
 
-contains :: Eq a => a -> List a -> Bool
-contains = Data.List.elem
+member :: Eq a => a -> List a -> Bool
+member = Data.List.elem
 
 indexOf :: Eq a => a -> List a -> Maybe Int
 indexOf = Data.List.elemIndex

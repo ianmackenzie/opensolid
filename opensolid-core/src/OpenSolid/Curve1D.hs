@@ -626,7 +626,7 @@ findZeros derivatives subdomain derivativeBoundsStream exclusions
           Resolved [] -> Solve1D.pass
           Resolved (NonEmpty subdomainZeros) -> do
             let subdomainInterior = Domain1D.interior subdomain
-            let isInterior (t0, _) = Interval.includes t0 subdomainInterior
+            let isInterior (t0, _) = Interval.member t0 subdomainInterior
             if NonEmpty.all isInterior subdomainZeros
               then Solve1D.return (NonEmpty.map toZero subdomainZeros)
               else Solve1D.recurse

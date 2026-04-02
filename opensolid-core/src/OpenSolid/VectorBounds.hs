@@ -1,7 +1,7 @@
 module OpenSolid.VectorBounds
   ( VectorBounds
   , Exists
-  , includes
+  , member
   , center
   , squaredMagnitude_
   , magnitude
@@ -101,7 +101,7 @@ class
   ) =>
   Exists dimension units space
   where
-  includes :: Vector dimension units space -> VectorBounds dimension units space -> Bool
+  member :: Vector dimension units space -> VectorBounds dimension units space -> Bool
   center :: VectorBounds dimension units space -> Vector dimension units space
   squaredMagnitude_ :: VectorBounds dimension units space -> Interval (units ?*? units)
   magnitude :: VectorBounds dimension units space -> Interval units
@@ -112,7 +112,7 @@ class
   areIndependent :: VectorBounds dimension units space -> VectorBounds dimension units space -> Bool
 
 instance Exists 1 units Void where
-  includes = Interval.includes
+  member = Interval.member
   center = Interval.midpoint
   squaredMagnitude_ = Interval.squared_
   magnitude = Interval.abs
@@ -126,7 +126,7 @@ instance Exists 1 units Void where
   areIndependent _ _ = False
 
 instance Exists 2 units Void where
-  includes = VectorBounds2D.includes
+  member = VectorBounds2D.member
   center = VectorBounds2D.center
   squaredMagnitude_ = VectorBounds2D.squaredMagnitude_
   magnitude = VectorBounds2D.magnitude
@@ -137,7 +137,7 @@ instance Exists 2 units Void where
   areIndependent = VectorBounds2D.areIndependent
 
 instance Exists 3 units space where
-  includes = VectorBounds3D.includes
+  member = VectorBounds3D.member
   center = VectorBounds3D.center
   squaredMagnitude_ = VectorBounds3D.squaredMagnitude_
   magnitude = VectorBounds3D.magnitude

@@ -34,7 +34,7 @@ module OpenSolid.VectorBounds2D
   , exclusion#
   , inclusion
   , inclusion#
-  , includes
+  , member
   , contains
   , isContainedIn
   , separation
@@ -267,8 +267,8 @@ inclusion vector box = Quantity# (inclusion# vector box)
 inclusion# :: Vector2D units -> VectorBounds2D units -> Double#
 inclusion# vector box = negate# (exclusion# vector box)
 
-includes :: Vector2D units -> VectorBounds2D units -> Bool
-includes (Vector2D vx vy) (VectorBounds2D x y) = Interval.includes vx x && Interval.includes vy y
+member :: Vector2D units -> VectorBounds2D units -> Bool
+member (Vector2D vx vy) (VectorBounds2D x y) = Interval.member vx x && Interval.member vy y
 
 contains :: VectorBounds2D units -> VectorBounds2D units -> Bool
 contains (VectorBounds2D x2 y2) (VectorBounds2D x1 y1) =
