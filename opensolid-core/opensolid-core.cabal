@@ -335,6 +335,7 @@ test-suite opensolid-core-test
   other-modules:
     Test
     Tests.Array
+    Tests.Body3D
     Tests.Bounds2D
     Tests.Bounds3D
     Tests.Curve1D
