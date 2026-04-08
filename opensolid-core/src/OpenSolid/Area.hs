@@ -5,6 +5,9 @@ module OpenSolid.Area
   , squareMeters
   , inSquareMeters
   , squareMeter
+  , squareCentimeters
+  , inSquareCentimeters
+  , squareCentimeter
   , squareInches
   , inSquareInches
   , squareInch
@@ -34,6 +37,10 @@ zero = Quantity.zero
 squareMeter :: Area
 squareMeter = squareMeters 1.0
 
+-- | One square centimeter
+squareCentimeter :: Area
+squareCentimeter = Length.centimeter * Length.centimeter
+
 -- | One square inch.
 squareInch :: Area
 squareInch = Length.inch * Length.inch
@@ -45,6 +52,14 @@ squareMeters = Quantity.coerce
 -- | Convert an area to a number of square meters.
 inSquareMeters :: Area -> Number
 inSquareMeters = Quantity.coerce
+
+-- | Construct an area from a number of square centimeters.
+squareCentimeters :: Number -> Area
+squareCentimeters = (* squareCentimeter)
+
+-- | Convert an area to a number of square centimeters.
+inSquareCentimeters :: Area -> Number
+inSquareCentimeters = (/ squareCentimeter)
 
 -- | Construct an area from a number of square inches.
 squareInches :: Number -> Area
