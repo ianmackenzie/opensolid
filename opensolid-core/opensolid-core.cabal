@@ -243,6 +243,7 @@ library
     OpenSolid.Transform2D
     OpenSolid.Transform3D
     OpenSolid.Triangle2D
+    OpenSolid.Triangle3D
     OpenSolid.Units
     OpenSolid.UvBounds
     OpenSolid.UvPoint
