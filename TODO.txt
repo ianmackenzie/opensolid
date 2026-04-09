@@ -1,3 +1,5 @@
+Switch back to Nix for GHC/Cabal
+
 Simplify Body3D 'stitching'
 - should be able to avoid iterative construction if surfaces are assumed to be oriented properly
   - independently compare every surface to every other surface...
