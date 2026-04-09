@@ -7,7 +7,7 @@ module OpenSolid.Result
   , collect
   , foldl
   , foldr
-  , sequence
+  , all
   )
 where
 
@@ -40,5 +40,5 @@ foldl = Data.Foldable.foldlM
 foldr :: (a -> b -> Result x b) -> b -> List a -> Result x b
 foldr = Data.Foldable.foldrM
 
-sequence :: List (Result x a) -> Result x (List a)
-sequence = Prelude.sequence
+all :: List (Result x a) -> Result x (List a)
+all = Prelude.sequence

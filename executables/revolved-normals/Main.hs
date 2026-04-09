@@ -27,7 +27,7 @@ main = Tolerance.using Tolerance.length do
   let profiles = [leftRegion, rightRegion]
   bodies <-
     Result.orFail do
-      Result.sequence
+      Result.all
         [ Body3D.revolved World3D.frontPlane profile axis sweptAngle
         | profile <- profiles
         , axis <- axes
