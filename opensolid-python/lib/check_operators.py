@@ -325,8 +325,15 @@ if __name__ == "__main__":
             try:
                 print("Checking addition of " + t1.__name__ + " and " + t2.__name__)
                 sum = dummy1 + dummy2
-            except Exception:
-                print("Failed to add " + t1.__name__ + " and " + t2.__name__)
+            except Exception as e:
+                print(
+                    "Failed to add "
+                    + t1.__name__
+                    + " and "
+                    + t2.__name__
+                    + ": "
+                    + str(e)
+                )
                 continue
             if not isinstance(sum, output_type):
                 print(
@@ -409,8 +416,15 @@ if __name__ == "__main__":
             try:
                 print("Checking subtraction of " + t1.__name__ + " and " + t2.__name__)
                 difference = dummy1 - dummy2
-            except Exception:
-                print("Failed to subtract " + t1.__name__ + " and " + t2.__name__)
+            except Exception as e:
+                print(
+                    "Failed to subtract "
+                    + t1.__name__
+                    + " and "
+                    + t2.__name__
+                    + ": "
+                    + str(e)
+                )
                 continue
             if not isinstance(difference, output_type):
                 print(
@@ -485,8 +499,15 @@ if __name__ == "__main__":
             try:
                 print("Checking product of " + t1.__name__ + " and " + t2.__name__)
                 product = dummy1 * dummy2
-            except Exception:
-                print("Failed to multiply " + t1.__name__ + " and " + t2.__name__)
+            except Exception as e:
+                print(
+                    "Failed to multiply "
+                    + t1.__name__
+                    + " and "
+                    + t2.__name__
+                    + ": "
+                    + str(e)
+                )
                 continue
             if not isinstance(product, output_type):
                 print(
@@ -554,8 +575,15 @@ if __name__ == "__main__":
                 print("Checking quotient of " + t1.__name__ + " and " + t2.__name__)
                 with Tolerance(tolerance_value(units[t2])):
                     quotient = dummy1 / dummy2
-            except Exception:
-                print("Failed to divide " + t1.__name__ + " and " + t2.__name__)
+            except Exception as e:
+                print(
+                    "Failed to divide "
+                    + t1.__name__
+                    + " and "
+                    + t2.__name__
+                    + ": "
+                    + str(e)
+                )
                 continue
             if not isinstance(quotient, output_type):
                 print(
