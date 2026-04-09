@@ -7,7 +7,6 @@ from opensolid import (
     Length,
     Point2D,
     Svg,
-    Tolerance,
     Triangle2D,
     Vector2D,
 )
@@ -29,14 +28,12 @@ else:
     print("Intersection:", r)
 
 v = Vector2D.meters(1, 2)
-with Tolerance(Length.nanometers(1)):
-    print(v.direction().components)
+print(v.direction().components)
 
 theta = Angle.two_pi * Curve.t
 c = theta.cos()
-with Tolerance(1e-9):
-    roots = [zero.location for zero in c.zeros()]
-    print(roots)
+roots = [zero.location for zero in c.zeros()]
+print(roots)
 
 color1 = Color.hex("#555555")
 print(color1.to_rgb1())

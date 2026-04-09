@@ -53,6 +53,7 @@ import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Step qualified as Step
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Svg qualified as Svg
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
@@ -76,6 +77,7 @@ classes =
   [ length
   , area
   , angle
+  , tolerance
   , unitlessInterval
   , interval
   , areaInterval
@@ -143,6 +145,7 @@ length :: Class
 length =
   Class.new @Length $(docs ''Length) $
     [ Class.constant "Zero" Length.zero $(docs 'Length.zero)
+    , Class.constant "Default Tolerance" Length.defaultTolerance $(docs 'Length.defaultTolerance)
     , Class.factory3 "Interpolate" "Start" "End" "Parameter Value" Quantity.interpolateFrom $(docs 'Quantity.interpolateFrom)
     , Class.static3 "Steps" "Start" "End" "N" (Quantity.steps @Meters) $(docs 'Quantity.steps)
     , Class.static3 "Leading" "Start" "End" "N" (Quantity.leading @Meters) $(docs 'Quantity.leading)
@@ -292,6 +295,13 @@ angle =
     , Class.divByR (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.floorDivBySelf
     , Class.modBySelf
+    ]
+
+tolerance :: Class
+tolerance =
+  Class.static "Tolerance" "Tolerance values used by OpenSolid." $
+    [ Class.constant "Unitless" Tolerance.unitless $(docs 'Tolerance.unitless)
+    , Class.constant "Angle" Tolerance.angle $(docs 'Tolerance.angle)
     ]
 
 type UnitlessInterval = Interval.Interval Unitless

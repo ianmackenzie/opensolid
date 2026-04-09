@@ -1,3 +1,4 @@
+import contextlib
 from dataclasses import dataclass
 
 from opensolid import (
@@ -243,15 +244,15 @@ def find_output_type(
             )
 
 
-def tolerance_value(units):
+def tolerance_context(units):
     if units == unitless:
-        return 1e-9
+        return contextlib.nullcontext()
     elif units == length_units:
-        return Length.meters(1e-9)
+        return contextlib.nullcontext()
     elif units == area_units:
-        return Area.square_meters(1e-9)
+        return Tolerance.area(Area.square_meters(1e-9))
     elif units == angle_units:
-        return Angle.radians(1e-9)
+        return contextlib.nullcontext()
     else:
         assert False, "Unrecognized units type: " + str(units)
 
@@ -573,7 +574,7 @@ if __name__ == "__main__":
             dummy2 = dummy_value[t2]
             try:
                 print("Checking quotient of " + t1.__name__ + " and " + t2.__name__)
-                with Tolerance(tolerance_value(units[t2])):
+                with tolerance_context(units[t2]):
                     quotient = dummy1 / dummy2
             except Exception as e:
                 print(

@@ -92,10 +92,10 @@ implicitValue argType = (implicitGetter argType, ImplicitArgument.ffiType argTyp
 
 implicitGetter :: ImplicitArgument -> Text
 implicitGetter argType = case argType of
-  ImplicitArgument.ToleranceUnitless -> "_float_tolerance()"
+  ImplicitArgument.ToleranceUnitless -> "Tolerance.unitless"
+  ImplicitArgument.ToleranceRadians -> "Tolerance.angle"
   ImplicitArgument.ToleranceMeters -> "_length_tolerance()"
   ImplicitArgument.ToleranceSquareMeters -> "_area_tolerance()"
-  ImplicitArgument.ToleranceRadians -> "_angle_tolerance()"
 
 arguments :: "includeSelf" ::: Bool -> List (Name, FFI.Type) -> List (Name, FFI.Type) -> Text
 arguments ("includeSelf" ::: includeSelf) positional named = do
