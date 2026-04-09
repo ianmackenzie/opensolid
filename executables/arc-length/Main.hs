@@ -57,7 +57,7 @@ analyticalLength (Point2D x0 y0) (Point2D x1 y1) (Point2D x2 y2) = do
   (a_32 * s_abc + a_2 * b * (s_abc - c_2) + (4.0 * c * a - b * b) * Number.log ((2.0 * a_2 + ba + s_abc) / (ba + c_2))) / (4.0 * a_32)
 
 testCubicSplineParameterization :: IO ()
-testCubicSplineParameterization = Tolerance.using Length.nanometer do
+testCubicSplineParameterization = Tolerance.using Length.defaultTolerance do
   let p1 = Point2D.centimeters 5.0 5.0
   let p2 = Point2D.centimeters 14.0 15.0
   let p3 = Point2D.centimeters 16.0 15.0

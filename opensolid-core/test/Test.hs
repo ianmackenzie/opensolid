@@ -24,6 +24,7 @@ import Control.Exception (SomeException)
 import Control.Exception qualified
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.IO qualified as IO
+import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
@@ -81,14 +82,14 @@ verifyWith :: Quantity units -> Text -> (Tolerance units => Expectation) -> Test
 verifyWith tolerance = checkWith tolerance 1
 
 verify :: Text -> (Tolerance Meters => Expectation) -> Test
-verify = verifyWith Tolerance.length
+verify = verifyWith Length.defaultTolerance
 
 checkWith :: Quantity units -> Int -> Text -> (Tolerance units => Expectation) -> Test
 checkWith tolerance count label expectation =
   Check count label (Tolerance.using tolerance expectation)
 
 check :: Int -> Text -> (Tolerance Meters => Expectation) -> Test
-check = checkWith Tolerance.length
+check = checkWith Length.defaultTolerance
 
 group :: Text -> List Test -> Test
 group = Group

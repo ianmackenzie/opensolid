@@ -18,7 +18,7 @@ import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 main :: IO ()
-main = Tolerance.using Length.nanometer do
+main = Tolerance.using Length.defaultTolerance do
   let weightCurve = Curve1D.quadraticSpline 1.0 (1.0 / Number.sqrt 2.0) 1.0
   let vE = Vector2D 1.0 0.0
   let vNE = Vector2D 1.0 1.0 / Number.sqrt 2.0

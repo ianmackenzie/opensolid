@@ -48,7 +48,7 @@ advancedFaceEntity loop surface =
     ]
 
 main :: IO ()
-main = Tolerance.using (Length.nanometers 1.0) do
+main = Tolerance.using Length.defaultTolerance do
   let rLarge = Length.centimeters 1.0
   let rSmall = Length.centimeters 0.5
   let thickness = Length.millimeters 3.0

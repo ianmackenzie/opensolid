@@ -21,7 +21,7 @@ import OpenSolid.World3D qualified as World3D
 import Prelude hiding (length)
 
 main :: IO ()
-main = Tolerance.using Length.nanometer do
+main = Tolerance.using Length.defaultTolerance do
   let radius = Length.meters 1.0
   let length = Length.meters 4.0
   let arc =

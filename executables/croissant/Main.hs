@@ -16,7 +16,7 @@ import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
-main = Tolerance.using Length.nanometer do
+main = Tolerance.using Length.defaultTolerance do
   let majorRadius = Length.meter
   let k = Length.meters 2.0
   let minorRadius =

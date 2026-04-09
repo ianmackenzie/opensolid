@@ -18,7 +18,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Triangle2D (Triangle2D (Triangle2D))
 
 main :: IO ()
-main = Tolerance.using Length.nanometer do
+main = Tolerance.using Length.defaultTolerance do
   let width = Length.centimeters 18.0
   let height = Length.centimeters 12.0
   let cornerRadius = Length.centimeters 5.0

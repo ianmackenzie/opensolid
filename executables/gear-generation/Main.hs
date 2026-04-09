@@ -34,7 +34,7 @@ gearBody numTeeth = do
   Body3D.extruded World3D.frontPlane profile (-0.5 * width) (0.5 * width) & Result.orFail
 
 main :: IO ()
-main = Tolerance.using Length.nanometer do
+main = Tolerance.using Length.defaultTolerance do
   let resolution = Resolution.maxError (Length.millimeters 0.01)
   let writeGlb numTeeth = do
         timer <- Timer.start

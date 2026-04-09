@@ -1,6 +1,7 @@
 module OpenSolid.Length
   ( Length
   , zero
+  , defaultTolerance
   , meter
   , millimeter
   , centimeter
@@ -39,6 +40,14 @@ type Length = Quantity Meters
 -- | The zero value.
 zero :: Length
 zero = Quantity.zero
+
+{-| The default length tolerance of 1e-9 meters (one nanometer).
+
+This should be a reasonable default for "human-scale" objects
+(from, say, the size of an earring up to the size of a house).
+-}
+defaultTolerance :: Length
+defaultTolerance = nanometers 1.0
 
 -- | One meter.
 meter :: Length

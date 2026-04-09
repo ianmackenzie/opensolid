@@ -140,11 +140,11 @@ vectorBounds2D :: Generator (VectorBounds2D Meters)
 vectorBounds2D = Random.map2 VectorBounds2D lengthInterval lengthInterval
 
 line2D :: Generator (Curve2D Meters)
-line2D = Tolerance.using Tolerance.length do
+line2D = Tolerance.using Length.defaultTolerance do
   Random.map2 Curve2D.lineFrom point2D point2D
 
 arc2D :: Generator (Curve2D Meters)
-arc2D = Tolerance.using Tolerance.length do
+arc2D = Tolerance.using Length.defaultTolerance do
   startPoint <- point2D
   endPoint <- point2D
   angleSign <- Random.sign

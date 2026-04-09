@@ -31,7 +31,7 @@ data Space
 
 tests :: List Test
 tests =
-  Tolerance.using Length.nanometer $
+  Tolerance.using Length.defaultTolerance $
     [ quadratic1D
     , arc2D
     , simpleSurface2D

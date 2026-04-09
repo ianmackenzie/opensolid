@@ -16,7 +16,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
-main = Tolerance.using Length.nanometer do
+main = Tolerance.using Length.defaultTolerance do
   let p1 = Point2D.origin
   let p2 = Point2D.centimeters 20.0 0.0
   let p3 = Point2D.centimeters 20.0 10.0
