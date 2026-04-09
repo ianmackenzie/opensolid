@@ -32,7 +32,7 @@ main = do
   let domainCenter = UvPoint 0.5 0.5
   let domainDiameter = 2 / 3
   let domainCircle = Curve2D.circle (Circle2D.withDiameter domainDiameter domainCenter)
-  domain <- Tolerance.using 1e-9 do Region2D.boundedBy [domainCircle] & Result.orFail
+  domain <- Tolerance.using Tolerance.unitless do Region2D.boundedBy [domainCircle] & Result.orFail
   let surface = Surface3D.parametric surfaceFunction domain
   let mesh = Surface3D.toMesh (Length.millimeters 2.0) surface
   IO.printLine ("Num faces: " <> Text.int (Mesh.numFaces mesh))

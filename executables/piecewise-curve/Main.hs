@@ -31,7 +31,7 @@ main = Tolerance.using Length.defaultTolerance do
   let radius = Length.centimeters 10.0
   let arc v1 v2 v3 = do
         radialUnitVector <-
-          Tolerance.using 1e-9 do
+          Tolerance.using Tolerance.unitless do
             VectorCurve2D.quotient (VectorCurve2D.quadraticBezier v1 v2 v3) weightCurve
               & Result.orFail
         IO.succeed (Point2D.origin + radius * radialUnitVector)

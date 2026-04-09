@@ -197,7 +197,7 @@ testPlaneTorusIntersection = do
   log "  Saddle points" (List.length zeros.saddlePoints)
 
 testPlaneParaboloidIntersection :: IO ()
-testPlaneParaboloidIntersection = Tolerance.using 1e-9 do
+testPlaneParaboloidIntersection = Tolerance.using Tolerance.unitless do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
   let f = SurfaceFunction1D.squared u + SurfaceFunction1D.squared v - 0.5
@@ -364,7 +364,7 @@ testTextSum = do
     log "sum" sum
 
 testNewtonRaphson2D :: IO ()
-testNewtonRaphson2D = Tolerance.using 1e-9 do
+testNewtonRaphson2D = Tolerance.using Tolerance.unitless do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
   let f = SurfaceFunction1D.squared u + SurfaceFunction1D.squared v - 4.0
@@ -398,7 +398,7 @@ testCurve2dExpression = do
   log "Evaluated 2D curve" (Expression.value curve 3.0)
 
 testQuotientDesingularization :: IO ()
-testQuotientDesingularization = Tolerance.using 1e-9 do
+testQuotientDesingularization = Tolerance.using Tolerance.unitless do
   let numerator = Curve1D.sin (Angle.pi * Curve1D.t)
   let denominator = Curve1D.t * (1.0 - Curve1D.t)
   quotient <- Curve1D.quotient numerator denominator & Result.orFail

@@ -74,5 +74,5 @@ tripleProduct = Test.check 1000 "tripleProduct" do
   (bounds3, vector3) <- Test.generate boundsAndContainedVector
   let boundsTripleProduct = VectorBounds3D.tripleProduct bounds1 bounds2 bounds3
   let vectorTripleProduct = (vector1 `cross` vector2) `dot` vector3
-  Tolerance.using (1e-9 * Volume.cubicMeter) $
+  Tolerance.using (Tolerance.unitless * Volume.cubicMeter) $
     Test.expect (vectorTripleProduct `intersects` boundsTripleProduct)

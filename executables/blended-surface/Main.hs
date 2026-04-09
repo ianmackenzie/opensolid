@@ -18,7 +18,7 @@ import OpenSolid.UvPoint (pattern UvPoint)
 import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
-main = Tolerance.using 1e-9 do
+main = Tolerance.using Tolerance.unitless do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
   f <- SurfaceFunction1D.quotient (u * (5.0 - 2.0 * v)) (u * (1.0 + v)) & Result.orFail
