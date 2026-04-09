@@ -1,18 +1,6 @@
-Switch back to Nix for GHC/Cabal
-
 Simplify Body3D 'stitching'
 - should be able to avoid iterative construction if surfaces are assumed to be oriented properly
   - independently compare every surface to every other surface...
-
-Have World3D.forwardAxis etc. take an origin point argument?
-- could of course be World3D.originPoint to get "the" forward axis...
-
-Add default tolerances to Python library
-- and allow setting separate tolerances separately
-
-Try having type-safe exponentiation operator that takes exponent as *type* argument?
-
-Add 'division' of objects by Frame2D/Frame3D values to mean 'relativeTo'?
 
 Refactor Surface3D to be composed of a list of patches
 
