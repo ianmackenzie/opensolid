@@ -85,8 +85,8 @@ area = Test.verify "area" do
   let areaEstimate = Curve1D.integrate dAdt
   let expectedArea = Area.squareMeters Number.halfPi
   areaIsCorrect <-
-    Tolerance.using (Area.squareMeters 1e-4) $
-      Result.orFail (resolvesTo expectedArea areaEstimate)
+    Tolerance.using (Area.squareMeters 1e-4) do
+      resolvesTo expectedArea areaEstimate & Result.orFail
   Test.expect areaIsCorrect
 
 minimumBy :: Test

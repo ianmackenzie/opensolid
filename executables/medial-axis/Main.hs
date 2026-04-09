@@ -59,7 +59,7 @@ testSplineAndLine = do
 testCurveMedialAxis :: Tolerance Meters => Text -> Curve2D Meters -> Curve2D Meters -> IO ()
 testCurveMedialAxis label curve1 curve2 = do
   timer <- Timer.start
-  segments <- Result.orFail (Curve2D.medialAxis curve1 curve2)
+  segments <- Curve2D.medialAxis curve1 curve2 & Result.orFail
   let drawTangentCircles (segment :: Curve2D.MedialAxis.Segment Meters) = do
         let (parameterization, _) = Curve2D.arcLengthParameterization segment.curve
         let drawTangentCircle u = do

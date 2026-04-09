@@ -29,7 +29,7 @@ main = Tolerance.using Length.nanometer do
   let p3 = Point2D (width - cornerRadius) height
   let p4 = Point2D.y height
   let holeCenter = Point2D (width - cornerRadius) (height - cornerRadius)
-  region <- Result.orFail do
+  region <-
     Region2D.boundedBy
       [ Curve2D.lineFrom p0 p1
       , Curve2D.lineFrom p1 p2
@@ -38,6 +38,7 @@ main = Tolerance.using Length.nanometer do
       , Curve2D.lineFrom p4 p0
       , Curve2D.circle (Circle2D.withDiameter holeDiameter holeCenter)
       ]
+      & Result.orFail
   let resolution = Resolution.maxError (Length.millimeters 1.0)
   let mesh = Region2D.toMesh resolution region
   let triangles = Mesh.faceVertices mesh

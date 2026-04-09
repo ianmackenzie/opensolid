@@ -21,8 +21,8 @@ main :: IO ()
 main = Tolerance.using 1e-9 do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
-  f <- Result.orFail (SurfaceFunction1D.quotient (u * (5.0 - 2.0 * v)) (u * (1.0 + v)))
-  expression <- Result.orFail (CompiledFunction.expression f.compiled)
+  f <- SurfaceFunction1D.quotient (u * (5.0 - 2.0 * v)) (u * (1.0 + v)) & Result.orFail
+  expression <- CompiledFunction.expression f.compiled & Result.orFail
   IO.printLine (Expression.debug expression)
   let meshPoint uvPoint = do
         let UvPoint uValue vValue = uvPoint

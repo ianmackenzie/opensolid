@@ -30,11 +30,10 @@ main = Tolerance.using Length.nanometer do
   let vSE = Vector2D 1.0 -1.0 / Number.sqrt 2.0
   let radius = Length.centimeters 10.0
   let arc v1 v2 v3 = do
-        radialUnitVector <- Result.orFail do
-          Tolerance.using 1e-9 $
-            VectorCurve2D.quotient
-              (VectorCurve2D.quadraticBezier v1 v2 v3)
-              weightCurve
+        radialUnitVector <-
+          Tolerance.using 1e-9 do
+            VectorCurve2D.quotient (VectorCurve2D.quadraticBezier v1 v2 v3) weightCurve
+              & Result.orFail
         IO.succeed (Point2D.origin + radius * radialUnitVector)
   arc1 <- arc vE vNE vN
   arc2 <- arc vN vNW vW

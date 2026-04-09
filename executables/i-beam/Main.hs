@@ -39,9 +39,9 @@ main = Tolerance.using Length.nanometer do
         , webTopRight & Point2D.mirrorAcross Axis2D.x
         , webTopRight & Point2D.mirrorAcross Axis2D.y & Point2D.mirrorAcross Axis2D.x
         ]
-  baseProfile <- Result.orFail (Region2D.polygon (Polygon2D allPoints))
-  profile <- Result.orFail (Region2D.fillet filletPoints (#radius filletRadius) baseProfile)
-  body <- Result.orFail (Body3D.extruded World3D.frontPlane profile (-0.5 * length) (0.5 * length))
+  baseProfile <- Region2D.polygon (Polygon2D allPoints) & Result.orFail
+  profile <- Region2D.fillet filletPoints (#radius filletRadius) baseProfile & Result.orFail
+  body <- Body3D.extruded World3D.frontPlane profile (-0.5 * length) (0.5 * length) & Result.orFail
   let material = PbrMaterial.metal (Color.rgb1 0.913 0.921 0.925) (#roughness 0.3)
   let model = Model3D.bodyWith [Model3D.pbrMaterial material] body
   let resolution = Resolution.maxError (Length.millimeters 1.0)

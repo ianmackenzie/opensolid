@@ -4,6 +4,7 @@
 
 module Main (main) where
 
+import Data.Function ((&))
 import OpenSolid qualified
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Body3D qualified as Body3D
@@ -30,10 +31,10 @@ main = Tolerance.using Length.nanometer do
           (#startAngle (Angle.degrees -45.0))
           (#endAngle (Angle.degrees 225.0))
   let line = Curve2D.lineFrom (Curve2D.endPoint arc) (Curve2D.startPoint arc)
-  profile <- Result.orFail (Region2D.boundedBy [arc, line])
+  profile <- Region2D.boundedBy [arc, line] & Result.orFail
   let extrusionStart = OpenSolid.product (OpenSolid.number -0.5) length
   let extrusionEnd = OpenSolid.product (OpenSolid.number 0.5) length
-  body <- Result.orFail (Body3D.extruded World3D.frontPlane profile extrusionStart extrusionEnd)
+  body <- Body3D.extruded World3D.frontPlane profile extrusionStart extrusionEnd & Result.orFail
   let resolution = Resolution.maxSize (Length.centimeters 30.0)
   let mesh = Body3D.toPointMesh resolution body
   let outputPath = "executables/body3d-meshing/mesh.stl"

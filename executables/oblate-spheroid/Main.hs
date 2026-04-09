@@ -22,8 +22,8 @@ main = Tolerance.using Length.nanometer do
   let p3 = Point2D.centimeters 20.0 10.0
   let p4 = Point2D.centimeters 0.0 10.0
   let spline = Curve2D.cubicBezier p1 p2 p3 p4
-  profile <- Result.orFail (Region2D.boundedBy [spline, Curve2D.lineFrom p4 p1])
-  body <- Result.orFail (Body3D.revolved World3D.rightPlane profile Axis2D.y Angle.twoPi)
+  profile <- Region2D.boundedBy [spline, Curve2D.lineFrom p4 p1] & Result.orFail
+  body <- Body3D.revolved World3D.rightPlane profile Axis2D.y Angle.twoPi & Result.orFail
   let model = Model3D.body body
   let resolution = Resolution.maxError (Length.millimeters 0.05)
   Gltf.writeBinary "executables/oblate-spheroid/mesh.glb" model resolution

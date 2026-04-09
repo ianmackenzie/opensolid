@@ -12,6 +12,6 @@ import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
 main = Tolerance.using Tolerance.length do
-  body <- Result.orFail (Body3D.sphere (#centerPoint World3D.originPoint) (#diameter (Length.centimeters 10.0)))
+  body <- Body3D.sphere (#centerPoint World3D.originPoint) (#diameter (Length.centimeters 10.0)) & Result.orFail
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   Stl.writeText "executables/sphere/mesh.stl" Convention3D.yUp Length.inMillimeters (Body3D.toPointMesh resolution body)

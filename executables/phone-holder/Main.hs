@@ -55,7 +55,7 @@ main = Tolerance.using (Length.nanometers 1.0) do
   let width = Length.centimeters 5.0
 
   let baseLine = Line2D Point2D.origin (Point2D.centimeters 5.0 0.0)
-  profilePath <- Result.orFail do
+  profilePath <-
     Ok (NonEmpty.one (Edge2D.Line baseLine))
       & Result.andThen (Path2D.addArc rLarge (Angle.degrees 100.0))
       & Result.andThen (Path2D.addLine (Length.centimeters 5.0))
@@ -65,8 +65,9 @@ main = Tolerance.using (Length.nanometers 1.0) do
       & Result.andThen (Path2D.addLine (Length.centimeters 1.0))
       & Result.andThen (Path2D.addArc rSmall (Angle.degrees -90.0))
       & Result.andThen (Path2D.addLine (Length.centimeters 1.0))
+      & Result.orFail
 
-  profile2D <- Result.orFail (Path2D.thickenLeftwardBy thickness profilePath)
+  profile2D <- Path2D.thickenLeftwardBy thickness profilePath & Result.orFail
 
   let midPlane = World3D.rightPlane
   let rightPlane = midPlane & Plane3D.offsetBy (0.5 * width)
@@ -103,7 +104,7 @@ main = Tolerance.using (Length.nanometers 1.0) do
         let loop = NonEmpty.four leftEdge endEdge rightEdge startEdge
         Ok (advancedFaceEntity loop surface)
 
-  extrudedFaces <- Result.orFail (Result.collect extrudedFace (NonEmpty.loop (,) profile2D))
+  extrudedFaces <- Result.collect extrudedFace (NonEmpty.loop (,) profile2D) & Result.orFail
   let allFaces = extrudedFaces & NonEmpty.push leftFace & NonEmpty.push rightFace
   let closedShell =
         Step.entity "CLOSED_SHELL" $

@@ -48,7 +48,7 @@ squareArea = Test.verify "squareArea" do
   let line2 = Curve2D.lineFrom p2 p3
   let line3 = Curve2D.lineFrom p4 p3
   let line4 = Curve2D.lineFrom p4 p1
-  region <- Result.orFail (Region2D.boundedBy [line1, line3, line2, line4])
+  region <- Region2D.boundedBy [line1, line3, line2, line4] & Result.orFail
   Test.expect (areaIsApproximately (width * width) region)
 
 quarterCircleArea :: Test
@@ -60,7 +60,7 @@ quarterCircleArea = Test.verify "quarterCircleArea" do
   let line1 = Curve2D.lineFrom p1 p2
   let line2 = Curve2D.lineFrom p1 p3
   let arc = Curve2D.arcFrom p2 p3 Angle.quarterTurn
-  region <- Result.orFail (Region2D.boundedBy [line1, line2, arc])
+  region <- Region2D.boundedBy [line1, line2, arc] & Result.orFail
   let expectedArea = 0.25 * Number.pi * radius * radius
   Test.expect (areaIsApproximately expectedArea region)
 
@@ -79,7 +79,7 @@ squareWithHoleArea = Test.verify "squareWithHoleArea" do
   let holeDiameter = 0.5 * width
   let holeRadius = 0.5 * holeDiameter
   let hole = Curve2D.circle (Circle2D.withDiameter holeDiameter centerPoint)
-  region <- Result.orFail (Region2D.boundedBy [line1, line3, line2, line4, hole])
+  region <- Region2D.boundedBy [line1, line3, line2, line4, hole] & Result.orFail
   let expectedArea = width * width - Number.pi * holeRadius * holeRadius
   Test.expect (areaIsApproximately expectedArea region)
 
@@ -159,7 +159,7 @@ pointContainment = Test.verify "pointContainment" do
           , circle 2.5 0.5
           , square 2.5 1.5
           ]
-  region <- Result.orFail (Region2D.boundedBy boundaryCurves)
+  region <- Region2D.boundedBy boundaryCurves & Result.orFail
   let expectInside points = Test.combine (Test.expect . intersects region) points
   let expectOutside points = Test.combine (Test.expect . not . intersects region) points
   Test.all

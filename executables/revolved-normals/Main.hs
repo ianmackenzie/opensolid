@@ -22,17 +22,17 @@ main = Tolerance.using Tolerance.length do
   let axes = [Axis2D.y, -Axis2D.y]
   let sweptAngles = [Angle.degrees 45.0, Angle.degrees -45.0]
   let interval = Interval (Length.centimeters 5.0) (Length.centimeters 10.0)
-  leftRegion <- Result.orFail (Region2D.rectangle (Bounds2D -interval interval))
-  rightRegion <- Result.orFail (Region2D.rectangle (Bounds2D interval interval))
+  leftRegion <- Region2D.rectangle (Bounds2D -interval interval) & Result.orFail
+  rightRegion <- Region2D.rectangle (Bounds2D interval interval) & Result.orFail
   let profiles = [leftRegion, rightRegion]
   bodies <-
-    Result.orFail do
-      Result.all
-        [ Body3D.revolved World3D.frontPlane profile axis sweptAngle
-        | profile <- profiles
-        , axis <- axes
-        , sweptAngle <- sweptAngles
-        ]
+    Result.all
+      [ Body3D.revolved World3D.frontPlane profile axis sweptAngle
+      | profile <- profiles
+      , axis <- axes
+      , sweptAngle <- sweptAngles
+      ]
+      & Result.orFail
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   IO.forEachWithIndex bodies $ \index body -> do
     let path = "executables/revolved-normals/mesh" <> Text.int (index + 1) <> ".stl"

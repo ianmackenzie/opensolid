@@ -141,7 +141,7 @@ curveOverlap1 :: Test
 curveOverlap1 = Test.verify "curveOverlap1" do
   let arc1 = Curve2D.arcFrom (Point2D.meters 1.0 0.0) (Point2D.meters -1.0 0.0) Angle.halfTurn
   let arc2 = Curve2D.arcFrom (Point2D.meters 0.0 -1.0) (Point2D.meters 0.0 1.0) Angle.halfTurn
-  (sign, actualSegments) <- Result.orFail (overlappingSegments arc1 arc2)
+  (sign, actualSegments) <- overlappingSegments arc1 arc2 & Result.orFail
   let expectedSegments = NonEmpty.one (Interval 0.0 0.5, Interval 0.5 1.0)
   Test.all
     [ Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
@@ -162,7 +162,7 @@ curveOverlap2 = Test.verify "curveOverlap2" do
           (#radius Length.meter)
           (#startAngle (Angle.degrees -45.0))
           (#endAngle (Angle.degrees 225.0))
-  (sign, segments) <- Result.orFail (overlappingSegments arc1 arc2)
+  (sign, segments) <- overlappingSegments arc1 arc2 & Result.orFail
   let expectedSegments =
         NonEmpty.two
           (Interval 0.0 (1 / 4), Interval 0.0 (1 / 6))
@@ -176,7 +176,7 @@ crossingIntersection :: Test
 crossingIntersection = Test.verify "crossingIntersection" do
   let arc1 = Curve2D.arcFrom Point2D.origin (Point2D.meters 0.0 1.0) Angle.halfTurn
   let arc2 = Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
-  intersections <- Result.orFail (Curve2D.intersections arc1 arc2)
+  intersections <- Curve2D.intersections arc1 arc2 & Result.orFail
   let expectedIntersectionPoints =
         NonEmpty.two (IntersectionPoint.crossing 0.0 0.0) (IntersectionPoint.crossing 0.5 0.5)
   case intersections of
@@ -202,7 +202,7 @@ tangentIntersection = Test.verify "tangentIntersection" do
           (#radius (Length.meters 0.5))
           (#startAngle -Angle.pi)
           (#endAngle Angle.zero)
-  intersections <- Result.orFail (Curve2D.intersections arc1 arc2)
+  intersections <- Curve2D.intersections arc1 arc2 & Result.orFail
   let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent 0.5 0.5 Negative)
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
@@ -218,7 +218,7 @@ solving = Test.verify "solving" do
   let arc = Curve2D.arcFrom (Point2D.meters 0.0 1.0) (Point2D.meters 1.0 0.0) Angle.quarterTurn
   let distanceFromOrigin = VectorCurve2D.magnitude (arc - Point2D.origin)
   let desiredDistance = Length.meters 0.5
-  zeros <- Result.orFail (Curve1D.zeros (distanceFromOrigin - desiredDistance))
+  zeros <- Curve1D.zeros (distanceFromOrigin - desiredDistance) & Result.orFail
   let distanceAt zero = Point2D.distanceFrom Point2D.origin (Curve2D.point arc zero.location)
   Test.expect (List.map distanceAt zeros ~= [desiredDistance, desiredDistance])
 
@@ -229,7 +229,7 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" do
   p2 <- Test.generate Random.point2D
   let curve = Curve2D.cubicBezier p0 p0 p1 p2
   let decreasingTValues = [2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-  tangentDirection <- Result.orFail (Curve2D.tangentDirection curve)
+  tangentDirection <- Curve2D.tangentDirection curve & Result.orFail
   let startTangent = DirectionCurve2D.startValue tangentDirection
   let otherTangents = List.map (DirectionCurve2D.value tangentDirection) decreasingTValues
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom startTangent otherTangent)
@@ -243,7 +243,7 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" do
   p2 <- Test.generate Random.point2D
   let curve = Curve2D.cubicBezier p0 p1 p2 p2
   let increasingTValues = [1.0 - 2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-  tangentDirection <- Result.orFail (Curve2D.tangentDirection curve)
+  tangentDirection <- Curve2D.tangentDirection curve & Result.orFail
   let endTangent = DirectionCurve2D.endValue tangentDirection
   let otherTangents = List.map (DirectionCurve2D.value tangentDirection) increasingTValues
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom endTangent otherTangent)
@@ -258,7 +258,7 @@ tangentDerivativeIsPerpendicularToTangent =
     p2 <- Test.generate Random.point2D
     p3 <- Test.generate Random.point2D
     let curve = Curve2D.cubicBezier p0 p1 p2 p3
-    tangentDirection <- Result.orFail (Curve2D.tangentDirection curve)
+    tangentDirection <- Curve2D.tangentDirection curve & Result.orFail
     let tangentDerivative = DirectionCurve2D.derivative tangentDirection
     tValue <- Test.generate Parameter.random
     let tangent = DirectionCurve2D.value tangentDirection tValue
@@ -277,7 +277,7 @@ degenerateStartPointTangentDerivative =
     p2 <- Test.generate Random.point2D
     let curve = Curve2D.cubicBezier p0 p0 p1 p2
     let decreasingTValues = [2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-    tangentDirection <- Result.orFail (Curve2D.tangentDirection curve)
+    tangentDirection <- Curve2D.tangentDirection curve & Result.orFail
     let tangentDerivative = DirectionCurve2D.derivative tangentDirection
     let startTangentDerivative = VectorCurve2D.startValue tangentDerivative
     let otherTangentDerivatives =
@@ -297,7 +297,7 @@ degenerateEndPointTangentDerivative =
     p2 <- Test.generate Random.point2D
     let curve = Curve2D.cubicBezier p0 p1 p2 p2
     let increasingTValues = [1.0 - 2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-    tangentDirection <- Result.orFail (Curve2D.tangentDirection curve)
+    tangentDirection <- Curve2D.tangentDirection curve & Result.orFail
     let tangentDerivative = DirectionCurve2D.derivative tangentDirection
     let endTangentDerivative = VectorCurve2D.endValue tangentDerivative
     let otherTangentDerivatives =
@@ -430,8 +430,8 @@ g2 = Test.check 100 "G2 continuity" do
   let spline = Curve2D.cubicBezier p1 p2 p3 p4
   t <- Test.generate Parameter.random
   let point = Curve2D.point spline t
-  tangentCurve <- Result.orFail (Curve2D.tangentDirection spline)
-  curvatureCurve <- Result.orFail (Curve2D.curvature spline)
+  tangentCurve <- Curve2D.tangentDirection spline & Result.orFail
+  curvatureCurve <- Curve2D.curvature spline & Result.orFail
   let tangentDirection = DirectionCurve2D.value tangentCurve t
   let signedRadius = 1.0 / Curve1D.value curvatureCurve t
   let normalDirection = Direction2D.rotateLeft tangentDirection
@@ -450,7 +450,7 @@ curvatureVectorIsTangentDerivative =
     if p1 ~= p2 || p2 ~= p3 || p3 ~= p4
       then Test.fail "Randomly generated points are equal"
       else do
-        tangent <- Result.orFail (Curve2D.tangentDirection spline)
+        tangent <- Curve2D.tangentDirection spline & Result.orFail
         let tangentDerivative = DirectionCurve2D.derivative tangent
         let firstDerivative = Curve2D.derivative spline
         let curvatureVector = Units.specialize (Curve.Nonzero.curvatureVector_ (Nonzero spline))

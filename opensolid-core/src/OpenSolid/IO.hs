@@ -89,7 +89,7 @@ writeBinary path builder = Builder.writeFile (Text.unpack path) builder
 readUtf8 :: Text -> IO Text
 readUtf8 path = do
   bytes <- readBinary path
-  Result.orFail (Text.decodeUtf8 bytes)
+  Text.decodeUtf8 bytes & Result.orFail
 
 writeUtf8 :: Text -> Text -> IO ()
 writeUtf8 path text = do

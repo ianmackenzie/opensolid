@@ -65,7 +65,7 @@ curveOverlap1 = Test.verify "curveOverlap1" do
   let arc2 =
         Curve3D.on World3D.topPlane $
           Curve2D.arcFrom (Point2D.meters 0.0 -1.0) (Point2D.meters 0.0 1.0) Angle.halfTurn
-  (sign, actualSegments) <- Result.orFail (overlappingSegments arc1 arc2)
+  (sign, actualSegments) <- overlappingSegments arc1 arc2 & Result.orFail
   let expectedSegments = NonEmpty.one (Interval 0.0 0.5, Interval 0.5 1.0)
   Test.all
     [ Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
@@ -88,7 +88,7 @@ curveOverlap2 = Test.verify "curveOverlap2" do
             (#radius Length.meter)
             (#startAngle (Angle.degrees -45.0))
             (#endAngle (Angle.degrees 225.0))
-  (sign, segments) <- Result.orFail (overlappingSegments arc1 arc2)
+  (sign, segments) <- overlappingSegments arc1 arc2 & Result.orFail
   let expectedSegments =
         NonEmpty.two
           (Interval 0.0 (1 / 4), Interval 0.0 (1 / 6))
@@ -106,7 +106,7 @@ crossingIntersection = Test.verify "crossingIntersection" do
   let arc2 =
         Curve3D.on World3D.topPlane $
           Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
-  intersections <- Result.orFail (Curve3D.intersections arc1 arc2)
+  intersections <- Curve3D.intersections arc1 arc2 & Result.orFail
   let expectedIntersectionPoints =
         NonEmpty.two (IntersectionPoint.crossing 0.0 0.0) (IntersectionPoint.crossing 0.5 0.5)
   case intersections of
@@ -134,7 +134,7 @@ tangentIntersection = Test.verify "tangentIntersection" do
             (#radius (Length.meters 0.5))
             (#startAngle -Angle.pi)
             (#endAngle Angle.zero)
-  intersections <- Result.orFail (Curve3D.intersections arc1 arc2)
+  intersections <- Curve3D.intersections arc1 arc2 & Result.orFail
   let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent 0.5 0.5 Negative)
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"

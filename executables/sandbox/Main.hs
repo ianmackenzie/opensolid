@@ -134,14 +134,14 @@ testListOperations = do
 
 getCrossProduct :: Tolerance Meters => Result Text Number
 getCrossProduct = do
-  vectorDirection <- Result.orFail (Vector2D.direction (Vector2D.meters 2.0 3.0))
-  lineDirection <- Result.orFail (Direction2D.from Point2D.origin Point2D.origin)
+  vectorDirection <- Vector2D.direction (Vector2D.meters 2.0 3.0) & Result.orFail
+  lineDirection <- Direction2D.from Point2D.origin Point2D.origin & Result.orFail
   Ok (vectorDirection `cross` lineDirection)
 
 testTry :: Tolerance Meters => IO ()
 testTry =
   IO.onError IO.printLine do
-    crossProduct <- Result.orFail getCrossProduct
+    crossProduct <- getCrossProduct & Result.orFail
     log "Got cross product" crossProduct
 
 testIOIteration :: IO ()
@@ -149,7 +149,7 @@ testIOIteration = IO.forEach [1 .. 3] (log "Looping")
 
 doublingIO :: Text -> IO Int
 doublingIO input = do
-  value <- Result.orFail (Int.parse input)
+  value <- Int.parse input & Result.orFail
   let doubled = 2 * value
   IO.succeed doubled
 
@@ -190,7 +190,7 @@ testPlaneTorusIntersection = do
   -- Other possibilities: Direction3D.xy (Angle.degrees 45), Direction3D.z
   let planeNormal = Direction3D.polar World3D.frontPlane (alpha + Angle.halfPi)
   let f = planeNormal `dot` (Surface3D.function surface - World3D.originPoint)
-  zeros <- Result.orFail (SurfaceFunction1D.zeros f)
+  zeros <- SurfaceFunction1D.zeros f & Result.orFail
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
   log "  Crossing curves" (List.length zeros.crossingCurves)
@@ -201,7 +201,7 @@ testPlaneParaboloidIntersection = Tolerance.using 1e-9 do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
   let f = SurfaceFunction1D.squared u + SurfaceFunction1D.squared v - 0.5
-  zeros <- Result.orFail (SurfaceFunction1D.zeros f)
+  zeros <- SurfaceFunction1D.zeros f & Result.orFail
   drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
   log "  Crossing curves" (List.length zeros.crossingCurves)
@@ -350,17 +350,17 @@ testExplicitRandomStep = do
 
 textSum :: Text -> Text -> Result Text Int
 textSum t1 t2 = do
-  n1 <- Result.orFail (Int.parse t1)
-  n2 <- Result.orFail (Int.parse t2)
+  n1 <- Int.parse t1 & Result.orFail
+  n2 <- Int.parse t2 & Result.orFail
   Ok (n1 + n2)
 
 testTextSum :: IO ()
 testTextSum = do
   IO.onError IO.printLine do
-    sum <- Result.orFail (textSum "5" "abc")
+    sum <- textSum "5" "abc" & Result.orFail
     log "sum" sum
   IO.onError IO.printLine do
-    sum <- Result.orFail (textSum "2" "3")
+    sum <- textSum "2" "3" & Result.orFail
     log "sum" sum
 
 testNewtonRaphson2D :: IO ()
@@ -401,7 +401,7 @@ testQuotientDesingularization :: IO ()
 testQuotientDesingularization = Tolerance.using 1e-9 do
   let numerator = Curve1D.sin (Angle.pi * Curve1D.t)
   let denominator = Curve1D.t * (1.0 - Curve1D.t)
-  quotient <- Result.orFail (Curve1D.quotient numerator denominator)
+  quotient <- Curve1D.quotient numerator denominator & Result.orFail
   let quotient' = Curve1D.derivative quotient
   let quotient'' = Curve1D.derivative quotient'
   let quotient''' = Curve1D.derivative quotient''
