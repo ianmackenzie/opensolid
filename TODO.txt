@@ -2,6 +2,9 @@ Simplify Body3D 'stitching'
 - should be able to avoid iterative construction if surfaces are assumed to be oriented properly
   - independently compare every surface to every other surface...
 
+Refactor Pair.decorate to have the decoration *first*?
+- better for both sorting and constructing key/value lists for map construction
+
 Refactor Surface3D to be composed of a list of patches
 
 Implement Surface3D.findPoint
@@ -46,8 +49,6 @@ Try to reuse compiled expressions when composing them into larger expressions?
 
 Add Region2D.unsafe?
 - take correct, preconstructed loops directly
-
-Remove last uses of Linearization.error
 
 Replace uses of tangentDirection etc. curves/functions with direct tangentDirectionBounds etc.?
 - *might* be able to avoid funky desingularization logic entirely
@@ -177,13 +178,6 @@ Add UvDebug module
 Add Debug2D module
 
 Add Debug3D module
-
-Move SurfaceLinearization.error to SurfaceFunction3D.linearDeviation
--> Estimate with Gaussian integration instead of using e.g. second derivative bounds?
-   Should be more accurate *and* more efficient...
-   -> if curvature estimated by Gaussian integration changes by e.g. less than 1% when bisecting,
-      then use that estimated curvature to 'jump' to the necessary subdivision size for linearization
--> probably OK if accuracy of mesh is not 100% guaranteed; it's an approximation anyways
 
 Add batch evaluation functions?
 - most important for target languages to avoid many FFI calls
