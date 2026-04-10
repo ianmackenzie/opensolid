@@ -3,12 +3,13 @@ module OpenSolid.SurfaceFunction1D.SaddleRegion
   , Frame
   , JoiningCurve (Incoming, Outgoing)
   , point
+  , subdomain
+  , bounds
   , quadratic
   , connectingCurve
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
@@ -56,11 +57,11 @@ joiningPoint (Outgoing curve) = Curve2D.startPoint curve
 point :: SaddleRegion units -> UvPoint
 point SaddleRegion{frame} = Frame2D.originPoint frame
 
-instance HasField "subdomain" (SaddleRegion units) Domain2D where
-  getField = (.subproblem.subdomain)
+subdomain :: SaddleRegion units -> Domain2D
+subdomain = (.subproblem.subdomain)
 
-instance HasField "bounds" (SaddleRegion units) UvBounds where
-  getField = (.subproblem.uvBounds)
+bounds :: SaddleRegion units -> UvBounds
+bounds = (.subproblem.uvBounds)
 
 quadratic :: Subproblem units -> UvPoint -> SaddleRegion units
 quadratic subproblem saddlePoint = do

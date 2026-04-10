@@ -13,7 +13,7 @@ module OpenSolid.Primitives
   , Vector3D (Vector3D, Vector3D#)
   , Direction3D (Unit3D, Direction3D)
   , PlaneOrientation3D (PlaneOrientation3D)
-  , Orientation3D (Orientation3D)
+  , Orientation3D (..)
   , Point3D (Point3D, Position3D)
   , VectorBounds3D (VectorBounds3D, VectorBounds3D#)
   , Bounds3D (Bounds3D, PositionBounds3D)
@@ -25,7 +25,6 @@ module OpenSolid.Primitives
 where
 
 import Data.Coerce qualified
-import GHC.Records (HasField)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.HasZero (HasZero)
@@ -1097,8 +1096,11 @@ instance FFI (PlaneOrientation3D FFI.Space) where
 type role Orientation3D phantom
 
 -- | A set of cardinal directions (forward, upward etc.) defining a 3D orientation.
-data Orientation3D space
-  = Orientation3D (Direction3D space) (Direction3D space) (Direction3D space)
+data Orientation3D space = Orientation3D
+  { rightwardDirection :: Direction3D space
+  , forwardDirection :: Direction3D space
+  , upwardDirection :: Direction3D space
+  }
 
 deriving instance Eq (Orientation3D space)
 
@@ -1106,83 +1108,6 @@ deriving instance Show (Orientation3D space)
 
 instance FFI (Orientation3D FFI.Space) where
   representation = FFI.classRepresentation "Orientation3D"
-
-instance HasField "rightwardDirection" (Orientation3D space) (Direction3D space) where
-  getField (Orientation3D r _ _) = r
-
-instance HasField "leftwardDirection" (Orientation3D space) (Direction3D space) where
-  getField orientation = -orientation.rightwardDirection
-
-instance HasField "forwardDirection" (Orientation3D space) (Direction3D space) where
-  getField (Orientation3D _ f _) = f
-
-instance HasField "backwardDirection" (Orientation3D space) (Direction3D space) where
-  getField orientation = -orientation.forwardDirection
-
-instance HasField "upwardDirection" (Orientation3D space) (Direction3D space) where
-  getField (Orientation3D _ _ u) = u
-
-instance HasField "downwardDirection" (Orientation3D space) (Direction3D space) where
-  getField orientation = -orientation.upwardDirection
-
-instance HasField "rightPlaneOrientation" (Orientation3D space) (PlaneOrientation3D space) where
-  getField orientation =
-    PlaneOrientation3D orientation.forwardDirection orientation.upwardDirection
-
-instance HasField "leftPlaneOrientation" (Orientation3D space) (PlaneOrientation3D space) where
-  getField orientation =
-    PlaneOrientation3D orientation.backwardDirection orientation.upwardDirection
-
-instance HasField "frontPlaneOrientation" (Orientation3D space) (PlaneOrientation3D space) where
-  getField orientation =
-    PlaneOrientation3D orientation.leftwardDirection orientation.upwardDirection
-
-instance HasField "backPlaneOrientation" (Orientation3D space) (PlaneOrientation3D space) where
-  getField orientation =
-    PlaneOrientation3D orientation.rightwardDirection orientation.upwardDirection
-
-instance HasField "topPlaneOrientation" (Orientation3D space) (PlaneOrientation3D space) where
-  getField orientation =
-    PlaneOrientation3D orientation.rightwardDirection orientation.forwardDirection
-
-instance HasField "bottomPlaneOrientation" (Orientation3D space) (PlaneOrientation3D space) where
-  getField orientation =
-    PlaneOrientation3D orientation.leftwardDirection orientation.forwardDirection
-
-instance HasField "backwardOrientation" (Orientation3D space) (Orientation3D space) where
-  getField orientation =
-    Orientation3D
-      orientation.leftwardDirection
-      orientation.backwardDirection
-      orientation.upwardDirection
-
-instance HasField "rightwardOrientation" (Orientation3D space) (Orientation3D space) where
-  getField orientation =
-    Orientation3D
-      orientation.backwardDirection
-      orientation.rightwardDirection
-      orientation.upwardDirection
-
-instance HasField "leftwardOrientation" (Orientation3D space) (Orientation3D space) where
-  getField orientation =
-    Orientation3D
-      orientation.forwardDirection
-      orientation.leftwardDirection
-      orientation.upwardDirection
-
-instance HasField "upwardOrientation" (Orientation3D space) (Orientation3D space) where
-  getField orientation =
-    Orientation3D
-      orientation.leftwardDirection
-      orientation.upwardDirection
-      orientation.forwardDirection
-
-instance HasField "downwardOrientation" (Orientation3D space) (Orientation3D space) where
-  getField orientation =
-    Orientation3D
-      orientation.rightwardDirection
-      orientation.downwardDirection
-      orientation.forwardDirection
 
 ----- Point3D -----
 
@@ -1895,57 +1820,6 @@ data Frame3D global local = Frame3D
   { originPoint :: Point3D global
   , orientation :: Orientation3D global
   }
-
-instance HasField "rightwardDirection" (Frame3D global local) (Direction3D global) where
-  getField = (.orientation.rightwardDirection)
-
-instance HasField "leftwardDirection" (Frame3D global local) (Direction3D global) where
-  getField = (.orientation.leftwardDirection)
-
-instance HasField "forwardDirection" (Frame3D global local) (Direction3D global) where
-  getField = (.orientation.forwardDirection)
-
-instance HasField "backwardDirection" (Frame3D global local) (Direction3D global) where
-  getField = (.orientation.backwardDirection)
-
-instance HasField "upwardDirection" (Frame3D global local) (Direction3D global) where
-  getField = (.orientation.upwardDirection)
-
-instance HasField "downwardDirection" (Frame3D global local) (Direction3D global) where
-  getField = (.orientation.downwardDirection)
-
-instance HasField "rightwardAxis" (Frame3D global local) (Axis3D global) where
-  getField frame = Axis3D frame.originPoint frame.rightwardDirection
-
-instance HasField "leftwardAxis" (Frame3D global local) (Axis3D global) where
-  getField frame = Axis3D frame.originPoint frame.leftwardDirection
-
-instance HasField "forwardAxis" (Frame3D global local) (Axis3D global) where
-  getField frame = Axis3D frame.originPoint frame.forwardDirection
-
-instance HasField "backwardAxis" (Frame3D global local) (Axis3D global) where
-  getField frame = Axis3D frame.originPoint frame.backwardDirection
-
-instance HasField "upwardAxis" (Frame3D global local) (Axis3D global) where
-  getField frame = Axis3D frame.originPoint frame.upwardDirection
-
-instance HasField "downwardAxis" (Frame3D global local) (Axis3D global) where
-  getField frame = Axis3D frame.originPoint frame.downwardDirection
-
-instance HasField "backwardOrientation" (Frame3D global local) (Orientation3D global) where
-  getField = (.orientation.backwardOrientation)
-
-instance HasField "rightwardOrientation" (Frame3D global local) (Orientation3D global) where
-  getField = (.orientation.rightwardOrientation)
-
-instance HasField "leftwardOrientation" (Frame3D global local) (Orientation3D global) where
-  getField = (.orientation.leftwardOrientation)
-
-instance HasField "upwardOrientation" (Frame3D global local) (Orientation3D global) where
-  getField = (.orientation.upwardOrientation)
-
-instance HasField "downwardOrientation" (Frame3D global local) (Orientation3D global) where
-  getField = (.orientation.downwardOrientation)
 
 deriving instance Eq (Frame3D global local)
 

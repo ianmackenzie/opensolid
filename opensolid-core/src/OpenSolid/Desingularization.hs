@@ -17,7 +17,7 @@ import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Desingularization.Curve (Curve)
 import OpenSolid.Desingularization.Curve qualified as Desingularization.Curve
-import OpenSolid.Interval (Interval)
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
@@ -39,9 +39,9 @@ value t start middle end
   | otherwise = middle
 
 bounds :: Interval Unitless -> a -> a -> a -> a
-bounds t start middle end
-  | t.upper <= t0 = start
-  | t.lower >= t1 = end
+bounds (Interval tLow tHigh) start middle end
+  | tHigh <= t0 = start
+  | tLow >= t1 = end
   | otherwise = middle
 
 {-| The order of continuity to use when joining a synthetic curve to a base curve

@@ -124,9 +124,9 @@ revolved plane curve axis angle = do
   let theta = angle * SurfaceFunction1D.v
   let surfaceFunction =
         frame3D.originPoint
-          + radius * SurfaceFunction1D.cos theta * frame3D.rightwardDirection
-          + radius * SurfaceFunction1D.sin theta * frame3D.forwardDirection
-          + height * frame3D.upwardDirection
+          + radius * SurfaceFunction1D.cos theta * Frame3D.rightwardDirection frame3D
+          + radius * SurfaceFunction1D.sin theta * Frame3D.forwardDirection frame3D
+          + height * Frame3D.upwardDirection frame3D
   parametric surfaceFunction UvRegion.unitSquare
 
 overallBounds :: Surface3D space -> Bounds3D space

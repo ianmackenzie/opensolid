@@ -67,7 +67,6 @@ module OpenSolid.Interval
 where
 
 import Data.Coerce qualified
-import GHC.Records (HasField)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -91,18 +90,6 @@ type Interval :: Type -> Type
 -- | A range of possible values, with a lower bound and upper bound.
 data Interval units = Ordered# Double# Double#
   deriving (Eq, Show)
-
-instance HasField "endpoints" (Interval units) (Quantity units, Quantity units) where
-  getField = endpoints
-
-instance HasField "lower" (Interval units) (Quantity units) where
-  getField = lower
-
-instance HasField "upper" (Interval units) (Quantity units) where
-  getField = upper
-
-instance HasField "width" (Interval units) (Quantity units) where
-  getField = width
 
 {-| Construct a bounding range from two given values (endpoints).
 

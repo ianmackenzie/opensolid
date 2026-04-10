@@ -25,7 +25,6 @@ module OpenSolid.Domain1D
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
@@ -38,9 +37,6 @@ data Domain1D = Domain1D
   , j :: Number
   }
   deriving (Show)
-
-instance HasField "bounds" Domain1D (Interval Unitless) where
-  getField = bounds
 
 instance Eq Domain1D where
   Domain1D n1 i1 j1 == Domain1D n2 i2 j2 =

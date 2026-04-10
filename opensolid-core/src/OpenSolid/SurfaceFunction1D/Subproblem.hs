@@ -60,7 +60,7 @@ new ::
   Domain2D ->
   Subproblem units
 new f dudv dvdu subdomain = do
-  let uvBounds = subdomain.bounds
+  let uvBounds = Domain2D.bounds subdomain
   Subproblem
     { f
     , dudv

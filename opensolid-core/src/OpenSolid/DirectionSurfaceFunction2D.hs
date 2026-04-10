@@ -11,7 +11,6 @@ module OpenSolid.DirectionSurfaceFunction2D
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
@@ -238,12 +237,6 @@ instance
     (SurfaceFunction1D units)
   where
   lhs `cross` DirectionSurfaceFunction2D rhs = lhs `cross` rhs
-
-instance HasField "xComponent" DirectionSurfaceFunction2D (SurfaceFunction1D Unitless) where
-  getField (DirectionSurfaceFunction2D function) = function.xComponent
-
-instance HasField "yComponent" DirectionSurfaceFunction2D (SurfaceFunction1D Unitless) where
-  getField (DirectionSurfaceFunction2D function) = function.yComponent
 
 placeIn :: Frame2D frameUnits -> DirectionSurfaceFunction2D -> DirectionSurfaceFunction2D
 placeIn frame (DirectionSurfaceFunction2D function) =

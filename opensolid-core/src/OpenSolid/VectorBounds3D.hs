@@ -53,6 +53,7 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import {-# SOURCE #-} OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import {-# SOURCE #-} OpenSolid.DirectionBounds3D qualified as DirectionBounds3D
+import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval (Interval, Interval#))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Number qualified as Number
@@ -406,9 +407,9 @@ placeIn frame (VectorBounds3D vR vF vU) = do
   let rF = 0.5 * Interval.width vF
   let rU = 0.5 * Interval.width vU
   let Vector3D cR' cF' cU' = Vector3D.placeIn frame (Vector3D cR cF cU)
-  let Direction3D iR iF iU = frame.rightwardDirection
-  let Direction3D jR jF jU = frame.forwardDirection
-  let Direction3D kR kF kU = frame.upwardDirection
+  let Direction3D iR iF iU = Frame3D.rightwardDirection frame
+  let Direction3D jR jF jU = Frame3D.forwardDirection frame
+  let Direction3D kR kF kU = Frame3D.upwardDirection frame
   let rR' = rR * Number.abs iR + rF * Number.abs jR + rU * Number.abs kR
   let rF' = rR * Number.abs iF + rF * Number.abs jF + rU * Number.abs kF
   let rU' = rR * Number.abs iU + rF * Number.abs jU + rU * Number.abs kU
@@ -426,9 +427,9 @@ relativeTo frame (VectorBounds3D vR vF vU) = do
   let rF = 0.5 * Interval.width vF
   let rU = 0.5 * Interval.width vU
   let Vector3D cR' cF' cU' = Vector3D.relativeTo frame (Vector3D cR cF cU)
-  let Direction3D iR iF iU = frame.rightwardDirection
-  let Direction3D jR jF jU = frame.forwardDirection
-  let Direction3D kR kF kU = frame.upwardDirection
+  let Direction3D iR iF iU = Frame3D.rightwardDirection frame
+  let Direction3D jR jF jU = Frame3D.forwardDirection frame
+  let Direction3D kR kF kU = Frame3D.upwardDirection frame
   let rR' = rR * Number.abs iR + rF * Number.abs iF + rU * Number.abs iU
   let rF' = rR * Number.abs jR + rF * Number.abs jF + rU * Number.abs jU
   let rU' = rR * Number.abs kR + rF * Number.abs kF + rU * Number.abs kU

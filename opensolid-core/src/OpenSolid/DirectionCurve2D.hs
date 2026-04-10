@@ -15,7 +15,6 @@ module OpenSolid.DirectionCurve2D
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Direction2D (Direction2D)
@@ -36,9 +35,6 @@ import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 newtype DirectionCurve2D = DirectionCurve2D (VectorCurve2D Unitless)
-
-instance HasField "derivative" DirectionCurve2D (VectorCurve2D Unitless) where
-  getField = derivative
 
 unsafe :: VectorCurve2D Unitless -> DirectionCurve2D
 unsafe = DirectionCurve2D
@@ -165,12 +161,6 @@ instance
   where
   DirectionCurve2D curve . surfaceParameter =
     DirectionSurfaceFunction2D.unsafe (curve . surfaceParameter)
-
-instance HasField "xComponent" DirectionCurve2D (Curve1D Unitless) where
-  getField (DirectionCurve2D curve) = VectorCurve2D.xComponent curve
-
-instance HasField "yComponent" DirectionCurve2D (Curve1D Unitless) where
-  getField (DirectionCurve2D curve) = VectorCurve2D.yComponent curve
 
 placeIn :: Frame2D frameUnits -> DirectionCurve2D -> DirectionCurve2D
 placeIn frame (DirectionCurve2D curve) = DirectionCurve2D (VectorCurve2D.placeIn frame curve)

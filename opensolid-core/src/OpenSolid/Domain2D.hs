@@ -24,7 +24,6 @@ module OpenSolid.Domain2D
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
@@ -32,9 +31,6 @@ import OpenSolid.Prelude
 import OpenSolid.UvBounds (UvBounds)
 
 data Domain2D = Domain2D Domain1D Domain1D deriving (Show)
-
-instance HasField "bounds" Domain2D UvBounds where
-  getField = bounds
 
 data Boundary
   = Corner Sign Sign Domain1D.Boundary Domain1D.Boundary
@@ -126,7 +122,7 @@ half :: Domain2D -> Domain2D
 half (Domain2D x y) = Domain2D (Domain1D.half x) (Domain1D.half y)
 
 bounds :: Domain2D -> UvBounds
-bounds (Domain2D x y) = Bounds2D x.bounds y.bounds
+bounds (Domain2D x y) = Bounds2D (Domain1D.bounds x) (Domain1D.bounds y)
 
 interior :: Domain2D -> UvBounds
 interior (Domain2D x y) = Bounds2D (Domain1D.interior x) (Domain1D.interior y)

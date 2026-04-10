@@ -73,7 +73,7 @@ checkRefinement stepsWithoutProgress estimate = case estimate of
   Estimate implementation initialBounds -> do
     let refinedEstimate = refineImpl implementation
     if
-      | Interval.width (bounds refinedEstimate) < initialBounds.width -> refinedEstimate
+      | Interval.width (bounds refinedEstimate) < Interval.width initialBounds -> refinedEstimate
       | stepsWithoutProgress < 10 -> checkRefinement (stepsWithoutProgress + 1) refinedEstimate
       | otherwise -> throw RefinementStalled
 
@@ -83,7 +83,7 @@ satisfy predicate estimate = do
   if predicate current then current else satisfy predicate (refine estimate)
 
 within :: Quantity units -> Estimate units -> Interval units
-within tolerance = satisfy (\current -> current.width <= tolerance)
+within tolerance = satisfy (\current -> Interval.width current <= tolerance)
 
 resolve :: (Interval units -> Fuzzy a) -> Estimate units -> a
 resolve function estimate =

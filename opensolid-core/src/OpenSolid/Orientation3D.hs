@@ -38,7 +38,7 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Direction3D (Unit3D)
   , Frame3D
-  , Orientation3D (Orientation3D)
+  , Orientation3D (..)
   , PlaneOrientation3D (PlaneOrientation3D)
   )
 import OpenSolid.Random qualified as Random
@@ -62,15 +62,15 @@ upwardDirection = (.upwardDirection)
 
 -- | Get the leftward direction of a orientation.
 leftwardDirection :: Orientation3D space -> Direction3D space
-leftwardDirection = (.leftwardDirection)
+leftwardDirection orientation = negate (rightwardDirection orientation)
 
 -- | Get the backward direction of a orientation.
 backwardDirection :: Orientation3D space -> Direction3D space
-backwardDirection = (.backwardDirection)
+backwardDirection orientation = negate (forwardDirection orientation)
 
 -- | Get the downward direction of a orientation.
 downwardDirection :: Orientation3D space -> Direction3D space
-downwardDirection = (.downwardDirection)
+downwardDirection orientation = negate (upwardDirection orientation)
 
 {-| Construct a forward-facing plane orientation from a parent orientation.
 
@@ -80,7 +80,8 @@ the X direction of the plane orientation will point leftward,
 and the Y direction of the plane orientation will point upward.
 -}
 frontPlaneOrientation :: Orientation3D space -> PlaneOrientation3D space
-frontPlaneOrientation = (.frontPlaneOrientation)
+frontPlaneOrientation orientation =
+  PlaneOrientation3D (leftwardDirection orientation) (upwardDirection orientation)
 
 {-| Construct a backward-facing plane orientation from a parent orientation.
 
@@ -90,7 +91,8 @@ the X direction of the plane orientation will point rightward,
 and the Y direction of the plane orientation will point upward.
 -}
 backPlaneOrientation :: Orientation3D space -> PlaneOrientation3D space
-backPlaneOrientation = (.backPlaneOrientation)
+backPlaneOrientation orientation =
+  PlaneOrientation3D (rightwardDirection orientation) (upwardDirection orientation)
 
 {-| Construct a leftward-facing plane orientation from a parent orientation.
 
@@ -100,7 +102,8 @@ the X direction of the plane orientation will point backward,
 and the Y direction of the plane orientation will point upward.
 -}
 leftPlaneOrientation :: Orientation3D space -> PlaneOrientation3D space
-leftPlaneOrientation = (.leftPlaneOrientation)
+leftPlaneOrientation orientation =
+  PlaneOrientation3D (backwardDirection orientation) (upwardDirection orientation)
 
 {-| Construct a rightward-facing plane orientation from a parent orientation.
 
@@ -110,7 +113,8 @@ the X direction of the plane orientation will point forward,
 and the Y direction of the plane orientation will point upward.
 -}
 rightPlaneOrientation :: Orientation3D space -> PlaneOrientation3D space
-rightPlaneOrientation = (.rightPlaneOrientation)
+rightPlaneOrientation orientation =
+  PlaneOrientation3D (forwardDirection orientation) (upwardDirection orientation)
 
 {-| Construct a upward-facing plane orientation from a parent orientation.
 
@@ -120,7 +124,8 @@ the X direction of the plane orientation will point rightward,
 and the Y direction of the plane orientation will point forward.
 -}
 topPlaneOrientation :: Orientation3D space -> PlaneOrientation3D space
-topPlaneOrientation = (.topPlaneOrientation)
+topPlaneOrientation orientation =
+  PlaneOrientation3D (rightwardDirection orientation) (forwardDirection orientation)
 
 {-| Construct a downward-facing plane orientation from a parent orientation.
 
@@ -130,7 +135,8 @@ the X direction of the plane orientation will point leftward,
 and the Y direction of the plane orientation will point forward.
 -}
 bottomPlaneOrientation :: Orientation3D space -> PlaneOrientation3D space
-bottomPlaneOrientation = (.bottomPlaneOrientation)
+bottomPlaneOrientation orientation =
+  PlaneOrientation3D (leftwardDirection orientation) (forwardDirection orientation)
 
 -- | Construct an orientation from its front plane orientation.
 fromFrontPlaneOrientation :: PlaneOrientation3D space -> Orientation3D space
@@ -170,7 +176,11 @@ the rightward direction of the orientation will point leftward,
 and the upward direction of the orientation will point upward.
 -}
 backwardOrientation :: Orientation3D space -> Orientation3D space
-backwardOrientation = (.backwardOrientation)
+backwardOrientation orientation =
+  Orientation3D
+    (leftwardDirection orientation)
+    (backwardDirection orientation)
+    (upwardDirection orientation)
 
 {-| Construct a leftward facing orientation relative to a parent/reference orientation.
 
@@ -180,7 +190,11 @@ the rightward direction of the orientation will point forward,
 and the upward direction of the orientation will point upward.
 -}
 leftwardOrientation :: Orientation3D space -> Orientation3D space
-leftwardOrientation = (.leftwardOrientation)
+leftwardOrientation orientation =
+  Orientation3D
+    (forwardDirection orientation)
+    (leftwardDirection orientation)
+    (upwardDirection orientation)
 
 {-| Construct a rightward facing orientation relative to a parent/reference orientation.
 
@@ -190,7 +204,11 @@ the rightward direction of the orientation will point backward,
 and the upward direction of the orientation will point upward.
 -}
 rightwardOrientation :: Orientation3D space -> Orientation3D space
-rightwardOrientation = (.rightwardOrientation)
+rightwardOrientation orientation =
+  Orientation3D
+    (backwardDirection orientation)
+    (rightwardDirection orientation)
+    (upwardDirection orientation)
 
 {-| Construct an upward facing orientation relative to a parent/reference orientation.
 
@@ -200,7 +218,11 @@ the rightward direction of the orientation will point leftward,
 and the upward direction of the orientation will point forward.
 -}
 upwardOrientation :: Orientation3D space -> Orientation3D space
-upwardOrientation = (.upwardOrientation)
+upwardOrientation orientation =
+  Orientation3D
+    (leftwardDirection orientation)
+    (upwardDirection orientation)
+    (forwardDirection orientation)
 
 {-| Construct a downward facing orientation relative to a parent/reference orientation.
 
@@ -210,7 +232,11 @@ the rightward direction of the orientation will point rightward,
 and the upward direction of the orientation will point forward.
 -}
 downwardOrientation :: Orientation3D space -> Orientation3D space
-downwardOrientation = (.downwardOrientation)
+downwardOrientation orientation =
+  Orientation3D
+    (rightwardDirection orientation)
+    (downwardDirection orientation)
+    (forwardDirection orientation)
 
 transformBy :: Transform3D.Rigid space -> Orientation3D space -> Orientation3D space
 transformBy transform (Orientation3D i j k) =
