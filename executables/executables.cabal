@@ -103,14 +103,6 @@ executable region-triangulation
     base,
     opensolid-core,
 
-executable surface3d-meshing
-  import: config
-  main-is: Main.hs
-  hs-source-dirs: surface3d-meshing
-  build-depends:
-    base,
-    opensolid-core,
-
 executable body3d-meshing
   import: config
   main-is: Main.hs
