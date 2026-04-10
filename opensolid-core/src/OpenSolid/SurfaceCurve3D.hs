@@ -1,9 +1,9 @@
 module OpenSolid.SurfaceCurve3D
   ( SurfaceCurve3D
+  , new
   , curve
   , uvCurve
   , surfaceFunction
-  , on
   )
 where
 
@@ -18,8 +18,8 @@ data SurfaceCurve3D space = SurfaceCurve3D
   , curve :: Curve3D space
   }
 
-on :: SurfaceFunction3D space -> Curve2D Unitless -> SurfaceCurve3D space
-on givenSurfaceFunction givenUvCurve =
+new :: SurfaceFunction3D space -> Curve2D Unitless -> SurfaceCurve3D space
+new givenSurfaceFunction givenUvCurve =
   SurfaceCurve3D
     { surfaceFunction = givenSurfaceFunction
     , uvCurve = givenUvCurve

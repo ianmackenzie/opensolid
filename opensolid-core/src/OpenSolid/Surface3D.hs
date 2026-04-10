@@ -71,7 +71,7 @@ innerLoops = (.innerLoops)
 
 parametric :: SurfaceFunction3D space -> UvRegion -> Surface3D space
 parametric givenFunction givenDomain = do
-  let boundaryLoop domainLoop = NonEmpty.map (SurfaceCurve3D.on givenFunction) domainLoop
+  let boundaryLoop domainLoop = NonEmpty.map (SurfaceCurve3D.new givenFunction) domainLoop
   Surface3D
     { function = givenFunction
     , domain = givenDomain
