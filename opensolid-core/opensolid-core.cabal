@@ -277,7 +277,6 @@ library
     OpenSolid.Curve.CurvatureVector
     OpenSolid.Curve1D.Bisection
     OpenSolid.HasZero
-    OpenSolid.Linearization
     OpenSolid.Lobatto
     OpenSolid.Quadrature
     OpenSolid.Region2D.Boundary
@@ -296,7 +295,6 @@ library
     OpenSolid.SurfaceFunction1D.SaddleRegion
     OpenSolid.SurfaceFunction1D.Subproblem
     OpenSolid.SurfaceFunction1D.VerticalCurve
-    OpenSolid.SurfaceLinearization
     OpenSolid.Text.Parse
     OpenSolid.Unboxed.Math
 
