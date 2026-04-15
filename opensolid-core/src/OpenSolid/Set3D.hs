@@ -16,8 +16,13 @@ module OpenSolid.Set3D
   , union
   , any
   , all
-  , findAll
-  , findAllWithIndices
+  , intersecting
+  , filter
+  , filterWithIndex
+  , filterMap
+  , filterMapWithIndex
+  , partition
+  , partitionWithIndex
   , foldrMap
   , foldrMapWithIndex
   , foldlMap
@@ -82,11 +87,50 @@ any = Set.any
 all :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bool
 all = Set.all
 
-findAll :: Tolerance Meters => Bounds3D space -> Set3D space item -> List item
-findAll = Set.findAll
+intersecting ::
+  ( Intersects target (Bounds3D space) constraint1
+  , Intersects target item constraint2
+  , constraint1
+  , constraint2
+  ) =>
+  target ->
+  Set3D space item ->
+  List item
+intersecting = Set.intersecting
 
-findAllWithIndices :: Tolerance Meters => Bounds3D space -> Set3D space item -> List (Int, item)
-findAllWithIndices = Set.findAllWithIndices
+filter :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> List item
+filter = Set.filter
+
+filterWithIndex ::
+  (Bounds3D space -> Bool) ->
+  (Int -> item -> Bool) ->
+  Set3D space item ->
+  List (Int, item)
+filterWithIndex = Set.filterWithIndex
+
+filterMap :: (Bounds3D space -> Bool) -> (item -> Maybe a) -> Set3D space item -> List a
+filterMap = Set.filterMap
+
+filterMapWithIndex ::
+  (Bounds3D space -> Bool) ->
+  (Int -> item -> Maybe a) ->
+  Set3D space item ->
+  List (Int, a)
+filterMapWithIndex = Set.filterMapWithIndex
+
+partition ::
+  (Bounds3D space -> Fuzzy Bool) ->
+  (item -> Bool) ->
+  Set3D space item ->
+  (List item, List item)
+partition = Set.partition
+
+partitionWithIndex ::
+  (Bounds3D space -> Fuzzy Bool) ->
+  (Int -> item -> Bool) ->
+  Set3D space item ->
+  (List (Int, item), List (Int, item))
+partitionWithIndex = Set.partitionWithIndex
 
 foldrMap ::
   (item -> accumulated) ->

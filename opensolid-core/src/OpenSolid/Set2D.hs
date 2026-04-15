@@ -16,8 +16,13 @@ module OpenSolid.Set2D
   , union
   , any
   , all
-  , findAll
-  , findAllWithIndices
+  , intersecting
+  , filter
+  , filterWithIndex
+  , filterMap
+  , filterMapWithIndex
+  , partition
+  , partitionWithIndex
   , foldrMap
   , foldrMapWithIndex
   , foldlMap
@@ -83,11 +88,50 @@ any = Set.any
 all :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
 all = Set.all
 
-findAll :: Tolerance units => Bounds2D units -> Set2D units item -> List item
-findAll = Set.findAll
+intersecting ::
+  ( Intersects target (Bounds2D units) constraint1
+  , Intersects target item constraint2
+  , constraint1
+  , constraint2
+  ) =>
+  target ->
+  Set2D units item ->
+  List item
+intersecting = Set.intersecting
 
-findAllWithIndices :: Tolerance units => Bounds2D units -> Set2D units item -> List (Int, item)
-findAllWithIndices = Set.findAllWithIndices
+filter :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> List item
+filter = Set.filter
+
+filterWithIndex ::
+  (Bounds2D units -> Bool) ->
+  (Int -> item -> Bool) ->
+  Set2D units item ->
+  List (Int, item)
+filterWithIndex = Set.filterWithIndex
+
+filterMap :: (Bounds2D units -> Bool) -> (item -> Maybe a) -> Set2D units item -> List a
+filterMap = Set.filterMap
+
+filterMapWithIndex ::
+  (Bounds2D units -> Bool) ->
+  (Int -> item -> Maybe a) ->
+  Set2D units item ->
+  List (Int, a)
+filterMapWithIndex = Set.filterMapWithIndex
+
+partition ::
+  (Bounds2D units -> Fuzzy Bool) ->
+  (item -> Bool) ->
+  Set2D units item ->
+  (List item, List item)
+partition = Set.partition
+
+partitionWithIndex ::
+  (Bounds2D units -> Fuzzy Bool) ->
+  (Int -> item -> Bool) ->
+  Set2D units item ->
+  (List (Int, item), List (Int, item))
+partitionWithIndex = Set.partitionWithIndex
 
 foldrMap ::
   (item -> accumulated) ->

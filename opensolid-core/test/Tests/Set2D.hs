@@ -36,6 +36,6 @@ testSet =
 findAll :: Test
 findAll = Test.verify "findAll" do
   let searchBounds = Bounds2D.hull2 (point 2 2) (point 6 6)
-  let foundPoints = Set2D.findAll searchBounds testSet
+  let foundPoints = Set2D.intersecting searchBounds testSet
   let expectedPoints = [point 3 5, point 5 5]
   Test.expect (List.sort foundPoints == List.sort expectedPoints)
