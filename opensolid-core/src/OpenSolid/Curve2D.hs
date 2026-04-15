@@ -756,7 +756,7 @@ buildPiecewiseTree ::
   (PiecewiseTree units space, Quantity units)
 buildPiecewiseTree segmentArray begin end = case end - begin of
   1 -> do
-    let (segment, length) = Array.get begin segmentArray
+    let (segment, length) = segmentArray !! begin
     (PiecewiseLeaf segment length, length)
   n -> assert (n >= 2) do
     let mid = begin + n // 2

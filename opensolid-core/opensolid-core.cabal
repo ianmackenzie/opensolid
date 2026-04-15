@@ -160,6 +160,7 @@ library
     OpenSolid.HigherOrderZero
     OpenSolid.IO
     OpenSolid.IO.Parallel
+    OpenSolid.IndexOutOfBounds
     OpenSolid.Int
     OpenSolid.InternalError
     OpenSolid.Interval

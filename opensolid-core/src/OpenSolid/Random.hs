@@ -24,7 +24,6 @@ module OpenSolid.Random
   )
 where
 
-import Data.List.NonEmpty ((!!))
 import Data.List.NonEmpty qualified
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude

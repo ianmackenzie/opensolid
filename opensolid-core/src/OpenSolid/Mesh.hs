@@ -48,9 +48,7 @@ empty :: Mesh vertex
 empty = Mesh Array.empty []
 
 faceVertices :: Mesh vertex -> List (vertex, vertex, vertex)
-faceVertices (Mesh vs fs) = do
-  let toVertices (i, j, k) = (Array.get i vs, Array.get j vs, Array.get k vs)
-  List.map toVertices fs
+faceVertices (Mesh vs fs) = fs & List.map \(i, j, k) -> (vs !! i, vs !! j, vs !! k)
 
 map :: (a -> b) -> Mesh a -> Mesh b
 map f (Mesh vs fs) = Mesh (Array.map f vs) fs

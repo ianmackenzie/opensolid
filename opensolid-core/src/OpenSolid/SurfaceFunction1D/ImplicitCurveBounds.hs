@@ -25,12 +25,12 @@ build boxes = do
 
 subtree :: Array (Interval Unitless, Interval Unitless) -> Int -> Int -> ImplicitCurveBounds
 subtree boxes begin end = case end - begin of
-  1 -> Leaf (Pair.second (Array.get begin boxes))
+  1 -> Leaf (Pair.second (boxes !! begin))
   n -> assert (n >= 2) do
     let mid = begin + n // 2
     let left = subtree boxes begin mid
     let right = subtree boxes mid end
-    let split = Interval.lower (Pair.first (Array.get mid boxes))
+    let split = Interval.lower (Pair.first (boxes !! mid))
     Node left split right
 
 at :: Number -> ImplicitCurveBounds -> Interval Unitless

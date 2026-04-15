@@ -9,7 +9,6 @@ module OpenSolid.Set
   , toNonEmpty
   , toList
   , union
-  , get
   , find
   , findWithIndex
   , findAll
@@ -20,6 +19,7 @@ where
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Fuzzy qualified as Fuzzy
+import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
@@ -42,6 +42,18 @@ data Set dimension units space item where
     Set dimension units space item
 
 deriving instance (Bounds.Exists dimension units space, Show item) => Show (Set dimension units space item)
+
+instance Indexed (Set dimension units space item) Int item where
+  set !! index
+    | index >= 0 && index <= size set = get index set
+    | otherwise = throw IndexOutOfBounds{index = index, size = size set}
+
+get :: Int -> Set dimension units space item -> item
+get index set = case set of
+  SizedNode _ leftSize _ leftChild rightChild
+    | index < leftSize -> get index leftChild
+    | otherwise -> get (index - leftSize) rightChild
+  Leaf _ item -> assert (index == 0) item
 
 pattern Node ::
   Bounds dimension units space ->
@@ -141,16 +153,6 @@ union ::
 union left right = do
   let aggregateBounds = Bounds.aggregate2 (bounds left) (bounds right)
   SizedNode aggregateBounds (size left) (size right) left right
-
-get :: Int -> Set dimension units space item -> Maybe item
-get index set = if index >= 0 && index <= size set then Just (unsafeGet index set) else Nothing
-
-unsafeGet :: Int -> Set dimension units space item -> item
-unsafeGet index set = case set of
-  SizedNode _ leftSize _ leftChild rightChild
-    | index < leftSize -> unsafeGet index leftChild
-    | otherwise -> unsafeGet (index - leftSize) rightChild
-  Leaf _ item -> item
 
 find ::
   (Bounds.Exists dimension units space, Tolerance units) =>

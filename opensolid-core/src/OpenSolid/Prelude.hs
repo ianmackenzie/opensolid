@@ -30,6 +30,7 @@ module OpenSolid.Prelude
   , Tolerance
   , ApproximateEquality ((~=))
   , (!=)
+  , Indexed ((!!))
   , Intersects (intersects)
   , Quantity (Quantity)
   , Unitless
@@ -480,6 +481,19 @@ instance
 instance DivMod (Quantity units) where
   x // y = Prelude.floor (x / y)
   x % y = x - y * (fromIntegral (x // y) :: Number)
+
+----- Indexed -----
+
+class Indexed container index item | container -> index, container -> item where
+  (!!) :: container -> index -> item
+
+infixl 9 !!
+
+instance Indexed (List item) Int item where
+  (!!) = (Prelude.!!)
+
+instance Indexed (NonEmpty item) Int item where
+  (!!) = (Data.List.NonEmpty.!!)
 
 ----- Intersection -----
 

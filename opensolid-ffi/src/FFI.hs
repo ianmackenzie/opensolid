@@ -1,5 +1,6 @@
 -- Avoid errors when running Fourmolu
 {-# LANGUAGE GHC2024 #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module FFI (generateExports) where
 
@@ -14,6 +15,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
+import Prelude qualified
 
 type Function = Ptr () -> Ptr () -> IO ()
 
@@ -23,12 +25,13 @@ functionArray = case API.functions of
   NonEmpty nonEmpty -> Array.fromNonEmpty (NonEmpty.map Function.invoke nonEmpty)
 
 invoke :: Int -> Ptr () -> Ptr () -> IO ()
-invoke functionIndex = Array.get functionIndex functionArray
+invoke functionIndex arg = (functionArray !! functionIndex) arg
 
 generateExports :: TH.Q (List TH.Dec)
 generateExports =
-  fmap List.concat $
-    traverse generateExport (List.indexed (List.map Function.ffiName API.functions))
+  List.indexed (List.map Function.ffiName API.functions)
+    & Prelude.traverse generateExport
+    & Prelude.fmap List.concat
 
 generateExport :: (Int, Text) -> TH.Q (List TH.Dec)
 generateExport (index, name) = do
@@ -37,11 +40,11 @@ generateExport (index, name) = do
   functionTypeAliasInfo <- TH.reify ''Function
   foreignFunctionType <-
     case functionTypeAliasInfo of
-      TH.TyConI (TH.TySynD _ _ typ) -> return typ
-      _ -> fail "Function type alias has unexpected Template Haskell representation"
+      TH.TyConI (TH.TySynD _ _ typ) -> Prelude.return typ
+      _ -> Prelude.fail "Function type alias has unexpected Template Haskell representation"
   let indexLiteral = TH.IntegerL (fromIntegral index)
   let functionBody = TH.NormalB (TH.AppE (TH.VarE 'invoke) (TH.LitE indexLiteral))
-  return
+  Prelude.return
     [ TH.ForeignD (TH.ExportF TH.CCall nameString thName foreignFunctionType)
     , TH.SigD thName foreignFunctionType
     , TH.FunD thName [TH.Clause [] functionBody []]
