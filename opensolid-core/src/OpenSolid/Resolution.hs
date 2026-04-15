@@ -4,7 +4,6 @@ module OpenSolid.Resolution
   , maxSize
   , custom
   , acceptable
-  , predicate
   )
 where
 
@@ -38,15 +37,6 @@ maxSize size = Resolution{maxError = Quantity.infinity, maxSize = size}
 custom :: "maxError" ::: Quantity units -> "maxSize" ::: Quantity units -> Resolution units
 custom ("maxError" ::: givenMaxError) ("maxSize" ::: givenMaxSize) =
   Resolution{maxError = givenMaxError, maxSize = givenMaxSize}
-
-predicate ::
-  "size" ::: (a -> Quantity units) ->
-  "error" ::: (a -> Quantity units) ->
-  Resolution units ->
-  a ->
-  Bool
-predicate ("size" ::: size) ("error" ::: error) resolution value =
-  acceptable (#size (size value)) (#error (error value)) resolution
 
 acceptable :: "size" ::: Quantity units -> "error" ::: Quantity units -> Resolution units -> Bool
 acceptable ("size" ::: size) ("error" ::: error) resolution =
