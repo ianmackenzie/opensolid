@@ -132,32 +132,36 @@ linear ::
   Bounds.Exists dimension units space =>
   NonEmpty (item, Bounds dimension units space) ->
   Set dimension units space item
-linear boundedItems = buildLinear (NonEmpty.length boundedItems) boundedItems
+linear boundedItems = do
+  let toLeaf (item, itemBounds) = Leaf itemBounds item
+  buildLinear (NonEmpty.map toLeaf boundedItems)
 
 linearBy ::
   Bounds.Exists dimension units space =>
   (item -> Bounds dimension units space) ->
   NonEmpty item ->
   Set dimension units space item
-linearBy function items = linear (NonEmpty.map (Pair.decorate function) items)
+linearBy function items = do
+  let toLeaf item = Leaf (function item) item
+  buildLinear (NonEmpty.map toLeaf items)
 
 buildLinear ::
   Bounds.Exists dimension units space =>
-  Int ->
-  NonEmpty (item, Bounds dimension units space) ->
+  NonEmpty (Set dimension units space item) ->
   Set dimension units space item
-buildLinear count boundedItems
-  | count == 1 = assert (NonEmpty.length boundedItems == 1) do
-      let (item, itemBounds) = NonEmpty.first boundedItems
-      Leaf itemBounds item
-  | otherwise = assert (count >= 2 && NonEmpty.length boundedItems == count) do
-      let leftCount = count // 2
-      let rightCount = count - leftCount
-      let (leftBoundedItems, rightBoundedItems) = splitAtIndex leftCount boundedItems
-      let leftChild = buildLinear leftCount leftBoundedItems
-      let rightChild = buildLinear rightCount rightBoundedItems
-      let nodeBounds = Bounds.aggregate2 (bounds leftChild) (bounds rightChild)
-      SizedNode nodeBounds leftCount rightCount leftChild rightChild
+buildLinear sets =
+  case reduceLinear sets of
+    NonEmpty.One set -> set
+    reduced -> buildLinear reduced
+
+reduceLinear ::
+  Bounds.Exists dimension units space =>
+  NonEmpty (Set dimension units space item) ->
+  NonEmpty (Set dimension units space item)
+reduceLinear (first :| []) = NonEmpty.one first
+reduceLinear (first :| second : []) = NonEmpty.one (union first second)
+reduceLinear (first :| second : NonEmpty rest) =
+  NonEmpty.push (union first second) (reduceLinear rest)
 
 splitAtIndex :: Int -> NonEmpty a -> (NonEmpty a, NonEmpty a)
 splitAtIndex 0 _ = InternalError.throw "Bad split index in Set.build"
