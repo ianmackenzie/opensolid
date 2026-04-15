@@ -1,3 +1,9 @@
+Move Tolerance.unitless -> Unitless.tolerance, Tolerange.angle -> Angle.tolerance?
+- more consistent with Length.defaultTolerance
+
+Rename e.g. Curve.bounds -> Curve.range, Curve.overallBounds -> Curve.bounds
+- rename 'bounds' to 'range' for all function types
+
 Simplify Body3D 'stitching'
 - should be able to avoid iterative construction if surfaces are assumed to be oriented properly
   - independently compare every surface to every other surface...
@@ -5,13 +11,19 @@ Simplify Body3D 'stitching'
 Refactor Pair.decorate to have the decoration *first*?
 - better for both sorting and constructing key/value lists for map construction
 
-Refactor Surface3D to be composed of a list of patches
-
 Implement Surface3D.findPoint
 
 Implement Curve3D-Surface3D intersection
 
-Implement Surfac3D-Surface3D intersection...
+Implement Surface3D-Surface3D intersection...
+
+Add support for simple enums to target languages
+- no payloads, at least for now
+
+Implement Intersects for:
+- Axis2D/Bounds2D
+- Axis3D/Bounds3D
+- Plane3D/Bounds3D
 
 Rework Region2D sign-fixing to use overall signed rotation angle instead of signed area?
 - seems a bit simpler and more efficient
@@ -35,7 +47,14 @@ Optimize curve segment bounds computation using tangent bounds
 - use that to construct a 'sphere' bounding box at the line midpoint
 - take hull with endpoints
 
-Remove Resolution.predicate
+Add support for generic interface types to target language API?
+- add Class.container
+- add FFI.containerRepresentation
+- add special Item FFI type for use in container functions
+- use to implement support for Set2D and Set3D
+
+Have functions like "to string", "to list" be 'special' in target language API?
+- allow target languages to choose appropriate names or use to support language-specific protocols
 
 Optimize findPoint to immediately reject monotonic segments where no solution is possible
 - if segment is monotonic then check if point is definitely "off either end"
@@ -156,6 +175,8 @@ Add Bezier#D etc. types/modules?
 
 Switch SurfaceFunction zero finding to use new Search module
 - will need to implement solution curve trimming/merging
+
+Update Region2D.fillet to actually use Set2D for lookup instead of just converting to a list
 
 Use CBOR for FFI calls from target languages
 - have single calling function:
