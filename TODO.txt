@@ -158,20 +158,21 @@ Switch SurfaceFunction zero finding to use new Search module
 - will need to implement solution curve trimming/merging
 
 Use CBOR for FFI calls from target languages
--> have single calling function:
-   void*
-   opensolid_invoke(
-     char* function,
-     int64_t arguments_size,
-     void* arguments_data,
-     int64_t* result_size
-   )
--> arguments are formatted as array
--> result_size can be set to be negative,
-   in which case returned data is an error object in JSON-RPC format ('code', 'message')
--> much less room for segfaults, weird data corruption etc. - can't accidentally treat int as double or whatever
--> means that exact same format can be used in client-server way over WebSockets, HTTP, sockets, standard in/out streams etc.
--> can use Haskell 'serialise' library which seems nice and well supported
+- have single calling function:
+  void*
+  opensolid_invoke(
+    char* function,
+    int64_t arguments_size,
+    void* arguments_data,
+    int64_t* result_size
+  )
+- arguments are formatted as array
+- result_size can be set to be negative,
+  in which case returned data is an error object in JSON-RPC format ('code', 'message')
+- much less room for segfaults, weird data corruption etc. - can't accidentally treat int as double or whatever
+- means that exact same format can be used in client-server way over WebSockets, HTTP, sockets, standard in/out streams etc.
+- can use Haskell 'serialise' library which seems nice and well supported
+- can then get rid of generate-def-file executable since .def file can be static!
 
 Add UvDebug module
 
