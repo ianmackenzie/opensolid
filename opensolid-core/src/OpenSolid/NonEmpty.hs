@@ -191,6 +191,7 @@ eight a1 a2 a3 a4 a5 a6 a7 a8 = a1 :| [a2, a3, a4, a5, a6, a7, a8]
 toList :: NonEmpty a -> List a
 toList (x :| xs) = x : xs
 
+{-# INLINE push #-}
 push :: a -> NonEmpty a -> NonEmpty a
 push x (y :| ys) = x :| (y : ys)
 
