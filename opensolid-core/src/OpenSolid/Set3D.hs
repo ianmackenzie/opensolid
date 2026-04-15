@@ -10,7 +10,9 @@ module OpenSolid.Set3D
   , aggregate
   , flatten
   , toNonEmpty
+  , toNonEmptyOf
   , toList
+  , toListOf
   , map
   , reverseMap
   , union
@@ -58,8 +60,14 @@ flatten = Set.flatten
 toNonEmpty :: Set3D space item -> NonEmpty item
 toNonEmpty = Set.toNonEmpty
 
+toNonEmptyOf :: (item -> a) -> Set3D space item -> NonEmpty a
+toNonEmptyOf = Set.toNonEmptyOf
+
 toList :: Set3D space item -> List item
 toList = Set.toList
+
+toListOf :: (item -> a) -> Set3D space item -> List a
+toListOf = Set.toListOf
 
 map :: (a -> b) -> (b -> Bounds3D space2) -> Set3D space1 a -> Set3D space2 b
 map = Set.map

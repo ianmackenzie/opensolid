@@ -10,7 +10,9 @@ module OpenSolid.Set
   , map
   , reverseMap
   , toNonEmpty
+  , toNonEmptyOf
   , toList
+  , toListOf
   , union
   , cull
   , cullIndexed
@@ -295,8 +297,14 @@ foldlMapWithIndexContinue startIndex function set accumulated = case set of
 toNonEmpty :: Set dimension units space item -> NonEmpty item
 toNonEmpty = foldrMap NonEmpty.one NonEmpty.push
 
+toNonEmptyOf :: (item -> a) -> Set dimension units space item -> NonEmpty a
+toNonEmptyOf function = foldrMap (NonEmpty.one . function) (NonEmpty.push . function)
+
 toList :: Set dimension units space item -> List item
 toList = NonEmpty.toList . toNonEmpty
+
+toListOf :: (item -> a) -> Set dimension units space item -> List a
+toListOf function = NonEmpty.toList . toNonEmptyOf function
 
 union ::
   Bounds.Exists dimension units space =>

@@ -34,7 +34,6 @@ import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
-import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
@@ -83,7 +82,7 @@ innerLoops :: Surface3D space -> List (NonEmpty (SurfaceCurve3D space))
 innerLoops surface =
   case innerBoundaries surface of
     Nothing -> []
-    Just innerBoundarySet -> Set3D.toList innerBoundarySet & List.map Set3D.toNonEmpty
+    Just innerBoundarySet -> Set3D.toListOf Set3D.toNonEmpty innerBoundarySet
 
 boundaries :: Surface3D space -> Set3D space (Set3D space (SurfaceCurve3D space))
 boundaries surface = do

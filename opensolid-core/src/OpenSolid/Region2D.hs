@@ -387,7 +387,7 @@ innerLoops :: Region2D units -> List (NonEmpty (Curve2D units))
 innerLoops region =
   case innerBoundaries region of
     Nothing -> []
-    Just innerBoundarySet -> List.map Boundary.loop (Set2D.toList innerBoundarySet)
+    Just innerBoundarySet -> Set2D.toListOf Boundary.loop innerBoundarySet
 
 boundaries :: Region2D units -> Set2D units (Boundary units)
 boundaries region = do
@@ -531,8 +531,8 @@ bounds region = Boundary.bounds region.outerBoundary
 area :: Units.Squared units1 units2 => Region2D units1 -> Estimate units2
 area region = do
   let referencePoint = Curve2D.startPoint (outerBoundary region !! 0)
-  Set2D.toNonEmpty (boundaryCurves region)
-    & NonEmpty.map (areaIntegral referencePoint)
+  boundaryCurves region
+    & Set2D.toNonEmptyOf (areaIntegral referencePoint)
     & Estimate.sum
 
 toMesh :: Resolution units -> Region2D units -> Mesh (Point2D units)

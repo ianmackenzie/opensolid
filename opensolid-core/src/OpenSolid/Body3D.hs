@@ -290,7 +290,7 @@ translational sketchPlane profile givenDisplacement = do
   let startCap = Surface3D.flip (Surface3D.on startPlane profile)
   let endCap = Surface3D.on endPlane profile
   let sideSurface curve = Surface3D.translational (Curve2D.placeOn sketchPlane curve) displacement
-  let sideSurfaces = List.map sideSurface (Set2D.toList (Region2D.boundaryCurves profile))
+  let sideSurfaces = Set2D.toListOf sideSurface (Region2D.boundaryCurves profile)
   boundedBy (startCap : endCap : sideSurfaces)
 
 {-| Create a revolved body from a sketch plane and profile.

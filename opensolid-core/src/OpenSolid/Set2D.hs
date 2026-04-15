@@ -10,7 +10,9 @@ module OpenSolid.Set2D
   , aggregate
   , flatten
   , toNonEmpty
+  , toNonEmptyOf
   , toList
+  , toListOf
   , map
   , reverseMap
   , union
@@ -59,8 +61,14 @@ flatten = Set.flatten
 toNonEmpty :: Set2D units item -> NonEmpty item
 toNonEmpty = Set.toNonEmpty
 
+toNonEmptyOf :: (item -> a) -> Set2D units item -> NonEmpty a
+toNonEmptyOf = Set.toNonEmptyOf
+
 toList :: Set2D units item -> List item
 toList = Set.toList
+
+toListOf :: (item -> a) -> Set2D units item -> List a
+toListOf = Set.toListOf
 
 map :: (a -> b) -> (b -> Bounds2D units2) -> Set2D units1 a -> Set2D units2 b
 map = Set.map
