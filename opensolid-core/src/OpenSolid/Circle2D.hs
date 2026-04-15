@@ -6,13 +6,16 @@ module OpenSolid.Circle2D
   , radius
   , diameter
   , point
+  , bounds
   )
 where
 
 import OpenSolid.Angle (Angle)
+import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Point2D (Point2D)
+import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Vector2D qualified as Vector2D
@@ -60,3 +63,11 @@ The angle is measured counterclockwise from the positive X direction.
 -}
 point :: Circle2D units -> Angle -> Point2D units
 point circle angle = centerPoint circle + Vector2D.polar (radius circle) angle
+
+bounds :: Circle2D units -> Bounds2D units
+bounds circle = do
+  let Point2D cx cy = centerPoint circle
+  let r = radius circle
+  let xInterval = Interval (cx - r) (cx + r)
+  let yInterval = Interval (cy - r) (cy + r)
+  Bounds2D xInterval yInterval
