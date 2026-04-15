@@ -44,6 +44,9 @@ instance Units.Coercion (Boundary units1) (Boundary units2) where
       , tree = Units.coerce boundary.tree
       }
 
+instance Indexed (Boundary units) Int (Curve2D units) where
+  boundary !! index = boundary.curves !! index
+
 instance units1 ~ units2 => Intersects (Point2D units1) (Boundary units2) (Tolerance units1) where
   intersects point boundary = Set2D.any (intersects point) (intersects point) (curves boundary)
 
