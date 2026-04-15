@@ -29,6 +29,8 @@ import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
+import OpenSolid.Units (HasUnits)
+import OpenSolid.Units qualified as Units
 
 data Set dimension units space item where
   Leaf ::
@@ -46,6 +48,25 @@ data Set dimension units space item where
 deriving instance
   (Bounds.Exists dimension units space, Show item) =>
   Show (Set dimension units space item)
+
+instance
+  ( dimension1 ~ dimension2
+  , space1 ~ space2
+  , Units.Coercion (Bounds dimension1 units1 space1) (Bounds dimension2 units2 space2)
+  , Units.Coercion item1 item2
+  , HasUnits item1 units1
+  , HasUnits item2 units2
+  ) =>
+  Units.Coercion (Set dimension1 units1 space1 item1) (Set dimension2 units2 space2 item2)
+  where
+  coerce (Leaf itemBounds item) = Leaf (Units.coerce itemBounds) (Units.coerce item)
+  coerce (SizedNode nodeBounds leftSize rightSize leftChild rightChild) =
+    SizedNode
+      (Units.coerce nodeBounds)
+      leftSize
+      rightSize
+      (Units.coerce leftChild)
+      (Units.coerce rightChild)
 
 instance Indexed (Set dimension units space item) Int item where
   set !! index
