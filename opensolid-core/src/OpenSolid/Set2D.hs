@@ -10,8 +10,11 @@ module OpenSolid.Set2D
   , toNonEmpty
   , toList
   , union
+  , get
   , find
-  , filter
+  , findWithIndex
+  , findAll
+  , findAllWithIndices
   )
 where
 
@@ -55,8 +58,17 @@ toList = Set.toList
 union :: Set2D units item -> Set2D units item -> Set2D units item
 union = Set.union
 
+get :: Int -> Set2D units item -> Maybe item
+get = Set.get
+
 find :: Tolerance units => Bounds2D units -> Set2D units item -> Fuzzy (Maybe item)
 find = Set.find
 
-filter :: Tolerance units => Bounds2D units -> Set2D units item -> List item
-filter = Set.filter
+findWithIndex :: Tolerance units => Bounds2D units -> Set2D units item -> Fuzzy (Maybe (Int, item))
+findWithIndex = Set.findWithIndex
+
+findAll :: Tolerance units => Bounds2D units -> Set2D units item -> List item
+findAll = Set.findAll
+
+findAllWithIndices :: Tolerance units => Bounds2D units -> Set2D units item -> List (Int, item)
+findAllWithIndices = Set.findAllWithIndices

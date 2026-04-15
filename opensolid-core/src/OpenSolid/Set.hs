@@ -1,5 +1,6 @@
 module OpenSolid.Set
   ( Set (Node, Leaf)
+  , size
   , bounds
   , one
   , two
@@ -8,15 +9,21 @@ module OpenSolid.Set
   , toNonEmpty
   , toList
   , union
+  , get
   , find
-  , filter
+  , findWithIndex
+  , findAll
+  , findAllWithIndices
   )
 where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval qualified as Interval
+import OpenSolid.List qualified as List
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -26,19 +33,35 @@ data Set dimension units space item where
     Bounds dimension units space ->
     item ->
     Set dimension units space item
-  Node ::
+  SizedNode ::
     Bounds dimension units space ->
+    Int ->
+    Int ->
     Set dimension units space item ->
     Set dimension units space item ->
     Set dimension units space item
 
 deriving instance (Bounds.Exists dimension units space, Show item) => Show (Set dimension units space item)
 
+pattern Node ::
+  Bounds dimension units space ->
+  Set dimension units space item ->
+  Set dimension units space item ->
+  Set dimension units space item
+pattern Node nodeBounds leftChild rightChild <- SizedNode nodeBounds _ _ leftChild rightChild
+  where
+    Node nodeBounds leftChild rightChild =
+      SizedNode nodeBounds (size leftChild) (size rightChild) leftChild rightChild
+
+size :: Set dimension units space item -> Int
+size Leaf{} = 1
+size (SizedNode _ leftSize rightSize _ _) = leftSize + rightSize
+
 bounds ::
   Bounds.Exists dimension units space =>
   Set dimension units space item ->
   Bounds dimension units space
-bounds (Node nodeBounds _ _) = nodeBounds
+bounds (SizedNode nodeBounds _ _ _ _) = nodeBounds
 bounds (Leaf leafBounds _) = leafBounds
 
 one ::
@@ -54,7 +77,7 @@ two ::
   Set dimension units space item
 two (firstItem, firstBounds) (secondItem, secondBounds) = do
   let nodeBounds = Bounds.aggregate2 firstBounds secondBounds
-  Node nodeBounds (Leaf firstBounds firstItem) (Leaf secondBounds secondItem)
+  SizedNode nodeBounds 1 1 (Leaf firstBounds firstItem) (Leaf secondBounds secondItem)
 
 partition ::
   Bounds.Exists dimension units space =>
@@ -89,7 +112,7 @@ build count boundedItems index
       let leftChild = build leftCount leftBoundedItems (index + 1)
       let rightChild = build rightCount rightBoundedItems (index + 1)
       let nodeBounds = Bounds.aggregate2 (bounds leftChild) (bounds rightChild)
-      Node nodeBounds leftChild rightChild
+      SizedNode nodeBounds leftCount rightCount leftChild rightChild
 
 splitAtIndex :: Int -> NonEmpty a -> (NonEmpty a, NonEmpty a)
 splitAtIndex 0 _ = InternalError.throw "Bad split index in Set.build"
@@ -99,7 +122,7 @@ splitAtIndex n (first :| NonEmpty rest) =
   Pair.mapFirst (NonEmpty.push first) (splitAtIndex (n - 1) rest)
 
 toNonEmpty :: Set dimension units space item -> NonEmpty item
-toNonEmpty (Node _ leftChild rightChild) = gather leftChild (toNonEmpty rightChild)
+toNonEmpty (SizedNode _ _ _ leftChild rightChild) = gather leftChild (toNonEmpty rightChild)
 toNonEmpty (Leaf _ item) = NonEmpty.one item
 
 toList :: Set dimension units space item -> List item
@@ -107,7 +130,7 @@ toList = NonEmpty.toList . toNonEmpty
 
 gather :: Set dimension units space item -> NonEmpty item -> NonEmpty item
 gather set accumulated = case set of
-  Node _ leftChild rightChild -> gather leftChild (gather rightChild accumulated)
+  SizedNode _ _ _ leftChild rightChild -> gather leftChild (gather rightChild accumulated)
   Leaf _ item -> NonEmpty.push item accumulated
 
 union ::
@@ -117,48 +140,90 @@ union ::
   Set dimension units space item
 union left right = do
   let aggregateBounds = Bounds.aggregate2 (bounds left) (bounds right)
-  Node aggregateBounds left right
+  SizedNode aggregateBounds (size left) (size right) left right
+
+get :: Int -> Set dimension units space item -> Maybe item
+get index set = if index >= 0 && index <= size set then Just (unsafeGet index set) else Nothing
+
+unsafeGet :: Int -> Set dimension units space item -> item
+unsafeGet index set = case set of
+  SizedNode _ leftSize _ leftChild rightChild
+    | index < leftSize -> unsafeGet index leftChild
+    | otherwise -> unsafeGet (index - leftSize) rightChild
+  Leaf _ item -> item
 
 find ::
   (Bounds.Exists dimension units space, Tolerance units) =>
   Bounds dimension units space ->
   Set dimension units space item ->
   Fuzzy (Maybe item)
-find searchBounds set = case set of
-  Node nodeBounds leftChild rightChild
+find searchBounds set = Fuzzy.map (Maybe.map Pair.second) (findWithIndex searchBounds set)
+
+findWithIndex ::
+  (Bounds.Exists dimension units space, Tolerance units) =>
+  Bounds dimension units space ->
+  Set dimension units space item ->
+  Fuzzy (Maybe (Int, item))
+findWithIndex searchBounds set = findWithIndexImpl 0 searchBounds set
+
+findWithIndexImpl ::
+  (Bounds.Exists dimension units space, Tolerance units) =>
+  Int ->
+  Bounds dimension units space ->
+  Set dimension units space item ->
+  Fuzzy (Maybe (Int, item))
+findWithIndexImpl startIndex searchBounds set = case set of
+  SizedNode nodeBounds leftSize _ leftChild rightChild
     | not (nodeBounds `intersects` searchBounds) -> Resolved Nothing -- No overlapping items
     | Bounds.contains nodeBounds searchBounds -> Unresolved -- More than one overlapping item
-    | otherwise -> case (find searchBounds leftChild, find searchBounds rightChild) of
-        (Unresolved, _) -> Unresolved -- More than one item found just in the left
-        (_, Unresolved) -> Unresolved -- More than one item found just in the right
-        (Resolved Nothing, rightResult) -> rightResult -- If nothing found in the left, use the right result
-        (leftResult, Resolved Nothing) -> leftResult -- If nothing found in the right, use the left result
-        (Resolved (Just _), Resolved (Just _)) -> Unresolved -- Found exactly one item in each side
+    | otherwise -> do
+        let leftResult = findWithIndexImpl startIndex searchBounds leftChild
+        let rightResult = findWithIndexImpl (startIndex + leftSize) searchBounds rightChild
+        case (leftResult, rightResult) of
+          (Unresolved, _) -> Unresolved -- More than one item found just in the left
+          (_, Unresolved) -> Unresolved -- More than one item found just in the right
+          (Resolved Nothing, _) -> rightResult -- If nothing found in the left, use the right result
+          (_, Resolved Nothing) -> leftResult -- If nothing found in the right, use the left result
+          (Resolved (Just _), Resolved (Just _)) -> Unresolved -- Found exactly one item in each side
   Leaf itemBounds item ->
-    Resolved (if searchBounds `intersects` itemBounds then Just item else Nothing)
+    Resolved (if searchBounds `intersects` itemBounds then Just (startIndex, item) else Nothing)
 
-filter ::
+findAll ::
   (Bounds.Exists dimension units space, Tolerance units) =>
   Bounds dimension units space ->
   Set dimension units space item ->
   List item
-filter searchBounds set = search searchBounds set []
+findAll searchBounds set = List.map Pair.second (findAllWithIndices searchBounds set)
 
-search ::
+findAllWithIndices ::
   (Bounds.Exists dimension units space, Tolerance units) =>
   Bounds dimension units space ->
   Set dimension units space item ->
-  List item ->
-  List item
-search searchBounds set accumulated = case set of
-  Node nodeBounds leftChild rightChild
+  List (Int, item)
+findAllWithIndices searchBounds set = findAllWithIndicesImpl 0 searchBounds set []
+
+findAllWithIndicesImpl ::
+  (Bounds.Exists dimension units space, Tolerance units) =>
+  Int ->
+  Bounds dimension units space ->
+  Set dimension units space item ->
+  List (Int, item) ->
+  List (Int, item)
+findAllWithIndicesImpl startIndex searchBounds set accumulated = case set of
+  SizedNode nodeBounds leftSize _ leftChild rightChild
     | not (nodeBounds `intersects` searchBounds) -> accumulated
-    | Bounds.contains nodeBounds searchBounds -> returnAll set accumulated
-    | otherwise -> search searchBounds leftChild (search searchBounds rightChild accumulated)
+    | Bounds.contains nodeBounds searchBounds -> returnAll startIndex set accumulated
+    | otherwise ->
+        accumulated
+          & findAllWithIndicesImpl (startIndex + leftSize) searchBounds rightChild
+          & findAllWithIndicesImpl startIndex searchBounds leftChild
   Leaf itemBounds item ->
-    if searchBounds `intersects` itemBounds then item : accumulated else accumulated
+    if searchBounds `intersects` itemBounds then (startIndex, item) : accumulated else accumulated
 
-returnAll :: Set dimension units space item -> List item -> List item
-returnAll set accumulated = case set of
-  Node _ leftChild rightChild -> returnAll leftChild (returnAll rightChild accumulated)
-  Leaf _ item -> item : accumulated
+returnAll :: Int -> Set dimension units space item -> List (Int, item) -> List (Int, item)
+returnAll startIndex set accumulated = case set of
+  SizedNode _ leftSize _ leftChild rightChild ->
+    accumulated
+      & returnAll (startIndex + leftSize) rightChild
+      & returnAll startIndex leftChild
+  Leaf _ item -> (startIndex, item) : accumulated

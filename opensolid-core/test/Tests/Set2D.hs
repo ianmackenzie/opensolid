@@ -15,7 +15,7 @@ import Test qualified
 tests :: List Test
 tests =
   [ find
-  , filter
+  , findAll
   ]
 
 point :: Int -> Int -> Point2D Meters
@@ -48,9 +48,9 @@ find =
         Test.expect (Set2D.find searchBounds testSet == Unresolved)
     ]
 
-filter :: Test
-filter = Test.verify "filter" do
+findAll :: Test
+findAll = Test.verify "findAll" do
   let searchBounds = Bounds2D.hull2 (point 2 2) (point 6 6)
-  let filteredPoints = Set2D.filter searchBounds testSet
+  let foundPoints = Set2D.findAll searchBounds testSet
   let expectedPoints = [point 3 5, point 5 5]
-  Test.expect (List.sort filteredPoints == List.sort expectedPoints)
+  Test.expect (List.sort foundPoints == List.sort expectedPoints)

@@ -10,8 +10,11 @@ module OpenSolid.Set3D
   , toNonEmpty
   , toList
   , union
+  , get
   , find
-  , filter
+  , findWithIndex
+  , findAll
+  , findAllWithIndices
   )
 where
 
@@ -54,8 +57,17 @@ toList = Set.toList
 union :: Set3D space item -> Set3D space item -> Set3D space item
 union = Set.union
 
+get :: Int -> Set3D space item -> Maybe item
+get = Set.get
+
 find :: Tolerance Meters => Bounds3D space -> Set3D space item -> Fuzzy (Maybe item)
 find = Set.find
 
-filter :: Tolerance Meters => Bounds3D space -> Set3D space item -> List item
-filter = Set.filter
+findWithIndex :: Tolerance Meters => Bounds3D space -> Set3D space item -> Fuzzy (Maybe (Int, item))
+findWithIndex = Set.findWithIndex
+
+findAll :: Tolerance Meters => Bounds3D space -> Set3D space item -> List item
+findAll = Set.findAll
+
+findAllWithIndices :: Tolerance Meters => Bounds3D space -> Set3D space item -> List (Int, item)
+findAllWithIndices = Set.findAllWithIndices
