@@ -97,10 +97,7 @@ size :: Set dimension units space item -> Int
 size Leaf{} = 1
 size (SizedNode _ leftSize rightSize _ _) = leftSize + rightSize
 
-bounds ::
-  Bounds.Exists dimension units space =>
-  Set dimension units space item ->
-  Bounds dimension units space
+bounds :: Set dimension units space item -> Bounds dimension units space
 bounds (SizedNode nodeBounds _ _ _ _) = nodeBounds
 bounds (Leaf leafBounds _) = leafBounds
 
