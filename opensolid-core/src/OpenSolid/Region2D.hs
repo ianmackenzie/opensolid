@@ -462,22 +462,17 @@ classify point region =
       Nothing -> Inside
       -- Need to check point against inner boundaries
       Just innerBoundarySet ->
-        classifyInnerResults $
-          Set2D.filterMap
-            (intersects point)
-            (Just . Boundary.classifyPoint point)
-            innerBoundarySet
+        Set2D.cull (intersects point) innerBoundarySet
+          & classifyInner point
 
-classifyInnerResults :: List Boundary.Classification -> Classification
-classifyInnerResults classifications = case classifications of
-  -- Point is inside a hole, so outside the region
-  Boundary.Internal : _ -> Outside
-  -- Point is on a hole boundary
-  Boundary.Intersected : _ -> OnBoundary
-  -- Point is not enclosed in or on the boundary of the current hole, check the rest
-  Boundary.External : rest -> classifyInnerResults rest
-  -- Point is not enclosed in or on the boundary of any holes, so is inside the region
-  [] -> Inside
+classifyInner :: Tolerance units => Point2D units -> List (Boundary units) -> Classification
+classifyInner point holes = case holes of
+  first : rest ->
+    case Boundary.classifyPoint point first of
+      Boundary.Internal -> Outside -- Point is inside a hole, so outside the region
+      Boundary.Intersected -> OnBoundary -- Point is on a hole boundary
+      Boundary.External -> classifyInner point rest -- Point is outside this hole, so check the rest
+  [] -> Inside -- Point is not inside or on the boundary of any hole, so is inside the region
 
 classifyLoops :: Tolerance units => List (Loop units) -> Result BoundedBy.Error (Region2D units)
 classifyLoops [] = Error BoundedBy.EmptyRegion

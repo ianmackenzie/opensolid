@@ -14,21 +14,8 @@ module OpenSolid.Set2D
   , map
   , reverseMap
   , union
-  , any
-  , anyWithIndex
-  , all
-  , allWithIndex
-  , intersecting
-  , filter
-  , filterWithIndex
-  , filterMap
-  , filterMapWithIndex
-  , partition
-  , partitionWithIndex
-  , foldrMap
-  , foldrMapWithIndex
-  , foldlMap
-  , foldlMapWithIndex
+  , cull
+  , cullIndexed
   )
 where
 
@@ -84,87 +71,8 @@ reverseMap = Set.reverseMap
 union :: Set2D units item -> Set2D units item -> Set2D units item
 union = Set.union
 
-any :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
-any = Set.any
+cull :: (Bounds2D units -> Bool) -> Set2D units item -> List item
+cull = Set.cull
 
-anyWithIndex :: (Bounds2D units -> Bool) -> (Int -> item -> Bool) -> Set2D units item -> Bool
-anyWithIndex = Set.anyWithIndex
-
-all :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
-all = Set.all
-
-allWithIndex :: (Bounds2D units -> Bool) -> (Int -> item -> Bool) -> Set2D units item -> Bool
-allWithIndex = Set.allWithIndex
-
-intersecting ::
-  ( Intersects target (Bounds2D units) constraint1
-  , Intersects target item constraint2
-  , constraint1
-  , constraint2
-  ) =>
-  target ->
-  Set2D units item ->
-  List item
-intersecting = Set.intersecting
-
-filter :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> List item
-filter = Set.filter
-
-filterWithIndex ::
-  (Bounds2D units -> Bool) ->
-  (Int -> item -> Bool) ->
-  Set2D units item ->
-  List (Int, item)
-filterWithIndex = Set.filterWithIndex
-
-filterMap :: (Bounds2D units -> Bool) -> (item -> Maybe a) -> Set2D units item -> List a
-filterMap = Set.filterMap
-
-filterMapWithIndex ::
-  (Bounds2D units -> Bool) ->
-  (Int -> item -> Maybe a) ->
-  Set2D units item ->
-  List (Int, a)
-filterMapWithIndex = Set.filterMapWithIndex
-
-partition ::
-  (Bounds2D units -> Fuzzy Bool) ->
-  (item -> Bool) ->
-  Set2D units item ->
-  (List item, List item)
-partition = Set.partition
-
-partitionWithIndex ::
-  (Bounds2D units -> Fuzzy Bool) ->
-  (Int -> item -> Bool) ->
-  Set2D units item ->
-  (List (Int, item), List (Int, item))
-partitionWithIndex = Set.partitionWithIndex
-
-foldrMap ::
-  (item -> accumulated) ->
-  (item -> accumulated -> accumulated) ->
-  Set2D units item ->
-  accumulated
-foldrMap = Set.foldrMap
-
-foldrMapWithIndex ::
-  (Int -> item -> accumulated) ->
-  (Int -> item -> accumulated -> accumulated) ->
-  Set2D units item ->
-  accumulated
-foldrMapWithIndex = Set.foldrMapWithIndex
-
-foldlMap ::
-  (item -> accumulated) ->
-  (accumulated -> item -> accumulated) ->
-  Set2D units item ->
-  accumulated
-foldlMap = Set.foldlMap
-
-foldlMapWithIndex ::
-  (Int -> item -> accumulated) ->
-  (Int -> accumulated -> item -> accumulated) ->
-  Set2D units item ->
-  accumulated
-foldlMapWithIndex = Set.foldlMapWithIndex
+cullIndexed :: (Bounds2D units -> Bool) -> Set2D units item -> List (Int, item)
+cullIndexed = Set.cullIndexed

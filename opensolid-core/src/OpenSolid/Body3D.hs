@@ -455,10 +455,9 @@ registerHalfEdge halfEdgeSet surfaceRegistry halfEdge = do
       Ok SurfaceRegistry{unprocessed, processed, edges = Map.set halfEdgeId edge edges}
     HalfEdge{halfEdgeId, uvCurve, curve3D} -> do
       let matingEdges =
-            Set3D.filterMap
-              (intersects (halfEdgeBounds halfEdge))
-              (toMatingEdge halfEdgeId curve3D)
-              halfEdgeSet
+            halfEdgeSet
+              & Set3D.cull (intersects (halfEdgeBounds halfEdge))
+              & List.filterMap (toMatingEdge halfEdgeId curve3D)
       case matingEdges of
         [] -> Error BoundedBy.BoundaryHasGaps
         List.TwoOrMore -> Error BoundedBy.BoundaryIntersectsItself

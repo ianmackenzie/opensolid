@@ -12,17 +12,8 @@ module OpenSolid.Set
   , toNonEmpty
   , toList
   , union
-  , any
-  , anyWithIndex
-  , all
-  , allWithIndex
-  , intersecting
-  , filter
-  , filterWithIndex
-  , filterMap
-  , filterMapWithIndex
-  , partition
-  , partitionWithIndex
+  , cull
+  , cullIndexed
   , foldrMap
   , foldrMapWithIndex
   , foldlMap
@@ -35,7 +26,6 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -317,172 +307,28 @@ union left right = do
   let aggregateBounds = Bounds.aggregate2 (bounds left) (bounds right)
   SizedNode aggregateBounds (size left) (size right) left right
 
-any ::
-  (Bounds dimension units space -> Bool) ->
-  (item -> Bool) ->
-  Set dimension units space item ->
-  Bool
-any boundsPredicate itemPredicate set =
-  anyWithIndex boundsPredicate (const itemPredicate) set
+cull :: (Bounds dimension units space -> Bool) -> Set dimension units space item -> List item
+cull predicate set = cullImpl 0 predicate (const id) set []
 
-anyWithIndex ::
+cullIndexed ::
   (Bounds dimension units space -> Bool) ->
-  (Int -> item -> Bool) ->
-  Set dimension units space item ->
-  Bool
-anyWithIndex boundsPredicate itemPredicate set =
-  anyWithIndexImpl 0 boundsPredicate itemPredicate set
-
-anyWithIndexImpl ::
-  Int ->
-  (Bounds dimension units space -> Bool) ->
-  (Int -> item -> Bool) ->
-  Set dimension units space item ->
-  Bool
-anyWithIndexImpl startIndex boundsPredicate itemPredicate set =
-  boundsPredicate (bounds set) && case set of
-    Leaf _ item -> itemPredicate startIndex item
-    SizedNode _ leftSize _ left right ->
-      anyWithIndexImpl startIndex boundsPredicate itemPredicate left
-        || anyWithIndexImpl (startIndex + leftSize) boundsPredicate itemPredicate right
-
-all ::
-  (Bounds dimension units space -> Bool) ->
-  (item -> Bool) ->
-  Set dimension units space item ->
-  Bool
-all boundsPredicate itemPredicate set =
-  allWithIndex boundsPredicate (const itemPredicate) set
-
-allWithIndex ::
-  (Bounds dimension units space -> Bool) ->
-  (Int -> item -> Bool) ->
-  Set dimension units space item ->
-  Bool
-allWithIndex boundsPredicate itemPredicate set =
-  allWithIndexImpl 0 boundsPredicate itemPredicate set
-
-allWithIndexImpl ::
-  Int ->
-  (Bounds dimension units space -> Bool) ->
-  (Int -> item -> Bool) ->
-  Set dimension units space item ->
-  Bool
-allWithIndexImpl startIndex boundsPredicate itemPredicate set =
-  boundsPredicate (bounds set) && case set of
-    Leaf _ item -> itemPredicate startIndex item
-    SizedNode _ leftSize _ left right ->
-      allWithIndexImpl startIndex boundsPredicate itemPredicate left
-        && allWithIndexImpl (startIndex + leftSize) boundsPredicate itemPredicate right
-
-intersecting ::
-  ( Intersects target (Bounds dimension units space) constraint1
-  , Intersects target item constraint2
-  , constraint1
-  , constraint2
-  ) =>
-  target ->
-  Set dimension units space item ->
-  List item
-intersecting target = filter (intersects target) (intersects target)
-
-filter ::
-  (Bounds dimension units space -> Bool) ->
-  (item -> Bool) ->
-  Set dimension units space item ->
-  List item
-filter boundsPredicate itemPredicate set =
-  filterWithIndex boundsPredicate (const itemPredicate) set & List.map Pair.second
-
-filterWithIndex ::
-  (Bounds dimension units space -> Bool) ->
-  (Int -> item -> Bool) ->
   Set dimension units space item ->
   List (Int, item)
-filterWithIndex boundsPredicate itemPredicate set = do
-  let itemFunction index item = if itemPredicate index item then Just item else Nothing
-  filterMapWithIndex boundsPredicate itemFunction set
+cullIndexed predicate set = cullImpl 0 predicate (,) set []
 
-filterMap ::
-  (Bounds dimension units space -> Bool) ->
-  (item -> Maybe a) ->
-  Set dimension units space item ->
-  List a
-filterMap boundsPredicate itemFunction set =
-  filterMapWithIndex boundsPredicate (const itemFunction) set & List.map Pair.second
-
-filterMapWithIndex ::
-  (Bounds dimension units space -> Bool) ->
-  (Int -> item -> Maybe a) ->
-  Set dimension units space item ->
-  List (Int, a)
-filterMapWithIndex boundsPredicate itemFunction set =
-  filterMapWithIndexImpl 0 boundsPredicate itemFunction set []
-
-filterMapWithIndexImpl ::
+cullImpl ::
   Int ->
   (Bounds dimension units space -> Bool) ->
-  (Int -> item -> Maybe a) ->
+  (Int -> item -> a) ->
   Set dimension units space item ->
-  List (Int, a) ->
-  List (Int, a)
-filterMapWithIndexImpl startIndex boundsPredicate itemFunction set accumulated =
-  case boundsPredicate (bounds set) of
+  List a ->
+  List a
+cullImpl startIndex predicate function set accumulated =
+  case predicate (bounds set) of
     False -> accumulated
     True -> case set of
+      Leaf _ item -> function startIndex item : accumulated
       SizedNode _ leftSize _ leftChild rightChild ->
         accumulated
-          & filterMapWithIndexImpl (startIndex + leftSize) boundsPredicate itemFunction rightChild
-          & filterMapWithIndexImpl startIndex boundsPredicate itemFunction leftChild
-      Leaf _ item ->
-        case itemFunction startIndex item of
-          Just value -> (startIndex, value) : accumulated
-          Nothing -> accumulated
-
-partition ::
-  (Bounds dimension units space -> Fuzzy Bool) ->
-  (item -> Bool) ->
-  Set dimension units space item ->
-  (List item, List item)
-partition boundsPredicate itemPredicate set =
-  partitionWithIndex boundsPredicate (const itemPredicate) set
-    & Pair.map (List.map Pair.second)
-
-partitionWithIndex ::
-  (Bounds dimension units space -> Fuzzy Bool) ->
-  (Int -> item -> Bool) ->
-  Set dimension units space item ->
-  (List (Int, item), List (Int, item))
-partitionWithIndex boundsPredicate itemPredicate set =
-  partitionWithIndexImpl 0 boundsPredicate itemPredicate set ([], [])
-
-partitionWithIndexImpl ::
-  Int ->
-  (Bounds dimension units space -> Fuzzy Bool) ->
-  (Int -> item -> Bool) ->
-  Set dimension units space item ->
-  (List (Int, item), List (Int, item)) ->
-  (List (Int, item), List (Int, item))
-partitionWithIndexImpl startIndex boundsPredicate itemPredicate set accumulated = do
-  let (passes, failures) = accumulated
-  case boundsPredicate (bounds set) of
-    Resolved True -> (addAll startIndex set passes, failures)
-    Resolved False -> (passes, addAll startIndex set failures)
-    Unresolved -> case set of
-      SizedNode _ leftSize _ leftChild rightChild ->
-        accumulated
-          & partitionWithIndexImpl (startIndex + leftSize) boundsPredicate itemPredicate rightChild
-          & partitionWithIndexImpl startIndex boundsPredicate itemPredicate leftChild
-      Leaf _ item -> do
-        let indexedItem = (startIndex, item)
-        if itemPredicate startIndex item
-          then (indexedItem : passes, failures)
-          else (passes, indexedItem : failures)
-
-addAll :: Int -> Set dimension units space item -> List (Int, item) -> List (Int, item)
-addAll startIndex set accumulated = case set of
-  Leaf _ item -> (startIndex, item) : accumulated
-  SizedNode _ leftSize _ leftChild rightChild ->
-    accumulated
-      & addAll (startIndex + leftSize) rightChild
-      & addAll startIndex leftChild
+          & cullImpl (startIndex + leftSize) predicate function rightChild
+          & cullImpl startIndex predicate function leftChild

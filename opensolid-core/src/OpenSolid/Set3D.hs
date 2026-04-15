@@ -14,21 +14,8 @@ module OpenSolid.Set3D
   , map
   , reverseMap
   , union
-  , any
-  , anyWithIndex
-  , all
-  , allWithIndex
-  , intersecting
-  , filter
-  , filterWithIndex
-  , filterMap
-  , filterMapWithIndex
-  , partition
-  , partitionWithIndex
-  , foldrMap
-  , foldrMapWithIndex
-  , foldlMap
-  , foldlMapWithIndex
+  , cull
+  , cullIndexed
   )
 where
 
@@ -83,87 +70,8 @@ reverseMap = Set.reverseMap
 union :: Set3D space item -> Set3D space item -> Set3D space item
 union = Set.union
 
-any :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bool
-any = Set.any
+cull :: (Bounds3D space -> Bool) -> Set3D space item -> List item
+cull = Set.cull
 
-anyWithIndex :: (Bounds3D space -> Bool) -> (Int -> item -> Bool) -> Set3D space item -> Bool
-anyWithIndex = Set.anyWithIndex
-
-all :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bool
-all = Set.all
-
-allWithIndex :: (Bounds3D space -> Bool) -> (Int -> item -> Bool) -> Set3D space item -> Bool
-allWithIndex = Set.allWithIndex
-
-intersecting ::
-  ( Intersects target (Bounds3D space) constraint1
-  , Intersects target item constraint2
-  , constraint1
-  , constraint2
-  ) =>
-  target ->
-  Set3D space item ->
-  List item
-intersecting = Set.intersecting
-
-filter :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> List item
-filter = Set.filter
-
-filterWithIndex ::
-  (Bounds3D space -> Bool) ->
-  (Int -> item -> Bool) ->
-  Set3D space item ->
-  List (Int, item)
-filterWithIndex = Set.filterWithIndex
-
-filterMap :: (Bounds3D space -> Bool) -> (item -> Maybe a) -> Set3D space item -> List a
-filterMap = Set.filterMap
-
-filterMapWithIndex ::
-  (Bounds3D space -> Bool) ->
-  (Int -> item -> Maybe a) ->
-  Set3D space item ->
-  List (Int, a)
-filterMapWithIndex = Set.filterMapWithIndex
-
-partition ::
-  (Bounds3D space -> Fuzzy Bool) ->
-  (item -> Bool) ->
-  Set3D space item ->
-  (List item, List item)
-partition = Set.partition
-
-partitionWithIndex ::
-  (Bounds3D space -> Fuzzy Bool) ->
-  (Int -> item -> Bool) ->
-  Set3D space item ->
-  (List (Int, item), List (Int, item))
-partitionWithIndex = Set.partitionWithIndex
-
-foldrMap ::
-  (item -> accumulated) ->
-  (item -> accumulated -> accumulated) ->
-  Set3D space item ->
-  accumulated
-foldrMap = Set.foldrMap
-
-foldrMapWithIndex ::
-  (Int -> item -> accumulated) ->
-  (Int -> item -> accumulated -> accumulated) ->
-  Set3D space item ->
-  accumulated
-foldrMapWithIndex = Set.foldrMapWithIndex
-
-foldlMap ::
-  (item -> accumulated) ->
-  (accumulated -> item -> accumulated) ->
-  Set3D space item ->
-  accumulated
-foldlMap = Set.foldlMap
-
-foldlMapWithIndex ::
-  (Int -> item -> accumulated) ->
-  (Int -> accumulated -> item -> accumulated) ->
-  Set3D space item ->
-  accumulated
-foldlMapWithIndex = Set.foldlMapWithIndex
+cullIndexed :: (Bounds3D space -> Bool) -> Set3D space item -> List (Int, item)
+cullIndexed = Set.cullIndexed
