@@ -76,9 +76,11 @@ import System.Random.Stateful qualified
 import Prelude
   ( Applicative
   , Bool (False, True)
+  , Bounded
   , Char
   , Double
   , Either (Left, Right)
+  , Enum
   , Eq
   , Foldable
   , Functor
