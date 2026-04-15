@@ -15,7 +15,9 @@ module OpenSolid.Set2D
   , reverseMap
   , union
   , any
+  , anyWithIndex
   , all
+  , allWithIndex
   , intersecting
   , filter
   , filterWithIndex
@@ -85,8 +87,14 @@ union = Set.union
 any :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
 any = Set.any
 
+anyWithIndex :: (Bounds2D units -> Bool) -> (Int -> item -> Bool) -> Set2D units item -> Bool
+anyWithIndex = Set.anyWithIndex
+
 all :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
 all = Set.all
+
+allWithIndex :: (Bounds2D units -> Bool) -> (Int -> item -> Bool) -> Set2D units item -> Bool
+allWithIndex = Set.allWithIndex
 
 intersecting ::
   ( Intersects target (Bounds2D units) constraint1

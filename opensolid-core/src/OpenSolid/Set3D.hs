@@ -15,7 +15,9 @@ module OpenSolid.Set3D
   , reverseMap
   , union
   , any
+  , anyWithIndex
   , all
+  , allWithIndex
   , intersecting
   , filter
   , filterWithIndex
@@ -84,8 +86,14 @@ union = Set.union
 any :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bool
 any = Set.any
 
+anyWithIndex :: (Bounds3D space -> Bool) -> (Int -> item -> Bool) -> Set3D space item -> Bool
+anyWithIndex = Set.anyWithIndex
+
 all :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bool
 all = Set.all
+
+allWithIndex :: (Bounds3D space -> Bool) -> (Int -> item -> Bool) -> Set3D space item -> Bool
+allWithIndex = Set.allWithIndex
 
 intersecting ::
   ( Intersects target (Bounds3D space) constraint1

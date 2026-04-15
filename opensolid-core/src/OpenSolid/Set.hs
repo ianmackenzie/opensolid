@@ -13,7 +13,9 @@ module OpenSolid.Set
   , toList
   , union
   , any
+  , anyWithIndex
   , all
+  , allWithIndex
   , intersecting
   , filter
   , filterWithIndex
@@ -321,22 +323,58 @@ any ::
   (item -> Bool) ->
   Set dimension units space item ->
   Bool
-any boundsPredicate predicate set = case set of
-  Leaf leafBounds item -> boundsPredicate leafBounds && predicate item
-  SizedNode nodeBounds _ _ left right ->
-    boundsPredicate nodeBounds && do
-      any boundsPredicate predicate left || any boundsPredicate predicate right
+any boundsPredicate itemPredicate set =
+  anyWithIndex boundsPredicate (const itemPredicate) set
+
+anyWithIndex ::
+  (Bounds dimension units space -> Bool) ->
+  (Int -> item -> Bool) ->
+  Set dimension units space item ->
+  Bool
+anyWithIndex boundsPredicate itemPredicate set =
+  anyWithIndexImpl 0 boundsPredicate itemPredicate set
+
+anyWithIndexImpl ::
+  Int ->
+  (Bounds dimension units space -> Bool) ->
+  (Int -> item -> Bool) ->
+  Set dimension units space item ->
+  Bool
+anyWithIndexImpl startIndex boundsPredicate itemPredicate set =
+  boundsPredicate (bounds set) && case set of
+    Leaf _ item -> itemPredicate startIndex item
+    SizedNode _ leftSize _ left right ->
+      anyWithIndexImpl startIndex boundsPredicate itemPredicate left
+        || anyWithIndexImpl (startIndex + leftSize) boundsPredicate itemPredicate right
 
 all ::
   (Bounds dimension units space -> Bool) ->
   (item -> Bool) ->
   Set dimension units space item ->
   Bool
-all boundsPredicate predicate set = case set of
-  Leaf leafBounds item -> boundsPredicate leafBounds && predicate item
-  SizedNode nodeBounds _ _ left right ->
-    boundsPredicate nodeBounds && do
-      all boundsPredicate predicate left && all boundsPredicate predicate right
+all boundsPredicate itemPredicate set =
+  allWithIndex boundsPredicate (const itemPredicate) set
+
+allWithIndex ::
+  (Bounds dimension units space -> Bool) ->
+  (Int -> item -> Bool) ->
+  Set dimension units space item ->
+  Bool
+allWithIndex boundsPredicate itemPredicate set =
+  allWithIndexImpl 0 boundsPredicate itemPredicate set
+
+allWithIndexImpl ::
+  Int ->
+  (Bounds dimension units space -> Bool) ->
+  (Int -> item -> Bool) ->
+  Set dimension units space item ->
+  Bool
+allWithIndexImpl startIndex boundsPredicate itemPredicate set =
+  boundsPredicate (bounds set) && case set of
+    Leaf _ item -> itemPredicate startIndex item
+    SizedNode _ leftSize _ left right ->
+      allWithIndexImpl startIndex boundsPredicate itemPredicate left
+        && allWithIndexImpl (startIndex + leftSize) boundsPredicate itemPredicate right
 
 intersecting ::
   ( Intersects target (Bounds dimension units space) constraint1
