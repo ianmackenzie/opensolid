@@ -6,6 +6,8 @@ module OpenSolid.Set
   , two
   , partition
   , partitionBy
+  , linear
+  , linearBy
   , toNonEmpty
   , toList
   , union
@@ -123,6 +125,37 @@ build count boundedItems index
       let (leftBoundedItems, rightBoundedItems) = splitAtIndex leftCount sorted
       let leftChild = build leftCount leftBoundedItems (index + 1)
       let rightChild = build rightCount rightBoundedItems (index + 1)
+      let nodeBounds = Bounds.aggregate2 (bounds leftChild) (bounds rightChild)
+      SizedNode nodeBounds leftCount rightCount leftChild rightChild
+
+linear ::
+  Bounds.Exists dimension units space =>
+  NonEmpty (item, Bounds dimension units space) ->
+  Set dimension units space item
+linear boundedItems = buildLinear (NonEmpty.length boundedItems) boundedItems
+
+linearBy ::
+  Bounds.Exists dimension units space =>
+  (item -> Bounds dimension units space) ->
+  NonEmpty item ->
+  Set dimension units space item
+linearBy function items = linear (NonEmpty.map (Pair.decorate function) items)
+
+buildLinear ::
+  Bounds.Exists dimension units space =>
+  Int ->
+  NonEmpty (item, Bounds dimension units space) ->
+  Set dimension units space item
+buildLinear count boundedItems
+  | count == 1 = assert (NonEmpty.length boundedItems == 1) do
+      let (item, itemBounds) = NonEmpty.first boundedItems
+      Leaf itemBounds item
+  | otherwise = assert (count >= 2 && NonEmpty.length boundedItems == count) do
+      let leftCount = count // 2
+      let rightCount = count - leftCount
+      let (leftBoundedItems, rightBoundedItems) = splitAtIndex leftCount boundedItems
+      let leftChild = buildLinear leftCount leftBoundedItems
+      let rightChild = buildLinear rightCount rightBoundedItems
       let nodeBounds = Bounds.aggregate2 (bounds leftChild) (bounds rightChild)
       SizedNode nodeBounds leftCount rightCount leftChild rightChild
 

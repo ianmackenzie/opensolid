@@ -5,6 +5,8 @@ module OpenSolid.Set2D
   , one
   , two
   , bounds
+  , linear
+  , linearBy
   , partition
   , partitionBy
   , toNonEmpty
@@ -41,6 +43,12 @@ one = Set.one
 
 two :: (item, Bounds2D units) -> (item, Bounds2D units) -> Set2D units item
 two = Set.two
+
+linear :: NonEmpty (item, Bounds2D units) -> Set2D units item
+linear = Set.linear
+
+linearBy :: (item -> Bounds2D units) -> NonEmpty item -> Set2D units item
+linearBy = Set.linearBy
 
 partition :: NonEmpty (item, Bounds2D units) -> Set2D units item
 partition = Set.partition

@@ -7,6 +7,8 @@ module OpenSolid.Set3D
   , bounds
   , partition
   , partitionBy
+  , linear
+  , linearBy
   , toNonEmpty
   , toList
   , union
@@ -46,6 +48,12 @@ partition = Set.partition
 
 partitionBy :: (item -> Bounds3D space) -> NonEmpty item -> Set3D space item
 partitionBy = Set.partitionBy
+
+linear :: NonEmpty (item, Bounds3D space) -> Set3D space item
+linear = Set.linear
+
+linearBy :: (item -> Bounds3D space) -> NonEmpty item -> Set3D space item
+linearBy = Set.linearBy
 
 toNonEmpty :: Set3D space item -> NonEmpty item
 toNonEmpty = Set.toNonEmpty
