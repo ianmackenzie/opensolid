@@ -14,8 +14,7 @@ import Test qualified
 
 tests :: List Test
 tests =
-  [ find
-  , findAll
+  [ findAll
   ]
 
 point :: Int -> Int -> Point2D Meters
@@ -33,20 +32,6 @@ testSet =
       (point 5 5)
       (point 2 9)
       (point 7 3)
-
-find :: Test
-find =
-  Test.group "find" $
-    [ Test.verify "point" do
-        let searchBounds = Bounds2D.hull2 (point 0 0) (point 2 2)
-        Test.expect (Set2D.find searchBounds testSet == Resolved (Just (point 1 1)))
-    , Test.verify "nothing" do
-        let searchBounds = Bounds2D.hull2 (point 4 9) (point 5 10)
-        Test.expect (Set2D.find searchBounds testSet == Resolved Nothing)
-    , Test.verify "unresolved" do
-        let searchBounds = Bounds2D.hull2 (point 3 3) (point 6 6)
-        Test.expect (Set2D.find searchBounds testSet == Unresolved)
-    ]
 
 findAll :: Test
 findAll = Test.verify "findAll" do

@@ -14,8 +14,6 @@ module OpenSolid.Set
   , union
   , any
   , all
-  , find
-  , findWithIndex
   , findAll
   , findAllWithIndices
   , foldrMap
@@ -27,12 +25,10 @@ where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
-import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
-import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -339,42 +335,6 @@ all boundsPredicate predicate set = case set of
   SizedNode nodeBounds _ _ left right ->
     boundsPredicate nodeBounds && do
       all boundsPredicate predicate left && all boundsPredicate predicate right
-
-find ::
-  (Bounds.Exists dimension units space, Tolerance units) =>
-  Bounds dimension units space ->
-  Set dimension units space item ->
-  Fuzzy (Maybe item)
-find searchBounds set = Fuzzy.map (Maybe.map Pair.second) (findWithIndex searchBounds set)
-
-findWithIndex ::
-  (Bounds.Exists dimension units space, Tolerance units) =>
-  Bounds dimension units space ->
-  Set dimension units space item ->
-  Fuzzy (Maybe (Int, item))
-findWithIndex searchBounds set = findWithIndexImpl 0 searchBounds set
-
-findWithIndexImpl ::
-  (Bounds.Exists dimension units space, Tolerance units) =>
-  Int ->
-  Bounds dimension units space ->
-  Set dimension units space item ->
-  Fuzzy (Maybe (Int, item))
-findWithIndexImpl startIndex searchBounds set = case set of
-  SizedNode nodeBounds leftSize _ leftChild rightChild
-    | not (nodeBounds `intersects` searchBounds) -> Resolved Nothing -- No overlapping items
-    | Bounds.contains nodeBounds searchBounds -> Unresolved -- More than one overlapping item
-    | otherwise -> do
-        let leftResult = findWithIndexImpl startIndex searchBounds leftChild
-        let rightResult = findWithIndexImpl (startIndex + leftSize) searchBounds rightChild
-        case (leftResult, rightResult) of
-          (Unresolved, _) -> Unresolved -- More than one item found just in the left
-          (_, Unresolved) -> Unresolved -- More than one item found just in the right
-          (Resolved Nothing, _) -> rightResult -- If nothing found in the left, use the right result
-          (_, Resolved Nothing) -> leftResult -- If nothing found in the right, use the left result
-          (Resolved (Just _), Resolved (Just _)) -> Unresolved -- Found exactly one item in each side
-  Leaf itemBounds item ->
-    Resolved (if searchBounds `intersects` itemBounds then Just (startIndex, item) else Nothing)
 
 findAll ::
   (Bounds.Exists dimension units space, Tolerance units) =>

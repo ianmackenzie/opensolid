@@ -16,8 +16,6 @@ module OpenSolid.Set3D
   , union
   , any
   , all
-  , find
-  , findWithIndex
   , findAll
   , findAllWithIndices
   , foldrMap
@@ -83,12 +81,6 @@ any = Set.any
 
 all :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bool
 all = Set.all
-
-find :: Tolerance Meters => Bounds3D space -> Set3D space item -> Fuzzy (Maybe item)
-find = Set.find
-
-findWithIndex :: Tolerance Meters => Bounds3D space -> Set3D space item -> Fuzzy (Maybe (Int, item))
-findWithIndex = Set.findWithIndex
 
 findAll :: Tolerance Meters => Bounds3D space -> Set3D space item -> List item
 findAll = Set.findAll

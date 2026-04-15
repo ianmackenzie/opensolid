@@ -16,8 +16,6 @@ module OpenSolid.Set2D
   , union
   , any
   , all
-  , find
-  , findWithIndex
   , findAll
   , findAllWithIndices
   , foldrMap
@@ -84,12 +82,6 @@ any = Set.any
 
 all :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
 all = Set.all
-
-find :: Tolerance units => Bounds2D units -> Set2D units item -> Fuzzy (Maybe item)
-find = Set.find
-
-findWithIndex :: Tolerance units => Bounds2D units -> Set2D units item -> Fuzzy (Maybe (Int, item))
-findWithIndex = Set.findWithIndex
 
 findAll :: Tolerance units => Bounds2D units -> Set2D units item -> List item
 findAll = Set.findAll
