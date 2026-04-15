@@ -7,6 +7,7 @@ module OpenSolid.Set
   , build
   , linear
   , aggregate
+  , flatten
   , map
   , reverseMap
   , toNonEmpty
@@ -190,6 +191,13 @@ splitAtIndex _ (_ :| []) = InternalError.throw "Bad split index in Set.aggregate
 splitAtIndex 1 (first :| NonEmpty rest) = (NonEmpty.one first, rest)
 splitAtIndex n (first :| NonEmpty rest) =
   Pair.mapFirst (NonEmpty.push first) (splitAtIndex (n - 1) rest)
+
+flatten :: Set dimension units space (Set dimension units space item) -> Set dimension units space item
+flatten (Leaf _ set) = set
+flatten (SizedNode nodeBounds _ _ left right) = do
+  let flattenedLeft = flatten left
+  let flattenedRight = flatten right
+  SizedNode nodeBounds (size flattenedLeft) (size flattenedRight) flattenedLeft flattenedRight
 
 map ::
   Bounds.Exists dimension2 units2 space2 =>

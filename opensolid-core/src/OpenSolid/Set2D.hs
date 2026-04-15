@@ -9,6 +9,7 @@ module OpenSolid.Set2D
   , build
   , linear
   , aggregate
+  , flatten
   , toNonEmpty
   , toList
   , map
@@ -68,6 +69,9 @@ linear = Set.linear
 
 aggregate :: NonEmpty (Set2D units item) -> Set2D units item
 aggregate = Set.aggregate
+
+flatten :: Set2D units (Set2D units item) -> Set2D units item
+flatten = Set.flatten
 
 toNonEmpty :: Set2D units item -> NonEmpty item
 toNonEmpty = Set.toNonEmpty
