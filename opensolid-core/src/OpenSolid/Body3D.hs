@@ -784,7 +784,8 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById toVertex boundaryS
                     -- (sufficient to just use the boundary points)
                     []
                   Set2D.Node{} ->
-                    List.filterMap (steinerPoint boundarySegmentSet) (Set2D.toList surfaceSegments)
+                    Set2D.toList surfaceSegments
+                      & List.filterMap (steinerPoint boundarySegmentSet)
           let boundaryVertexLoops = NonEmpty.map Polygon2D.vertices boundaryPolygons
           -- Decent refinement option: (Just (List.length steinerPoints, steinerVertex))
           let uvPointMesh = CDT.unsafe boundaryVertexLoops steinerPoints
