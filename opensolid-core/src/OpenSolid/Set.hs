@@ -2,8 +2,7 @@ module OpenSolid.Set
   ( Set (Node, Leaf)
   , size
   , bounds
-  , one
-  , two
+  , singleton
   , build
   , linear
   , aggregate
@@ -109,20 +108,12 @@ bounds :: Set dimension units space item -> Bounds dimension units space
 bounds (SizedNode nodeBounds _ _ _ _) = nodeBounds
 bounds (Leaf leafBounds _) = leafBounds
 
-one ::
+singleton ::
   Bounds.Exists dimension units space =>
-  (item, Bounds dimension units space) ->
+  Bounds dimension units space ->
+  item ->
   Set dimension units space item
-one (item, itemBounds) = Leaf itemBounds item
-
-two ::
-  Bounds.Exists dimension units space =>
-  (item, Bounds dimension units space) ->
-  (item, Bounds dimension units space) ->
-  Set dimension units space item
-two (firstItem, firstBounds) (secondItem, secondBounds) = do
-  let nodeBounds = Bounds.aggregate2 firstBounds secondBounds
-  SizedNode nodeBounds 1 1 (Leaf firstBounds firstItem) (Leaf secondBounds secondItem)
+singleton = Leaf
 
 build ::
   Bounds.Exists dimension units space =>

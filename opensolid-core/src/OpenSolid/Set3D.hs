@@ -2,8 +2,7 @@ module OpenSolid.Set3D
   ( Set3D
   , pattern Leaf
   , pattern Node
-  , one
-  , two
+  , singleton
   , size
   , bounds
   , build
@@ -54,11 +53,8 @@ size = Set.size
 bounds :: Set3D space item -> Bounds3D space
 bounds = Set.bounds
 
-one :: (item, Bounds3D space) -> Set3D space item
-one = Set.one
-
-two :: (item, Bounds3D space) -> (item, Bounds3D space) -> Set3D space item
-two = Set.two
+singleton :: Bounds3D space -> item -> Set3D space item
+singleton = Set.singleton
 
 build :: (item -> Bounds3D space) -> NonEmpty item -> Set3D space item
 build = Set.build

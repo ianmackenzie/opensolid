@@ -1,12 +1,17 @@
 module OpenSolid.Region2D
   ( Region2D
+  , Classification (Inside, Outside, OnBoundary)
+  , Boundary
   , EmptyRegion (EmptyRegion)
   , boundedBy
   , rectangle
   , circle
   , polygon
+  , outerBoundary
   , outerLoop
+  , innerBoundaries
   , innerLoops
+  , boundaries
   , boundaryLoops
   , boundaryCurves
   , placeIn
@@ -30,7 +35,6 @@ module OpenSolid.Region2D
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.CDT qualified as CDT
@@ -51,7 +55,6 @@ import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D (Frame2D)
-import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
@@ -88,10 +91,12 @@ type role Region2D nominal
 -- | A closed 2D region (possibly with holes), defined by a set of boundary curves.
 data Region2D units = Region2D
   { outerBoundary :: Boundary units
-  , innerBoundaries :: List (Boundary units)
+  , innerBoundaries :: Maybe (Set2D units (Boundary units))
   }
 
 type Loop units = NonEmpty (Curve2D units)
+
+data Classification = Inside | Outside | OnBoundary deriving (Eq, Show, Bounded, Enum)
 
 instance FFI (Region2D Meters) where
   representation = FFI.classRepresentation "Region2D"
@@ -105,15 +110,15 @@ instance Units.Coercion (Region2D units1) (Region2D units2) where
   coerce region =
     Region2D
       { outerBoundary = Units.coerce region.outerBoundary
-      , innerBoundaries = List.map Units.coerce region.innerBoundaries
+      , innerBoundaries = Units.coerce region.innerBoundaries
       }
 
 instance Intersects (Point2D units) (Region2D units) (Tolerance units) where
   intersects point region =
     case classify point region of
-      Nothing -> True -- Point on boundary is considered contained
-      Just Positive -> True
-      Just Negative -> False
+      Inside -> True
+      Outside -> False
+      OnBoundary -> True
 
 instance Intersects (Region2D units) (Point2D units) (Tolerance units) where
   intersects region point = intersects point region
@@ -156,14 +161,16 @@ rectangle (Bounds2D xBounds yBounds) =
               (Curve2D.lineFrom p21 p22)
               (Curve2D.lineFrom p22 p12)
               (Curve2D.lineFrom p12 p11)
-      Region2D (Boundary.build edges) []
+      Region2D (Boundary.build edges) Nothing
 
 -- | Create a region from the given circle.
 circle :: Tolerance units => Circle2D units -> Result EmptyRegion (Region2D units)
 circle givenCircle =
   if Circle2D.diameter givenCircle ~= Quantity.zero
     then Error EmptyRegion
-    else Ok (Region2D (Boundary.build (NonEmpty.one (Curve2D.circle givenCircle))) [])
+    else do
+      let edges = NonEmpty.one (Curve2D.circle givenCircle)
+      Ok (Region2D (Boundary.build edges) Nothing)
 
 -- | Create a region from the given polygon.
 polygon :: Tolerance units => Polygon2D units -> Result BoundedBy.Error (Region2D units)
@@ -347,45 +354,73 @@ startLoop :: Curve2D units -> PartialLoop units
 startLoop curve =
   PartialLoop (Curve2D.startPoint curve) (NonEmpty.one curve) (Curve2D.endPoint curve)
 
-{-| The set of curves forming the outer boundary of the region.
+{-| The outer boundary of the region.
 
-The curves will be in counterclockwise order around the region,
+The boundary curves will be in counterclockwise order,
 and each curve will be in the counterclockwise direction.
 -}
-outerLoop :: Region2D units -> Set2D units (Curve2D units)
-outerLoop region = Boundary.curves region.outerBoundary
+outerBoundary :: Region2D units -> Boundary units
+outerBoundary = (.outerBoundary)
 
-{-| The lists of curves (if any) forming the holes within the region.
+{-| The list of curves forming the outer boundary of a region.
 
-The curves will be in clockwise order around each hole,
+The curves will be in counterclockwise order,
+and each curve will be in the counterclockwise direction.
+-}
+outerLoop :: Region2D units -> NonEmpty (Curve2D units)
+outerLoop = Boundary.loop . outerBoundary
+
+{-| The inner boundaries / holes (if any) of the region.
+
+The boundary curves will be in clockwise order,
 and each curve will be in the clockwise direction.
 -}
-innerLoops :: Region2D units -> List (Set2D units (Curve2D units))
-innerLoops region = List.map Boundary.curves region.innerBoundaries
+innerBoundaries :: Region2D units -> Maybe (Set2D units (Boundary units))
+innerBoundaries = (.innerBoundaries)
 
-boundaryLoops :: Region2D units -> NonEmpty (Set2D units (Curve2D units))
+{-| The lists of curves forming the inner boundaries / holes (if any) of the region.
+
+The curves will be in clockwise order,
+and each curve will be in the clockwise direction.
+-}
+innerLoops :: Region2D units -> List (NonEmpty (Curve2D units))
+innerLoops region =
+  case innerBoundaries region of
+    Nothing -> []
+    Just innerBoundarySet -> List.map Boundary.loop (Set2D.toList innerBoundarySet)
+
+boundaries :: Region2D units -> Set2D units (Boundary units)
+boundaries region = do
+  let outerSet = Set2D.singleton (Boundary.bounds region.outerBoundary) region.outerBoundary
+  case region.innerBoundaries of
+    Just innerSet -> Set2D.union outerSet innerSet
+    Nothing -> outerSet
+
+boundaryLoops :: Region2D units -> NonEmpty (NonEmpty (Curve2D units))
 boundaryLoops region = outerLoop region :| innerLoops region
 
 -- | The set of all (outer and inner) boundary curves of a region.
 boundaryCurves :: Region2D units -> Set2D units (Curve2D units)
-boundaryCurves region = Set2D.aggregate (boundaryLoops region)
+boundaryCurves region =
+  boundaries region
+    & Set2D.map Boundary.curves Set2D.bounds
+    & Set2D.flatten
+
+map :: (Boundary units1 -> Boundary units2) -> Region2D units1 -> Region2D units2
+map function region =
+  Region2D
+    { outerBoundary = function region.outerBoundary
+    , innerBoundaries = Maybe.map (Set2D.map function Boundary.bounds) region.innerBoundaries
+    }
 
 placeIn :: Frame2D units -> Region2D units -> Region2D units
-placeIn frame region =
-  Region2D
-    { outerBoundary = Boundary.placeIn frame region.outerBoundary
-    , innerBoundaries = List.map (Boundary.placeIn frame) region.innerBoundaries
-    }
+placeIn frame = map (Boundary.placeIn frame)
 
 relativeTo :: Frame2D units -> Region2D units -> Region2D units
-relativeTo frame region = placeIn (Frame2D.inverse frame) region
+relativeTo frame = map (Boundary.relativeTo frame)
 
 transformBy :: Transform2D tag units -> Region2D units -> Region2D units
-transformBy transform region =
-  Region2D
-    { outerBoundary = Boundary.transformBy transform region.outerBoundary
-    , innerBoundaries = List.map (Boundary.transformBy transform) region.innerBoundaries
-    }
+transformBy transform = map (Boundary.transformBy transform)
 
 translateBy :: Vector2D units -> Region2D units -> Region2D units
 translateBy = Transform2D.translateByImpl transformBy
@@ -409,30 +444,54 @@ scaleAlong :: Axis2D units -> Number -> Region2D units -> Region2D units
 scaleAlong = Transform2D.scaleAlongImpl transformBy
 
 convert :: Quantity (units2 ?/? units1) -> Region2D units1 -> Region2D units2
-convert factor region =
-  Region2D
-    { outerBoundary = Boundary.convert factor region.outerBoundary
-    , innerBoundaries = List.map (Boundary.convert factor) region.innerBoundaries
-    }
+convert factor = map (Boundary.convert factor)
 
 unconvert :: Quantity (units2 ?/? units1) -> Region2D units2 -> Region2D units1
 unconvert factor region = convert (Units.simplify (1.0 ?/? factor)) region
 
-classify :: Tolerance units => Point2D units -> Region2D units -> Maybe Sign
-classify point region = do
-  let boundaries = region.outerBoundary :| region.innerBoundaries
-  sweptAngles <- Maybe.collect (Boundary.pointSweptAngle point) boundaries
-  Just (Quantity.sign (NonEmpty.sum sweptAngles - Angle.pi))
+classify :: Tolerance units => Point2D units -> Region2D units -> Classification
+classify point region =
+  case Boundary.classifyPoint point region.outerBoundary of
+    -- Point is outside outer boundary, so outside region as a whole
+    Boundary.External -> Outside
+    -- Point is on outer boundary
+    Boundary.Intersected -> OnBoundary
+    -- Point is enclosed within outer boundary, so have to check inner boundaries
+    Boundary.Internal -> case region.innerBoundaries of
+      -- No inner boundaries, so inside outer boundary means inside region
+      Nothing -> Inside
+      -- Need to check point against inner boundaries
+      Just innerBoundarySet ->
+        classifyInnerResults $
+          Set2D.filterMap
+            (intersects point)
+            (Just . Boundary.classifyPoint point)
+            innerBoundarySet
+
+classifyInnerResults :: List Boundary.Classification -> Classification
+classifyInnerResults classifications = case classifications of
+  -- Point is inside a hole, so outside the region
+  Boundary.Internal : _ -> Outside
+  -- Point is on a hole boundary
+  Boundary.Intersected : _ -> OnBoundary
+  -- Point is not enclosed in or on the boundary of the current hole, check the rest
+  Boundary.External : rest -> classifyInnerResults rest
+  -- Point is not enclosed in or on the boundary of any holes, so is inside the region
+  [] -> Inside
 
 classifyLoops :: Tolerance units => List (Loop units) -> Result BoundedBy.Error (Region2D units)
 classifyLoops [] = Error BoundedBy.EmptyRegion
 classifyLoops (NonEmpty loops) = do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
   let outerBoundaryCandidate = Boundary.build (fixSign Positive largestLoop)
-  let innerBoundaryCandidates = List.map (Boundary.build . fixSign Negative) smallerLoops
-  if List.all (boundaryIsInside outerBoundaryCandidate) innerBoundaryCandidates
-    then Ok (Region2D outerBoundaryCandidate innerBoundaryCandidates)
-    else Error BoundedBy.MultipleDisjointRegions
+  case List.map (Boundary.build . fixSign Negative) smallerLoops of
+    [] -> Ok (Region2D outerBoundaryCandidate Nothing) -- No inner loops
+    NonEmpty innerBoundaryCandidates ->
+      if NonEmpty.all (boundaryIsInside outerBoundaryCandidate) innerBoundaryCandidates
+        then do
+          let innerBoundarySet = Set2D.build Boundary.bounds innerBoundaryCandidates
+          Ok (Region2D outerBoundaryCandidate (Just innerBoundarySet))
+        else Error BoundedBy.MultipleDisjointRegions
 
 fixSign :: Tolerance units => Sign -> Loop units -> Loop units
 fixSign desiredSign loop =
@@ -465,16 +524,18 @@ areaIntegral_ referencePoint curve = do
 boundaryIsInside :: Tolerance units => Boundary units -> Boundary units -> Bool
 boundaryIsInside outer inner = do
   let testPoint = Curve2D.startPoint (Boundary.curves inner !! 0)
-  case Boundary.pointSweptAngle testPoint outer of
-    Nothing -> True -- Shouldn't happen, loops should be guaranteed not to be touching by this point
-    Just sweptAngle -> sweptAngle > Angle.pi
+  case Boundary.classifyPoint testPoint outer of
+    Boundary.Internal -> True
+    Boundary.External -> False
+    -- Shouldn't happen, loops should be guaranteed not to be touching by this point
+    Boundary.Intersected -> InternalError.throw "Unexpected contact between region boundaries"
 
 bounds :: Region2D units -> Bounds2D units
 bounds region = Boundary.bounds region.outerBoundary
 
 area :: Units.Squared units1 units2 => Region2D units1 -> Estimate units2
 area region = do
-  let referencePoint = Curve2D.startPoint (outerLoop region !! 0)
+  let referencePoint = Curve2D.startPoint (outerBoundary region !! 0)
   Set2D.toNonEmpty (boundaryCurves region)
     & NonEmpty.map (areaIntegral referencePoint)
     & Estimate.sum
@@ -484,12 +545,12 @@ toMesh resolution region = do
   let vertexLoops = NonEmpty.map (toVertexLoop resolution) (boundaryLoops region)
   CDT.unsafe vertexLoops []
 
-toVertexLoop :: Resolution units -> Set2D units (Curve2D units) -> NonEmpty (Point2D units)
+toVertexLoop :: Resolution units -> NonEmpty (Curve2D units) -> NonEmpty (Point2D units)
 toVertexLoop resolution loop = do
   let trailingVertices curve = do
         let polyline = Curve2D.toPolyline resolution curve
         NonEmpty.rest (Polyline2D.vertices polyline)
-  let allVertices = List.combine trailingVertices (Set2D.toList loop)
+  let allVertices = List.combine trailingVertices (NonEmpty.toList loop)
   case allVertices of
     NonEmpty vertices -> vertices
     [] -> InternalError.throw "Should always have at least one vertex"

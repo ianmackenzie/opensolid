@@ -2,8 +2,12 @@ module OpenSolid.Surface3D
   ( Surface3D
   , function
   , domain
+  , outerBoundary
   , outerLoop
+  , innerBoundaries
   , innerLoops
+  , boundaries
+  , boundaryLoops
   , parametric
   , on
   , extruded
@@ -12,7 +16,6 @@ module OpenSolid.Surface3D
   , revolved
   , overallBounds
   , boundaryCurves
-  , boundarySurfaceCurves
   , flip
   , placeIn
   , relativeTo
@@ -28,17 +31,18 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
-import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.List qualified as List
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
+import OpenSolid.Region2D.Boundary qualified as Region2D.Boundary
 import OpenSolid.Set qualified as Set
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
@@ -56,8 +60,8 @@ import OpenSolid.VectorCurve3D (VectorCurve3D)
 data Surface3D space = Surface3D
   { function :: SurfaceFunction3D space
   , domain :: UvRegion
-  , outerLoop :: ~(Set3D space (SurfaceCurve3D space))
-  , innerLoops :: ~(List (Set3D space (SurfaceCurve3D space)))
+  , outerBoundary :: ~(Set3D space (SurfaceCurve3D space))
+  , innerBoundaries :: ~(Maybe (Set3D space (Set3D space (SurfaceCurve3D space))))
   }
 
 function :: Surface3D space -> SurfaceFunction3D space
@@ -66,21 +70,42 @@ function = (.function)
 domain :: Surface3D space -> UvRegion
 domain = (.domain)
 
-outerLoop :: Surface3D space -> Set3D space (SurfaceCurve3D space)
-outerLoop = (.outerLoop)
+outerBoundary :: Surface3D space -> Set3D space (SurfaceCurve3D space)
+outerBoundary = (.outerBoundary)
 
-innerLoops :: Surface3D space -> List (Set3D space (SurfaceCurve3D space))
-innerLoops = (.innerLoops)
+outerLoop :: Surface3D space -> NonEmpty (SurfaceCurve3D space)
+outerLoop = Set3D.toNonEmpty . outerBoundary
+
+innerBoundaries :: Surface3D space -> Maybe (Set3D space (Set3D space (SurfaceCurve3D space)))
+innerBoundaries = (.innerBoundaries)
+
+innerLoops :: Surface3D space -> List (NonEmpty (SurfaceCurve3D space))
+innerLoops surface =
+  case innerBoundaries surface of
+    Nothing -> []
+    Just innerBoundarySet -> Set3D.toList innerBoundarySet & List.map Set3D.toNonEmpty
+
+boundaries :: Surface3D space -> Set3D space (Set3D space (SurfaceCurve3D space))
+boundaries surface = do
+  let outerSet = Set3D.singleton (Set3D.bounds surface.outerBoundary) surface.outerBoundary
+  case surface.innerBoundaries of
+    Just innerSet -> Set3D.union outerSet innerSet
+    Nothing -> outerSet
+
+boundaryLoops :: Surface3D space -> NonEmpty (NonEmpty (SurfaceCurve3D space))
+boundaryLoops surface = outerLoop surface :| innerLoops surface
 
 parametric :: SurfaceFunction3D space -> UvRegion -> Surface3D space
 parametric givenFunction givenDomain = do
-  let boundaryLoop domainLoop =
-        Set.map (SurfaceCurve3D.new givenFunction) SurfaceCurve3D.bounds domainLoop
+  let surfaceBoundary domainBoundary =
+        Region2D.Boundary.curves domainBoundary
+          & Set.map (SurfaceCurve3D.new givenFunction) SurfaceCurve3D.bounds
   Surface3D
     { function = givenFunction
     , domain = givenDomain
-    , outerLoop = boundaryLoop (Region2D.outerLoop givenDomain)
-    , innerLoops = List.map boundaryLoop (Region2D.innerLoops givenDomain)
+    , outerBoundary = surfaceBoundary (Region2D.outerBoundary givenDomain)
+    , innerBoundaries =
+        Maybe.map (Set.map surfaceBoundary Set.bounds) (Region2D.innerBoundaries givenDomain)
     }
 
 on :: Plane3D space -> Region2D Meters -> Surface3D space
@@ -136,12 +161,8 @@ revolved plane curve axis angle = do
 overallBounds :: Surface3D space -> Bounds3D space
 overallBounds surface = SurfaceFunction3D.bounds surface.function (Region2D.bounds surface.domain)
 
-boundaryCurves :: Surface3D space -> Set3D space (Curve3D space)
-boundaryCurves surface =
-  Set.map SurfaceCurve3D.curve Curve3D.overallBounds (boundarySurfaceCurves surface)
-
-boundarySurfaceCurves :: Surface3D space -> Set3D space (SurfaceCurve3D space)
-boundarySurfaceCurves surface = Set3D.aggregate (surface.outerLoop :| surface.innerLoops)
+boundaryCurves :: Surface3D space -> Set3D space (SurfaceCurve3D space)
+boundaryCurves = Set3D.flatten . boundaries
 
 flip :: Surface3D space -> Surface3D space
 flip surface =

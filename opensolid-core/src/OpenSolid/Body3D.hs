@@ -380,7 +380,7 @@ surfaceWithHalfEdgesMapEntry surfaceWithHalfEdges =
 
 toSurfaceWithHalfEdges :: Tolerance Meters => Int -> Surface3D space -> SurfaceWithHalfEdges space
 toSurfaceWithHalfEdges surfaceIndex surface = do
-  let loops = Region2D.boundaryLoops (Surface3D.domain surface) & NonEmpty.map Set2D.toNonEmpty
+  let loops = Region2D.boundaryLoops (Surface3D.domain surface)
   let surfaceId = SurfaceId surfaceIndex
   let halfEdgeLoops =
         NonEmpty.mapWithIndex (loopHalfEdges surfaceId (Surface3D.function surface)) loops

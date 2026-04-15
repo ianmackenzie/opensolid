@@ -2,8 +2,7 @@ module OpenSolid.Set2D
   ( Set2D
   , pattern Leaf
   , pattern Node
-  , one
-  , two
+  , singleton
   , size
   , bounds
   , build
@@ -52,11 +51,8 @@ pattern Node nodeBounds leftChild rightChild = Set.Node nodeBounds leftChild rig
 bounds :: Set2D units item -> Bounds2D units
 bounds = Set.bounds
 
-one :: (item, Bounds2D units) -> Set2D units item
-one = Set.one
-
-two :: (item, Bounds2D units) -> (item, Bounds2D units) -> Set2D units item
-two = Set.two
+singleton :: Bounds2D units -> item -> Set2D units item
+singleton = Set.singleton
 
 size :: Set2D units item -> Int
 size = Set.size
