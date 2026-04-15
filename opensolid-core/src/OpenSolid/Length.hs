@@ -47,7 +47,7 @@ This should be a reasonable default for "human-scale" objects
 (from, say, the size of an earring up to the size of a house).
 -}
 defaultTolerance :: Length
-defaultTolerance = nanometers 1.0
+defaultTolerance = meters 1e-9
 
 -- | One meter.
 meter :: Length
