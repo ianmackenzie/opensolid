@@ -290,7 +290,7 @@ translational sketchPlane profile givenDisplacement = do
   let startCap = Surface3D.flip (Surface3D.on startPlane profile)
   let endCap = Surface3D.on endPlane profile
   let sideSurface curve = Surface3D.translational (Curve2D.placeOn sketchPlane curve) displacement
-  let sideSurfaces = List.map sideSurface (NonEmpty.toList (Region2D.boundaryCurves profile))
+  let sideSurfaces = List.map sideSurface (Set2D.toList (Region2D.boundaryCurves profile))
   boundedBy (startCap : endCap : sideSurfaces)
 
 {-| Create a revolved body from a sketch plane and profile.
@@ -309,7 +309,7 @@ revolved ::
   Angle ->
   Result BoundedBy.Error (Body3D space)
 revolved sketchPlane profile givenAxis givenSweptAngle = do
-  let profileCurves = Region2D.boundaryCurves profile
+  let profileCurves = Set2D.toNonEmpty (Region2D.boundaryCurves profile)
   let offAxisCurves = NonEmpty.filter (not . Curve2D.isOnAxis givenAxis) profileCurves
   let signedDistanceCurves = List.map (Curve2D.distanceLeftOf givenAxis) offAxisCurves
   -- Check if the given profile is to the left of the given axis ('positive')
@@ -350,7 +350,7 @@ boundedBy [] = Error BoundedBy.EmptyBody
 boundedBy (NonEmpty givenSurfaces) = do
   let surfacesWithHalfEdges = NonEmpty.mapWithIndex toSurfaceWithHalfEdges givenSurfaces
   let halfEdges = NonEmpty.combine getAllHalfEdges surfacesWithHalfEdges
-  let halfEdgeSet = Set3D.partitionBy halfEdgeBounds halfEdges
+  let halfEdgeSet = Set3D.build halfEdgeBounds halfEdges
   let initialSurfaceRegistry =
         SurfaceRegistry
           { unprocessed =
@@ -380,7 +380,7 @@ surfaceWithHalfEdgesMapEntry surfaceWithHalfEdges =
 
 toSurfaceWithHalfEdges :: Tolerance Meters => Int -> Surface3D space -> SurfaceWithHalfEdges space
 toSurfaceWithHalfEdges surfaceIndex surface = do
-  let loops = Region2D.boundaryLoops (Surface3D.domain surface)
+  let loops = Region2D.boundaryLoops (Surface3D.domain surface) & NonEmpty.map Set2D.toNonEmpty
   let surfaceId = SurfaceId surfaceIndex
   let halfEdgeLoops =
         NonEmpty.mapWithIndex (loopHalfEdges surfaceId (Surface3D.function surface)) loops
@@ -768,7 +768,7 @@ boundarySurfaceMesh surfaceSegmentsById innerEdgeVerticesById toVertex boundaryS
     Ok surfaceFunction -> do
       let boundaryPolygons = NonEmpty.map (toPolygon innerEdgeVerticesById) edgeLoops
       let boundarySegments = NonEmpty.combine Polygon2D.edges boundaryPolygons
-      let boundarySegmentSet = Set2D.partitionBy Line2D.bounds boundarySegments
+      let boundarySegmentSet = Set2D.build Line2D.bounds boundarySegments
       case Map.get surfaceId surfaceSegmentsById of
         Nothing -> InternalError.throw "Should always be able to look up surface segments by ID"
         Just surfaceSegments -> do

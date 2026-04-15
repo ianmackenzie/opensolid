@@ -28,17 +28,20 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
+import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.List qualified as List
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
+import OpenSolid.Set qualified as Set
+import OpenSolid.Set3D (Set3D)
+import OpenSolid.Set3D qualified as Set3D
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
@@ -53,8 +56,8 @@ import OpenSolid.VectorCurve3D (VectorCurve3D)
 data Surface3D space = Surface3D
   { function :: SurfaceFunction3D space
   , domain :: UvRegion
-  , outerLoop :: ~(NonEmpty (SurfaceCurve3D space))
-  , innerLoops :: ~(List (NonEmpty (SurfaceCurve3D space)))
+  , outerLoop :: ~(Set3D space (SurfaceCurve3D space))
+  , innerLoops :: ~(List (Set3D space (SurfaceCurve3D space)))
   }
 
 function :: Surface3D space -> SurfaceFunction3D space
@@ -63,15 +66,16 @@ function = (.function)
 domain :: Surface3D space -> UvRegion
 domain = (.domain)
 
-outerLoop :: Surface3D space -> NonEmpty (SurfaceCurve3D space)
+outerLoop :: Surface3D space -> Set3D space (SurfaceCurve3D space)
 outerLoop = (.outerLoop)
 
-innerLoops :: Surface3D space -> List (NonEmpty (SurfaceCurve3D space))
+innerLoops :: Surface3D space -> List (Set3D space (SurfaceCurve3D space))
 innerLoops = (.innerLoops)
 
 parametric :: SurfaceFunction3D space -> UvRegion -> Surface3D space
 parametric givenFunction givenDomain = do
-  let boundaryLoop domainLoop = NonEmpty.map (SurfaceCurve3D.new givenFunction) domainLoop
+  let boundaryLoop domainLoop =
+        Set.map (SurfaceCurve3D.new givenFunction) SurfaceCurve3D.bounds domainLoop
   Surface3D
     { function = givenFunction
     , domain = givenDomain
@@ -132,11 +136,12 @@ revolved plane curve axis angle = do
 overallBounds :: Surface3D space -> Bounds3D space
 overallBounds surface = SurfaceFunction3D.bounds surface.function (Region2D.bounds surface.domain)
 
-boundaryCurves :: Surface3D space -> NonEmpty (Curve3D space)
-boundaryCurves surface = NonEmpty.map SurfaceCurve3D.curve (boundarySurfaceCurves surface)
+boundaryCurves :: Surface3D space -> Set3D space (Curve3D space)
+boundaryCurves surface =
+  Set.map SurfaceCurve3D.curve Curve3D.overallBounds (boundarySurfaceCurves surface)
 
-boundarySurfaceCurves :: Surface3D space -> NonEmpty (SurfaceCurve3D space)
-boundarySurfaceCurves surface = NonEmpty.concat (surface.outerLoop :| surface.innerLoops)
+boundarySurfaceCurves :: Surface3D space -> Set3D space (SurfaceCurve3D space)
+boundarySurfaceCurves surface = Set3D.aggregate (surface.outerLoop :| surface.innerLoops)
 
 flip :: Surface3D space -> Surface3D space
 flip surface =

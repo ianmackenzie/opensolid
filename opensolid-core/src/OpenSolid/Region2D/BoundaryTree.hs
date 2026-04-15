@@ -14,10 +14,11 @@ import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
+import OpenSolid.Set2D (Set2D)
+import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D qualified as Vector2D
 
@@ -39,29 +40,13 @@ instance Units.Coercion (BoundaryTree units1) (BoundaryTree units2) where
       , right = Units.coerce tree.right
       }
 
-build :: NonEmpty (Curve2D units) -> BoundaryTree units
-build loop = assembleLoop (NonEmpty.map buildCurve loop)
-
-assembleLoop :: NonEmpty (BoundaryTree units) -> BoundaryTree units
-assembleLoop subtrees =
-  case reduceLoop subtrees of
-    NonEmpty.One tree -> tree
-    reduced -> assembleLoop reduced
-
-reduceLoop :: NonEmpty (BoundaryTree units) -> NonEmpty (BoundaryTree units)
-reduceLoop (first :| []) = NonEmpty.one first
-reduceLoop (first :| second : []) = NonEmpty.one (join first second)
-reduceLoop (first :| second : NonEmpty rest) = NonEmpty.push (join first second) (reduceLoop rest)
-
-join :: BoundaryTree units -> BoundaryTree units -> BoundaryTree units
-join left right =
-  BoundaryTree
-    { bounds = Bounds2D.aggregate2 left.bounds right.bounds
-    , startPoint = left.startPoint
-    , endPoint = right.endPoint
-    , left
-    , right
-    }
+build :: Set2D units (Curve2D units) -> BoundaryTree units
+build curves = case curves of
+  Set2D.Leaf _ curve -> buildCurve curve
+  Set2D.Node nodeBounds leftCurves rightCurves -> do
+    let leftChild = build leftCurves
+    let rightChild = build rightCurves
+    BoundaryTree nodeBounds leftChild.startPoint rightChild.endPoint leftChild rightChild
 
 buildCurve :: Curve2D units -> BoundaryTree units
 buildCurve curve =
@@ -77,13 +62,9 @@ buildCurveImpl curve tBounds startPoint endPoint = do
   let Interval tLow tHigh = tBounds
   let tMid = Number.midpoint tLow tHigh
   let midpoint = Curve2D.point curve tMid
-  BoundaryTree
-    { bounds = Curve2D.bounds curve tBounds
-    , startPoint
-    , endPoint
-    , left = buildCurveImpl curve (Interval tLow tMid) startPoint midpoint
-    , right = buildCurveImpl curve (Interval tMid tHigh) midpoint endPoint
-    }
+  let leftChild = buildCurveImpl curve (Interval tLow tMid) startPoint midpoint
+  let rightChild = buildCurveImpl curve (Interval tMid tHigh) midpoint endPoint
+  BoundaryTree (Curve2D.bounds curve tBounds) startPoint endPoint leftChild rightChild
 
 bounds :: BoundaryTree units -> Bounds2D units
 bounds = (.bounds)

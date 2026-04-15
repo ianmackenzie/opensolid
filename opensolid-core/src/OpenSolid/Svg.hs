@@ -71,6 +71,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution (Resolution)
+import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Triangle2D (Triangle2D (Triangle2D))
@@ -252,7 +253,7 @@ region = regionWith []
 
 regionWith :: List Attribute -> Resolution Meters -> Region2D Meters -> Svg
 regionWith attributes resolution givenRegion = do
-  let loops = NonEmpty.toList (Region2D.boundaryLoops givenRegion)
+  let loops = Region2D.boundaryLoops givenRegion & NonEmpty.toList & List.map Set2D.toNonEmpty
   let dAttribute = Attribute "d" (Text.join " " (List.map (loopCommands resolution) loops))
   Node "path" (dAttribute : attributes) []
 

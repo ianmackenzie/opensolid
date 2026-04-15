@@ -48,6 +48,7 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
+import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.SpurGear (SpurGear)
 import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Step qualified as Step
@@ -1520,9 +1521,9 @@ region2D =
     [ Class.factoryM1R "Bounded By" "Curves" Region2D.boundedBy $(docs 'Region2D.boundedBy)
     , Class.factoryM1R "Rectangle" "Bounding Box" Region2D.rectangle $(docs 'Region2D.rectangle)
     , Class.factoryM1R "Circle" "Circle" Region2D.circle $(docs 'Region2D.circle)
-    , Class.property "Outer Loop" Region2D.outerLoop $(docs 'Region2D.outerLoop)
-    , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
-    , Class.property "Boundary Curves" Region2D.boundaryCurves $(docs 'Region2D.boundaryCurves)
+    , Class.property "Outer Loop" (Set2D.toNonEmpty . Region2D.outerLoop) $(docs 'Region2D.outerLoop)
+    , Class.property "Inner Loops" (List.map Set2D.toNonEmpty . Region2D.innerLoops) $(docs 'Region2D.innerLoops)
+    , Class.property "Boundary Curves" (Set2D.toNonEmpty . Region2D.boundaryCurves) $(docs 'Region2D.boundaryCurves)
     , Class.factoryM1R "Polygon" "Polygon" Region2D.polygon $(docs 'Region2D.polygon)
     , Class.memberM2 "Fillet" "Points" "Radius" Region2D.fillet $(docs 'Region2D.fillet)
     ]
@@ -1535,9 +1536,9 @@ uvRegion =
     , Class.factoryU1R "Bounded By" "Curves" Region2D.boundedBy $(docs 'Region2D.boundedBy)
     , Class.factoryU1R "Rectangle" "Bounding Box" Region2D.rectangle $(docs 'Region2D.rectangle)
     , Class.factoryU1R "Circle" "Circle" Region2D.circle $(docs 'Region2D.circle)
-    , Class.property "Outer Loop" Region2D.outerLoop $(docs 'Region2D.outerLoop)
-    , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
-    , Class.property "Boundary Curves" Region2D.boundaryCurves $(docs 'Region2D.boundaryCurves)
+    , Class.property "Outer Loop" (Set2D.toNonEmpty . Region2D.outerLoop) $(docs 'Region2D.outerLoop)
+    , Class.property "Inner Loops" (List.map Set2D.toNonEmpty . Region2D.innerLoops) $(docs 'Region2D.innerLoops)
+    , Class.property "Boundary Curves" (Set2D.toNonEmpty . Region2D.boundaryCurves) $(docs 'Region2D.boundaryCurves)
     ]
 
 type Body3D = Body3D.Body3D FFI.Space

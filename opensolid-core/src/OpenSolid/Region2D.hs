@@ -73,6 +73,8 @@ import OpenSolid.Region2D.Boundary qualified as Boundary
 import OpenSolid.Region2D.BoundedBy qualified as BoundedBy
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Result qualified as Result
+import OpenSolid.Set2D (Set2D)
+import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
@@ -154,14 +156,14 @@ rectangle (Bounds2D xBounds yBounds) =
               (Curve2D.lineFrom p21 p22)
               (Curve2D.lineFrom p22 p12)
               (Curve2D.lineFrom p12 p11)
-      Region2D (Boundary.new edges) []
+      Region2D (Boundary.build edges) []
 
 -- | Create a region from the given circle.
 circle :: Tolerance units => Circle2D units -> Result EmptyRegion (Region2D units)
 circle givenCircle =
   if Circle2D.diameter givenCircle ~= Quantity.zero
     then Error EmptyRegion
-    else Ok (Region2D (Boundary.new (NonEmpty.one (Curve2D.circle givenCircle))) [])
+    else Ok (Region2D (Boundary.build (NonEmpty.one (Curve2D.circle givenCircle))) [])
 
 -- | Create a region from the given polygon.
 polygon :: Tolerance units => Polygon2D units -> Result BoundedBy.Error (Region2D units)
@@ -183,7 +185,7 @@ fillet ::
   Region2D units ->
   Result Text (Region2D units)
 fillet points ("radius" ::: radius) region = do
-  let initialCurves = NonEmpty.toList (boundaryCurves region)
+  let initialCurves = Set2D.toList (boundaryCurves region)
   filletedCurves <- Result.foldl (addFillet radius) initialCurves points & Result.orFail
   boundedBy filletedCurves & Result.orFail
 
@@ -345,12 +347,12 @@ startLoop :: Curve2D units -> PartialLoop units
 startLoop curve =
   PartialLoop (Curve2D.startPoint curve) (NonEmpty.one curve) (Curve2D.endPoint curve)
 
-{-| The list of curves forming the outer boundary of the region.
+{-| The set of curves forming the outer boundary of the region.
 
 The curves will be in counterclockwise order around the region,
 and each curve will be in the counterclockwise direction.
 -}
-outerLoop :: Region2D units -> NonEmpty (Curve2D units)
+outerLoop :: Region2D units -> Set2D units (Curve2D units)
 outerLoop region = Boundary.curves region.outerBoundary
 
 {-| The lists of curves (if any) forming the holes within the region.
@@ -358,15 +360,15 @@ outerLoop region = Boundary.curves region.outerBoundary
 The curves will be in clockwise order around each hole,
 and each curve will be in the clockwise direction.
 -}
-innerLoops :: Region2D units -> List (NonEmpty (Curve2D units))
+innerLoops :: Region2D units -> List (Set2D units (Curve2D units))
 innerLoops region = List.map Boundary.curves region.innerBoundaries
 
-boundaryLoops :: Region2D units -> NonEmpty (NonEmpty (Curve2D units))
+boundaryLoops :: Region2D units -> NonEmpty (Set2D units (Curve2D units))
 boundaryLoops region = outerLoop region :| innerLoops region
 
--- | The list of all (outer and inner) boundary curves of a region.
-boundaryCurves :: Region2D units -> NonEmpty (Curve2D units)
-boundaryCurves region = NonEmpty.concat (boundaryLoops region)
+-- | The set of all (outer and inner) boundary curves of a region.
+boundaryCurves :: Region2D units -> Set2D units (Curve2D units)
+boundaryCurves region = Set2D.aggregate (boundaryLoops region)
 
 placeIn :: Frame2D units -> Region2D units -> Region2D units
 placeIn frame region =
@@ -426,8 +428,8 @@ classifyLoops :: Tolerance units => List (Loop units) -> Result BoundedBy.Error 
 classifyLoops [] = Error BoundedBy.EmptyRegion
 classifyLoops (NonEmpty loops) = do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
-  let outerBoundaryCandidate = Boundary.new (fixSign Positive largestLoop)
-  let innerBoundaryCandidates = List.map (Boundary.new . fixSign Negative) smallerLoops
+  let outerBoundaryCandidate = Boundary.build (fixSign Positive largestLoop)
+  let innerBoundaryCandidates = List.map (Boundary.build . fixSign Negative) smallerLoops
   if List.all (boundaryIsInside outerBoundaryCandidate) innerBoundaryCandidates
     then Ok (Region2D outerBoundaryCandidate innerBoundaryCandidates)
     else Error BoundedBy.MultipleDisjointRegions
@@ -462,7 +464,7 @@ areaIntegral_ referencePoint curve = do
 
 boundaryIsInside :: Tolerance units => Boundary units -> Boundary units -> Bool
 boundaryIsInside outer inner = do
-  let testPoint = Curve2D.startPoint (NonEmpty.first (Boundary.curves inner))
+  let testPoint = Curve2D.startPoint (Boundary.curves inner !! 0)
   case Boundary.pointSweptAngle testPoint outer of
     Nothing -> True -- Shouldn't happen, loops should be guaranteed not to be touching by this point
     Just sweptAngle -> sweptAngle > Angle.pi
@@ -472,21 +474,22 @@ bounds region = Boundary.bounds region.outerBoundary
 
 area :: Units.Squared units1 units2 => Region2D units1 -> Estimate units2
 area region = do
-  let referencePoint = Curve2D.startPoint (NonEmpty.first (outerLoop region))
-  let edgeIntegrals = NonEmpty.map (areaIntegral referencePoint) (boundaryCurves region)
-  Estimate.sum edgeIntegrals
+  let referencePoint = Curve2D.startPoint (outerLoop region !! 0)
+  Set2D.toNonEmpty (boundaryCurves region)
+    & NonEmpty.map (areaIntegral referencePoint)
+    & Estimate.sum
 
 toMesh :: Resolution units -> Region2D units -> Mesh (Point2D units)
 toMesh resolution region = do
   let vertexLoops = NonEmpty.map (toVertexLoop resolution) (boundaryLoops region)
   CDT.unsafe vertexLoops []
 
-toVertexLoop :: Resolution units -> NonEmpty (Curve2D units) -> NonEmpty (Point2D units)
+toVertexLoop :: Resolution units -> Set2D units (Curve2D units) -> NonEmpty (Point2D units)
 toVertexLoop resolution loop = do
   let trailingVertices curve = do
         let polyline = Curve2D.toPolyline resolution curve
         NonEmpty.rest (Polyline2D.vertices polyline)
-  let allVertices = List.combine trailingVertices (NonEmpty.toList loop)
+  let allVertices = List.combine trailingVertices (Set2D.toList loop)
   case allVertices of
     NonEmpty vertices -> vertices
     [] -> InternalError.throw "Should always have at least one vertex"

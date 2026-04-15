@@ -4,18 +4,26 @@ module OpenSolid.Set2D
   , pattern Node
   , one
   , two
+  , size
   , bounds
+  , build
   , linear
-  , linearBy
-  , partition
-  , partitionBy
+  , aggregate
   , toNonEmpty
   , toList
+  , map
+  , reverseMap
   , union
+  , any
+  , all
   , find
   , findWithIndex
   , findAll
   , findAllWithIndices
+  , foldrMap
+  , foldrMapWithIndex
+  , foldlMap
+  , foldlMapWithIndex
   )
 where
 
@@ -44,17 +52,17 @@ one = Set.one
 two :: (item, Bounds2D units) -> (item, Bounds2D units) -> Set2D units item
 two = Set.two
 
-linear :: NonEmpty (item, Bounds2D units) -> Set2D units item
+size :: Set2D units item -> Int
+size = Set.size
+
+build :: (item -> Bounds2D units) -> NonEmpty item -> Set2D units item
+build = Set.build
+
+linear :: (item -> Bounds2D units) -> NonEmpty item -> Set2D units item
 linear = Set.linear
 
-linearBy :: (item -> Bounds2D units) -> NonEmpty item -> Set2D units item
-linearBy = Set.linearBy
-
-partition :: NonEmpty (item, Bounds2D units) -> Set2D units item
-partition = Set.partition
-
-partitionBy :: (item -> Bounds2D units) -> NonEmpty item -> Set2D units item
-partitionBy = Set.partitionBy
+aggregate :: NonEmpty (Set2D units item) -> Set2D units item
+aggregate = Set.aggregate
 
 toNonEmpty :: Set2D units item -> NonEmpty item
 toNonEmpty = Set.toNonEmpty
@@ -62,8 +70,20 @@ toNonEmpty = Set.toNonEmpty
 toList :: Set2D units item -> List item
 toList = Set.toList
 
+map :: (a -> b) -> (b -> Bounds2D units2) -> Set2D units1 a -> Set2D units2 b
+map = Set.map
+
+reverseMap :: (a -> b) -> (b -> Bounds2D units2) -> Set2D units1 a -> Set2D units2 b
+reverseMap = Set.reverseMap
+
 union :: Set2D units item -> Set2D units item -> Set2D units item
 union = Set.union
+
+any :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
+any = Set.any
+
+all :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
+all = Set.all
 
 find :: Tolerance units => Bounds2D units -> Set2D units item -> Fuzzy (Maybe item)
 find = Set.find
@@ -76,3 +96,31 @@ findAll = Set.findAll
 
 findAllWithIndices :: Tolerance units => Bounds2D units -> Set2D units item -> List (Int, item)
 findAllWithIndices = Set.findAllWithIndices
+
+foldrMap ::
+  (item -> accumulated) ->
+  (item -> accumulated -> accumulated) ->
+  Set2D units item ->
+  accumulated
+foldrMap = Set.foldrMap
+
+foldrMapWithIndex ::
+  (Int -> item -> accumulated) ->
+  (Int -> item -> accumulated -> accumulated) ->
+  Set2D units item ->
+  accumulated
+foldrMapWithIndex = Set.foldrMapWithIndex
+
+foldlMap ::
+  (item -> accumulated) ->
+  (accumulated -> item -> accumulated) ->
+  Set2D units item ->
+  accumulated
+foldlMap = Set.foldlMap
+
+foldlMapWithIndex ::
+  (Int -> item -> accumulated) ->
+  (Int -> accumulated -> item -> accumulated) ->
+  Set2D units item ->
+  accumulated
+foldlMapWithIndex = Set.foldlMapWithIndex

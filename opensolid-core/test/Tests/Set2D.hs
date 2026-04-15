@@ -23,7 +23,7 @@ point x y = Point2D.centimeters (Number.fromInt x) (Number.fromInt y)
 
 testSet :: Set2D Meters (Point2D Meters)
 testSet =
-  Set2D.partitionBy Bounds2D.constant $
+  Set2D.build Bounds2D.constant $
     NonEmpty.eight
       (point 1 1)
       (point 3 5)

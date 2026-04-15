@@ -4,18 +4,26 @@ module OpenSolid.Set3D
   , pattern Node
   , one
   , two
+  , size
   , bounds
-  , partition
-  , partitionBy
+  , build
   , linear
-  , linearBy
+  , aggregate
   , toNonEmpty
   , toList
+  , map
+  , reverseMap
   , union
+  , any
+  , all
   , find
   , findWithIndex
   , findAll
   , findAllWithIndices
+  , foldrMap
+  , foldrMapWithIndex
+  , foldlMap
+  , foldlMapWithIndex
   )
 where
 
@@ -34,6 +42,9 @@ pattern Node nodeBounds leftChild rightChild = Set.Node nodeBounds leftChild rig
 
 {-# COMPLETE Node, Leaf #-}
 
+size :: Set3D space item -> Int
+size = Set.size
+
 bounds :: Set3D space item -> Bounds3D space
 bounds = Set.bounds
 
@@ -43,17 +54,14 @@ one = Set.one
 two :: (item, Bounds3D space) -> (item, Bounds3D space) -> Set3D space item
 two = Set.two
 
-partition :: NonEmpty (item, Bounds3D space) -> Set3D space item
-partition = Set.partition
+build :: (item -> Bounds3D space) -> NonEmpty item -> Set3D space item
+build = Set.build
 
-partitionBy :: (item -> Bounds3D space) -> NonEmpty item -> Set3D space item
-partitionBy = Set.partitionBy
-
-linear :: NonEmpty (item, Bounds3D space) -> Set3D space item
+linear :: (item -> Bounds3D space) -> NonEmpty item -> Set3D space item
 linear = Set.linear
 
-linearBy :: (item -> Bounds3D space) -> NonEmpty item -> Set3D space item
-linearBy = Set.linearBy
+aggregate :: NonEmpty (Set3D space item) -> Set3D space item
+aggregate = Set.aggregate
 
 toNonEmpty :: Set3D space item -> NonEmpty item
 toNonEmpty = Set.toNonEmpty
@@ -61,8 +69,20 @@ toNonEmpty = Set.toNonEmpty
 toList :: Set3D space item -> List item
 toList = Set.toList
 
+map :: (a -> b) -> (b -> Bounds3D space2) -> Set3D space1 a -> Set3D space2 b
+map = Set.map
+
+reverseMap :: (a -> b) -> (b -> Bounds3D space2) -> Set3D space1 a -> Set3D space2 b
+reverseMap = Set.reverseMap
+
 union :: Set3D space item -> Set3D space item -> Set3D space item
 union = Set.union
+
+any :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bool
+any = Set.any
+
+all :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bool
+all = Set.all
 
 find :: Tolerance Meters => Bounds3D space -> Set3D space item -> Fuzzy (Maybe item)
 find = Set.find
@@ -75,3 +95,31 @@ findAll = Set.findAll
 
 findAllWithIndices :: Tolerance Meters => Bounds3D space -> Set3D space item -> List (Int, item)
 findAllWithIndices = Set.findAllWithIndices
+
+foldrMap ::
+  (item -> accumulated) ->
+  (item -> accumulated -> accumulated) ->
+  Set3D space item ->
+  accumulated
+foldrMap = Set.foldrMap
+
+foldrMapWithIndex ::
+  (Int -> item -> accumulated) ->
+  (Int -> item -> accumulated -> accumulated) ->
+  Set3D space item ->
+  accumulated
+foldrMapWithIndex = Set.foldrMapWithIndex
+
+foldlMap ::
+  (item -> accumulated) ->
+  (accumulated -> item -> accumulated) ->
+  Set3D space item ->
+  accumulated
+foldlMap = Set.foldlMap
+
+foldlMapWithIndex ::
+  (Int -> item -> accumulated) ->
+  (Int -> accumulated -> item -> accumulated) ->
+  Set3D space item ->
+  accumulated
+foldlMapWithIndex = Set.foldlMapWithIndex
