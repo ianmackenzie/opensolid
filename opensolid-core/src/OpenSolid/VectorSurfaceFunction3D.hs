@@ -15,11 +15,11 @@ module OpenSolid.VectorSurfaceFunction3D
   , zero
   , constant
   , value
-  , bounds
+  , range
   , compiled
   , derivative
   , derivativeValue
-  , derivativeBounds
+  , derivativeRange
   , placeIn
   , relativeTo
   , transformBy
@@ -31,7 +31,7 @@ module OpenSolid.VectorSurfaceFunction3D
   , squaredMagnitude_
   , magnitude
   , direction
-  , directionBounds
+  , directionRange
   , newtonRaphson
   )
 where
@@ -552,8 +552,8 @@ constant vector = new (CompiledFunction.constant vector) (const zero)
 value :: VectorSurfaceFunction3D units space -> UvPoint -> Vector3D units space
 value function uvPoint = CompiledFunction.value function.compiled uvPoint
 
-bounds :: VectorSurfaceFunction3D units space -> UvBounds -> VectorBounds3D units space
-bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
+range :: VectorSurfaceFunction3D units space -> UvBounds -> VectorBounds3D units space
+range function uvRange = CompiledFunction.range function.compiled uvRange
 
 compiled :: VectorSurfaceFunction3D units space -> Compiled units space
 compiled = (.compiled)
@@ -573,13 +573,13 @@ derivativeValue ::
 derivativeValue U function uvPoint = value function.du uvPoint
 derivativeValue V function uvPoint = value function.dv uvPoint
 
-derivativeBounds ::
+derivativeRange ::
   SurfaceParameter ->
   VectorSurfaceFunction3D units space ->
   UvBounds ->
   VectorBounds3D units space
-derivativeBounds U function uvBounds = bounds function.du uvBounds
-derivativeBounds V function uvBounds = bounds function.dv uvBounds
+derivativeRange U function uvRange = range function.du uvRange
+derivativeRange V function uvRange = range function.dv uvRange
 
 placeIn ::
   Frame3D global local ->
@@ -688,16 +688,16 @@ direction function = case quotient function (magnitude function) of
   Error DivisionByZero -> Error IsDegenerate
   Ok normalizedFunction -> Ok (DirectionSurfaceFunction3D.unsafe normalizedFunction)
 
-directionBounds :: VectorSurfaceFunction3D units space -> UvBounds -> DirectionBounds3D space
-directionBounds function uvBounds = do
-  let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvBounds
+directionRange :: VectorSurfaceFunction3D units space -> UvBounds -> DirectionBounds3D space
+directionRange function uvRange = do
+  let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvRange
   VectorBounds3D.direction $
     if
-      | uLow == 0.0 && function.singularU0 -> bounds function.du uvBounds
-      | uHigh == 1.0 && function.singularU1 -> negate (bounds function.du uvBounds)
-      | vLow == 0.0 && function.singularV0 -> bounds function.dv uvBounds
-      | vHigh == 1.0 && function.singularV1 -> negate (bounds function.dv uvBounds)
-      | otherwise -> bounds function uvBounds
+      | uLow == 0.0 && function.singularU0 -> range function.du uvRange
+      | uHigh == 1.0 && function.singularU1 -> negate (range function.du uvRange)
+      | vLow == 0.0 && function.singularV0 -> range function.dv uvRange
+      | vHigh == 1.0 && function.singularV1 -> negate (range function.dv uvRange)
+      | otherwise -> range function uvRange
 
 newtonRaphson :: VectorSurfaceFunction3D units space -> UvPoint -> UvPoint
 newtonRaphson function uvPoint0 = do

@@ -4,7 +4,7 @@ module OpenSolid.SurfaceFunction3D
   , new
   , constant
   , point
-  , bounds
+  , range
   , derivative
   , transformBy
   )
@@ -62,7 +62,7 @@ new ::
   SurfaceFunction3D space
 constant :: Point3D space -> SurfaceFunction3D space
 point :: SurfaceFunction3D space -> UvPoint -> Point3D space
-bounds :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
+range :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
 derivative ::
   SurfaceParameter ->
   SurfaceFunction3D space ->

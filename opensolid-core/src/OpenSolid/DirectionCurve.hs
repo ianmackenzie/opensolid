@@ -4,7 +4,7 @@ module OpenSolid.DirectionCurve
   , unsafe
   , unwrap
   , value
-  , bounds
+  , range
   , derivative
   )
 where
@@ -40,21 +40,21 @@ class
   unsafeImpl :: VectorCurve dimension Unitless space -> DirectionCurve dimension space
   unwrapImpl :: DirectionCurve dimension space -> VectorCurve dimension Unitless space
   value :: DirectionCurve dimension space -> Number -> Direction dimension space
-  bounds :: DirectionCurve dimension space -> Interval Unitless -> DirectionBounds dimension space
+  range :: DirectionCurve dimension space -> Interval Unitless -> DirectionBounds dimension space
   derivative :: DirectionCurve dimension space -> VectorCurve dimension Unitless space
 
 instance Exists 2 Void where
   unsafeImpl = DirectionCurve2D.unsafe
   unwrapImpl = DirectionCurve2D.unwrap
   value = DirectionCurve2D.value
-  bounds = DirectionCurve2D.bounds
+  range = DirectionCurve2D.range
   derivative = DirectionCurve2D.derivative
 
 instance Exists 3 space where
   unsafeImpl = DirectionCurve3D.unsafe
   unwrapImpl = DirectionCurve3D.unwrap
   value = DirectionCurve3D.value
-  bounds = DirectionCurve3D.bounds
+  range = DirectionCurve3D.range
   derivative = DirectionCurve3D.derivative
 
 unsafe ::

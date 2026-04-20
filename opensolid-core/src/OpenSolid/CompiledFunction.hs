@@ -7,7 +7,7 @@ module OpenSolid.CompiledFunction
   , expression
   , desingularized
   , value
-  , bounds
+  , range
   , evaluators
   , map
   , map2
@@ -46,8 +46,8 @@ instance
     (CompiledFunction inputValue outputValue2 inputBounds outputBounds2)
   where
   coerce (Concrete expr) = Concrete (Units.coerce expr)
-  coerce (Abstract valueImpl boundsImpl) =
-    Abstract (Units.coerce . valueImpl) (Units.coerce . boundsImpl)
+  coerce (Abstract valueImpl rangeImpl) =
+    Abstract (Units.coerce . valueImpl) (Units.coerce . rangeImpl)
 
 instance
   ( Expression.Evaluation inputValue outputValue inputBounds outputBounds
@@ -322,7 +322,7 @@ desingularized ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   CompiledFunction inputValue outputValue inputBounds outputBounds
-desingularized = map4 Expression.desingularized Desingularization.value Desingularization.bounds
+desingularized = map4 Expression.desingularized Desingularization.value Desingularization.range
 
 map ::
   Expression.Evaluation inputValue outputValue2 inputBounds outputBounds2 =>
@@ -332,8 +332,8 @@ map ::
   CompiledFunction inputValue outputValue1 inputBounds outputBounds1 ->
   CompiledFunction inputValue outputValue2 inputBounds outputBounds2
 map mapExpression _ _ (Concrete expr) = Concrete (mapExpression expr)
-map _ mapValue mapBounds (Abstract valueImpl boundsImpl) =
-  Abstract (mapValue . valueImpl) (mapBounds . boundsImpl)
+map _ mapValue mapBounds (Abstract valueImpl rangeImpl) =
+  Abstract (mapValue . valueImpl) (mapBounds . rangeImpl)
 
 value ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
@@ -342,18 +342,18 @@ value ::
 value (Concrete expr) inputValue = Expression.value expr inputValue
 value (Abstract valueImpl _) inputValue = valueImpl inputValue
 
-bounds ::
+range ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   inputBounds ->
   outputBounds
-bounds (Concrete expr) inputValue = Expression.bounds expr inputValue
-bounds (Abstract _ boundsImpl) inputValue = boundsImpl inputValue
+range (Concrete expr) inputRange = Expression.range expr inputRange
+range (Abstract _ rangeImpl) inputRange = rangeImpl inputRange
 
 evaluators ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   (inputValue -> outputValue, inputBounds -> outputBounds)
-evaluators (Concrete expr) = (Expression.value expr, Expression.bounds expr)
-evaluators (Abstract valueImpl boundsImpl) = (valueImpl, boundsImpl)
+evaluators (Concrete expr) = (Expression.value expr, Expression.range expr)
+evaluators (Abstract valueImpl rangeImpl) = (valueImpl, rangeImpl)
 
 map2 ::
   Expression.Evaluation inputValue outputValue3 inputBounds outputBounds3 =>
@@ -369,11 +369,11 @@ map2 ::
 map2 combineExpressions _ _ (Concrete expression1) (Concrete expression2) =
   Concrete (combineExpressions expression1 expression2)
 map2 _ combineValues combineBounds compiled1 compiled2 = do
-  let (value1, bounds1) = evaluators compiled1
-  let (value2, bounds2) = evaluators compiled2
+  let (value1, range1) = evaluators compiled1
+  let (value2, range2) = evaluators compiled2
   Abstract
     (\t -> combineValues (value1 t) (value2 t))
-    (\t -> combineBounds (bounds1 t) (bounds2 t))
+    (\t -> combineBounds (range1 t) (range2 t))
 
 map3 ::
   Expression.Evaluation inputValue outputValue4 inputBounds outputBounds4 =>
@@ -391,12 +391,12 @@ map3 ::
 map3 combineExpressions _ _ (Concrete expression1) (Concrete expression2) (Concrete expression3) =
   Concrete (combineExpressions expression1 expression2 expression3)
 map3 _ combineValues combineBounds compiled1 compiled2 compiled3 = do
-  let (value1, bounds1) = evaluators compiled1
-  let (value2, bounds2) = evaluators compiled2
-  let (value3, bounds3) = evaluators compiled3
+  let (value1, range1) = evaluators compiled1
+  let (value2, range2) = evaluators compiled2
+  let (value3, range3) = evaluators compiled3
   Abstract
     (\t -> combineValues (value1 t) (value2 t) (value3 t))
-    (\t -> combineBounds (bounds1 t) (bounds2 t) (bounds3 t))
+    (\t -> combineBounds (range1 t) (range2 t) (range3 t))
 
 map4 ::
   Expression.Evaluation inputValue outputValue5 inputBounds outputBounds5 =>
@@ -420,13 +420,13 @@ map4 combineExpressions combineValues combineBounds compiled1 compiled2 compiled
   , Concrete expression4 <- compiled4 =
       Concrete (combineExpressions expression1 expression2 expression3 expression4)
   | otherwise = do
-      let (value1, bounds1) = evaluators compiled1
-      let (value2, bounds2) = evaluators compiled2
-      let (value3, bounds3) = evaluators compiled3
-      let (value4, bounds4) = evaluators compiled4
+      let (value1, range1) = evaluators compiled1
+      let (value2, range2) = evaluators compiled2
+      let (value3, range3) = evaluators compiled3
+      let (value4, range4) = evaluators compiled4
       Abstract
         (\t -> combineValues (value1 t) (value2 t) (value3 t) (value4 t))
-        (\t -> combineBounds (bounds1 t) (bounds2 t) (bounds3 t) (bounds4 t))
+        (\t -> combineBounds (range1 t) (range2 t) (range3 t) (range4 t))
 
 instance
   ( innerOutputValue ~ outerInputValue
@@ -444,9 +444,9 @@ instance
   where
   Concrete outer . Concrete inner = Concrete (outer . inner)
   outer . inner = do
-    let (outerValue, outerBounds) = evaluators outer
-    let (innerValue, innerBounds) = evaluators inner
-    Abstract (outerValue . innerValue) (outerBounds . innerBounds)
+    let (outerValue, outerRange) = evaluators outer
+    let (innerValue, innerRange) = evaluators inner
+    Abstract (outerValue . innerValue) (outerRange . innerRange)
 
 debug :: CompiledFunction input output inputBounds outputBounds -> Text
 debug (Concrete expr) = Expression.debug expr

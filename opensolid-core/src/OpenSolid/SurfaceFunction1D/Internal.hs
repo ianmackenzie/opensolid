@@ -1,8 +1,8 @@
 module OpenSolid.SurfaceFunction1D.Internal
   ( solveForU
   , solveForV
-  , curveBoundsAt
-  , curveBoundsOver
+  , curveRangeAt
+  , curveRangeOver
   )
 where
 
@@ -45,8 +45,8 @@ solveForV f fv uValue vBounds = do
     Solve1D.Exact vValue -> vValue
     Solve1D.Closest vValue -> vValue
 
-curveBoundsAt :: Number -> Number -> Quantity units -> Quantity units -> Interval units -> Interval units
-curveBoundsAt x1 x2 y1 y2 (Interval mLow mHigh)
+curveRangeAt :: Number -> Number -> Quantity units -> Quantity units -> Interval units -> Interval units
+curveRangeAt x1 x2 y1 y2 (Interval mLow mHigh)
   | mLow >= Quantity.zero || mHigh <= Quantity.zero = Interval y1 y2 -- Monotonic case
   | otherwise = do
       let dX = x2 - x1
@@ -63,8 +63,8 @@ curveBoundsAt x1 x2 y1 y2 (Interval mLow mHigh)
               else y1 + mHigh * dXPeak
       Interval yValley yPeak
 
-curveBoundsOver :: Number -> Number -> Interval units -> Interval units -> Interval units -> Interval units
-curveBoundsOver x1 x2 y1 y2 (Interval mLow mHigh)
+curveRangeOver :: Number -> Number -> Interval units -> Interval units -> Interval units -> Interval units
+curveRangeOver x1 x2 y1 y2 (Interval mLow mHigh)
   | mLow >= Quantity.zero || mHigh <= Quantity.zero = Interval.aggregate2 y1 y2 -- Monotonic case
   | otherwise = do
       let dX = x2 - x1

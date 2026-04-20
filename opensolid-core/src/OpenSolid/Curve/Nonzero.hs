@@ -1,10 +1,10 @@
 module OpenSolid.Curve.Nonzero
   ( tangentDirection
   , tangentDirectionValue
-  , tangentDirectionBounds
+  , tangentDirectionRange
   , curvatureVector_
   , curvatureVectorValue_
-  , curvatureVectorBounds_
+  , curvatureVectorRange_
   )
 where
 
@@ -44,13 +44,13 @@ tangentDirectionValue (Nonzero curve) tValue = do
   let derivativeValue = Curve.derivativeValue curve tValue
   Direction.unsafe (derivativeValue / Vector.magnitude derivativeValue)
 
-tangentDirectionBounds ::
+tangentDirectionRange ::
   (Curve.Exists dimension units space, DirectionBounds.Exists dimension space) =>
   Nonzero (Curve dimension units space) ->
   Interval Unitless ->
   DirectionBounds dimension space
-tangentDirectionBounds (Nonzero curve) tBounds =
-  VectorBounds.direction (Curve.derivativeBounds curve tBounds)
+tangentDirectionRange (Nonzero curve) tRange =
+  VectorBounds.direction (Curve.derivativeRange curve tRange)
 
 curvatureVector_ ::
   (Curve.Exists dimension units space, VectorCurve.Exists dimension (Unitless ?/? units) space) =>
@@ -75,12 +75,12 @@ curvatureVectorValue_ (Nonzero curve) tValue =
     (Curve.derivativeValue curve tValue)
     (Curve.secondDerivativeValue curve tValue)
 
-curvatureVectorBounds_ ::
+curvatureVectorRange_ ::
   (Curve.Exists dimension units space, VectorBounds.Exists dimension (Unitless ?/? units) space) =>
   Nonzero (Curve dimension units space) ->
   Interval Unitless ->
   VectorBounds dimension (Unitless ?/? units) space
-curvatureVectorBounds_ (Nonzero curve) tBounds =
-  Curve.CurvatureVector.bounds_
-    (Curve.derivativeBounds curve tBounds)
-    (Curve.secondDerivativeBounds curve tBounds)
+curvatureVectorRange_ (Nonzero curve) tRange =
+  Curve.CurvatureVector.range_
+    (Curve.derivativeRange curve tRange)
+    (Curve.secondDerivativeRange curve tRange)

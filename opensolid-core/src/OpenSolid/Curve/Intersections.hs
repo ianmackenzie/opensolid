@@ -60,7 +60,7 @@ intersections ::
 intersections curve1 curve2 = do
   nondegenerate1 <- Curve.nondegenerate curve1
   nondegenerate2 <- Curve.nondegenerate curve2
-  if not (Curve.overallBounds curve1 `intersects` Curve.overallBounds curve2)
+  if not (Curve.bounds curve1 `intersects` Curve.bounds curve2)
     then Ok Nothing
     else do
       let endpointSolutions = findEndpointSolutions nondegenerate1 nondegenerate2
@@ -117,11 +117,11 @@ findInteriorSolution ::
   Interval Unitless ->
   Interval Unitless ->
   Maybe (Number, Number)
-findInteriorSolution evaluate curve1 curve2 tBounds1 tBounds2 = do
-  let uvPoint0 = UvPoint (Interval.midpoint tBounds1) (Interval.midpoint tBounds2)
+findInteriorSolution evaluate curve1 curve2 tRange1 tRange2 = do
+  let uvPoint0 = UvPoint (Interval.midpoint tRange1) (Interval.midpoint tRange2)
   let UvPoint t1 t2 = NewtonRaphson.surface evaluate uvPoint0
-  let isInterior1 = Search.isInterior t1 tBounds1
-  let isInterior2 = Search.isInterior t2 tBounds2
+  let isInterior1 = Search.isInterior t1 tRange1
+  let isInterior2 = Search.isInterior t2 tRange2
   let pointsAreEqual = Curve.point curve1 t1 ~= Curve.point curve2 t2
   if isInterior1 && isInterior2 && pointsAreEqual then Just (t1, t2) else Nothing
 
@@ -160,20 +160,20 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
         let yu = negate xv
         let yv = gv `dot_` gv + d `dot_` gvv
         (# Vector2D x y, Vector2D xu yu, Vector2D xv yv #)
-  let interiorIntersectionPoint (tBounds1, tBounds2) (segment1, segment2)
-        | not (Curve.Segment.bounds segment1 `intersects` Curve.Segment.bounds segment2) =
+  let interiorIntersectionPoint (tRange1, tRange2) (segment1, segment2)
+        | not (Curve.Segment.range segment1 `intersects` Curve.Segment.range segment2) =
             Resolved Nothing
         | otherwise = do
-            let tangentDirectionBounds1 = Curve.Segment.tangentDirectionBounds segment1
-            let tangentDirectionBounds2 = Curve.Segment.tangentDirectionBounds segment2
-            let curvatureVectorBounds1_ = Curve.Segment.curvatureVectorBounds_ segment1
-            let curvatureVectorBounds2_ = Curve.Segment.curvatureVectorBounds_ segment2
+            let tangentDirectionRange1 = Curve.Segment.tangentDirectionRange segment1
+            let tangentDirectionRange2 = Curve.Segment.tangentDirectionRange segment2
+            let curvatureVectorRange1_ = Curve.Segment.curvatureVectorRange_ segment1
+            let curvatureVectorRange2_ = Curve.Segment.curvatureVectorRange_ segment2
             let isCrossing =
-                  DirectionBounds.areIndependent tangentDirectionBounds1 tangentDirectionBounds2
+                  DirectionBounds.areIndependent tangentDirectionRange1 tangentDirectionRange2
             let curvatureVectorsAreDistinct =
-                  VectorBounds.areDistinct curvatureVectorBounds1_ curvatureVectorBounds2_
+                  VectorBounds.areDistinct curvatureVectorRange1_ curvatureVectorRange2_
             let isLocal EndpointSolution{t1, t2} =
-                  Interval.member t1 tBounds1 && Interval.member t2 tBounds2
+                  Interval.member t1 tRange1 && Interval.member t2 tRange2
             let singleEndpointSolution =
                   case List.filter isLocal endpointSolutions of
                     List.One endpointSolution -> Just endpointSolution
@@ -187,9 +187,9 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
             let hasContinuation = case singleEndpointSolution of
                   Just EndpointSolution{t1, t2}
                     | (t1 == 0.0 && t2 == 0.0) || (t1 == 1.0 && t2 == 1.0) ->
-                        DirectionBounds.areDistinct tangentDirectionBounds1 tangentDirectionBounds2
+                        DirectionBounds.areDistinct tangentDirectionRange1 tangentDirectionRange2
                     | (t1 == 0.0 && t2 == 1.0) || (t1 == 1.0 && t2 == 0.0) ->
-                        DirectionBounds.areDistinct tangentDirectionBounds1 -tangentDirectionBounds2
+                        DirectionBounds.areDistinct tangentDirectionRange1 -tangentDirectionRange2
                     | otherwise -> False
                   Nothing -> False
             let hasTangentEndpointSolution = case singleEndpointSolution of
@@ -200,18 +200,18 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
             let hasDegenerateEndpointSolution = case singleEndpointSolution of
                   Just EndpointSolution{isDegenerate} -> isDegenerate
                   Nothing -> False
-            let isSmall = SearchDomain.isSmall tBounds1
+            let isSmall = SearchDomain.isSmall tRange1
             if
               | hasContinuation -> Resolved Nothing
               | isCrossing && hasCrossingEndpointSolution -> Resolved Nothing
               | curvatureVectorsAreDistinct && hasTangentEndpointSolution -> Resolved Nothing
               | isSmall && hasDegenerateEndpointSolution -> Resolved Nothing
               | isCrossing ->
-                  case findInteriorSolution evaluateCrossing curve1 curve2 tBounds1 tBounds2 of
+                  case findInteriorSolution evaluateCrossing curve1 curve2 tRange1 tRange2 of
                     Just (t1, t2) -> Resolved (Just (IntersectionPoint.crossing t1 t2))
                     Nothing -> Unresolved
               | curvatureVectorsAreDistinct ->
-                  case findInteriorSolution evaluateTangent curve1 curve2 tBounds1 tBounds2 of
+                  case findInteriorSolution evaluateTangent curve1 curve2 tRange1 tRange2 of
                     Just (t1, t2) -> do
                       let tangentVector1 = Curve.Nonzero.tangentDirectionValue nonzero1 t1
                       let tangentVector2 = Curve.Nonzero.tangentDirectionValue nonzero2 t2
@@ -224,7 +224,7 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
                           | otherwise -> Unresolved
                     Nothing -> Unresolved
               | otherwise -> Unresolved
-  let isDuplicate (tBounds1, _) (tBounds2, _) = SearchDomain.overlapping tBounds1 tBounds2
+  let isDuplicate (tRange1, _) (tRange2, _) = SearchDomain.overlapping tRange1 tRange2
   List.map Pair.second (Search.exclusive interiorIntersectionPoint isDuplicate searchTree)
 
 findOverlappingSegments ::

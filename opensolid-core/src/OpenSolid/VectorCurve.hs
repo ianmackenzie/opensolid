@@ -18,20 +18,20 @@ module OpenSolid.VectorCurve
   , startValue
   , endValue
   , value
-  , bounds
+  , range
   , compiled
   , derivative
   , secondDerivative
   , derivativeValue
-  , derivativeBounds
+  , derivativeRange
   , secondDerivativeValue
-  , secondDerivativeBounds
+  , secondDerivativeRange
   , squaredMagnitude_
   , squaredMagnitude
   , nondegenerate
   , magnitude
   , direction
-  , directionBounds
+  , directionRange
   , quotient_
   , reverse
   , zeros
@@ -1149,12 +1149,12 @@ value curve 0.0 = curve.startValue
 value curve 1.0 = curve.endValue
 value curve tValue = CompiledFunction.value curve.compiled tValue
 
-bounds ::
+range ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   Interval Unitless ->
   VectorBounds dimension units space
-bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
+range curve tRange = CompiledFunction.range curve.compiled tRange
 
 derivativeValue ::
   Exists dimension units space =>
@@ -1163,12 +1163,12 @@ derivativeValue ::
   Vector dimension units space
 derivativeValue curve tValue = value (derivative curve) tValue
 
-derivativeBounds ::
+derivativeRange ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   Interval Unitless ->
   VectorBounds dimension units space
-derivativeBounds curve tBounds = bounds (derivative curve) tBounds
+derivativeRange curve tRange = range (derivative curve) tRange
 
 secondDerivativeValue ::
   Exists dimension units space =>
@@ -1177,12 +1177,12 @@ secondDerivativeValue ::
   Vector dimension units space
 secondDerivativeValue curve tValue = value (secondDerivative curve) tValue
 
-secondDerivativeBounds ::
+secondDerivativeRange ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   Interval Unitless ->
   VectorBounds dimension units space
-secondDerivativeBounds curve tBounds = bounds (secondDerivative curve) tBounds
+secondDerivativeRange curve tRange = range (secondDerivative curve) tRange
 
 direction ::
   (Exists dimension units space, Tolerance units) =>
@@ -1190,13 +1190,13 @@ direction ::
   Result IsDegenerate (DirectionCurve dimension space)
 direction vectorCurve = Result.map VectorCurve.Nondegenerate.direction (nondegenerate vectorCurve)
 
-directionBounds ::
+directionRange ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   Interval Unitless ->
   DirectionBounds dimension space
-directionBounds curve tBounds =
-  VectorCurve.Direction.bounds curve tBounds (bounds curve tBounds) (derivativeBounds curve tBounds)
+directionRange curve tRange =
+  VectorCurve.Direction.range curve tRange (range curve tRange) (derivativeRange curve tRange)
 
 isZero :: Tolerance units => VectorCurve dimension units space -> Bool
 isZero curve = curve.maxSampledMagnitude <= ?tolerance

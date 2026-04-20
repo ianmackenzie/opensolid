@@ -3,7 +3,7 @@ module Tests.Curve2D
   , firstDerivativeIsConsistent
   , firstDerivativeIsConsistentWithin
   , secondDerivativeIsConsistent
-  , boundsConsistency
+  , rangeConsistency
   )
 where
 
@@ -119,15 +119,15 @@ overlappingSegments curve1 curve2 =
     Ok Nothing -> Error "Should have found some overlapping segments"
     Error error -> Error (Text.show error)
 
-equalParameterBounds :: Interval Unitless -> Interval Unitless -> Bool
-equalParameterBounds (Interval actualLow actualHigh) (Interval expectedLow expectedHigh) =
+equalParameterRanges :: Interval Unitless -> Interval Unitless -> Bool
+equalParameterRanges (Interval actualLow actualHigh) (Interval expectedLow expectedHigh) =
   Tolerance.using 1e-12 (actualLow ~= expectedLow && actualHigh ~= expectedHigh)
 
 equalOverlapSegments ::
   ((Interval Unitless, Interval Unitless), (Interval Unitless, Interval Unitless)) ->
   Bool
 equalOverlapSegments ((actual1, actual2), (expected1, expected2)) =
-  equalParameterBounds actual1 expected1 && equalParameterBounds actual2 expected2
+  equalParameterRanges actual1 expected1 && equalParameterRanges actual2 expected2
 
 equalOverlapSegmentLists ::
   NonEmpty (Interval Unitless, Interval Unitless) ->
@@ -374,17 +374,17 @@ reversalConsistency =
           t <- Test.generate Parameter.random
           Test.expect (Curve2D.point curve t ~= Curve2D.point reversedCurve (1.0 - t))
 
-boundsConsistency :: (Tolerance units, Show (Quantity units)) => Curve2D units -> Expectation
-boundsConsistency curve = do
-  tBounds <- Test.generate (Interval.random Parameter.random)
-  tValue <- Test.generate (Random.map (Interval.interpolate tBounds) Parameter.random)
+rangeConsistency :: (Tolerance units, Show (Quantity units)) => Curve2D units -> Expectation
+rangeConsistency curve = do
+  tRange <- Test.generate (Interval.random Parameter.random)
+  tValue <- Test.generate (Random.map (Interval.interpolate tRange) Parameter.random)
   let curveValue = Curve2D.point curve tValue
-  let curveBounds = Curve2D.bounds curve tBounds
-  Test.expect (curveValue `intersects` curveBounds)
+  let curveRange = Curve2D.range curve tRange
+  Test.expect (curveValue `intersects` curveRange)
     & Test.output "tValue" tValue
-    & Test.output "tBounds" tBounds
+    & Test.output "tRange" tRange
     & Test.output "curveValue" curveValue
-    & Test.output "curveBounds" curveBounds
+    & Test.output "curveRange" curveRange
 
 arcConstruction :: Test
 arcConstruction = do

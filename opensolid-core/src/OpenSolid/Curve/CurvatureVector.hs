@@ -1,4 +1,4 @@
-module OpenSolid.Curve.CurvatureVector (value_, bounds_) where
+module OpenSolid.Curve.CurvatureVector (value_, range_) where
 
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Prelude
@@ -20,16 +20,17 @@ value_ derivativeValue secondDerivativeValue = do
           - derivativeValue * ((secondDerivativeValue `dot_` derivativeValue) / derivativeSquaredMagnitude_)
   Vector.unerase (Vector.erase numerator / Quantity.erase derivativeSquaredMagnitude_)
 
-bounds_ ::
+range_ ::
   ( VectorBounds.Exists dimension units space
   , VectorBounds.Exists dimension (Unitless ?/? units) space
   ) =>
   VectorBounds dimension units space ->
   VectorBounds dimension units space ->
   VectorBounds dimension (Unitless ?/? units) space
-bounds_ derivativeBounds secondDerivativeBounds = do
-  let derivativeSquaredMagnitude_ = VectorBounds.squaredMagnitude_ derivativeBounds
+range_ derivativeRange secondDerivativeRange = do
+  let derivativeSquaredMagnitude_ = VectorBounds.squaredMagnitude_ derivativeRange
   let numerator =
-        secondDerivativeBounds
-          - derivativeBounds * ((secondDerivativeBounds `dot_` derivativeBounds) / derivativeSquaredMagnitude_)
+        secondDerivativeRange
+          - derivativeRange
+            * ((secondDerivativeRange `dot_` derivativeRange) / derivativeSquaredMagnitude_)
   VectorBounds.unerase (VectorBounds.erase numerator / Interval.erase derivativeSquaredMagnitude_)

@@ -33,11 +33,11 @@ planeTorusIntersection :: Test
 planeTorusIntersection =
   Test.group "planeTorusIntersection" $
     [ firstDerivativeConsistency
-    , intersectionCurveBoundsConsistency
+    , intersectionCurveRangeConsistency
     , intersectionCurveFirstDerivativeConsistency
-    , intersectionCurveFirstDerivativeBoundsConsistency
+    , intersectionCurveFirstDerivativeRangeConsistency
     , intersectionCurveSecondDerivativeConsistency
-    , intersectionCurveSecondDerivativeBoundsConsistency
+    , intersectionCurveSecondDerivativeRangeConsistency
     ]
 
 firstDerivativeConsistency :: Test
@@ -64,19 +64,19 @@ intersectionCurveFirstDerivativeConsistency =
       Tests.Curve2D.firstDerivativeIsConsistentWithin 1e-6 curve tValue
         & Test.output "tValue" tValue
 
-intersectionCurveBoundsConsistency :: Test
-intersectionCurveBoundsConsistency =
+intersectionCurveRangeConsistency :: Test
+intersectionCurveRangeConsistency =
   withIntersectionCurves \curves ->
-    Test.check 100 "intersectionCurveBoundsConsistency" do
+    Test.check 100 "intersectionCurveRangeConsistency" do
       curve <- Test.generate (Random.oneOf curves)
-      Tolerance.using Tolerance.unitless (Tests.Curve2D.boundsConsistency curve)
+      Tolerance.using Tolerance.unitless (Tests.Curve2D.rangeConsistency curve)
 
-intersectionCurveFirstDerivativeBoundsConsistency :: Test
-intersectionCurveFirstDerivativeBoundsConsistency =
+intersectionCurveFirstDerivativeRangeConsistency :: Test
+intersectionCurveFirstDerivativeRangeConsistency =
   withIntersectionCurves \curves ->
-    Test.check 100 "intersectionCurveBoundsConsistency" do
+    Test.check 100 "intersectionCurveRangeConsistency" do
       curve <- Test.generate (Random.oneOf curves)
-      Tolerance.using Tolerance.unitless (Tests.VectorCurve2D.boundsConsistency (Curve2D.derivative curve))
+      Tolerance.using Tolerance.unitless (Tests.VectorCurve2D.rangeConsistency (Curve2D.derivative curve))
 
 intersectionCurveSecondDerivativeConsistency :: Test
 intersectionCurveSecondDerivativeConsistency =
@@ -85,14 +85,14 @@ intersectionCurveSecondDerivativeConsistency =
       curve <- Test.generate (Random.oneOf curves)
       Tests.VectorCurve2D.derivativeConsistency 1e-6 (Curve2D.derivative curve)
 
-intersectionCurveSecondDerivativeBoundsConsistency :: Test
-intersectionCurveSecondDerivativeBoundsConsistency =
+intersectionCurveSecondDerivativeRangeConsistency :: Test
+intersectionCurveSecondDerivativeRangeConsistency =
   withIntersectionCurves \curves ->
-    Test.check 100 "intersectionCurveSecondDerivativeBoundsConsistency" do
+    Test.check 100 "intersectionCurveSecondDerivativeRangeConsistency" do
       curve <- Test.generate (Random.oneOf curves)
       let firstDerivative = Curve2D.derivative curve
       let secondDerivative = VectorCurve2D.derivative firstDerivative
-      Tolerance.using Tolerance.unitless (Tests.VectorCurve2D.boundsConsistency secondDerivative)
+      Tolerance.using Tolerance.unitless (Tests.VectorCurve2D.rangeConsistency secondDerivative)
 
 planeTorusSurface :: SurfaceFunction1D Meters
 planeTorusSurface = do

@@ -10,7 +10,7 @@ module OpenSolid.VectorSurfaceFunction2D
   , constant
   , xy
   , value
-  , bounds
+  , range
   , xComponent
   , yComponent
   , components
@@ -527,16 +527,10 @@ transformBy transform function = do
 value :: VectorSurfaceFunction2D units -> UvPoint -> Vector2D units
 value function uvPoint = CompiledFunction.value function.compiled uvPoint
 
-bounds ::
-  VectorSurfaceFunction2D units ->
-  UvBounds ->
-  VectorBounds2D units
-bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
+range :: VectorSurfaceFunction2D units -> UvBounds -> VectorBounds2D units
+range function uvRange = CompiledFunction.range function.compiled uvRange
 
-derivative ::
-  SurfaceParameter ->
-  VectorSurfaceFunction2D units ->
-  VectorSurfaceFunction2D units
+derivative :: SurfaceParameter -> VectorSurfaceFunction2D units -> VectorSurfaceFunction2D units
 derivative U = (.du)
 derivative V = (.dv)
 

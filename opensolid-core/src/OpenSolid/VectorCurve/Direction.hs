@@ -1,4 +1,4 @@
-module OpenSolid.VectorCurve.Direction (bounds) where
+module OpenSolid.VectorCurve.Direction (range) where
 
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
@@ -9,7 +9,7 @@ import OpenSolid.VectorBounds qualified as VectorBounds
 import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
-bounds ::
+range ::
   ( VectorCurve.Exists dimension units space
   , VectorBounds.Exists dimension units space
   , DirectionBounds.Exists dimension space
@@ -19,7 +19,7 @@ bounds ::
   VectorBounds dimension units space ->
   VectorBounds dimension units space ->
   DirectionBounds dimension space
-bounds curve (Interval tLow tHigh) curveBounds derivativeBounds
-  | tLow == 0.0 && VectorCurve.singular0 curve = VectorBounds.direction derivativeBounds
-  | tHigh == 1.0 && VectorCurve.singular1 curve = VectorBounds.direction -derivativeBounds
-  | otherwise = VectorBounds.direction curveBounds
+range curve (Interval tLow tHigh) curveRange derivativeRange
+  | tLow == 0.0 && VectorCurve.singular0 curve = VectorBounds.direction derivativeRange
+  | tHigh == 1.0 && VectorCurve.singular1 curve = VectorBounds.direction -derivativeRange
+  | otherwise = VectorBounds.direction curveRange

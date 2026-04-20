@@ -61,7 +61,7 @@ subdomain :: SaddleRegion units -> Domain2D
 subdomain = (.subproblem.subdomain)
 
 bounds :: SaddleRegion units -> UvBounds
-bounds = (.subproblem.uvBounds)
+bounds = (.subproblem.uvRange)
 
 quadratic :: Subproblem units -> UvPoint -> SaddleRegion units
 quadratic subproblem saddlePoint = do
@@ -133,14 +133,14 @@ connect ::
   Curve2D Unitless
 connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
   let saddlePoint = Frame2D.originPoint frame
-  let Subproblem{f, dvdu, dudv, uvBounds} = subproblem
-  let Bounds2D uBounds vBounds = uvBounds
+  let Subproblem{f, dvdu, dudv, uvRange} = subproblem
+  let Bounds2D uRange vRange = uvRange
   let UvPoint uP vP = saddlePoint
   let UvPoint uC vC = joiningPoint joiningCurve
   let Direction2D du dv = outgoingDirection
   if Quantity.abs du >= Quantity.abs dv
     then do
-      let implicitBounds = NonEmpty.one (Bounds2D (Interval uP uC) vBounds)
+      let implicitBounds = NonEmpty.one (Bounds2D (Interval uP uC) vRange)
       case joiningCurve of
         Incoming _ -> do
           let dudt = uP - uC
@@ -153,7 +153,7 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
           let implicitCurve = HorizontalCurve.bounded f dvdu uP uC implicitBounds frame boundingAxes
           Curve2D.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing
     else do
-      let implicitBounds = NonEmpty.one (Bounds2D uBounds (Interval vP vC))
+      let implicitBounds = NonEmpty.one (Bounds2D uRange (Interval vP vC))
       case joiningCurve of
         Incoming _ -> do
           let dvdt = vP - vC

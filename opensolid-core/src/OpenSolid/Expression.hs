@@ -51,7 +51,7 @@ module OpenSolid.Expression
   , b11d2
   , b11d3
   , desingularized
-  , Evaluation (value, bounds)
+  , Evaluation (value, range)
   , solveMonotonicSurfaceU
   , solveMonotonicSurfaceV
   )
@@ -1688,7 +1688,7 @@ class
     , output -> outputBounds
   where
   value :: Expression input output -> input -> output
-  bounds :: Expression input output -> inputBounds -> outputBounds
+  range :: Expression input output -> inputBounds -> outputBounds
 
 instance
   Evaluation
@@ -1698,7 +1698,7 @@ instance
     (Interval units)
   where
   value (Curve1D _ compiled) tValue = Evaluate.curve1dValue compiled tValue
-  bounds (Curve1D _ compiled) tBounds = Evaluate.curve1dBounds compiled tBounds
+  range (Curve1D _ compiled) tRange = Evaluate.curve1dRange compiled tRange
 
 instance
   Evaluation
@@ -1708,7 +1708,7 @@ instance
     (Interval units)
   where
   value (Surface1D _ compiled) uvPoint = Evaluate.surface1dValue compiled uvPoint
-  bounds (Surface1D _ compiled) uvBounds = Evaluate.surface1dBounds compiled uvBounds
+  range (Surface1D _ compiled) uvRange = Evaluate.surface1dRange compiled uvRange
 
 instance
   Evaluation
@@ -1718,7 +1718,7 @@ instance
     (Bounds2D units)
   where
   value (Curve2D _ compiled) tValue = Position2D (Evaluate.curve2dValue compiled tValue)
-  bounds (Curve2D _ compiled) tBounds = PositionBounds2D (Evaluate.curve2dBounds compiled tBounds)
+  range (Curve2D _ compiled) tRange = PositionBounds2D (Evaluate.curve2dRange compiled tRange)
 
 instance
   Evaluation
@@ -1728,7 +1728,7 @@ instance
     (Bounds2D units)
   where
   value (Surface2D _ compiled) uvPoint = Position2D (Evaluate.surface2dValue compiled uvPoint)
-  bounds (Surface2D _ compiled) uvBounds = PositionBounds2D (Evaluate.surface2dBounds compiled uvBounds)
+  range (Surface2D _ compiled) uvRange = PositionBounds2D (Evaluate.surface2dRange compiled uvRange)
 
 instance
   Evaluation
@@ -1738,7 +1738,7 @@ instance
     (VectorBounds2D units)
   where
   value (VectorCurve2D _ compiled) tValue = Evaluate.curve2dValue compiled tValue
-  bounds (VectorCurve2D _ compiled) tBounds = Evaluate.curve2dBounds compiled tBounds
+  range (VectorCurve2D _ compiled) tRange = Evaluate.curve2dRange compiled tRange
 
 instance
   Evaluation
@@ -1748,7 +1748,7 @@ instance
     (VectorBounds2D units)
   where
   value (VectorSurface2D _ compiled) uvPoint = Evaluate.surface2dValue compiled uvPoint
-  bounds (VectorSurface2D _ compiled) uvBounds = Evaluate.surface2dBounds compiled uvBounds
+  range (VectorSurface2D _ compiled) uvRange = Evaluate.surface2dRange compiled uvRange
 
 instance
   Evaluation
@@ -1758,7 +1758,7 @@ instance
     (Bounds3D space)
   where
   value (Curve3D _ compiled) tValue = Position3D (Evaluate.curve3dValue compiled tValue)
-  bounds (Curve3D _ compiled) tBounds = PositionBounds3D (Evaluate.curve3dBounds compiled tBounds)
+  range (Curve3D _ compiled) tRange = PositionBounds3D (Evaluate.curve3dRange compiled tRange)
 
 instance
   Evaluation
@@ -1768,7 +1768,7 @@ instance
     (Bounds3D space)
   where
   value (Surface3D _ compiled) uvPoint = Position3D (Evaluate.surface3dValue compiled uvPoint)
-  bounds (Surface3D _ compiled) uvBounds = PositionBounds3D (Evaluate.surface3dBounds compiled uvBounds)
+  range (Surface3D _ compiled) uvRange = PositionBounds3D (Evaluate.surface3dRange compiled uvRange)
 
 instance
   Evaluation
@@ -1778,7 +1778,7 @@ instance
     (VectorBounds3D units space)
   where
   value (VectorCurve3D _ compiled) tValue = Evaluate.curve3dValue compiled tValue
-  bounds (VectorCurve3D _ compiled) tBounds = Evaluate.curve3dBounds compiled tBounds
+  range (VectorCurve3D _ compiled) tRange = Evaluate.curve3dRange compiled tRange
 
 instance
   Evaluation
@@ -1788,7 +1788,7 @@ instance
     (VectorBounds3D units space)
   where
   value (VectorSurface3D _ compiled) uvPoint = Evaluate.surface3dValue compiled uvPoint
-  bounds (VectorSurface3D _ compiled) uvBounds = Evaluate.surface3dBounds compiled uvBounds
+  range (VectorSurface3D _ compiled) uvRange = Evaluate.surface3dRange compiled uvRange
 
 solveMonotonicSurfaceU ::
   Tolerance units =>

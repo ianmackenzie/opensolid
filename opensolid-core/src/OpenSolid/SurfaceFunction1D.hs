@@ -2,7 +2,7 @@ module OpenSolid.SurfaceFunction1D
   ( SurfaceFunction1D (compiled, du, dv)
   , Compiled
   , value
-  , bounds
+  , range
   , derivative
   , derivativeIn
   , compiled
@@ -353,8 +353,8 @@ instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFuncti
 value :: SurfaceFunction1D units -> UvPoint -> Quantity units
 value function uvPoint = CompiledFunction.value function.compiled uvPoint
 
-bounds :: SurfaceFunction1D units -> UvBounds -> Interval units
-bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
+range :: SurfaceFunction1D units -> UvBounds -> Interval units
+range function uvRange = CompiledFunction.range function.compiled uvRange
 
 derivative :: SurfaceParameter -> SurfaceFunction1D units -> SurfaceFunction1D units
 derivative U = (.du)
@@ -628,8 +628,8 @@ findZeros f dudv dvdu context subdomain exclusions = do
         case context of
           CrossingCurvesOnly -> findCrossingCurves subproblem
           AllZeroTypes -> do
-            let Subproblem{fuBounds, fvBounds} = subproblem
-            if Interval.isResolved fuBounds || Interval.isResolved fvBounds
+            let Subproblem{fuRange, fvRange} = subproblem
+            if Interval.isResolved fuRange || Interval.isResolved fvRange
               then findCrossingCurves subproblem
               else findTangentSolutions subproblem
 
@@ -638,8 +638,8 @@ findTangentSolutions ::
   Subproblem units ->
   Solve2D.Action Solve2D.NoExclusions FindZerosContext (Solution units)
 findTangentSolutions subproblem = do
-  let Subproblem{f, subdomain, uvBounds, fuuBounds, fuvBounds, fvvBounds} = subproblem
-  let determinant = fuuBounds ?*? fvvBounds - fuvBounds ?*? fuvBounds
+  let Subproblem{f, subdomain, uvRange, fuuRange, fuvRange, fvvRange} = subproblem
+  let determinant = fuuRange ?*? fvvRange - fuvRange ?*? fuvRange
   case Interval.resolvedSign determinant of
     Resolved determinantSign -> do
       let fu = f.du
@@ -649,11 +649,11 @@ findTangentSolutions subproblem = do
       let fvv = f.dv.dv
       let maybePoint =
             Solve2D.unique
-              (\testBounds -> VectorBounds2D (bounds fu testBounds) (bounds fv testBounds))
+              (\testRange -> VectorBounds2D (range fu testRange) (range fv testRange))
               (\testPoint -> Vector2D (value fu testPoint) (value fv testPoint))
               (\testPoint -> Vector2D (value fuu testPoint) (value fuv testPoint))
               (\testPoint -> Vector2D (value fuv testPoint) (value fvv testPoint))
-              uvBounds
+              uvRange
       case maybePoint of
         Nothing -> Solve2D.recurse CrossingCurvesOnly
         Just point ->
@@ -665,7 +665,7 @@ findTangentSolutions subproblem = do
                 -- Note that fuu and fvv must be either both positive or both negative
                 -- to reach this code path, so we can take the sign of either one
                 -- to determine the sign of the tangent point
-                let sign = Quantity.sign (Interval.lower fuuBounds)
+                let sign = Quantity.sign (Interval.lower fuuRange)
                 Solve2D.return (TangentPointSolution (point, sign))
               Negative -> do
                 -- Saddle region
@@ -703,9 +703,9 @@ diagonalCrossingCurve ::
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
 diagonalCrossingCurve subproblem = do
-  let Subproblem{fuBounds, fvBounds} = subproblem
-  fuSign <- Interval.resolvedSign fuBounds
-  fvSign <- Interval.resolvedSign fvBounds
+  let Subproblem{fuRange, fvRange} = subproblem
+  fuSign <- Interval.resolvedSign fuRange
+  fvSign <- Interval.resolvedSign fvRange
   Resolved $
     case (fuSign, fvSign) of
       (Negative, Negative) -> southeastCrossingCurve subproblem
@@ -796,13 +796,13 @@ horizontalCrossingCurve ::
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
 horizontalCrossingCurve subproblem = do
-  let Subproblem{fvBounds} = subproblem
-  if Interval.isResolved fvBounds
+  let Subproblem{fvRange} = subproblem
+  if Interval.isResolved fvRange
     then do
-      let bottomEdgeBounds = Subproblem.bottomEdgeBounds subproblem
-      let topEdgeBounds = Subproblem.topEdgeBounds subproblem
-      bottomEdgeSign <- Interval.resolvedSign bottomEdgeBounds
-      topEdgeSign <- Interval.resolvedSign topEdgeBounds
+      let bottomEdgeRange = Subproblem.bottomEdgeRange subproblem
+      let topEdgeRange = Subproblem.topEdgeRange subproblem
+      bottomEdgeSign <- Interval.resolvedSign bottomEdgeRange
+      topEdgeSign <- Interval.resolvedSign topEdgeRange
       case (bottomEdgeSign, topEdgeSign) of
         (Negative, Negative) -> Resolved Nothing
         (Positive, Positive) -> Resolved Nothing
@@ -828,16 +828,16 @@ horizontalCurve ::
   (UvPoint, Domain2D.Boundary) ->
   (UvPoint, Domain2D.Boundary) ->
   Fuzzy PartialZeros.CrossingSegment
-horizontalCurve Subproblem{f, dvdu, subdomain, uvBounds} start end = do
+horizontalCurve Subproblem{f, dvdu, subdomain, uvRange} start end = do
   let startPoint = Pair.first start
   let endPoint = Pair.first end
   let uStart = Point2D.xCoordinate startPoint
   let uEnd = Point2D.xCoordinate endPoint
-  let curve = HorizontalCurve.new f dvdu uStart uEnd (NonEmpty.one uvBounds)
+  let curve = HorizontalCurve.new f dvdu uStart uEnd (NonEmpty.one uvRange)
   let Domain2D _ vSubdomain = subdomain
-  let Bounds2D _ curveVBounds = Curve2D.overallBounds curve
+  let Bounds2D _ curveVBounds = Curve2D.bounds curve
   if Interval.contains curveVBounds (Domain1D.interior vSubdomain)
-    then Resolved (PartialZeros.horizontalSegment start end uvBounds)
+    then Resolved (PartialZeros.horizontalSegment start end uvRange)
     else Unresolved
 
 verticalCrossingCurve ::
@@ -845,13 +845,13 @@ verticalCrossingCurve ::
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
 verticalCrossingCurve subproblem = do
-  let Subproblem{fuBounds} = subproblem
-  if Interval.isResolved fuBounds
+  let Subproblem{fuRange} = subproblem
+  if Interval.isResolved fuRange
     then do
-      let leftEdgeBounds = Subproblem.leftEdgeBounds subproblem
-      let rightEdgeBounds = Subproblem.rightEdgeBounds subproblem
-      leftEdgeSign <- Interval.resolvedSign leftEdgeBounds
-      rightEdgeSign <- Interval.resolvedSign rightEdgeBounds
+      let leftEdgeRange = Subproblem.leftEdgeRange subproblem
+      let rightEdgeRange = Subproblem.rightEdgeRange subproblem
+      leftEdgeSign <- Interval.resolvedSign leftEdgeRange
+      rightEdgeSign <- Interval.resolvedSign rightEdgeRange
       case (leftEdgeSign, rightEdgeSign) of
         (Negative, Negative) -> Resolved Nothing
         (Positive, Positive) -> Resolved Nothing
@@ -877,14 +877,14 @@ verticalCurve ::
   (UvPoint, Domain2D.Boundary) ->
   (UvPoint, Domain2D.Boundary) ->
   Fuzzy PartialZeros.CrossingSegment
-verticalCurve Subproblem{f, dudv, subdomain, uvBounds} start end = do
+verticalCurve Subproblem{f, dudv, subdomain, uvRange} start end = do
   let startPoint = Pair.first start
   let endPoint = Pair.first end
   let vStart = Point2D.yCoordinate startPoint
   let vEnd = Point2D.yCoordinate endPoint
-  let curve = VerticalCurve.new f dudv vStart vEnd (NonEmpty.one uvBounds)
+  let curve = VerticalCurve.new f dudv vStart vEnd (NonEmpty.one uvRange)
   let Domain2D uSubdomain _ = subdomain
-  let Bounds2D curveUBounds _ = Curve2D.overallBounds curve
+  let Bounds2D curveUBounds _ = Curve2D.bounds curve
   if Interval.contains curveUBounds (Domain1D.interior uSubdomain)
-    then Resolved (PartialZeros.verticalSegment start end uvBounds)
+    then Resolved (PartialZeros.verticalSegment start end uvRange)
     else Unresolved

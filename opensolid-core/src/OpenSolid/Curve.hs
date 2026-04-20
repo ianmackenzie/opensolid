@@ -19,18 +19,18 @@ module OpenSolid.Curve
   , hermite
   , derivative
   , compiled
-  , overallBounds
-  , point
   , bounds
+  , point
+  , range
   , startPoint
   , endPoint
   , endpoints
   , secondDerivative
   , derivativeValue
-  , derivativeBounds
+  , derivativeRange
   , secondDerivativeValue
-  , secondDerivativeBounds
-  , tangentDirectionBounds
+  , secondDerivativeRange
+  , tangentDirectionRange
   , reverse
   , isPoint
   , singular0
@@ -509,11 +509,11 @@ endpoints ::
   (Point dimension units space, Point dimension units space)
 endpoints curve = (startPoint curve, endPoint curve)
 
-bounds :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
-bounds curve tBounds = CompiledFunction.bounds curve.compiled tBounds
+range :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
+range curve tRange = CompiledFunction.range curve.compiled tRange
 
-overallBounds :: Curve dimension units space -> Bounds dimension units space
-overallBounds curve = Curve.Segment.bounds (SearchTree.value (searchTree curve))
+bounds :: Curve dimension units space -> Bounds dimension units space
+bounds curve = Curve.Segment.range (SearchTree.value (searchTree curve))
 
 searchTree :: Curve dimension units space -> SearchTree dimension units space
 searchTree = (.searchTree)
@@ -569,12 +569,12 @@ derivativeValue ::
   Vector dimension units space
 derivativeValue curve tValue = VectorCurve.value (derivative curve) tValue
 
-derivativeBounds ::
+derivativeRange ::
   Exists dimension units space =>
   Curve dimension units space ->
   Interval Unitless ->
   VectorBounds dimension units space
-derivativeBounds curve tBounds = VectorCurve.bounds (derivative curve) tBounds
+derivativeRange curve tRange = VectorCurve.range (derivative curve) tRange
 
 secondDerivativeValue ::
   Exists dimension units space =>
@@ -583,19 +583,19 @@ secondDerivativeValue ::
   Vector dimension units space
 secondDerivativeValue curve tValue = VectorCurve.value (secondDerivative curve) tValue
 
-secondDerivativeBounds ::
+secondDerivativeRange ::
   Exists dimension units space =>
   Curve dimension units space ->
   Interval Unitless ->
   VectorBounds dimension units space
-secondDerivativeBounds curve tBounds = VectorCurve.bounds (secondDerivative curve) tBounds
+secondDerivativeRange curve tRange = VectorCurve.range (secondDerivative curve) tRange
 
-tangentDirectionBounds ::
+tangentDirectionRange ::
   Exists dimension units space =>
   Curve dimension units space ->
   Interval Unitless ->
   DirectionBounds dimension space
-tangentDirectionBounds curve tBounds = VectorCurve.directionBounds (derivative curve) tBounds
+tangentDirectionRange curve tRange = VectorCurve.directionRange (derivative curve) tRange
 
 reverse ::
   Exists dimension units space =>
@@ -645,25 +645,25 @@ findPoint givenPoint curve = do
   let isSolution tValue = point curve tValue ~= givenPoint
   let isDegenerate tValue = derivativeValue curve tValue ~= Vector.zero
   let endpointSolutions = List.filter isSolution [0.0, 1.0]
-  let solveMonotonic tBounds = do
-        let tMid = Interval.midpoint tBounds
+  let solveMonotonic tRange = do
+        let tMid = Interval.midpoint tRange
         let tSolution = NewtonRaphson.curve evaluate tMid
-        if Search.isInterior tSolution tBounds && isSolution tSolution
+        if Search.isInterior tSolution tRange && isSolution tSolution
           then Resolved (Just tSolution)
           else Unresolved
-  let interiorSolution tBounds segment
-        | not (givenPoint `intersects` Curve.Segment.bounds segment) = Resolved Nothing
+  let interiorSolution tRange segment
+        | not (givenPoint `intersects` Curve.Segment.range segment) = Resolved Nothing
         | otherwise = do
             let isMonotonic = Curve.Segment.monotonic segment
-            let isSmall = SearchDomain.isSmall tBounds
-            let endpointSolution = List.find (Number.includedIn tBounds) endpointSolutions
+            let isSmall = SearchDomain.isSmall tRange
+            let endpointSolution = List.find (Number.includedIn tRange) endpointSolutions
             let hasEndpointSolution = endpointSolution /= Nothing
             if
               | isMonotonic && hasEndpointSolution -> Resolved Nothing
               | isSmall, Just tValue <- endpointSolution, isDegenerate tValue -> Resolved Nothing
-              | isMonotonic -> solveMonotonic tBounds
+              | isMonotonic -> solveMonotonic tRange
               | otherwise -> Unresolved
-  let isDuplicate (tBounds1, _) (tBounds2, _) = SearchDomain.overlapping tBounds1 tBounds2
+  let isDuplicate (tRange1, _) (tRange2, _) = SearchDomain.overlapping tRange1 tRange2
   let interiorSolutions =
         Search.exclusive interiorSolution isDuplicate (searchTree curve)
           & List.map Pair.second
@@ -759,13 +759,14 @@ arcLengthParameterization curve =
   case nondegenerate curve of
     Error IsDegenerate -> (Curve1D.t, Quantity.zero)
     Ok nondegenerateCurve -> do
-      let (parameterizationFunction, length) = arcLengthParameterizationFunction curve
-      let parameterizationBounds (Interval uLow uHigh) =
-            Interval (parameterizationFunction uLow) (parameterizationFunction uHigh)
+      let (parameterizationValue, length) = arcLengthParameterizationFunction curve
+      let parameterizationRange (Interval uLow uHigh) =
+            Interval (parameterizationValue uLow) (parameterizationValue uHigh)
       let compiledParameterization =
-            CompiledFunction.abstract parameterizationFunction parameterizationBounds
+            CompiledFunction.abstract parameterizationValue parameterizationRange
       let nondegenerateDerivative = Curve.Nondegenerate.derivative nondegenerateCurve
-      let nondegenerateDerivativeMagnitude = VectorCurve.Nondegenerate.magnitude nondegenerateDerivative
+      let nondegenerateDerivativeMagnitude =
+            VectorCurve.Nondegenerate.magnitude nondegenerateDerivative
       let parameterizationCurve = recursive \self -> do
             let dtdu = Curve1D.constant length / nondegenerateDerivativeMagnitude
             Curve1D.new compiledParameterization (dtdu . self)

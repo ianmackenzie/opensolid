@@ -1,4 +1,4 @@
-module Tests.VectorCurve2D (boundsConsistency, derivativeConsistency) where
+module Tests.VectorCurve2D (rangeConsistency, derivativeConsistency) where
 
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Parameter qualified as Parameter
@@ -27,17 +27,17 @@ derivativeConsistency givenTolerance curve = do
       & Test.output "numericalFirstDerivative" numericalFirstDerivative
       & Test.output "analyticFirstDerivative" analyticFirstDerivative
 
-boundsConsistency ::
+rangeConsistency ::
   (Tolerance units, Show (Quantity units)) =>
   VectorCurve2D units ->
   Expectation
-boundsConsistency vectorCurve = do
-  tBounds <- Test.generate (Interval.random Parameter.random)
-  tValue <- Test.generate (Random.map (Interval.interpolate tBounds) Parameter.random)
+rangeConsistency vectorCurve = do
+  tRange <- Test.generate (Interval.random Parameter.random)
+  tValue <- Test.generate (Random.map (Interval.interpolate tRange) Parameter.random)
   let vectorCurveValue = VectorCurve2D.value vectorCurve tValue
-  let vectorCurveBounds = VectorCurve2D.bounds vectorCurve tBounds
-  Test.expect (vectorCurveValue `intersects` vectorCurveBounds)
+  let vectorCurveRange = VectorCurve2D.range vectorCurve tRange
+  Test.expect (vectorCurveValue `intersects` vectorCurveRange)
     & Test.output "tValue" tValue
-    & Test.output "tBounds" tBounds
+    & Test.output "tRange" tRange
     & Test.output "vectorCurveValue" vectorCurveValue
-    & Test.output "vectorCurveBounds" vectorCurveBounds
+    & Test.output "vectorCurveRange" vectorCurveRange

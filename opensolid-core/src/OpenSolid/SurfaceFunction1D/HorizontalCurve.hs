@@ -25,8 +25,8 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import OpenSolid.SurfaceFunction1D.ImplicitCurveBounds (ImplicitCurveBounds)
-import OpenSolid.SurfaceFunction1D.ImplicitCurveBounds qualified as ImplicitCurveBounds
+import OpenSolid.SurfaceFunction1D.ImplicitCurveRange (ImplicitCurveRange)
+import OpenSolid.SurfaceFunction1D.ImplicitCurveRange qualified as ImplicitCurveRange
 import OpenSolid.SurfaceFunction1D.Internal qualified as Internal
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (pattern UvPoint)
@@ -38,9 +38,9 @@ data Monotonicity
   | NotMonotonic
   deriving (Eq, Show)
 
-implicitCurveBounds :: NonEmpty UvBounds -> ImplicitCurveBounds
-implicitCurveBounds boxes =
-  ImplicitCurveBounds.build (NonEmpty.map (\(Bounds2D u v) -> (u, v)) boxes)
+implicitCurveRange :: NonEmpty UvBounds -> ImplicitCurveRange
+implicitCurveRange boxes =
+  ImplicitCurveRange.build (NonEmpty.map (\(Bounds2D u v) -> (u, v)) boxes)
 
 new ::
   Tolerance units =>
@@ -89,20 +89,19 @@ horizontalCurve ::
   List (Axis2D Unitless) ->
   Curve2D Unitless
 horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
-  let curveBounds = implicitCurveBounds boxes
-  let clampedVBounds uValue =
-        List.foldl (clamp uValue) (ImplicitCurveBounds.at uValue curveBounds) boundingAxes
+  let curveRange = implicitCurveRange boxes
+  let clampedVRange uValue =
+        List.foldl (clamp uValue) (ImplicitCurveRange.at uValue curveRange) boundingAxes
   let solveForV =
         case (f.compiled, f.dv.compiled) of
           (CompiledFunction.Concrete fExpr, CompiledFunction.Concrete fvExpr) ->
-            \uValue -> Expression.solveMonotonicSurfaceV fExpr fvExpr uValue (clampedVBounds uValue)
-          _ -> \uValue -> Internal.solveForV f f.dv uValue (clampedVBounds uValue)
+            \uValue -> Expression.solveMonotonicSurfaceV fExpr fvExpr uValue (clampedVRange uValue)
+          _ -> \uValue -> Internal.solveForV f f.dv uValue (clampedVRange uValue)
   let value tValue = do
         let uValue = Number.interpolateFrom uStart uEnd tValue
         let vValue = solveForV uValue
         UvPoint uValue vValue
-  let bounds tBounds = do
-        let Interval t1 t2 = tBounds
+  let range (Interval t1 t2) = do
         let u1 = Number.interpolateFrom uStart uEnd t1
         let u2 = Number.interpolateFrom uStart uEnd t2
         let v1 = solveForV u1
@@ -115,14 +114,14 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
             Bounds2D.hull2 (Point2D.relativeTo frame p1) (Point2D.relativeTo frame p2)
               & Bounds2D.placeIn frame
           NotMonotonic -> do
-            let vBounds = ImplicitCurveBounds.over (Interval u1 u2) curveBounds
-            let slopeBounds = SurfaceFunction1D.bounds dvdu (Bounds2D (Interval u1 u2) vBounds)
-            let segmentVBounds = Internal.curveBoundsAt u1 u2 v1 v2 slopeBounds
-            Bounds2D (Interval u1 u2) segmentVBounds
+            let vRange = ImplicitCurveRange.over (Interval u1 u2) curveRange
+            let slopeRange = SurfaceFunction1D.range dvdu (Bounds2D (Interval u1 u2) vRange)
+            let segmentVRange = Internal.curveRangeAt u1 u2 v1 v2 slopeRange
+            Bounds2D (Interval u1 u2) segmentVRange
   recursive \self -> do
     let dudt = Curve1D.constant (uEnd - uStart)
     let dvdt = dudt * dvdu . self
-    Curve2D.new (CompiledFunction.abstract value bounds) (VectorCurve2D.xy dudt dvdt)
+    Curve2D.new (CompiledFunction.abstract value range) (VectorCurve2D.xy dudt dvdt)
 
 clamp :: Number -> Interval Unitless -> Axis2D Unitless -> Interval Unitless
 clamp u (Interval vLow vHigh) axis = do

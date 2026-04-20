@@ -4,13 +4,13 @@ module OpenSolid.SurfaceFunction3D
   , new
   , constant
   , point
-  , bounds
+  , range
   , derivative
   , derivativeValue
-  , derivativeBounds
+  , derivativeRange
   , nondegenerate
   , normalDirection
-  , normalDirectionBounds
+  , normalDirectionRange
   , placeIn
   , relativeTo
   , transformBy
@@ -191,16 +191,16 @@ constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunct
 point :: SurfaceFunction3D space -> UvPoint -> Point3D space
 point function uvPoint = CompiledFunction.value function.compiled uvPoint
 
-bounds :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
-bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
+range :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
+range function uvRange = CompiledFunction.range function.compiled uvRange
 
 derivativeValue :: SurfaceParameter -> SurfaceFunction3D space -> UvPoint -> Vector3D Meters space
 derivativeValue U function uvPoint = VectorSurfaceFunction3D.value function.du uvPoint
 derivativeValue V function uvPoint = VectorSurfaceFunction3D.value function.dv uvPoint
 
-derivativeBounds :: SurfaceParameter -> SurfaceFunction3D space -> UvBounds -> VectorBounds3D Meters space
-derivativeBounds U function uvBounds = VectorSurfaceFunction3D.bounds function.du uvBounds
-derivativeBounds V function uvBounds = VectorSurfaceFunction3D.bounds function.dv uvBounds
+derivativeRange :: SurfaceParameter -> SurfaceFunction3D space -> UvBounds -> VectorBounds3D Meters space
+derivativeRange U function uvRange = VectorSurfaceFunction3D.range function.du uvRange
+derivativeRange V function uvRange = VectorSurfaceFunction3D.range function.dv uvRange
 
 derivative ::
   SurfaceParameter ->
@@ -229,10 +229,10 @@ normalDirection function = do
   let crossProduct = duDirection `cross` dvDirection
   Tolerance.using Tolerance.unitless (VectorSurfaceFunction3D.direction crossProduct)
 
-normalDirectionBounds :: SurfaceFunction3D space -> UvBounds -> DirectionBounds3D space
-normalDirectionBounds function uvBounds = do
-  let duDirectionBounds = VectorSurfaceFunction3D.directionBounds function.du uvBounds
-  let dvDirectionBounds = VectorSurfaceFunction3D.directionBounds function.dv uvBounds
+normalDirectionRange :: SurfaceFunction3D space -> UvBounds -> DirectionBounds3D space
+normalDirectionRange function uvRange = do
+  let duDirectionBounds = VectorSurfaceFunction3D.directionRange function.du uvRange
+  let dvDirectionBounds = VectorSurfaceFunction3D.directionRange function.dv uvRange
   VectorBounds3D.direction (duDirectionBounds `cross` dvDirectionBounds)
 
 transformBy :: Transform3D tag space -> SurfaceFunction3D space -> SurfaceFunction3D space

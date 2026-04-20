@@ -42,7 +42,7 @@ surfaceFunction :: SurfaceCurve3D space -> SurfaceFunction3D space
 surfaceFunction = (.surfaceFunction)
 
 bounds :: SurfaceCurve3D space -> Bounds3D space
-bounds = Curve3D.overallBounds . curve
+bounds = Curve3D.bounds . curve
 
 uvBounds :: SurfaceCurve3D space -> UvBounds
-uvBounds = Curve2D.overallBounds . uvCurve
+uvBounds = Curve2D.bounds . uvCurve

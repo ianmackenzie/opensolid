@@ -4,7 +4,7 @@ module OpenSolid.DirectionCurve
   , unsafe
   , unwrap
   , value
-  , bounds
+  , range
   )
 where
 
@@ -44,7 +44,7 @@ value ::
   DirectionCurve dimension space ->
   Number ->
   Direction dimension space
-bounds ::
+range ::
   Exists dimension space =>
   DirectionCurve dimension space ->
   Interval Unitless ->

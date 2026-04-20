@@ -13,11 +13,11 @@ module OpenSolid.VectorCurve3D
   , startValue
   , endValue
   , value
-  , bounds
+  , range
   , derivativeValue
-  , derivativeBounds
+  , derivativeRange
   , secondDerivativeValue
-  , secondDerivativeBounds
+  , secondDerivativeRange
   , zero
   , constant
   , interpolateFrom
@@ -173,27 +173,27 @@ desingularized = VectorCurve.desingularized
 value :: VectorCurve3D units space -> Number -> Vector3D units space
 value = VectorCurve.value
 
-bounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
-bounds = VectorCurve.bounds
+range :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
+range = VectorCurve.range
 
 {-# INLINE derivativeValue #-}
 derivativeValue :: VectorCurve3D units space -> Number -> Vector3D units space
 derivativeValue = VectorCurve.derivativeValue
 
-{-# INLINE derivativeBounds #-}
-derivativeBounds :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
-derivativeBounds = VectorCurve.derivativeBounds
+{-# INLINE derivativeRange #-}
+derivativeRange :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
+derivativeRange = VectorCurve.derivativeRange
 
 {-# INLINE secondDerivativeValue #-}
 secondDerivativeValue :: VectorCurve3D units space -> Number -> Vector3D units space
 secondDerivativeValue = VectorCurve.secondDerivativeValue
 
-{-# INLINE secondDerivativeBounds #-}
-secondDerivativeBounds ::
+{-# INLINE secondDerivativeRange #-}
+secondDerivativeRange ::
   VectorCurve3D units space ->
   Interval Unitless ->
   VectorBounds3D units space
-secondDerivativeBounds = VectorCurve.secondDerivativeBounds
+secondDerivativeRange = VectorCurve.secondDerivativeRange
 
 reverse :: VectorCurve3D units space -> VectorCurve3D units space
 reverse = VectorCurve.reverse

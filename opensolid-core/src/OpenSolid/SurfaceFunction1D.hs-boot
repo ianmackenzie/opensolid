@@ -7,7 +7,7 @@ module OpenSolid.SurfaceFunction1D
   , v
   , parameter
   , value
-  , bounds
+  , range
   , derivative
   , squared
   , squared_
@@ -109,7 +109,7 @@ u :: SurfaceFunction1D Unitless
 v :: SurfaceFunction1D Unitless
 parameter :: SurfaceParameter -> SurfaceFunction1D Unitless
 value :: SurfaceFunction1D units -> UvPoint -> Quantity units
-bounds :: SurfaceFunction1D units -> UvBounds -> Interval units
+range :: SurfaceFunction1D units -> UvBounds -> Interval units
 derivative :: SurfaceParameter -> SurfaceFunction1D units -> SurfaceFunction1D units
 squared :: Units.Squared units1 units2 => SurfaceFunction1D units1 -> SurfaceFunction1D units2
 squared_ :: SurfaceFunction1D units1 -> SurfaceFunction1D (units1 ?*? units1)

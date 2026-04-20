@@ -289,7 +289,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawingInnerControlPoints = List.map (Point2D.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints <> [drawingEndPoint])
   let curve = Curve2D.bezier drawingControlPoints
-  let drawSegmentBounds tBounds = drawBounds (Curve2D.bounds curve tBounds)
+  let drawCurveRange tRange = drawBounds (Curve2D.range curve tRange)
   let controlPointDiameter = Length.millimeters 10.0
   let drawControlPoint point = Svg.circle (#centerPoint point) (#diameter controlPointDiameter)
   let resolution = Resolution.maxError Length.millimeter
@@ -301,7 +301,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
         [ Svg.polyline (Polyline2D drawingControlPoints)
         , Svg.combineWith [Svg.fillColor color] drawControlPoint $
             NonEmpty.toList drawingControlPoints
-        , Svg.combine drawSegmentBounds (Parameter.intervals 10)
+        , Svg.combine drawCurveRange (Parameter.intervals 10)
         ]
     , Svg.curve resolution curve
     ]
@@ -375,7 +375,7 @@ testNewtonRaphson2D = Tolerance.using Tolerance.unitless do
   let vDerivative = VectorSurfaceFunction2D.derivative SurfaceParameter.V function
   let solution =
         Solve2D.unique
-          (VectorSurfaceFunction2D.bounds function)
+          (VectorSurfaceFunction2D.range function)
           (VectorSurfaceFunction2D.value function)
           (VectorSurfaceFunction2D.value uDerivative)
           (VectorSurfaceFunction2D.value vDerivative)
@@ -388,7 +388,7 @@ testExpression = do
   let xSquared = Expression.squared x
   let expression = xSquared / (xSquared + Expression.constant @Number @Number 1.0)
   log "Expression value" (Expression.value expression 2.0)
-  log "Expression bounds" (Expression.bounds expression (Interval 1.0 3.0))
+  log "Expression range" (Expression.range expression (Interval 1.0 3.0))
 
 testCurve2dExpression :: IO ()
 testCurve2dExpression = do

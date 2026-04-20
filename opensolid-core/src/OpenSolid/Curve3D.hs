@@ -16,18 +16,18 @@ module OpenSolid.Curve3D
   , derivative
   , secondDerivative
   , derivativeValue
-  , derivativeBounds
+  , derivativeRange
   , secondDerivativeValue
-  , secondDerivativeBounds
+  , secondDerivativeRange
   , tangentDirection
-  , tangentDirectionBounds
+  , tangentDirectionRange
   , curvatureVector
   , startPoint
   , endPoint
   , endpoints
   , point
+  , range
   , bounds
-  , overallBounds
   , reverse
   , arcLengthParameterizationFunction
   , arcLengthParameterization
@@ -161,12 +161,12 @@ derivativeValue ::
   Vector3D Meters space
 derivativeValue = Curve.derivativeValue
 
-{-# INLINE derivativeBounds #-}
-derivativeBounds ::
+{-# INLINE derivativeRange #-}
+derivativeRange ::
   Curve3D space ->
   Interval Unitless ->
   VectorBounds3D Meters space
-derivativeBounds = Curve.derivativeBounds
+derivativeRange = Curve.derivativeRange
 
 {-# INLINE secondDerivativeValue #-}
 secondDerivativeValue ::
@@ -175,12 +175,12 @@ secondDerivativeValue ::
   Vector3D Meters space
 secondDerivativeValue = Curve.secondDerivativeValue
 
-{-# INLINE secondDerivativeBounds #-}
-secondDerivativeBounds ::
+{-# INLINE secondDerivativeRange #-}
+secondDerivativeRange ::
   Curve3D space ->
   Interval Unitless ->
   VectorBounds3D Meters space
-secondDerivativeBounds = Curve.secondDerivativeBounds
+secondDerivativeRange = Curve.secondDerivativeRange
 
 tangentDirection ::
   Tolerance Meters =>
@@ -188,8 +188,8 @@ tangentDirection ::
   Result IsDegenerate (DirectionCurve3D space)
 tangentDirection = Curve.tangentDirection
 
-tangentDirectionBounds :: Curve3D space -> Interval Unitless -> DirectionBounds3D space
-tangentDirectionBounds = Curve.tangentDirectionBounds
+tangentDirectionRange :: Curve3D space -> Interval Unitless -> DirectionBounds3D space
+tangentDirectionRange = Curve.tangentDirectionRange
 
 curvatureVector ::
   Tolerance Meters =>
@@ -209,11 +209,11 @@ endpoints = Curve.endpoints
 point :: Curve3D space -> Number -> Point3D space
 point = Curve.point
 
-bounds :: Curve3D space -> Interval Unitless -> Bounds3D space
-bounds = Curve.bounds
+range :: Curve3D space -> Interval Unitless -> Bounds3D space
+range = Curve.range
 
-overallBounds :: Curve3D space -> Bounds3D space
-overallBounds = Curve.overallBounds
+bounds :: Curve3D space -> Bounds3D space
+bounds = Curve.bounds
 
 reverse :: Curve3D space -> Curve3D space
 reverse = Curve.reverse

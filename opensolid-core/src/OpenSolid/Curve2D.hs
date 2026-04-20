@@ -24,27 +24,27 @@ module OpenSolid.Curve2D
   , cubicBezier
   , hermite
   , derivativeValue
-  , derivativeBounds
+  , derivativeRange
   , secondDerivativeValue
-  , secondDerivativeBounds
+  , secondDerivativeRange
   , desingularize
   , desingularized
   , point
   , startPoint
   , endPoint
   , endpoints
-  , bounds
+  , range
   , compiled
   , derivative
   , secondDerivative
   , tangentDirection
-  , tangentDirectionBounds
+  , tangentDirectionRange
   , curvatureVector_
   , curvatureVector
   , offsetLeftwardBy
   , offsetRightwardBy
   , reverse
-  , overallBounds
+  , bounds
   , g2
   , intersections
   , findPoint
@@ -396,17 +396,17 @@ hermite = Curve.hermite
 derivativeValue :: Curve2D units -> Number -> Vector2D units
 derivativeValue = Curve.derivativeValue
 
-{-# INLINE derivativeBounds #-}
-derivativeBounds :: Curve2D units -> Interval Unitless -> VectorBounds2D units
-derivativeBounds = Curve.derivativeBounds
+{-# INLINE derivativeRange #-}
+derivativeRange :: Curve2D units -> Interval Unitless -> VectorBounds2D units
+derivativeRange = Curve.derivativeRange
 
 {-# INLINE secondDerivativeValue #-}
 secondDerivativeValue :: Curve2D units -> Number -> Vector2D units
 secondDerivativeValue = Curve.secondDerivativeValue
 
-{-# INLINE secondDerivativeBounds #-}
-secondDerivativeBounds :: Curve2D units -> Interval Unitless -> VectorBounds2D units
-secondDerivativeBounds = Curve.secondDerivativeBounds
+{-# INLINE secondDerivativeRange #-}
+secondDerivativeRange :: Curve2D units -> Interval Unitless -> VectorBounds2D units
+secondDerivativeRange = Curve.secondDerivativeRange
 
 desingularize ::
   Maybe (Point2D units, Vector2D units) ->
@@ -437,15 +437,15 @@ endPoint = Curve.endPoint
 endpoints :: Curve2D units -> (Point2D units, Point2D units)
 endpoints = Curve.endpoints
 
-bounds :: Curve2D units -> Interval Unitless -> Bounds2D units
-bounds = Curve.bounds
+range :: Curve2D units -> Interval Unitless -> Bounds2D units
+range = Curve.range
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2D units -> Curve2D units
 reverse = Curve.reverse
 
-overallBounds :: Curve2D units -> Bounds2D units
-overallBounds = Curve.overallBounds
+bounds :: Curve2D units -> Bounds2D units
+bounds = Curve.bounds
 
 compiled :: Curve2D units -> Compiled units
 compiled = Curve.compiled
@@ -459,8 +459,8 @@ secondDerivative = Curve.secondDerivative
 tangentDirection :: Tolerance units => Curve2D units -> Result IsDegenerate DirectionCurve2D
 tangentDirection = Curve.tangentDirection
 
-tangentDirectionBounds :: Curve2D units -> Interval Unitless -> DirectionBounds2D
-tangentDirectionBounds = Curve.tangentDirectionBounds
+tangentDirectionRange :: Curve2D units -> Interval Unitless -> DirectionBounds2D
+tangentDirectionRange = Curve.tangentDirectionRange
 
 curvatureVector_ ::
   Tolerance units =>
@@ -741,9 +741,9 @@ makePiecewise parameterizedSegments = do
   let segmentArray = Array.fromNonEmpty parameterizedSegments
   let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
   let pointImpl t = piecewisePoint tree (arcLength * t)
-  let boundsImpl (Interval t1 t2) = piecewiseBounds tree (arcLength * t1) (arcLength * t2)
+  let rangeImpl (Interval t1 t2) = piecewiseRange tree (arcLength * t1) (arcLength * t2)
   new
-    (CompiledFunction.abstract pointImpl boundsImpl)
+    (CompiledFunction.abstract pointImpl rangeImpl)
     (piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength)
 
 piecewise :: Tolerance units => NonEmpty (Curve2D units) -> Curve2D units
@@ -782,23 +782,23 @@ piecewisePoint tree length = case tree of
     | otherwise -> piecewisePoint rightTree (length - leftLength)
   PiecewiseLeaf curve segmentLength -> point curve (length / segmentLength)
 
-piecewiseBounds ::
+piecewiseRange ::
   PiecewiseTree units space ->
   Quantity units ->
   Quantity units ->
   Bounds2D units
-piecewiseBounds tree startLength endLength = case tree of
+piecewiseRange tree startLength endLength = case tree of
   PiecewiseNode leftTree leftLength rightTree
     | endLength <= leftLength ->
-        piecewiseBounds leftTree startLength endLength
+        piecewiseRange leftTree startLength endLength
     | startLength >= leftLength ->
-        piecewiseBounds rightTree (startLength - leftLength) (endLength - leftLength)
+        piecewiseRange rightTree (startLength - leftLength) (endLength - leftLength)
     | otherwise ->
         Bounds2D.aggregate2
-          (piecewiseBounds leftTree startLength leftLength)
-          (piecewiseBounds rightTree Quantity.zero (endLength - leftLength))
+          (piecewiseRange leftTree startLength leftLength)
+          (piecewiseRange rightTree Quantity.zero (endLength - leftLength))
   PiecewiseLeaf curve segmentLength ->
-    bounds curve (Interval (startLength / segmentLength) (endLength / segmentLength))
+    range curve (Interval (startLength / segmentLength) (endLength / segmentLength))
 
 piecewiseDerivative ::
   PiecewiseDerivativeTree units space ->
@@ -806,9 +806,9 @@ piecewiseDerivative ::
   VectorCurve2D units
 piecewiseDerivative tree length = do
   let valueImpl t = piecewiseDerivativeValue tree (length * t)
-  let boundsImpl (Interval t1 t2) = piecewiseDerivativeBounds tree (length * t1) (length * t2)
+  let rangeImpl (Interval t1 t2) = piecewiseDerivativeRange tree (length * t1) (length * t2)
   VectorCurve2D.new
-    (CompiledFunction.abstract valueImpl boundsImpl)
+    (CompiledFunction.abstract valueImpl rangeImpl)
     (piecewiseDerivative (piecewiseDerivativeTreeDerivative tree length) length)
 
 data PiecewiseDerivativeTree units space where
@@ -861,27 +861,27 @@ piecewiseDerivativeValue tree length = case tree of
   PiecewiseDerivativeLeaf curve segmentLength ->
     VectorCurve2D.value curve (length / segmentLength)
 
-piecewiseDerivativeBounds ::
+piecewiseDerivativeRange ::
   PiecewiseDerivativeTree units space ->
   Quantity units ->
   Quantity units ->
   VectorBounds2D units
-piecewiseDerivativeBounds tree startLength endLength = case tree of
+piecewiseDerivativeRange tree startLength endLength = case tree of
   PiecewiseDerivativeNode leftTree leftLength rightTree
     | endLength <= leftLength ->
-        piecewiseDerivativeBounds leftTree startLength endLength
+        piecewiseDerivativeRange leftTree startLength endLength
     | startLength >= leftLength ->
-        piecewiseDerivativeBounds
+        piecewiseDerivativeRange
           rightTree
           (startLength - leftLength)
           (endLength - leftLength)
     | otherwise ->
         VectorBounds2D.aggregate2
-          (piecewiseDerivativeBounds leftTree startLength leftLength)
-          (piecewiseDerivativeBounds rightTree Quantity.zero (endLength - leftLength))
+          (piecewiseDerivativeRange leftTree startLength leftLength)
+          (piecewiseDerivativeRange rightTree Quantity.zero (endLength - leftLength))
   PiecewiseDerivativeLeaf curve segmentLength -> do
-    let tBounds = Interval (startLength / segmentLength) (endLength / segmentLength)
-    VectorCurve2D.bounds curve tBounds
+    let tRange = Interval (startLength / segmentLength) (endLength / segmentLength)
+    VectorCurve2D.range curve tRange
 
 searchTree :: Curve2D units -> SearchTree units
 searchTree = Curve.searchTree

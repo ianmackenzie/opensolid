@@ -288,7 +288,7 @@ library
     OpenSolid.SurfaceFunction1D.Blending
     OpenSolid.SurfaceFunction1D.Desingularization
     OpenSolid.SurfaceFunction1D.HorizontalCurve
-    OpenSolid.SurfaceFunction1D.ImplicitCurveBounds
+    OpenSolid.SurfaceFunction1D.ImplicitCurveRange
     OpenSolid.SurfaceFunction1D.Internal
     OpenSolid.SurfaceFunction1D.PartialZeros
     OpenSolid.SurfaceFunction1D.Quotient

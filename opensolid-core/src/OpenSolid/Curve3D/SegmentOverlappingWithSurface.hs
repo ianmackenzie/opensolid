@@ -5,6 +5,6 @@ import OpenSolid.Prelude
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 
 data SegmentOverlappingWithSurface space = SegmentOverlappingWithSurface
-  { tBounds :: Interval Unitless
+  { tRange :: Interval Unitless
   , surfaceCurve :: SurfaceCurve3D space
   }

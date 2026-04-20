@@ -6,15 +6,15 @@ module OpenSolid.Curve
   , Compiled
   , constant
   , point
-  , bounds
+  , range
   , startPoint
   , endPoint
   , derivative
   , derivativeValue
-  , derivativeBounds
+  , derivativeRange
   , secondDerivative
   , secondDerivativeValue
-  , secondDerivativeBounds
+  , secondDerivativeRange
   , tangentDirection
   , curvatureVector_
   , singular0
@@ -124,7 +124,7 @@ point ::
   Curve dimension units space ->
   Number ->
   Point dimension units space
-bounds ::
+range ::
   Curve dimension units space ->
   Interval Unitless ->
   Bounds dimension units space
@@ -142,7 +142,7 @@ derivativeValue ::
   Curve dimension units space ->
   Number ->
   Vector dimension units space
-derivativeBounds ::
+derivativeRange ::
   Exists dimension units space =>
   Curve dimension units space ->
   Interval Unitless ->
@@ -156,7 +156,7 @@ secondDerivativeValue ::
   Curve dimension units space ->
   Number ->
   Vector dimension units space
-secondDerivativeBounds ::
+secondDerivativeRange ::
   Exists dimension units space =>
   Curve dimension units space ->
   Interval Unitless ->

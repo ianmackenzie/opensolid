@@ -3,7 +3,7 @@ module OpenSolid.DirectionSurfaceFunction2D
   , unsafe
   , unwrap
   , value
-  , bounds
+  , range
   , derivative
   , constant
   , placeIn
@@ -40,9 +40,9 @@ value :: DirectionSurfaceFunction2D -> UvPoint -> Direction2D
 value (DirectionSurfaceFunction2D vectorSurfaceFunction) uvPoint =
   Direction2D.unsafe (VectorSurfaceFunction2D.value vectorSurfaceFunction uvPoint)
 
-bounds :: DirectionSurfaceFunction2D -> UvBounds -> DirectionBounds2D
-bounds (DirectionSurfaceFunction2D vectorSurfaceFunction) uvBounds =
-  DirectionBounds2D.unsafe (VectorSurfaceFunction2D.bounds vectorSurfaceFunction uvBounds)
+range :: DirectionSurfaceFunction2D -> UvBounds -> DirectionBounds2D
+range (DirectionSurfaceFunction2D vectorSurfaceFunction) uvRange =
+  DirectionBounds2D.unsafe (VectorSurfaceFunction2D.range vectorSurfaceFunction uvRange)
 
 derivative :: SurfaceParameter -> DirectionSurfaceFunction2D -> VectorSurfaceFunction2D Unitless
 derivative parameter (DirectionSurfaceFunction2D vectorSurfaceFunction) =

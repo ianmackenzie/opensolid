@@ -12,7 +12,7 @@ module OpenSolid.Curve1D
   , value
   , derivativeValue
   , secondDerivativeValue
-  , bounds
+  , range
   , zeros
   , singularityTolerance
   , desingularized
@@ -105,7 +105,7 @@ derivative :: Curve1D units -> Curve1D units
 value :: Curve1D units -> Number -> Quantity units
 derivativeValue :: Curve1D units -> Number -> Quantity units
 secondDerivativeValue :: Curve1D units -> Number -> Quantity units
-bounds :: Curve1D units -> Interval Unitless -> Interval units
+range :: Curve1D units -> Interval Unitless -> Interval units
 zeros :: Tolerance units => Curve1D units -> Result IsZero (List Zero)
 singularityTolerance :: Curve1D units -> Quantity units
 desingularized :: Curve1D units -> Curve1D units -> Curve1D units -> Curve1D units

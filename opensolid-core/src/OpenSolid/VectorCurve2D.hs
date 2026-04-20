@@ -11,11 +11,11 @@ module OpenSolid.VectorCurve2D
   , startValue
   , endValue
   , value
-  , bounds
+  , range
   , derivativeValue
-  , derivativeBounds
+  , derivativeRange
   , secondDerivativeValue
-  , secondDerivativeBounds
+  , secondDerivativeRange
   , xComponent
   , yComponent
   , components
@@ -191,27 +191,27 @@ The parameter value should be between 0 and 1.
 value :: VectorCurve2D units -> Number -> Vector2D units
 value = VectorCurve.value
 
-bounds :: VectorCurve2D units -> Interval Unitless -> VectorBounds2D units
-bounds = VectorCurve.bounds
+range :: VectorCurve2D units -> Interval Unitless -> VectorBounds2D units
+range = VectorCurve.range
 
 {-# INLINE derivativeValue #-}
 derivativeValue :: VectorCurve2D units -> Number -> Vector2D units
 derivativeValue = VectorCurve.derivativeValue
 
-{-# INLINE derivativeBounds #-}
-derivativeBounds :: VectorCurve2D units -> Interval Unitless -> VectorBounds2D units
-derivativeBounds = VectorCurve.derivativeBounds
+{-# INLINE derivativeRange #-}
+derivativeRange :: VectorCurve2D units -> Interval Unitless -> VectorBounds2D units
+derivativeRange = VectorCurve.derivativeRange
 
 {-# INLINE secondDerivativeValue #-}
 secondDerivativeValue :: VectorCurve2D units -> Number -> Vector2D units
 secondDerivativeValue = VectorCurve.secondDerivativeValue
 
-{-# INLINE secondDerivativeBounds #-}
-secondDerivativeBounds ::
+{-# INLINE secondDerivativeRange #-}
+secondDerivativeRange ::
   VectorCurve2D units ->
   Interval Unitless ->
   VectorBounds2D units
-secondDerivativeBounds = VectorCurve.secondDerivativeBounds
+secondDerivativeRange = VectorCurve.secondDerivativeRange
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xComponent :: VectorCurve2D units -> Curve1D units

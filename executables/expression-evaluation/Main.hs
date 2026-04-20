@@ -25,6 +25,6 @@ main = do
   IO.forEach (Parameter.steps 10) \tValue -> do
     let evaluated = Expression.value bezier tValue
     IO.printLine (Text.number evaluated)
-  IO.forEach (Parameter.intervals 10) \tBounds -> do
-    let evaluated = Expression.bounds bezier tBounds
+  IO.forEach (Parameter.intervals 10) \tRange -> do
+    let evaluated = Expression.range bezier tRange
     IO.printLine (Text.show evaluated)

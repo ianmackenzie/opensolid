@@ -176,8 +176,8 @@ unique ::
   (UvPoint -> Vector2D units) ->
   UvBounds ->
   Maybe UvPoint
-unique fBounds f fu fv uvBounds =
-  solveUnique uvBounds fBounds f fu fv uvBounds
+unique fBounds f fu fv uvRange =
+  solveUnique uvRange fBounds f fu fv uvRange
 
 solveUnique ::
   Tolerance units =>
@@ -243,7 +243,7 @@ solveNewtonRaphson ::
   UvPoint ->
   Vector2D units ->
   Result Divergence UvPoint
-solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
+solveNewtonRaphson iterations f fu fv uvRange p1 f1 =
   if iterations > 10 -- Check if we've entered an infinite loop
     then Error Divergence
     else do
@@ -256,31 +256,31 @@ solveNewtonRaphson iterations f fu fv uvBounds p1 f1 =
         else do
           let deltaU = (xv1 ?*? y1 - yv1 ?*? x1) / determinant
           let deltaV = (yu1 ?*? x1 - xu1 ?*? y1) / determinant
-          let p2 = boundedStep uvBounds p1 (p1 + Vector2D deltaU deltaV)
+          let p2 = boundedStep uvRange p1 (p1 + Vector2D deltaU deltaV)
           let f2 = f p2
           if Vector2D.squaredMagnitude_ f2 >= Vector2D.squaredMagnitude_ f1
             then -- We've stopped converging, check if we've actually found a root
               if f1 ~= Vector2D.zero then Ok p1 else Error Divergence
             else -- We're still converging, so take another iteration
-              solveNewtonRaphson (iterations + 1) f fu fv uvBounds p2 f2
+              solveNewtonRaphson (iterations + 1) f fu fv uvRange p2 f2
 
 boundedStep :: UvBounds -> UvPoint -> UvPoint -> UvPoint
-boundedStep uvBounds p1 p2 =
-  if Bounds2D.member p2 uvBounds
+boundedStep uvRange p1 p2 =
+  if Bounds2D.member p2 uvRange
     then p2 -- Stepped point is still within the given bounds, so we can use it
     else do
       -- Stepped point is outside the given bounds,
       -- pull it back in along the step direction
-      let Bounds2D uBounds vBounds = uvBounds
+      let Bounds2D uRange vRange = uvRange
       let UvPoint u1 v1 = p1
       let UvPoint u2 v2 = p2
-      let clampedU = Quantity.clampTo uBounds u2
-      let clampedV = Quantity.clampTo vBounds v2
+      let clampedU = Quantity.clampTo uRange u2
+      let clampedV = Quantity.clampTo vRange v2
       let uScale = if u1 == u2 then 1.0 else (clampedU - u1) / (u2 - u1)
       let vScale = if v1 == v2 then 1.0 else (clampedV - v1) / (v2 - v1)
       let scale = min uScale vScale
       let UvPoint u v = Point2D.interpolateFrom p1 p2 scale
       -- Perform a final clamping step
       -- in case numerical roundoff during interpolation
-      -- left the point *slightly* outside uvBounds
-      UvPoint (Quantity.clampTo uBounds u) (Quantity.clampTo vBounds v)
+      -- left the point *slightly* outside uvRange
+      UvPoint (Quantity.clampTo uRange u) (Quantity.clampTo vRange v)

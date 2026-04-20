@@ -417,7 +417,7 @@ toHalfEdge surfaceId loopId surfaceFunction curveIndex uvCurve = do
         , uvCurve = uvCurve . parameterization
         , curve3D = curve3D . parameterization
         , length
-        , bounds = Curve3D.overallBounds curve3D
+        , bounds = Curve3D.bounds curve3D
         }
 
 getAllHalfEdges :: SurfaceWithHalfEdges space -> NonEmpty (HalfEdge space)
@@ -580,13 +580,13 @@ boundarySurfaceSegmentSet ::
   Point3D space ->
   Point3D space ->
   Set2D Unitless UvBounds
-boundarySurfaceSegmentSet resolution function uvBounds p11 p21 p12 p22 = do
+boundarySurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
   let d1 = p21 - p12
   let d2 = p22 - p11
   let size = max (Vector3D.magnitude d1) (Vector3D.magnitude d2)
-  let UvBounds uBounds vBounds = uvBounds
-  let uMid = Interval.midpoint uBounds
-  let vMid = Interval.midpoint vBounds
+  let UvBounds uRange vRange = uvRange
+  let uMid = Interval.midpoint uRange
+  let vMid = Interval.midpoint vRange
   let uvCenter = UvPoint uMid vMid
   let pCenter = SurfaceFunction3D.point function uvCenter
   let duCenter = SurfaceFunction3D.derivativeValue U function uvCenter
@@ -594,8 +594,8 @@ boundarySurfaceSegmentSet resolution function uvBounds p11 p21 p12 p22 = do
   let nCenter = Vector3D.normalize (duCenter `cross_` dvCenter)
   let error point = Quantity.abs ((point - pCenter) `dot` nCenter)
   let maxCornerError = error p11 `max` error p12 `max` error p21 `max` error p22
-  let uWidth = Interval.width uBounds
-  let vWidth = Interval.width vBounds
+  let uWidth = Interval.width uRange
+  let vWidth = Interval.width vRange
   let uOffset = 0.5 * uWidth * Number.sqrt (3 / 7)
   let vOffset = 0.5 * vWidth * Number.sqrt (3 / 7)
   let uInterior1 = uMid - uOffset
@@ -614,29 +614,29 @@ boundarySurfaceSegmentSet resolution function uvBounds p11 p21 p12 p22 = do
           `max` interiorError12
           `max` interiorError22
   if Resolution.acceptable (#size size) (#error maxError) resolution
-    then Set2D.Leaf uvBounds uvBounds
+    then Set2D.Leaf uvRange uvRange
     else do
-      let Interval u1 u2 = uBounds
-      let Interval v1 v2 = vBounds
+      let Interval u1 u2 = uRange
+      let Interval v1 v2 = vRange
       let pMid1 = SurfaceFunction3D.point function (UvPoint uMid v1)
       let pMid2 = SurfaceFunction3D.point function (UvPoint uMid v2)
       let p1Mid = SurfaceFunction3D.point function (UvPoint u1 vMid)
       let p2Mid = SurfaceFunction3D.point function (UvPoint u2 vMid)
-      let uBounds1 = Interval u1 uMid
-      let uBounds2 = Interval uMid u2
-      let vBounds1 = Interval v1 vMid
-      let vBounds2 = Interval vMid v2
-      let uvBounds11 = UvBounds uBounds1 vBounds1
-      let uvBounds21 = UvBounds uBounds2 vBounds1
-      let uvBounds12 = UvBounds uBounds1 vBounds2
-      let uvBounds22 = UvBounds uBounds2 vBounds2
-      let set11 = boundarySurfaceSegmentSet resolution function uvBounds11 p11 pMid1 p1Mid pCenter
-      let set21 = boundarySurfaceSegmentSet resolution function uvBounds21 pMid1 p21 pCenter p2Mid
-      let set12 = boundarySurfaceSegmentSet resolution function uvBounds12 p1Mid pCenter p12 pMid2
-      let set22 = boundarySurfaceSegmentSet resolution function uvBounds22 pCenter p2Mid pMid2 p22
-      let set1 = Set2D.Node (Bounds2D uBounds vBounds1) set11 set21
-      let set2 = Set2D.Node (Bounds2D uBounds vBounds2) set12 set22
-      Set2D.Node uvBounds set1 set2
+      let uRange1 = Interval u1 uMid
+      let uRange2 = Interval uMid u2
+      let vRange1 = Interval v1 vMid
+      let vRange2 = Interval vMid v2
+      let uvRange11 = UvBounds uRange1 vRange1
+      let uvRange21 = UvBounds uRange2 vRange1
+      let uvRange12 = UvBounds uRange1 vRange2
+      let uvRange22 = UvBounds uRange2 vRange2
+      let set11 = boundarySurfaceSegmentSet resolution function uvRange11 p11 pMid1 p1Mid pCenter
+      let set21 = boundarySurfaceSegmentSet resolution function uvRange21 pMid1 p21 pCenter p2Mid
+      let set12 = boundarySurfaceSegmentSet resolution function uvRange12 p1Mid pCenter p12 pMid2
+      let set22 = boundarySurfaceSegmentSet resolution function uvRange22 pCenter p2Mid pMid2 p22
+      let set1 = Set2D.Node (Bounds2D uRange vRange1) set11 set21
+      let set2 = Set2D.Node (Bounds2D uRange vRange2) set12 set22
+      Set2D.Node uvRange set1 set2
 
 addBoundaryInnerEdgeVertices ::
   Resolution Meters ->
@@ -714,38 +714,38 @@ edgeLinearizationPredicate
   matingUvCurve
   surfaceSegments
   matingSurfaceSegments
-  tBounds = do
-    let Interval tStart tEnd = tBounds
+  tRange = do
+    let Interval tStart tEnd = tRange
     let uvStart = Curve2D.point uvCurve tStart
     let uvEnd = Curve2D.point uvCurve tEnd
     let matingTStart = 1.0 - tStart
     let matingTEnd = 1.0 - tEnd
     let matingUvStart = Curve2D.point matingUvCurve matingTStart
     let matingUvEnd = Curve2D.point matingUvCurve matingTEnd
-    let uvBounds = Bounds2D.hull2 uvStart uvEnd
-    let matingUvBounds = Bounds2D.hull2 matingUvStart matingUvEnd
+    let uvRange = Bounds2D.hull2 uvStart uvEnd
+    let matingUvRange = Bounds2D.hull2 matingUvStart matingUvEnd
     let edgeSize = Point2D.distanceFrom uvStart uvEnd
     let matingEdgeSize = Point2D.distanceFrom matingUvStart matingUvEnd
     let startPoint = Curve3D.point curve3D tStart
     let endPoint = Curve3D.point curve3D tEnd
     let edgeLength = Point3D.distanceFrom startPoint endPoint
-    let edgeLinearDeviation = Curve.linearDeviation curve3D tBounds
+    let edgeLinearDeviation = Curve.linearDeviation curve3D tRange
     Resolution.acceptable (#size edgeLength) (#error edgeLinearDeviation) resolution
-      && validEdge uvBounds edgeSize surfaceSegments
-      && validEdge matingUvBounds matingEdgeSize matingSurfaceSegments
+      && validEdge uvRange edgeSize surfaceSegments
+      && validEdge matingUvRange matingEdgeSize matingSurfaceSegments
 
 degenerateEdgeLinearizationPredicate ::
   Curve2D Unitless ->
   Set2D Unitless UvBounds ->
   Interval Unitless ->
   Bool
-degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tBounds = do
-  let Interval tStart tEnd = tBounds
+degenerateEdgeLinearizationPredicate uvCurve surfaceSegments tRange = do
+  let Interval tStart tEnd = tRange
   let uvStart = Curve2D.point uvCurve tStart
   let uvEnd = Curve2D.point uvCurve tEnd
-  let uvBounds = Bounds2D.hull2 uvStart uvEnd
+  let edgeBounds = Bounds2D.hull2 uvStart uvEnd
   let edgeSize = Point2D.distanceFrom uvStart uvEnd
-  validEdge uvBounds edgeSize surfaceSegments
+  validEdge edgeBounds edgeSize surfaceSegments
 
 validEdge :: UvBounds -> Number -> Set2D Unitless UvBounds -> Bool
 validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Quantity.zero do
@@ -821,9 +821,9 @@ leadingEdgeVerticesImpl innerEdgeVerticesById edgeId uvStartPoint =
     Nothing -> InternalError.throw "Should always be able to look up internal edge vertices by ID"
 
 steinerPoint :: Set2D Unitless (Line2D Unitless) -> UvBounds -> Maybe UvPoint
-steinerPoint boundarySegmentSet uvBounds = do
-  let Bounds2D uBounds vBounds = uvBounds
-  let uvPoint = UvPoint (Interval.midpoint uBounds) (Interval.midpoint vBounds)
+steinerPoint boundarySegmentSet uvRange = do
+  let Bounds2D uRange vRange = uvRange
+  let uvPoint = UvPoint (Interval.midpoint uRange) (Interval.midpoint vRange)
   if isValidSteinerPoint boundarySegmentSet uvPoint then Just uvPoint else Nothing
 
 isValidSteinerPoint :: Set2D Unitless (Line2D Unitless) -> UvPoint -> Bool

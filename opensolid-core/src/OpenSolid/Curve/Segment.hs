@@ -1,10 +1,10 @@
 module OpenSolid.Curve.Segment
   ( Segment
-  , bounds
-  , derivativeBounds
-  , secondDerivativeBounds
-  , curvatureVectorBounds_
-  , tangentDirectionBounds
+  , range
+  , derivativeRange
+  , secondDerivativeRange
+  , curvatureVectorRange_
+  , tangentDirectionRange
   , new
   , monotonic
   , crossingTangents
@@ -32,11 +32,11 @@ import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve.Direction qualified as VectorCurve.Direction
 
 data Segment dimension units space = Segment
-  { bounds :: ~(Bounds dimension units space)
-  , derivativeBounds :: ~(VectorBounds dimension units space)
-  , secondDerivativeBounds :: ~(VectorBounds dimension units space)
-  , tangentDirectionBounds :: ~(DirectionBounds dimension space)
-  , curvatureVectorBounds_ :: ~(VectorBounds dimension (Unitless ?/? units) space)
+  { range :: ~(Bounds dimension units space)
+  , derivativeRange :: ~(VectorBounds dimension units space)
+  , secondDerivativeRange :: ~(VectorBounds dimension units space)
+  , tangentDirectionRange :: ~(DirectionBounds dimension space)
+  , curvatureVectorRange_ :: ~(VectorBounds dimension (Unitless ?/? units) space)
   }
 
 instance HasUnits (Segment dimension units space) units
@@ -57,32 +57,32 @@ instance
   where
   coerce segment =
     Segment
-      { bounds = Units.coerce segment.bounds
-      , derivativeBounds = VectorBounds.coerce segment.derivativeBounds
-      , secondDerivativeBounds = VectorBounds.coerce segment.secondDerivativeBounds
-      , tangentDirectionBounds = segment.tangentDirectionBounds
-      , curvatureVectorBounds_ = VectorBounds.coerce segment.curvatureVectorBounds_
+      { range = Units.coerce segment.range
+      , derivativeRange = VectorBounds.coerce segment.derivativeRange
+      , secondDerivativeRange = VectorBounds.coerce segment.secondDerivativeRange
+      , tangentDirectionRange = segment.tangentDirectionRange
+      , curvatureVectorRange_ = VectorBounds.coerce segment.curvatureVectorRange_
       }
 
-bounds :: Segment dimension units space -> Bounds dimension units space
-bounds = (.bounds)
+range :: Segment dimension units space -> Bounds dimension units space
+range = (.range)
 
-derivativeBounds :: Segment dimension units space -> VectorBounds dimension units space
-derivativeBounds = (.derivativeBounds)
+derivativeRange :: Segment dimension units space -> VectorBounds dimension units space
+derivativeRange = (.derivativeRange)
 
-secondDerivativeBounds :: Segment dimension units space -> VectorBounds dimension units space
-secondDerivativeBounds = (.secondDerivativeBounds)
+secondDerivativeRange :: Segment dimension units space -> VectorBounds dimension units space
+secondDerivativeRange = (.secondDerivativeRange)
 
-curvatureVectorBounds_ ::
+curvatureVectorRange_ ::
   Segment dimension units space ->
   VectorBounds dimension (Unitless ?/? units) space
-curvatureVectorBounds_ segment = segment.curvatureVectorBounds_
+curvatureVectorRange_ = (.curvatureVectorRange_)
 
-tangentDirectionBounds :: Segment dimension units space -> DirectionBounds dimension space
-tangentDirectionBounds segment = segment.tangentDirectionBounds
+tangentDirectionRange :: Segment dimension units space -> DirectionBounds dimension space
+tangentDirectionRange segment = segment.tangentDirectionRange
 
 monotonic :: VectorBounds.Exists dimension units space => Segment dimension units space -> Bool
-monotonic segment = Interval.isResolved (VectorBounds.magnitude segment.derivativeBounds)
+monotonic segment = Interval.isResolved (VectorBounds.magnitude segment.derivativeRange)
 
 crossingTangents ::
   DirectionBounds.Exists dimension space =>
@@ -90,10 +90,10 @@ crossingTangents ::
   Nonzero (Segment dimension units space) ->
   Bool
 crossingTangents (Nonzero segment1) (Nonzero segment2) = do
-  let bounds1 = DirectionBounds.unwrap segment1.tangentDirectionBounds
-  let bounds2 = DirectionBounds.unwrap segment2.tangentDirectionBounds
-  let notEqual = Interval.isResolved (VectorBounds.magnitude (bounds1 - bounds2))
-  let notOpposite = Interval.isResolved (VectorBounds.magnitude (bounds1 + bounds2))
+  let range1 = DirectionBounds.unwrap segment1.tangentDirectionRange
+  let range2 = DirectionBounds.unwrap segment2.tangentDirectionRange
+  let notEqual = Interval.isResolved (VectorBounds.magnitude (range1 - range2))
+  let notOpposite = Interval.isResolved (VectorBounds.magnitude (range1 + range2))
   notEqual && notOpposite
 
 distinctCurvatures ::
@@ -104,9 +104,9 @@ distinctCurvatures ::
   Segment dimension units space ->
   Bool
 distinctCurvatures segment1 segment2 = do
-  let bounds1 = curvatureVectorBounds_ segment1
-  let bounds2 = curvatureVectorBounds_ segment2
-  Interval.isResolved (VectorBounds.magnitude (bounds1 - bounds2))
+  let range1 = curvatureVectorRange_ segment1
+  let range2 = curvatureVectorRange_ segment2
+  Interval.isResolved (VectorBounds.magnitude (range1 - range2))
 
 new ::
   ( Curve.Exists dimension units space
@@ -127,35 +127,35 @@ new ::
   Curve dimension units space ->
   Interval Unitless ->
   Segment dimension units space
-new givenCurve tBounds = do
-  let Interval t1 t2 = tBounds
+new givenCurve tRange = do
+  let Interval t1 t2 = tRange
   let p1 = Curve.point givenCurve t1
   let p2 = Curve.point givenCurve t2
-  let segmentBounds0 = Curve.bounds givenCurve tBounds
-  let segmentDerivativeBounds = Curve.derivativeBounds givenCurve tBounds
-  let segmentSecondDerivativeBounds = Curve.secondDerivativeBounds givenCurve tBounds
-  let leftBounds = Bounds.aggregate2 (Bounds.constant p1) (p1 + 0.5 * segmentDerivativeBounds)
-  let rightBounds = Bounds.aggregate2 (Bounds.constant p2) (p2 - 0.5 * segmentDerivativeBounds)
-  let segmentBounds1 = Bounds.aggregate2 leftBounds rightBounds
-  let segmentBounds =
-        case Bounds.intersection segmentBounds0 segmentBounds1 of
+  let segmentRange0 = Curve.range givenCurve tRange
+  let segmentDerivativeRange = Curve.derivativeRange givenCurve tRange
+  let segmentSecondDerivativeRange = Curve.secondDerivativeRange givenCurve tRange
+  let leftRange = Bounds.aggregate2 (Bounds.constant p1) (p1 + 0.5 * segmentDerivativeRange)
+  let rightRange = Bounds.aggregate2 (Bounds.constant p2) (p2 - 0.5 * segmentDerivativeRange)
+  let segmentRange1 = Bounds.aggregate2 leftRange rightRange
+  let segmentRange =
+        case Bounds.intersection segmentRange0 segmentRange1 of
           Just intersection -> intersection
-          -- Shouldn't happen, bounds and derivative bounds should be consistent
-          Nothing -> segmentBounds0
-  let segmentTangentDirectionBounds =
-        VectorCurve.Direction.bounds
+          -- Shouldn't happen, range and derivative range should be consistent
+          Nothing -> segmentRange0
+  let segmentTangentDirectionRange =
+        VectorCurve.Direction.range
           (Curve.derivative givenCurve)
-          tBounds
-          segmentDerivativeBounds
-          segmentSecondDerivativeBounds
-  let segmentCurvatureVectorBounds_ =
-        Curve.CurvatureVector.bounds_
-          segmentDerivativeBounds
-          segmentSecondDerivativeBounds
+          tRange
+          segmentDerivativeRange
+          segmentSecondDerivativeRange
+  let segmentCurvatureVectorRange_ =
+        Curve.CurvatureVector.range_
+          segmentDerivativeRange
+          segmentSecondDerivativeRange
   Segment
-    { bounds = segmentBounds
-    , derivativeBounds = segmentDerivativeBounds
-    , secondDerivativeBounds = segmentSecondDerivativeBounds
-    , tangentDirectionBounds = segmentTangentDirectionBounds
-    , curvatureVectorBounds_ = segmentCurvatureVectorBounds_
+    { range = segmentRange
+    , derivativeRange = segmentDerivativeRange
+    , secondDerivativeRange = segmentSecondDerivativeRange
+    , tangentDirectionRange = segmentTangentDirectionRange
+    , curvatureVectorRange_ = segmentCurvatureVectorRange_
     }

@@ -6,8 +6,8 @@ module OpenSolid.Curve2D
   , startPoint
   , endPoint
   , point
+  , range
   , bounds
-  , overallBounds
   , compiled
   , derivative
   , reverse
@@ -36,8 +36,8 @@ new :: Compiled units -> VectorCurve2D units -> Curve2D units
 startPoint :: Curve2D units -> Point2D units
 endPoint :: Curve2D units -> Point2D units
 point :: Curve2D units -> Number -> Point2D units
-bounds :: Curve2D units -> Interval Unitless -> Bounds2D units
-overallBounds :: Curve2D units -> Bounds2D units
+range :: Curve2D units -> Interval Unitless -> Bounds2D units
+bounds :: Curve2D units -> Bounds2D units
 compiled :: Curve2D units -> Compiled units
 derivative :: Curve2D units -> VectorCurve2D units
 reverse :: Curve2D units -> Curve2D units

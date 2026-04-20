@@ -8,7 +8,7 @@ module OpenSolid.VectorCurve
   , singular0
   , singular1
   , value
-  , bounds
+  , range
   , derivative
   , derivativeValue
   , squaredMagnitude_
@@ -225,7 +225,7 @@ value ::
   VectorCurve dimension units space ->
   Number ->
   Vector dimension units space
-bounds ::
+range ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   Interval Unitless ->

@@ -6,8 +6,8 @@ module OpenSolid.Curve3D
   , on
   , derivative
   , point
+  , range
   , bounds
-  , overallBounds
   , reverse
   )
 where
@@ -27,6 +27,6 @@ new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 on :: Plane3D space -> Curve2D Meters -> Curve3D space
 derivative :: Curve3D space -> VectorCurve3D Meters space
 point :: Curve3D space -> Number -> Point3D space
-bounds :: Curve3D space -> Interval Unitless -> Bounds3D space
-overallBounds :: Curve3D space -> Bounds3D space
+range :: Curve3D space -> Interval Unitless -> Bounds3D space
+bounds :: Curve3D space -> Bounds3D space
 reverse :: Curve3D space -> Curve3D space

@@ -61,7 +61,7 @@ instance units1 ~ units2 => Intersects (Boundary units2) (Point2D units1) (Toler
 data Classification = Internal | External | Intersected deriving (Eq, Show, Bounded, Enum)
 
 build :: NonEmpty (Curve2D units) -> Boundary units
-build givenCurves = new (Set2D.linear Curve2D.overallBounds givenCurves)
+build givenCurves = new (Set2D.linear Curve2D.bounds givenCurves)
 
 new :: Set2D units (Curve2D units) -> Boundary units
 new givenCurves = Boundary givenCurves (Region2D.BoundaryTree.build givenCurves)
@@ -78,8 +78,8 @@ loop = Set2D.toNonEmpty . curves
 map :: Sign -> (Curve2D units1 -> Curve2D units2) -> Boundary units1 -> Boundary units2
 map sign function boundary =
   new $ case sign of
-    Positive -> Set2D.map function Curve2D.overallBounds (curves boundary)
-    Negative -> Set2D.reverseMap (Curve2D.reverse . function) Curve2D.overallBounds (curves boundary)
+    Positive -> Set2D.map function Curve2D.bounds (curves boundary)
+    Negative -> Set2D.reverseMap (Curve2D.reverse . function) Curve2D.bounds (curves boundary)
 
 transformBy :: Transform2D tag units -> Boundary units -> Boundary units
 transformBy transform = map (Transform2D.handedness transform) (Curve2D.transformBy transform)

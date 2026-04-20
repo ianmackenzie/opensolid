@@ -3,7 +3,7 @@ module OpenSolid.Desingularization
   , t0
   , t1
   , value
-  , bounds
+  , range
   , continuity
   , curve
   , syntheticStart
@@ -38,8 +38,8 @@ value t start middle end
   | t >= t1 = end
   | otherwise = middle
 
-bounds :: Interval Unitless -> a -> a -> a -> a
-bounds (Interval tLow tHigh) start middle end
+range :: Interval Unitless -> a -> a -> a -> a
+range (Interval tLow tHigh) start middle end
   | tHigh <= t0 = start
   | tLow >= t1 = end
   | otherwise = middle

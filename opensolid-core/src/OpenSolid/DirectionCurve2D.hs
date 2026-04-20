@@ -5,7 +5,7 @@ module OpenSolid.DirectionCurve2D
   , startValue
   , endValue
   , value
-  , bounds
+  , range
   , derivative
   , constant
   , arc
@@ -52,9 +52,9 @@ value :: DirectionCurve2D -> Number -> Direction2D
 value (DirectionCurve2D vectorCurve) tValue =
   Direction2D.unsafe (VectorCurve2D.value vectorCurve tValue)
 
-bounds :: DirectionCurve2D -> Interval Unitless -> DirectionBounds2D
-bounds (DirectionCurve2D vectorCurve) tBounds =
-  DirectionBounds2D.unsafe (VectorCurve2D.bounds vectorCurve tBounds)
+range :: DirectionCurve2D -> Interval Unitless -> DirectionBounds2D
+range (DirectionCurve2D vectorCurve) tRange =
+  DirectionBounds2D.unsafe (VectorCurve2D.range vectorCurve tRange)
 
 derivative :: DirectionCurve2D -> VectorCurve2D Unitless
 derivative (DirectionCurve2D vectorCurve) = VectorCurve2D.derivative vectorCurve

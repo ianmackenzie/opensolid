@@ -1,5 +1,5 @@
-module OpenSolid.SurfaceFunction1D.ImplicitCurveBounds
-  ( ImplicitCurveBounds
+module OpenSolid.SurfaceFunction1D.ImplicitCurveRange
+  ( ImplicitCurveRange
   , build
   , at
   , over
@@ -14,16 +14,16 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 
-data ImplicitCurveBounds
-  = Node ImplicitCurveBounds Number ImplicitCurveBounds
+data ImplicitCurveRange
+  = Node ImplicitCurveRange Number ImplicitCurveRange
   | Leaf (Interval Unitless)
 
-build :: NonEmpty (Interval Unitless, Interval Unitless) -> ImplicitCurveBounds
+build :: NonEmpty (Interval Unitless, Interval Unitless) -> ImplicitCurveRange
 build boxes = do
   let array = Array.fromNonEmpty (NonEmpty.sortBy (Interval.lower . Pair.first) boxes)
   subtree array 0 (Array.length array)
 
-subtree :: Array (Interval Unitless, Interval Unitless) -> Int -> Int -> ImplicitCurveBounds
+subtree :: Array (Interval Unitless, Interval Unitless) -> Int -> Int -> ImplicitCurveRange
 subtree boxes begin end = case end - begin of
   1 -> Leaf (Pair.second (boxes !! begin))
   n -> assert (n >= 2) do
@@ -33,15 +33,15 @@ subtree boxes begin end = case end - begin of
     let split = Interval.lower (Pair.first (boxes !! mid))
     Node left split right
 
-at :: Number -> ImplicitCurveBounds -> Interval Unitless
-at x implicitCurveBounds = case implicitCurveBounds of
+at :: Number -> ImplicitCurveRange -> Interval Unitless
+at x implicitCurveRange = case implicitCurveRange of
   Node left split right -> if x < split then at x left else at x right
-  Leaf leafBounds -> leafBounds
+  Leaf leafRange -> leafRange
 
-over :: Interval Unitless -> ImplicitCurveBounds -> Interval Unitless
-over x implicitCurveBounds = case implicitCurveBounds of
+over :: Interval Unitless -> ImplicitCurveRange -> Interval Unitless
+over x implicitCurveRange = case implicitCurveRange of
   Node left split right
     | Interval.upper x <= split -> over x left
     | Interval.lower x >= split -> over x right
     | otherwise -> Interval.aggregate2 (over x left) (over x right)
-  Leaf leafBounds -> leafBounds
+  Leaf leafRange -> leafRange

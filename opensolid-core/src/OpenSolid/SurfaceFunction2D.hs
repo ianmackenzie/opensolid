@@ -6,7 +6,7 @@ module OpenSolid.SurfaceFunction2D
   , uv
   , xy
   , point
-  , bounds
+  , range
   , derivative
   , distanceAlong
   , xCoordinate
@@ -194,8 +194,8 @@ xy x y = do
 point :: SurfaceFunction2D units -> UvPoint -> Point2D units
 point function uvPoint = CompiledFunction.value function.compiled uvPoint
 
-bounds :: SurfaceFunction2D units -> UvBounds -> Bounds2D units
-bounds function uvBounds = CompiledFunction.bounds function.compiled uvBounds
+range :: SurfaceFunction2D units -> UvBounds -> Bounds2D units
+range function uvRange = CompiledFunction.range function.compiled uvRange
 
 derivative :: SurfaceParameter -> SurfaceFunction2D units -> VectorSurfaceFunction2D units
 derivative U = (.du)

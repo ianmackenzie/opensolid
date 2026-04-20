@@ -58,13 +58,13 @@ buildCurveImpl ::
   Point2D units ->
   Point2D units ->
   BoundaryTree units
-buildCurveImpl curve tBounds startPoint endPoint = do
-  let Interval tLow tHigh = tBounds
+buildCurveImpl curve tRange startPoint endPoint = do
+  let Interval tLow tHigh = tRange
   let tMid = Number.midpoint tLow tHigh
   let midpoint = Curve2D.point curve tMid
   let leftChild = buildCurveImpl curve (Interval tLow tMid) startPoint midpoint
   let rightChild = buildCurveImpl curve (Interval tMid tHigh) midpoint endPoint
-  BoundaryTree (Curve2D.bounds curve tBounds) startPoint endPoint leftChild rightChild
+  BoundaryTree (Curve2D.range curve tRange) startPoint endPoint leftChild rightChild
 
 bounds :: BoundaryTree units -> Bounds2D units
 bounds = (.bounds)

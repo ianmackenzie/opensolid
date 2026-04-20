@@ -52,21 +52,21 @@ diagonalSegment ::
   (UvPoint, Domain2D.Boundary) ->
   UvBounds ->
   CrossingSegment
-diagonalSegment start end uvBounds = CrossingSegment Diagonal start end (NonEmpty.one uvBounds)
+diagonalSegment start end uvRange = CrossingSegment Diagonal start end (NonEmpty.one uvRange)
 
 horizontalSegment ::
   (UvPoint, Domain2D.Boundary) ->
   (UvPoint, Domain2D.Boundary) ->
   UvBounds ->
   CrossingSegment
-horizontalSegment start end uvBounds = CrossingSegment Horizontal start end (NonEmpty.one uvBounds)
+horizontalSegment start end uvRange = CrossingSegment Horizontal start end (NonEmpty.one uvRange)
 
 verticalSegment ::
   (UvPoint, Domain2D.Boundary) ->
   (UvPoint, Domain2D.Boundary) ->
   UvBounds ->
   CrossingSegment
-verticalSegment start end uvBounds = CrossingSegment Vertical start end (NonEmpty.one uvBounds)
+verticalSegment start end uvRange = CrossingSegment Vertical start end (NonEmpty.one uvRange)
 
 empty :: PartialZeros units
 empty =

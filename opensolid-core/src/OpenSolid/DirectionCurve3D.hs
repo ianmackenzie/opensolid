@@ -5,7 +5,7 @@ module OpenSolid.DirectionCurve3D
   , startValue
   , endValue
   , value
-  , bounds
+  , range
   , derivative
   , constant
   , reverse
@@ -46,9 +46,9 @@ value :: DirectionCurve3D space -> Number -> Direction3D space
 value (DirectionCurve3D vectorCurve) tValue =
   Direction3D.unsafe (VectorCurve3D.value vectorCurve tValue)
 
-bounds :: DirectionCurve3D space -> Interval Unitless -> DirectionBounds3D space
-bounds (DirectionCurve3D vectorCurve) tBounds =
-  DirectionBounds3D.unsafe (VectorCurve3D.bounds vectorCurve tBounds)
+range :: DirectionCurve3D space -> Interval Unitless -> DirectionBounds3D space
+range (DirectionCurve3D vectorCurve) tRange =
+  DirectionBounds3D.unsafe (VectorCurve3D.range vectorCurve tRange)
 
 derivative :: DirectionCurve3D space -> VectorCurve3D Unitless space
 derivative (DirectionCurve3D vectorCurve) = VectorCurve3D.derivative vectorCurve
