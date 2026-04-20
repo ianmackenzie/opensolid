@@ -1,21 +1,16 @@
-Move Tolerance.unitless -> Unitless.tolerance, Tolerange.angle -> Angle.tolerance?
-- more consistent with Length.defaultTolerance
-
-Rename e.g. Curve.bounds -> Curve.range, Curve.overallBounds -> Curve.bounds
-- rename 'bounds' to 'range' for all function types
-
 Simplify Body3D 'stitching'
 - should be able to avoid iterative construction if surfaces are assumed to be oriented properly
   - independently compare every surface to every other surface...
-
-Refactor Pair.decorate to have the decoration *first*?
-- better for both sorting and constructing key/value lists for map construction
 
 Implement Surface3D.findPoint
 
 Implement Curve3D-Surface3D intersection
 
 Implement Surface3D-Surface3D intersection...
+
+Switch DirectionCurve to be an actual type instead of a type family
+
+Move piecewise curve construction into Curve module
 
 Add support for simple enums to target languages
 - no payloads, at least for now
@@ -108,6 +103,9 @@ Optimize bounds construction in Curve.Segment to take monotonicity into account
 
 Update Curve2D.curvature_ to be based on curvatureVector_
 
+Refactor Pair.decorate to have the decoration *first*?
+- better for both sorting and constructing key/value lists for map construction
+
 Add Bounds#D.expandBy?
 
 Add Curve#D.steps etc. functions
@@ -116,8 +114,9 @@ Add Curve#D.steps etc. functions
 Try to remove unsafeQuotient and unsafeSqrt functions in favour of using Nonzero/Nondegenerate machinery?
 - maybe after implementing generic SurfaceFunction and VectorSurfaceFunction...
 
-Add ParameterInterval module and move 'includes' and 'isInterior' functions there
-- also move Bounds2D.includes and Domain.isInterior to UvBounds.[includes,iInterior]
+Add ParameterRange module and move 'includes' and 'isInterior' functions there
+- rename UvBounds to UvRange?
+- also move Bounds2D.includes and Domain.isInterior to UvRange.[includes,isInterior]
 - generally avoid having no-tolerance functions in units-generic modules
 - maybe also move 'overlapping' functions from Search.Domain into ParameterInterval and UvBounds
 
