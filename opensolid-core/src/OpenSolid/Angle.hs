@@ -2,6 +2,7 @@ module OpenSolid.Angle
   ( Angle
   , zero
   , goldenAngle
+  , tolerance
   , sin
   , cos
   , tan
@@ -29,6 +30,7 @@ where
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Tolerance qualified as Tolerance
 import Prelude qualified
 
 {-|  An angle in degrees, radians, turns etc.
@@ -44,6 +46,14 @@ zero = Quantity.zero
 -- | The [golden angle](https://en.wikipedia.org/wiki/Golden_angle).
 goldenAngle :: Angle
 goldenAngle = radians (Number.pi * (3.0 - Number.sqrt 5.0))
+
+{-| A tolerance value of 1e-9 radians used internally by OpenSolid.
+
+This is used to e.g. check if a 'revolve' operation is a full revolution
+(by checking if the angle of revolution is equal to 360 degrees, within a tolerance).
+-}
+tolerance :: Angle
+tolerance = radians Tolerance.unitless
 
 -- | Compute the sine of an angle.
 sin :: Angle -> Number

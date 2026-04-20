@@ -330,7 +330,7 @@ revolved sketchPlane profile givenAxis givenSweptAngle = do
   let sweptAngle = Quantity.abs givenSweptAngle
   let startCap = Surface3D.flip (Surface3D.on startPlane profile)
   let endCap = Surface3D.on endPlane profile
-  let isFullRevolution = Tolerance.using Tolerance.angle (sweptAngle ~= Angle.twoPi)
+  let isFullRevolution = Tolerance.using Angle.tolerance (sweptAngle ~= Angle.twoPi)
   let endSurfaces = if isFullRevolution then [] else [startCap, endCap]
   -- A 2D axis such that the profile is to the *left* of the axis
   -- (such that it comes "out of the page" when revolved,

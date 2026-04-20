@@ -248,6 +248,7 @@ angle :: Class
 angle =
   Class.new @Angle $(docs ''Angle) $
     [ Class.constant "Zero" Angle.zero $(docs 'Angle.zero)
+    , Class.constant "Tolerance" Angle.tolerance $(docs 'Angle.tolerance)
     , Class.factory3 "Interpolate" "Start" "End" "Parameter Value" Quantity.interpolateFrom $(docs 'Quantity.interpolateFrom)
     , Class.static3 "Steps" "Start" "End" "N" (Quantity.steps @Radians) $(docs 'Quantity.steps)
     , Class.static3 "Leading" "Start" "End" "N" (Quantity.leading @Radians) $(docs 'Quantity.leading)
@@ -302,7 +303,6 @@ tolerance :: Class
 tolerance =
   Class.static "Tolerance" "Tolerance values used by OpenSolid." $
     [ Class.constant "Unitless" Tolerance.unitless $(docs 'Tolerance.unitless)
-    , Class.constant "Angle" Tolerance.angle $(docs 'Tolerance.angle)
     ]
 
 type UnitlessInterval = Interval.Interval Unitless

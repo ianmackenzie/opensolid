@@ -93,7 +93,7 @@ implicitValue argType = (implicitGetter argType, ImplicitArgument.ffiType argTyp
 implicitGetter :: ImplicitArgument -> Text
 implicitGetter argType = case argType of
   ImplicitArgument.ToleranceUnitless -> "Tolerance.unitless"
-  ImplicitArgument.ToleranceRadians -> "Tolerance.angle"
+  ImplicitArgument.ToleranceRadians -> "Angle.tolerance"
   ImplicitArgument.ToleranceMeters -> "_length_tolerance()"
   ImplicitArgument.ToleranceSquareMeters -> "_area_tolerance()"
 

@@ -2,12 +2,9 @@ module OpenSolid.Tolerance
   ( Tolerance
   , using
   , unitless
-  , angle
   )
 where
 
-import OpenSolid.Angle (Angle)
-import OpenSolid.Angle qualified as Angle
 import OpenSolid.Prelude
 
 using :: Quantity units -> (Tolerance units => a) -> a
@@ -24,7 +21,3 @@ or if two curve parameter values are equal
 -}
 unitless :: Number
 unitless = 1e-9
-
--- | A default tolerance of 1e-9 radians used internally when comparing angles.
-angle :: Angle
-angle = Angle.radians unitless
