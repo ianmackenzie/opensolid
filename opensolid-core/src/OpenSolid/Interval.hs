@@ -594,10 +594,7 @@ isDistinctFrom :: Quantity units -> Interval units -> Bool
 isDistinctFrom value interval = isResolved (interval - value)
 
 random :: Random.Generator (Quantity units) -> Random.Generator (Interval units)
-random randomQuantity = do
-  a <- randomQuantity
-  b <- randomQuantity
-  Random.return (Interval a b)
+random randomQuantity = Random.map2 Interval randomQuantity randomQuantity
 
 sampleValues :: Interval units -> NonEmpty (Quantity units)
 sampleValues interval = NonEmpty.map (interpolate interval) Parameter.samples
