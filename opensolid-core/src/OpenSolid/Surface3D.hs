@@ -61,6 +61,7 @@ data Surface3D space = Surface3D
   , domain :: UvRegion
   , outerBoundary :: ~(Set3D space (SurfaceCurve3D space))
   , innerBoundaries :: ~(Maybe (Set3D space (Set3D space (SurfaceCurve3D space))))
+  , boundaries :: ~(Set3D space (Set3D space (SurfaceCurve3D space)))
   }
 
 function :: Surface3D space -> SurfaceFunction3D space
@@ -85,11 +86,7 @@ innerLoops surface =
     Just innerBoundarySet -> Set3D.toListOf Set3D.toNonEmpty innerBoundarySet
 
 boundaries :: Surface3D space -> Set3D space (Set3D space (SurfaceCurve3D space))
-boundaries surface = do
-  let outerSet = Set3D.singleton (Set3D.bounds surface.outerBoundary) surface.outerBoundary
-  case surface.innerBoundaries of
-    Just innerSet -> Set3D.union outerSet innerSet
-    Nothing -> outerSet
+boundaries = (.boundaries)
 
 boundaryLoops :: Surface3D space -> NonEmpty (NonEmpty (SurfaceCurve3D space))
 boundaryLoops surface = outerLoop surface :| innerLoops surface
@@ -99,12 +96,20 @@ parametric givenFunction givenDomain = do
   let surfaceBoundary domainBoundary =
         Region2D.Boundary.curves domainBoundary
           & Set.map (SurfaceCurve3D.new givenFunction) SurfaceCurve3D.bounds
+  let surfaceOuterBoundary = surfaceBoundary (Region2D.outerBoundary givenDomain)
+  let surfaceInnerBoundaries =
+        Maybe.map (Set.map surfaceBoundary Set.bounds) (Region2D.innerBoundaries givenDomain)
+  let outerBoundarySet = Set3D.singleton (Set3D.bounds surfaceOuterBoundary) surfaceOuterBoundary
+  let surfaceBoundaries =
+        case surfaceInnerBoundaries of
+          Just innerBoundarySet -> Set3D.union outerBoundarySet innerBoundarySet
+          Nothing -> outerBoundarySet
   Surface3D
     { function = givenFunction
     , domain = givenDomain
-    , outerBoundary = surfaceBoundary (Region2D.outerBoundary givenDomain)
-    , innerBoundaries =
-        Maybe.map (Set.map surfaceBoundary Set.bounds) (Region2D.innerBoundaries givenDomain)
+    , outerBoundary = surfaceOuterBoundary
+    , innerBoundaries = surfaceInnerBoundaries
+    , boundaries = surfaceBoundaries
     }
 
 on :: Plane3D space -> Region2D Meters -> Surface3D space
