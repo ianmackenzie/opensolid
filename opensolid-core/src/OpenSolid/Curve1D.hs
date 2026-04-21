@@ -77,7 +77,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.Int qualified as Int
-import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.Interval (Interval (Interval), (+/-))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson1D qualified as NewtonRaphson1D
@@ -537,8 +537,7 @@ instance Estimate.Interface (Integral units) units where
     let value1 = value curve (Interval.lower tRange)
     let value2 = value curve (Interval.upper tRange)
     let m = Interval.width (derivativeRange curve tRange)
-    let error1 = 0.125 * m * dt * dt
-    let estimate1 = dt * Quantity.midpoint value1 value2 + Interval -error1 error1
+    let estimate1 = dt * Quantity.midpoint value1 value2 +/- 0.125 * m * dt * dt
     case Interval.intersection estimate0 estimate1 of
       Just intersection -> intersection
       Nothing -> estimate0 -- Shouldn't happen if ranges are correct

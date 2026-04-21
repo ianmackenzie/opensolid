@@ -8,6 +8,9 @@ module OpenSolid.Interval
   , erase
   , zeroTo
   , symmetric
+  , uncertainty
+  , (+/-)
+  , estimate
   , infinite
   , hull3
   , hull4
@@ -308,6 +311,21 @@ The lower bound of the range will be -w/2 and the upper bound will be w/2.
 -}
 symmetric :: "width" ::: Quantity units -> Interval units
 symmetric ("width" ::: w) = let r = 0.5 * w in Interval -r r
+
+uncertainty :: Quantity units -> Interval units
+uncertainty magnitude = Interval -magnitude magnitude
+
+{-| Construct an interval from a midpoint and radius/error/uncertainty.
+
+'a +/- b' is equivalent to 'Interval (a - b) (a + b)'.
+-}
+(+/-) :: Quantity units -> Quantity units -> Interval units
+value +/- error = Interval (value - error) (value + error)
+
+infixl 6 +/-
+
+estimate :: Quantity units -> Quantity units -> Interval units
+estimate value error = value +/- error
 
 infinite :: Interval units
 infinite = Interval -Quantity.infinity Quantity.infinity
