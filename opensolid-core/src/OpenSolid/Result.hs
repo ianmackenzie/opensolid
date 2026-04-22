@@ -34,11 +34,11 @@ orFail (Error error) = Prelude.fail (Prelude.show error)
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
 collect = Prelude.mapM
 
-foldl :: (b -> a -> Result x b) -> b -> List a -> Result x b
+foldl :: Foldable list => (b -> a -> Result x b) -> b -> list a -> Result x b
 foldl = Data.Foldable.foldlM
 
-foldr :: (a -> b -> Result x b) -> b -> List a -> Result x b
+foldr :: Foldable list => (a -> b -> Result x b) -> b -> list a -> Result x b
 foldr = Data.Foldable.foldrM
 
-all :: List (Result x a) -> Result x (List a)
+all :: Traversable list => list (Result x a) -> Result x (list a)
 all = Prelude.sequence
