@@ -1,16 +1,17 @@
 module OpenSolid.ArcLength (parameterization) where
 
-import OpenSolid.Curve1D (Curve1D)
-import OpenSolid.Curve1D qualified as Curve1D
+import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Lobatto qualified as Lobatto
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
+import OpenSolid.Quantity (Quantity (Quantity#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Sign qualified as Sign
+import OpenSolid.Unboxed.Math
 
 data Tree units
   = Node (Tree units) (Quantity units) (Tree units)
-  | Leaf (Quantity units) (Curve1D Unitless)
+  | Leaf (Quantity units) Double# Double# Double# Double# Double# Double#
 
 parameterization ::
   Tolerance units =>
@@ -63,7 +64,9 @@ evaluateIn tree length = case tree of
   Node leftTree leftLength rightTree
     | length < leftLength -> evaluateIn leftTree length
     | otherwise -> evaluateIn rightTree (length - leftLength)
-  Leaf segmentLength curve -> Curve1D.value curve (length / segmentLength)
+  Leaf segmentLength p1# p2# p3# p4# p5# p6# -> do
+    let !(Quantity# t#) = length / segmentLength
+    Quantity# (quinticBezier# p1# p2# p3# p4# p5# p6# t#)
 
 buildTree ::
   Int ->
@@ -93,8 +96,9 @@ buildTree level dsdt d2sdt2 tStart tEnd dsdtStart dsdtEnd coarseEstimate = do
       let dtduEnd = deltaS / dsdtEnd
       let d2tdu2Start = -deltaS ?*? d2sdt2 tStart * dtduStart / Quantity.squared_ dsdtStart
       let d2tdu2End = -deltaS ?*? d2sdt2 tEnd * dtduEnd / Quantity.squared_ dsdtEnd
-      let tCurve = Curve1D.hermite tStart [dtduStart, d2tdu2Start] tEnd [dtduEnd, d2tdu2End]
-      (Leaf deltaS tCurve, fineEstimate)
+      let !(Quantity# p1#, Quantity# p2#, Quantity# p3#, Quantity# p4#, Quantity# p5#, Quantity# p6#) =
+            Bezier.quinticHermite tStart dtduStart d2tdu2Start tEnd dtduEnd d2tdu2End
+      (Leaf deltaS p1# p2# p3# p4# p5# p6#, fineEstimate)
     else do
       let (leftTree, leftLength) =
             buildTree (level + 1) dsdt d2sdt2 tStart tMid dsdtStart dsdtMid leftEstimate
