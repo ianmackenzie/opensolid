@@ -5,6 +5,7 @@ module OpenSolid.Result
   , map2
   , orFail
   , collect
+  , forEach
   , foldl
   , foldr
   , all
@@ -39,6 +40,9 @@ foldl = Data.Foldable.foldlM
 
 foldr :: Foldable list => (a -> b -> Result x b) -> b -> list a -> Result x b
 foldr = Data.Foldable.foldrM
+
+forEach :: Foldable list => list a -> (a -> b -> Result x b) -> b -> Result x b
+forEach list function init = foldl (Prelude.flip function) init list
 
 all :: Traversable list => list (Result x a) -> Result x (list a)
 all = Prelude.sequence

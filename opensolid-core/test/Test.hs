@@ -128,7 +128,7 @@ reportError context messages = do
     ]
   IO.printLine (context <> " failed:")
   System.Console.ANSI.setSGR [System.Console.ANSI.Reset]
-  IO.forEach messages (Text.indent "   " >> IO.printLine)
+  List.forEach messages (Text.indent "   " >> IO.printLine)
   IO.succeed (0, 1)
 
 runImpl :: List Text -> Text -> Test -> IO (Int, Int)

@@ -38,6 +38,7 @@ module OpenSolid.NonEmpty
   , reverseMap
   , filterMap
   , forEach
+  , forEachWithIndex
   , map2
   , map3
   , map4
@@ -92,6 +93,7 @@ import Data.Foldable1 qualified as Foldable1
 import Data.Functor qualified
 import Data.List.NonEmpty qualified
 import Data.Semigroup qualified
+import OpenSolid.Chainable (Chainable)
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -226,10 +228,13 @@ reverseMap function (x :| xs) = go x xs []
   go item (next : following) acc = go next following (function item : acc)
 
 filterMap :: (a -> Maybe b) -> NonEmpty a -> List b
-filterMap function = List.filterMap function . toList
+filterMap function = toList >> List.filterMap function
 
-forEach :: NonEmpty a -> (a -> b) -> NonEmpty b
-forEach nonEmpty function = map function nonEmpty
+forEach :: Chainable action => NonEmpty a -> (a -> action) -> action
+forEach = toList >> List.forEach
+
+forEachWithIndex :: Chainable action => NonEmpty a -> (Int -> a -> action) -> action
+forEachWithIndex = toList >> List.forEachWithIndex
 
 map2 :: (a -> b -> c) -> NonEmpty a -> NonEmpty b -> NonEmpty c
 map2 = Data.List.NonEmpty.zipWith
@@ -348,7 +353,7 @@ any :: (a -> Bool) -> NonEmpty a -> Bool
 any = Prelude.any
 
 successive :: (a -> a -> b) -> NonEmpty a -> List b
-successive function nonEmpty = List.successive function (toList nonEmpty)
+successive function = toList >> List.successive function
 
 loop :: (a -> a -> b) -> NonEmpty a -> NonEmpty b
 loop function nonEmpty = do

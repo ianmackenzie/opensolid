@@ -356,7 +356,7 @@ secondDerivativeConsistency randomCurve = Test.check 100 "secondDerivativeConsis
 derivativeConsistency :: Test
 derivativeConsistency =
   Test.group "derivativeConsistency" $
-    List.forEach curveGenerators $
+    curveGenerators & List.map
       \(label, generator) ->
         Test.group label $
           [ firstDerivativeConsistency generator
@@ -366,7 +366,7 @@ derivativeConsistency =
 reversalConsistency :: Test
 reversalConsistency =
   Test.group "reversalConsistency" $
-    List.forEach curveGenerators $
+    curveGenerators & List.map
       \(label, randomCurve) ->
         Test.check 100 label do
           curve <- Test.generate randomCurve

@@ -32,9 +32,7 @@ main = Tolerance.using Tolerance.unitless do
           (Length.meters (SurfaceFunction1D.value f uvPoint))
   let mesh = Mesh.grid 512 512 meshPoint
   let numOriginPoints =
-        Array.foldl
-          (\n point -> if point == World3D.originPoint then n + 1 else n)
-          0
-          (Mesh.vertices mesh)
+        0 & Array.forEach (Mesh.vertices mesh) \point n ->
+          if point == World3D.originPoint then n + 1 else n
   IO.printLine ("Number of origin points in mesh: " <> Text.int numOriginPoints)
   Stl.writeBinary "executables/blended-surface/mesh.stl" Convention3D.zUp Length.inMeters mesh

@@ -15,10 +15,15 @@ module OpenSolid.Int
   , product
   , gcd
   , lcm
+  , forEach
+  , forEachIndex
+  , reverseForEachIndex
   )
 where
 
 import Data.Ord qualified
+import OpenSolid.Chainable (Chainable)
+import OpenSolid.Chainable qualified as Chainable
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
@@ -76,7 +81,7 @@ prod !acc a b = case compare a b of
   GT -> acc
 
 sum :: List Int -> Int
-sum = List.foldl (+) 0
+sum values = 0 & List.forEach values (+)
 
 sumOf :: (a -> Int) -> List a -> Int
 sumOf f list = sum (List.map f list)
@@ -89,3 +94,19 @@ gcd = Prelude.gcd
 
 lcm :: Int -> Int -> Int
 lcm = Prelude.lcm
+
+forEach :: Chainable action => Int -> Int -> (Int -> action) -> action
+forEach first last function
+  | first < last = Chainable.chain (function first) (forEach (first + 1) last function)
+  | first > last = Chainable.chain (function first) (forEach (first - 1) last function)
+  | otherwise = function first
+
+forEachIndex :: Chainable action => Int -> (Int -> action) -> action
+forEachIndex size function
+  | size > 0 = forEach 0 (size - 1) function
+  | otherwise = Chainable.empty
+
+reverseForEachIndex :: Chainable action => Int -> (Int -> action) -> action
+reverseForEachIndex size function
+  | size > 0 = forEach (size - 1) 0 function
+  | otherwise = Chainable.empty

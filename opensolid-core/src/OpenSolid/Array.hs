@@ -13,13 +13,17 @@ module OpenSolid.Array
   , mapWithIndex
   , reverse
   , reverseMap
+  , forEach
+  , forEachWithIndex
   , foldl
   , foldr
   )
 where
 
 import Data.Array qualified
+import OpenSolid.Chainable (Chainable)
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
+import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
@@ -93,6 +97,12 @@ reverseMap f array = do
   let n = length array
   let newItems = foldl (\acc item -> f item : acc) [] array
   Array (Data.Array.listArray (0, n - 1) newItems)
+
+forEach :: Chainable action => Array a -> (a -> action) -> action
+forEach array function = forEachWithIndex array (const function)
+
+forEachWithIndex :: Chainable action => Array a -> (Int -> a -> action) -> action
+forEachWithIndex array function = Int.forEachIndex (length array) \i -> function i (array !! i)
 
 foldl :: (b -> a -> b) -> b -> Array a -> b
 foldl f init array = Prelude.foldl' f init (unwrap array)

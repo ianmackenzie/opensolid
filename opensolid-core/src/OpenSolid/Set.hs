@@ -21,6 +21,10 @@ module OpenSolid.Set
   , union
   , cull
   , cullIndexed
+  , forEach
+  , forEachWithIndex
+  , reverseForEach
+  , reverseForEachWithIndex
   , foldr
   , foldrWithIndex
   , foldl
@@ -34,6 +38,8 @@ where
 
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Chainable (Chainable)
+import OpenSolid.Chainable qualified as Chainable
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval qualified as Interval
@@ -263,6 +269,60 @@ combineWithIndexImpl startIndex function set = case set of
     let nodeBounds2 = Bounds.aggregate2 (bounds leftChild2) (bounds rightChild2)
     SizedNode nodeBounds2 (size leftChild2) (size rightChild2) leftChild2 rightChild2
 
+forEach ::
+  Chainable action =>
+  Set dimension units space item ->
+  (item -> action) ->
+  action
+forEach set function = forEachWithIndex set (const function)
+
+forEachWithIndex ::
+  Chainable action =>
+  Set dimension units space item ->
+  (Int -> item -> action) ->
+  action
+forEachWithIndex = forEachWithIndexImpl 0
+
+forEachWithIndexImpl ::
+  Chainable action =>
+  Int ->
+  Set dimension units space item ->
+  (Int -> item -> action) ->
+  action
+forEachWithIndexImpl startIndex set function = case set of
+  Leaf _ item -> function startIndex item
+  SizedNode _ leftSize _ left right ->
+    Chainable.chain
+      (forEachWithIndexImpl startIndex left function)
+      (forEachWithIndexImpl (startIndex + leftSize) right function)
+
+reverseForEach ::
+  Chainable action =>
+  Set dimension units space item ->
+  (item -> action) ->
+  action
+reverseForEach set function = reverseForEachWithIndex set (const function)
+
+reverseForEachWithIndex ::
+  Chainable action =>
+  Set dimension units space item ->
+  (Int -> item -> action) ->
+  action
+reverseForEachWithIndex = reverseForEachWithIndexImpl 0
+
+reverseForEachWithIndexImpl ::
+  Chainable action =>
+  Int ->
+  Set dimension units space item ->
+  (Int -> item -> action) ->
+  action
+reverseForEachWithIndexImpl startIndex set function = case set of
+  Leaf _ item -> function startIndex item
+  SizedNode _ leftSize _ left right ->
+    Chainable.chain
+      (reverseForEachWithIndexImpl (startIndex + leftSize) right function)
+      (reverseForEachWithIndexImpl startIndex left function)
+
 foldr ::
   (item -> accumulated -> accumulated) ->
   accumulated ->
@@ -282,38 +342,15 @@ foldrWithIndex ::
   accumulated ->
   Set dimension units space item ->
   accumulated
-foldrWithIndex function init set = foldrWithIndexImpl 0 function init set
+foldrWithIndex function init set = reverseForEachWithIndex set function init
 
 foldlWithIndex ::
   (Int -> accumulated -> item -> accumulated) ->
   accumulated ->
   Set dimension units space item ->
   accumulated
-foldlWithIndex function init set = foldlWithIndexImpl 0 function init set
-
-foldrWithIndexImpl ::
-  Int ->
-  (Int -> item -> accumulated -> accumulated) ->
-  accumulated ->
-  Set dimension units space item ->
-  accumulated
-foldrWithIndexImpl startIndex function accumulated set = case set of
-  Leaf _ item -> function startIndex item accumulated
-  SizedNode _ leftSize _ left right -> do
-    let rightAccumulated = right & foldrWithIndexImpl (startIndex + leftSize) function accumulated
-    left & foldrWithIndexImpl startIndex function rightAccumulated
-
-foldlWithIndexImpl ::
-  Int ->
-  (Int -> accumulated -> item -> accumulated) ->
-  accumulated ->
-  Set dimension units space item ->
-  accumulated
-foldlWithIndexImpl startIndex function accumulated set = case set of
-  Leaf _ item -> function startIndex accumulated item
-  SizedNode _ leftSize _ left right -> do
-    let leftAccumulated = left & foldlWithIndexImpl startIndex function accumulated
-    right & foldlWithIndexImpl (startIndex + leftSize) function leftAccumulated
+foldlWithIndex function init set =
+  init & forEachWithIndex set \index item accumulated -> function index accumulated item
 
 foldrMap ::
   (item -> accumulated) ->

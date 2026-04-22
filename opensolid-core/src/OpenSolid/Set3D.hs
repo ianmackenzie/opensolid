@@ -23,14 +23,15 @@ module OpenSolid.Set3D
   , union
   , cull
   , cullIndexed
-  , foldr
-  , foldl
-  , foldrWithIndex
-  , foldlWithIndex
+  , forEach
+  , forEachWithIndex
+  , reverseForEach
+  , reverseForEachWithIndex
   )
 where
 
 import OpenSolid.Bounds3D (Bounds3D)
+import OpenSolid.Chainable (Chainable)
 import OpenSolid.Prelude
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
@@ -116,22 +117,18 @@ cull = Set.cull
 cullIndexed :: (Bounds3D space -> Bool) -> Set3D space item -> List (Int, item)
 cullIndexed = Set.cullIndexed
 
-foldr :: (item -> accumulated -> accumulated) -> accumulated -> Set3D space item -> accumulated
-foldr = Set.foldr
+forEach :: Chainable action => Set3D space item -> (item -> action) -> action
+forEach = Set.forEach
 
-foldl :: (accumulated -> item -> accumulated) -> accumulated -> Set3D space item -> accumulated
-foldl = Set.foldl
+forEachWithIndex :: Chainable action => Set3D space item -> (Int -> item -> action) -> action
+forEachWithIndex = Set.forEachWithIndex
 
-foldrWithIndex ::
-  (Int -> item -> accumulated -> accumulated) ->
-  accumulated ->
+reverseForEach :: Chainable action => Set3D space item -> (item -> action) -> action
+reverseForEach = Set.reverseForEach
+
+reverseForEachWithIndex ::
+  Chainable action =>
   Set3D space item ->
-  accumulated
-foldrWithIndex = Set.foldrWithIndex
-
-foldlWithIndex ::
-  (Int -> accumulated -> item -> accumulated) ->
-  accumulated ->
-  Set3D space item ->
-  accumulated
-foldlWithIndex = Set.foldlWithIndex
+  (Int -> item -> action) ->
+  action
+reverseForEachWithIndex = Set.reverseForEachWithIndex

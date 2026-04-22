@@ -5,7 +5,7 @@ import Foreign.Marshal qualified
 import Foreign.Marshal.Array qualified
 import OpenSolid.Array qualified as Array
 import OpenSolid.IO qualified as IO
-import OpenSolid.List qualified as List
+import OpenSolid.Int qualified as Int
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -44,20 +44,19 @@ unsafe boundaryLoops steinerVertices = do
             IO.succeed (Mesh.indexed meshVertices faceIndices)
 
 collectEdgeIndices :: List (NonEmpty vertex) -> Int -> List Int -> List Int
-collectEdgeIndices loops startIndex accumulated = case loops of
-  [] -> accumulated
-  first : rest -> do
-    let firstLength = NonEmpty.length first
-    collectLoopEdgeIndices startIndex firstLength accumulated
-      & collectEdgeIndices rest (startIndex + firstLength)
+collectEdgeIndices [] _ accumulated = accumulated
+collectEdgeIndices (first : rest) startIndex accumulated = do
+  let firstLength = NonEmpty.length first
+  accumulated
+    & collectLoopEdgeIndices startIndex firstLength
+    & collectEdgeIndices rest (startIndex + firstLength)
 
 collectLoopEdgeIndices :: Int -> Int -> List Int -> List Int
-collectLoopEdgeIndices startIndex loopLength accumulated = do
-  let addEdge i acc = do
-        let edgeStart = startIndex + i
-        let edgeEnd = startIndex + (i + 1) % loopLength
-        edgeStart : edgeEnd : acc
-  List.foldr addEdge accumulated [0 .. loopLength - 1]
+collectLoopEdgeIndices startIndex loopLength =
+  Int.reverseForEachIndex loopLength \i accumulated -> do
+    let edgeStart = startIndex + i
+    let edgeEnd = startIndex + (i + 1) % loopLength
+    edgeStart : edgeEnd : accumulated
 
 foreign import ccall safe "opensolid_cdt"
   opensolid_cdt ::

@@ -4,8 +4,6 @@ module OpenSolid.IO
   , map
   , run
   , maybe
-  , forEach
-  , forEachWithIndex
   , collect
   , sleep
   , onError
@@ -29,7 +27,6 @@ import Data.Text.IO.Utf8 qualified
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
-import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
@@ -54,12 +51,6 @@ run = Data.Foldable.fold
 maybe :: (a -> IO ()) -> Maybe a -> IO ()
 maybe _ Nothing = succeed ()
 maybe callback (Just value) = callback value
-
-forEach :: List a -> (a -> IO ()) -> IO ()
-forEach items callback = run (List.map callback items)
-
-forEachWithIndex :: List a -> (Int -> a -> IO ()) -> IO ()
-forEachWithIndex items callback = run (List.mapWithIndex callback items)
 
 collect :: Traversable list => (a -> IO b) -> list a -> IO (list b)
 collect = Prelude.mapM

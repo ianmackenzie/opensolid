@@ -23,15 +23,16 @@ module OpenSolid.Set2D
   , union
   , cull
   , cullIndexed
-  , foldl
-  , foldlWithIndex
-  , foldr
-  , foldrWithIndex
+  , forEach
+  , forEachWithIndex
+  , reverseForEach
+  , reverseForEachWithIndex
   )
 where
 
 import Data.Void (Void)
 import OpenSolid.Bounds2D (Bounds2D)
+import OpenSolid.Chainable (Chainable)
 import OpenSolid.Prelude
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
@@ -117,22 +118,18 @@ cull = Set.cull
 cullIndexed :: (Bounds2D units -> Bool) -> Set2D units item -> List (Int, item)
 cullIndexed = Set.cullIndexed
 
-foldr :: (item -> accumulated -> accumulated) -> accumulated -> Set2D units item -> accumulated
-foldr = Set.foldr
+forEach :: Chainable action => Set2D units item -> (item -> action) -> action
+forEach = Set.forEach
 
-foldl :: (accumulated -> item -> accumulated) -> accumulated -> Set2D units item -> accumulated
-foldl = Set.foldl
+forEachWithIndex :: Chainable action => Set2D units item -> (Int -> item -> action) -> action
+forEachWithIndex = Set.forEachWithIndex
 
-foldrWithIndex ::
-  (Int -> item -> accumulated -> accumulated) ->
-  accumulated ->
+reverseForEach :: Chainable action => Set2D units item -> (item -> action) -> action
+reverseForEach = Set.reverseForEach
+
+reverseForEachWithIndex ::
+  Chainable action =>
   Set2D units item ->
-  accumulated
-foldrWithIndex = Set.foldrWithIndex
-
-foldlWithIndex ::
-  (Int -> accumulated -> item -> accumulated) ->
-  accumulated ->
-  Set2D units item ->
-  accumulated
-foldlWithIndex = Set.foldlWithIndex
+  (Int -> item -> action) ->
+  action
+reverseForEachWithIndex = Set.reverseForEachWithIndex

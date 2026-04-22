@@ -299,9 +299,8 @@ refinePairs pairs = do
   let widthCutoff = 0.5 * NonEmpty.maximumOf itemBoundsWidth pairs
   NonEmpty.map (Pair.mapSecond (refineWiderThan widthCutoff)) pairs
 
-prependItems :: List (a, Estimate units) -> List a -> List a
-prependItems pairs items =
-  List.foldr (\(item, _) acc -> item : acc) items pairs
+addItems :: List (a, Estimate units) -> List a -> List a
+addItems pairs = List.forEach pairs \(item, _) accumulated -> item : accumulated
 
 isResolved :: Tolerance units => Estimate units -> Bool
 isResolved estimate = boundsWidth estimate ~= Quantity.zero
@@ -338,9 +337,9 @@ pickMinimumBy function items = go (NonEmpty.map (Pair.decorate function) items) 
     let (leader, followers) = NonEmpty.pickMinimumBy estimateUpperBound pairs
     let cutoff = estimateUpperBound leader
     let (filtered, discarded) = List.partition (estimateLowerBoundAtMost cutoff) followers
-    let updated = prependItems discarded accumulated
+    let updated = addItems discarded accumulated
     if allResolved filtered
-      then (Pair.first leader, prependItems filtered updated)
+      then (Pair.first leader, addItems filtered updated)
       else go (refinePairs (leader :| filtered)) updated
 
 pickMaximumBy :: Tolerance units => (a -> Estimate units) -> NonEmpty a -> (a, List a)
@@ -350,9 +349,9 @@ pickMaximumBy function items = go (NonEmpty.map (Pair.decorate function) items) 
     let (leader, followers) = NonEmpty.pickMaximumBy estimateLowerBound pairs
     let cutoff = estimateLowerBound leader
     let (filtered, discarded) = List.partition (estimateUpperBoundAtLeast cutoff) followers
-    let updated = prependItems discarded accumulated
+    let updated = addItems discarded accumulated
     if allResolved filtered
-      then (Pair.first leader, prependItems filtered updated)
+      then (Pair.first leader, addItems filtered updated)
       else go (refinePairs (leader :| filtered)) updated
 
 sign :: Tolerance units => Estimate units -> Sign

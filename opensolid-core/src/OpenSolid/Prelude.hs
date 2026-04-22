@@ -26,7 +26,7 @@ module OpenSolid.Prelude
   , CrossMultiplication (cross)
   , DivMod ((//), (%))
   , Exponentiation ((**))
-  , Composition ((.))
+  , Composition ((.), (>>))
   , Tolerance
   , ApproximateEquality ((~=))
   , (!=)
@@ -89,7 +89,7 @@ import Prelude
   , IO
   , Int
   , Maybe (Just, Nothing)
-  , Monad ((>>), (>>=))
+  , Monad ((>>=))
   , MonadFail
   , Ord
   , Ordering (EQ, GT, LT)
@@ -103,6 +103,7 @@ import Prelude
   , min
   , not
   , otherwise
+  , seq
   , ($)
   , (&&)
   , (/=)
@@ -334,9 +335,21 @@ instance
 
 class Composition f g h | f g -> h where
   (.) :: f -> g -> h
+  f . g = g >> f
+
+  (>>) :: g -> f -> h
+  g >> f = f . g
+
+  {-# MINIMAL (.) | (>>) #-}
 
 instance b1 ~ b2 => Composition (b2 -> c) (a -> b1) (a -> c) where
   (.) = (Prelude..)
+
+instance Composition (Result x a) (Result x ()) (Result x a) where
+  (>>) = (Prelude.>>)
+
+instance Composition (IO a) (IO ()) (IO a) where
+  (>>) = (Prelude.>>)
 
 infixr 9 .
 

@@ -145,7 +145,7 @@ testTry =
     log "Got cross product" crossProduct
 
 testIOIteration :: IO ()
-testIOIteration = IO.forEach [1 .. 3] (log "Looping")
+testIOIteration = Int.forEach 1 3 (log "Looping")
 
 doublingIO :: Text -> IO Int
 doublingIO input = do
@@ -159,7 +159,7 @@ doubleManyIO = IO.collect doublingIO ["1", "-2", "3"]
 testIOSequencing :: IO ()
 testIOSequencing = do
   doubledValues <- doubleManyIO
-  IO.forEach doubledValues (log "Doubled value")
+  List.forEach doubledValues (log "Doubled value")
 
 testParameter1dGeneration :: IO ()
 testParameter1dGeneration = do
@@ -406,14 +406,10 @@ testQuotientDesingularization = Tolerance.using Tolerance.unitless do
   let quotient'' = Curve1D.derivative quotient'
   let quotient''' = Curve1D.derivative quotient''
   let tValues = Quantity.steps 0.0 1.0 10
-  IO.forEach tValues \tValue -> do
-    log "quotient" (Curve1D.value quotient tValue)
-  IO.forEach tValues \tValue -> do
-    log "derivative" (Curve1D.value quotient' tValue)
-  IO.forEach tValues \tValue -> do
-    log "second derivative" (Curve1D.value quotient'' tValue)
-  IO.forEach tValues \tValue -> do
-    log "third derivative" (Curve1D.value quotient''' tValue)
+  List.forEach tValues (Curve1D.value quotient >> log "quotient")
+  List.forEach tValues (Curve1D.value quotient' >> log "derivative")
+  List.forEach tValues (Curve1D.value quotient'' >> log "second derivative")
+  List.forEach tValues (Curve1D.value quotient''' >> log "third derivative")
 
 testCurveSqrt :: IO ()
 testCurveSqrt = Tolerance.using 1e-6 do
