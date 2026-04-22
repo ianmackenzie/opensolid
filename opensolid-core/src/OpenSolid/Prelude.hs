@@ -486,7 +486,7 @@ instance DivMod (Quantity units) where
 
 ----- Indexed -----
 
-class Indexed container index item | container -> index, container -> item where
+class Indexed container index item | container index -> item where
   (!!) :: container -> index -> item
 
 infixl 9 !!
