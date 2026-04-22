@@ -11,13 +11,22 @@ module OpenSolid.Set2D
   , flatten
   , toNonEmpty
   , toNonEmptyOf
+  , toNonEmptyWithIndex
   , toList
   , toListOf
+  , toListWithIndex
   , map
+  , mapWithIndex
   , reverseMap
+  , combine
+  , combineWithIndex
   , union
   , cull
   , cullIndexed
+  , foldl
+  , foldlWithIndex
+  , foldr
+  , foldrWithIndex
   )
 where
 
@@ -64,17 +73,40 @@ toNonEmpty = Set.toNonEmpty
 toNonEmptyOf :: (item -> a) -> Set2D units item -> NonEmpty a
 toNonEmptyOf = Set.toNonEmptyOf
 
+toNonEmptyWithIndex :: (Int -> item -> a) -> Set2D units item -> NonEmpty a
+toNonEmptyWithIndex = Set.toNonEmptyWithIndex
+
 toList :: Set2D units item -> List item
 toList = Set.toList
 
 toListOf :: (item -> a) -> Set2D units item -> List a
 toListOf = Set.toListOf
 
-map :: (a -> b) -> (b -> Bounds2D units2) -> Set2D units1 a -> Set2D units2 b
+toListWithIndex :: (Int -> item -> a) -> Set2D units item -> List a
+toListWithIndex = Set.toListWithIndex
+
+map :: (item1 -> item2) -> (item2 -> Bounds2D units2) -> Set2D units1 item1 -> Set2D units2 item2
 map = Set.map
 
-reverseMap :: (a -> b) -> (b -> Bounds2D units2) -> Set2D units1 a -> Set2D units2 b
+mapWithIndex ::
+  (Int -> item1 -> item2) ->
+  (item2 -> Bounds2D units2) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2
+mapWithIndex = Set.mapWithIndex
+
+reverseMap ::
+  (item1 -> item2) ->
+  (item2 -> Bounds2D units2) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2
 reverseMap = Set.reverseMap
+
+combine :: (item1 -> Set2D units2 item2) -> Set2D units1 item1 -> Set2D units2 item2
+combine = Set.combine
+
+combineWithIndex :: (Int -> item1 -> Set2D units2 item2) -> Set2D units1 item1 -> Set2D units2 item2
+combineWithIndex = Set.combineWithIndex
 
 union :: Set2D units item -> Set2D units item -> Set2D units item
 union = Set.union
@@ -84,3 +116,23 @@ cull = Set.cull
 
 cullIndexed :: (Bounds2D units -> Bool) -> Set2D units item -> List (Int, item)
 cullIndexed = Set.cullIndexed
+
+foldr :: (item -> accumulated -> accumulated) -> accumulated -> Set2D units item -> accumulated
+foldr = Set.foldr
+
+foldl :: (accumulated -> item -> accumulated) -> accumulated -> Set2D units item -> accumulated
+foldl = Set.foldl
+
+foldrWithIndex ::
+  (Int -> item -> accumulated -> accumulated) ->
+  accumulated ->
+  Set2D units item ->
+  accumulated
+foldrWithIndex = Set.foldrWithIndex
+
+foldlWithIndex ::
+  (Int -> accumulated -> item -> accumulated) ->
+  accumulated ->
+  Set2D units item ->
+  accumulated
+foldlWithIndex = Set.foldlWithIndex

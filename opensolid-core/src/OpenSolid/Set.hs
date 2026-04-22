@@ -8,14 +8,23 @@ module OpenSolid.Set
   , aggregate
   , flatten
   , map
+  , mapWithIndex
   , reverseMap
+  , combine
+  , combineWithIndex
   , toNonEmpty
   , toNonEmptyOf
+  , toNonEmptyWithIndex
   , toList
   , toListOf
+  , toListWithIndex
   , union
   , cull
   , cullIndexed
+  , foldr
+  , foldrWithIndex
+  , foldl
+  , foldlWithIndex
   , foldrMap
   , foldrMapWithIndex
   , foldlMap
@@ -33,6 +42,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
+import Prelude qualified
 
 data Set dimension units space item where
   Leaf ::
@@ -50,6 +60,10 @@ data Set dimension units space item where
 deriving instance
   (Bounds.Exists dimension units space, Show item) =>
   Show (Set dimension units space item)
+
+instance Foldable (Set dimension units space) where
+  foldl = foldl
+  foldr = foldr
 
 instance
   ( dimension1 ~ dimension2
@@ -188,15 +202,19 @@ map ::
   (item2 -> Bounds dimension2 units2 space2) ->
   Set dimension1 units1 space1 item1 ->
   Set dimension2 units2 space2 item2
-map function boundsFunction set = case set of
-  Leaf _ item1 -> do
-    let item2 = function item1
-    Leaf (boundsFunction item2) item2
-  SizedNode _ leftSize rightSize leftChild1 rightChild1 -> do
-    let leftChild2 = map function boundsFunction leftChild1
-    let rightChild2 = map function boundsFunction rightChild1
-    let nodeBounds2 = Bounds.aggregate2 (bounds leftChild2) (bounds rightChild2)
-    SizedNode nodeBounds2 leftSize rightSize leftChild2 rightChild2
+map function boundsFunction set = mapWithIndex (const function) boundsFunction set
+
+mapWithIndex ::
+  Bounds.Exists dimension2 units2 space2 =>
+  (Int -> item1 -> item2) ->
+  (item2 -> Bounds dimension2 units2 space2) ->
+  Set dimension1 units1 space1 item1 ->
+  Set dimension2 units2 space2 item2
+mapWithIndex function boundsFunction =
+  combineWithIndex \index item1 -> do
+    let item2 = function index item1
+    let bounds2 = boundsFunction item2
+    singleton bounds2 item2
 
 reverseMap ::
   Bounds.Exists dimension2 units2 space2 =>
@@ -207,7 +225,8 @@ reverseMap ::
 reverseMap function boundsFunction set = case set of
   Leaf _ item1 -> do
     let item2 = function item1
-    Leaf (boundsFunction item2) item2
+    let bounds2 = boundsFunction item2
+    Leaf bounds2 item2
   SizedNode _ leftSize1 rightSize1 leftChild1 rightChild1 -> do
     let leftSize2 = rightSize1
     let rightSize2 = leftSize1
@@ -215,6 +234,86 @@ reverseMap function boundsFunction set = case set of
     let rightChild2 = reverseMap function boundsFunction leftChild1
     let nodeBounds2 = Bounds.aggregate2 (bounds leftChild2) (bounds rightChild2)
     SizedNode nodeBounds2 leftSize2 rightSize2 leftChild2 rightChild2
+
+combine ::
+  Bounds.Exists dimension2 units2 space2 =>
+  (item1 -> Set dimension2 units2 space2 item2) ->
+  Set dimension1 units1 space1 item1 ->
+  Set dimension2 units2 space2 item2
+combine function set = combineWithIndex (const function) set
+
+combineWithIndex ::
+  Bounds.Exists dimension2 units2 space2 =>
+  (Int -> item1 -> Set dimension2 units2 space2 item2) ->
+  Set dimension1 units1 space1 item1 ->
+  Set dimension2 units2 space2 item2
+combineWithIndex function set = combineWithIndexImpl 0 function set
+
+combineWithIndexImpl ::
+  Bounds.Exists dimension2 units2 space2 =>
+  Int ->
+  (Int -> item1 -> Set dimension2 units2 space2 item2) ->
+  Set dimension1 units1 space1 item1 ->
+  Set dimension2 units2 space2 item2
+combineWithIndexImpl startIndex function set = case set of
+  Leaf _ item1 -> function startIndex item1
+  SizedNode _ leftSize _ leftChild1 rightChild1 -> do
+    let leftChild2 = combineWithIndexImpl startIndex function leftChild1
+    let rightChild2 = combineWithIndexImpl (startIndex + leftSize) function rightChild1
+    let nodeBounds2 = Bounds.aggregate2 (bounds leftChild2) (bounds rightChild2)
+    SizedNode nodeBounds2 (size leftChild2) (size rightChild2) leftChild2 rightChild2
+
+foldr ::
+  (item -> accumulated -> accumulated) ->
+  accumulated ->
+  Set dimension units space item ->
+  accumulated
+foldr function init set = foldrWithIndex (const function) init set
+
+foldl ::
+  (accumulated -> item -> accumulated) ->
+  accumulated ->
+  Set dimension units space item ->
+  accumulated
+foldl function init set = foldlWithIndex (const function) init set
+
+foldrWithIndex ::
+  (Int -> item -> accumulated -> accumulated) ->
+  accumulated ->
+  Set dimension units space item ->
+  accumulated
+foldrWithIndex function init set = foldrWithIndexImpl 0 function init set
+
+foldlWithIndex ::
+  (Int -> accumulated -> item -> accumulated) ->
+  accumulated ->
+  Set dimension units space item ->
+  accumulated
+foldlWithIndex function init set = foldlWithIndexImpl 0 function init set
+
+foldrWithIndexImpl ::
+  Int ->
+  (Int -> item -> accumulated -> accumulated) ->
+  accumulated ->
+  Set dimension units space item ->
+  accumulated
+foldrWithIndexImpl startIndex function accumulated set = case set of
+  Leaf _ item -> function startIndex item accumulated
+  SizedNode _ leftSize _ left right -> do
+    let rightAccumulated = right & foldrWithIndexImpl (startIndex + leftSize) function accumulated
+    left & foldrWithIndexImpl startIndex function rightAccumulated
+
+foldlWithIndexImpl ::
+  Int ->
+  (Int -> accumulated -> item -> accumulated) ->
+  accumulated ->
+  Set dimension units space item ->
+  accumulated
+foldlWithIndexImpl startIndex function accumulated set = case set of
+  Leaf _ item -> function startIndex accumulated item
+  SizedNode _ leftSize _ left right -> do
+    let leftAccumulated = left & foldlWithIndexImpl startIndex function accumulated
+    right & foldlWithIndexImpl (startIndex + leftSize) function leftAccumulated
 
 foldrMap ::
   (item -> accumulated) ->
@@ -300,11 +399,20 @@ toNonEmpty = foldrMap NonEmpty.one NonEmpty.push
 toNonEmptyOf :: (item -> a) -> Set dimension units space item -> NonEmpty a
 toNonEmptyOf function = foldrMap (NonEmpty.one . function) (NonEmpty.push . function)
 
+toNonEmptyWithIndex :: (Int -> item -> a) -> Set dimension units space item -> NonEmpty a
+toNonEmptyWithIndex function =
+  foldrMapWithIndex
+    (\index item -> NonEmpty.one (function index item))
+    (\index item accumulated -> NonEmpty.push (function index item) accumulated)
+
 toList :: Set dimension units space item -> List item
 toList = NonEmpty.toList . toNonEmpty
 
 toListOf :: (item -> a) -> Set dimension units space item -> List a
 toListOf function = NonEmpty.toList . toNonEmptyOf function
+
+toListWithIndex :: (Int -> item -> a) -> Set dimension units space item -> List a
+toListWithIndex function = NonEmpty.toList . toNonEmptyWithIndex function
 
 union ::
   Bounds.Exists dimension units space =>
