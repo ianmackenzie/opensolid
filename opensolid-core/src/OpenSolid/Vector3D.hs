@@ -49,7 +49,6 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Convention3D (Convention3D (Convention3D))
 import OpenSolid.Convention3D qualified as Convention3D
-import OpenSolid.List qualified as List
 import {-# SOURCE #-} OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -230,7 +229,7 @@ projectInto :: Plane3D space -> Vector3D units space -> Vector2D units
 projectInto (Plane3D _ (PlaneOrientation3D i j)) v = Vector2D (v `dot` i) (v `dot` j)
 
 sum :: List (Vector3D units space) -> Vector3D units space
-sum = List.foldl (+) zero
+sum = Vector.sum
 
 convert :: Quantity (units2 ?/? units1) -> Vector3D units1 space -> Vector3D units2 space
 convert factor vector = Units.simplify (vector ?*? factor)
