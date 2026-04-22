@@ -59,6 +59,8 @@ import Data.Hashable (Hashable)
 import Data.Kind (Type)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
+import Data.Map.Strict (Map)
+import Data.Map.Strict qualified
 import Data.Proxy (Proxy (Proxy))
 import Data.String (fromString)
 import Data.Text (Text)
@@ -496,6 +498,9 @@ instance Indexed (List item) Int item where
 
 instance Indexed (NonEmpty item) Int item where
   (!!) = (Data.List.NonEmpty.!!)
+
+instance Ord key => Indexed (Map key value) key value where
+  (!!) = (Data.Map.Strict.!)
 
 ----- Intersection -----
 
