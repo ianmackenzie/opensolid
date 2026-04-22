@@ -24,6 +24,8 @@ module OpenSolid.Map
   , takeMin
   , getMax
   , takeMax
+  , forEach
+  , forEachWithKey
   , foldl
   , foldlWithKey
   , foldr
@@ -114,6 +116,13 @@ takeMax givenMap =
   if isEmpty givenMap
     then (Nothing, givenMap)
     else Pair.mapFirst Just (Data.Map.Strict.deleteFindMax givenMap)
+
+forEach :: Map k v -> (v -> a -> a) -> a -> a
+forEach givenMap function = forEachWithKey givenMap (const function)
+
+forEachWithKey :: Map k v -> (k -> v -> a -> a) -> a -> a
+forEachWithKey givenMap function init =
+  foldlWithKey (\accumulated key value -> function key value accumulated) init givenMap
 
 foldr :: (v -> a -> a) -> a -> Map k v -> a
 foldr = Data.Map.Strict.foldr'
