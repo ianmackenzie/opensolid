@@ -8,23 +8,16 @@ import Test qualified
 
 tests :: List Test
 tests =
-  [ foldl
-  , foldr
+  [ forEach
   , take
   ]
 
 simpleMap :: Map Int Text
 simpleMap = Map.fromList [(1, "a"), (2, "b"), (3, "c")]
 
-foldl :: Test
-foldl = Test.verify "foldl" do
-  let actual = Map.foldl (<>) "" simpleMap
-  let expected = "abc"
-  Test.expect (actual == expected)
-
-foldr :: Test
-foldr = Test.verify "foldr" do
-  let actual = Map.foldr (<>) "" simpleMap
+forEach :: Test
+forEach = Test.verify "forEach" do
+  let actual = "" & Map.forEach simpleMap \value accumulated -> accumulated <> value
   let expected = "abc"
   Test.expect (actual == expected)
 
