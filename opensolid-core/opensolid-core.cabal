@@ -33,6 +33,7 @@ common config
     hashable,
     random,
     text,
+    unordered-containers,
     zlib,
 
   ghc-options:

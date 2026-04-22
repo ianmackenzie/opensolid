@@ -55,6 +55,8 @@ import Control.Exception (Exception, assert, throw)
 import Data.Coerce
 import Data.Function ((&))
 import Data.Function qualified
+import Data.HashMap.Strict (HashMap)
+import Data.HashMap.Strict qualified
 import Data.Hashable (Hashable)
 import Data.Kind (Type)
 import Data.List.NonEmpty (NonEmpty ((:|)))
@@ -512,6 +514,9 @@ instance Indexed (NonEmpty item) Int item where
 
 instance Ord key => Indexed (Map key value) key value where
   (!!) = (Data.Map.Strict.!)
+
+instance Hashable key => Indexed (HashMap key value) key value where
+  (!!) = (Data.HashMap.Strict.!)
 
 ----- Intersection -----
 
