@@ -272,6 +272,8 @@ library
     OpenSolid.World3D
 
   other-modules:
+    OpenSolid.Body3D.HalfEdge
+    OpenSolid.Body3D.Ids
     OpenSolid.Bytecode.Compile
     OpenSolid.Bytecode.Encode
     OpenSolid.Bytecode.Evaluate
