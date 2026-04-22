@@ -1,7 +1,7 @@
 {-# LANGUAGE UnboxedTuples #-}
 
 module OpenSolid.Interval
-  ( Interval (Interval, Interval#)
+  ( Interval (Interval, I#)
   , constant
   , unit
   , coerce
@@ -107,7 +107,7 @@ If either argument is NaN, then the result will be open/infinite
 pattern Interval :: Quantity units -> Quantity units -> Interval units
 pattern Interval low high <- (viewInterval -> (# low, high #))
   where
-    Interval (Q# a#) (Q# b#) = Interval# a# b#
+    Interval (Q# a#) (Q# b#) = I# a# b#
 
 {-# INLINE viewInterval #-}
 viewInterval :: Interval units -> (# Quantity units, Quantity units #)
@@ -115,15 +115,13 @@ viewInterval (Ordered# low# high#) = (# Q# low#, Q# high# #)
 
 {-# COMPLETE Interval #-}
 
-{-# INLINE Interval# #-}
-pattern Interval# :: Double# -> Double# -> Interval units
-pattern Interval# low# high# <- Ordered# low# high#
+{-# INLINE I# #-}
+pattern I# :: Double# -> Double# -> Interval units
+pattern I# low# high# <- Ordered# low# high#
   where
-    Interval# a# b# = do
-      let !(# low#, high# #) = hull2# a# b#
-      Ordered# low# high#
+    I# a# b# = let !(# low#, high# #) = hull2# a# b# in Ordered# low# high#
 
-{-# COMPLETE Interval# #-}
+{-# COMPLETE I# #-}
 
 instance FFI (Interval Unitless) where
   representation = FFI.classRepresentation "UnitlessInterval"
@@ -152,7 +150,7 @@ instance units1 ~ units2 => Intersects (Interval units1) (Interval units2) (Tole
   first `intersects` second = separation first second <= ?tolerance
 
 instance Negation (Interval units) where
-  negate (Interval# low# high#) = Interval# (negate# high#) (negate# low#)
+  negate (I# low# high#) = I# (negate# high#) (negate# low#)
 
 instance Multiplication Sign (Interval units) (Interval units) where
   Positive * interval = interval
@@ -163,50 +161,43 @@ instance Multiplication (Interval units) Sign (Interval units) where
   interval * Negative = -interval
 
 instance units1 ~ units2 => Addition (Interval units1) (Interval units2) (Interval units1) where
-  Interval# low1# high1# + Interval# low2# high2# =
-    Interval# (low1# +# low2#) (high1# +# high2#)
+  I# low1# high1# + I# low2# high2# = I# (low1# +# low2#) (high1# +# high2#)
 
 instance units1 ~ units2 => Addition (Interval units1) (Quantity units2) (Interval units1) where
-  Interval# low# high# + Q# value# =
-    Interval# (low# +# value#) (high# +# value#)
+  I# low# high# + Q# value# = I# (low# +# value#) (high# +# value#)
 
 instance units1 ~ units2 => Addition (Quantity units1) (Interval units2) (Interval units1) where
-  Q# value# + Interval# low# high# =
-    Interval# (value# +# low#) (value# +# high#)
+  Q# value# + I# low# high# = I# (value# +# low#) (value# +# high#)
 
 instance units1 ~ units2 => Subtraction (Interval units1) (Interval units2) (Interval units1) where
-  Interval# low1# high1# - Interval# low2# high2# =
-    Interval# (low1# -# high2#) (high1# -# low2#)
+  I# low1# high1# - I# low2# high2# = I# (low1# -# high2#) (high1# -# low2#)
 
 instance units1 ~ units2 => Subtraction (Interval units1) (Quantity units2) (Interval units1) where
-  Interval# low# high# - Q# value# =
-    Interval# (low# -# value#) (high# -# value#)
+  I# low# high# - Q# value# = I# (low# -# value#) (high# -# value#)
 
 instance units1 ~ units2 => Subtraction (Quantity units1) (Interval units2) (Interval units1) where
-  Q# value# - Interval# low# high# =
-    Interval# (value# -# high#) (value# -# low#)
+  Q# value# - I# low# high# = I# (value# -# high#) (value# -# low#)
 
 instance Multiplication_ (Quantity units1) (Interval units2) (Interval (units1 ?*? units2)) where
-  Q# value# ?*? Interval# low# high# =
-    Interval# (value# *# low#) (value# *# high#)
+  Q# value# ?*? I# low# high# = I# (value# *# low#) (value# *# high#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Interval units2) (Interval units3)
   where
-  Q# value# * Interval# low# high# = Interval# (value# *# low#) (value# *# high#)
+  Q# value# * I# low# high# = I# (value# *# low#) (value# *# high#)
 
 instance Multiplication_ (Interval units1) (Quantity units2) (Interval (units1 ?*? units2)) where
-  Interval# low# high# ?*? Q# value# = Interval# (low# *# value#) (high# *# value#)
+  I# low# high# ?*? Q# value# = I# (low# *# value#) (high# *# value#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Interval units1) (Quantity units2) (Interval units3)
   where
-  Interval# low# high# * Q# value# = Interval# (low# *# value#) (high# *# value#)
+  I# low# high# * Q# value# = I# (low# *# value#) (high# *# value#)
 
 instance Multiplication_ (Interval units1) (Interval units2) (Interval (units1 ?*? units2)) where
-  Interval# low1# high1# ?*? Interval# low2# high2# = do
+  I# low1# high1# ?*? I# low2# high2# = do
     let !(# low#, high# #) = intervalTimesInterval# low1# high1# low2# high2#
     Ordered# low# high#
 
@@ -214,7 +205,7 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Interval units1) (Interval units2) (Interval units3)
   where
-  Interval# low1# high1# * Interval# low2# high2# = do
+  I# low1# high1# * I# low2# high2# = do
     let !(# low#, high# #) = intervalTimesInterval# low1# high1# low2# high2#
     Ordered# low# high#
 
@@ -246,7 +237,7 @@ instance
   dot = (*)
 
 instance Division_ (Quantity units1) (Interval units2) (Interval (units1 ?/? units2)) where
-  Q# n# ?/? Interval# dl# dh# = do
+  Q# n# ?/? I# dl# dh# = do
     let !(# low#, high# #) = doubleOverInterval# n# dl# dh#
     Ordered# low# high#
 
@@ -254,12 +245,12 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Quantity units1) (Interval units2) (Interval units3)
   where
-  Q# n# / Interval# dl# dh# = do
+  Q# n# / I# dl# dh# = do
     let !(# low#, high# #) = doubleOverInterval# n# dl# dh#
     Ordered# low# high#
 
 instance Division_ (Interval units1) (Quantity units2) (Interval (units1 ?/? units2)) where
-  Interval# nl# nh# ?/? Q# d# = do
+  I# nl# nh# ?/? Q# d# = do
     let !(# low#, high# #) = intervalOverDouble# nl# nh# d#
     Ordered# low# high#
 
@@ -267,12 +258,12 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Interval units1) (Quantity units2) (Interval units3)
   where
-  Interval# nl# nh# / Q# d# = do
+  I# nl# nh# / Q# d# = do
     let !(# low#, high# #) = intervalOverDouble# nl# nh# d#
     Ordered# low# high#
 
 instance Division_ (Interval units1) (Interval units2) (Interval (units1 ?/? units2)) where
-  Interval# nl# nh# ?/? Interval# dl# dh# = do
+  I# nl# nh# ?/? I# dl# dh# = do
     let !(# low#, high# #) = intervalOverInterval# nl# nh# dl# dh#
     Ordered# low# high#
 
@@ -280,7 +271,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Interval units1) (Interval units2) (Interval units3)
   where
-  Interval# nl# nh# / Interval# dl# dh# = do
+  I# nl# nh# / I# dl# dh# = do
     let !(# low#, high# #) = intervalOverInterval# nl# nh# dl# dh#
     Ordered# low# high#
 
@@ -403,7 +394,7 @@ width interval = Q# (width# interval)
 
 {-# INLINE width# #-}
 width# :: Interval units -> Double#
-width# (Interval# low# high#) = high# -# low#
+width# (I# low# high#) = high# -# low#
 
 {-# INLINE maxAbs #-}
 maxAbs :: Interval units -> Quantity units
@@ -438,7 +429,7 @@ sqrt :: Units.Squared units1 units2 => Interval units2 -> Interval units1
 sqrt = sqrt_ . Units.unspecialize
 
 hypot2 :: Interval units -> Interval units -> Interval units
-hypot2 (Interval# xMin# xMax#) (Interval# yMin# yMax#) = do
+hypot2 (I# xMin# xMax#) (I# yMin# yMax#) = do
   let positiveX# = xMin# >=# 0.0##
   let negativeX# = xMax# <=# 0.0##
   let positiveY# = yMin# >=# 0.0##
@@ -447,15 +438,15 @@ hypot2 (Interval# xMin# xMax#) (Interval# yMin# yMax#) = do
   let yMagnitude# = max# (abs# yMin#) (abs# yMax#)
   let maxMagnitude# = hypot2# xMagnitude# yMagnitude#
   case (# positiveX#, negativeX#, positiveY#, negativeY# #) of
-    (# 1#, _, 1#, _ #) -> Interval# (hypot2# xMin# yMin#) maxMagnitude#
-    (# 1#, _, _, 1# #) -> Interval# (hypot2# xMin# yMax#) maxMagnitude#
-    (# _, 1#, 1#, _ #) -> Interval# (hypot2# xMax# yMin#) maxMagnitude#
-    (# _, 1#, _, 1# #) -> Interval# (hypot2# xMax# yMax#) maxMagnitude#
-    (# 1#, _, _, _ #) -> Interval# xMin# maxMagnitude#
-    (# _, 1#, _, _ #) -> Interval# (negate# xMax#) maxMagnitude#
-    (# _, _, 1#, _ #) -> Interval# yMin# maxMagnitude#
-    (# _, _, _, 1# #) -> Interval# (negate# yMax#) maxMagnitude#
-    (# _, _, _, _ #) -> Interval# 0.0## maxMagnitude#
+    (# 1#, _, 1#, _ #) -> I# (hypot2# xMin# yMin#) maxMagnitude#
+    (# 1#, _, _, 1# #) -> I# (hypot2# xMin# yMax#) maxMagnitude#
+    (# _, 1#, 1#, _ #) -> I# (hypot2# xMax# yMin#) maxMagnitude#
+    (# _, 1#, _, 1# #) -> I# (hypot2# xMax# yMax#) maxMagnitude#
+    (# 1#, _, _, _ #) -> I# xMin# maxMagnitude#
+    (# _, 1#, _, _ #) -> I# (negate# xMax#) maxMagnitude#
+    (# _, _, 1#, _ #) -> I# yMin# maxMagnitude#
+    (# _, _, _, 1# #) -> I# (negate# yMax#) maxMagnitude#
+    (# _, _, _, _ #) -> I# 0.0## maxMagnitude#
 
 cubed :: Interval Unitless -> Interval Unitless
 cubed (Interval low high) = Interval (low * low * low) (high * high * high)
@@ -474,7 +465,7 @@ exclusion (Q# value#) interval = Q# (exclusion# value# interval)
 
 {-# INLINE exclusion# #-}
 exclusion# :: Double# -> Interval units -> Double#
-exclusion# value# (Interval# low# high#) = max# (low# -# value#) (value# -# high#)
+exclusion# value# (I# low# high#) = max# (low# -# value#) (value# -# high#)
 
 inclusion :: Quantity units -> Interval units -> Quantity units
 inclusion (Q# value#) interval = Q# (inclusion# value# interval)
@@ -500,7 +491,7 @@ separation interval1 interval2 = Q# (separation# interval1 interval2)
 
 {-# INLINE separation# #-}
 separation# :: Interval units -> Interval units -> Double#
-separation# (Interval# low1# high1#) (Interval# low2# high2#) =
+separation# (I# low1# high1#) (I# low2# high2#) =
   max# (low1# -# high2#) (low2# -# high1#)
 
 overlap :: Interval units -> Interval units -> Quantity units

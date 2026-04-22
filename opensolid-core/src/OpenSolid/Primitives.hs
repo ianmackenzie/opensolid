@@ -29,7 +29,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
-import OpenSolid.Interval (Interval (Interval#))
+import OpenSolid.Interval (Interval (I#))
 import OpenSolid.Length (Length)
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Q#))
@@ -1220,14 +1220,14 @@ pattern VectorBounds3D ::
   VectorBounds3D units space
 pattern VectorBounds3D x y z <- (viewVectorBounds3D -> (# x, y, z #))
   where
-    VectorBounds3D (Interval# xl# xh#) (Interval# yl# yh#) (Interval# zl# zh#) =
+    VectorBounds3D (I# xl# xh#) (I# yl# yh#) (I# zl# zh#) =
       VectorBounds3D# xl# xh# yl# yh# zl# zh#
 
 viewVectorBounds3D ::
   VectorBounds3D units space ->
   (# Interval units, Interval units, Interval units #)
 viewVectorBounds3D (VectorBounds3D# xl# xh# yl# yh# zl# zh#) =
-  (# Interval# xl# xh#, Interval# yl# yh#, Interval# zl# zh# #)
+  (# I# xl# xh#, I# yl# yh#, I# zl# zh# #)
 
 {-# COMPLETE VectorBounds3D #-}
 
@@ -1413,13 +1413,11 @@ boundsTimesVectorBounds3D ::
   Interval units1 ->
   VectorBounds3D units2 space ->
   VectorBounds3D units3 space
-boundsTimesVectorBounds3D
-  (Interval# vl1# vh1#)
-  (VectorBounds3D# xl2# xh2# yl2# yh2# zl2# zh2#) = do
-    let !(# xl#, xh# #) = intervalTimesInterval# vl1# vh1# xl2# xh2#
-    let !(# yl#, yh# #) = intervalTimesInterval# vl1# vh1# yl2# yh2#
-    let !(# zl#, zh# #) = intervalTimesInterval# vl1# vh1# zl2# zh2#
-    VectorBounds3D# xl# xh# yl# yh# zl# zh#
+boundsTimesVectorBounds3D (I# vl1# vh1#) (VectorBounds3D# xl2# xh2# yl2# yh2# zl2# zh2#) = do
+  let !(# xl#, xh# #) = intervalTimesInterval# vl1# vh1# xl2# xh2#
+  let !(# yl#, yh# #) = intervalTimesInterval# vl1# vh1# yl2# yh2#
+  let !(# zl#, zh# #) = intervalTimesInterval# vl1# vh1# zl2# zh2#
+  VectorBounds3D# xl# xh# yl# yh# zl# zh#
 
 instance
   Multiplication_

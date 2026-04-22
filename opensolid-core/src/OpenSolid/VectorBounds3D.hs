@@ -54,7 +54,7 @@ import OpenSolid.Angle (Angle)
 import {-# SOURCE #-} OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import {-# SOURCE #-} OpenSolid.DirectionBounds3D qualified as DirectionBounds3D
 import OpenSolid.Frame3D qualified as Frame3D
-import OpenSolid.Interval (Interval (Interval, Interval#))
+import OpenSolid.Interval (Interval (I#, Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
@@ -246,7 +246,7 @@ magnitude bounds = do
           (# _, _, _, _, 1#, _ #) -> zMin#
           (# _, _, _, _, _, 1# #) -> negate# zMax#
           (# _, _, _, _, _, _ #) -> 0.0##
-  Interval# minMagnitude# (maxMagnitude# bounds)
+  I# minMagnitude# (maxMagnitude# bounds)
 
 maxMagnitude :: VectorBounds3D units space -> Quantity units
 maxMagnitude bounds = Q# (maxMagnitude# bounds)
@@ -509,4 +509,4 @@ tripleProduct_ bounds1 bounds2 bounds3 = do
           yMax3#
           zMin3#
           zMax3#
-  Interval# low# high#
+  I# low# high#

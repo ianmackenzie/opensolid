@@ -4,7 +4,6 @@ module OpenSolid.Unboxed.Math
   ( Double#
   , Int#
   , Double (D#)
-  , Int (I#)
   , negate#
   , (+#)
   , (-#)
@@ -45,7 +44,7 @@ module OpenSolid.Unboxed.Math
   )
 where
 
-import GHC.Exts (Double (D#), Double#, Int (I#), Int#)
+import GHC.Exts (Double (D#), Double#, Int#)
 import GHC.Exts qualified
 import OpenSolid.Prelude
 
