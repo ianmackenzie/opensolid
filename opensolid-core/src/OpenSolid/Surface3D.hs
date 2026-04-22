@@ -1,5 +1,6 @@
 module OpenSolid.Surface3D
   ( Surface3D
+  , Boundary
   , function
   , domain
   , outerBoundary
@@ -59,10 +60,12 @@ import OpenSolid.VectorCurve3D (VectorCurve3D)
 data Surface3D space = Surface3D
   { function :: SurfaceFunction3D space
   , domain :: UvRegion
-  , outerBoundary :: ~(Set3D space (SurfaceCurve3D space))
-  , innerBoundaries :: ~(Maybe (Set3D space (Set3D space (SurfaceCurve3D space))))
-  , boundaries :: ~(Set3D space (Set3D space (SurfaceCurve3D space)))
+  , outerBoundary :: ~(Boundary space)
+  , innerBoundaries :: ~(Maybe (Set3D space (Boundary space)))
+  , boundaries :: ~(Set3D space (Boundary space))
   }
+
+type Boundary space = Set3D space (SurfaceCurve3D space)
 
 function :: Surface3D space -> SurfaceFunction3D space
 function = (.function)
@@ -70,13 +73,13 @@ function = (.function)
 domain :: Surface3D space -> UvRegion
 domain = (.domain)
 
-outerBoundary :: Surface3D space -> Set3D space (SurfaceCurve3D space)
+outerBoundary :: Surface3D space -> Boundary space
 outerBoundary = (.outerBoundary)
 
 outerLoop :: Surface3D space -> NonEmpty (SurfaceCurve3D space)
 outerLoop = Set3D.toNonEmpty . outerBoundary
 
-innerBoundaries :: Surface3D space -> Maybe (Set3D space (Set3D space (SurfaceCurve3D space)))
+innerBoundaries :: Surface3D space -> Maybe (Set3D space (Boundary space))
 innerBoundaries = (.innerBoundaries)
 
 innerLoops :: Surface3D space -> List (NonEmpty (SurfaceCurve3D space))
@@ -85,7 +88,7 @@ innerLoops surface =
     Nothing -> []
     Just innerBoundarySet -> Set3D.toListOf Set3D.toNonEmpty innerBoundarySet
 
-boundaries :: Surface3D space -> Set3D space (Set3D space (SurfaceCurve3D space))
+boundaries :: Surface3D space -> Set3D space (Boundary space)
 boundaries = (.boundaries)
 
 boundaryLoops :: Surface3D space -> NonEmpty (NonEmpty (SurfaceCurve3D space))
