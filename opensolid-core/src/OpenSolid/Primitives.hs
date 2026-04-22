@@ -1,7 +1,7 @@
 {-# LANGUAGE UnboxedTuples #-}
 
 module OpenSolid.Primitives
-  ( Vector2D (Vector2D, Vector2D#)
+  ( Vector2D (Vector2D, V2D#)
   , Direction2D (Unit2D, Direction2D)
   , Orientation2D (Orientation2D)
   , Point2D (Point2D, Position2D)
@@ -10,7 +10,7 @@ module OpenSolid.Primitives
   , Axis2D (Axis2D, originPoint, direction)
   , Frame2D (Frame2D, originPoint, orientation)
   , Transform2D (Transform2D)
-  , Vector3D (Vector3D, Vector3D#)
+  , Vector3D (Vector3D, V3D#)
   , Direction3D (Unit3D, Direction3D)
   , PlaneOrientation3D (PlaneOrientation3D)
   , Orientation3D (..)
@@ -44,7 +44,7 @@ import OpenSolid.Units qualified as Units
 type role Vector2D phantom
 
 type Vector2D :: Type -> Type
-data Vector2D units = Vector2D# Double# Double#
+data Vector2D units = V2D# Double# Double#
   deriving (Eq, Ord, Show)
 
 -- | Construct a vector from its X and Y components.
@@ -52,11 +52,11 @@ data Vector2D units = Vector2D# Double# Double#
 pattern Vector2D :: Quantity units -> Quantity units -> Vector2D units
 pattern Vector2D vx vy <- (viewVector2D -> (# vx, vy #))
   where
-    Vector2D (Q# vx#) (Q# vy#) = Vector2D# vx# vy#
+    Vector2D (Q# vx#) (Q# vy#) = V2D# vx# vy#
 
 {-# INLINE viewVector2D #-}
 viewVector2D :: Vector2D units -> (# Quantity units, Quantity units #)
-viewVector2D (Vector2D# vx# vy#) = (# Q# vx#, Q# vy# #)
+viewVector2D (V2D# vx# vy#) = (# Q# vx#, Q# vy# #)
 
 {-# COMPLETE Vector2D #-}
 
@@ -75,14 +75,16 @@ instance Units.Coercion (Vector2D units1) (Vector2D units2) where
   coerce = Data.Coerce.coerce
 
 instance ApproximateEquality (Vector2D units) (Tolerance units) where
-  Vector2D# x1# y1# ~= Vector2D# x2# y2# =
-    case hypot2# (x2# -# x1#) (y2# -# y1#) ~=# 0.0## of 1# -> True; _ -> False
+  V2D# x1# y1# ~= V2D# x2# y2# =
+    case hypot2# (x2# -# x1#) (y2# -# y1#) ~=# 0.0## of
+      1# -> True
+      _ -> False
 
 instance HasZero (Vector2D units) where
-  zero = Vector2D# 0.0## 0.0##
+  zero = V2D# 0.0## 0.0##
 
 instance Negation (Vector2D units) where
-  negate (Vector2D# vx# vy#) = Vector2D# (negate# vx#) (negate# vy#)
+  negate (V2D# vx# vy#) = V2D# (negate# vx#) (negate# vy#)
 
 instance Multiplication Sign (Vector2D units) (Vector2D units) where
   Positive * vector = vector
@@ -96,31 +98,31 @@ instance
   units1 ~ units2 =>
   Addition (Vector2D units1) (Vector2D units2) (Vector2D units1)
   where
-  Vector2D# x1# y1# + Vector2D# x2# y2# = Vector2D# (x1# +# x2#) (y1# +# y2#)
+  V2D# x1# y1# + V2D# x2# y2# = V2D# (x1# +# x2#) (y1# +# y2#)
 
 instance
   units1 ~ units2 =>
   Subtraction (Vector2D units1) (Vector2D units2) (Vector2D units1)
   where
-  Vector2D# x1# y1# - Vector2D# x2# y2# = Vector2D# (x1# -# x2#) (y1# -# y2#)
+  V2D# x1# y1# - V2D# x2# y2# = V2D# (x1# -# x2#) (y1# -# y2#)
 
 instance Multiplication_ (Quantity units1) (Vector2D units2) (Vector2D (units1 ?*? units2)) where
-  Q# scale# ?*? Vector2D# vx# vy# = Vector2D# (scale# *# vx#) (scale# *# vy#)
+  Q# scale# ?*? V2D# vx# vy# = V2D# (scale# *# vx#) (scale# *# vy#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Vector2D units2) (Vector2D units3)
   where
-  Q# scale# * Vector2D# vx# vy# = Vector2D# (scale# *# vx#) (scale# *# vy#)
+  Q# scale# * V2D# vx# vy# = V2D# (scale# *# vx#) (scale# *# vy#)
 
 instance Multiplication_ (Vector2D units1) (Quantity units2) (Vector2D (units1 ?*? units2)) where
-  Vector2D# vx# vy# ?*? Q# scale# = Vector2D# (vx# *# scale#) (vy# *# scale#)
+  V2D# vx# vy# ?*? Q# scale# = V2D# (vx# *# scale#) (vy# *# scale#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector2D units1) (Quantity units2) (Vector2D units3)
   where
-  Vector2D# vx# vy# * Q# scale# = Vector2D# (vx# *# scale#) (vy# *# scale#)
+  V2D# vx# vy# * Q# scale# = V2D# (vx# *# scale#) (vy# *# scale#)
 
 instance
   Multiplication_
@@ -801,7 +803,7 @@ instance
 type role Vector3D phantom phantom
 
 type Vector3D :: Type -> Type -> Type
-data Vector3D units space = Vector3D# Double# Double# Double#
+data Vector3D units space = V3D# Double# Double# Double#
   deriving (Eq, Ord, Show)
 
 -- | Construct a vector from its X and Y components.
@@ -809,11 +811,11 @@ data Vector3D units space = Vector3D# Double# Double# Double#
 pattern Vector3D :: Quantity units -> Quantity units -> Quantity units -> Vector3D units space
 pattern Vector3D vx vy vz <- (viewVector3D -> (# vx, vy, vz #))
   where
-    Vector3D (Q# vx#) (Q# vy#) (Q# vz#) = Vector3D# vx# vy# vz#
+    Vector3D (Q# vx#) (Q# vy#) (Q# vz#) = V3D# vx# vy# vz#
 
 {-# INLINE viewVector3D #-}
 viewVector3D :: Vector3D units space -> (# Quantity units, Quantity units, Quantity units #)
-viewVector3D (Vector3D# vx# vy# vz#) = (# Q# vx#, Q# vy#, Q# vz# #)
+viewVector3D (V3D# vx# vy# vz#) = (# Q# vx#, Q# vy#, Q# vz# #)
 
 {-# COMPLETE Vector3D #-}
 

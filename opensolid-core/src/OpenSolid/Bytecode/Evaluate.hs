@@ -30,13 +30,13 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Vector3D (Vector3D#), VectorBounds3D (VB3D#))
+import OpenSolid.Primitives (Vector3D (V3D#), VectorBounds3D (VB3D#))
 import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector2D (Vector2D (Vector2D#))
+import OpenSolid.Vector2D (Vector2D (V2D#))
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
@@ -73,7 +73,7 @@ curve2dValue (Constant value) _ = Vector2D.coerce value
 curve2dValue (Bytecode bytecode) (Q# t#) =
   callFunction bytecode \f# -> do
     let !(# x#, y# #) = opensolid_cmm_curve2d_value f# t#
-    IO.succeed (Vector2D# x# y#)
+    IO.succeed (V2D# x# y#)
 
 curve2dRange :: Compiled Number (Vector2D units1) -> Interval Unitless -> VectorBounds2D units2
 curve2dRange (Constant value) _ = VectorBounds2D.constant (Vector2D.coerce value)
@@ -87,7 +87,7 @@ curve3dValue (Constant value) _ = Vector3D.coerce value
 curve3dValue (Bytecode bytecode) (Q# t#) =
   callFunction bytecode \f# -> do
     let !(# x#, y#, z# #) = opensolid_cmm_curve3d_value f# t#
-    IO.succeed (Vector3D# x# y# z#)
+    IO.succeed (V3D# x# y# z#)
 
 curve3dRange ::
   Compiled Number (Vector3D units1 space1) ->
@@ -119,7 +119,7 @@ surface2dValue (Constant value) _ = Vector2D.coerce value
 surface2dValue (Bytecode bytecode) (Point2D (Q# u#) (Q# v#)) =
   callFunction bytecode \f# -> do
     let !(# x#, y# #) = opensolid_cmm_surface2d_value f# u# v#
-    IO.succeed (Vector2D# x# y#)
+    IO.succeed (V2D# x# y#)
 
 surface2dRange :: Compiled UvPoint (Vector2D units1) -> UvBounds -> VectorBounds2D units2
 surface2dRange (Constant value) _ = VectorBounds2D.constant (Vector2D.coerce value)
@@ -137,7 +137,7 @@ surface3dValue (Constant value) _ = Vector3D.coerce value
 surface3dValue (Bytecode bytecode) (Point2D (Q# u#) (Q# v#)) =
   callFunction bytecode \f# -> do
     let !(# x#, y#, z# #) = opensolid_cmm_surface3d_value f# u# v#
-    IO.succeed (Vector3D# x# y# z#)
+    IO.succeed (V3D# x# y# z#)
 
 surface3dRange ::
   Compiled UvPoint (Vector3D units1 space1) ->

@@ -59,7 +59,7 @@ import OpenSolid.Primitives
   , Plane3D (Plane3D)
   , PlaneOrientation3D (PlaneOrientation3D)
   , Vector2D (Vector2D)
-  , Vector3D (Vector3D, Vector3D#)
+  , Vector3D (V3D#, Vector3D)
   )
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform3D (Transform3D (Transform3D))
@@ -159,7 +159,7 @@ zUpComponents (Vector3D r f u) = (r, f, u)
 
 {-# INLINE zUpComponents# #-}
 zUpComponents# :: Vector3D units space -> (# Double#, Double#, Double# #)
-zUpComponents# (Vector3D# r# f# u#) = (# r#, f#, u# #)
+zUpComponents# (V3D# r# f# u#) = (# r#, f#, u# #)
 
 {-| Get the XYZ components of a vector using a Y-up coordinate convention.
 
@@ -171,7 +171,7 @@ yUpComponents (Vector3D r f u) = (-r, u, f)
 
 {-# INLINE yUpComponents# #-}
 yUpComponents# :: Vector3D units space -> (# Double#, Double#, Double# #)
-yUpComponents# (Vector3D# r# f# u#) = (# negate# r#, u#, f# #)
+yUpComponents# (V3D# r# f# u#) = (# negate# r#, u#, f# #)
 
 interpolateFrom ::
   Vector3D units space ->

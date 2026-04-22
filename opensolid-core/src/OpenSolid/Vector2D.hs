@@ -1,5 +1,5 @@
 module OpenSolid.Vector2D
-  ( Vector2D (Vector2D, Vector2D#)
+  ( Vector2D (Vector2D, V2D#)
   , zero
   , coerce
   , unit
@@ -63,7 +63,7 @@ import OpenSolid.Primitives
   , PlaneOrientation3D (PlaneOrientation3D)
   , Point2D
   , Transform2D (Transform2D)
-  , Vector2D (Vector2D, Vector2D#)
+  , Vector2D (V2D#, Vector2D)
   , Vector3D
   )
 import OpenSolid.Primitives qualified as Primitives
