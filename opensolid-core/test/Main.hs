@@ -4,6 +4,7 @@ import OpenSolid.Prelude
 import Test (Test)
 import Test qualified
 import Tests.Array qualified
+import Tests.Bezier qualified
 import Tests.Body3D qualified
 import Tests.Bounds2D qualified
 import Tests.Bounds3D qualified
@@ -56,6 +57,7 @@ tests =
   , Test.group "Tests.NewtonRaphson" Tests.NewtonRaphson.tests
   , Test.group "Tests.Curve3D" Tests.Curve3D.tests
   , Test.group "Tests.Body3D" Tests.Body3D.tests
+  , Test.group "Tests.Bezier" Tests.Bezier.tests
   ]
 
 main :: IO ()

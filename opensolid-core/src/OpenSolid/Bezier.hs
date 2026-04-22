@@ -3,6 +3,8 @@ module OpenSolid.Bezier
   , Constraints
   , derivative
   , hermite
+  , cubicHermite
+  , quinticHermite
   , segment
   )
 where
@@ -25,6 +27,7 @@ type Vector vector =
 type Constraints point vector =
   ( Vector vector
   , Addition point vector point
+  , Subtraction point vector point
   , Subtraction point point vector
   )
 
@@ -36,6 +39,48 @@ derivative controlPoints = do
   case scaledDifferences of
     [] -> NonEmpty.one zero
     NonEmpty derivativeControlPoints -> derivativeControlPoints
+
+{-# INLINE cubicHermite #-}
+cubicHermite ::
+  Constraints point vector =>
+  point ->
+  vector ->
+  point ->
+  vector ->
+  (point, point, point, point)
+cubicHermite point1 derivative1 point2 derivative2 =
+  ( point1
+  , point1 + (1 / 3) * derivative1
+  , point2 - (1 / 3) * derivative2
+  , point2
+  )
+
+{-# INLINE quinticHermite #-}
+quinticHermite ::
+  Constraints point vector =>
+  point ->
+  vector ->
+  vector ->
+  point ->
+  vector ->
+  vector ->
+  (point, point, point, point, point, point)
+quinticHermite
+  startPoint
+  startFirstDerivative
+  startSecondDerivative
+  endPoint
+  endFirstDerivative
+  endSecondDerivative = do
+    let p1 = startPoint
+    let p6 = endPoint
+    let d2 = (1 / 5) * startFirstDerivative
+    let d5 = (1 / 5) * endFirstDerivative
+    let p2 = startPoint + d2
+    let p5 = endPoint - d5
+    let p3 = p2 + d2 + (1 / 20) * startSecondDerivative
+    let p4 = p5 - d5 + (1 / 20) * endSecondDerivative
+    (p1, p2, p3, p4, p5, p6)
 
 hermite ::
   Constraints point vector =>
