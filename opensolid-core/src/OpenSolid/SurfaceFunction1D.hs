@@ -586,12 +586,12 @@ zeros function
       let dvdu = unsafeQuotient -fu fv
       case Solve2D.search (findZeros function dudv dvdu) AllZeroTypes of
         Ok solutions -> do
-          let partialZeros = List.foldl addSolution PartialZeros.empty solutions
+          let partialZeros = PartialZeros.empty & List.forEach solutions addSolution
           Ok (PartialZeros.finalize function dvdu dudv partialZeros)
         Error Solve2D.InfiniteRecursion -> throw HigherOrderZero
 
-addSolution :: PartialZeros units -> Solution units -> PartialZeros units
-addSolution partialZeros solution = case solution of
+addSolution :: Solution units -> PartialZeros units -> PartialZeros units
+addSolution solution partialZeros = case solution of
   CrossingCurveSolution segment ->
     PartialZeros.addCrossingSegment segment partialZeros
   TangentPointSolution tangentPoint ->

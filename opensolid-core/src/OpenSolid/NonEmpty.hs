@@ -292,7 +292,7 @@ foldr :: (a -> b -> b) -> b -> NonEmpty a -> b
 foldr = Prelude.foldr
 
 reduce :: (a -> a -> a) -> NonEmpty a -> a
-reduce function (x :| xs) = List.foldl function x xs
+reduce function nonEmpty = first nonEmpty & List.forEach (rest nonEmpty) function
 
 reverse :: NonEmpty a -> NonEmpty a
 reverse = Data.List.NonEmpty.reverse

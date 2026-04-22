@@ -74,8 +74,8 @@ traversal = ?context
 inspect :: (Traversal => Model3D space -> a) -> Model3D space -> a
 inspect function model = let ?context = rootContext in function model
 
-applyAttribute :: Context -> Attribute -> Context
-applyAttribute ctx attr = case attr of
+applyAttribute :: Attribute -> Context -> Context
+applyAttribute attr ctx = case attr of
   Name value -> ctx{ownName = Just value}
   PbrMaterial value -> ctx{ownPbrMaterial = Just value, currentPbrMaterial = value}
   -- Note that here we *don't* update currentMultipliedOpacity here,
@@ -95,7 +95,7 @@ inChildContext childAttributes callback = do
           , ownOpacity = 1.0
           , currentMultipliedOpacity = parentContext.currentMultipliedOpacity
           }
-  let appliedContext = List.foldl applyAttribute initialContext childAttributes
+  let appliedContext = initialContext & List.forEach childAttributes applyAttribute
   -- After applying attribute values, update the current multiplied opacity
   -- (just in case the current node has multiple opacity attribute values,
   -- we should only multiply the current opacity by the *last*/active one;

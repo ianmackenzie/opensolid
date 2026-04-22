@@ -33,7 +33,7 @@ collectPrimary callback searchTree accumulated = do
       Resolved Nothing -> accumulated
       Resolved (Just solution) -> (domainBounds, solution) : accumulated
       Unresolved ->
-        List.foldr (collectPrimary callback) accumulated (SearchTree.children searchTree)
+        accumulated & List.forEach (SearchTree.children searchTree) (collectPrimary callback)
     else accumulated
 
 data SolutionTree bounds solution
@@ -98,7 +98,8 @@ collectSolutions ::
   List (bounds, solution)
 collectSolutions (Leaf _ Nothing) accumulated = accumulated
 collectSolutions (Leaf bounds (Just solution)) accumulated = (bounds, solution) : accumulated
-collectSolutions (Node _ children) accumulated = List.foldr collectSolutions accumulated children
+collectSolutions (Node _ children) accumulated =
+  accumulated & List.forEach children collectSolutions
 
 deduplicate ::
   ((bounds, solution) -> (bounds, solution) -> Bool) ->

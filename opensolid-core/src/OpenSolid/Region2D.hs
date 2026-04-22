@@ -208,16 +208,16 @@ fillet ::
   Result Text (Region2D units)
 fillet points ("radius" ::: radius) region = do
   let initialCurves = Set2D.toList (boundaryCurves region)
-  filletedCurves <- Result.foldl (addFillet radius) initialCurves points & Result.orFail
+  filletedCurves <- initialCurves & Result.forEach points (addFillet radius) & Result.orFail
   boundedBy filletedCurves & Result.orFail
 
 addFillet ::
   Tolerance units =>
   Quantity units ->
-  List (Curve2D units) ->
   Point2D units ->
+  List (Curve2D units) ->
   Result Text (List (Curve2D units))
-addFillet radius curves point = do
+addFillet radius point curves = do
   let couldNotFindPointToFillet = Error "Could not find point to fillet"
   let couldNotSolveForFilletLocation = Error "Could not solve for fillet location"
   let curveIncidences = List.map (curveIncidence point) curves

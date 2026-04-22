@@ -194,9 +194,9 @@ finalize function dvdu dudv partialZeros = do
   let piecewiseCurveSegments =
         List.map (piecewiseCurve function dvdu dudv) crossingSegments
   let (piecewiseCurves, crossingLoopSegments) =
-        List.foldr insertPiecewiseCurve ([], []) piecewiseCurveSegments
+        ([], []) & List.forEach piecewiseCurveSegments insertPiecewiseCurve
   let extendedPiecewiseCurves =
-        List.map (\initialCurve -> List.foldl extend initialCurve saddleRegions) piecewiseCurves
+        List.map (List.forEach saddleRegions extendPiecewiseCurve) piecewiseCurves
   let crossingCurveSegments =
         List.map (\(PiecewiseCurve _ _ segments) -> segments) extendedPiecewiseCurves
   Zeros
@@ -209,8 +209,8 @@ finalize function dvdu dudv partialZeros = do
         List.map (Tolerance.using Quantity.zero Curve2D.piecewise) crossingLoopSegments
     }
 
-extend :: Tolerance units => PiecewiseCurve -> SaddleRegion units -> PiecewiseCurve
-extend curve saddleRegion = do
+extendPiecewiseCurve :: Tolerance units => SaddleRegion units -> PiecewiseCurve -> PiecewiseCurve
+extendPiecewiseCurve saddleRegion curve = do
   let (PiecewiseCurve start end segments) = curve
   let extendStart = Domain2D.contacts (SaddleRegion.subdomain saddleRegion) start
   let extendEnd = Domain2D.contacts (SaddleRegion.subdomain saddleRegion) end

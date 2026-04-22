@@ -157,7 +157,7 @@ sum ::
   Exists dimension units space =>
   List (Vector dimension units space) ->
   Vector dimension units space
-sum = List.foldl (+) zero
+sum vectors = zero & List.forEach vectors (+)
 
 {-# INLINE erase #-}
 erase ::

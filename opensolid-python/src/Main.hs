@@ -298,7 +298,7 @@ extraMemberFunctions className = do
 
 ffiTypeDeclarations :: Text
 ffiTypeDeclarations = do
-  let registry = List.foldr registerFunctionTypes Python.Type.Registry.empty API.functions
+  let registry = Python.Type.Registry.empty & List.forEach API.functions registerFunctionTypes
   Python.Type.Registry.typeDeclarations registry
 
 topLevelClassName :: Class -> Maybe Text

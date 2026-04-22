@@ -91,7 +91,15 @@ verticalCurve ::
 verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
   let curveRange = implicitCurveRange boxes
   let clampedURange vValue =
-        List.foldl (clamp vValue) (ImplicitCurveRange.at vValue curveRange) boundingAxes
+        ImplicitCurveRange.at vValue curveRange & do
+          List.forEach boundingAxes \boundingAxis (Interval uLow uHigh) -> do
+            let UvPoint u0 v0 = Axis2D.originPoint boundingAxis
+            let Direction2D du dv = Axis2D.direction boundingAxis
+            let u = u0 + (vValue - v0) * du / dv
+            if
+              | dv > 0.0 -> Interval uLow (min uHigh u)
+              | dv < 0.0 -> Interval (max uLow u) uHigh
+              | otherwise -> Interval uLow uHigh
   let solveForU =
         case (f.compiled, f.du.compiled) of
           (CompiledFunction.Concrete fExpr, CompiledFunction.Concrete fuExpr) ->
@@ -122,13 +130,3 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
     let dvdt = Curve1D.constant (vEnd - vStart)
     let dudt = dvdt * dudv . self
     Curve2D.new (CompiledFunction.abstract value range) (VectorCurve2D.xy dudt dvdt)
-
-clamp :: Number -> Interval Unitless -> Axis2D Unitless -> Interval Unitless
-clamp v (Interval uLow uHigh) axis = do
-  let UvPoint u0 v0 = Axis2D.originPoint axis
-  let Direction2D du dv = Axis2D.direction axis
-  let u = u0 + (v - v0) * du / dv
-  if
-    | dv > 0.0 -> Interval uLow (min uHigh u)
-    | dv < 0.0 -> Interval (max uLow u) uHigh
-    | otherwise -> Interval uLow uHigh
