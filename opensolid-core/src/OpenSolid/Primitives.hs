@@ -15,7 +15,7 @@ module OpenSolid.Primitives
   , PlaneOrientation3D (PlaneOrientation3D)
   , Orientation3D (..)
   , Point3D (Point3D, Position3D)
-  , VectorBounds3D (VectorBounds3D, VectorBounds3D#)
+  , VectorBounds3D (VectorBounds3D, VB3D#)
   , Bounds3D (Bounds3D, PositionBounds3D)
   , Axis3D (Axis3D, originPoint, direction)
   , Plane3D (Plane3D, originPoint, orientation)
@@ -1207,8 +1207,7 @@ instance
 type role VectorBounds3D phantom phantom
 
 type VectorBounds3D :: Type -> Type -> Type
-data VectorBounds3D units space
-  = VectorBounds3D# Double# Double# Double# Double# Double# Double#
+data VectorBounds3D units space = VB3D# Double# Double# Double# Double# Double# Double#
   deriving (Show)
 
 -- | Construct a vector bounds from its rightward, forward and upward components.
@@ -1220,13 +1219,12 @@ pattern VectorBounds3D ::
   VectorBounds3D units space
 pattern VectorBounds3D x y z <- (viewVectorBounds3D -> (# x, y, z #))
   where
-    VectorBounds3D (I# xl# xh#) (I# yl# yh#) (I# zl# zh#) =
-      VectorBounds3D# xl# xh# yl# yh# zl# zh#
+    VectorBounds3D (I# xl# xh#) (I# yl# yh#) (I# zl# zh#) = VB3D# xl# xh# yl# yh# zl# zh#
 
 viewVectorBounds3D ::
   VectorBounds3D units space ->
   (# Interval units, Interval units, Interval units #)
-viewVectorBounds3D (VectorBounds3D# xl# xh# yl# yh# zl# zh#) =
+viewVectorBounds3D (VB3D# xl# xh# yl# yh# zl# zh#) =
   (# I# xl# xh#, I# yl# yh#, I# zl# zh# #)
 
 {-# COMPLETE VectorBounds3D #-}
@@ -1260,14 +1258,8 @@ instance
     r1 `intersects` r2 && f1 `intersects` f2 && u1 `intersects` u2
 
 instance Negation (VectorBounds3D units space) where
-  negate (VectorBounds3D# xl# xh# yl# yh# zl# zh#) = do
-    VectorBounds3D#
-      (negate# xh#)
-      (negate# xl#)
-      (negate# yh#)
-      (negate# yl#)
-      (negate# zh#)
-      (negate# zl#)
+  negate (VB3D# xl# xh# yl# yh# zl# zh#) = do
+    VB3D# (negate# xh#) (negate# xl#) (negate# yh#) (negate# yl#) (negate# zh#) (negate# zl#)
 
 instance
   Multiplication
@@ -1296,12 +1288,11 @@ instance
     (VectorBounds3D units2 space2)
     (VectorBounds3D units1 space1)
   where
-  VectorBounds3D# xl1# xh1# yl1# yh1# zl1# zh1#
-    + VectorBounds3D# xl2# xh2# yl2# yh2# zl2# zh2# = do
-      let !(# xl#, xh# #) = intervalPlusInterval# xl1# xh1# xl2# xh2#
-      let !(# yl#, yh# #) = intervalPlusInterval# yl1# yh1# yl2# yh2#
-      let !(# zl#, zh# #) = intervalPlusInterval# zl1# zh1# zl2# zh2#
-      VectorBounds3D# xl# xh# yl# yh# zl# zh#
+  VB3D# xl1# xh1# yl1# yh1# zl1# zh1# + VB3D# xl2# xh2# yl2# yh2# zl2# zh2# = do
+    let !(# xl#, xh# #) = intervalPlusInterval# xl1# xh1# xl2# xh2#
+    let !(# yl#, yh# #) = intervalPlusInterval# yl1# yh1# yl2# yh2#
+    let !(# zl#, zh# #) = intervalPlusInterval# zl1# zh1# zl2# zh2#
+    VB3D# xl# xh# yl# yh# zl# zh#
 
 instance
   ( space1 ~ space2
@@ -1334,12 +1325,11 @@ instance
     (VectorBounds3D units2 space2)
     (VectorBounds3D units1 space1)
   where
-  VectorBounds3D# xl1# xh1# yl1# yh1# zl1# zh1#
-    - VectorBounds3D# xl2# xh2# yl2# yh2# zl2# zh2# = do
-      let !(# xl#, xh# #) = intervalMinusInterval# xl1# xh1# xl2# xh2#
-      let !(# yl#, yh# #) = intervalMinusInterval# yl1# yh1# yl2# yh2#
-      let !(# zl#, zh# #) = intervalMinusInterval# zl1# zh1# zl2# zh2#
-      VectorBounds3D# xl# xh# yl# yh# zl# zh#
+  VB3D# xl1# xh1# yl1# yh1# zl1# zh1# - VB3D# xl2# xh2# yl2# yh2# zl2# zh2# = do
+    let !(# xl#, xh# #) = intervalMinusInterval# xl1# xh1# xl2# xh2#
+    let !(# yl#, yh# #) = intervalMinusInterval# yl1# yh1# yl2# yh2#
+    let !(# zl#, zh# #) = intervalMinusInterval# zl1# zh1# zl2# zh2#
+    VB3D# xl# xh# yl# yh# zl# zh#
 
 instance
   ( space1 ~ space2
@@ -1368,11 +1358,11 @@ quantityTimesVectorBounds3D ::
   Quantity units1 ->
   VectorBounds3D units2 space ->
   VectorBounds3D units3 space
-quantityTimesVectorBounds3D (Q# v1#) (VectorBounds3D# xl2# xh2# yl2# yh2# zl2# zh2#) = do
+quantityTimesVectorBounds3D (Q# v1#) (VB3D# xl2# xh2# yl2# yh2# zl2# zh2#) = do
   let !(# xl#, xh# #) = doubleTimesInterval# v1# xl2# xh2#
   let !(# yl#, yh# #) = doubleTimesInterval# v1# yl2# yh2#
   let !(# zl#, zh# #) = doubleTimesInterval# v1# zl2# zh2#
-  VectorBounds3D# xl# xh# yl# yh# zl# zh#
+  VB3D# xl# xh# yl# yh# zl# zh#
 
 instance
   Multiplication_
@@ -1413,11 +1403,11 @@ boundsTimesVectorBounds3D ::
   Interval units1 ->
   VectorBounds3D units2 space ->
   VectorBounds3D units3 space
-boundsTimesVectorBounds3D (I# vl1# vh1#) (VectorBounds3D# xl2# xh2# yl2# yh2# zl2# zh2#) = do
+boundsTimesVectorBounds3D (I# vl1# vh1#) (VB3D# xl2# xh2# yl2# yh2# zl2# zh2#) = do
   let !(# xl#, xh# #) = intervalTimesInterval# vl1# vh1# xl2# xh2#
   let !(# yl#, yh# #) = intervalTimesInterval# vl1# vh1# yl2# yh2#
   let !(# zl#, zh# #) = intervalTimesInterval# vl1# vh1# zl2# zh2#
-  VectorBounds3D# xl# xh# yl# yh# zl# zh#
+  VB3D# xl# xh# yl# yh# zl# zh#
 
 instance
   Multiplication_

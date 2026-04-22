@@ -67,7 +67,7 @@ import OpenSolid.Primitives
   , Vector2D (Vector2D)
   , Vector3D (Vector3D)
   , VectorBounds2D (VectorBounds2D)
-  , VectorBounds3D (VectorBounds3D, VectorBounds3D#)
+  , VectorBounds3D (VB3D#, VectorBounds3D)
   )
 import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
@@ -210,7 +210,7 @@ squaredMagnitude_ (VectorBounds3D x y z) =
 
 magnitude :: VectorBounds3D units space -> Interval units
 magnitude bounds = do
-  let !(VectorBounds3D# xMin# xMax# yMin# yMax# zMin# zMax#) = bounds
+  let !(VB3D# xMin# xMax# yMin# yMax# zMin# zMax#) = bounds
   let positiveX# = xMin# >=# 0.0##
   let negativeX# = xMax# <=# 0.0##
   let positiveY# = yMin# >=# 0.0##
@@ -252,7 +252,7 @@ maxMagnitude :: VectorBounds3D units space -> Quantity units
 maxMagnitude bounds = Q# (maxMagnitude# bounds)
 
 maxMagnitude# :: VectorBounds3D units space -> Double#
-maxMagnitude# (VectorBounds3D# minX# maxX# minY# maxY# minZ# maxZ#) = do
+maxMagnitude# (VB3D# minX# maxX# minY# maxY# minZ# maxZ#) = do
   let xMagnitude# = max# (abs# minX#) (abs# maxX#)
   let yMagnitude# = max# (abs# minY#) (abs# maxY#)
   let zMagnitude# = max# (abs# minZ#) (abs# maxZ#)
@@ -486,9 +486,9 @@ tripleProduct_ ::
   VectorBounds3D units space ->
   Interval ((units ?*? units) ?*? units)
 tripleProduct_ bounds1 bounds2 bounds3 = do
-  let !(VectorBounds3D# xMin1# xMax1# yMin1# yMax1# zMin1# zMax1#) = bounds1
-  let !(VectorBounds3D# xMin2# xMax2# yMin2# yMax2# zMin2# zMax2#) = bounds2
-  let !(VectorBounds3D# xMin3# xMax3# yMin3# yMax3# zMin3# zMax3#) = bounds3
+  let !(VB3D# xMin1# xMax1# yMin1# yMax1# zMin1# zMax1#) = bounds1
+  let !(VB3D# xMin2# xMax2# yMin2# yMax2# zMin2# zMax2#) = bounds2
+  let !(VB3D# xMin3# xMax3# yMin3# yMax3# zMin3# zMax3#) = bounds3
   let !(# low#, high# #) =
         determinantBounds3D#
           xMin1#

@@ -30,7 +30,7 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Vector3D (Vector3D#), VectorBounds3D (VectorBounds3D#))
+import OpenSolid.Primitives (Vector3D (Vector3D#), VectorBounds3D (VB3D#))
 import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
@@ -98,7 +98,7 @@ curve3dRange (Bytecode bytecode) (I# tLow# tHigh#) =
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh#, yLow#, yHigh#, zLow#, zHigh# #) =
           opensolid_cmm_curve3d_bounds f# tLow# tHigh#
-    IO.succeed (VectorBounds3D# xLow# xHigh# yLow# yHigh# zLow# zHigh#)
+    IO.succeed (VB3D# xLow# xHigh# yLow# yHigh# zLow# zHigh#)
 
 surface1dValue :: Compiled UvPoint (Quantity units1) -> UvPoint -> Quantity units2
 surface1dValue (Constant value) _ = Quantity.coerce value
@@ -148,7 +148,7 @@ surface3dRange (Bytecode bytecode) (Bounds2D (I# uLow# uHigh#) (I# vLow# vHigh#)
   callFunction bytecode \f# -> do
     let !(# xLow#, xHigh#, yLow#, yHigh#, zLow#, zHigh# #) =
           opensolid_cmm_surface3d_bounds f# uLow# uHigh# vLow# vHigh#
-    IO.succeed (VectorBounds3D# xLow# xHigh# yLow# yHigh# zLow# zHigh#)
+    IO.succeed (VB3D# xLow# xHigh# yLow# yHigh# zLow# zHigh#)
 
 callSolver :: ByteString -> ByteString -> (CString -> CString -> IO a) -> a
 callSolver functionBytes derivativeBytes callback =
