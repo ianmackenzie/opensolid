@@ -745,8 +745,8 @@ arcLengthParameterization curve =
     Error IsDegenerate -> (Curve1D.t, Quantity.zero)
     Ok nondegenerateCurve -> do
       let (parameterizationValue, length) = arcLengthParameterizationFunction curve
-      let parameterizationRange (Interval uLow uHigh) =
-            Interval (parameterizationValue uLow) (parameterizationValue uHigh)
+      let parameterizationRange (Interval sLow sHigh) =
+            Interval (parameterizationValue sLow) (parameterizationValue sHigh)
       let compiledParameterization =
             CompiledFunction.abstract parameterizationValue parameterizationRange
       let nondegenerateDerivative = Curve.Nondegenerate.derivative nondegenerateCurve

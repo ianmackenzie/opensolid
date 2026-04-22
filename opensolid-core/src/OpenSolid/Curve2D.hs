@@ -740,8 +740,8 @@ makePiecewise :: NonEmpty (Curve2D units, Quantity units) -> Curve2D units
 makePiecewise parameterizedSegments = do
   let segmentArray = Array.fromNonEmpty parameterizedSegments
   let (tree, arcLength) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
-  let pointImpl t = piecewisePoint tree (arcLength * t)
-  let rangeImpl (Interval t1 t2) = piecewiseRange tree (arcLength * t1) (arcLength * t2)
+  let pointImpl s = piecewisePoint tree (arcLength * s)
+  let rangeImpl (Interval s1 s2) = piecewiseRange tree (arcLength * s1) (arcLength * s2)
   new
     (CompiledFunction.abstract pointImpl rangeImpl)
     (piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength)
@@ -805,8 +805,8 @@ piecewiseDerivative ::
   Quantity units ->
   VectorCurve2D units
 piecewiseDerivative tree length = do
-  let valueImpl t = piecewiseDerivativeValue tree (length * t)
-  let rangeImpl (Interval t1 t2) = piecewiseDerivativeRange tree (length * t1) (length * t2)
+  let valueImpl s = piecewiseDerivativeValue tree (length * s)
+  let rangeImpl (Interval s1 s2) = piecewiseDerivativeRange tree (length * s1) (length * s2)
   VectorCurve2D.new
     (CompiledFunction.abstract valueImpl rangeImpl)
     (piecewiseDerivative (piecewiseDerivativeTreeDerivative tree length) length)

@@ -18,24 +18,24 @@ parameterization ::
   (Number -> Quantity units) ->
   (Number -> Quantity units) ->
   (Number -> Number, Quantity units)
-parameterization dsdt d2sdt2 = do
-  let dsdt1 = dsdt 0.0
-  let dsdt2 = dsdt Lobatto.p2
-  let dsdt3 = dsdt Lobatto.p3
-  let dsdt4 = dsdt 1.0
+parameterization dldt d2ldt2 = do
+  let dldt1 = dldt 0.0
+  let dldt2 = dldt Lobatto.p2
+  let dldt3 = dldt Lobatto.p3
+  let dldt4 = dldt 1.0
   if
-    | isConstant dsdt1 dsdt2 dsdt3 dsdt4 -> (id, dsdt1)
-    | isLinear dsdt1 dsdt2 dsdt3 dsdt4 -> do
-        let delta = dsdt4 - dsdt1
-        let t0 = -dsdt1 / delta
+    | isConstant dldt1 dldt2 dldt3 dldt4 -> (id, dldt1)
+    | isLinear dldt1 dldt2 dldt3 dldt4 -> do
+        let delta = dldt4 - dldt1
+        let t0 = -dldt1 / delta
         let sign = Sign.value (Quantity.sign delta)
-        let function t = t0 + sign * Number.sqrt (t0 * t0 + (1.0 - 2.0 * t0) * t)
-        let length = 0.5 * (dsdt1 + dsdt4)
+        let function s = t0 + sign * Number.sqrt (t0 * t0 + (1.0 - 2.0 * t0) * s)
+        let length = 0.5 * (dldt1 + dldt4)
         (function, length)
     | otherwise -> do
-        let coarseEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
-        let (tree, length) = buildTree 1 dsdt d2sdt2 0.0 1.0 dsdt1 dsdt4 coarseEstimate
-        let function t = evaluateIn tree (t * length)
+        let coarseEstimate = Lobatto.estimate dldt1 dldt2 dldt3 dldt4
+        let (tree, length) = buildTree 1 dldt d2ldt2 0.0 1.0 dldt1 dldt4 coarseEstimate
+        let function s = evaluateIn tree (s * length)
         (function, length)
 
 isConstant ::
@@ -64,9 +64,9 @@ evaluateIn tree length = case tree of
   Node leftTree leftLength rightTree
     | length < leftLength -> evaluateIn leftTree length
     | otherwise -> evaluateIn rightTree (length - leftLength)
-  Leaf segmentLength p1# p2# p3# p4# p5# p6# -> do
-    let !(Quantity# t#) = length / segmentLength
-    Quantity# (quinticBezier# p1# p2# p3# p4# p5# p6# t#)
+  Leaf segmentLength t1# t2# t3# t4# t5# t6# -> do
+    let !(Quantity# s#) = length / segmentLength
+    Quantity# (quinticBezier# t1# t2# t3# t4# t5# t6# s#)
 
 buildTree ::
   Int ->
@@ -78,30 +78,30 @@ buildTree ::
   Quantity units ->
   Quantity units ->
   (Tree units, Quantity units)
-buildTree level dsdt d2sdt2 tStart tEnd dsdtStart dsdtEnd coarseEstimate = do
+buildTree level dldt d2ldt2 tStart tEnd dldtStart dldtEnd coarseEstimate = do
   let tMid = Number.midpoint tStart tEnd
-  let dsdtMid = dsdt tMid
-  let dsdtLeft2 = dsdt (Number.interpolateFrom tStart tMid Lobatto.p2)
-  let dsdtLeft3 = dsdt (Number.interpolateFrom tStart tMid Lobatto.p3)
-  let dsdtRight2 = dsdt (Number.interpolateFrom tMid tEnd Lobatto.p2)
-  let dsdtRight3 = dsdt (Number.interpolateFrom tMid tEnd Lobatto.p3)
+  let dldtMid = dldt tMid
+  let dldtLeft2 = dldt (Number.interpolateFrom tStart tMid Lobatto.p2)
+  let dldtLeft3 = dldt (Number.interpolateFrom tStart tMid Lobatto.p3)
+  let dldtRight2 = dldt (Number.interpolateFrom tMid tEnd Lobatto.p2)
+  let dldtRight3 = dldt (Number.interpolateFrom tMid tEnd Lobatto.p3)
   let halfWidth = 0.5 * (tEnd - tStart)
-  let leftEstimate = halfWidth * Lobatto.estimate dsdtStart dsdtLeft2 dsdtLeft3 dsdtMid
-  let rightEstimate = halfWidth * Lobatto.estimate dsdtMid dsdtRight2 dsdtRight3 dsdtEnd
+  let leftEstimate = halfWidth * Lobatto.estimate dldtStart dldtLeft2 dldtLeft3 dldtMid
+  let rightEstimate = halfWidth * Lobatto.estimate dldtMid dldtRight2 dldtRight3 dldtEnd
   let fineEstimate = leftEstimate + rightEstimate
   if level >= 10 || Quantity.abs (fineEstimate - coarseEstimate) <= 1e-12 * fineEstimate
     then do
-      let deltaS = fineEstimate
-      let dtduStart = deltaS / dsdtStart
-      let dtduEnd = deltaS / dsdtEnd
-      let d2tdu2Start = -deltaS ?*? d2sdt2 tStart * dtduStart / Quantity.squared_ dsdtStart
-      let d2tdu2End = -deltaS ?*? d2sdt2 tEnd * dtduEnd / Quantity.squared_ dsdtEnd
-      let !(Quantity# p1#, Quantity# p2#, Quantity# p3#, Quantity# p4#, Quantity# p5#, Quantity# p6#) =
-            Bezier.quinticHermite tStart dtduStart d2tdu2Start tEnd dtduEnd d2tdu2End
-      (Leaf deltaS p1# p2# p3# p4# p5# p6#, fineEstimate)
+      let segmentLength = fineEstimate
+      let dtdsStart = segmentLength / dldtStart
+      let dtdsEnd = segmentLength / dldtEnd
+      let d2tds2Start = -segmentLength ?*? d2ldt2 tStart * dtdsStart / Quantity.squared_ dldtStart
+      let d2tds2End = -segmentLength ?*? d2ldt2 tEnd * dtdsEnd / Quantity.squared_ dldtEnd
+      let !(Quantity# t1#, Quantity# t2#, Quantity# t3#, Quantity# t4#, Quantity# t5#, Quantity# t6#) =
+            Bezier.quinticHermite tStart dtdsStart d2tds2Start tEnd dtdsEnd d2tds2End
+      (Leaf segmentLength t1# t2# t3# t4# t5# t6#, segmentLength)
     else do
       let (leftTree, leftLength) =
-            buildTree (level + 1) dsdt d2sdt2 tStart tMid dsdtStart dsdtMid leftEstimate
+            buildTree (level + 1) dldt d2ldt2 tStart tMid dldtStart dldtMid leftEstimate
       let (rightTree, rightLength) =
-            buildTree (level + 1) dsdt d2sdt2 tMid tEnd dsdtMid dsdtEnd rightEstimate
+            buildTree (level + 1) dldt d2ldt2 tMid tEnd dldtMid dldtEnd rightEstimate
       (Node leftTree leftLength rightTree, leftLength + rightLength)
