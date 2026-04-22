@@ -423,13 +423,12 @@ testCurveSqrt = Tolerance.using 1e-6 do
   Svg.write
     "executables/sandbox/cos-sqrt.svg"
     (Debug.Plot.viewBox (Point2D -0.1 -4.1) (Point2D 1.1 4.1))
-    ( Svg.group
-        [ Debug.Plot.xAxis 0.0 1.0
-        , Debug.Plot.yAxis 0.0 1.0
-        , Debug.Plot.curve curve
-        , Debug.Plot.curve curve'
-        ]
-    )
+    $ Svg.group
+      [ Debug.Plot.xAxis 0.0 1.0
+      , Debug.Plot.yAxis 0.0 1.0
+      , Debug.Plot.curve curve
+      , Debug.Plot.curve curve'
+      ]
 
 main :: IO ()
 main = Tolerance.using Length.defaultTolerance do
