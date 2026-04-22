@@ -116,13 +116,13 @@ takeMax givenMap =
     else Pair.mapFirst Just (Data.Map.Strict.deleteFindMax givenMap)
 
 foldr :: (v -> a -> a) -> a -> Map k v -> a
-foldr = Data.Map.Strict.foldr
+foldr = Data.Map.Strict.foldr'
 
 foldrWithKey :: (k -> v -> a -> a) -> a -> Map k v -> a
-foldrWithKey = Data.Map.Strict.foldrWithKey
+foldrWithKey = Data.Map.Strict.foldrWithKey'
 
 foldl :: (a -> v -> a) -> a -> Map k v -> a
 foldl = Data.Map.Strict.foldl'
 
 foldlWithKey :: (a -> k -> v -> a) -> a -> Map k v -> a
-foldlWithKey = Data.Map.Strict.foldlWithKey
+foldlWithKey = Data.Map.Strict.foldlWithKey'
