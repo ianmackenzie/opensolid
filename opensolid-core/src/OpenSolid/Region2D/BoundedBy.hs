@@ -7,5 +7,4 @@ data Error
   | BoundaryHasGaps
   | BoundaryIntersectsItself
   | MultipleDisjointRegions
-  | BoundaryCurveHasDegeneracy
   deriving (Eq, Show)

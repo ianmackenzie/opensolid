@@ -6,5 +6,4 @@ data Error
   = EmptyBody
   | BoundaryHasGaps
   | BoundaryIntersectsItself
-  | BoundaryCurveHasDegeneracy
   deriving (Eq, Show)
