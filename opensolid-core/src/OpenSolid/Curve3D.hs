@@ -22,6 +22,7 @@ module OpenSolid.Curve3D
   , tangentDirection
   , tangentDirectionRange
   , curvatureVector
+  , isPoint
   , startPoint
   , endPoint
   , endpoints
@@ -196,6 +197,9 @@ curvatureVector ::
   Curve3D space ->
   Result HasSingularity (VectorCurve3D InverseMeters space)
 curvatureVector curve = Result.map Units.specialize (Curve.curvatureVector_ curve)
+
+isPoint :: Tolerance Meters => Curve3D space -> Bool
+isPoint = Curve.isPoint
 
 startPoint :: Curve3D space -> Point3D space
 startPoint = Curve.startPoint
