@@ -1,6 +1,28 @@
-Simplify Body3D 'stitching'
-- should be able to avoid iterative construction if surfaces are assumed to be oriented properly
-  - independently compare every surface to every other surface...
+Rework CDT code to encode arrays using Builder and then Data.ByteString.Unsafe.unsafeUseAsCStringLen
+
+Move IndexOutOfBounds into Error module?
+- search for other error types ('deriving (Show, Exception)' or just search for Exception)
+  - HigherOrderZero, InfiniteRecursion, InternalError?
+- rename Error module to Exception?
+
+Add support for 'Nondegenerate Surface3D'
+- then refactor Body3D to store a set of 'Nondegenerate Surface3D'
+
+Tweak meshing to require monotonicity?
+- resolved normal/tangent direction
+- maybe two-phase refinement...refine until normal/tangent is resolved,
+  then switch to sampling-based to avoid computing normal/tangent direction any more
+
+Optimize bytecode compilation
+- or try to simplify expressions/ASTs
+  - dump out ASTs/instructions and see what can be simplified...
+  - also has the benefit of making *evaluation* faster!
+  - one candidate: add specialized SurfaceFunction3D.planar, use in Surface3D.on constructor
+  - generally dig through curve construction functions used in gear generation example and try to simplify/optimize?
+
+Implement 'perfect' Body3D stitching?
+- tweak Set indexing to be cyclic, so that it's possible to use index increment/decrement to get the next/previous edge in a loop?
+- build up *vertex* adjacency map of some sort
 
 Implement Surface3D.findPoint
 
@@ -9,6 +31,11 @@ Implement Curve3D-Surface3D intersection
 Implement Surface3D-Surface3D intersection...
 
 Switch DirectionCurve to be an actual type instead of a type family
+
+Switch e.g. Curve.arcLengthParameterization to only return the 'Curve1D Unitless'
+- have separate 'Curve.arcLengthAndParameterization' to return the tuple
+- similarly 'Curve.arcLengthParameterizationFunction' and 'Curve.arcLengthAndParameterizationFunction'
+- what about 'Curve.parameterizeByArcLength'?
 
 Move piecewise curve construction into Curve module
 
