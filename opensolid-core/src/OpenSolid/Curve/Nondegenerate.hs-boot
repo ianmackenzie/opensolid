@@ -1,6 +1,7 @@
 module OpenSolid.Curve.Nondegenerate
   ( derivative
   , tangentDirectionValue
+  , findPoint
   )
 where
 
@@ -9,6 +10,7 @@ import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.Nondegenerate (Nondegenerate)
+import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.VectorCurve (VectorCurve)
 
@@ -24,3 +26,8 @@ tangentDirectionValue ::
   Nondegenerate (Curve dimension units space) ->
   Number ->
   Direction dimension space
+findPoint ::
+  (Curve.Exists dimension units space, Tolerance units) =>
+  Point dimension units space ->
+  Nondegenerate (Curve dimension units space) ->
+  List Number

@@ -537,7 +537,7 @@ yCoordinate curve = do
 coordinates :: Curve2D units -> (Curve1D units, Curve1D units)
 coordinates curve = (xCoordinate curve, yCoordinate curve)
 
-findPoint :: Tolerance units => Point2D units -> Curve2D units -> List Number
+findPoint :: Tolerance units => Point2D units -> Curve2D units -> Result IsDegenerate (List Number)
 findPoint = Curve.findPoint
 
 intersections ::

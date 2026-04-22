@@ -96,7 +96,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
@@ -108,7 +107,6 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
-import OpenSolid.Search qualified as Search
 import OpenSolid.SearchDomain qualified as SearchDomain
 import OpenSolid.SearchTree qualified as SearchTree
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
@@ -283,25 +281,36 @@ instance
   units1 ~ units2 =>
   Intersects (Curve2D units1) (Point2D units2) (Tolerance units1)
   where
-  curve `intersects` givenPoint = not (List.isEmpty (findPoint givenPoint curve))
+  intersects curve givenPoint = intersects givenPoint curve
 
 instance
   units1 ~ units2 =>
   Intersects (Point2D units1) (Curve2D units2) (Tolerance units1)
   where
-  givenPoint `intersects` curve = curve `intersects` givenPoint
+  intersects = intersectsPoint
 
 instance
   space1 ~ space2 =>
   Intersects (Curve3D space1) (Point3D space2) (Tolerance Meters)
   where
-  curve `intersects` givenPoint = not (List.isEmpty (findPoint givenPoint curve))
+  intersects curve givenPoint = intersects givenPoint curve
 
 instance
   space1 ~ space2 =>
   Intersects (Point3D space1) (Curve3D space2) (Tolerance Meters)
   where
-  givenPoint `intersects` curve = curve `intersects` givenPoint
+  intersects = intersectsPoint
+
+intersectsPoint ::
+  (Exists dimension units space, Tolerance units) =>
+  Point dimension units space ->
+  Curve dimension units space ->
+  Bool
+intersectsPoint givenPoint curve = case nondegenerate curve of
+  Error IsDegenerate -> givenPoint ~= startPoint curve
+  Ok nondegenerateCurve ->
+    Curve.Nondegenerate.findPoint givenPoint nondegenerateCurve
+      & not . List.isEmpty
 
 instance
   Exists dimension units space =>
@@ -382,6 +391,8 @@ class
       (Curve dimension units space)
       (Point dimension units space)
       (Vector dimension units space)
+  , Intersects (Curve dimension units space) (Point dimension units space) (Tolerance units)
+  , Intersects (Point dimension units space) (Curve dimension units space) (Tolerance units)
   ) =>
   Exists dimension units space
 
@@ -639,35 +650,9 @@ findPoint ::
   (Exists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Curve dimension units space ->
-  List Number
-findPoint givenPoint curve = do
-  let evaluate tValue = (# point curve tValue - givenPoint, derivativeValue curve tValue #)
-  let isSolution tValue = point curve tValue ~= givenPoint
-  let isDegenerate tValue = derivativeValue curve tValue ~= Vector.zero
-  let endpointSolutions = List.filter isSolution [0.0, 1.0]
-  let solveMonotonic tRange = do
-        let tMid = Interval.midpoint tRange
-        let tSolution = NewtonRaphson.curve evaluate tMid
-        if Search.isInterior tSolution tRange && isSolution tSolution
-          then Resolved (Just tSolution)
-          else Unresolved
-  let interiorSolution tRange segment
-        | not (givenPoint `intersects` Curve.Segment.range segment) = Resolved Nothing
-        | otherwise = do
-            let isMonotonic = Curve.Segment.monotonic segment
-            let isSmall = SearchDomain.isSmall tRange
-            let endpointSolution = List.find (Number.includedIn tRange) endpointSolutions
-            let hasEndpointSolution = endpointSolution /= Nothing
-            if
-              | isMonotonic && hasEndpointSolution -> Resolved Nothing
-              | isSmall, Just tValue <- endpointSolution, isDegenerate tValue -> Resolved Nothing
-              | isMonotonic -> solveMonotonic tRange
-              | otherwise -> Unresolved
-  let isDuplicate (tRange1, _) (tRange2, _) = SearchDomain.overlapping tRange1 tRange2
-  let interiorSolutions =
-        Search.exclusive interiorSolution isDuplicate (searchTree curve)
-          & List.map Pair.second
-  List.sort (endpointSolutions <> interiorSolutions)
+  Result IsDegenerate (List Number)
+findPoint givenPoint curve =
+  Result.map (Curve.Nondegenerate.findPoint givenPoint) (nondegenerate curve)
 
 intersections ::
   ( Exists dimension units space

@@ -76,10 +76,10 @@ findPoint = Test.verify "findPoint" do
   let p2 = Point2D.meters 1.0 2.0
   let p3 = Point2D.meters 2.0 0.0
   let testSpline = Curve2D.quadraticBezier p1 p2 p3
-  let startParameterValues = Curve2D.findPoint Point2D.origin testSpline
-  let endParameterValues = Curve2D.findPoint (Point2D.meters 2.0 0.0) testSpline
-  let midParameterValues = Curve2D.findPoint (Point2D.meters 1.0 1.0) testSpline
-  let offCurveParameterValues = Curve2D.findPoint (Point2D.meters 1.0 1.1) testSpline
+  startParameterValues <- Curve2D.findPoint Point2D.origin testSpline & Result.orFail
+  endParameterValues <- Curve2D.findPoint (Point2D.meters 2.0 0.0) testSpline & Result.orFail
+  midParameterValues <- Curve2D.findPoint (Point2D.meters 1.0 1.0) testSpline & Result.orFail
+  offCurveParameterValues <- Curve2D.findPoint (Point2D.meters 1.0 1.1) testSpline & Result.orFail
   Tolerance.using 1e-12 do
     Test.all
       [ Test.expect (startParameterValues ~= [0.0])
@@ -100,7 +100,7 @@ findOwnPoint = Test.check 500 "findOwnPoint" do
   let testSpline = Curve2D.quadraticBezier p1 p2 p3
   t <- Test.generate Parameter.random
   let p = Curve2D.point testSpline t
-  let solutions = Curve2D.findPoint p testSpline
+  solutions <- Curve2D.findPoint p testSpline & Result.orFail
   Tolerance.using 1e-12 do
     Test.expect (solutions ~= [t])
       & Test.output "t" t
