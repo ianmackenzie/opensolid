@@ -41,6 +41,7 @@ module OpenSolid.Unboxed.Math
   , intervalOverInterval#
   , determinantBounds2D#
   , determinantBounds3D#
+  , quinticBezier#
   )
 where
 
@@ -292,3 +293,38 @@ determinantBounds3D#
     let !(# dxyMin#, dxyMax# #) =
           intervalMinusInterval# x1ProdMin# x1ProdMax# y1ProdMin# y1ProdMax#
     intervalPlusInterval# dxyMin# dxyMax# z1ProdMin# z1ProdMax#
+
+{-# INLINE lerp# #-}
+lerp# :: Double# -> Double# -> Double# -> Double#
+lerp# start# end# t# = start# +# t# *# (end# -# start#)
+
+quinticBezier# ::
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double#
+quinticBezier# p1# p2# p3# p4# p5# p6# t# = do
+  -- First De Casteljau step
+  let a1# = lerp# p1# p2# t#
+  let a2# = lerp# p2# p3# t#
+  let a3# = lerp# p3# p4# t#
+  let a4# = lerp# p4# p5# t#
+  let a5# = lerp# p5# p6# t#
+  -- Second De Casteljau step
+  let b1# = lerp# a1# a2# t#
+  let b2# = lerp# a2# a3# t#
+  let b3# = lerp# a3# a4# t#
+  let b4# = lerp# a4# a5# t#
+  -- Third De Casteljau step
+  let c1# = lerp# b1# b2# t#
+  let c2# = lerp# b2# b3# t#
+  let c3# = lerp# b3# b4# t#
+  -- Fourth De Casteljau step
+  let d1# = lerp# c1# c2# t#
+  let d2# = lerp# c2# c3# t#
+  -- Fifth De Casteljau step
+  lerp# d1# d2# t#

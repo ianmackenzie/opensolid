@@ -243,6 +243,7 @@ library
     OpenSolid.Transform3D
     OpenSolid.Triangle2D
     OpenSolid.Triangle3D
+    OpenSolid.Unboxed.Math
     OpenSolid.Units
     OpenSolid.UvBounds
     OpenSolid.UvPoint
@@ -297,7 +298,6 @@ library
     OpenSolid.SurfaceFunction1D.Subproblem
     OpenSolid.SurfaceFunction1D.VerticalCurve
     OpenSolid.Text.Parse
-    OpenSolid.Unboxed.Math
 
   hs-source-dirs: src
   cxx-sources:
