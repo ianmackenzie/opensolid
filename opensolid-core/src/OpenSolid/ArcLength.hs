@@ -4,7 +4,7 @@ import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Lobatto qualified as Lobatto
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Sign qualified as Sign
 import OpenSolid.Unboxed.Math
@@ -65,8 +65,8 @@ evaluateIn tree length = case tree of
     | length < leftLength -> evaluateIn leftTree length
     | otherwise -> evaluateIn rightTree (length - leftLength)
   Leaf segmentLength t1# t2# t3# t4# t5# t6# -> do
-    let !(Quantity# s#) = length / segmentLength
-    Quantity# (quinticBezier# t1# t2# t3# t4# t5# t6# s#)
+    let !(Q# s#) = length / segmentLength
+    Q# (quinticBezier# t1# t2# t3# t4# t5# t6# s#)
 
 buildTree ::
   Int ->
@@ -96,7 +96,7 @@ buildTree level dldt d2ldt2 tStart tEnd dldtStart dldtEnd coarseEstimate = do
       let dtdsEnd = segmentLength / dldtEnd
       let d2tds2Start = -segmentLength ?*? d2ldt2 tStart * dtdsStart / Quantity.squared_ dldtStart
       let d2tds2End = -segmentLength ?*? d2ldt2 tEnd * dtdsEnd / Quantity.squared_ dldtEnd
-      let !(Quantity# t1#, Quantity# t2#, Quantity# t3#, Quantity# t4#, Quantity# t5#, Quantity# t6#) =
+      let !(Q# t1#, Q# t2#, Q# t3#, Q# t4#, Q# t5#, Q# t6#) =
             Bezier.quinticHermite tStart dtdsStart d2tds2Start tEnd dtdsEnd d2tds2End
       (Leaf segmentLength t1# t2# t3# t4# t5# t6#, segmentLength)
     else do

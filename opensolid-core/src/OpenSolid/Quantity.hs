@@ -1,5 +1,5 @@
 module OpenSolid.Quantity
-  ( Quantity (Quantity, Quantity#)
+  ( Quantity (Quantity, Q#)
   , zero
   , unit
   , infinity
@@ -41,11 +41,11 @@ import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 import Prelude qualified
 
-{-# COMPLETE Quantity# #-}
+{-# COMPLETE Q# #-}
 
-{-# INLINE Quantity# #-}
-pattern Quantity# :: Double# -> Quantity units
-pattern Quantity# x# = Quantity (D# x#)
+{-# INLINE Q# #-}
+pattern Q# :: Double# -> Quantity units
+pattern Q# x# = Quantity (D# x#)
 
 {-# INLINE zero #-}
 zero :: Quantity units
@@ -94,10 +94,10 @@ sqrt_ x | x <= zero = zero
 sqrt_ (Quantity x) = Quantity (Prelude.sqrt x)
 
 hypot2 :: Quantity units -> Quantity units -> Quantity units
-hypot2 (Quantity# x#) (Quantity# y#) = Quantity# (hypot2# x# y#)
+hypot2 (Q# x#) (Q# y#) = Q# (hypot2# x# y#)
 
 hypot3 :: Quantity units -> Quantity units -> Quantity units -> Quantity units
-hypot3 (Quantity# x#) (Quantity# y#) (Quantity# z#) = Quantity# (hypot3# x# y# z#)
+hypot3 (Q# x#) (Q# y#) (Q# z#) = Q# (hypot3# x# y# z#)
 
 {-# INLINE abs #-}
 abs :: Quantity units -> Quantity units

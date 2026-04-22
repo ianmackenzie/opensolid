@@ -32,7 +32,7 @@ import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.Interval (Interval (Interval#))
 import OpenSolid.Length (Length)
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
@@ -52,11 +52,11 @@ data Vector2D units = Vector2D# Double# Double#
 pattern Vector2D :: Quantity units -> Quantity units -> Vector2D units
 pattern Vector2D vx vy <- (viewVector2D -> (# vx, vy #))
   where
-    Vector2D (Quantity# vx#) (Quantity# vy#) = Vector2D# vx# vy#
+    Vector2D (Q# vx#) (Q# vy#) = Vector2D# vx# vy#
 
 {-# INLINE viewVector2D #-}
 viewVector2D :: Vector2D units -> (# Quantity units, Quantity units #)
-viewVector2D (Vector2D# vx# vy#) = (# Quantity# vx#, Quantity# vy# #)
+viewVector2D (Vector2D# vx# vy#) = (# Q# vx#, Q# vy# #)
 
 {-# COMPLETE Vector2D #-}
 
@@ -105,22 +105,22 @@ instance
   Vector2D# x1# y1# - Vector2D# x2# y2# = Vector2D# (x1# -# x2#) (y1# -# y2#)
 
 instance Multiplication_ (Quantity units1) (Vector2D units2) (Vector2D (units1 ?*? units2)) where
-  Quantity# scale# ?*? Vector2D# vx# vy# = Vector2D# (scale# *# vx#) (scale# *# vy#)
+  Q# scale# ?*? Vector2D# vx# vy# = Vector2D# (scale# *# vx#) (scale# *# vy#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Vector2D units2) (Vector2D units3)
   where
-  Quantity# scale# * Vector2D# vx# vy# = Vector2D# (scale# *# vx#) (scale# *# vy#)
+  Q# scale# * Vector2D# vx# vy# = Vector2D# (scale# *# vx#) (scale# *# vy#)
 
 instance Multiplication_ (Vector2D units1) (Quantity units2) (Vector2D (units1 ?*? units2)) where
-  Vector2D# vx# vy# ?*? Quantity# scale# = Vector2D# (vx# *# scale#) (vy# *# scale#)
+  Vector2D# vx# vy# ?*? Q# scale# = Vector2D# (vx# *# scale#) (vy# *# scale#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector2D units1) (Quantity units2) (Vector2D units3)
   where
-  Vector2D# vx# vy# * Quantity# scale# = Vector2D# (vx# *# scale#) (vy# *# scale#)
+  Vector2D# vx# vy# * Q# scale# = Vector2D# (vx# *# scale#) (vy# *# scale#)
 
 instance
   Multiplication_
@@ -809,11 +809,11 @@ data Vector3D units space = Vector3D# Double# Double# Double#
 pattern Vector3D :: Quantity units -> Quantity units -> Quantity units -> Vector3D units space
 pattern Vector3D vx vy vz <- (viewVector3D -> (# vx, vy, vz #))
   where
-    Vector3D (Quantity# vx#) (Quantity# vy#) (Quantity# vz#) = Vector3D# vx# vy# vz#
+    Vector3D (Q# vx#) (Q# vy#) (Q# vz#) = Vector3D# vx# vy# vz#
 
 {-# INLINE viewVector3D #-}
 viewVector3D :: Vector3D units space -> (# Quantity units, Quantity units, Quantity units #)
-viewVector3D (Vector3D# vx# vy# vz#) = (# Quantity# vx#, Quantity# vy#, Quantity# vz# #)
+viewVector3D (Vector3D# vx# vy# vz#) = (# Q# vx#, Q# vy#, Q# vz# #)
 
 {-# COMPLETE Vector3D #-}
 
@@ -1368,13 +1368,11 @@ quantityTimesVectorBounds3D ::
   Quantity units1 ->
   VectorBounds3D units2 space ->
   VectorBounds3D units3 space
-quantityTimesVectorBounds3D
-  (Quantity# v1#)
-  (VectorBounds3D# xl2# xh2# yl2# yh2# zl2# zh2#) = do
-    let !(# xl#, xh# #) = doubleTimesInterval# v1# xl2# xh2#
-    let !(# yl#, yh# #) = doubleTimesInterval# v1# yl2# yh2#
-    let !(# zl#, zh# #) = doubleTimesInterval# v1# zl2# zh2#
-    VectorBounds3D# xl# xh# yl# yh# zl# zh#
+quantityTimesVectorBounds3D (Q# v1#) (VectorBounds3D# xl2# xh2# yl2# yh2# zl2# zh2#) = do
+  let !(# xl#, xh# #) = doubleTimesInterval# v1# xl2# xh2#
+  let !(# yl#, yh# #) = doubleTimesInterval# v1# yl2# yh2#
+  let !(# zl#, zh# #) = doubleTimesInterval# v1# zl2# zh2#
+  VectorBounds3D# xl# xh# yl# yh# zl# zh#
 
 instance
   Multiplication_

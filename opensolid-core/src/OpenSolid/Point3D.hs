@@ -51,7 +51,7 @@ import OpenSolid.Primitives
   , Transform3D (Transform3D)
   , Vector3D
   )
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Unboxed.Math
 import OpenSolid.Vector3D qualified as Vector3D
@@ -139,14 +139,12 @@ midpoint (Position3D p1) (Position3D p2) = Position3D (Vector3D.midpoint p1 p2)
 -- | Compute the distance from one point to another.
 {-# INLINE distanceFrom #-}
 distanceFrom :: Point3D space -> Point3D space -> Length
-distanceFrom p1 p2 = Quantity# (distanceFrom# p1 p2)
+distanceFrom p1 p2 = Q# (distanceFrom# p1 p2)
 
 {-# INLINE distanceFrom# #-}
 distanceFrom# :: Point3D space -> Point3D space -> Double#
-distanceFrom#
-  (Point3D (Quantity# x1#) (Quantity# y1#) (Quantity# z1#))
-  (Point3D (Quantity# x2#) (Quantity# y2#) (Quantity# z2#)) =
-    hypot3# (x2# -# x1#) (y2# -# y1#) (z2# -# z1#)
+distanceFrom# (Point3D (Q# x1#) (Q# y1#) (Q# z1#)) (Point3D (Q# x2#) (Q# y2#) (Q# z2#)) =
+  hypot3# (x2# -# x1#) (y2# -# y1#) (z2# -# z1#)
 
 {-| Compute the (signed) distance of a point along an axis.
 

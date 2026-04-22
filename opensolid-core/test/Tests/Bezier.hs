@@ -5,7 +5,7 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
@@ -71,7 +71,7 @@ unboxedQuinticHermiteEvaluation = Test.check 100 "unboxedQuinticHermiteEvaluatio
   endPoint <- Test.generate randomNumber
   endFirstDerivative <- Test.generate randomNumber
   endSecondDerivative <- Test.generate randomNumber
-  let !(Quantity# p1#, Quantity# p2#, Quantity# p3#, Quantity# p4#, Quantity# p5#, Quantity# p6#) =
+  let !(Q# p1#, Q# p2#, Q# p3#, Q# p4#, Q# p5#, Q# p6#) =
         Bezier.quinticHermite
           startPoint
           startFirstDerivative
@@ -86,8 +86,8 @@ unboxedQuinticHermiteEvaluation = Test.check 100 "unboxedQuinticHermiteEvaluatio
           endPoint
           [endFirstDerivative, endSecondDerivative]
   t <- Test.generate Parameter.random
-  let !(Quantity# t#) = t
-  let actual = Quantity# (quinticBezier# p1# p2# p3# p4# p5# p6# t#)
+  let !(Q# t#) = t
+  let actual = Q# (quinticBezier# p1# p2# p3# p4# p5# p6# t#)
   let expected = Curve1D.value curve t
   Test.expect (Tolerance.using Tolerance.unitless (actual ~= expected))
     & Test.output "actual" actual

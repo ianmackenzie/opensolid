@@ -53,7 +53,7 @@ import OpenSolid.Primitives
   , Point3D
   , Transform2D (Transform2D)
   )
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Unboxed.Math
@@ -147,11 +147,11 @@ midpoint (Position2D p1) (Position2D p2) = Position2D (Vector2D.midpoint p1 p2)
 
 -- | Compute the distance from one point to another.
 distanceFrom :: Point2D units -> Point2D units -> Quantity units
-distanceFrom p1 p2 = Quantity# (distanceFrom# p1 p2)
+distanceFrom p1 p2 = Q# (distanceFrom# p1 p2)
 
 {-# INLINE distanceFrom# #-}
 distanceFrom# :: Point2D units -> Point2D units -> Double#
-distanceFrom# (Point2D (Quantity# x1#) (Quantity# y1#)) (Point2D (Quantity# x2#) (Quantity# y2#)) =
+distanceFrom# (Point2D (Q# x1#) (Q# y1#)) (Point2D (Q# x2#) (Q# y2#)) =
   hypot2# (x2# -# x1#) (y2# -# y1#)
 
 angleFrom :: Point2D units -> Point2D units -> Angle

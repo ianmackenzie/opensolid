@@ -31,7 +31,7 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3D (Vector3D#), VectorBounds3D (VectorBounds3D#))
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
@@ -56,10 +56,10 @@ callFunction bytecode callback =
 
 curve1dValue :: Compiled Number (Quantity units1) -> Number -> Quantity units2
 curve1dValue (Constant value) _ = Quantity.coerce value
-curve1dValue (Bytecode bytecode) (Quantity# t#) =
+curve1dValue (Bytecode bytecode) (Q# t#) =
   callFunction bytecode \f# -> do
     let x# = opensolid_cmm_curve1d_value f# t#
-    IO.succeed (Quantity# x#)
+    IO.succeed (Q# x#)
 
 curve1dRange :: Compiled Number (Quantity units1) -> Interval Unitless -> Interval units2
 curve1dRange (Constant value) _ = Interval.constant (Quantity.coerce value)
@@ -70,7 +70,7 @@ curve1dRange (Bytecode bytecode) (Interval# tLow# tHigh#) =
 
 curve2dValue :: Compiled Number (Vector2D units1) -> Number -> Vector2D units2
 curve2dValue (Constant value) _ = Vector2D.coerce value
-curve2dValue (Bytecode bytecode) (Quantity# t#) =
+curve2dValue (Bytecode bytecode) (Q# t#) =
   callFunction bytecode \f# -> do
     let !(# x#, y# #) = opensolid_cmm_curve2d_value f# t#
     IO.succeed (Vector2D# x# y#)
@@ -84,7 +84,7 @@ curve2dRange (Bytecode bytecode) (Interval# tLow# tHigh#) =
 
 curve3dValue :: Compiled Number (Vector3D units1 space1) -> Number -> Vector3D units2 space2
 curve3dValue (Constant value) _ = Vector3D.coerce value
-curve3dValue (Bytecode bytecode) (Quantity# t#) =
+curve3dValue (Bytecode bytecode) (Q# t#) =
   callFunction bytecode \f# -> do
     let !(# x#, y#, z# #) = opensolid_cmm_curve3d_value f# t#
     IO.succeed (Vector3D# x# y# z#)
@@ -102,10 +102,10 @@ curve3dRange (Bytecode bytecode) (Interval# tLow# tHigh#) =
 
 surface1dValue :: Compiled UvPoint (Quantity units1) -> UvPoint -> Quantity units2
 surface1dValue (Constant value) _ = Quantity.coerce value
-surface1dValue (Bytecode bytecode) (Point2D (Quantity# u#) (Quantity# v#)) =
+surface1dValue (Bytecode bytecode) (Point2D (Q# u#) (Q# v#)) =
   callFunction bytecode \f# -> do
     let x# = opensolid_cmm_surface1d_value f# u# v#
-    IO.succeed (Quantity# x#)
+    IO.succeed (Q# x#)
 
 surface1dRange :: Compiled UvPoint (Quantity units1) -> UvBounds -> Interval units2
 surface1dRange (Constant value) _ = Interval.constant (Quantity.coerce value)
@@ -116,7 +116,7 @@ surface1dRange (Bytecode bytecode) (Bounds2D (Interval# uLow# uHigh#) (Interval#
 
 surface2dValue :: Compiled UvPoint (Vector2D units1) -> UvPoint -> Vector2D units2
 surface2dValue (Constant value) _ = Vector2D.coerce value
-surface2dValue (Bytecode bytecode) (Point2D (Quantity# u#) (Quantity# v#)) =
+surface2dValue (Bytecode bytecode) (Point2D (Q# u#) (Q# v#)) =
   callFunction bytecode \f# -> do
     let !(# x#, y# #) = opensolid_cmm_surface2d_value f# u# v#
     IO.succeed (Vector2D# x# y#)
@@ -134,7 +134,7 @@ surface3dValue ::
   UvPoint ->
   Vector3D units2 space2
 surface3dValue (Constant value) _ = Vector3D.coerce value
-surface3dValue (Bytecode bytecode) (Point2D (Quantity# u#) (Quantity# v#)) =
+surface3dValue (Bytecode bytecode) (Point2D (Q# u#) (Q# v#)) =
   callFunction bytecode \f# -> do
     let !(# x#, y#, z# #) = opensolid_cmm_surface3d_value f# u# v#
     IO.succeed (Vector3D# x# y# z#)

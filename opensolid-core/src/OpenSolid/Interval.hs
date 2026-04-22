@@ -78,7 +78,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude hiding (max, min)
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Unboxed.Math
@@ -107,11 +107,11 @@ If either argument is NaN, then the result will be open/infinite
 pattern Interval :: Quantity units -> Quantity units -> Interval units
 pattern Interval low high <- (viewInterval -> (# low, high #))
   where
-    Interval (Quantity# a#) (Quantity# b#) = Interval# a# b#
+    Interval (Q# a#) (Q# b#) = Interval# a# b#
 
 {-# INLINE viewInterval #-}
 viewInterval :: Interval units -> (# Quantity units, Quantity units #)
-viewInterval (Ordered# low# high#) = (# Quantity# low#, Quantity# high# #)
+viewInterval (Ordered# low# high#) = (# Q# low#, Q# high# #)
 
 {-# COMPLETE Interval #-}
 
@@ -167,11 +167,11 @@ instance units1 ~ units2 => Addition (Interval units1) (Interval units2) (Interv
     Interval# (low1# +# low2#) (high1# +# high2#)
 
 instance units1 ~ units2 => Addition (Interval units1) (Quantity units2) (Interval units1) where
-  Interval# low# high# + Quantity# value# =
+  Interval# low# high# + Q# value# =
     Interval# (low# +# value#) (high# +# value#)
 
 instance units1 ~ units2 => Addition (Quantity units1) (Interval units2) (Interval units1) where
-  Quantity# value# + Interval# low# high# =
+  Q# value# + Interval# low# high# =
     Interval# (value# +# low#) (value# +# high#)
 
 instance units1 ~ units2 => Subtraction (Interval units1) (Interval units2) (Interval units1) where
@@ -179,31 +179,31 @@ instance units1 ~ units2 => Subtraction (Interval units1) (Interval units2) (Int
     Interval# (low1# -# high2#) (high1# -# low2#)
 
 instance units1 ~ units2 => Subtraction (Interval units1) (Quantity units2) (Interval units1) where
-  Interval# low# high# - Quantity# value# =
+  Interval# low# high# - Q# value# =
     Interval# (low# -# value#) (high# -# value#)
 
 instance units1 ~ units2 => Subtraction (Quantity units1) (Interval units2) (Interval units1) where
-  Quantity# value# - Interval# low# high# =
+  Q# value# - Interval# low# high# =
     Interval# (value# -# high#) (value# -# low#)
 
 instance Multiplication_ (Quantity units1) (Interval units2) (Interval (units1 ?*? units2)) where
-  Quantity# value# ?*? Interval# low# high# =
+  Q# value# ?*? Interval# low# high# =
     Interval# (value# *# low#) (value# *# high#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Interval units2) (Interval units3)
   where
-  Quantity# value# * Interval# low# high# = Interval# (value# *# low#) (value# *# high#)
+  Q# value# * Interval# low# high# = Interval# (value# *# low#) (value# *# high#)
 
 instance Multiplication_ (Interval units1) (Quantity units2) (Interval (units1 ?*? units2)) where
-  Interval# low# high# ?*? Quantity# value# = Interval# (low# *# value#) (high# *# value#)
+  Interval# low# high# ?*? Q# value# = Interval# (low# *# value#) (high# *# value#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Interval units1) (Quantity units2) (Interval units3)
   where
-  Interval# low# high# * Quantity# value# = Interval# (low# *# value#) (high# *# value#)
+  Interval# low# high# * Q# value# = Interval# (low# *# value#) (high# *# value#)
 
 instance Multiplication_ (Interval units1) (Interval units2) (Interval (units1 ?*? units2)) where
   Interval# low1# high1# ?*? Interval# low2# high2# = do
@@ -246,7 +246,7 @@ instance
   dot = (*)
 
 instance Division_ (Quantity units1) (Interval units2) (Interval (units1 ?/? units2)) where
-  Quantity# n# ?/? Interval# dl# dh# = do
+  Q# n# ?/? Interval# dl# dh# = do
     let !(# low#, high# #) = doubleOverInterval# n# dl# dh#
     Ordered# low# high#
 
@@ -254,12 +254,12 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Quantity units1) (Interval units2) (Interval units3)
   where
-  Quantity# n# / Interval# dl# dh# = do
+  Q# n# / Interval# dl# dh# = do
     let !(# low#, high# #) = doubleOverInterval# n# dl# dh#
     Ordered# low# high#
 
 instance Division_ (Interval units1) (Quantity units2) (Interval (units1 ?/? units2)) where
-  Interval# nl# nh# ?/? Quantity# d# = do
+  Interval# nl# nh# ?/? Q# d# = do
     let !(# low#, high# #) = intervalOverDouble# nl# nh# d#
     Ordered# low# high#
 
@@ -267,7 +267,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Interval units1) (Quantity units2) (Interval units3)
   where
-  Interval# nl# nh# / Quantity# d# = do
+  Interval# nl# nh# / Q# d# = do
     let !(# low#, high# #) = intervalOverDouble# nl# nh# d#
     Ordered# low# high#
 
@@ -364,7 +364,7 @@ hull3 a b c = Interval (Prelude.min a (Prelude.min b c)) (Prelude.max a (Prelude
 
 {-# INLINE hull4 #-}
 hull4 :: Quantity units -> Quantity units -> Quantity units -> Quantity units -> Interval units
-hull4 (Quantity# a#) (Quantity# b#) (Quantity# c#) (Quantity# d#) = do
+hull4 (Q# a#) (Q# b#) (Q# c#) (Q# d#) = do
   let !(# low#, high# #) = hull4# a# b# c# d#
   Ordered# low# high#
 
@@ -399,7 +399,7 @@ endpoints (Interval low high) = (low, high)
 
 {-# INLINE width #-}
 width :: Interval units -> Quantity units
-width interval = Quantity# (width# interval)
+width interval = Q# (width# interval)
 
 {-# INLINE width# #-}
 width# :: Interval units -> Double#
@@ -470,14 +470,14 @@ member :: Quantity units -> Interval units -> Bool
 member value (Interval low high) = low <= value && value <= high
 
 exclusion :: Quantity units -> Interval units -> Quantity units
-exclusion (Quantity# value#) interval = Quantity# (exclusion# value# interval)
+exclusion (Q# value#) interval = Q# (exclusion# value# interval)
 
 {-# INLINE exclusion# #-}
 exclusion# :: Double# -> Interval units -> Double#
 exclusion# value# (Interval# low# high#) = max# (low# -# value#) (value# -# high#)
 
 inclusion :: Quantity units -> Interval units -> Quantity units
-inclusion (Quantity# value#) interval = Quantity# (inclusion# value# interval)
+inclusion (Q# value#) interval = Q# (inclusion# value# interval)
 
 {-# INLINE inclusion# #-}
 inclusion# :: Double# -> Interval units -> Double#
@@ -496,7 +496,7 @@ containedIn :: Interval units -> Interval units -> Bool
 containedIn interval value = contains value interval
 
 separation :: Interval units -> Interval units -> Quantity units
-separation interval1 interval2 = Quantity# (separation# interval1 interval2)
+separation interval1 interval2 = Q# (separation# interval1 interval2)
 
 {-# INLINE separation# #-}
 separation# :: Interval units -> Interval units -> Double#

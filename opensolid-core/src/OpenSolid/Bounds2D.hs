@@ -72,7 +72,7 @@ import OpenSolid.Primitives
   , Point2D (Position2D)
   , Point3D (Point3D)
   )
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Transform2D (Transform2D (Transform2D))
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
@@ -224,7 +224,7 @@ corners box =
 
 {-# INLINE diameter #-}
 diameter :: Bounds2D units -> Quantity units
-diameter bounds = Quantity# (diameter# bounds)
+diameter bounds = Q# (diameter# bounds)
 
 {-# INLINE diameter# #-}
 diameter# :: Bounds2D units -> Double#

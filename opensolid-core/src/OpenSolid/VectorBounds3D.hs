@@ -69,7 +69,7 @@ import OpenSolid.Primitives
   , VectorBounds2D (VectorBounds2D)
   , VectorBounds3D (VectorBounds3D, VectorBounds3D#)
   )
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform3D (Transform3D (Transform3D))
 import OpenSolid.Transform3D qualified as Transform3D
@@ -249,7 +249,7 @@ magnitude bounds = do
   Interval# minMagnitude# (maxMagnitude# bounds)
 
 maxMagnitude :: VectorBounds3D units space -> Quantity units
-maxMagnitude bounds = Quantity# (maxMagnitude# bounds)
+maxMagnitude bounds = Q# (maxMagnitude# bounds)
 
 maxMagnitude# :: VectorBounds3D units space -> Double#
 maxMagnitude# (VectorBounds3D# minX# maxX# minY# maxY# minZ# maxZ#) = do

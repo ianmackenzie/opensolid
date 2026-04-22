@@ -75,7 +75,7 @@ import OpenSolid.Primitives
   , VectorBounds3D (VectorBounds3D)
   )
 import OpenSolid.Primitives qualified as Primitives
-import OpenSolid.Quantity (Quantity (Quantity#))
+import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform2D (Transform2D (Transform2D))
 import OpenSolid.Unboxed.Math
@@ -245,11 +245,11 @@ clampNormalized (Interval low high) =
   Interval (Quantity.clampTo normalizedBounds low) (Quantity.clampTo normalizedBounds high)
 
 exclusion :: Vector2D units -> VectorBounds2D units -> Quantity units
-exclusion vector bounds = Quantity# (exclusion# vector bounds)
+exclusion vector bounds = Q# (exclusion# vector bounds)
 
 {-# INLINEABLE exclusion# #-}
 exclusion# :: Vector2D units -> VectorBounds2D units -> Double#
-exclusion# (Vector2D (Quantity# vx#) (Quantity# vy#)) (VectorBounds2D bx by) = do
+exclusion# (Vector2D (Q# vx#) (Q# vy#)) (VectorBounds2D bx by) = do
   let exclusionX# = Interval.exclusion# vx# bx
   let exclusionY# = Interval.exclusion# vy# by
   let positiveX# = exclusionX# >=# 0.0##
@@ -261,7 +261,7 @@ exclusion# (Vector2D (Quantity# vx#) (Quantity# vy#)) (VectorBounds2D bx by) = d
     (# _, _ #) -> max# exclusionX# exclusionY#
 
 inclusion :: Vector2D units -> VectorBounds2D units -> Quantity units
-inclusion vector box = Quantity# (inclusion# vector box)
+inclusion vector box = Q# (inclusion# vector box)
 
 {-# INLINE inclusion# #-}
 inclusion# :: Vector2D units -> VectorBounds2D units -> Double#
@@ -278,7 +278,7 @@ isContainedIn :: VectorBounds2D units -> VectorBounds2D units -> Bool
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
 separation :: VectorBounds2D units -> VectorBounds2D units -> Quantity units
-separation bounds1 bounds2 = Quantity# (separation# bounds1 bounds2)
+separation bounds1 bounds2 = Q# (separation# bounds1 bounds2)
 
 {-# INLINEABLE separation# #-}
 separation# :: VectorBounds2D units -> VectorBounds2D units -> Double#
@@ -294,7 +294,7 @@ separation# (VectorBounds2D x1 y1) (VectorBounds2D x2 y2) = do
     (# _, _ #) -> max# separationX# separationY#
 
 overlap :: VectorBounds2D units -> VectorBounds2D units -> Quantity units
-overlap first second = Quantity# (overlap# first second)
+overlap first second = Q# (overlap# first second)
 
 {-# INLINE overlap# #-}
 overlap# :: VectorBounds2D units -> VectorBounds2D units -> Double#
