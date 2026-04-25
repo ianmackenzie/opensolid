@@ -401,11 +401,9 @@ instance MonadFail (Result Text) where
 ----- Quantity -----
 
 type Quantity :: Type -> Type
-newtype Quantity units = Quantity Prelude.Double deriving (Eq, Ord, Show)
-
-deriving newtype instance Storable (Quantity units)
-
-deriving newtype instance Hashable (Quantity units)
+newtype Quantity units = Quantity Prelude.Double
+  deriving (Eq, Ord, Show)
+  deriving newtype (Storable, Hashable)
 
 type Number = Quantity Unitless
 
