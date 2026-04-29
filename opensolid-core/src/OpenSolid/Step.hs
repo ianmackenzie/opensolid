@@ -80,7 +80,7 @@ encodeHeader givenHeader = do
           ]
   let fileSchemaEntity = entity "FILE_SCHEMA" [list text givenHeader.schemaIdentifiers]
   let headerEntities = [fileDescriptionEntity, fileNameEntity, fileSchemaEntity]
-  let encodeEntityLine (_, _, encodedEntity) =
+  let encodeEntityLine (_, encodedEntity) =
         Data.ByteString.Builder.byteString encodedEntity <> char ';'
   let compiledEntities = Step.Entities.compile headerEntities
   encodeLines (List.map encodeEntityLine compiledEntities)
@@ -98,7 +98,7 @@ will also get included in the output.
 builder :: Header -> List Entity -> Builder
 builder givenHeader entities = do
   let compiledEntities = Step.Entities.compile entities
-  let encodeEntityLine (entityId, _, encodedEntity) =
+  let encodeEntityLine (entityId, encodedEntity) =
         Binary.concat
           [ Step.Encode.id entityId
           , char '='

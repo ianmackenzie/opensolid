@@ -12,14 +12,16 @@ import OpenSolid.Step.Encode qualified as Step.Encode
 import OpenSolid.Step.TypeName (TypeName)
 import OpenSolid.Step.Types (Attribute (..), Entity (..), SubEntity (SubEntity))
 
-data EntityMap = EntityMap Int (Map ByteString (Int, Entity))
+data EntityMap = EntityMap
+  { nextId :: Int
+  , idMap :: Map ByteString Int
+  }
+
+emptyMap :: EntityMap
+emptyMap = EntityMap{nextId = 1, idMap = Map.empty}
 
 buildMap :: List Entity -> EntityMap
-buildMap entities =
-  List.foldl
-    (\accumulatedMap entity -> Pair.second (addEntity entity accumulatedMap))
-    (EntityMap 1 Map.empty)
-    entities
+buildMap entities = emptyMap & List.forEach entities \entity -> Pair.second . addEntity entity
 
 encodeEntityRecord :: (TypeName, List Builder) -> Builder
 encodeEntityRecord (typeName, encodedAttributes) =
@@ -31,7 +33,7 @@ addEntity entity entityMap =
     SimpleEntity typeName attributes -> do
       let (attributeValues, mapWithAttributes) = addAttributes attributes entityMap
       let encodedEntity = encodeEntityRecord (typeName, attributeValues)
-      update entity encodedEntity mapWithAttributes
+      update encodedEntity mapWithAttributes
     ComplexEntity subEntities -> do
       let (simpleEntityValues, mapWithSimpleEntities) = addEntityRecords subEntities entityMap []
       let encodedSimpleEntities = List.map encodeEntityRecord simpleEntityValues
@@ -39,7 +41,7 @@ addEntity entity entityMap =
       let closingParenthesis = Data.ByteString.Builder.charUtf8 ')'
       let encodedEntity =
             openingParenthesis <> Binary.concat encodedSimpleEntities <> closingParenthesis
-      update entity encodedEntity mapWithSimpleEntities
+      update encodedEntity mapWithSimpleEntities
 
 addEntityRecords ::
   List SubEntity ->
@@ -54,15 +56,14 @@ addEntityRecords entityRecords entityMap accumulated =
     [] -> (List.reverse accumulated, entityMap)
 
 addAttributes :: List Attribute -> EntityMap -> (List Builder, EntityMap)
-addAttributes attributes entityMap =
-  List.foldl
-    ( \(accumulatedAttributeValues, accumulatedMap) attribute -> do
-        let (attributeValue, mapWithAttribute) = addAttribute attribute accumulatedMap
-        (attributeValue : accumulatedAttributeValues, mapWithAttribute)
-    )
-    ([], entityMap)
-    attributes
-    & Pair.mapFirst List.reverse
+addAttributes attributes entityMap = do
+  let (finalAttributeValues, finalMap) =
+        ([], entityMap) & do
+          List.forEach attributes \attribute (currentAttributeValues, currentMap) -> do
+            let (attributeValue, updatedMap) = addAttribute attribute currentMap
+            let updatedAttributeValues = attributeValue : currentAttributeValues
+            (updatedAttributeValues, updatedMap)
+  (List.reverse finalAttributeValues, finalMap)
 
 addAttribute :: Attribute -> EntityMap -> (Builder, EntityMap)
 addAttribute attribute entityMap =
@@ -87,17 +88,21 @@ addAttribute attribute entityMap =
       let (attributeValues, mapWithAttributes) = addAttributes attributes entityMap
       (Step.Encode.list attributeValues, mapWithAttributes)
 
-update :: Entity -> Builder -> EntityMap -> (Int, EntityMap)
-update entity encodedEntity entityMap = do
-  let EntityMap nextId idMap = entityMap
+update :: Builder -> EntityMap -> (Int, EntityMap)
+update encodedEntity entityMap = do
   let entityBytes = Binary.bytes encodedEntity
-  case Map.get entityBytes idMap of
-    Just (entityId, _) -> (entityId, entityMap)
-    Nothing -> (nextId, EntityMap (nextId + 1) (Map.set entityBytes (nextId, entity) idMap))
+  case Map.get entityBytes entityMap.idMap of
+    Just entityId -> (entityId, entityMap)
+    Nothing -> do
+      let entityId = entityMap.nextId
+      let updatedMap =
+            EntityMap
+              { nextId = entityId + 1
+              , idMap = entityMap.idMap & Map.set entityBytes entityId
+              }
+      (entityId, updatedMap)
 
-compile :: List Entity -> List (Int, Entity, ByteString)
+compile :: List Entity -> List (Int, ByteString)
 compile entities = do
-  let (EntityMap _ idMap) = buildMap entities
-  Map.toList idMap
-    & List.map (\(entityBytes, (entityId, entity)) -> (entityId, entity, entityBytes))
-    & List.sortBy (\(entityId, _, _) -> entityId)
+  let entityMap = buildMap entities
+  entityMap.idMap & Map.toList & List.map Pair.flip & List.sortBy Pair.first
