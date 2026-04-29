@@ -1,6 +1,7 @@
 module OpenSolid.Pair
   ( first
   , second
+  , flip
   , map
   , mapFirst
   , mapSecond
@@ -15,6 +16,9 @@ first (a, _) = a
 {-# INLINE second #-}
 second :: (a, b) -> b
 second (_, b) = b
+
+flip :: (a, b) -> (b, a)
+flip (a, b) = (b, a)
 
 {-# INLINE map #-}
 map :: (a -> b) -> (a, a) -> (b, b)
