@@ -488,6 +488,7 @@ value function uvPoint = CompiledFunction.value function.compiled uvPoint
 range :: VectorSurfaceFunction2D units -> UvBounds -> VectorBounds2D units
 range function uvRange = CompiledFunction.range function.compiled uvRange
 
+{-# INLINE compiled #-}
 compiled :: VectorSurfaceFunction2D units -> Compiled units
 compiled = (.compiled)
 

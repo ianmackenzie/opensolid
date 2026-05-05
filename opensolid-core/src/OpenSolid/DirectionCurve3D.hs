@@ -50,6 +50,7 @@ range :: DirectionCurve3D space -> Interval Unitless -> DirectionBounds3D space
 range (DirectionCurve3D vectorCurve) tRange =
   DirectionBounds3D.unsafe (VectorCurve3D.range vectorCurve tRange)
 
+{-# INLINE derivative #-}
 derivative :: DirectionCurve3D space -> VectorCurve3D Unitless space
 derivative (DirectionCurve3D vectorCurve) = VectorCurve3D.derivative vectorCurve
 

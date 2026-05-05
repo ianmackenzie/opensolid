@@ -489,9 +489,11 @@ hermite ::
 hermite start startDerivatives end endDerivatives =
   bezier (Bezier.hermite start startDerivatives end endDerivatives)
 
+{-# INLINE derivative #-}
 derivative :: Curve dimension units space -> VectorCurve dimension units space
 derivative = (.derivative)
 
+{-# INLINE compiled #-}
 compiled :: Curve dimension units space -> Compiled dimension units space
 compiled = (.compiled)
 

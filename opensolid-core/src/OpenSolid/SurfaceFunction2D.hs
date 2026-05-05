@@ -158,9 +158,11 @@ point function uvPoint = CompiledFunction.value (compiled function) uvPoint
 range :: SurfaceFunction2D units -> UvBounds -> Bounds2D units
 range function uvRange = CompiledFunction.range (compiled function) uvRange
 
+{-# INLINE compiled #-}
 compiled :: SurfaceFunction2D units -> Compiled units
 compiled = (.compiled)
 
+{-# INLINE derivative #-}
 derivative :: SurfaceParameter -> SurfaceFunction2D units -> VectorSurfaceFunction2D units
 derivative U = (.du)
 derivative V = (.dv)

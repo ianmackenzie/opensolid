@@ -146,9 +146,11 @@ hermite ::
   Curve3D space
 hermite = Curve.hermite
 
+{-# INLINE derivative #-}
 derivative :: Curve3D space -> VectorCurve3D Meters space
 derivative = Curve.derivative
 
+{-# INLINE compiled #-}
 compiled :: Curve3D space -> Compiled space
 compiled = Curve.compiled
 

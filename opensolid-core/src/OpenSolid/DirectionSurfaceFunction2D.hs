@@ -44,6 +44,7 @@ range :: DirectionSurfaceFunction2D -> UvBounds -> DirectionBounds2D
 range (DirectionSurfaceFunction2D vectorSurfaceFunction) uvRange =
   DirectionBounds2D.unsafe (VectorSurfaceFunction2D.range vectorSurfaceFunction uvRange)
 
+{-# INLINE derivative #-}
 derivative :: SurfaceParameter -> DirectionSurfaceFunction2D -> VectorSurfaceFunction2D Unitless
 derivative parameter (DirectionSurfaceFunction2D vectorSurfaceFunction) =
   VectorSurfaceFunction2D.derivative parameter vectorSurfaceFunction

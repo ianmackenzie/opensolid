@@ -447,9 +447,11 @@ reverse = Curve.reverse
 bounds :: Curve2D units -> Bounds2D units
 bounds = Curve.bounds
 
+{-# INLINE compiled #-}
 compiled :: Curve2D units -> Compiled units
 compiled = Curve.compiled
 
+{-# INLINE derivative #-}
 derivative :: Curve2D units -> VectorCurve2D units
 derivative = Curve.derivative
 

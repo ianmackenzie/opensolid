@@ -85,9 +85,11 @@ import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
 
 type Compiled units = VectorCurve.Compiled 2 units Void
 
+{-# INLINE compiled #-}
 compiled :: VectorCurve2D units -> Compiled units
 compiled = VectorCurve.compiled
 
+{-# INLINE derivative #-}
 derivative :: VectorCurve2D units -> VectorCurve2D units
 derivative = VectorCurve.derivative
 

@@ -56,6 +56,7 @@ range :: DirectionCurve2D -> Interval Unitless -> DirectionBounds2D
 range (DirectionCurve2D vectorCurve) tRange =
   DirectionBounds2D.unsafe (VectorCurve2D.range vectorCurve tRange)
 
+{-# INLINE derivative #-}
 derivative :: DirectionCurve2D -> VectorCurve2D Unitless
 derivative (DirectionCurve2D vectorCurve) = VectorCurve2D.derivative vectorCurve
 

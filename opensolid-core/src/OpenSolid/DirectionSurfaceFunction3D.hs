@@ -44,6 +44,7 @@ range :: DirectionSurfaceFunction3D space -> UvBounds -> DirectionBounds3D space
 range (DirectionSurfaceFunction3D vectorSurfaceFunction) uvRange =
   DirectionBounds3D.unsafe (VectorSurfaceFunction3D.range vectorSurfaceFunction uvRange)
 
+{-# INLINE derivative #-}
 derivative ::
   SurfaceParameter ->
   DirectionSurfaceFunction3D space ->
