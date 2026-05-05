@@ -145,8 +145,8 @@ instance
     (SurfaceFunction3D space)
   where
   outer . inner = do
-    let duOuter = outer.du . inner
-    let dvOuter = outer.dv . inner
+    let duOuter = derivative U outer . inner
+    let dvOuter = derivative V outer . inner
     let composedDerivative parameter = do
           let innerDerivative = SurfaceFunction2D.derivative parameter inner
           let (dU, dV) = VectorSurfaceFunction2D.components innerDerivative
@@ -177,20 +177,19 @@ range :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
 range function uvRange = CompiledFunction.range function.compiled uvRange
 
 derivativeValue :: SurfaceParameter -> SurfaceFunction3D space -> UvPoint -> Vector3D Meters space
-derivativeValue U function uvPoint = VectorSurfaceFunction3D.value function.du uvPoint
-derivativeValue V function uvPoint = VectorSurfaceFunction3D.value function.dv uvPoint
+derivativeValue U function uvPoint = VectorSurfaceFunction3D.value (derivative U function) uvPoint
+derivativeValue V function uvPoint = VectorSurfaceFunction3D.value (derivative V function) uvPoint
 
 derivativeRange :: SurfaceParameter -> SurfaceFunction3D space -> UvBounds -> VectorBounds3D Meters space
-derivativeRange U function uvRange = VectorSurfaceFunction3D.range function.du uvRange
-derivativeRange V function uvRange = VectorSurfaceFunction3D.range function.dv uvRange
+derivativeRange U function uvRange = VectorSurfaceFunction3D.range (derivative U function) uvRange
+derivativeRange V function uvRange = VectorSurfaceFunction3D.range (derivative V function) uvRange
 
+{-# INLINE compiled #-}
 compiled :: SurfaceFunction3D space -> Compiled space
 compiled = (.compiled)
 
-derivative ::
-  SurfaceParameter ->
-  SurfaceFunction3D space ->
-  VectorSurfaceFunction3D Meters space
+{-# INLINE derivative #-}
+derivative :: SurfaceParameter -> SurfaceFunction3D space -> VectorSurfaceFunction3D Meters space
 derivative U = (.du)
 derivative V = (.dv)
 
@@ -199,8 +198,8 @@ nondegenerate ::
   SurfaceFunction3D space ->
   Result IsDegenerate (Nondegenerate (SurfaceFunction3D space))
 nondegenerate function = do
-  _ <- VectorSurfaceFunction3D.nondegenerate function.du
-  _ <- VectorSurfaceFunction3D.nondegenerate function.dv
+  _ <- VectorSurfaceFunction3D.nondegenerate (derivative U function)
+  _ <- VectorSurfaceFunction3D.nondegenerate (derivative V function)
   -- TODO also check if partial derivative directions are parallel at any UV corner?
   Ok (Nondegenerate function)
 
@@ -209,15 +208,15 @@ normalDirection ::
   SurfaceFunction3D space ->
   Result IsDegenerate (DirectionSurfaceFunction3D space)
 normalDirection function = do
-  duDirection <- VectorSurfaceFunction3D.direction function.du
-  dvDirection <- VectorSurfaceFunction3D.direction function.dv
+  duDirection <- VectorSurfaceFunction3D.direction (derivative U function)
+  dvDirection <- VectorSurfaceFunction3D.direction (derivative V function)
   let crossProduct = duDirection `cross` dvDirection
   Tolerance.using Tolerance.unitless (VectorSurfaceFunction3D.direction crossProduct)
 
 normalDirectionRange :: SurfaceFunction3D space -> UvBounds -> DirectionBounds3D space
 normalDirectionRange function uvRange = do
-  let duDirectionBounds = VectorSurfaceFunction3D.directionRange function.du uvRange
-  let dvDirectionBounds = VectorSurfaceFunction3D.directionRange function.dv uvRange
+  let duDirectionBounds = VectorSurfaceFunction3D.directionRange (derivative U function) uvRange
+  let dvDirectionBounds = VectorSurfaceFunction3D.directionRange (derivative V function) uvRange
   VectorBounds3D.direction (duDirectionBounds `cross` dvDirectionBounds)
 
 transformBy :: Transform3D tag space -> SurfaceFunction3D space -> SurfaceFunction3D space

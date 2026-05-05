@@ -356,14 +356,16 @@ value function uvPoint = CompiledFunction.value function.compiled uvPoint
 range :: SurfaceFunction1D units -> UvBounds -> Interval units
 range function uvRange = CompiledFunction.range function.compiled uvRange
 
+{-# INLINE derivative #-}
 derivative :: SurfaceParameter -> SurfaceFunction1D units -> SurfaceFunction1D units
 derivative U = (.du)
 derivative V = (.dv)
 
 derivativeIn :: Direction2D -> SurfaceFunction1D units -> SurfaceFunction1D units
 derivativeIn (Direction2D dx dy) function =
-  dx * function.du + dy * function.dv
+  dx * derivative U function + dy * derivative V function
 
+{-# INLINE compiled #-}
 compiled :: SurfaceFunction1D units -> Compiled units
 compiled = (.compiled)
 
@@ -390,7 +392,8 @@ new :: Compiled units -> (SurfaceParameter -> SurfaceFunction1D units) -> Surfac
 new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
-  SurfaceFunction1D c du (SurfaceFunction1D dv.compiled du.dv dv.dv)
+  let dv' = SurfaceFunction1D (compiled dv) (derivative V du) (derivative V dv)
+  SurfaceFunction1D c du dv'
 
 desingularize ::
   SurfaceFunction1D units ->
@@ -577,8 +580,8 @@ zeros :: Tolerance units => SurfaceFunction1D units -> Result IsZero Zeros
 zeros function
   | function ~= zero = Error IsZero
   | otherwise = do
-      let fu = function.du
-      let fv = function.dv
+      let fu = derivative U function
+      let fv = derivative V function
       -- Using unsafeQuotient should be OK here
       -- since we only actually use dudv and dvdu
       -- in subdomains where we know the denominator is non-zero
@@ -642,11 +645,11 @@ findTangentSolutions subproblem = do
   let determinant = fuuRange ?*? fvvRange - fuvRange ?*? fuvRange
   case Interval.resolvedSign determinant of
     Resolved determinantSign -> do
-      let fu = f.du
-      let fv = f.dv
-      let fuu = f.du.du
-      let fuv = f.du.dv
-      let fvv = f.dv.dv
+      let fu = derivative U f
+      let fv = derivative V f
+      let fuu = derivative U fu
+      let fuv = derivative V fu
+      let fvv = derivative V fv
       let maybePoint =
             Solve2D.unique
               (\testRange -> VectorBounds2D (range fu testRange) (range fv testRange))

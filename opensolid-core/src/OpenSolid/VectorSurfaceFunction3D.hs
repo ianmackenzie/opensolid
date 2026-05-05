@@ -467,8 +467,8 @@ new givenCompiled derivativeFunction = do
   let dv' =
         VectorSurfaceFunction3D
           { compiled = dv.compiled
-          , du = du.dv
-          , dv = dv.dv
+          , du = derivative V du
+          , dv = derivative V dv
           , maxSampledMagnitude = dv.maxSampledMagnitude
           , singularU0 = dv.singularU0
           , singularU1 = dv.singularU1
@@ -561,9 +561,11 @@ value function uvPoint = CompiledFunction.value function.compiled uvPoint
 range :: VectorSurfaceFunction3D units space -> UvBounds -> VectorBounds3D units space
 range function uvRange = CompiledFunction.range function.compiled uvRange
 
+{-# INLINE compiled #-}
 compiled :: VectorSurfaceFunction3D units space -> Compiled units space
 compiled = (.compiled)
 
+{-# INLINE derivative #-}
 derivative ::
   SurfaceParameter ->
   VectorSurfaceFunction3D units space ->
@@ -576,16 +578,16 @@ derivativeValue ::
   VectorSurfaceFunction3D units space ->
   UvPoint ->
   Vector3D units space
-derivativeValue U function uvPoint = value function.du uvPoint
-derivativeValue V function uvPoint = value function.dv uvPoint
+derivativeValue U function uvPoint = value (derivative U function) uvPoint
+derivativeValue V function uvPoint = value (derivative V function) uvPoint
 
 derivativeRange ::
   SurfaceParameter ->
   VectorSurfaceFunction3D units space ->
   UvBounds ->
   VectorBounds3D units space
-derivativeRange U function uvRange = range function.du uvRange
-derivativeRange V function uvRange = range function.dv uvRange
+derivativeRange U function uvRange = range (derivative U function) uvRange
+derivativeRange V function uvRange = range (derivative V function) uvRange
 
 placeIn ::
   Frame3D global local ->
@@ -700,10 +702,10 @@ directionRange function uvRange = do
   let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvRange
   VectorBounds3D.direction $
     if
-      | uLow == 0.0 && function.singularU0 -> range function.du uvRange
-      | uHigh == 1.0 && function.singularU1 -> negate (range function.du uvRange)
-      | vLow == 0.0 && function.singularV0 -> range function.dv uvRange
-      | vHigh == 1.0 && function.singularV1 -> negate (range function.dv uvRange)
+      | uLow == 0.0 && function.singularU0 -> range (derivative U function) uvRange
+      | uHigh == 1.0 && function.singularU1 -> negate (range (derivative U function) uvRange)
+      | vLow == 0.0 && function.singularV0 -> range (derivative V function) uvRange
+      | vHigh == 1.0 && function.singularV1 -> negate (range (derivative V function) uvRange)
       | otherwise -> range function uvRange
 
 newtonRaphson :: VectorSurfaceFunction3D units space -> UvPoint -> UvPoint

@@ -398,7 +398,7 @@ instance
     let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative curve)
     VectorCurve2D.new
       (function.compiled . Curve2D.compiled curve)
-      ((function.du . curve) * dudt + (function.dv . curve) * dvdt)
+      ((derivative U function . curve) * dudt + (derivative V function . curve) * dvdt)
 
 new ::
   Compiled units ->
@@ -407,7 +407,7 @@ new ::
 new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
-  let dv' = VectorSurfaceFunction2D dv.compiled du.dv dv.dv
+  let dv' = VectorSurfaceFunction2D (compiled dv) (derivative V du) (derivative V dv)
   VectorSurfaceFunction2D c du dv'
 
 desingularize ::
@@ -491,6 +491,7 @@ range function uvRange = CompiledFunction.range function.compiled uvRange
 compiled :: VectorSurfaceFunction2D units -> Compiled units
 compiled = (.compiled)
 
+{-# INLINE derivative #-}
 derivative :: SurfaceParameter -> VectorSurfaceFunction2D units -> VectorSurfaceFunction2D units
 derivative U = (.du)
 derivative V = (.dv)

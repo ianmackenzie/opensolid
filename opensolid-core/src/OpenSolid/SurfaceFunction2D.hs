@@ -186,8 +186,8 @@ instance
   function . curve = do
     let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative curve)
     Curve2D.new
-      (function.compiled . Curve2D.compiled curve)
-      ((function.du . curve) * dudt + (function.dv . curve) * dvdt)
+      (compiled function . Curve2D.compiled curve)
+      ((derivative U function . curve) * dudt + (derivative V function . curve) * dvdt)
 
 instance
   Composition
