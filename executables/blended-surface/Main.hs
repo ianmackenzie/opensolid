@@ -22,7 +22,7 @@ main = Tolerance.using Tolerance.unitless do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
   f <- SurfaceFunction1D.quotient (u * (5.0 - 2.0 * v)) (u * (1.0 + v)) & Result.orFail
-  expression <- CompiledFunction.expression f.compiled & Result.orFail
+  expression <- CompiledFunction.expression (SurfaceFunction1D.compiled f) & Result.orFail
   IO.printLine (Expression.debug expression)
   let meshPoint uvPoint = do
         let UvPoint uValue vValue = uvPoint

@@ -245,7 +245,7 @@ instance
 instance Composition (Curve2D units) (SurfaceFunction1D Unitless) (SurfaceFunction2D units) where
   curve . function =
     SurfaceFunction2D.new
-      (compiled curve . function.compiled)
+      (compiled curve . SurfaceFunction1D.compiled function)
       (\p -> derivative curve . function * SurfaceFunction1D.derivative p function)
 
 instance Composition (Curve2D units) SurfaceParameter (SurfaceFunction2D units) where
@@ -254,7 +254,11 @@ instance Composition (Curve2D units) SurfaceParameter (SurfaceFunction2D units) 
 instance Composition (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units) where
   f . g = do
     let (dudt, dvdt) = VectorCurve2D.components (derivative g)
-    Curve1D.new (f.compiled . compiled g) (f.du . g * dudt + f.dv . g * dvdt)
+    let compiledComposed = SurfaceFunction1D.compiled f . compiled g
+    let composedDerivative =
+          SurfaceFunction1D.derivative U f . g * dudt
+            + SurfaceFunction1D.derivative V f . g * dvdt
+    Curve1D.new compiledComposed composedDerivative
 
 instance
   Composition
@@ -347,7 +351,7 @@ instance
 instance Composition (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
   curve . function =
     SurfaceFunction3D.new
-      (compiled curve . function.compiled)
+      (compiled curve . SurfaceFunction1D.compiled function)
       (\p -> (derivative curve . function) * SurfaceFunction1D.derivative p function)
 
 class

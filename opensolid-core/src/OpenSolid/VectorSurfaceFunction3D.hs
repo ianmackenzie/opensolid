@@ -233,7 +233,7 @@ instance
   where
   lhs ?*? rhs =
     new
-      (lhs.compiled ?*? rhs.compiled)
+      (SurfaceFunction1D.compiled lhs ?*? rhs.compiled)
       (\p -> SurfaceFunction1D.derivative p lhs ?*? rhs + lhs ?*? derivative p rhs)
 
 instance
@@ -270,7 +270,7 @@ instance
   where
   lhs ?*? rhs =
     new
-      (lhs.compiled ?*? rhs.compiled)
+      (lhs.compiled ?*? SurfaceFunction1D.compiled rhs)
       (\p -> derivative p lhs ?*? rhs + lhs ?*? SurfaceFunction1D.derivative p rhs)
 
 instance
@@ -538,10 +538,16 @@ desingularized ::
   VectorSurfaceFunction3D units space ->
   VectorSurfaceFunction3D units space ->
   VectorSurfaceFunction3D units space
-desingularized t start middle end =
-  new
-    (CompiledFunction.desingularized t.compiled start.compiled middle.compiled end.compiled)
-    (\p -> desingularized t (derivative p start) (derivative p middle) (derivative p end))
+desingularized t start middle end = do
+  let compiledDesingularized =
+        CompiledFunction.desingularized
+          (SurfaceFunction1D.compiled t)
+          start.compiled
+          middle.compiled
+          end.compiled
+  let desingularizedDerivative p =
+        desingularized t (derivative p start) (derivative p middle) (derivative p end)
+  new compiledDesingularized desingularizedDerivative
 
 zero :: VectorSurfaceFunction3D units space
 zero = constant Vector3D.zero
@@ -652,7 +658,8 @@ unsafeQuotient_ ::
   SurfaceFunction1D units2 ->
   VectorSurfaceFunction3D (units1 ?/? units2) space
 unsafeQuotient_ lhs rhs = do
-  let compiledQuotient = CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled rhs.compiled
+  let compiledQuotient =
+        CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled (SurfaceFunction1D.compiled rhs)
   recursive \self -> do
     let quotientDerivative p =
           unsafeQuotient_ (derivative p lhs) rhs

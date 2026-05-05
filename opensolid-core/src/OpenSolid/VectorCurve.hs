@@ -907,7 +907,7 @@ instance
   where
   curve . function =
     VectorSurfaceFunction2D.new
-      (curve.compiled . function.compiled)
+      (curve.compiled . SurfaceFunction1D.compiled function)
       (\p -> (curve.derivative . function) * SurfaceFunction1D.derivative p function)
 
 instance
@@ -918,7 +918,7 @@ instance
   where
   curve . function =
     VectorSurfaceFunction3D.new
-      (curve.compiled . function.compiled)
+      (curve.compiled . SurfaceFunction1D.compiled function)
       (\p -> (curve.derivative . function) * SurfaceFunction1D.derivative p function)
 
 instance

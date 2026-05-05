@@ -174,7 +174,7 @@ instance
   where
   lhs ?*? rhs =
     new
-      (lhs.compiled ?*? rhs.compiled)
+      (SurfaceFunction1D.compiled lhs ?*? rhs.compiled)
       (\p -> SurfaceFunction1D.derivative p lhs ?*? rhs + lhs ?*? derivative p rhs)
 
 instance
@@ -211,7 +211,7 @@ instance
   where
   lhs ?*? rhs =
     new
-      (lhs.compiled ?*? rhs.compiled)
+      (lhs.compiled ?*? SurfaceFunction1D.compiled rhs)
       (\p -> derivative p lhs ?*? rhs + lhs ?*? SurfaceFunction1D.derivative p rhs)
 
 instance
@@ -425,10 +425,16 @@ desingularized ::
   VectorSurfaceFunction2D units ->
   VectorSurfaceFunction2D units ->
   VectorSurfaceFunction2D units
-desingularized t start middle end =
-  new
-    (CompiledFunction.desingularized t.compiled start.compiled middle.compiled end.compiled)
-    (\p -> desingularized t (derivative p start) (derivative p middle) (derivative p end))
+desingularized t start middle end = do
+  let compiledDesingularized =
+        CompiledFunction.desingularized
+          (SurfaceFunction1D.compiled t)
+          start.compiled
+          middle.compiled
+          end.compiled
+  let desingularizedDerivative p =
+        desingularized t (derivative p start) (derivative p middle) (derivative p end)
+  new compiledDesingularized desingularizedDerivative
 
 zero :: VectorSurfaceFunction2D units
 zero = constant Vector2D.zero
@@ -446,8 +452,8 @@ xy x y = do
           Expression.xy
           Vector2D
           VectorBounds2D
-          x.compiled
-          y.compiled
+          (SurfaceFunction1D.compiled x)
+          (SurfaceFunction1D.compiled y)
   new compiledXY (\p -> xy (SurfaceFunction1D.derivative p x) (SurfaceFunction1D.derivative p y))
 
 placeIn :: Frame2D frameUnits -> VectorSurfaceFunction2D units -> VectorSurfaceFunction2D units
@@ -557,7 +563,8 @@ unsafeQuotient_ ::
   SurfaceFunction1D units2 ->
   VectorSurfaceFunction2D (units1 ?/? units2)
 unsafeQuotient_ lhs rhs = do
-  let compiledQuotient = CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled rhs.compiled
+  let compiledQuotient =
+        CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled (SurfaceFunction1D.compiled rhs)
   recursive \self -> do
     let quotientDerivative p =
           unsafeQuotient_ (derivative p lhs) rhs

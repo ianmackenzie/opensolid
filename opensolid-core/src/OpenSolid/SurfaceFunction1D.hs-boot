@@ -1,5 +1,5 @@
 module OpenSolid.SurfaceFunction1D
-  ( SurfaceFunction1D (compiled, du, dv)
+  ( SurfaceFunction1D
   , Compiled
   , constant
   , zero
@@ -8,6 +8,7 @@ module OpenSolid.SurfaceFunction1D
   , parameter
   , value
   , range
+  , compiled
   , derivative
   , squared
   , squared_
@@ -110,6 +111,7 @@ v :: SurfaceFunction1D Unitless
 parameter :: SurfaceParameter -> SurfaceFunction1D Unitless
 value :: SurfaceFunction1D units -> UvPoint -> Quantity units
 range :: SurfaceFunction1D units -> UvBounds -> Interval units
+compiled :: SurfaceFunction1D units -> Compiled units
 derivative :: SurfaceParameter -> SurfaceFunction1D units -> SurfaceFunction1D units
 squared :: Units.Squared units1 units2 => SurfaceFunction1D units1 -> SurfaceFunction1D units2
 squared_ :: SurfaceFunction1D units1 -> SurfaceFunction1D (units1 ?*? units1)

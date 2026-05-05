@@ -144,8 +144,8 @@ xy x y = do
           Expression.xy
           Point2D
           Bounds2D
-          x.compiled
-          y.compiled
+          (SurfaceFunction1D.compiled x)
+          (SurfaceFunction1D.compiled y)
   let xyDerivative p =
         VectorSurfaceFunction2D.xy
           (SurfaceFunction1D.derivative p x)
@@ -196,12 +196,12 @@ instance
     (SurfaceFunction1D units)
   where
   f . g = do
-    let dfdu = f.du . g
-    let dfdv = f.dv . g
+    let dfdu = SurfaceFunction1D.derivative U f . g
+    let dfdv = SurfaceFunction1D.derivative V f . g
     let composedDerivative p = do
           let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
           dfdu * dudp + dfdv * dvdp
-    SurfaceFunction1D.new (f.compiled . g.compiled) composedDerivative
+    SurfaceFunction1D.new (SurfaceFunction1D.compiled f . g.compiled) composedDerivative
 
 instance
   Composition

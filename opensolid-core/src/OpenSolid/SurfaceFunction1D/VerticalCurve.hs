@@ -28,6 +28,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction1D.ImplicitCurveRange (ImplicitCurveRange)
 import OpenSolid.SurfaceFunction1D.ImplicitCurveRange qualified as ImplicitCurveRange
 import OpenSolid.SurfaceFunction1D.Internal qualified as Internal
+import OpenSolid.SurfaceParameter (SurfaceParameter (U))
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (pattern UvPoint)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -100,11 +101,12 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
               | dv > 0.0 -> Interval uLow (min uHigh u)
               | dv < 0.0 -> Interval (max uLow u) uHigh
               | otherwise -> Interval uLow uHigh
+  let fu = SurfaceFunction1D.derivative U f
   let solveForU =
-        case (f.compiled, f.du.compiled) of
+        case (SurfaceFunction1D.compiled f, SurfaceFunction1D.compiled fu) of
           (CompiledFunction.Concrete fExpr, CompiledFunction.Concrete fuExpr) ->
             \vValue -> Expression.solveMonotonicSurfaceU fExpr fuExpr (clampedURange vValue) vValue
-          _ -> \vValue -> Internal.solveForU f f.du (clampedURange vValue) vValue
+          _ -> \vValue -> Internal.solveForU f fu (clampedURange vValue) vValue
   let value tValue = do
         let vValue = Number.interpolateFrom vStart vEnd tValue
         let uValue = solveForU vValue

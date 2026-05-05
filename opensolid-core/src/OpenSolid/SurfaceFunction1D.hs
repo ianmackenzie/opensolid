@@ -1,5 +1,5 @@
 module OpenSolid.SurfaceFunction1D
-  ( SurfaceFunction1D (compiled, du, dv)
+  ( SurfaceFunction1D
   , Compiled
   , value
   , range
