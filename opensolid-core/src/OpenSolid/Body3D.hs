@@ -83,7 +83,7 @@ import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceFunction3D.Nondegenerate qualified as SurfaceFunction3D.Nondegenerate
-import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D, normal, position))
+import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds, pattern UvBounds)
 import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
@@ -352,9 +352,8 @@ toSurfaceMesh ::
 toSurfaceMesh resolution body =
   body & toMesh resolution \function uvPoint ->
     SurfaceVertex3D
-      { position = SurfaceFunction3D.Nondegenerate.point function uvPoint
-      , normal = SurfaceFunction3D.Nondegenerate.normalDirectionValue function uvPoint
-      }
+      (SurfaceFunction3D.Nondegenerate.point function uvPoint)
+      (SurfaceFunction3D.Nondegenerate.normalDirectionValue function uvPoint)
 
 toMesh ::
   Tolerance Meters =>

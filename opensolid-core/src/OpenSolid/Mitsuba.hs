@@ -215,7 +215,7 @@ pointBuilder vertex = do
 
 normalBuilder :: SurfaceVertex3D space -> Builder
 normalBuilder vertex = do
-  let (nx, ny, nz) = Direction3D.components convention (SurfaceVertex3D.normal vertex)
+  let (nx, ny, nz) = Direction3D.components convention (SurfaceVertex3D.normalDirection vertex)
   Binary.combine Binary.float64LE [nx, ny, nz]
 
 faceIndicesBuilder :: (Int, Int, Int) -> Builder
