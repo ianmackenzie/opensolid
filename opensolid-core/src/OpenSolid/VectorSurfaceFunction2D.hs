@@ -14,6 +14,7 @@ module OpenSolid.VectorSurfaceFunction2D
   , xComponent
   , yComponent
   , components
+  , compiled
   , derivative
   , placeIn
   , relativeTo
@@ -30,7 +31,6 @@ module OpenSolid.VectorSurfaceFunction2D
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
@@ -63,51 +63,11 @@ import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
-data VectorSurfaceFunction2D units
-  = VectorSurfaceFunction2D
-      (Compiled units)
-      ~(VectorSurfaceFunction2D units)
-      ~(VectorSurfaceFunction2D units)
-
-instance
-  HasField
-    "xComponent"
-    (VectorSurfaceFunction2D units)
-    (SurfaceFunction1D units)
-  where
-  getField = xComponent
-
-instance
-  HasField
-    "yComponent"
-    (VectorSurfaceFunction2D units)
-    (SurfaceFunction1D units)
-  where
-  getField = yComponent
-
-instance
-  HasField
-    "components"
-    (VectorSurfaceFunction2D units)
-    (SurfaceFunction1D units, SurfaceFunction1D units)
-  where
-  getField = components
-
-instance
-  HasField
-    "du"
-    (VectorSurfaceFunction2D units)
-    (VectorSurfaceFunction2D units)
-  where
-  getField (VectorSurfaceFunction2D _ du _) = du
-
-instance
-  HasField
-    "dv"
-    (VectorSurfaceFunction2D units)
-    (VectorSurfaceFunction2D units)
-  where
-  getField (VectorSurfaceFunction2D _ _ dv) = dv
+data VectorSurfaceFunction2D units = VectorSurfaceFunction2D
+  { compiled :: Compiled units
+  , du :: ~(VectorSurfaceFunction2D units)
+  , dv :: ~(VectorSurfaceFunction2D units)
+  }
 
 type Compiled units =
   CompiledFunction
@@ -440,14 +400,6 @@ instance
       (function.compiled . Curve2D.compiled curve)
       ((function.du . curve) * dudt + (function.dv . curve) * dvdt)
 
-instance
-  HasField
-    "compiled"
-    (VectorSurfaceFunction2D units)
-    (Compiled units)
-  where
-  getField (VectorSurfaceFunction2D c _ _) = c
-
 new ::
   Compiled units ->
   (SurfaceParameter -> VectorSurfaceFunction2D units) ->
@@ -530,6 +482,9 @@ value function uvPoint = CompiledFunction.value function.compiled uvPoint
 range :: VectorSurfaceFunction2D units -> UvBounds -> VectorBounds2D units
 range function uvRange = CompiledFunction.range function.compiled uvRange
 
+compiled :: VectorSurfaceFunction2D units -> Compiled units
+compiled = (.compiled)
+
 derivative :: SurfaceParameter -> VectorSurfaceFunction2D units -> VectorSurfaceFunction2D units
 derivative U = (.du)
 derivative V = (.dv)
@@ -556,7 +511,7 @@ yComponent function = do
           function.compiled
   SurfaceFunction1D.new
     compiledYComponent
-    (\parameter -> (derivative parameter function).yComponent)
+    (\parameter -> yComponent (derivative parameter function))
 
 components ::
   VectorSurfaceFunction2D units ->

@@ -3,6 +3,7 @@ module OpenSolid.VectorSurfaceFunction2D
   , Compiled
   , new
   , constant
+  , compiled
   , derivative
   , xComponent
   , yComponent
@@ -11,7 +12,6 @@ module OpenSolid.VectorSurfaceFunction2D
   )
 where
 
-import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector2D, VectorBounds2D)
@@ -29,12 +29,6 @@ data VectorSurfaceFunction2D units
 
 type Compiled units =
   CompiledFunction UvPoint (Vector2D units) UvBounds (VectorBounds2D units)
-
-instance
-  HasField
-    "compiled"
-    (VectorSurfaceFunction2D units)
-    (Compiled units)
 
 instance HasUnits (VectorSurfaceFunction2D units) units
 
@@ -103,6 +97,7 @@ new ::
   Compiled units ->
   (SurfaceParameter -> VectorSurfaceFunction2D units) ->
   VectorSurfaceFunction2D units
+compiled :: VectorSurfaceFunction2D units -> Compiled units
 derivative :: SurfaceParameter -> VectorSurfaceFunction2D units -> VectorSurfaceFunction2D units
 constant :: Vector2D units -> VectorSurfaceFunction2D units
 xComponent :: VectorSurfaceFunction2D units -> SurfaceFunction1D units

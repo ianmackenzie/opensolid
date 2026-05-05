@@ -45,6 +45,7 @@ import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
+import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
@@ -148,7 +149,7 @@ instance
     let dvOuter = outer.dv . inner
     let composedDerivative parameter = do
           let innerDerivative = SurfaceFunction2D.derivative parameter inner
-          let (dU, dV) = innerDerivative.components
+          let (dU, dV) = VectorSurfaceFunction2D.components innerDerivative
           duOuter * dU + dvOuter * dV
     new (outer.compiled . SurfaceFunction2D.compiled inner) composedDerivative
 

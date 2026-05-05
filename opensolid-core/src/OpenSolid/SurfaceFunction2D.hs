@@ -72,7 +72,7 @@ instance
   where
   lhs + rhs =
     new
-      (compiled lhs + rhs.compiled)
+      (compiled lhs + VectorSurfaceFunction2D.compiled rhs)
       (\p -> derivative p lhs + VectorSurfaceFunction2D.derivative p rhs)
 
 instance
@@ -93,7 +93,7 @@ instance
   where
   lhs - rhs =
     new
-      (compiled lhs - rhs.compiled)
+      (compiled lhs - VectorSurfaceFunction2D.compiled rhs)
       (\p -> derivative p lhs - VectorSurfaceFunction2D.derivative p rhs)
 
 instance
@@ -124,7 +124,11 @@ new ::
 new c derivativeFunction = do
   let du = derivativeFunction U
   let dv = derivativeFunction V
-  let dv' = VectorSurfaceFunction2D.new dv.compiled (\case U -> du.dv; V -> dv.dv)
+  let dvCompiled = VectorSurfaceFunction2D.compiled dv
+  let dvDerivative parameter = case parameter of
+        U -> VectorSurfaceFunction2D.derivative V du
+        V -> VectorSurfaceFunction2D.derivative V dv
+  let dv' = VectorSurfaceFunction2D.new dvCompiled dvDerivative
   SurfaceFunction2D c du dv'
 
 constant :: Point2D units -> SurfaceFunction2D units
@@ -206,12 +210,13 @@ instance
     (VectorSurfaceFunction2D units)
   where
   f . g = do
-    let dfdu = f.du . g
-    let dfdv = f.dv . g
+    let dfdu = VectorSurfaceFunction2D.derivative U f . g
+    let dfdv = VectorSurfaceFunction2D.derivative V f . g
+    let compiledComposed = VectorSurfaceFunction2D.compiled f . g.compiled
     let composedDerivative p = do
           let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
           dfdu * dudp + dfdv * dvdp
-    VectorSurfaceFunction2D.new (f.compiled . g.compiled) composedDerivative
+    VectorSurfaceFunction2D.new compiledComposed composedDerivative
 
 instance
   Composition
