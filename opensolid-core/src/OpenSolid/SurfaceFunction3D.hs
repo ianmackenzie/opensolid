@@ -166,7 +166,7 @@ instance
           let innerDerivative = SurfaceFunction2D.derivative parameter inner
           let (dU, dV) = innerDerivative.components
           duOuter * dU + dvOuter * dV
-    new (outer.compiled . inner.compiled) composedDerivative
+    new (outer.compiled . SurfaceFunction2D.compiled inner) composedDerivative
 
 instance HasField "compiled" (SurfaceFunction3D space) (Compiled space) where
   getField (SurfaceFunction3D c _ _) = c

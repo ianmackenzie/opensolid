@@ -2,12 +2,12 @@ module OpenSolid.SurfaceFunction2D
   ( SurfaceFunction2D
   , Compiled
   , derivative
+  , compiled
   , new
   , xy
   )
 where
 
-import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Prelude
@@ -26,8 +26,6 @@ data SurfaceFunction2D units
 
 type Compiled units =
   CompiledFunction UvPoint (Point2D units) UvBounds (Bounds2D units)
-
-instance HasField "compiled" (SurfaceFunction2D units) (Compiled units)
 
 instance
   units1 ~ units2 =>
@@ -68,4 +66,5 @@ new ::
   (SurfaceParameter -> VectorSurfaceFunction2D units) ->
   SurfaceFunction2D units
 xy :: SurfaceFunction1D units -> SurfaceFunction1D units -> SurfaceFunction2D units
+compiled :: SurfaceFunction2D units -> Compiled units
 derivative :: SurfaceParameter -> SurfaceFunction2D units -> VectorSurfaceFunction2D units
