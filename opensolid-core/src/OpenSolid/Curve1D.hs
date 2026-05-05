@@ -123,7 +123,11 @@ instance FFI (Curve1D Radians) where
 instance HasUnits (Curve1D units) units
 
 instance Units.Coercion (Curve1D units1) (Curve1D units2) where
-  coerce curve = Curve1D (Units.coerce curve.compiled) (Units.coerce curve.derivative)
+  coerce curve =
+    Curve1D
+      { compiled = Units.coerce curve.compiled
+      , derivative = Units.coerce curve.derivative
+      }
 
 instance ApproximateEquality (Curve1D units) (Tolerance units) where
   curve1 ~= curve2 = do
@@ -184,10 +188,12 @@ t = new (CompiledFunction.concrete Expression.t) (constant 1.0)
 interpolateFrom :: Quantity units -> Quantity units -> Curve1D units
 interpolateFrom a b = a + t * (b - a)
 
+{-# INLINE compiled #-}
 compiled :: Curve1D units -> Compiled units
 compiled = (.compiled)
 
 -- | Get the derivative of a curve.
+{-# INLINE derivative #-}
 derivative :: Curve1D units -> Curve1D units
 derivative = (.derivative)
 
@@ -195,7 +201,7 @@ secondDerivative :: Curve1D units -> Curve1D units
 secondDerivative = derivative . derivative
 
 instance Negation (Curve1D units) where
-  negate curve = new (negate curve.compiled) (negate curve.derivative)
+  negate curve = new (negate (compiled curve)) (negate (derivative curve))
 
 instance Multiplication Sign (Curve1D units) (Curve1D units) where
   Positive * curve = curve
@@ -206,7 +212,7 @@ instance Multiplication (Curve1D units) Sign (Curve1D units) where
   curve * Negative = -curve
 
 instance units1 ~ units2 => Addition (Curve1D units1) (Curve1D units2) (Curve1D units1) where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
+  lhs + rhs = new (compiled lhs + compiled rhs) (derivative lhs + derivative rhs)
 
 instance units1 ~ units2 => Addition (Curve1D units1) (Quantity units2) (Curve1D units1) where
   curve + quantity = curve + constant quantity
@@ -215,7 +221,7 @@ instance units1 ~ units2 => Addition (Quantity units1) (Curve1D units2) (Curve1D
   quantity + curve = constant quantity + curve
 
 instance units1 ~ units2 => Subtraction (Curve1D units1) (Curve1D units2) (Curve1D units1) where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
+  lhs - rhs = new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
 
 instance
   units1 ~ units2 =>
@@ -237,7 +243,7 @@ instance
 
 instance Multiplication_ (Curve1D units1) (Curve1D units2) (Curve1D (units1 ?*? units2)) where
   lhs ?*? rhs =
-    new (lhs.compiled ?*? rhs.compiled) (lhs.derivative ?*? rhs + lhs ?*? rhs.derivative)
+    new (compiled lhs ?*? compiled rhs) (derivative lhs ?*? rhs + lhs ?*? derivative rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -323,7 +329,7 @@ instance
   vector ?*? curve = VectorCurve3D.constant vector ?*? curve
 
 instance Composition (Curve1D units) (Curve1D Unitless) (Curve1D units) where
-  f . g = new (f.compiled . g.compiled) ((f.derivative . g) * g.derivative)
+  f . g = new (compiled f . compiled g) ((derivative f . g) * derivative g)
 
 reverse :: Curve1D units -> Curve1D units
 reverse curve = curve . (1.0 - t)
@@ -379,11 +385,11 @@ The parameter value should be between 0 and 1.
 -}
 {-# INLINE value #-}
 value :: Curve1D units -> Number -> Quantity units
-value curve = CompiledFunction.value curve.compiled
+value curve = CompiledFunction.value (compiled curve)
 
 {-# INLINE range #-}
 range :: Curve1D units -> Interval Unitless -> Interval units
-range curve = CompiledFunction.range curve.compiled
+range curve = CompiledFunction.range (compiled curve)
 
 startValue :: Curve1D units -> Quantity units
 startValue curve = value curve 0.0
@@ -417,8 +423,8 @@ desingularize = Desingularization.curve
 desingularized :: Curve1D units -> Curve1D units -> Curve1D units -> Curve1D units
 desingularized start middle end =
   new
-    (CompiledFunction.desingularized t.compiled start.compiled middle.compiled end.compiled)
-    (desingularized start.derivative middle.derivative end.derivative)
+    (CompiledFunction.desingularized (compiled t) (compiled start) (compiled middle) (compiled end))
+    (desingularized (derivative start) (derivative middle) (derivative end))
 
 quotient ::
   (Units.Quotient units1 units2 units3, Tolerance units2) =>
@@ -491,8 +497,8 @@ squared curve = Units.specialize (squared_ curve)
 squared_ :: Curve1D units -> Curve1D (units ?*? units)
 squared_ curve =
   new
-    (CompiledFunction.map Expression.squared_ Quantity.squared_ Interval.squared_ curve.compiled)
-    (2.0 * curve ?*? curve.derivative)
+    (CompiledFunction.map Expression.squared_ Quantity.squared_ Interval.squared_ (compiled curve))
+    (2.0 * curve ?*? derivative curve)
 
 -- | Compute the square root of a curve.
 sqrt :: Tolerance units1 => Units.Squared units1 units2 => Curve1D units2 -> Curve1D units1
@@ -508,22 +514,22 @@ sqrt_ curve =
 cubed :: Curve1D Unitless -> Curve1D Unitless
 cubed curve =
   new
-    (CompiledFunction.map Expression.cubed Number.cubed Interval.cubed curve.compiled)
-    (3.0 * squared curve * curve.derivative)
+    (CompiledFunction.map Expression.cubed Number.cubed Interval.cubed (compiled curve))
+    (3.0 * squared curve * derivative curve)
 
 -- | Compute the sine of a curve.
 sin :: Curve1D Radians -> Curve1D Unitless
 sin curve =
   new
-    (CompiledFunction.map Expression.sin Angle.sin Interval.sin curve.compiled)
-    (cos curve * (curve.derivative / Angle.radian))
+    (CompiledFunction.map Expression.sin Angle.sin Interval.sin (compiled curve))
+    (cos curve * (derivative curve / Angle.radian))
 
 -- | Compute the cosine of a curve.
 cos :: Curve1D Radians -> Curve1D Unitless
 cos curve =
   new
-    (CompiledFunction.map Expression.cos Angle.cos Interval.cos curve.compiled)
-    (negate (sin curve) * (curve.derivative / Angle.radian))
+    (CompiledFunction.map Expression.cos Angle.cos Interval.cos (compiled curve))
+    (negate (sin curve) * (derivative curve / Angle.radian))
 
 integrate :: Curve1D units -> Estimate units
 integrate curve = Estimate.new (Integral curve Interval.unit)
@@ -594,7 +600,7 @@ zeros :: Tolerance units => Curve1D units -> Result IsZero (List Zero)
 zeros curve
   | curve ~= zero = Error IsZero
   | otherwise = do
-      let derivatives = Stream.iterate (.derivative) curve
+      let derivatives = Stream.iterate derivative curve
       let derivativeRangeStream tRange = Stream.map (\f -> range f tRange) derivatives
       let cache = Solve1D.init derivativeRangeStream
       case Solve1D.search (findZeros derivatives) cache of

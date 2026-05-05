@@ -322,7 +322,7 @@ instance
   Exists dimension units space =>
   Composition (Curve dimension units space) (Curve1D Unitless) (Curve dimension units space)
   where
-  f . g = new (f.compiled . Curve1D.compiled g) ((f.derivative . g) * Curve1D.derivative g)
+  f . g = new (compiled f . Curve1D.compiled g) ((derivative f . g) * Curve1D.derivative g)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -511,9 +511,9 @@ isPoint :: (Exists dimension units space, Tolerance units) => Curve dimension un
 isPoint curve = VectorCurve.isZero (derivative curve)
 
 point :: Curve dimension units space -> Number -> Point dimension units space
-point curve 0.0 = curve.startPoint
-point curve 1.0 = curve.endPoint
-point curve tValue = CompiledFunction.value curve.compiled tValue
+point curve 0.0 = startPoint curve
+point curve 1.0 = endPoint curve
+point curve tValue = CompiledFunction.value (compiled curve) tValue
 
 startPoint :: Curve dimension units space -> Point dimension units space
 startPoint = (.startPoint)
@@ -527,7 +527,7 @@ endpoints ::
 endpoints curve = (startPoint curve, endPoint curve)
 
 range :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
-range curve tRange = CompiledFunction.range curve.compiled tRange
+range curve tRange = CompiledFunction.range (compiled curve) tRange
 
 bounds :: Curve dimension units space -> Bounds dimension units space
 bounds curve = Curve.Segment.range (SearchTree.value (searchTree curve))
@@ -645,9 +645,9 @@ desingularized start middle end = do
   let compiledDesingularized =
         CompiledFunction.desingularized
           (Curve1D.compiled Curve1D.t)
-          start.compiled
-          middle.compiled
-          end.compiled
+          (compiled start)
+          (compiled middle)
+          (compiled end)
   let desingularizedDerivative =
         VectorCurve.desingularized start.derivative middle.derivative end.derivative
   new compiledDesingularized desingularizedDerivative
