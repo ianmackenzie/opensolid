@@ -5,6 +5,7 @@ module OpenSolid.SurfaceFunction3D
   , constant
   , point
   , range
+  , compiled
   , derivative
   , derivativeValue
   , derivativeRange
@@ -17,7 +18,6 @@ module OpenSolid.SurfaceFunction3D
   )
 where
 
-import GHC.Records (HasField)
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
@@ -48,27 +48,11 @@ import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
-data SurfaceFunction3D space
-  = SurfaceFunction3D
-      (Compiled space)
-      ~(VectorSurfaceFunction3D Meters space)
-      ~(VectorSurfaceFunction3D Meters space)
-
-instance
-  HasField
-    "du"
-    (SurfaceFunction3D space)
-    (VectorSurfaceFunction3D Meters space)
-  where
-  getField (SurfaceFunction3D _ du _) = du
-
-instance
-  HasField
-    "dv"
-    (SurfaceFunction3D space)
-    (VectorSurfaceFunction3D Meters space)
-  where
-  getField (SurfaceFunction3D _ _ dv) = dv
+data SurfaceFunction3D space = SurfaceFunction3D
+  { compiled :: Compiled space
+  , du :: ~(VectorSurfaceFunction3D Meters space)
+  , dv :: ~(VectorSurfaceFunction3D Meters space)
+  }
 
 type Compiled space =
   CompiledFunction UvPoint (Point3D space) UvBounds (Bounds3D space)
@@ -168,9 +152,6 @@ instance
           duOuter * dU + dvOuter * dV
     new (outer.compiled . SurfaceFunction2D.compiled inner) composedDerivative
 
-instance HasField "compiled" (SurfaceFunction3D space) (Compiled space) where
-  getField (SurfaceFunction3D c _ _) = c
-
 new ::
   Compiled space ->
   (SurfaceParameter -> VectorSurfaceFunction3D Meters space) ->
@@ -201,6 +182,9 @@ derivativeValue V function uvPoint = VectorSurfaceFunction3D.value function.dv u
 derivativeRange :: SurfaceParameter -> SurfaceFunction3D space -> UvBounds -> VectorBounds3D Meters space
 derivativeRange U function uvRange = VectorSurfaceFunction3D.range function.du uvRange
 derivativeRange V function uvRange = VectorSurfaceFunction3D.range function.dv uvRange
+
+compiled :: SurfaceFunction3D space -> Compiled space
+compiled = (.compiled)
 
 derivative ::
   SurfaceParameter ->

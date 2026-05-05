@@ -273,9 +273,11 @@ instance
 instance Composition (SurfaceFunction3D space) (Curve2D Unitless) (Curve3D space) where
   function . uvCurve = do
     let (dudt, dvdt) = VectorCurve2D.components (derivative uvCurve)
-    new
-      (function.compiled . compiled uvCurve)
-      (function.du . uvCurve * dudt + function.dv . uvCurve * dvdt)
+    let compiledComposed = SurfaceFunction3D.compiled function . compiled uvCurve
+    let composedDerivative =
+          SurfaceFunction3D.derivative U function . uvCurve * dudt
+            + SurfaceFunction3D.derivative V function . uvCurve * dvdt
+    new compiledComposed composedDerivative
 
 instance
   units1 ~ units2 =>

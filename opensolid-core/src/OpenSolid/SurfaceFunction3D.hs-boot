@@ -5,12 +5,12 @@ module OpenSolid.SurfaceFunction3D
   , constant
   , point
   , range
+  , compiled
   , derivative
   , transformBy
   )
 where
 
-import GHC.Records (HasField)
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds3D, Point3D)
@@ -25,22 +25,8 @@ type role SurfaceFunction3D nominal
 type SurfaceFunction3D :: Type -> Type
 data SurfaceFunction3D space
 
-instance
-  HasField
-    "du"
-    (SurfaceFunction3D space)
-    (VectorSurfaceFunction3D Meters space)
-
-instance
-  HasField
-    "dv"
-    (SurfaceFunction3D space)
-    (VectorSurfaceFunction3D Meters space)
-
 type Compiled space =
   CompiledFunction UvPoint (Point3D space) UvBounds (Bounds3D space)
-
-instance HasField "compiled" (SurfaceFunction3D space) (Compiled space)
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -63,6 +49,7 @@ new ::
 constant :: Point3D space -> SurfaceFunction3D space
 point :: SurfaceFunction3D space -> UvPoint -> Point3D space
 range :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
+compiled :: SurfaceFunction3D space -> Compiled space
 derivative ::
   SurfaceParameter ->
   SurfaceFunction3D space ->
