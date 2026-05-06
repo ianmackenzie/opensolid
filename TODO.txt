@@ -1,3 +1,16 @@
+Add generic Curve.transformBy
+- add necessary constraints to Curve.Exists (e.g. Expression.TransformBy constraint)
+
+Add actual tag value to transforms
+- GADT tag type so that it's possible to know if e.g. an affine transformation is actually rigid
+- store scaling factor in uniform transformation tag! (maybe call it 'kind'?)
+
+Optimize curves to reuse arc lengths and uniform parameterizations where possible
+- can simply reuse as is for rigid transformations and coordinate conversions
+- can scale arc length (by absolute value of uniform scale) for uniform transformations, and reuse uniform parameterization
+
+Add one or more Curve2D constructors for involute curves
+
 Rework CDT code to encode arrays using Builder and then Data.ByteString.Unsafe.unsafeUseAsCStringLen
 
 Move IndexOutOfBounds into Error module?
