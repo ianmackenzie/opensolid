@@ -61,7 +61,7 @@ testCurveMedialAxis label curve1 curve2 = do
   timer <- Timer.start
   segments <- Curve2D.medialAxis curve1 curve2 & Result.orFail
   let drawTangentCircles (segment :: Curve2D.MedialAxis.Segment Meters) = do
-        let (_, parameterization) = Curve2D.uniformParameterization segment.curve
+        let parameterization = Curve2D.uniformParameterization segment.curve
         let drawTangentCircle r = do
               let t = Curve1D.value parameterization r
               let centerPoint = Curve2D.point segment.curve t

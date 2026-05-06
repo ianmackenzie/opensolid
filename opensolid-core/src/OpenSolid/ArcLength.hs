@@ -19,7 +19,7 @@ data Tree units
 parameterization ::
   (Number -> Quantity units) ->
   (Number -> Quantity units) ->
-  (Quantity units, Quantity units -> Number)
+  (Quantity units, Number -> Number)
 parameterization dsdt d2sdt2 = do
   let dsdt1 = dsdt 0.0
   let dsdt2 = dsdt Lobatto.p2
@@ -32,26 +32,27 @@ parameterization dsdt d2sdt2 = do
         Tolerance.using dsdtTolerance do
           (dsdtMin ~= dsdtMax, dsdt1 ~= Quantity.zero, dsdt4 ~= Quantity.zero)
   if isConstant
-    then (dsdt1, (/ dsdt1)) -- Constant-speed curve (e.g. line or arc)
+    then (dsdt1, id) -- Constant-speed curve (e.g. line or arc)
     else do
       let initialEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
       let (length, tree) =
             buildTree 1 dsdt d2sdt2 singular0 singular1 0.0 1.0 dsdt1 dsdt4 initialEstimate
-      (length, evaluate tree)
+      let uniformParameterizationValue r = evaluate tree (length * r)
+      (length, uniformParameterizationValue)
 
 evaluate :: Tree units -> Quantity units -> Number
-evaluate tree length = case tree of
+evaluate tree s = case tree of
   Node leftLength leftTree rightTree
-    | length < leftLength -> evaluate leftTree length
-    | otherwise -> evaluate rightTree (length - leftLength)
+    | s < leftLength -> evaluate leftTree s
+    | otherwise -> evaluate rightTree (s - leftLength)
   Leaf segmentLength t1# t2# t3# t4# t5# t6# -> do
-    let !(Q# r#) = Quantity.clampTo Interval.unit (length / segmentLength)
+    let !(Q# r#) = Quantity.clampTo Interval.unit (s / segmentLength)
     Q# (quinticBezier# t1# t2# t3# t4# t5# t6# r#)
   SingularStart segmentLength q1# q2# q3# q4# -> do
-    let !(Q# r#) = Quantity.clampTo Interval.unit (length / segmentLength)
+    let !(Q# r#) = Quantity.clampTo Interval.unit (s / segmentLength)
     Q# (sqrt# (cubicBezier# q1# q2# q3# q4# r#))
   SingularEnd segmentLength q1# q2# q3# q4# -> do
-    let !(Q# r#) = 1.0 - Quantity.clampTo Interval.unit (length / segmentLength)
+    let !(Q# r#) = 1.0 - Quantity.clampTo Interval.unit (s / segmentLength)
     Q# (1.0## -# sqrt# (cubicBezier# q1# q2# q3# q4# r#))
 
 buildTree ::

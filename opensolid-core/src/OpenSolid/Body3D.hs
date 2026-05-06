@@ -35,7 +35,6 @@ import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CDT qualified as CDT
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
@@ -97,7 +96,7 @@ import OpenSolid.World3D qualified as World3D
 -- | A solid body in 3D, defined by a set of boundary surfaces.
 data Body3D space = Body3D
   { surfaces :: Set3D space (Surface3D space)
-  , seams :: HashMap HalfEdge.Id (Maybe Seam)
+  , seams :: HashMap HalfEdge.Id (Maybe HalfEdge.Id)
   }
 
 instance Indexed (Body3D space) SurfaceId (Surface3D space) where
@@ -105,13 +104,6 @@ instance Indexed (Body3D space) SurfaceId (Surface3D space) where
 
 instance Indexed (Body3D space) HalfEdge.Id (SurfaceCurve3D space) where
   body !! HalfEdge.Id{surfaceId, boundaryId, curveId} = body !! surfaceId !! boundaryId !! curveId
-
--- | Data defining how a half-edge mates to its neighbour.
-data Seam = Seam
-  { matingHalfEdgeId :: HalfEdge.Id
-  , uniformParameterization :: Curve1D Unitless
-  , matingUniformParameterization :: Curve1D Unitless
-  }
 
 instance FFI (Body3D FFI.Space) where
   representation = FFI.classRepresentation "Body3D"
@@ -307,39 +299,29 @@ buildHalfEdgeSet surfaceSet =
       boundary & Set3D.combineWithIndex \curveIndex surfaceCurve -> do
         let curveId = CurveId curveIndex
         let halfEdgeId = HalfEdge.Id{surfaceId, boundaryId, curveId}
-        let curve3D = SurfaceCurve3D.curve surfaceCurve
-        let (_, uniformParameterization) = Curve3D.uniformParameterization curve3D
-        let halfEdge = HalfEdge{id = halfEdgeId, surfaceCurve, uniformParameterization}
+        let halfEdge = HalfEdge{id = halfEdgeId, surfaceCurve}
         Set3D.singleton (HalfEdge.bounds halfEdge) halfEdge
 
 registerSeam ::
   Tolerance Meters =>
   Set3D space (HalfEdge space) ->
   HalfEdge space ->
-  HashMap HalfEdge.Id (Maybe Seam) ->
-  Result BoundedBy.Error (HashMap HalfEdge.Id (Maybe Seam))
+  HashMap HalfEdge.Id (Maybe HalfEdge.Id) ->
+  Result BoundedBy.Error (HashMap HalfEdge.Id (Maybe HalfEdge.Id))
 registerSeam halfEdgeSet halfEdge accumulated =
   case accumulated & HashMap.lookup halfEdge.id of
     Just _ -> Ok accumulated -- We've already registered this seam from the other side
     Nothing -> do
-      let curve3D = HalfEdge.curve halfEdge
-      if Curve3D.isPoint curve3D
-        then Ok (accumulated & HashMap.insert halfEdge.id Nothing) -- Current half-edge is degenerate
+      let curve = HalfEdge.curve halfEdge
+      if Curve3D.isPoint curve
+        then Ok (accumulated & HashMap.insert halfEdge.id Nothing) -- Degenerate half-edge has no mating half-edge
         else case HalfEdge.findMatingHalfEdges halfEdgeSet halfEdge of
           List.One matingHalfEdge -> Ok do
             accumulated
-              & HashMap.insert halfEdge.id (Just (seam halfEdge matingHalfEdge))
-              & HashMap.insert matingHalfEdge.id (Just (seam matingHalfEdge halfEdge))
+              & HashMap.insert halfEdge.id (Just matingHalfEdge.id)
+              & HashMap.insert matingHalfEdge.id (Just halfEdge.id)
           [] -> Error BoundedBy.BoundaryHasGaps
           List.TwoOrMore -> Error BoundedBy.BoundaryIntersectsItself
-
-seam :: HalfEdge space -> HalfEdge space -> Seam
-seam halfEdge matingHalfEdge =
-  Seam
-    { matingHalfEdgeId = matingHalfEdge.id
-    , uniformParameterization = halfEdge.uniformParameterization
-    , matingUniformParameterization = matingHalfEdge.uniformParameterization
-    }
 
 ----- MESHING -----
 
@@ -473,8 +455,9 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
         Set3D.forEachWithIndex boundary \curveIndex surfaceCurve accumulated -> do
           let curveId = CurveId curveIndex
           let halfEdgeId = HalfEdge.Id{surfaceId, boundaryId, curveId}
-          let curve3D = SurfaceCurve3D.curve surfaceCurve
+          let curve = SurfaceCurve3D.curve surfaceCurve
           let uvCurve = SurfaceCurve3D.uvCurve surfaceCurve
+          let uniformParameterization = Curve3D.uniformParameterizationValue curve
           case body.seams !! halfEdgeId of
             Nothing -> do
               -- Degenerate half-edge not mated to any adjacent half-edge
@@ -482,7 +465,7 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
               let tValues = Domain1D.leadingSamplingPoints edgePredicate
               let uvPoints = NonEmpty.map (Curve2D.point uvCurve) tValues
               accumulated & HashMap.insert halfEdgeId uvPoints
-            Just Seam{matingHalfEdgeId, uniformParameterization, matingUniformParameterization} ->
+            Just matingHalfEdgeId ->
               -- The logic below generates mesh vertices for *both* sides of a given half-edge,
               -- so it would be wasteful and redundant to run it once on one half-edge
               -- and then run it again later on the mating half-edge.
@@ -492,28 +475,27 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
                 then do
                   let matingSurfaceCurve = body !! matingHalfEdgeId
                   let matingSurfaceSegments = surfaceSegmentsMap !! matingHalfEdgeId.surfaceId
+                  let matingCurve = SurfaceCurve3D.curve matingSurfaceCurve
+                  let matingUniformParameterization =
+                        Curve3D.uniformParameterizationValue matingCurve
                   let matingUvCurve = SurfaceCurve3D.uvCurve matingSurfaceCurve
                   let edgePredicate =
                         edgeLinearizationPredicate
                           resolution
-                          curve3D
+                          curve
                           uvCurve
                           uniformParameterization
                           matingUvCurve
                           matingUniformParameterization
                           surfaceSegments
                           matingSurfaceSegments
-                  let innerSValues = Domain1D.innerSamplingPoints edgePredicate
-                  let innerUvPoints =
-                        List.map
-                          (Curve2D.point uvCurve . Curve1D.value uniformParameterization)
-                          innerSValues
+                  let innerRValues = Domain1D.innerSamplingPoints edgePredicate
+                  let uvPoint = Curve2D.point uvCurve . uniformParameterization
+                  let innerUvPoints = List.map uvPoint innerRValues
                   let uvPoints = Curve2D.startPoint uvCurve :| innerUvPoints
-                  let matingInnerSValues = List.reverseMap (1.0 -) innerSValues
-                  let matingInnerUvPoints =
-                        List.map
-                          (Curve2D.point matingUvCurve . Curve1D.value matingUniformParameterization)
-                          matingInnerSValues
+                  let matingInnerRValues = List.reverseMap (1.0 -) innerRValues
+                  let matingUvPoint = Curve2D.point matingUvCurve . matingUniformParameterization
+                  let matingInnerUvPoints = List.map matingUvPoint matingInnerRValues
                   let matingUvPoints = Curve2D.startPoint matingUvCurve :| matingInnerUvPoints
                   accumulated
                     & HashMap.insert halfEdgeId uvPoints
@@ -524,16 +506,16 @@ edgeLinearizationPredicate ::
   Resolution Meters ->
   Curve3D space ->
   Curve2D Unitless ->
-  Curve1D Unitless ->
+  (Number -> Number) ->
   Curve2D Unitless ->
-  Curve1D Unitless ->
+  (Number -> Number) ->
   Set2D Unitless UvBounds ->
   Set2D Unitless UvBounds ->
   Interval Unitless ->
   Bool
 edgeLinearizationPredicate
   resolution
-  curve3D
+  curve
   uvCurve
   uniformParameterization
   matingUvCurve
@@ -541,22 +523,22 @@ edgeLinearizationPredicate
   surfaceSegments
   matingSurfaceSegments
   (Interval rStart rEnd) = do
-    let tStart = Curve1D.value uniformParameterization rStart
-    let tEnd = Curve1D.value uniformParameterization rEnd
+    let tStart = uniformParameterization rStart
+    let tEnd = uniformParameterization rEnd
     let uvStart = Curve2D.point uvCurve tStart
     let uvEnd = Curve2D.point uvCurve tEnd
-    let matingRStart = Curve1D.value matingUniformParameterization (1.0 - rStart)
-    let matingREnd = Curve1D.value matingUniformParameterization (1.0 - rEnd)
-    let matingUvStart = Curve2D.point matingUvCurve matingRStart
-    let matingUvEnd = Curve2D.point matingUvCurve matingREnd
+    let matingTStart = matingUniformParameterization (1.0 - rStart)
+    let matingTEnd = matingUniformParameterization (1.0 - rEnd)
+    let matingUvStart = Curve2D.point matingUvCurve matingTStart
+    let matingUvEnd = Curve2D.point matingUvCurve matingTEnd
     let uvRange = Bounds2D.hull2 uvStart uvEnd
     let matingUvRange = Bounds2D.hull2 matingUvStart matingUvEnd
     let edgeSize = Point2D.distanceFrom uvStart uvEnd
     let matingEdgeSize = Point2D.distanceFrom matingUvStart matingUvEnd
-    let startPoint = Curve3D.point curve3D tStart
-    let endPoint = Curve3D.point curve3D tEnd
+    let startPoint = Curve3D.point curve tStart
+    let endPoint = Curve3D.point curve tEnd
     let edgeLength = Point3D.distanceFrom startPoint endPoint
-    let edgeLinearDeviation = Curve.linearDeviation curve3D (Interval tStart tEnd)
+    let edgeLinearDeviation = Curve.linearDeviation curve (Interval tStart tEnd)
     Resolution.acceptable (#size edgeLength) (#error edgeLinearDeviation) resolution
       && validEdge uvRange edgeSize surfaceSegments
       && validEdge matingUvRange matingEdgeSize matingSurfaceSegments

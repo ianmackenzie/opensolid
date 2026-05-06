@@ -51,12 +51,15 @@ module OpenSolid.Curve
   , linearDeviation
   , linearize
   , toPolyline
-  , arcLengthParameterization
+  , length
   , uniformParameterization
+  , uniformParameterizationValue
+  , uniformPoint
   )
 where
 
 import Data.Void (Void)
+import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Axis (Axis)
 import OpenSolid.Axis qualified as Axis
 import OpenSolid.Bezier qualified as Bezier
@@ -138,6 +141,8 @@ data Curve dimension units space = Curve
   , startPoint :: ~(Point dimension units space)
   , endPoint :: ~(Point dimension units space)
   , searchTree :: ~(SearchTree dimension units space)
+  , nondegenerateLength :: ~(Quantity units)
+  , nondegenerateUniformParameterization :: ~(Curve1D Unitless)
   }
 
 -- | A parametric curve in 2D space.
@@ -166,6 +171,8 @@ instance Units.Coercion (Curve2D units1) (Curve2D units2) where
       , startPoint = Units.coerce curve.startPoint
       , endPoint = Units.coerce curve.endPoint
       , searchTree = Units.coerce curve.searchTree
+      , nondegenerateLength = Quantity.coerce curve.nondegenerateLength
+      , nondegenerateUniformParameterization = curve.nondegenerateUniformParameterization
       }
 
 instance FFI (Curve2D Meters) where
@@ -424,14 +431,52 @@ new ::
   VectorCurve dimension units space ->
   Curve dimension units space
 new givenCompiled givenDerivative =
-  recursive \self ->
+  recursive \curve -> do
+    let (nondegenerateLength, nondegenerateUniformParameterizationValue) = do
+          let dsdt t = Vector.magnitude (derivativeValue curve t)
+          let d2sdt2 t = do
+                let tangent = Curve.Nondegenerate.tangentDirectionValue (Nondegenerate curve) t
+                secondDerivativeValue curve t `dot` tangent
+          ArcLength.parameterization dsdt d2sdt2
     Curve
       { compiled = givenCompiled
       , derivative = givenDerivative
       , startPoint = CompiledFunction.value givenCompiled 0.0
       , endPoint = CompiledFunction.value givenCompiled 1.0
-      , searchTree = SearchTree.build (Curve.Segment.new self) SearchDomain.curve
+      , searchTree = SearchTree.build (Curve.Segment.new curve) SearchDomain.curve
+      , nondegenerateLength
+      , nondegenerateUniformParameterization =
+          nondegenerateUniformParameterization
+            (Nondegenerate curve)
+            nondegenerateLength
+            nondegenerateUniformParameterizationValue
       }
+
+nondegenerateUniformParameterization ::
+  Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) ->
+  Quantity units ->
+  (Number -> Number) ->
+  Curve1D Unitless
+nondegenerateUniformParameterization curve curveLength parameterizationValue =
+  recursive \self -> do
+    let parameterizationRange (Interval rLow rHigh) =
+          Interval (parameterizationValue rLow) (parameterizationValue rHigh)
+    Curve1D.new
+      (CompiledFunction.abstract parameterizationValue parameterizationRange)
+      (uniformParameterizationDerivative curve curveLength self)
+
+uniformParameterizationDerivative ::
+  Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) ->
+  Quantity units ->
+  Curve1D Unitless ->
+  Curve1D Unitless
+uniformParameterizationDerivative curve curveLength curveUniformParameterization = do
+  let nondegenerateDerivative = Curve.Nondegenerate.derivative curve
+  let derivativeMagnitude = VectorCurve.Nondegenerate.magnitude nondegenerateDerivative
+  let dtdr = Curve1D.constant curveLength / derivativeMagnitude
+  dtdr . curveUniformParameterization
 
 constant ::
   Exists dimension units space =>
@@ -729,29 +774,29 @@ leftRightError curve t1 t2 p1 p2 = do
   let rightError = Line.distanceTo (point curve tRight) (Line p1 p2)
   max leftError rightError
 
-arcLengthParameterization ::
+length ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  Result IsDegenerate (Quantity units, Quantity units -> Number)
-arcLengthParameterization curve =
-  Result.map Curve.Nondegenerate.arcLengthParameterization (nondegenerate curve)
+  Quantity units
+length curve = if isPoint curve then Quantity.zero else curve.nondegenerateLength
 
 uniformParameterization ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  (Quantity units, Curve1D Unitless)
+  Curve1D Unitless
 uniformParameterization curve =
-  case nondegenerate curve of
-    Error IsDegenerate -> (Quantity.zero, Curve1D.t)
-    Ok nondegenerateCurve -> do
-      let (length, parameterization) =
-            Curve.Nondegenerate.arcLengthParameterization nondegenerateCurve
-      let tValue rValue = parameterization (length * rValue)
-      let tRange (Interval rLow rHigh) = Interval (tValue rLow) (tValue rHigh)
-      let compiledParameterization = CompiledFunction.abstract tValue tRange
-      let curveDerivative = Curve.Nondegenerate.derivative nondegenerateCurve
-      let derivativeMagnitude = VectorCurve.Nondegenerate.magnitude curveDerivative
-      let parameterizationCurve = recursive \self -> do
-            let dtdr = Curve1D.constant length / derivativeMagnitude
-            Curve1D.new compiledParameterization (dtdr . self)
-      (length, parameterizationCurve)
+  if isPoint curve then Curve1D.t else curve.nondegenerateUniformParameterization
+
+uniformParameterizationValue ::
+  (Exists dimension units space, Tolerance units) =>
+  Curve dimension units space ->
+  Number ->
+  Number
+uniformParameterizationValue curve r = Curve1D.value (uniformParameterization curve) r
+
+uniformPoint ::
+  (Exists dimension units space, Tolerance units) =>
+  Curve dimension units space ->
+  Number ->
+  Point dimension units space
+uniformPoint curve r = point curve (uniformParameterizationValue curve r)

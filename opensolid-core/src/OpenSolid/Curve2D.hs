@@ -73,8 +73,10 @@ module OpenSolid.Curve2D
   , curvature_
   , toPolyline
   , medialAxis
-  , arcLengthParameterization
+  , length
   , uniformParameterization
+  , uniformParameterizationValue
+  , uniformPoint
   , piecewise
   , searchTree
   )
@@ -112,7 +114,6 @@ import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.List qualified as List
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Orientation2D (Orientation2D)
 import OpenSolid.Orientation2D qualified as Orientation2D
@@ -725,41 +726,39 @@ medialAxis curve1 curve2 = do
                 }
         Ok (List.map toSegment zeros.crossingCurves)
 
-arcLengthParameterization ::
-  Tolerance units =>
-  Curve2D units ->
-  Result IsDegenerate (Quantity units, Quantity units -> Number)
-arcLengthParameterization = Curve.arcLengthParameterization
+length :: Tolerance units => Curve2D units -> Quantity units
+length = Curve.length
 
-uniformParameterization :: Tolerance units => Curve2D units -> (Quantity units, Curve1D Unitless)
+uniformParameterization :: Tolerance units => Curve2D units -> Curve1D Unitless
 uniformParameterization = Curve.uniformParameterization
+
+uniformParameterizationValue :: Tolerance units => Curve2D units -> Number -> Number
+uniformParameterizationValue = Curve.uniformParameterizationValue
+
+uniformPoint :: Tolerance units => Curve2D units -> Number -> Point2D units
+uniformPoint = Curve.uniformPoint
 
 piecewise :: Tolerance units => NonEmpty (Curve2D units) -> Curve2D units
 piecewise segments = do
-  let makeUniform segment = do
-        let (length, parameterization) = uniformParameterization segment
-        (length, segment . parameterization)
-  makePiecewise (NonEmpty.map makeUniform segments)
-
-makePiecewise :: NonEmpty (Quantity units, Curve2D units) -> Curve2D units
-makePiecewise parameterizedSegments = do
-  let segmentArray = Array.fromNonEmpty parameterizedSegments
-  let (arcLength, tree) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
-  let pointImpl s = piecewisePoint tree (arcLength * s)
-  let rangeImpl (Interval s1 s2) = piecewiseRange tree (arcLength * s1) (arcLength * s2)
+  let segmentArray = Array.fromNonEmpty segments
+  let (totalLength, tree) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
+  let pointImpl r = piecewisePoint tree (totalLength * r)
+  let rangeImpl (Interval r1 r2) = piecewiseRange tree (totalLength * r1) (totalLength * r2)
   new
     (CompiledFunction.abstract pointImpl rangeImpl)
-    (piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength)
+    (piecewiseDerivative (piecewiseTreeDerivative tree totalLength) totalLength)
 
 buildPiecewiseTree ::
-  Array (Quantity units, Curve2D units) ->
+  Tolerance units =>
+  Array (Curve2D units) ->
   Int ->
   Int ->
   (Quantity units, PiecewiseTree units space)
 buildPiecewiseTree segmentArray begin end = case end - begin of
   1 -> do
-    let (length, segment) = segmentArray !! begin
-    (length, PiecewiseLeaf length segment)
+    let segment = segmentArray !! begin
+    let segmentLength = length segment
+    (segmentLength, PiecewiseLeaf segmentLength segment)
   n -> assert (n >= 2) do
     let mid = begin + n // 2
     let (leftLength, leftTree) = buildPiecewiseTree segmentArray begin mid
@@ -778,40 +777,39 @@ data PiecewiseTree units space where
     PiecewiseTree units space
 
 piecewisePoint :: PiecewiseTree units space -> Quantity units -> Point2D units
-piecewisePoint tree length = case tree of
+piecewisePoint tree s = case tree of
   PiecewiseNode leftLength leftTree rightTree
-    | length < leftLength -> piecewisePoint leftTree length
-    | otherwise -> piecewisePoint rightTree (length - leftLength)
-  PiecewiseLeaf segmentLength curve -> point curve (length / segmentLength)
+    | s < leftLength -> piecewisePoint leftTree s
+    | otherwise -> piecewisePoint rightTree (s - leftLength)
+  PiecewiseLeaf segmentLength curve -> point curve (s / segmentLength)
 
 piecewiseRange ::
   PiecewiseTree units space ->
   Quantity units ->
   Quantity units ->
   Bounds2D units
-piecewiseRange tree startLength endLength = case tree of
+piecewiseRange tree s1 s2 = case tree of
   PiecewiseNode leftLength leftTree rightTree
-    | endLength <= leftLength ->
-        piecewiseRange leftTree startLength endLength
-    | startLength >= leftLength ->
-        piecewiseRange rightTree (startLength - leftLength) (endLength - leftLength)
+    | s2 <= leftLength -> piecewiseRange leftTree s1 s2
+    | s1 >= leftLength -> piecewiseRange rightTree (s1 - leftLength) (s2 - leftLength)
     | otherwise ->
         Bounds2D.aggregate2
-          (piecewiseRange leftTree startLength leftLength)
-          (piecewiseRange rightTree Quantity.zero (endLength - leftLength))
+          (piecewiseRange leftTree s1 leftLength)
+          (piecewiseRange rightTree Quantity.zero (s2 - leftLength))
   PiecewiseLeaf segmentLength curve ->
-    range curve (Interval (startLength / segmentLength) (endLength / segmentLength))
+    range curve (Interval (s1 / segmentLength) (s2 / segmentLength))
 
 piecewiseDerivative ::
   PiecewiseDerivativeTree units space ->
   Quantity units ->
   VectorCurve2D units
-piecewiseDerivative tree length = do
-  let valueImpl s = piecewiseDerivativeValue tree (length * s)
-  let rangeImpl (Interval s1 s2) = piecewiseDerivativeRange tree (length * s1) (length * s2)
+piecewiseDerivative tree totalLength = do
+  let valueImpl r = piecewiseDerivativeValue tree (totalLength * r)
+  let rangeImpl (Interval r1 r2) =
+        piecewiseDerivativeRange tree (totalLength * r1) (totalLength * r2)
   VectorCurve2D.new
     (CompiledFunction.abstract valueImpl rangeImpl)
-    (piecewiseDerivative (piecewiseDerivativeTreeDerivative tree length) length)
+    (piecewiseDerivative (piecewiseDerivativeTreeDerivative tree totalLength) totalLength)
 
 data PiecewiseDerivativeTree units space where
   PiecewiseDerivativeNode ::
@@ -828,62 +826,57 @@ piecewiseTreeDerivative ::
   PiecewiseTree units space ->
   Quantity units ->
   PiecewiseDerivativeTree units space
-piecewiseTreeDerivative tree length = case tree of
+piecewiseTreeDerivative tree totalLength = case tree of
   PiecewiseNode leftLength leftTree rightTree ->
     PiecewiseDerivativeNode
       leftLength
-      (piecewiseTreeDerivative leftTree length)
-      (piecewiseTreeDerivative rightTree length)
+      (piecewiseTreeDerivative leftTree totalLength)
+      (piecewiseTreeDerivative rightTree totalLength)
   PiecewiseLeaf segmentLength curve ->
-    PiecewiseDerivativeLeaf segmentLength ((length / segmentLength) * derivative curve)
+    PiecewiseDerivativeLeaf segmentLength ((totalLength / segmentLength) * derivative curve)
 
 piecewiseDerivativeTreeDerivative ::
   PiecewiseDerivativeTree units space ->
   Quantity units ->
   PiecewiseDerivativeTree units space
-piecewiseDerivativeTreeDerivative tree length = case tree of
+piecewiseDerivativeTreeDerivative tree totalLength = case tree of
   PiecewiseDerivativeNode leftLength leftTree rightTree ->
     PiecewiseDerivativeNode
       leftLength
-      (piecewiseDerivativeTreeDerivative leftTree length)
-      (piecewiseDerivativeTreeDerivative rightTree length)
+      (piecewiseDerivativeTreeDerivative leftTree totalLength)
+      (piecewiseDerivativeTreeDerivative rightTree totalLength)
   PiecewiseDerivativeLeaf segmentLength curve ->
     PiecewiseDerivativeLeaf
       segmentLength
-      ((length / segmentLength) * VectorCurve2D.derivative curve)
+      ((totalLength / segmentLength) * VectorCurve2D.derivative curve)
 
 piecewiseDerivativeValue ::
   PiecewiseDerivativeTree units space ->
   Quantity units ->
   Vector2D units
-piecewiseDerivativeValue tree length = case tree of
+piecewiseDerivativeValue tree s = case tree of
   PiecewiseDerivativeNode leftLength leftTree rightTree
-    | length < leftLength -> piecewiseDerivativeValue leftTree length
-    | otherwise -> piecewiseDerivativeValue rightTree (length - leftLength)
+    | s < leftLength -> piecewiseDerivativeValue leftTree s
+    | otherwise -> piecewiseDerivativeValue rightTree (s - leftLength)
   PiecewiseDerivativeLeaf segmentLength curve ->
-    VectorCurve2D.value curve (length / segmentLength)
+    VectorCurve2D.value curve (s / segmentLength)
 
 piecewiseDerivativeRange ::
   PiecewiseDerivativeTree units space ->
   Quantity units ->
   Quantity units ->
   VectorBounds2D units
-piecewiseDerivativeRange tree startLength endLength = case tree of
+piecewiseDerivativeRange tree s1 s2 = case tree of
   PiecewiseDerivativeNode leftLength leftTree rightTree
-    | endLength <= leftLength ->
-        piecewiseDerivativeRange leftTree startLength endLength
-    | startLength >= leftLength ->
-        piecewiseDerivativeRange
-          rightTree
-          (startLength - leftLength)
-          (endLength - leftLength)
+    | s2 <= leftLength -> piecewiseDerivativeRange leftTree s1 s2
+    | s1 >= leftLength -> piecewiseDerivativeRange rightTree (s1 - leftLength) (s2 - leftLength)
     | otherwise ->
         VectorBounds2D.aggregate2
-          (piecewiseDerivativeRange leftTree startLength leftLength)
-          (piecewiseDerivativeRange rightTree Quantity.zero (endLength - leftLength))
+          (piecewiseDerivativeRange leftTree s1 leftLength)
+          (piecewiseDerivativeRange rightTree Quantity.zero (s2 - leftLength))
   PiecewiseDerivativeLeaf segmentLength curve -> do
-    let tRange = Interval (startLength / segmentLength) (endLength / segmentLength)
-    VectorCurve2D.range curve tRange
+    let rRange = Interval (s1 / segmentLength) (s2 / segmentLength)
+    VectorCurve2D.range curve rRange
 
 searchTree :: Curve2D units -> SearchTree units
 searchTree = Curve.searchTree

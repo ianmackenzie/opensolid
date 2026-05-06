@@ -30,8 +30,10 @@ module OpenSolid.Curve3D
   , range
   , bounds
   , reverse
-  , arcLengthParameterization
+  , length
   , uniformParameterization
+  , uniformParameterizationValue
+  , uniformPoint
   , transformBy
   , placeIn
   , relativeTo
@@ -223,14 +225,17 @@ bounds = Curve.bounds
 reverse :: Curve3D space -> Curve3D space
 reverse = Curve.reverse
 
-arcLengthParameterization ::
-  Tolerance Meters =>
-  Curve3D space ->
-  Result IsDegenerate (Length, Length -> Number)
-arcLengthParameterization = Curve.arcLengthParameterization
+length :: Tolerance Meters => Curve3D space -> Length
+length = Curve.length
 
-uniformParameterization :: Tolerance Meters => Curve3D space -> (Length, Curve1D Unitless)
+uniformParameterization :: Tolerance Meters => Curve3D space -> Curve1D Unitless
 uniformParameterization = Curve.uniformParameterization
+
+uniformParameterizationValue :: Tolerance Meters => Curve3D space -> Number -> Number
+uniformParameterizationValue = Curve.uniformParameterizationValue
+
+uniformPoint :: Tolerance Meters => Curve3D space -> Number -> Point3D space
+uniformPoint = Curve.uniformPoint
 
 transformBy :: Transform3D tag space -> Curve3D space -> Curve3D space
 transformBy transform curve = do
