@@ -73,9 +73,8 @@ module OpenSolid.Curve2D
   , curvature_
   , toPolyline
   , medialAxis
-  , arcLengthParameterizationFunction
   , arcLengthParameterization
-  , parameterizeByArcLength
+  , uniformParameterization
   , piecewise
   , searchTree
   )
@@ -726,17 +725,21 @@ medialAxis curve1 curve2 = do
                 }
         Ok (List.map toSegment zeros.crossingCurves)
 
-arcLengthParameterizationFunction ::
+arcLengthParameterization ::
   Tolerance units =>
   Curve2D units ->
-  (Quantity units, Number -> Number)
-arcLengthParameterizationFunction = Curve.arcLengthParameterizationFunction
-
-arcLengthParameterization :: Tolerance units => Curve2D units -> (Quantity units, Curve1D Unitless)
+  Result IsDegenerate (Quantity units, Quantity units -> Number)
 arcLengthParameterization = Curve.arcLengthParameterization
 
-parameterizeByArcLength :: Tolerance units => Curve2D units -> (Quantity units, Curve2D units)
-parameterizeByArcLength = Curve.parameterizeByArcLength
+uniformParameterization :: Tolerance units => Curve2D units -> (Quantity units, Curve1D Unitless)
+uniformParameterization = Curve.uniformParameterization
+
+piecewise :: Tolerance units => NonEmpty (Curve2D units) -> Curve2D units
+piecewise segments = do
+  let makeUniform segment = do
+        let (length, parameterization) = uniformParameterization segment
+        (length, segment . parameterization)
+  makePiecewise (NonEmpty.map makeUniform segments)
 
 makePiecewise :: NonEmpty (Quantity units, Curve2D units) -> Curve2D units
 makePiecewise parameterizedSegments = do
@@ -747,9 +750,6 @@ makePiecewise parameterizedSegments = do
   new
     (CompiledFunction.abstract pointImpl rangeImpl)
     (piecewiseDerivative (piecewiseTreeDerivative tree arcLength) arcLength)
-
-piecewise :: Tolerance units => NonEmpty (Curve2D units) -> Curve2D units
-piecewise segments = makePiecewise (NonEmpty.map parameterizeByArcLength segments)
 
 buildPiecewiseTree ::
   Array (Quantity units, Curve2D units) ->

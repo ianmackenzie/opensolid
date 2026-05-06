@@ -6,7 +6,6 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Sign qualified as Sign
 import OpenSolid.Unboxed.Math
 
 data Tree units
@@ -14,61 +13,28 @@ data Tree units
   | Leaf (Quantity units) Double# Double# Double# Double# Double# Double#
 
 parameterization ::
-  Tolerance units =>
   (Number -> Quantity units) ->
   (Number -> Quantity units) ->
-  (Quantity units, Number -> Number)
+  (Quantity units, Quantity units -> Number)
 parameterization dldt d2ldt2 = do
   let dldt1 = dldt 0.0
   let dldt2 = dldt Lobatto.p2
   let dldt3 = dldt Lobatto.p3
   let dldt4 = dldt 1.0
-  if
-    | isConstant dldt1 dldt2 dldt3 dldt4 -> (dldt1, id)
-    | isLinear dldt1 dldt2 dldt3 dldt4 -> do
-        let delta = dldt4 - dldt1
-        let t0 = -dldt1 / delta
-        let sign = Sign.value (Quantity.sign delta)
-        let function s = t0 + sign * Number.sqrt (t0 * t0 + (1.0 - 2.0 * t0) * s)
-        let length = 0.5 * (dldt1 + dldt4)
-        (length, function)
-    | otherwise -> do
-        let coarseEstimate = Lobatto.estimate dldt1 dldt2 dldt3 dldt4
-        let (length, tree) = buildTree 1 dldt d2ldt2 0.0 1.0 dldt1 dldt4 coarseEstimate
-        let function s = evaluateIn tree (s * length)
-        (length, function)
+  let coarseEstimate = Lobatto.estimate dldt1 dldt2 dldt3 dldt4
+  let (length, tree) = build 1 dldt d2ldt2 0.0 1.0 dldt1 dldt4 coarseEstimate
+  (length, evaluate tree)
 
-isConstant ::
-  Tolerance units =>
-  Quantity units ->
-  Quantity units ->
-  Quantity units ->
-  Quantity units ->
-  Bool
-isConstant y1 y2 y3 y4 = y1 ~= y2 && y1 ~= y3 && y1 ~= y4
-
-isLinear ::
-  Tolerance units =>
-  Quantity units ->
-  Quantity units ->
-  Quantity units ->
-  Quantity units ->
-  Bool
-isLinear y1 y2 y3 y4 = do
-  let dy = y4 - y1
-  y2 ~= y1 + dy * Lobatto.p2
-    && y3 ~= y1 + dy * Lobatto.p3
-
-evaluateIn :: Tree units -> Quantity units -> Number
-evaluateIn tree length = case tree of
+evaluate :: Tree units -> Quantity units -> Number
+evaluate tree length = case tree of
   Node leftLength leftTree rightTree
-    | length < leftLength -> evaluateIn leftTree length
-    | otherwise -> evaluateIn rightTree (length - leftLength)
+    | length < leftLength -> evaluate leftTree length
+    | otherwise -> evaluate rightTree (length - leftLength)
   Leaf segmentLength t1# t2# t3# t4# t5# t6# -> do
     let !(Q# s#) = length / segmentLength
     Q# (quinticBezier# t1# t2# t3# t4# t5# t6# s#)
 
-buildTree ::
+build ::
   Int ->
   (Number -> Quantity units) ->
   (Number -> Quantity units) ->
@@ -78,7 +44,7 @@ buildTree ::
   Quantity units ->
   Quantity units ->
   (Quantity units, Tree units)
-buildTree level dldt d2ldt2 tStart tEnd dldtStart dldtEnd coarseEstimate = do
+build level dldt d2ldt2 tStart tEnd dldtStart dldtEnd coarseEstimate = do
   let tMid = Number.midpoint tStart tEnd
   let dldtMid = dldt tMid
   let dldtLeft2 = dldt (Number.interpolateFrom tStart tMid Lobatto.p2)
@@ -101,7 +67,7 @@ buildTree level dldt d2ldt2 tStart tEnd dldtStart dldtEnd coarseEstimate = do
       (segmentLength, Leaf segmentLength t1# t2# t3# t4# t5# t6#)
     else do
       let (leftLength, leftTree) =
-            buildTree (level + 1) dldt d2ldt2 tStart tMid dldtStart dldtMid leftEstimate
+            build (level + 1) dldt d2ldt2 tStart tMid dldtStart dldtMid leftEstimate
       let (rightLength, rightTree) =
-            buildTree (level + 1) dldt d2ldt2 tMid tEnd dldtMid dldtEnd rightEstimate
+            build (level + 1) dldt d2ldt2 tMid tEnd dldtMid dldtEnd rightEstimate
       (leftLength + rightLength, Node leftLength leftTree rightTree)

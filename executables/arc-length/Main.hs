@@ -24,7 +24,7 @@ formatLength length =
 
 testCurve :: Text -> Curve2D Meters -> IO ()
 testCurve label curve = Tolerance.using (Length.meters 1e-12) do
-  let (length, _) = Curve2D.arcLengthParameterization curve
+  let (length, _) = Curve2D.uniformParameterization curve
   IO.printLine (label <> ": " <> formatLength length)
 
 testLineLength :: IO ()
@@ -63,7 +63,7 @@ testCubicSplineParameterization = Tolerance.using Length.defaultTolerance do
   let p3 = Point2D.centimeters 16.0 15.0
   let p4 = Point2D.centimeters 25.0 5.0
   let spline = Curve2D.cubicBezier p1 p2 p3 p4
-  let (length, parameterized) = Curve2D.parameterizeByArcLength spline
+  let (length, parameterization) = Curve2D.uniformParameterization spline
   IO.printLine ("Cubic spline: " <> formatLength length)
   let drawCurve fileName curve = do
         let pointLocations = List.map (Curve2D.point curve) (Parameter.steps 30)
@@ -78,7 +78,7 @@ testCubicSplineParameterization = Tolerance.using Length.defaultTolerance do
             , Svg.combine drawPoint pointLocations
             ]
   drawCurve "executables/arc-length/cubic-spline.svg" spline
-  drawCurve "executables/arc-length/parameterized-spline.svg" parameterized
+  drawCurve "executables/arc-length/parameterized-spline.svg" (spline . parameterization)
 
 main :: IO ()
 main = do

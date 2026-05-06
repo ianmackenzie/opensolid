@@ -51,14 +51,12 @@ module OpenSolid.Curve
   , linearDeviation
   , linearize
   , toPolyline
-  , arcLengthParameterizationFunction
   , arcLengthParameterization
-  , parameterizeByArcLength
+  , uniformParameterization
   )
 where
 
 import Data.Void (Void)
-import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Axis (Axis)
 import OpenSolid.Axis qualified as Axis
 import OpenSolid.Bezier qualified as Bezier
@@ -730,45 +728,29 @@ leftRightError curve t1 t2 p1 p2 = do
   let rightError = Line.distanceTo (point curve tRight) (Line p1 p2)
   max leftError rightError
 
-arcLengthParameterizationFunction ::
-  (Exists dimension units space, Tolerance units) =>
-  Curve dimension units space ->
-  (Quantity units, Number -> Number)
-arcLengthParameterizationFunction curve =
-  case nondegenerate curve of
-    Error IsDegenerate -> (Quantity.zero, id)
-    Ok nondegenerateCurve -> do
-      let dsdt t = Vector.magnitude (derivativeValue curve t)
-      let d2sdt2 t =
-            secondDerivativeValue curve t
-              `dot` Curve.Nondegenerate.tangentDirectionValue nondegenerateCurve t
-      ArcLength.parameterization dsdt d2sdt2
-
 arcLengthParameterization ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  (Quantity units, Curve1D Unitless)
+  Result IsDegenerate (Quantity units, Quantity units -> Number)
 arcLengthParameterization curve =
+  Result.map Curve.Nondegenerate.arcLengthParameterization (nondegenerate curve)
+
+uniformParameterization ::
+  (Exists dimension units space, Tolerance units) =>
+  Curve dimension units space ->
+  (Quantity units, Curve1D Unitless)
+uniformParameterization curve =
   case nondegenerate curve of
     Error IsDegenerate -> (Quantity.zero, Curve1D.t)
     Ok nondegenerateCurve -> do
-      let (length, parameterizationValue) = arcLengthParameterizationFunction curve
-      let parameterizationRange (Interval sLow sHigh) =
-            Interval (parameterizationValue sLow) (parameterizationValue sHigh)
-      let compiledParameterization =
-            CompiledFunction.abstract parameterizationValue parameterizationRange
-      let nondegenerateDerivative = Curve.Nondegenerate.derivative nondegenerateCurve
-      let nondegenerateDerivativeMagnitude =
-            VectorCurve.Nondegenerate.magnitude nondegenerateDerivative
+      let (length, parameterization) =
+            Curve.Nondegenerate.arcLengthParameterization nondegenerateCurve
+      let tValue rValue = parameterization (length * rValue)
+      let tRange (Interval rLow rHigh) = Interval (tValue rLow) (tValue rHigh)
+      let compiledParameterization = CompiledFunction.abstract tValue tRange
+      let curveDerivative = Curve.Nondegenerate.derivative nondegenerateCurve
+      let derivativeMagnitude = VectorCurve.Nondegenerate.magnitude curveDerivative
       let parameterizationCurve = recursive \self -> do
-            let dtdu = Curve1D.constant length / nondegenerateDerivativeMagnitude
-            Curve1D.new compiledParameterization (dtdu . self)
+            let dtdr = Curve1D.constant length / derivativeMagnitude
+            Curve1D.new compiledParameterization (dtdr . self)
       (length, parameterizationCurve)
-
-parameterizeByArcLength ::
-  (Exists dimension units space, Tolerance units) =>
-  Curve dimension units space ->
-  (Quantity units, Curve dimension units space)
-parameterizeByArcLength curve = do
-  let (length, parameterization) = arcLengthParameterization curve
-  (length, curve . parameterization)

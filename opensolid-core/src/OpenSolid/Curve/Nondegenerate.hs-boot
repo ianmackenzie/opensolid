@@ -2,6 +2,7 @@ module OpenSolid.Curve.Nondegenerate
   ( derivative
   , tangentDirectionValue
   , findPoint
+  , arcLengthParameterization
   )
 where
 
@@ -28,3 +29,7 @@ findPoint ::
   Point dimension units space ->
   Nondegenerate (Curve dimension units space) ->
   List Number
+arcLengthParameterization ::
+  Curve.Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) ->
+  (Quantity units, Quantity units -> Number)

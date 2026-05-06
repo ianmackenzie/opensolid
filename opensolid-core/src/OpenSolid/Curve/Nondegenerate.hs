@@ -6,9 +6,11 @@ module OpenSolid.Curve.Nondegenerate
   , tangentDirectionValue
   , findPoint
   , intersections
+  , arcLengthParameterization
   )
 where
 
+import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
@@ -96,3 +98,15 @@ intersections ::
   Nondegenerate (Curve dimension units space) ->
   Maybe Intersections
 intersections = Curve.Nondegenerate.Intersections.intersections
+
+arcLengthParameterization ::
+  Curve.Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) ->
+  (Quantity units, Quantity units -> Number)
+arcLengthParameterization (Nondegenerate curve) = do
+  let dsdt t = Vector.magnitude (Curve.derivativeValue curve t)
+  let d2sdt2 t = do
+        let secondDerivative = Curve.secondDerivativeValue curve t
+        let tangent = tangentDirectionValue (Nondegenerate curve) t
+        secondDerivative `dot` tangent
+  ArcLength.parameterization dsdt d2sdt2
