@@ -296,7 +296,8 @@ boundedBy (NonEmpty givenSurfaces) = do
 
 buildHalfEdgeSet ::
   Tolerance Meters =>
-  Set3D space (Surface3D space) -> Set3D space (HalfEdge space)
+  Set3D space (Surface3D space) ->
+  Set3D space (HalfEdge space)
 buildHalfEdgeSet surfaceSet =
   surfaceSet & Set3D.combineWithIndex \surfaceIndex surface -> do
     let surfaceId = SurfaceId surfaceIndex
