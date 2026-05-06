@@ -1,6 +1,7 @@
 module OpenSolid.Body3D.HalfEdge
   ( HalfEdge (..)
   , Id (..)
+  , id
   , bounds
   , curve
   , uvCurve
@@ -20,7 +21,7 @@ import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (id)
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
@@ -39,6 +40,9 @@ data Id = Id
   , curveId :: CurveId
   }
   deriving (Eq, Ord, Show, Generic, Hashable)
+
+id :: HalfEdge space -> Id
+id = (.id)
 
 bounds :: HalfEdge space -> Bounds3D space
 bounds halfEdge = SurfaceCurve3D.bounds halfEdge.surfaceCurve
