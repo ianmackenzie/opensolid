@@ -32,11 +32,7 @@ import {-# SOURCE #-} OpenSolid.UvPoint (UvPoint)
 
 type role SurfaceFunction1D nominal
 
-data SurfaceFunction1D units = SurfaceFunction1D
-  { compiled :: Compiled units
-  , du :: ~(SurfaceFunction1D units)
-  , dv :: ~(SurfaceFunction1D units)
-  }
+data SurfaceFunction1D (units :: Type)
 
 type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interval units)
 
