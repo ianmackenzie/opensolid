@@ -330,7 +330,7 @@ instance
   Exists dimension units space =>
   Negation (VectorCurve dimension units space)
   where
-  negate curve = new (negate curve.compiled) (negate curve.derivative)
+  negate curve = new (negate (compiled curve)) (negate (derivative curve))
 
 instance
   Exists dimension units space =>
@@ -357,7 +357,7 @@ instance
     (VectorCurve dimension2 units2 space2)
     (VectorCurve dimension1 units1 space1)
   where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (lhs.derivative + rhs.derivative)
+  lhs + rhs = new (compiled lhs + compiled rhs) (derivative lhs + derivative rhs)
 
 instance
   units1 ~ units2 =>
@@ -397,7 +397,7 @@ instance
     (VectorCurve dimension2 units2 space2)
     (VectorCurve dimension1 units1 space1)
   where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (lhs.derivative - rhs.derivative)
+  lhs - rhs = new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
 
 instance
   units1 ~ units2 =>
@@ -449,8 +449,8 @@ instance
   where
   lhs ?*? rhs =
     new
-      (Curve1D.compiled lhs ?*? rhs.compiled)
-      (Curve1D.derivative lhs ?*? rhs + lhs ?*? rhs.derivative)
+      (Curve1D.compiled lhs ?*? compiled rhs)
+      (Curve1D.derivative lhs ?*? rhs + lhs ?*? derivative rhs)
 
 instance
   Multiplication_
@@ -460,8 +460,8 @@ instance
   where
   lhs ?*? rhs =
     new
-      (Curve1D.compiled lhs ?*? rhs.compiled)
-      (Curve1D.derivative lhs ?*? rhs + lhs ?*? rhs.derivative)
+      (Curve1D.compiled lhs ?*? compiled rhs)
+      (Curve1D.derivative lhs ?*? rhs + lhs ?*? derivative rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -523,8 +523,8 @@ instance
   where
   lhs ?*? rhs =
     new
-      (lhs.compiled ?*? Curve1D.compiled rhs)
-      (lhs.derivative ?*? rhs + lhs ?*? Curve1D.derivative rhs)
+      (compiled lhs ?*? Curve1D.compiled rhs)
+      (derivative lhs ?*? rhs + lhs ?*? Curve1D.derivative rhs)
 
 instance
   Multiplication_
@@ -534,8 +534,8 @@ instance
   where
   lhs ?*? rhs =
     new
-      (lhs.compiled ?*? Curve1D.compiled rhs)
-      (lhs.derivative ?*? rhs + lhs ?*? Curve1D.derivative rhs)
+      (compiled lhs ?*? Curve1D.compiled rhs)
+      (derivative lhs ?*? rhs + lhs ?*? Curve1D.derivative rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -631,8 +631,8 @@ instance
   where
   lhs `dot_` rhs =
     Curve1D.new
-      (lhs.compiled `dot_` rhs.compiled)
-      (lhs.derivative `dot_` rhs + lhs `dot_` rhs.derivative)
+      (compiled lhs `dot_` compiled rhs)
+      (derivative lhs `dot_` rhs + lhs `dot_` derivative rhs)
 
 instance
   space1 ~ space2 =>
@@ -643,8 +643,8 @@ instance
   where
   lhs `dot_` rhs =
     Curve1D.new
-      (lhs.compiled `dot_` rhs.compiled)
-      (lhs.derivative `dot_` rhs + lhs `dot_` rhs.derivative)
+      (compiled lhs `dot_` compiled rhs)
+      (derivative lhs `dot_` rhs + lhs `dot_` derivative rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -754,8 +754,8 @@ instance
   where
   lhs `cross_` rhs =
     Curve1D.new
-      (lhs.compiled `cross_` rhs.compiled)
-      (lhs.derivative `cross_` rhs + lhs `cross_` rhs.derivative)
+      (compiled lhs `cross_` compiled rhs)
+      (derivative lhs `cross_` rhs + lhs `cross_` derivative rhs)
 
 instance
   space1 ~ space2 =>
@@ -766,8 +766,8 @@ instance
   where
   lhs `cross_` rhs =
     new
-      (lhs.compiled `cross_` rhs.compiled)
-      (lhs.derivative `cross_` rhs + lhs `cross_` rhs.derivative)
+      (compiled lhs `cross_` compiled rhs)
+      (derivative lhs `cross_` rhs + lhs `cross_` derivative rhs)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -896,8 +896,8 @@ instance
   where
   f . g =
     new
-      (f.compiled . Curve1D.compiled g)
-      ((f.derivative . g) * Curve1D.derivative g)
+      (compiled f . Curve1D.compiled g)
+      ((derivative f . g) * Curve1D.derivative g)
 
 instance
   Composition
@@ -907,8 +907,8 @@ instance
   where
   curve . function =
     VectorSurfaceFunction2D.new
-      (curve.compiled . SurfaceFunction1D.compiled function)
-      (\p -> (curve.derivative . function) * SurfaceFunction1D.derivative p function)
+      (compiled curve . SurfaceFunction1D.compiled function)
+      (\p -> (derivative curve . function) * SurfaceFunction1D.derivative p function)
 
 instance
   Composition
@@ -918,8 +918,8 @@ instance
   where
   curve . function =
     VectorSurfaceFunction3D.new
-      (curve.compiled . SurfaceFunction1D.compiled function)
-      (\p -> (curve.derivative . function) * SurfaceFunction1D.derivative p function)
+      (compiled curve . SurfaceFunction1D.compiled function)
+      (\p -> (derivative curve . function) * SurfaceFunction1D.derivative p function)
 
 instance
   Composition
@@ -1145,16 +1145,16 @@ value ::
   VectorCurve dimension units space ->
   Number ->
   Vector dimension units space
-value curve 0.0 = curve.startValue
-value curve 1.0 = curve.endValue
-value curve tValue = CompiledFunction.value curve.compiled tValue
+value curve 0.0 = startValue curve
+value curve 1.0 = endValue curve
+value curve tValue = CompiledFunction.value (compiled curve) tValue
 
 range ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   Interval Unitless ->
   VectorBounds dimension units space
-range curve tRange = CompiledFunction.range curve.compiled tRange
+range curve tRange = CompiledFunction.range (compiled curve) tRange
 
 derivativeValue ::
   Exists dimension units space =>
@@ -1260,10 +1260,11 @@ desingularized start middle end = do
   let compiledDesingularized =
         CompiledFunction.desingularized
           (Curve1D.compiled Curve1D.t)
-          start.compiled
-          middle.compiled
-          end.compiled
-  let desingularizedDerivative = desingularized start.derivative middle.derivative end.derivative
+          (compiled start)
+          (compiled middle)
+          (compiled end)
+  let desingularizedDerivative =
+        desingularized (derivative start) (derivative middle) (derivative end)
   new compiledDesingularized desingularizedDerivative
 
 squaredMagnitude_ ::
@@ -1276,7 +1277,7 @@ squaredMagnitude_ curve = do
           Expression.squaredMagnitude_
           Vector.squaredMagnitude_
           VectorBounds.squaredMagnitude_
-          curve.compiled
+          (compiled curve)
   let squaredMagnitudeDerivative = 2.0 * curve `dot_` derivative curve
   Curve1D.new compiledSquaredMagnitude squaredMagnitudeDerivative
 
