@@ -40,6 +40,10 @@ module OpenSolid.Unboxed.Math
   , intervalOverInterval#
   , determinantBounds2D#
   , determinantBounds3D#
+  , interpolateFrom#
+  , quadraticBezier#
+  , cubicBezier#
+  , quarticBezier#
   , quinticBezier#
   )
 where
@@ -293,10 +297,35 @@ determinantBounds3D#
           intervalMinusInterval# x1ProdMin# x1ProdMax# y1ProdMin# y1ProdMax#
     intervalPlusInterval# dxyMin# dxyMax# z1ProdMin# z1ProdMax#
 
-{-# INLINE lerp# #-}
-lerp# :: Double# -> Double# -> Double# -> Double#
-lerp# start# end# t# = start# +# t# *# (end# -# start#)
+{-# INLINE interpolateFrom# #-}
+interpolateFrom# :: Double# -> Double# -> Double# -> Double#
+interpolateFrom# start# end# t# = start# +# t# *# (end# -# start#)
 
+{-# INLINEABLE quadraticBezier# #-}
+quadraticBezier# :: Double# -> Double# -> Double# -> Double# -> Double#
+quadraticBezier# p1# p2# p3# t# = do
+  let q1# = interpolateFrom# p1# p2# t#
+  let q2# = interpolateFrom# p2# p3# t#
+  interpolateFrom# q1# q2# t#
+
+{-# INLINEABLE cubicBezier# #-}
+cubicBezier# :: Double# -> Double# -> Double# -> Double# -> Double# -> Double#
+cubicBezier# p1# p2# p3# p4# t# = do
+  let q1# = interpolateFrom# p1# p2# t#
+  let q2# = interpolateFrom# p2# p3# t#
+  let q3# = interpolateFrom# p3# p4# t#
+  quadraticBezier# q1# q2# q3# t#
+
+{-# INLINEABLE quarticBezier# #-}
+quarticBezier# :: Double# -> Double# -> Double# -> Double# -> Double# -> Double# -> Double#
+quarticBezier# p1# p2# p3# p4# p5# t# = do
+  let q1# = interpolateFrom# p1# p2# t#
+  let q2# = interpolateFrom# p2# p3# t#
+  let q3# = interpolateFrom# p3# p4# t#
+  let q4# = interpolateFrom# p4# p5# t#
+  cubicBezier# q1# q2# q3# q4# t#
+
+{-# INLINEABLE quinticBezier# #-}
 quinticBezier# ::
   Double# ->
   Double# ->
@@ -307,23 +336,9 @@ quinticBezier# ::
   Double# ->
   Double#
 quinticBezier# p1# p2# p3# p4# p5# p6# t# = do
-  -- First De Casteljau step
-  let a1# = lerp# p1# p2# t#
-  let a2# = lerp# p2# p3# t#
-  let a3# = lerp# p3# p4# t#
-  let a4# = lerp# p4# p5# t#
-  let a5# = lerp# p5# p6# t#
-  -- Second De Casteljau step
-  let b1# = lerp# a1# a2# t#
-  let b2# = lerp# a2# a3# t#
-  let b3# = lerp# a3# a4# t#
-  let b4# = lerp# a4# a5# t#
-  -- Third De Casteljau step
-  let c1# = lerp# b1# b2# t#
-  let c2# = lerp# b2# b3# t#
-  let c3# = lerp# b3# b4# t#
-  -- Fourth De Casteljau step
-  let d1# = lerp# c1# c2# t#
-  let d2# = lerp# c2# c3# t#
-  -- Fifth De Casteljau step
-  lerp# d1# d2# t#
+  let q1# = interpolateFrom# p1# p2# t#
+  let q2# = interpolateFrom# p2# p3# t#
+  let q3# = interpolateFrom# p3# p4# t#
+  let q4# = interpolateFrom# p4# p5# t#
+  let q5# = interpolateFrom# p5# p6# t#
+  quarticBezier# q1# q2# q3# q4# q5# t#
