@@ -507,6 +507,7 @@ secondDerivative ::
   VectorCurve dimension units space
 secondDerivative = VectorCurve.derivative . derivative
 
+{-# INLINE isPoint #-}
 isPoint :: (Exists dimension units space, Tolerance units) => Curve dimension units space -> Bool
 isPoint curve = VectorCurve.isZero (derivative curve)
 
