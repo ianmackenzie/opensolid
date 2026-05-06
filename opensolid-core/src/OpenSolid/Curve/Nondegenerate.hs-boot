@@ -19,10 +19,7 @@ derivative ::
   Nondegenerate (Curve dimension units space) ->
   Nondegenerate (VectorCurve dimension units space)
 tangentDirectionValue ::
-  ( Curve.Exists dimension units space
-  , Direction.Exists dimension space
-  , Tolerance units
-  ) =>
+  (Curve.Exists dimension units space, Direction.Exists dimension space) =>
   Nondegenerate (Curve dimension units space) ->
   Number ->
   Direction dimension space
