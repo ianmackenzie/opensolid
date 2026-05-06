@@ -10,6 +10,7 @@ module OpenSolid.SurfaceCurve3D
 where
 
 import OpenSolid.Bounds3D (Bounds3D)
+import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
@@ -23,6 +24,10 @@ data SurfaceCurve3D space = SurfaceCurve3D
   , uvCurve :: Curve2D Unitless
   , curve :: Curve3D space
   }
+
+instance Composition (SurfaceCurve3D space) (Curve1D Unitless) (SurfaceCurve3D space) where
+  surfaceCurve . parameterization =
+    new (surfaceFunction surfaceCurve) (uvCurve surfaceCurve . parameterization)
 
 new :: SurfaceFunction3D space -> Curve2D Unitless -> SurfaceCurve3D space
 new givenSurfaceFunction givenUvCurve =
