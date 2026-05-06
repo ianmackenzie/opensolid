@@ -306,7 +306,7 @@ buildHalfEdgeSet surfaceSet =
         let curveId = CurveId curveIndex
         let halfEdgeId = HalfEdge.Id{surfaceId, boundaryId, curveId}
         let curve3D = SurfaceCurve3D.curve surfaceCurve
-        let (arcLengthParameterization, _) = Curve3D.arcLengthParameterizationFunction curve3D
+        let (_, arcLengthParameterization) = Curve3D.arcLengthParameterizationFunction curve3D
         let halfEdge = HalfEdge{id = halfEdgeId, surfaceCurve, arcLengthParameterization}
         Set3D.singleton (HalfEdge.bounds halfEdge) halfEdge
 

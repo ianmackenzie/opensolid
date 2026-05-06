@@ -224,13 +224,13 @@ bounds = Curve.bounds
 reverse :: Curve3D space -> Curve3D space
 reverse = Curve.reverse
 
-arcLengthParameterizationFunction :: Tolerance Meters => Curve3D space -> (Number -> Number, Length)
+arcLengthParameterizationFunction :: Tolerance Meters => Curve3D space -> (Length, Number -> Number)
 arcLengthParameterizationFunction = Curve.arcLengthParameterizationFunction
 
-arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Curve1D Unitless, Length)
+arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Length, Curve1D Unitless)
 arcLengthParameterization = Curve.arcLengthParameterization
 
-parameterizeByArcLength :: Tolerance Meters => Curve3D space -> (Curve3D space, Length)
+parameterizeByArcLength :: Tolerance Meters => Curve3D space -> (Length, Curve3D space)
 parameterizeByArcLength = Curve.parameterizeByArcLength
 
 transformBy :: Transform3D tag space -> Curve3D space -> Curve3D space

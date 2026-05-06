@@ -733,10 +733,10 @@ leftRightError curve t1 t2 p1 p2 = do
 arcLengthParameterizationFunction ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  (Number -> Number, Quantity units)
+  (Quantity units, Number -> Number)
 arcLengthParameterizationFunction curve =
   case nondegenerate curve of
-    Error IsDegenerate -> (id, Quantity.zero)
+    Error IsDegenerate -> (Quantity.zero, id)
     Ok nondegenerateCurve -> do
       let dsdt t = Vector.magnitude (derivativeValue curve t)
       let d2sdt2 t =
@@ -747,12 +747,12 @@ arcLengthParameterizationFunction curve =
 arcLengthParameterization ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  (Curve1D Unitless, Quantity units)
+  (Quantity units, Curve1D Unitless)
 arcLengthParameterization curve =
   case nondegenerate curve of
-    Error IsDegenerate -> (Curve1D.t, Quantity.zero)
+    Error IsDegenerate -> (Quantity.zero, Curve1D.t)
     Ok nondegenerateCurve -> do
-      let (parameterizationValue, length) = arcLengthParameterizationFunction curve
+      let (length, parameterizationValue) = arcLengthParameterizationFunction curve
       let parameterizationRange (Interval sLow sHigh) =
             Interval (parameterizationValue sLow) (parameterizationValue sHigh)
       let compiledParameterization =
@@ -763,12 +763,12 @@ arcLengthParameterization curve =
       let parameterizationCurve = recursive \self -> do
             let dtdu = Curve1D.constant length / nondegenerateDerivativeMagnitude
             Curve1D.new compiledParameterization (dtdu . self)
-      (parameterizationCurve, length)
+      (length, parameterizationCurve)
 
 parameterizeByArcLength ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  (Curve dimension units space, Quantity units)
+  (Quantity units, Curve dimension units space)
 parameterizeByArcLength curve = do
-  let (parameterization, length) = arcLengthParameterization curve
-  (curve . parameterization, length)
+  let (length, parameterization) = arcLengthParameterization curve
+  (length, curve . parameterization)
