@@ -1198,6 +1198,7 @@ directionRange ::
 directionRange curve tRange =
   VectorCurve.Direction.range curve tRange (range curve tRange) (derivativeRange curve tRange)
 
+{-# INLINE isZero #-}
 isZero :: Tolerance units => VectorCurve dimension units space -> Bool
 isZero curve = curve.maxSampledMagnitude <= ?tolerance
 
