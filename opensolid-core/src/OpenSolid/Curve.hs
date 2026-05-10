@@ -197,9 +197,7 @@ instance
     (Curve dimension1 units1 space1)
   where
   lhs + rhs =
-    new
-      (compiled lhs + VectorCurve.compiled rhs)
-      (derivative lhs + VectorCurve.derivative rhs)
+    new (compiled lhs + VectorCurve.compiled rhs) (derivative lhs + VectorCurve.derivative rhs)
 
 instance
   (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
@@ -209,9 +207,7 @@ instance
     (Curve dimension1 units1 space1)
   where
   lhs - rhs =
-    new
-      (compiled lhs - VectorCurve.compiled rhs)
-      (derivative lhs - VectorCurve.derivative rhs)
+    new (compiled lhs - VectorCurve.compiled rhs) (derivative lhs - VectorCurve.derivative rhs)
 
 instance
   (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
@@ -220,8 +216,7 @@ instance
     (Curve dimension2 units2 space2)
     (VectorCurve dimension1 units1 space1)
   where
-  lhs - rhs =
-    VectorCurve.new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
+  lhs - rhs = VectorCurve.new (compiled lhs - compiled rhs) (derivative lhs - derivative rhs)
 
 instance
   units1 ~ units2 =>
