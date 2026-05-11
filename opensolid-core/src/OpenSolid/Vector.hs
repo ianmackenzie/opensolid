@@ -13,6 +13,7 @@ module OpenSolid.Vector
   , direction
   , magnitudeAndDirection
   , sum
+  , transformBy
   , erase
   , unerase
   , coerce
@@ -32,6 +33,7 @@ import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.Vector2D (Vector2D)
 import {-# SOURCE #-} OpenSolid.Vector3D (Vector3D)
 import {-# SOURCE #-} OpenSolid.Vector3D qualified as Vector3D
+import OpenSolid.VectorTransform (VectorTransform, VectorTransform1D (VectorTransform1D))
 
 type family Vector dimension units space = vector | vector -> dimension units space where
   Vector 1 units Void = Quantity units
@@ -77,6 +79,10 @@ class
     Vector dimension units space ->
     Vector dimension units space ->
     Quantity (units ?*? units)
+  transformBy ::
+    VectorTransform dimension tag space ->
+    Vector dimension units space ->
+    Vector dimension units space
 
 data IsZero = IsZero deriving (Eq, Show)
 
@@ -84,16 +90,19 @@ instance Exists 1 units Void where
   {-# INLINEABLE squaredMagnitude_ #-}
   squaredMagnitude_ = Quantity.squared_
   crossProductMagnitude_ _ _ = Quantity.zero
+  transformBy (VectorTransform1D scale) value = scale * value
 
 instance Exists 2 units Void where
   {-# INLINEABLE squaredMagnitude_ #-}
   squaredMagnitude_ vector = vector `dot_` vector
   crossProductMagnitude_ v1 v2 = Quantity.abs (v1 `cross_` v2)
+  transformBy transform vector = transform * vector
 
 instance Exists 3 units space where
   {-# INLINEABLE squaredMagnitude_ #-}
   squaredMagnitude_ vector = vector `dot_` vector
   crossProductMagnitude_ v1 v2 = Vector3D.magnitude (v1 `cross_` v2)
+  transformBy transform vector = transform * vector
 
 {-# INLINEABLE squaredMagnitude #-}
 squaredMagnitude ::
