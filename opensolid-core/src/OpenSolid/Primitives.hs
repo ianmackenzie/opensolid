@@ -746,6 +746,24 @@ instance FFI (Frame2D Meters) where
 instance FFI (Frame2D Unitless) where
   representation = FFI.classRepresentation "UvFrame"
 
+instance Multiplication (Vector2D units1) (Frame2D units2) (Vector2D units1) where
+  Vector2D vx vy * Frame2D _ (Orientation2D i j) = vx * i + vy * j
+
+instance Multiplication (Frame2D units1) (Vector2D units2) (Vector2D units2) where
+  frame * vector = vector * frame
+
+instance Division (Vector2D units1) (Frame2D units2) (Vector2D units1) where
+  v / Frame2D _ (Orientation2D i j) = Vector2D (v `dot` i) (v `dot` j)
+
+instance units1 ~ units2 => Multiplication (Point2D units1) (Frame2D units2) (Point2D units1) where
+  Point2D px py * Frame2D p0 (Orientation2D i j) = p0 + px * i + py * j
+
+instance units1 ~ units2 => Multiplication (Frame2D units1) (Point2D units2) (Point2D units2) where
+  frame * point = point * frame
+
+instance units1 ~ units2 => Division (Point2D units1) (Frame2D units2) (Point2D units1) where
+  p / Frame2D p0 (Orientation2D i j) = let v = p - p0 in Point2D (v `dot` i) (v `dot` j)
+
 ----- VectorTransform2D -----
 
 type role VectorTransform2D phantom
@@ -1847,6 +1865,43 @@ deriving instance Show (Frame3D global local)
 
 instance FFI (Frame3D FFI.Space FFI.Space) where
   representation = FFI.classRepresentation "Frame3D"
+
+instance
+  local1 ~ local2 =>
+  Multiplication (Vector3D units local1) (Frame3D global local2) (Vector3D units global)
+  where
+  Vector3D vx vy vz * Frame3D _ (Orientation3D i j k) = vx * i + vy * j + vz * k
+
+instance
+  local1 ~ local2 =>
+  Multiplication (Frame3D global local1) (Vector3D units local2) (Vector3D units global)
+  where
+  frame * vector = vector * frame
+
+instance
+  global1 ~ global2 =>
+  Division (Vector3D units global1) (Frame3D global2 local) (Vector3D units local)
+  where
+  v / Frame3D _ (Orientation3D i j k) = Vector3D (v `dot` i) (v `dot` j) (v `dot` k)
+
+instance
+  local1 ~ local2 =>
+  Multiplication (Point3D local1) (Frame3D global local2) (Point3D global)
+  where
+  Point3D px py pz * Frame3D p0 (Orientation3D i j k) = p0 + px * i + py * j + pz * k
+
+instance
+  local1 ~ local2 =>
+  Multiplication (Frame3D global local1) (Point3D local2) (Point3D global)
+  where
+  frame * point = point * frame
+
+instance
+  global1 ~ global2 =>
+  Division (Point3D global1) (Frame3D global2 local) (Point3D local)
+  where
+  p / Frame3D p0 (Orientation3D i j k) =
+    let v = p - p0 in Point3D (v `dot` i) (v `dot` j) (v `dot` k)
 
 ----- VectorTransform3D -----
 
