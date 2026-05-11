@@ -2,6 +2,7 @@ module OpenSolid.Point
   ( Point
   , Exists
   , distanceFrom
+  , transformBy
   )
 where
 
@@ -12,6 +13,7 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
+import OpenSolid.Transform (Transform)
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 
@@ -44,11 +46,17 @@ class
   Exists dimension units space
   where
   distanceFrom :: Point dimension units space -> Point dimension units space -> Quantity units
+  transformBy ::
+    Transform dimension tag units space ->
+    Point dimension units space ->
+    Point dimension units space
 
 instance Exists 2 units Void where
   {-# INLINE distanceFrom #-}
   distanceFrom = Point2D.distanceFrom
+  transformBy = Point2D.transformBy
 
 instance Exists 3 Meters space where
   {-# INLINE distanceFrom #-}
   distanceFrom = Point3D.distanceFrom
+  transformBy = Point3D.transformBy
