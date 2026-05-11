@@ -1,5 +1,6 @@
 module OpenSolid.Transform
-  ( Rigid
+  ( Transform
+  , Rigid
   , Orthonormal
   , Uniform
   , Affine
@@ -9,7 +10,16 @@ module OpenSolid.Transform
   )
 where
 
+import Data.Void (Void)
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Transform2D, Transform3D)
+
+type family
+  Transform dimension tag units space =
+    transform | transform -> dimension tag units space
+  where
+  Transform 2 tag units Void = Transform2D tag units
+  Transform 3 tag Meters space = Transform3D tag space
 
 data Rigid = Rigid deriving (Eq, Show)
 
