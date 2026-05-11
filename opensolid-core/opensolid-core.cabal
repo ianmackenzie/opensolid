@@ -268,6 +268,9 @@ library
     OpenSolid.VectorSurfaceFunction2D
     OpenSolid.VectorSurfaceFunction3D
     OpenSolid.VectorSurfaceFunction3D.Nondegenerate
+    OpenSolid.VectorTransform
+    OpenSolid.VectorTransform2D
+    OpenSolid.VectorTransform3D
     OpenSolid.Volume
     OpenSolid.World3D
 

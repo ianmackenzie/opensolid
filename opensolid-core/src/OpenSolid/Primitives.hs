@@ -9,6 +9,7 @@ module OpenSolid.Primitives
   , Bounds2D (Bounds2D, PositionBounds2D)
   , Axis2D (Axis2D, originPoint, direction)
   , Frame2D (Frame2D, originPoint, orientation)
+  , VectorTransform2D (VectorTransform2D)
   , Transform2D (Transform2D)
   , Vector3D (Vector3D, V3D#)
   , Direction3D (Unit3D, Direction3D)
@@ -20,6 +21,7 @@ module OpenSolid.Primitives
   , Axis3D (Axis3D, originPoint, direction)
   , Plane3D (Plane3D, originPoint, orientation)
   , Frame3D (Frame3D, originPoint, orientation)
+  , VectorTransform3D (VectorTransform3D)
   , Transform3D (Transform3D)
   )
 where
@@ -743,6 +745,37 @@ instance FFI (Frame2D Meters) where
 
 instance FFI (Frame2D Unitless) where
   representation = FFI.classRepresentation "UvFrame"
+
+----- VectorTransform2D -----
+
+type role VectorTransform2D phantom
+
+type VectorTransform2D :: Type -> Type
+data VectorTransform2D tag = VectorTransform2D (Vector2D Unitless) (Vector2D Unitless)
+
+deriving instance Eq (VectorTransform2D tag)
+
+deriving instance Ord (VectorTransform2D tag)
+
+deriving instance Show (VectorTransform2D tag)
+
+instance Multiplication (VectorTransform2D tag) (Vector2D units) (Vector2D units) where
+  transform * vector = vector * transform
+
+instance Multiplication (Vector2D units) (VectorTransform2D tag) (Vector2D units) where
+  Vector2D vx vy * VectorTransform2D i j = vx * i + vy * j
+
+instance
+  Composition outer inner composed =>
+  Composition
+    (VectorTransform2D outer)
+    (VectorTransform2D inner)
+    (VectorTransform2D composed)
+  where
+  outer . inner =
+    VectorTransform2D
+      (Vector2D 1.0 0.0 * inner * outer)
+      (Vector2D 0.0 1.0 * inner * outer)
 
 ----- Transform2D -----
 
@@ -1814,6 +1847,54 @@ deriving instance Show (Frame3D global local)
 
 instance FFI (Frame3D FFI.Space FFI.Space) where
   representation = FFI.classRepresentation "Frame3D"
+
+----- VectorTransform3D -----
+
+type role VectorTransform3D phantom phantom
+
+type VectorTransform3D :: Type -> Type -> Type
+data VectorTransform3D tag space
+  = VectorTransform3D
+      (Vector3D Unitless space)
+      (Vector3D Unitless space)
+      (Vector3D Unitless space)
+
+deriving instance Eq (VectorTransform3D tag space)
+
+deriving instance Ord (VectorTransform3D tag space)
+
+deriving instance Show (VectorTransform3D tag space)
+
+instance
+  space1 ~ space2 =>
+  Multiplication
+    (VectorTransform3D tag space1)
+    (Vector3D units space2)
+    (Vector3D units space1)
+  where
+  transform * vector = vector * transform
+
+instance
+  space1 ~ space2 =>
+  Multiplication
+    (Vector3D units space1)
+    (VectorTransform3D tag space2)
+    (Vector3D units space1)
+  where
+  Vector3D vx vy vz * VectorTransform3D i j k = vx * i + vy * j + vz * k
+
+instance
+  (Composition outer inner composed, space1 ~ space2) =>
+  Composition
+    (VectorTransform3D outer space1)
+    (VectorTransform3D inner space2)
+    (VectorTransform3D composed space1)
+  where
+  outer . inner =
+    VectorTransform3D
+      (Vector3D 1.0 0.0 0.0 * inner * outer)
+      (Vector3D 0.0 1.0 0.0 * inner * outer)
+      (Vector3D 0.0 0.0 1.0 * inner * outer)
 
 ----- Transform3D -----
 
