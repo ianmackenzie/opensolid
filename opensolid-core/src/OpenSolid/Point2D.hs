@@ -51,7 +51,7 @@ import OpenSolid.Primitives
   , PlaneOrientation3D (PlaneOrientation3D)
   , Point2D (Point2D, Position2D)
   , Point3D
-  , Transform2D (Transform2D)
+  , Transform2D
   )
 import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
@@ -188,10 +188,7 @@ unconvert :: Quantity (units2 ?/? units1) -> Point2D units2 -> Point2D units1
 unconvert factor (Position2D p) = Position2D (Vector2D.unconvert factor p)
 
 transformBy :: Transform2D tag units -> Point2D units -> Point2D units
-transformBy transform point = do
-  let (Transform2D p0 vx vy) = transform
-  let (px, py) = coordinates point
-  p0 + px * vx + py * vy
+transformBy transform point = point * transform
 
 translateBy :: Vector2D units -> Point2D units -> Point2D units
 translateBy = Transform2D.translateByImpl transformBy

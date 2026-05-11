@@ -55,7 +55,6 @@ import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
-import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D (Vector3D)
@@ -67,6 +66,7 @@ import OpenSolid.VectorCurve (VectorCurve3D)
 import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
+import OpenSolid.VectorTransform3D (VectorTransform3D)
 
 type Compiled units space = VectorCurve.Compiled 3 units space
 
@@ -93,7 +93,7 @@ singular0 = VectorCurve.singular0
 singular1 :: VectorCurve3D units space -> Bool
 singular1 = VectorCurve.singular1
 
-transformBy :: Transform3D tag space -> VectorCurve3D units space -> VectorCurve3D units space
+transformBy :: VectorTransform3D tag space -> VectorCurve3D units space -> VectorCurve3D units space
 transformBy transform curve = do
   let compiledTransformed =
         CompiledFunction.map

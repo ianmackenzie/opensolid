@@ -147,7 +147,9 @@ transformBy ::
   Plane3D space ->
   Plane3D space
 transformBy transform (Plane3D p o) =
-  Plane3D (Point3D.transformBy transform p) (PlaneOrientation3D.transformBy transform o)
+  Plane3D
+    (Point3D.transformBy transform p)
+    (PlaneOrientation3D.transformBy (Transform3D.vectorTransform transform) o)
 
 translateBy :: Vector3D Meters space -> Plane3D space -> Plane3D space
 translateBy = Transform3D.translateByImpl transformBy

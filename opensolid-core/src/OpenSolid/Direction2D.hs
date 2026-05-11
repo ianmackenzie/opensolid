@@ -45,8 +45,8 @@ import OpenSolid.Primitives
   , Plane3D
   , PlaneOrientation3D
   , Point2D
-  , Transform2D
   , Vector2D (Vector2D)
+  , VectorTransform2D
   )
 import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Random qualified as Random
@@ -197,7 +197,7 @@ random = Random.map fromAngle (Random.quantity -Angle.pi Angle.pi)
 
 transformBy ::
   Transform.IsOrthonormal tag =>
-  Transform2D tag translationUnits ->
+  VectorTransform2D tag ->
   Direction2D ->
   Direction2D
 transformBy transform = lift (Vector2D.transformBy transform)

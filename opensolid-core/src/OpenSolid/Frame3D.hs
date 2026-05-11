@@ -425,7 +425,9 @@ moveTo newOriginPoint (Frame3D _ o) = Frame3D newOriginPoint (Orientation3D.coer
 -- | Apply the given transform to a frame.
 transformBy :: Transform3D.Rigid global -> Frame3D global local1 -> Frame3D global local2
 transformBy transform (Frame3D p o) =
-  Frame3D (Point3D.transformBy transform p) (Orientation3D.transformBy transform o)
+  Frame3D
+    (Point3D.transformBy transform p)
+    (Orientation3D.transformBy (Transform3D.vectorTransform transform) o)
 
 translateBy :: Vector3D Meters global -> Frame3D global local1 -> Frame3D global local2
 translateBy = Transform3D.translateByImpl transformBy

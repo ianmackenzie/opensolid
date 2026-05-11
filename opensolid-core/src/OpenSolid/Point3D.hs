@@ -48,7 +48,7 @@ import OpenSolid.Primitives
   , Plane3D (Plane3D)
   , PlaneOrientation3D (PlaneOrientation3D)
   , Point3D (Point3D, Position3D)
-  , Transform3D (Transform3D)
+  , Transform3D
   , Vector3D
   )
 import OpenSolid.Quantity (Quantity (Q#))
@@ -178,9 +178,7 @@ projectInto (Plane3D p0 (PlaneOrientation3D i j)) p =
   let d = p - p0 in Point2D (d `dot` i) (d `dot` j)
 
 transformBy :: Transform3D tag space -> Point3D space -> Point3D space
-transformBy transform (Point3D px py pz) = do
-  let (Transform3D p0 vx vy vz) = transform
-  p0 + px * vx + py * vy + pz * vz
+transformBy transform point = point * transform
 
 translateBy :: Vector3D Meters space -> Point3D space -> Point3D space
 translateBy = Transform3D.translateByImpl transformBy

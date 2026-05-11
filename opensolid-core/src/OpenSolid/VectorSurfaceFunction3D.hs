@@ -63,7 +63,6 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds, pattern UvBounds)
@@ -73,6 +72,7 @@ import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
+import OpenSolid.VectorTransform3D (VectorTransform3D)
 
 data VectorSurfaceFunction3D units space
   = VectorSurfaceFunction3D
@@ -609,7 +609,7 @@ relativeTo ::
 relativeTo frame function = placeIn (Frame3D.inverse frame) function
 
 transformBy ::
-  Transform3D tag space ->
+  VectorTransform3D tag space ->
   VectorSurfaceFunction3D units space ->
   VectorSurfaceFunction3D units space
 transformBy transform function = do

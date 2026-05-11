@@ -60,9 +60,11 @@ import OpenSolid.Primitives
   , PlaneOrientation3D (PlaneOrientation3D)
   , Point3D (Point3D, Position3D)
   , Vector3D (Vector3D)
+  , VectorTransform3D (VectorTransform3D)
   )
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Transform3D (Transform3D (Transform3D))
+import OpenSolid.Transform3D (Transform3D)
+import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.World3D qualified as World3D
 
@@ -257,7 +259,7 @@ transformBy transform (Bounds3D pR pF pU) = do
   let rF = 0.5 * Interval.width pF
   let rU = 0.5 * Interval.width pU
   let Point3D cR' cF' cU' = Point3D.transformBy transform (Point3D cR cF cU)
-  let Transform3D _ i j k = transform
+  let VectorTransform3D i j k = Transform3D.vectorTransform transform
   let Vector3D iR iF iU = i
   let Vector3D jR jF jU = j
   let Vector3D kR kF kU = k

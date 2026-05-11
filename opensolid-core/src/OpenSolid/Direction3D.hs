@@ -54,8 +54,8 @@ import OpenSolid.Primitives
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform qualified as Transform
-import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Vector3D qualified as Vector3D
+import OpenSolid.VectorTransform3D (VectorTransform3D)
 
 -- | Get the XYZ components of a direction, given an XYZ coordinate convention to use.
 {-# INLINE components #-}
@@ -169,7 +169,7 @@ relativeTo frame = lift (Vector3D.relativeTo frame)
 
 transformBy ::
   Transform.IsOrthonormal tag =>
-  Transform3D tag space ->
+  VectorTransform3D tag space ->
   Direction3D space ->
   Direction3D space
 transformBy transform = lift (Vector3D.transformBy transform)

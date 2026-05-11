@@ -63,21 +63,10 @@ import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
-import OpenSolid.Primitives
-  ( Direction2D (Direction2D)
-  , Direction3D (Direction3D)
-  , Frame2D
-  , Orientation2D (Orientation2D)
-  , Plane3D
-  , PlaneOrientation3D (PlaneOrientation3D)
-  , Vector3D (Vector3D)
-  , VectorBounds2D (VectorBounds2D)
-  , VectorBounds3D (VectorBounds3D)
-  )
+import OpenSolid.Primitives (Direction2D (Direction2D), Direction3D (Direction3D), Frame2D, Orientation2D (Orientation2D), Plane3D, PlaneOrientation3D (PlaneOrientation3D), Vector3D (Vector3D), VectorBounds2D (VectorBounds2D), VectorBounds3D (VectorBounds3D), VectorTransform2D (VectorTransform2D))
 import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Transform2D (Transform2D (Transform2D))
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D (Vector2D))
@@ -369,14 +358,14 @@ convert factor vectorBounds = Units.simplify (vectorBounds ?*? factor)
 unconvert :: Quantity (units2 ?/? units1) -> VectorBounds2D units2 -> VectorBounds2D units1
 unconvert factor vectorBounds = Units.simplify (vectorBounds ?/? factor)
 
-transformBy :: Transform2D tag units1 -> VectorBounds2D units2 -> VectorBounds2D units2
+transformBy :: VectorTransform2D tag -> VectorBounds2D units -> VectorBounds2D units
 transformBy transform (VectorBounds2D x y) = do
   let xMid = Interval.midpoint x
   let yMid = Interval.midpoint y
   let xWidth = Interval.width x
   let yWidth = Interval.width y
   let Vector2D x0 y0 = Vector2D.transformBy transform (Vector2D xMid yMid)
-  let Transform2D _ i j = transform
+  let VectorTransform2D i j = transform
   let Vector2D ix iy = i
   let Vector2D jx jy = j
   let rx = 0.5 * Number.abs ix * xWidth + 0.5 * Number.abs jx * yWidth

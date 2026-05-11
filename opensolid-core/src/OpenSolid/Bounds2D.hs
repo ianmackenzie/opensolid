@@ -71,9 +71,11 @@ import OpenSolid.Primitives
   , PlaneOrientation3D (PlaneOrientation3D)
   , Point2D (Position2D)
   , Point3D (Point3D)
+  , VectorTransform2D (VectorTransform2D)
   )
 import OpenSolid.Quantity (Quantity (Q#))
-import OpenSolid.Transform2D (Transform2D (Transform2D))
+import OpenSolid.Transform2D (Transform2D)
+import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D (Vector2D))
@@ -290,7 +292,7 @@ transformBy transform (Bounds2D x y) = do
   let xWidth = Interval.width x
   let yWidth = Interval.width y
   let Point2D x0 y0 = Point2D.transformBy transform (Point2D xMid yMid)
-  let Transform2D _ i j = transform
+  let VectorTransform2D i j = Transform2D.vectorTransform transform
   let Vector2D ix iy = i
   let Vector2D jx jy = j
   let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx

@@ -621,7 +621,9 @@ transformBy transform curve = do
           (Point2D.transformBy transform)
           (Bounds2D.transformBy transform)
           (compiled curve)
-  new compiledTransformed (VectorCurve2D.transformBy transform (derivative curve))
+  let transformedDerivative =
+        VectorCurve2D.transformBy (Transform2D.vectorTransform transform) (derivative curve)
+  new compiledTransformed transformedDerivative
 
 -- | Translate by the given displacement.
 translateBy :: Vector2D units -> Curve2D units -> Curve2D units

@@ -68,6 +68,7 @@ import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.Transform3D (Transform3D)
+import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Units (InverseMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3D (Vector3D)
@@ -245,7 +246,9 @@ transformBy transform curve = do
           (Point3D.transformBy transform)
           (Bounds3D.transformBy transform)
           (compiled curve)
-  new compiledTransformed (VectorCurve3D.transformBy transform (derivative curve))
+  let transformedDerivative =
+        VectorCurve3D.transformBy (Transform3D.vectorTransform transform) (derivative curve)
+  new compiledTransformed transformedDerivative
 
 placeIn :: Frame3D global local -> Curve3D local -> Curve3D global
 placeIn frame curve = do

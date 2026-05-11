@@ -62,7 +62,7 @@ relativeTo = Test.check 100 "relativeTo" do
 transformBy :: Test
 transformBy = Test.check 100 "transformBy" do
   (originalBounds, originalVector) <- Test.generate boundsAndContainedVector
-  transform <- Test.generate Tests.Random.affineTransform3D
+  transform <- Test.generate Tests.Random.affineVectorTransform3D
   let transformedBounds = VectorBounds3D.transformBy transform originalBounds
   let transformedVector = Vector3D.transformBy transform originalVector
   Test.expect (transformedVector `intersects` transformedBounds)

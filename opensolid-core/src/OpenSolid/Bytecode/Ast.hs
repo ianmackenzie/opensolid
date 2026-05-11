@@ -98,19 +98,23 @@ import OpenSolid.Primitives
   ( Direction3D (Direction3D)
   , Point2D (Point2D, Position2D)
   , Point3D (Point3D, Position3D)
+  , Transform2D (Transform2D)
+  , Transform3D (Transform3D)
   , Vector3D (Vector3D)
+  , VectorTransform2D (VectorTransform2D)
+  , VectorTransform3D (VectorTransform3D)
   )
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Text qualified as Text
-import OpenSolid.Transform2D (Transform2D (Transform2D))
 import OpenSolid.Transform2D qualified as Transform2D
-import OpenSolid.Transform3D (Transform3D (Transform3D))
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D qualified as Vector3D
+import OpenSolid.VectorTransform2D qualified as VectorTransform2D
+import OpenSolid.VectorTransform3D qualified as VectorTransform3D
 
 data Space
 
@@ -215,7 +219,7 @@ data Variable2D input where
   Quotient2D :: Variable2D input -> Variable1D input -> Variable2D input
   QuotientConstantVariable2D :: Vector2D Unitless -> Variable1D input -> Variable2D input
   BezierCurve2D :: NonEmpty (Vector2D Unitless) -> Variable1D input -> Variable2D input
-  TransformVector2D :: Transform2D.Affine Unitless -> Variable2D input -> Variable2D input
+  TransformVector2D :: VectorTransform2D.Affine -> Variable2D input -> Variable2D input
   TransformPoint2D :: Transform2D.Affine Unitless -> Variable2D input -> Variable2D input
   ProjectVector3D :: Plane -> Variable3D input -> Variable2D input
   ProjectPoint3D :: Plane -> Variable3D input -> Variable2D input
@@ -256,7 +260,7 @@ data Variable3D input where
   Cross3D :: Variable3D input -> Variable3D input -> Variable3D input
   CrossVariableConstant3D :: Variable3D input -> Vector3D Unitless Space -> Variable3D input
   BezierCurve3D :: NonEmpty (Vector3D Unitless Space) -> Variable1D input -> Variable3D input
-  TransformVector3D :: Transform3D.Affine Space -> Variable3D input -> Variable3D input
+  TransformVector3D :: VectorTransform3D.Affine Space -> Variable3D input -> Variable3D input
   TransformPoint3D :: Transform3D.Affine Space -> Variable3D input -> Variable3D input
   PlaceVector2D :: Plane -> Variable2D input -> Variable3D input
   PlacePoint2D :: Plane -> Variable2D input -> Variable3D input
@@ -1083,9 +1087,9 @@ magnitude3D ast = case ast of
   Variable3D (Negated3D arg) -> Variable1D (Magnitude3D arg)
   Variable3D var -> Variable1D (Magnitude3D var)
 
-transformVector2D :: Transform2D tag units -> Ast2D input -> Ast2D input
+transformVector2D :: VectorTransform2D tag -> Ast2D input -> Ast2D input
 transformVector2D transform ast = do
-  let erasedTransform = Transform2D.coerce transform
+  let erasedTransform = VectorTransform2D.coerce transform
   case ast of
     Constant2D val -> Constant2D (Vector2D.transformBy erasedTransform val)
     Variable2D (TransformVector2D existing var) ->
@@ -1096,9 +1100,9 @@ transformVector2D transform ast = do
       Variable2D (BezierCurve2D transformedControlPoints param)
     Variable2D var -> Variable2D (TransformVector2D erasedTransform var)
 
-transformVector3D :: Transform3D tag space -> Ast3D input -> Ast3D input
+transformVector3D :: VectorTransform3D tag space -> Ast3D input -> Ast3D input
 transformVector3D transform ast = do
-  let erasedTransform = Transform3D.coerce transform
+  let erasedTransform = VectorTransform3D.coerce transform
   case ast of
     Constant3D val -> Constant3D (Vector3D.transformBy erasedTransform val)
     Variable3D (TransformVector3D existing var) ->
@@ -1150,6 +1154,11 @@ placementTransform2D :: Frame2D units -> Transform2D.Affine Unitless
 placementTransform2D frame =
   Transform2D
     (Point2D.coerce (Frame2D.originPoint frame))
+    (vectorPlacementTransform2D frame)
+
+vectorPlacementTransform2D :: Frame2D units -> VectorTransform2D.Affine
+vectorPlacementTransform2D frame =
+  VectorTransform2D
     (Vector2D.coerce (Vector2D.unit (Frame2D.xDirection frame)))
     (Vector2D.coerce (Vector2D.unit (Frame2D.yDirection frame)))
 
@@ -1157,18 +1166,23 @@ placementTransform3D :: Frame3D global local -> Transform3D.Affine Space
 placementTransform3D frame =
   Transform3D
     (Point3D.coerce (Frame3D.originPoint frame))
+    (vectorPlacementTransform3D frame)
+
+vectorPlacementTransform3D :: Frame3D global local -> VectorTransform3D.Affine Space
+vectorPlacementTransform3D frame =
+  VectorTransform3D
     (Vector3D.coerce (Vector3D.unit (Frame3D.rightwardDirection frame)))
     (Vector3D.coerce (Vector3D.unit (Frame3D.forwardDirection frame)))
     (Vector3D.coerce (Vector3D.unit (Frame3D.upwardDirection frame)))
 
 placeVector2DIn :: Frame2D frameUnits -> Ast2D input -> Ast2D input
-placeVector2DIn frame ast = transformVector2D (placementTransform2D frame) ast
+placeVector2DIn frame ast = transformVector2D (vectorPlacementTransform2D frame) ast
 
 placePoint2DIn :: Frame2D units -> Ast2D input -> Ast2D input
 placePoint2DIn frame ast = transformPoint2D (placementTransform2D frame) ast
 
 placeVector3dIn :: Frame3D global local -> Ast3D input -> Ast3D input
-placeVector3dIn frame ast = transformVector3D (placementTransform3D frame) ast
+placeVector3dIn frame ast = transformVector3D (vectorPlacementTransform3D frame) ast
 
 placePoint3dIn :: Frame3D global local -> Ast3D input -> Ast3D input
 placePoint3dIn frame ast = transformPoint3D (placementTransform3D frame) ast
@@ -1307,20 +1321,33 @@ desingularized3D _ _ _ (Constant3D right) = Constant3D right
 desingularized3D (Variable1D parameter) (Variable3D left) (Variable3D middle) (Variable3D right) =
   Variable3D (Desingularized3D parameter left middle right)
 
-addTransform2D :: Transform2D.Affine Unitless -> Compile.Step ConstantIndex
-addTransform2D (Transform2D origin i j) = do
+addVectorTransform2D :: VectorTransform2D.Affine -> Compile.Step ConstantIndex
+addVectorTransform2D (VectorTransform2D i j) = do
   let Vector2D iX iY = i
   let Vector2D jX jY = j
-  let Point2D oX oY = origin
-  Compile.addConstant (iX :| [iY, jX, jY, oX, oY])
+  Compile.addConstant (iX :| [iY, jX, jY])
+
+addVectorTransform3D :: VectorTransform3D.Affine Space -> Compile.Step ConstantIndex
+addVectorTransform3D (VectorTransform3D i j k) = do
+  let Vector3D iX iY iZ = i
+  let Vector3D jX jY jZ = j
+  let Vector3D kX kY kZ = k
+  Compile.addConstant (iX :| [iY, iZ, jX, jY, jZ, kX, kY, kZ])
+
+addTransform2D :: Transform2D.Affine Unitless -> Compile.Step ConstantIndex
+addTransform2D (Transform2D origin (VectorTransform2D i j)) = do
+  let Vector2D iX iY = i
+  let Vector2D jX jY = j
+  let Point2D x0 y0 = origin
+  Compile.addConstant (iX :| [iY, jX, jY, x0, y0])
 
 addTransform3D :: Transform3D.Affine Space -> Compile.Step ConstantIndex
-addTransform3D (Transform3D origin i j k) = do
-  let Vector3D iR iF iU = i
-  let Vector3D jR jF jU = j
-  let Vector3D kR kF kU = k
-  let Point3D oR oF oU = origin
-  Compile.addConstant (iR :| [iF, iU, jR, jF, jU, kR, kF, kU, Length.inMeters oR, Length.inMeters oF, Length.inMeters oU])
+addTransform3D (Transform3D origin (VectorTransform3D i j k)) = do
+  let Vector3D iX iY iZ = i
+  let Vector3D jX jY jZ = j
+  let Vector3D kX kY kZ = k
+  let Point3D x0 y0 z0 = origin
+  Compile.addConstant (iX :| [iY, iZ, jX, jY, jZ, kX, kY, kZ, Length.inMeters x0, Length.inMeters y0, Length.inMeters z0])
 
 addPlane :: Plane -> Compile.Step ConstantIndex
 addPlane plane = do
@@ -1567,7 +1594,7 @@ compileVariable2D variable = case variable of
     let instruction = Instruction.Bezier2D numControlPoints controlPointsIndex parameterIndex
     Compile.addVariable2D instruction
   TransformVector2D transform vector -> do
-    matrixIndex <- addTransform2D transform
+    matrixIndex <- addVectorTransform2D transform
     vectorIndex <- compileVariable2D vector
     Compile.addVariable2D (Instruction.TransformVector2D matrixIndex vectorIndex)
   TransformPoint2D transform point -> do
@@ -1646,7 +1673,7 @@ compileVariable3D variable = case variable of
     rhsIndex <- Compile.addConstant3D rhs
     Compile.addVariable3D (Instruction.CrossVariableConstant3D lhsIndex rhsIndex)
   TransformVector3D transform vector -> do
-    matrixIndex <- addTransform3D transform
+    matrixIndex <- addVectorTransform3D transform
     vectorIndex <- compileVariable3D vector
     Compile.addVariable3D (Instruction.TransformVector3D matrixIndex vectorIndex)
   TransformPoint3D transform point -> do

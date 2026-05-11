@@ -59,7 +59,7 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Axis3D (Axis3D)
+  ( Axis3D
   , Direction3D (Direction3D)
   , Frame3D
   , Plane3D (Plane3D)
@@ -68,15 +68,14 @@ import OpenSolid.Primitives
   , Vector3D (Vector3D)
   , VectorBounds2D (VectorBounds2D)
   , VectorBounds3D (VB3D#, VectorBounds3D)
+  , VectorTransform3D (VectorTransform3D)
   )
 import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Transform3D (Transform3D (Transform3D))
-import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3D qualified as Vector3D
-import OpenSolid.World3D qualified as World3D
+import OpenSolid.VectorTransform3D qualified as VectorTransform3D
 
 constant :: Vector3D units space -> VectorBounds3D units space
 constant (Vector3D x y z) =
@@ -438,7 +437,10 @@ relativeTo frame (VectorBounds3D vR vF vU) = do
     (Interval (cF' - rF') (cF' + rF'))
     (Interval (cU' - rU') (cU' + rU'))
 
-transformBy :: Transform3D tag space -> VectorBounds3D units space -> VectorBounds3D units space
+transformBy ::
+  VectorTransform3D tag space ->
+  VectorBounds3D units space ->
+  VectorBounds3D units space
 transformBy transform (VectorBounds3D vR vF vU) = do
   let cR = Interval.midpoint vR
   let cF = Interval.midpoint vF
@@ -447,7 +449,7 @@ transformBy transform (VectorBounds3D vR vF vU) = do
   let rF = 0.5 * Interval.width vF
   let rU = 0.5 * Interval.width vU
   let Vector3D cR' cF' cU' = Vector3D.transformBy transform (Vector3D cR cF cU)
-  let Transform3D _ i j k = transform
+  let VectorTransform3D i j k = transform
   let Vector3D iR iF iU = i
   let Vector3D jR jF jU = j
   let Vector3D kR kF kU = k
@@ -464,10 +466,10 @@ rotateIn ::
   Angle ->
   VectorBounds3D units space ->
   VectorBounds3D units space
-rotateIn axisDirection = rotateAround (Axis3D World3D.originPoint axisDirection)
+rotateIn = VectorTransform3D.rotateInImpl transformBy
 
 rotateAround :: Axis3D space -> Angle -> VectorBounds3D units space -> VectorBounds3D units space
-rotateAround = Transform3D.rotateAroundImpl transformBy
+rotateAround = VectorTransform3D.rotateAroundImpl transformBy
 
 tripleProduct ::
   ( Units.Product units units squaredUnits

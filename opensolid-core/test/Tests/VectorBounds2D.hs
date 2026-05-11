@@ -55,7 +55,7 @@ placeOn = Test.check 100 "placeOn" do
 transformBy :: Test
 transformBy = Test.check 100 "transformBy" do
   (originalBounds, originalVector) <- Test.generate boundsAndContainedVector
-  transform <- Test.generate Random.affineTransform2D
+  transform <- Test.generate Random.affineVectorTransform2D
   let transformedBounds = VectorBounds2D.transformBy transform originalBounds
   let transformedVector = Vector2D.transformBy transform originalVector
   Test.expect (transformedVector `intersects` transformedBounds)

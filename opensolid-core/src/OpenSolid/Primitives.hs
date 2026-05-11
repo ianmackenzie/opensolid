@@ -800,8 +800,7 @@ instance
 type role Transform2D phantom phantom
 
 type Transform2D :: Type -> Type -> Type
-data Transform2D tag units
-  = Transform2D (Point2D units) (Vector2D Unitless) (Vector2D Unitless)
+data Transform2D tag units = Transform2D (Point2D units) (VectorTransform2D tag)
 
 deriving instance Eq (Transform2D tag units)
 
@@ -821,13 +820,13 @@ instance Multiplication (Transform2D tag translationUnits) (Vector2D units) (Vec
   transform * vector = vector * transform
 
 instance Multiplication (Vector2D units) (Transform2D tag translationUnits) (Vector2D units) where
-  Vector2D vx vy * Transform2D _ i j = vx * i + vy * j
+  vector * Transform2D _ vectorTransform = vector * vectorTransform
 
 instance
   units1 ~ units2 =>
   Multiplication (Point2D units1) (Transform2D tag units2) (Point2D units1)
   where
-  Point2D px py * Transform2D p0 i j = p0 + px * i + py * j
+  Point2D px py * Transform2D p0 (VectorTransform2D i j) = p0 + px * i + py * j
 
 instance
   units1 ~ units2 =>
@@ -842,11 +841,10 @@ instance
     (Transform2D inner units2)
     (Transform2D composed units1)
   where
-  outer . inner =
-    Transform2D
-      (Point2D Quantity.zero Quantity.zero * inner * outer)
-      (Vector2D 1.0 0.0 * inner * outer)
-      (Vector2D 0.0 1.0 * inner * outer)
+  outer . inner = do
+    let Transform2D _ vectorOuter = outer
+    let Transform2D _ vectorInner = inner
+    Transform2D (Point2D Quantity.zero Quantity.zero * inner * outer) (vectorOuter . vectorInner)
 
 ----- Vector3D -----
 
@@ -1956,12 +1954,7 @@ instance
 type role Transform3D phantom phantom
 
 type Transform3D :: Type -> Type -> Type
-data Transform3D tag space
-  = Transform3D
-      (Point3D space)
-      (Vector3D Unitless space)
-      (Vector3D Unitless space)
-      (Vector3D Unitless space)
+data Transform3D tag space = Transform3D (Point3D space) (VectorTransform3D tag space)
 
 deriving instance Eq (Transform3D tag space)
 
@@ -1985,7 +1978,7 @@ instance
     (Transform3D tag space2)
     (Vector3D units space1)
   where
-  Vector3D vx vy vz * Transform3D _ i j k = vx * i + vy * j + vz * k
+  vector * Transform3D _ vectorTransform = vector * vectorTransform
 
 instance
   space1 ~ space2 =>
@@ -1994,7 +1987,7 @@ instance
     (Transform3D tag space2)
     (Point3D space1)
   where
-  Point3D px py pz * Transform3D p0 i j k = p0 + px * i + py * j + pz * k
+  Point3D px py pz * Transform3D p0 (VectorTransform3D i j k) = p0 + px * i + py * j + pz * k
 
 instance
   space1 ~ space2 =>
@@ -2014,9 +2007,9 @@ instance
     (Transform3D inner space2)
     (Transform3D composed space1)
   where
-  outer . inner =
+  outer . inner = do
+    let Transform3D _ vectorOuter = outer
+    let Transform3D _ vectorInner = inner
     Transform3D
       (Point3D Quantity.zero Quantity.zero Quantity.zero * inner * outer)
-      (Vector3D 1.0 0.0 0.0 * inner * outer)
-      (Vector3D 0.0 1.0 0.0 * inner * outer)
-      (Vector3D 0.0 0.0 1.0 * inner * outer)
+      (vectorOuter . vectorInner)

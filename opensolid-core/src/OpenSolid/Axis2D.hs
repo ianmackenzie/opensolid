@@ -79,7 +79,8 @@ placeOn plane (Axis2D p0 d) = Axis3D (Point2D.placeOn plane p0) (Direction2D.pla
 transformBy :: Transform.IsOrthonormal tag => Transform2D tag units -> Axis2D units -> Axis2D units
 transformBy transform axis = do
   let transformedOriginPoint = Point2D.transformBy transform (originPoint axis)
-  let transformedDirection = Direction2D.transformBy transform (direction axis)
+  let transformedDirection =
+        Direction2D.transformBy (Transform2D.vectorTransform transform) (direction axis)
   Axis2D transformedOriginPoint transformedDirection
 
 offsetLeftwardBy :: Quantity units -> Axis2D units -> Axis2D units

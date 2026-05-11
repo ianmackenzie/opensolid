@@ -40,6 +40,7 @@ import OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3D (Transform3D)
+import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector3D (Vector3D)
@@ -228,7 +229,9 @@ transformBy transform function = do
           (Bounds3D.transformBy transform)
           function.compiled
   let transformedDerivative parameter =
-        VectorSurfaceFunction3D.transformBy transform (derivative parameter function)
+        VectorSurfaceFunction3D.transformBy
+          (Transform3D.vectorTransform transform)
+          (derivative parameter function)
   new compiledTransformed transformedDerivative
 
 placeIn :: Frame3D global local -> SurfaceFunction3D local -> SurfaceFunction3D global

@@ -25,8 +25,8 @@ import OpenSolid.Primitives
   ( Direction3D (Unit3D)
   , Frame3D
   , PlaneOrientation3D (PlaneOrientation3D)
-  , Transform3D
   , Vector3D
+  , VectorTransform3D
   )
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
@@ -110,7 +110,7 @@ normalDirection (PlaneOrientation3D i j) = Unit3D (i `cross` j)
 
 transformBy ::
   Transform.IsOrthonormal tag =>
-  Transform3D tag space ->
+  VectorTransform3D tag space ->
   PlaneOrientation3D space ->
   PlaneOrientation3D space
 transformBy transform (PlaneOrientation3D i j) =

@@ -1,24 +1,30 @@
 module OpenSolid.VectorTransform3D
-  ( VectorTransform3D (VectorTransform3D)
+  ( VectorTransform3D
   , Rigid
   , Orthonormal
   , Uniform
   , Affine
   , identity
   , coerce
-  , rotateAround
   , scaleBy
   , scaleIn
+  , scaleAlong
+  , rotateIn
+  , rotateAround
+  , mirrorIn
   , mirrorAcross
   , placeIn
   , relativeTo
   , toOrthonormal
   , toUniform
   , toAffine
-  , rotateAroundImpl
-  , mirrorAcrossImpl
   , scaleByImpl
   , scaleInImpl
+  , scaleAlongImpl
+  , rotateInImpl
+  , rotateAroundImpl
+  , mirrorInImpl
+  , mirrorAcrossImpl
   )
 where
 
@@ -27,14 +33,15 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Direction3D (Direction3D)
+  ( Axis3D (..)
+  , Direction3D (Direction3D, Unit3D)
   , Frame3D
+  , Plane3D (Plane3D)
   , PlaneOrientation3D (PlaneOrientation3D)
   , Vector3D (Vector3D)
   , VectorTransform3D (VectorTransform3D)
   )
 import OpenSolid.Transform qualified as Transform
-import OpenSolid.Vector3D qualified as Vector3D
 
 type Rigid space = VectorTransform3D Transform.Rigid space
 
@@ -59,8 +66,26 @@ identity = VectorTransform3D unitX unitY unitZ
 coerce :: VectorTransform3D tag1 space1 -> VectorTransform3D tag2 space2
 coerce = Data.Coerce.coerce
 
-rotateAround :: Direction3D space -> Angle -> Rigid space
-rotateAround (Direction3D dx dy dz) angle = do
+scaleBy :: Number -> Uniform space
+scaleBy scale = do
+  let vx = Vector3D scale 0.0 0.0
+  let vy = Vector3D 0.0 scale 0.0
+  let vz = Vector3D 0.0 0.0 scale
+  VectorTransform3D vx vy vz
+
+scaleIn :: Direction3D space -> Number -> Affine space
+scaleIn direction scale = do
+  let Direction3D dx dy dz = direction
+  let vx = unitX + (scale - 1.0) * dx * direction
+  let vy = unitY + (scale - 1.0) * dy * direction
+  let vz = unitZ + (scale - 1.0) * dz * direction
+  VectorTransform3D vx vy vz
+
+scaleAlong :: Axis3D space -> Number -> Affine space
+scaleAlong axis = scaleIn axis.direction
+
+rotateIn :: Direction3D space -> Angle -> Rigid space
+rotateIn (Direction3D dx dy dz) angle = do
   let halfAngle = 0.5 * angle
   let sinHalfAngle = Angle.sin halfAngle
   let qx = dx * sinHalfAngle
@@ -81,72 +106,37 @@ rotateAround (Direction3D dx dy dz) angle = do
   let vz = Vector3D (2.0 * (xz + wy)) (2.0 * (yz - wx)) (1.0 - 2.0 * (xx + yy))
   VectorTransform3D vx vy vz
 
-scaleBy :: Number -> Uniform space
-scaleBy scale = do
-  let vx = Vector3D scale 0.0 0.0
-  let vy = Vector3D 0.0 scale 0.0
-  let vz = Vector3D 0.0 0.0 scale
-  VectorTransform3D vx vy vz
+rotateAround :: Axis3D space -> Angle -> Rigid space
+rotateAround axis = rotateIn axis.direction
 
-scaleIn :: Direction3D space -> Number -> Affine space
-scaleIn direction scale = do
-  let Direction3D dx dy dz = direction
-  -- TODO refactor to use Vector3D.scaleIn?
-  let vx = unitX + (scale - 1.0) * dx * direction
-  let vy = unitY + (scale - 1.0) * dy * direction
-  let vz = unitZ + (scale - 1.0) * dz * direction
-  VectorTransform3D vx vy vz
-
-mirrorAcross :: PlaneOrientation3D space -> Orthonormal space
-mirrorAcross (PlaneOrientation3D i j) = do
-  let Vector3D nx ny nz = i `cross` j
-  let axx = 1.0 - 2.0 * nx * nx
-  let ayy = 1.0 - 2.0 * ny * ny
-  let azz = 1.0 - 2.0 * nz * nz
-  let ayz = -2.0 * ny * nz
-  let axz = -2.0 * nx * nz
-  let axy = -2.0 * nx * ny
+mirrorIn :: Direction3D space -> Orthonormal space
+mirrorIn (Direction3D dx dy dz) = do
+  let axx = 1.0 - 2.0 * dx * dx
+  let ayy = 1.0 - 2.0 * dy * dy
+  let azz = 1.0 - 2.0 * dz * dz
+  let ayz = -2.0 * dy * dz
+  let axz = -2.0 * dx * dz
+  let axy = -2.0 * dx * dy
   let vx = Vector3D axx axy axz
   let vy = Vector3D axy ayy ayz
   let vz = Vector3D axz ayz azz
   VectorTransform3D vx vy vz
 
+mirrorAcross :: Plane3D space -> Orthonormal space
+mirrorAcross (Plane3D _ (PlaneOrientation3D i j)) = mirrorIn (Unit3D (i `cross` j))
+
 placeIn :: Frame3D global local -> VectorTransform3D tag local -> VectorTransform3D tag global
 placeIn frame transform = do
-  let vx =
-        unitX
-          & Vector3D.relativeTo frame
-          & (* transform)
-          & Vector3D.placeIn frame
-  let vy =
-        unitY
-          & Vector3D.relativeTo frame
-          & (* transform)
-          & Vector3D.placeIn frame
-  let vz =
-        unitZ
-          & Vector3D.relativeTo frame
-          & (* transform)
-          & Vector3D.placeIn frame
+  let vx = unitX / frame * transform * frame
+  let vy = unitY / frame * transform * frame
+  let vz = unitZ / frame * transform * frame
   VectorTransform3D vx vy vz
 
 relativeTo :: Frame3D global local -> VectorTransform3D tag global -> VectorTransform3D tag local
 relativeTo frame transform = do
-  let vx =
-        unitX
-          & Vector3D.placeIn frame
-          & (* transform)
-          & Vector3D.relativeTo frame
-  let vy =
-        unitY
-          & Vector3D.placeIn frame
-          & (* transform)
-          & Vector3D.relativeTo frame
-  let vz =
-        unitZ
-          & Vector3D.placeIn frame
-          & (* transform)
-          & Vector3D.relativeTo frame
+  let vx = unitX * frame * transform / frame
+  let vy = unitY * frame * transform / frame
+  let vz = unitZ * frame * transform / frame
   VectorTransform3D vx vy vz
 
 toOrthonormal :: Transform.IsOrthonormal tag => VectorTransform3D tag space -> Orthonormal space
@@ -160,14 +150,30 @@ toAffine = Data.Coerce.coerce
 
 -- Helper functions to define specific/concrete transformation functions
 
-rotateAroundImpl :: (Rigid space -> a -> b) -> Direction3D space -> Angle -> a -> b
-rotateAroundImpl transformBy direction angle = transformBy (rotateAround direction angle)
-
-mirrorAcrossImpl :: (Orthonormal space -> a -> b) -> PlaneOrientation3D space -> a -> b
-mirrorAcrossImpl transformBy planeOrientation = transformBy (mirrorAcross planeOrientation)
-
+{-# INLINE scaleByImpl #-}
 scaleByImpl :: (Uniform space -> a -> b) -> Number -> a -> b
 scaleByImpl transformBy scale = transformBy (scaleBy scale)
 
+{-# INLINE scaleInImpl #-}
 scaleInImpl :: (Affine space -> a -> b) -> Direction3D space -> Number -> a -> b
 scaleInImpl transformBy direction scale = transformBy (scaleIn direction scale)
+
+{-# INLINE scaleAlongImpl #-}
+scaleAlongImpl :: (Affine space -> a -> b) -> Axis3D space -> Number -> a -> b
+scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)
+
+{-# INLINE rotateInImpl #-}
+rotateInImpl :: (Rigid space -> a -> b) -> Direction3D space -> Angle -> a -> b
+rotateInImpl transformBy direction angle = transformBy (rotateIn direction angle)
+
+{-# INLINE rotateAroundImpl #-}
+rotateAroundImpl :: (Rigid space -> a -> b) -> Axis3D space -> Angle -> a -> b
+rotateAroundImpl transformBy axis angle = transformBy (rotateAround axis angle)
+
+{-# INLINE mirrorInImpl #-}
+mirrorInImpl :: (Orthonormal space -> a -> b) -> Direction3D space -> a -> b
+mirrorInImpl transformBy direction = transformBy (mirrorIn direction)
+
+{-# INLINE mirrorAcrossImpl #-}
+mirrorAcrossImpl :: (Orthonormal space -> a -> b) -> Plane3D space -> a -> b
+mirrorAcrossImpl transformBy plane = transformBy (mirrorAcross plane)

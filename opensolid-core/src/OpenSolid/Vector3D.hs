@@ -49,10 +49,9 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Convention3D (Convention3D (Convention3D))
 import OpenSolid.Convention3D qualified as Convention3D
-import {-# SOURCE #-} OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Axis3D (Axis3D)
+  ( Axis3D
   , Direction3D (Direction3D, Unit3D)
   , Frame3D (Frame3D)
   , Orientation3D (Orientation3D)
@@ -62,12 +61,11 @@ import OpenSolid.Primitives
   , Vector3D (V3D#, Vector3D)
   )
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Transform3D (Transform3D (Transform3D))
-import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector qualified as Vector
-import OpenSolid.World3D qualified as World3D
+import OpenSolid.VectorTransform3D (VectorTransform3D)
+import OpenSolid.VectorTransform3D qualified as VectorTransform3D
 
 -- | The zero vector.
 zero :: Vector3D units space
@@ -237,41 +235,41 @@ convert factor vector = Units.simplify (vector ?*? factor)
 unconvert :: Quantity (units2 ?/? units1) -> Vector3D units2 space -> Vector3D units1 space
 unconvert factor vector = Units.simplify (vector ?/? factor)
 
-transformBy :: Transform3D tag space -> Vector3D units space -> Vector3D units space
-transformBy transform vector = do
-  let Transform3D _ i j k = transform
-  let Vector3D vx vy vz = vector
-  vx * i + vy * j + vz * k
-
-{-| Rotate a vector in a given direction.
-
-This is equivalent to rotating around an axis with the given direction.
--}
-rotateIn :: Direction3D space -> Angle -> Vector3D units space -> Vector3D units space
-rotateIn axisDirection = rotateAround (Axis3D World3D.originPoint axisDirection)
+transformBy ::
+  VectorTransform3D tag space ->
+  Vector3D units space ->
+  Vector3D units space
+transformBy transform vector = vector * transform
 
 {-| Scale (stretch) in the given direction by the given scaling factor.
 
 This is equivalent to scaling along an axis with the given direction.
 -}
 scaleIn :: Direction3D space -> Number -> Vector3D units space -> Vector3D units space
-scaleIn axisDirection = scaleAlong (Axis3D World3D.originPoint axisDirection)
+scaleIn = VectorTransform3D.scaleInImpl transformBy
+
+-- | Scale (stretch) along the given axis by the given scaling factor.
+scaleAlong :: Axis3D space -> Number -> Vector3D units space -> Vector3D units space
+scaleAlong = VectorTransform3D.scaleAlongImpl transformBy
+
+{-| Rotate a vector in a given direction.
+
+This is equivalent to rotating around an axis with the given direction.
+-}
+rotateIn :: Direction3D space -> Angle -> Vector3D units space -> Vector3D units space
+rotateIn = VectorTransform3D.rotateInImpl transformBy
+
+-- | Rotate around the given axis by the given angle.
+rotateAround :: Axis3D space -> Angle -> Vector3D units space -> Vector3D units space
+rotateAround = VectorTransform3D.rotateAroundImpl transformBy
 
 {-| Mirror in a particular direction.
 
 This is equivalent to mirroring across a plane with the given normal direction.
 -}
 mirrorIn :: Direction3D space -> Vector3D units space -> Vector3D units space
-mirrorIn mirrorDirection vector = vector - 2.0 * projectionIn mirrorDirection vector
-
--- | Rotate around the given axis by the given angle.
-rotateAround :: Axis3D space -> Angle -> Vector3D units space -> Vector3D units space
-rotateAround = Transform3D.rotateAroundImpl transformBy
-
--- | Scale (stretch) along the given axis by the given scaling factor.
-scaleAlong :: Axis3D space -> Number -> Vector3D units space -> Vector3D units space
-scaleAlong = Transform3D.scaleAlongImpl transformBy
+mirrorIn = VectorTransform3D.mirrorInImpl transformBy
 
 -- | Mirror across the given plane.
 mirrorAcross :: Plane3D space -> Vector3D units space -> Vector3D units space
-mirrorAcross plane vector = mirrorIn (Plane3D.normalDirection plane) vector
+mirrorAcross = VectorTransform3D.mirrorAcrossImpl transformBy

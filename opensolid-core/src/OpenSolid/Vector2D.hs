@@ -41,28 +41,27 @@ module OpenSolid.Vector2D
   , unconvert
   , sum
   , transformBy
+  , scaleIn
+  , scaleAlong
   , rotateBy
   , mirrorIn
   , mirrorAcross
-  , scaleIn
   )
 where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
-import {-# SOURCE #-} OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Axis2D (Axis2D)
+  ( Axis2D
   , Direction2D (Unit2D)
   , Frame2D
   , Orientation2D (Orientation2D)
   , Plane3D
   , PlaneOrientation3D (PlaneOrientation3D)
   , Point2D
-  , Transform2D (Transform2D)
   , Vector2D (V2D#, Vector2D)
   , Vector3D
   )
@@ -71,6 +70,8 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units (SquareMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector qualified as Vector
+import OpenSolid.VectorTransform2D (VectorTransform2D)
+import OpenSolid.VectorTransform2D qualified as VectorTransform2D
 
 -- | The zero vector.
 zero :: Vector2D units
@@ -268,21 +269,21 @@ unconvert factor vector = Units.simplify (vector ?/? factor)
 sum :: List (Vector2D units) -> Vector2D units
 sum = Vector.sum
 
-transformBy :: Transform2D tag translationUnits -> Vector2D units -> Vector2D units
-transformBy transform vector = do
-  let Transform2D _ i j = transform
-  let Vector2D vx vy = vector
-  vx * i + vy * j
+transformBy :: VectorTransform2D tag -> Vector2D units -> Vector2D units
+transformBy transform vector = vector * transform
+
+scaleIn :: Direction2D -> Number -> Vector2D units -> Vector2D units
+scaleIn = VectorTransform2D.scaleInImpl transformBy
+
+scaleAlong :: Axis2D units1 -> Number -> Vector2D units2 -> Vector2D units2
+scaleAlong = VectorTransform2D.scaleAlongImpl transformBy
 
 {-| Rotate a vector by a given angle.
 
 A positive angle corresponds to a counterclockwise rotation.
 -}
 rotateBy :: Angle -> Vector2D units -> Vector2D units
-rotateBy theta (Vector2D vx vy) = do
-  let cosTheta = Angle.cos theta
-  let sinTheta = Angle.sin theta
-  Vector2D (cosTheta * vx - sinTheta * vy) (sinTheta * vx + cosTheta * vy)
+rotateBy = VectorTransform2D.rotateByImpl transformBy
 
 {-| Mirror a vector in/along a given direction.
 
@@ -290,7 +291,7 @@ For example, mirroring in the X direction
 will negate the vector's X component and leave its Y component unchanged.
 -}
 mirrorIn :: Direction2D -> Vector2D units -> Vector2D units
-mirrorIn mirrorDirection vector = vector - 2.0 * projectionIn mirrorDirection vector
+mirrorIn = VectorTransform2D.mirrorInImpl transformBy
 
 {-| Mirror a vector across a given axis.
 
@@ -299,8 +300,4 @@ For example, mirroring a vector across *any* axis parallel to the X axis
 will negate the vector's Y component while leaving its X component unchanged.
 -}
 mirrorAcross :: Axis2D originUnits -> Vector2D units -> Vector2D units
-mirrorAcross (Axis2D _ axisDirection) = mirrorIn (Direction2D.rotateLeft axisDirection)
-
-scaleIn :: Direction2D -> Number -> Vector2D units -> Vector2D units
-scaleIn scaleDirection scale vector =
-  vector + (scale - 1.0) * projectionIn scaleDirection vector
+mirrorAcross = VectorTransform2D.mirrorAcrossImpl transformBy

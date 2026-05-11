@@ -68,11 +68,8 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson2D qualified as NewtonRaphson2D
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Plane3D (Plane3D)
-import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
-import OpenSolid.Transform2D (Transform2D)
-import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
@@ -82,6 +79,8 @@ import OpenSolid.VectorCurve (VectorCurve2D)
 import OpenSolid.VectorCurve qualified as VectorCurve
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
+import OpenSolid.VectorTransform2D (VectorTransform2D)
+import OpenSolid.VectorTransform2D qualified as VectorTransform2D
 
 type Compiled units = VectorCurve.Compiled 2 units Void
 
@@ -99,10 +98,7 @@ nondegenerate ::
   Result IsDegenerate (Nondegenerate (VectorCurve2D units))
 nondegenerate = VectorCurve.nondegenerate
 
-transformBy ::
-  Transform2D tag translationUnits ->
-  VectorCurve2D units ->
-  VectorCurve2D units
+transformBy :: VectorTransform2D tag -> VectorCurve2D units -> VectorCurve2D units
 transformBy transform curve = do
   let compiledTransformed =
         CompiledFunction.map
@@ -113,7 +109,7 @@ transformBy transform curve = do
   new compiledTransformed (transformBy transform (derivative curve))
 
 rotateBy :: Angle -> VectorCurve2D units -> VectorCurve2D units
-rotateBy angle = transformBy (Transform2D.rotateAround Point2D.origin angle)
+rotateBy = VectorTransform2D.rotateByImpl transformBy
 
 new :: Compiled units -> VectorCurve2D units -> VectorCurve2D units
 new = VectorCurve.new

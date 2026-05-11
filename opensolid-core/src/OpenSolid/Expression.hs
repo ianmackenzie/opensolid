@@ -93,6 +93,8 @@ import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds2D (VectorBounds2D)
+import OpenSolid.VectorTransform2D (VectorTransform2D)
+import OpenSolid.VectorTransform3D (VectorTransform3D)
 
 type role Expression nominal nominal
 
@@ -1356,7 +1358,7 @@ class
 
 instance
   TransformBy
-    (Transform2D tag translationUnits)
+    (VectorTransform2D tag)
     (Expression input (Vector2D units))
     (Expression input (Vector2D units))
   where
@@ -1380,7 +1382,7 @@ instance
 instance
   space1 ~ space2 =>
   TransformBy
-    (Transform3D tag space1)
+    (VectorTransform3D tag space1)
     (Expression input (Vector3D units space2))
     (Expression input (Vector3D units space2))
   where

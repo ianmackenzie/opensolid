@@ -22,6 +22,7 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives (Axis3D (Axis3D, direction, originPoint), Frame3D, Plane3D (Plane3D))
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform3D (Transform3D)
+import OpenSolid.Transform3D qualified as Transform3D
 
 {-# INLINE coerce #-}
 coerce :: Axis3D space1 -> Axis3D space2
@@ -64,7 +65,8 @@ reverse (Axis3D p0 d) = Axis3D p0 -d
 transformBy :: Transform.IsOrthonormal tag => Transform3D tag space -> Axis3D space -> Axis3D space
 transformBy transform axis = do
   let transformedOriginPoint = Point3D.transformBy transform (originPoint axis)
-  let transformedDirection = Direction3D.transformBy transform (direction axis)
+  let transformedDirection =
+        Direction3D.transformBy (Transform3D.vectorTransform transform) (direction axis)
   Axis3D transformedOriginPoint transformedDirection
 
 -- | Convert an axis defined in local coordinates to one defined in global coordinates.

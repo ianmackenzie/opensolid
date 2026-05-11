@@ -42,7 +42,7 @@ import OpenSolid.Primitives
   , PlaneOrientation3D (PlaneOrientation3D)
   )
 import OpenSolid.Random qualified as Random
-import OpenSolid.Transform3D qualified as Transform3D
+import OpenSolid.VectorTransform3D qualified as VectorTransform3D
 
 coerce :: Orientation3D space1 -> Orientation3D space2
 coerce (Orientation3D r f u) =
@@ -238,7 +238,7 @@ downwardOrientation orientation =
     (downwardDirection orientation)
     (forwardDirection orientation)
 
-transformBy :: Transform3D.Rigid space -> Orientation3D space -> Orientation3D space
+transformBy :: VectorTransform3D.Rigid space -> Orientation3D space -> Orientation3D space
 transformBy transform (Orientation3D i j k) =
   Orientation3D
     (Direction3D.transformBy transform i)

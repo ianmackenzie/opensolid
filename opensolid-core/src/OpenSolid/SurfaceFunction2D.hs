@@ -37,6 +37,7 @@ import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Transform2D (Transform2D)
+import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
@@ -176,7 +177,9 @@ transformBy transform function = do
           (Bounds2D.transformBy transform)
           function.compiled
   let transformedDerivative p =
-        VectorSurfaceFunction2D.transformBy transform (derivative p function)
+        VectorSurfaceFunction2D.transformBy
+          (Transform2D.vectorTransform transform)
+          (derivative p function)
   new compiledTransformed transformedDerivative
 
 instance

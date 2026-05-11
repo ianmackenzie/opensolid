@@ -22,13 +22,21 @@ module Tests.Random
   , quadraticSpline2D
   , cubicSpline2D
   , rigidTransform2D
+  , rigidVectorTransform2D
   , rigidTransform3D
+  , rigidVectorTransform3D
   , orthonormalTransform2D
+  , orthonormalVectorTransform2D
   , orthonormalTransform3D
+  , orthonormalVectorTransform3D
   , uniformTransform2D
+  , uniformVectorTransform2D
   , uniformTransform3D
+  , uniformVectorTransform3D
   , affineTransform2D
+  , affineVectorTransform2D
   , affineTransform3D
+  , affineVectorTransform3D
   , surfaceParameter
   )
 where
@@ -74,6 +82,8 @@ import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Vector2D (Vector2D, pattern Vector2D)
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
+import OpenSolid.VectorTransform2D qualified as VectorTransform2D
+import OpenSolid.VectorTransform3D qualified as VectorTransform3D
 
 length :: Generator Length
 length = Random.quantity (Length.meters -10.0) (Length.meters 10.0)
@@ -173,6 +183,9 @@ mirror2D = Random.map Transform2D.mirrorAcross axis2D
 rigidTransform2D :: Generator (Transform2D.Rigid Meters)
 rigidTransform2D = Random.merge (NonEmpty.two translation2D rotation2D)
 
+rigidVectorTransform2D :: Generator VectorTransform2D.Rigid
+rigidVectorTransform2D = Random.map Transform2D.vectorTransform rigidTransform2D
+
 orthonormalTransform2D :: Generator (Transform2D.Orthonormal Meters)
 orthonormalTransform2D =
   Random.merge $
@@ -180,6 +193,9 @@ orthonormalTransform2D =
       (Random.map Transform2D.toOrthonormal translation2D)
       (Random.map Transform2D.toOrthonormal rotation2D)
       mirror2D
+
+orthonormalVectorTransform2D :: Generator VectorTransform2D.Orthonormal
+orthonormalVectorTransform2D = Random.map Transform2D.vectorTransform orthonormalTransform2D
 
 scalingFactor :: Generator Number
 scalingFactor = Random.number 0.5 2.0
@@ -196,6 +212,9 @@ uniformTransform2D =
       (Random.map Transform2D.toUniform mirror2D)
       uniformScaling2D
 
+uniformVectorTransform2D :: Generator VectorTransform2D.Uniform
+uniformVectorTransform2D = Random.map Transform2D.vectorTransform uniformTransform2D
+
 nonUniformScaling2D :: Generator (Transform2D.Affine Meters)
 nonUniformScaling2D = Random.map2 Transform2D.scaleAlong axis2D scalingFactor
 
@@ -208,6 +227,9 @@ affineTransform2D =
       (Random.map Transform2D.toAffine mirror2D)
       (Random.map Transform2D.toAffine uniformScaling2D)
       nonUniformScaling2D
+
+affineVectorTransform2D :: Generator VectorTransform2D.Affine
+affineVectorTransform2D = Random.map Transform2D.vectorTransform affineTransform2D
 
 surfaceParameter :: Generator SurfaceParameter
 surfaceParameter = Random.oneOf (NonEmpty.two U V)
@@ -227,6 +249,9 @@ mirror3D = Random.map Transform3D.mirrorAcross plane3D
 rigidTransform3D :: Generator (Transform3D.Rigid space)
 rigidTransform3D = Random.merge (NonEmpty.two translation3D rotation3D)
 
+rigidVectorTransform3D :: Generator (VectorTransform3D.Rigid space)
+rigidVectorTransform3D = Random.map Transform3D.vectorTransform rigidTransform3D
+
 orthonormalTransform3D :: Generator (Transform3D.Orthonormal space)
 orthonormalTransform3D =
   Random.merge $
@@ -234,6 +259,9 @@ orthonormalTransform3D =
       (Random.map Transform3D.toOrthonormal translation3D)
       (Random.map Transform3D.toOrthonormal rotation3D)
       mirror3D
+
+orthonormalVectorTransform3D :: Generator (VectorTransform3D.Orthonormal space)
+orthonormalVectorTransform3D = Random.map Transform3D.vectorTransform orthonormalTransform3D
 
 uniformScaling3D :: Generator (Transform3D.Uniform space)
 uniformScaling3D = Random.map2 Transform3D.scaleAbout point3D scalingFactor
@@ -247,6 +275,9 @@ uniformTransform3D =
       (Random.map Transform3D.toUniform mirror3D)
       uniformScaling3D
 
+uniformVectorTransform3D :: Generator (VectorTransform3D.Uniform space)
+uniformVectorTransform3D = Random.map Transform3D.vectorTransform uniformTransform3D
+
 nonUniformScaling3D :: Generator (Transform3D.Affine space)
 nonUniformScaling3D = Random.map2 Transform3D.scaleAlong axis3D scalingFactor
 
@@ -259,3 +290,6 @@ affineTransform3D =
       (Random.map Transform3D.toAffine mirror3D)
       (Random.map Transform3D.toAffine uniformScaling3D)
       nonUniformScaling3D
+
+affineVectorTransform3D :: Generator (VectorTransform3D.Affine space)
+affineVectorTransform3D = Random.map Transform3D.vectorTransform affineTransform3D

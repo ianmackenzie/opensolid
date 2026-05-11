@@ -51,7 +51,6 @@ import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction1D.Blending qualified as SurfaceFunction1D.Blending
 import OpenSolid.SurfaceFunction1D.Quotient qualified as SurfaceFunction1D.Quotient
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
-import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
@@ -62,6 +61,7 @@ import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
+import OpenSolid.VectorTransform2D (VectorTransform2D)
 
 data VectorSurfaceFunction2D units = VectorSurfaceFunction2D
   { compiled :: Compiled units
@@ -470,7 +470,7 @@ relativeTo :: Frame2D frameUnits -> VectorSurfaceFunction2D units -> VectorSurfa
 relativeTo frame = placeIn (Frame2D.inverse frame)
 
 transformBy ::
-  Transform2D tag translationUnits ->
+  VectorTransform2D tag ->
   VectorSurfaceFunction2D units ->
   VectorSurfaceFunction2D units
 transformBy transform function = do
