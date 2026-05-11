@@ -1,9 +1,14 @@
+Cache normal direction in PlaneOrientation3D?
+- will often be a constant anyways...and can compute lazily
+
 Add generic Curve.transformBy
 - add necessary constraints to Curve.Exists (e.g. Expression.TransformBy constraint)
 
 Add actual tag value to transforms
 - GADT tag type so that it's possible to know if e.g. an affine transformation is actually rigid
 - store scaling factor in uniform transformation tag! (maybe call it 'kind'?)
+
+Switch transforms to be flat structs of unboxed Double# components
 
 Optimize curves to reuse arc lengths and uniform parameterizations where possible
 - can simply reuse as is for rigid transformations and coordinate conversions
