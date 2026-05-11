@@ -729,8 +729,7 @@ instance Negation (Axis2D space) where
 type role Frame2D phantom
 
 type Frame2D :: Type -> Type
-data Frame2D units
-  = Frame2D
+data Frame2D units = Frame2D
   { originPoint :: Point2D units
   , orientation :: Orientation2D
   }
