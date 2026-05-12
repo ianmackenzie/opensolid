@@ -25,6 +25,7 @@ module OpenSolid.VectorTransform2D
   , toUniform
   , handedness
   , scale
+  , orthonormalSign
   , uniformScale
   , scaleInImpl
   , scaleAlongImpl
