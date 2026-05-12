@@ -7,13 +7,19 @@ module OpenSolid.Bytecode.Instruction
   )
 where
 
+import Data.Hashable (Hashable)
+import GHC.Generics (Generic)
 import OpenSolid.Binary (Builder)
 import OpenSolid.Bytecode.Encode qualified as Encode
 import OpenSolid.Prelude
 
 newtype ConstantIndex = ConstantIndex Int deriving (Eq, Ord, Show)
 
+deriving newtype instance Hashable ConstantIndex
+
 newtype VariableIndex = VariableIndex Int deriving (Eq, Ord, Show)
+
+deriving newtype instance Hashable VariableIndex
 
 data Instruction
   = Component0 VariableIndex
@@ -109,7 +115,7 @@ data Instruction
   | B11d1 VariableIndex
   | B11d2 VariableIndex
   | B11d3 VariableIndex
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show, Generic, Hashable)
 
 maxValues :: Int
 maxValues = 32768
