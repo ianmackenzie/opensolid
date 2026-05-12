@@ -34,6 +34,7 @@ module OpenSolid.VectorCurve
   , directionRange
   , quotient_
   , reverse
+  , transformBy
   , zeros
   , desingularized
   , desingularize
@@ -88,6 +89,7 @@ import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Transform qualified as Transform
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector)
@@ -104,6 +106,8 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
+import OpenSolid.VectorTransform (VectorTransform)
+import OpenSolid.VectorTransform qualified as VectorTransform
 
 data VectorCurve dimension units space = VectorCurve
   { compiled :: Compiled dimension units space
@@ -128,6 +132,7 @@ class
   ( Vector.Exists dimension units space
   , VectorBounds.Exists dimension units space
   , DirectionBounds.Exists dimension space
+  , VectorTransform.Exists dimension space
   , Exists dimension Unitless space
   , DirectionCurve.Exists dimension space
   , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
@@ -151,6 +156,10 @@ class
   , Expression.SquaredMagnitude_
       (Expression Number (Vector dimension units space))
       (Expression Number (Quantity (units ?*? units)))
+  , Expression.TransformBy
+      (VectorTransform dimension Transform.Affine space)
+      (Expression Number (Vector dimension units space))
+      (Expression Number (Vector dimension units space))
   , Multiplication Number (VectorCurve dimension units space) (VectorCurve dimension units space)
   , Multiplication (VectorCurve dimension units space) Number (VectorCurve dimension units space)
   , Multiplication
@@ -1233,6 +1242,21 @@ reverse ::
   VectorCurve dimension units space ->
   VectorCurve dimension units space
 reverse curve = curve . (1.0 - Curve1D.t)
+
+transformBy ::
+  Exists dimension units space =>
+  VectorTransform dimension tag space ->
+  VectorCurve dimension units space ->
+  VectorCurve dimension units space
+transformBy transform curve = do
+  let affineTransform = VectorTransform.toAffine transform
+  let compiledTransformed =
+        CompiledFunction.map
+          (Expression.transformBy affineTransform)
+          (Vector.transformBy affineTransform)
+          (VectorBounds.transformBy affineTransform)
+          (compiled curve)
+  new compiledTransformed (transformBy affineTransform (derivative curve))
 
 zeros ::
   (Exists dimension units space, Tolerance units) =>
