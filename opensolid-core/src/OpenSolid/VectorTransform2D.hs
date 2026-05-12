@@ -15,9 +15,9 @@ module OpenSolid.VectorTransform2D
   , mirrorAcross
   , placeIn
   , relativeTo
-  , toOrthonormal
-  , toUniform
-  , toAffine
+  , asOrthonormal
+  , asUniform
+  , asAffine
   , scaleInImpl
   , scaleAlongImpl
   , rotateByImpl
@@ -109,14 +109,14 @@ relativeTo frame transform = do
   let vy = unitY * frame * transform / frame
   VectorTransform2D vx vy
 
-toOrthonormal :: Transform.IsOrthonormal tag => VectorTransform2D tag -> Orthonormal
-toOrthonormal = Data.Coerce.coerce
+asOrthonormal :: Transform.IsOrthonormal tag => VectorTransform2D tag -> Orthonormal
+asOrthonormal = Data.Coerce.coerce
 
-toUniform :: Transform.IsUniform tag => VectorTransform2D tag -> Uniform
-toUniform = Data.Coerce.coerce
+asUniform :: Transform.IsUniform tag => VectorTransform2D tag -> Uniform
+asUniform = Data.Coerce.coerce
 
-toAffine :: VectorTransform2D tag -> Affine
-toAffine = Data.Coerce.coerce
+asAffine :: VectorTransform2D tag -> Affine
+asAffine = Data.Coerce.coerce
 
 scaleInImpl :: (Affine -> a -> b) -> Direction2D -> Number -> a -> b
 scaleInImpl transformBy direction scale = transformBy (scaleIn direction scale)

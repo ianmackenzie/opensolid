@@ -16,9 +16,9 @@ module OpenSolid.Transform3D
   , scaleAlong
   , placeIn
   , relativeTo
-  , toOrthonormal
-  , toUniform
-  , toAffine
+  , asOrthonormal
+  , asUniform
+  , asAffine
   , translateByImpl
   , translateInImpl
   , translateAlongImpl
@@ -111,14 +111,14 @@ relativeTo frame transform =
     (World3D.originPoint * frame * transform / frame)
     (VectorTransform3D.relativeTo frame (vectorTransform transform))
 
-toOrthonormal :: Transform.IsOrthonormal tag => Transform3D tag space -> Orthonormal space
-toOrthonormal = Data.Coerce.coerce
+asOrthonormal :: Transform.IsOrthonormal tag => Transform3D tag space -> Orthonormal space
+asOrthonormal = Data.Coerce.coerce
 
-toUniform :: Transform.IsUniform tag => Transform3D tag space -> Uniform space
-toUniform = Data.Coerce.coerce
+asUniform :: Transform.IsUniform tag => Transform3D tag space -> Uniform space
+asUniform = Data.Coerce.coerce
 
-toAffine :: Transform3D tag space -> Affine space
-toAffine = Data.Coerce.coerce
+asAffine :: Transform3D tag space -> Affine space
+asAffine = Data.Coerce.coerce
 
 -- Helper functions to define specific/concrete transformation functions
 

@@ -17,9 +17,9 @@ module OpenSolid.Transform2D
   , scaleAlong
   , placeIn
   , relativeTo
-  , toOrthonormal
-  , toUniform
-  , toAffine
+  , asOrthonormal
+  , asUniform
+  , asAffine
   , translateByImpl
   , translateInImpl
   , translateAlongImpl
@@ -105,14 +105,14 @@ relativeTo frame transform = do
   let p0 = Point2D.origin * frame * transform / frame
   Transform2D p0 (VectorTransform2D.relativeTo frame (vectorTransform transform))
 
-toOrthonormal :: Transform.IsOrthonormal tag => Transform2D tag units -> Orthonormal units
-toOrthonormal = Data.Coerce.coerce
+asOrthonormal :: Transform.IsOrthonormal tag => Transform2D tag units -> Orthonormal units
+asOrthonormal = Data.Coerce.coerce
 
-toUniform :: Transform.IsUniform tag => Transform2D tag units -> Uniform units
-toUniform = Data.Coerce.coerce
+asUniform :: Transform.IsUniform tag => Transform2D tag units -> Uniform units
+asUniform = Data.Coerce.coerce
 
-toAffine :: Transform2D tag units -> Affine units
-toAffine = Data.Coerce.coerce
+asAffine :: Transform2D tag units -> Affine units
+asAffine = Data.Coerce.coerce
 
 -- Helper functions to define specific/concrete transformation functions
 

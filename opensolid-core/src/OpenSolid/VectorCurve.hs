@@ -1249,7 +1249,7 @@ transformBy ::
   VectorCurve dimension units space ->
   VectorCurve dimension units space
 transformBy transform curve = do
-  let affineTransform = VectorTransform.toAffine transform
+  let affineTransform = VectorTransform.asAffine transform
   let compiledTransformed =
         CompiledFunction.map
           (Expression.transformBy affineTransform)

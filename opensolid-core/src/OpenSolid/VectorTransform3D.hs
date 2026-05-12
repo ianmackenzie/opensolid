@@ -15,9 +15,9 @@ module OpenSolid.VectorTransform3D
   , mirrorAcross
   , placeIn
   , relativeTo
-  , toOrthonormal
-  , toUniform
-  , toAffine
+  , asOrthonormal
+  , asUniform
+  , asAffine
   , scaleByImpl
   , scaleInImpl
   , scaleAlongImpl
@@ -139,14 +139,14 @@ relativeTo frame transform = do
   let vz = unitZ * frame * transform / frame
   VectorTransform3D vx vy vz
 
-toOrthonormal :: Transform.IsOrthonormal tag => VectorTransform3D tag space -> Orthonormal space
-toOrthonormal = Data.Coerce.coerce
+asOrthonormal :: Transform.IsOrthonormal tag => VectorTransform3D tag space -> Orthonormal space
+asOrthonormal = Data.Coerce.coerce
 
-toUniform :: Transform.IsUniform tag => VectorTransform3D tag space -> Uniform space
-toUniform = Data.Coerce.coerce
+asUniform :: Transform.IsUniform tag => VectorTransform3D tag space -> Uniform space
+asUniform = Data.Coerce.coerce
 
-toAffine :: VectorTransform3D tag space -> Affine space
-toAffine = Data.Coerce.coerce
+asAffine :: VectorTransform3D tag space -> Affine space
+asAffine = Data.Coerce.coerce
 
 -- Helper functions to define specific/concrete transformation functions
 

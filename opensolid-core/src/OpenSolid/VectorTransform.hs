@@ -2,7 +2,7 @@ module OpenSolid.VectorTransform
   ( VectorTransform
   , VectorTransform1D (VectorTransform1D)
   , Exists
-  , toAffine
+  , asAffine
   )
 where
 
@@ -25,15 +25,15 @@ type family
 newtype VectorTransform1D tag = VectorTransform1D Number
 
 class Exists dimension space where
-  toAffine ::
+  asAffine ::
     VectorTransform dimension tag space ->
     VectorTransform dimension Transform.Affine space
 
 instance Exists 1 Void where
-  toAffine = Data.Coerce.coerce
+  asAffine = Data.Coerce.coerce
 
 instance Exists 2 Void where
-  toAffine = VectorTransform2D.toAffine
+  asAffine = VectorTransform2D.asAffine
 
 instance Exists 3 space where
-  toAffine = VectorTransform3D.toAffine
+  asAffine = VectorTransform3D.asAffine

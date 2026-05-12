@@ -190,8 +190,8 @@ orthonormalTransform2D :: Generator (Transform2D.Orthonormal Meters)
 orthonormalTransform2D =
   Random.merge $
     NonEmpty.three
-      (Random.map Transform2D.toOrthonormal translation2D)
-      (Random.map Transform2D.toOrthonormal rotation2D)
+      (Random.map Transform2D.asOrthonormal translation2D)
+      (Random.map Transform2D.asOrthonormal rotation2D)
       mirror2D
 
 orthonormalVectorTransform2D :: Generator VectorTransform2D.Orthonormal
@@ -207,9 +207,9 @@ uniformTransform2D :: Generator (Transform2D.Uniform Meters)
 uniformTransform2D =
   Random.merge $
     NonEmpty.four
-      (Random.map Transform2D.toUniform translation2D)
-      (Random.map Transform2D.toUniform rotation2D)
-      (Random.map Transform2D.toUniform mirror2D)
+      (Random.map Transform2D.asUniform translation2D)
+      (Random.map Transform2D.asUniform rotation2D)
+      (Random.map Transform2D.asUniform mirror2D)
       uniformScaling2D
 
 uniformVectorTransform2D :: Generator VectorTransform2D.Uniform
@@ -222,10 +222,10 @@ affineTransform2D :: Generator (Transform2D.Affine Meters)
 affineTransform2D =
   Random.merge $
     NonEmpty.five
-      (Random.map Transform2D.toAffine translation2D)
-      (Random.map Transform2D.toAffine rotation2D)
-      (Random.map Transform2D.toAffine mirror2D)
-      (Random.map Transform2D.toAffine uniformScaling2D)
+      (Random.map Transform2D.asAffine translation2D)
+      (Random.map Transform2D.asAffine rotation2D)
+      (Random.map Transform2D.asAffine mirror2D)
+      (Random.map Transform2D.asAffine uniformScaling2D)
       nonUniformScaling2D
 
 affineVectorTransform2D :: Generator VectorTransform2D.Affine
@@ -256,8 +256,8 @@ orthonormalTransform3D :: Generator (Transform3D.Orthonormal space)
 orthonormalTransform3D =
   Random.merge $
     NonEmpty.three
-      (Random.map Transform3D.toOrthonormal translation3D)
-      (Random.map Transform3D.toOrthonormal rotation3D)
+      (Random.map Transform3D.asOrthonormal translation3D)
+      (Random.map Transform3D.asOrthonormal rotation3D)
       mirror3D
 
 orthonormalVectorTransform3D :: Generator (VectorTransform3D.Orthonormal space)
@@ -270,9 +270,9 @@ uniformTransform3D :: Generator (Transform3D.Uniform space)
 uniformTransform3D =
   Random.merge $
     NonEmpty.four
-      (Random.map Transform3D.toUniform translation3D)
-      (Random.map Transform3D.toUniform rotation3D)
-      (Random.map Transform3D.toUniform mirror3D)
+      (Random.map Transform3D.asUniform translation3D)
+      (Random.map Transform3D.asUniform rotation3D)
+      (Random.map Transform3D.asUniform mirror3D)
       uniformScaling3D
 
 uniformVectorTransform3D :: Generator (VectorTransform3D.Uniform space)
@@ -285,10 +285,10 @@ affineTransform3D :: Generator (Transform3D.Affine space)
 affineTransform3D =
   Random.merge $
     NonEmpty.five
-      (Random.map Transform3D.toAffine translation3D)
-      (Random.map Transform3D.toAffine rotation3D)
-      (Random.map Transform3D.toAffine mirror3D)
-      (Random.map Transform3D.toAffine uniformScaling3D)
+      (Random.map Transform3D.asAffine translation3D)
+      (Random.map Transform3D.asAffine rotation3D)
+      (Random.map Transform3D.asAffine mirror3D)
+      (Random.map Transform3D.asAffine uniformScaling3D)
       nonUniformScaling3D
 
 affineVectorTransform3D :: Generator (VectorTransform3D.Affine space)
