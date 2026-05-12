@@ -1,5 +1,8 @@
 module OpenSolid.Transform
   ( Transform
+  , Exists
+  , vectorTransform
+  , toAffine
   , Rigid
   , Orthonormal
   , Uniform
@@ -13,6 +16,9 @@ where
 import Data.Void (Void)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Transform2D, Transform3D)
+import OpenSolid.Transform2D qualified as Transform2D
+import OpenSolid.Transform3D qualified as Transform3D
+import OpenSolid.VectorTransform (VectorTransform)
 
 type family
   Transform dimension tag units space =
@@ -20,6 +26,18 @@ type family
   where
   Transform 2 tag units Void = Transform2D tag units
   Transform 3 tag Meters space = Transform3D tag space
+
+class Exists dimension units space where
+  vectorTransform :: Transform dimension t units space -> VectorTransform dimension t space
+  toAffine :: Transform dimension tag units space -> Transform dimension Affine units space
+
+instance Exists 2 units Void where
+  vectorTransform = Transform2D.vectorTransform
+  toAffine = Transform2D.toAffine
+
+instance Exists 3 Meters space where
+  vectorTransform = Transform3D.vectorTransform
+  toAffine = Transform3D.toAffine
 
 data Rigid = Rigid deriving (Eq, Show)
 

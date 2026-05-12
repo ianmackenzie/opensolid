@@ -44,7 +44,7 @@ import OpenSolid.Primitives
   , Vector3D
   , VectorTransform3D (VectorTransform3D)
   )
-import OpenSolid.Transform qualified as Transform
+import {-# SOURCE #-} OpenSolid.Transform qualified as Transform
 import OpenSolid.VectorTransform3D qualified as VectorTransform3D
 import OpenSolid.World3D qualified as World3D
 

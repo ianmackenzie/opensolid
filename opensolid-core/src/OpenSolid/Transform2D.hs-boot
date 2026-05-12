@@ -12,7 +12,7 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Axis2D, Direction2D, Point2D, Transform2D, Vector2D)
-import OpenSolid.Transform (Affine, Orthonormal, Rigid, Uniform)
+import {-# SOURCE #-} OpenSolid.Transform (Affine, Orthonormal, Rigid, Uniform)
 
 translateByImpl ::
   (Transform2D Rigid units -> a -> b) ->

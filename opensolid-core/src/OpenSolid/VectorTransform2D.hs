@@ -38,7 +38,7 @@ import OpenSolid.Primitives
   , Vector2D (Vector2D)
   , VectorTransform2D (VectorTransform2D)
   )
-import OpenSolid.Transform qualified as Transform
+import {-# SOURCE #-} OpenSolid.Transform qualified as Transform
 
 type Rigid = VectorTransform2D Transform.Rigid
 

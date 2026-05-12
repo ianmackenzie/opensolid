@@ -3,6 +3,8 @@ module OpenSolid.Transform
   , Orthonormal
   , Uniform
   , Affine
+  , IsOrthonormal
+  , IsUniform
   )
 where
 
@@ -13,3 +15,7 @@ data Orthonormal
 data Uniform
 
 data Affine
+
+class IsOrthonormal tag
+
+class IsUniform tag

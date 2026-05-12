@@ -53,7 +53,7 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Transform qualified as Transform
+import {-# SOURCE #-} OpenSolid.Transform qualified as Transform
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorTransform3D (VectorTransform3D)
 

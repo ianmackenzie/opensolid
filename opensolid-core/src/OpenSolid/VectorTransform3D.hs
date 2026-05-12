@@ -41,7 +41,7 @@ import OpenSolid.Primitives
   , Vector3D (Vector3D)
   , VectorTransform3D (VectorTransform3D)
   )
-import OpenSolid.Transform qualified as Transform
+import {-# SOURCE #-} OpenSolid.Transform qualified as Transform
 
 type Rigid space = VectorTransform3D Transform.Rigid space
 
