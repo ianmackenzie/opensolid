@@ -13,6 +13,7 @@ module OpenSolid.Curve3D
   , quadraticBezier
   , cubicBezier
   , hermite
+  , compiled
   , derivative
   , secondDerivative
   , derivativeValue
