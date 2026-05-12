@@ -3,6 +3,7 @@ module OpenSolid.Transform
   , Exists
   , vectorTransform
   , asAffine
+  , uniformScale
   , Rigid
   , Orthonormal
   , Uniform
@@ -30,14 +31,17 @@ type family
 class Exists dimension units space where
   vectorTransform :: Transform dimension t units space -> VectorTransform dimension t space
   asAffine :: Transform dimension tag units space -> Transform dimension Affine units space
+  uniformScale :: Transform dimension tag units space -> Maybe Number
 
 instance Exists 2 units Void where
   vectorTransform = Transform2D.vectorTransform
   asAffine = Transform2D.asAffine
+  uniformScale = Transform2D.uniformScale
 
 instance Exists 3 Meters space where
   vectorTransform = Transform3D.vectorTransform
   asAffine = Transform3D.asAffine
+  uniformScale = Transform3D.uniformScale
 
 data Rigid = Rigid deriving (Eq, Show)
 
