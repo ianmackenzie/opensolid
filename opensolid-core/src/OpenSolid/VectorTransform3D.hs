@@ -27,7 +27,6 @@ module OpenSolid.VectorTransform3D
   , handedness
   , scale
   , uniformScale
-  , scaleByImpl
   , scaleInImpl
   , scaleAlongImpl
   , rotateInImpl
@@ -204,10 +203,6 @@ toUniform :: VectorTransform3D tag space -> Maybe (Uniform space)
 toUniform transform = if isUniform transform then Just (coerce transform) else Nothing
 
 -- Helper functions to define specific/concrete transformation functions
-
-{-# INLINE scaleByImpl #-}
-scaleByImpl :: (Uniform space -> a -> b) -> Number -> a -> b
-scaleByImpl transformBy givenScale = transformBy (scaleBy givenScale)
 
 {-# INLINE scaleInImpl #-}
 scaleInImpl :: (Affine space -> a -> b) -> Direction3D space -> Number -> a -> b
