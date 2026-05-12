@@ -11,6 +11,7 @@ module OpenSolid.VectorBounds
   , isResolved
   , areDistinct
   , areIndependent
+  , transformBy
   , erase
   , unerase
   , coerce
@@ -32,6 +33,7 @@ import OpenSolid.VectorBounds2D (VectorBounds2D)
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
+import OpenSolid.VectorTransform (VectorTransform, VectorTransform1D (VectorTransform1D))
 
 type family
   VectorBounds dimension units space =
@@ -110,6 +112,10 @@ class
   isResolved :: VectorBounds dimension units space -> Bool
   areDistinct :: VectorBounds dimension units space -> VectorBounds dimension units space -> Bool
   areIndependent :: VectorBounds dimension units space -> VectorBounds dimension units space -> Bool
+  transformBy ::
+    VectorTransform dimension tag space ->
+    VectorBounds dimension units space ->
+    VectorBounds dimension units space
 
 instance Exists 1 units Void where
   member = Interval.member
@@ -124,6 +130,7 @@ instance Exists 1 units Void where
   isResolved = Interval.isResolved
   areDistinct = Interval.areDistinct
   areIndependent _ _ = False
+  transformBy (VectorTransform1D scale) value = scale * value
 
 instance Exists 2 units Void where
   member = VectorBounds2D.member
@@ -135,6 +142,7 @@ instance Exists 2 units Void where
   isResolved = VectorBounds2D.isResolved
   areDistinct = VectorBounds2D.areDistinct
   areIndependent = VectorBounds2D.areIndependent
+  transformBy = VectorBounds2D.transformBy
 
 instance Exists 3 units space where
   member = VectorBounds3D.member
@@ -146,6 +154,7 @@ instance Exists 3 units space where
   isResolved = VectorBounds3D.isResolved
   areDistinct = VectorBounds3D.areDistinct
   areIndependent = VectorBounds3D.areIndependent
+  transformBy = VectorBounds3D.transformBy
 
 direction ::
   Exists dimension units space =>
