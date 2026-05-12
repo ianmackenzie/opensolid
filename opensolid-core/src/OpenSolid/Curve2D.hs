@@ -101,7 +101,6 @@ import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
-import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
@@ -611,7 +610,7 @@ relativeTo :: Frame2D units -> Curve2D units -> Curve2D units
 relativeTo frame = placeIn (Frame2D.inverse frame)
 
 placeOn :: Plane3D space -> Curve2D Meters -> Curve3D space
-placeOn plane curve = Curve3D.on plane curve
+placeOn = Curve.placeOn
 
 transformBy :: Transform2D tag units -> Curve2D units -> Curve2D units
 transformBy = Curve.transformBy

@@ -43,7 +43,6 @@ module OpenSolid.Curve3D
   )
 where
 
-import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
@@ -51,7 +50,6 @@ import OpenSolid.Curve (Curve3D, HasSingularity)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve2D (Curve2D)
-import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionCurve3D (DirectionCurve3D)
 import OpenSolid.Error (IsDegenerate)
@@ -62,7 +60,6 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Length (Length)
 import OpenSolid.Line3D (Line3D)
 import OpenSolid.Plane3D (Plane3D)
-import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
@@ -90,14 +87,7 @@ constant :: Point3D space -> Curve3D space
 constant = Curve.constant
 
 on :: Plane3D space -> Curve2D Meters -> Curve3D space
-on plane curve2D = do
-  let compiledPlaced =
-        CompiledFunction.map
-          (Expression.placeOn plane)
-          (Point2D.placeOn plane)
-          (Bounds2D.placeOn plane)
-          (Curve2D.compiled curve2D)
-  new compiledPlaced (VectorCurve3D.on plane (Curve2D.derivative curve2D))
+on = Curve.placeOn
 
 line :: Line3D space -> Curve3D space
 line = Curve.line

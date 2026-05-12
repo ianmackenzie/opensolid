@@ -56,6 +56,7 @@ module OpenSolid.Curve
   , uniformParameterizationValue
   , uniformPoint
   , transformBy
+  , placeOn
   )
 where
 
@@ -66,6 +67,7 @@ import OpenSolid.Axis qualified as Axis
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
@@ -100,9 +102,11 @@ import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
+import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Point2D (Point2D)
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Polyline (Polyline (Polyline))
 import OpenSolid.Prelude
@@ -839,4 +843,24 @@ transformBy transform curve =
         searchTree = SearchTree.build (Curve.Segment.new transformed) SearchDomain.curve
       , nondegenerateLength = transformedLength
       , nondegenerateUniformParameterization = transformedUniformParameterization
+      }
+
+placeOn :: Plane3D space -> Curve2D Meters -> Curve3D space
+placeOn plane curve =
+  recursive \placed -> do
+    let compiledPlaced =
+          CompiledFunction.map
+            (Expression.placeOn plane)
+            (Point2D.placeOn plane)
+            (Bounds2D.placeOn plane)
+            (compiled curve)
+    let placedDerivative = VectorCurve3D.on plane (derivative curve)
+    Curve
+      { compiled = compiledPlaced
+      , derivative = placedDerivative
+      , startPoint = Point2D.placeOn plane curve.startPoint
+      , endPoint = Point2D.placeOn plane curve.endPoint
+      , searchTree = SearchTree.build (Curve.Segment.new placed) SearchDomain.curve
+      , nondegenerateLength = curve.nondegenerateLength
+      , nondegenerateUniformParameterization = curve.nondegenerateUniformParameterization
       }
