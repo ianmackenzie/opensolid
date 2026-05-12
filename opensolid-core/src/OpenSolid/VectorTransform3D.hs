@@ -18,6 +18,15 @@ module OpenSolid.VectorTransform3D
   , asOrthonormal
   , asUniform
   , asAffine
+  , isRigid
+  , isOrthonormal
+  , isUniform
+  , toRigid
+  , toOrthonormal
+  , toUniform
+  , handedness
+  , scale
+  , uniformScale
   , scaleByImpl
   , scaleInImpl
   , scaleAlongImpl
@@ -31,6 +40,7 @@ where
 import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3D (..)
@@ -41,7 +51,9 @@ import OpenSolid.Primitives
   , Vector3D (Vector3D)
   , VectorTransform3D (VectorTransform3D)
   )
+import OpenSolid.Tolerance qualified as Tolerance
 import {-# SOURCE #-} OpenSolid.Transform qualified as Transform
+import {-# SOURCE #-} OpenSolid.Vector3D qualified as Vector3D
 
 type Rigid space = VectorTransform3D Transform.Rigid space
 
@@ -67,18 +79,18 @@ coerce :: VectorTransform3D tag1 space1 -> VectorTransform3D tag2 space2
 coerce = Data.Coerce.coerce
 
 scaleBy :: Number -> Uniform space
-scaleBy scale = do
-  let vx = Vector3D scale 0.0 0.0
-  let vy = Vector3D 0.0 scale 0.0
-  let vz = Vector3D 0.0 0.0 scale
+scaleBy givenScale = do
+  let vx = Vector3D givenScale 0.0 0.0
+  let vy = Vector3D 0.0 givenScale 0.0
+  let vz = Vector3D 0.0 0.0 givenScale
   VectorTransform3D vx vy vz
 
 scaleIn :: Direction3D space -> Number -> Affine space
-scaleIn direction scale = do
+scaleIn direction givenScale = do
   let Direction3D dx dy dz = direction
-  let vx = unitX + (scale - 1.0) * dx * direction
-  let vy = unitY + (scale - 1.0) * dy * direction
-  let vz = unitZ + (scale - 1.0) * dz * direction
+  let vx = unitX + (givenScale - 1.0) * dx * direction
+  let vy = unitY + (givenScale - 1.0) * dy * direction
+  let vz = unitZ + (givenScale - 1.0) * dz * direction
   VectorTransform3D vx vy vz
 
 scaleAlong :: Axis3D space -> Number -> Affine space
@@ -148,19 +160,62 @@ asUniform = Data.Coerce.coerce
 asAffine :: VectorTransform3D tag space -> Affine space
 asAffine = Data.Coerce.coerce
 
+handedness :: VectorTransform3D tag space -> Sign
+handedness (VectorTransform3D vx vy vz) = Number.sign (vx `cross` vy `dot` vz)
+
+scale :: Uniform space -> Number
+scale (VectorTransform3D vx _ _) = Vector3D.magnitude vx
+
+isRigid :: VectorTransform3D tag space -> Bool
+isRigid transform = orthonormalSign transform == Just Positive
+
+isOrthonormal :: VectorTransform3D tag space -> Bool
+isOrthonormal transform = orthonormalSign transform /= Nothing
+
+isUniform :: VectorTransform3D tag space -> Bool
+isUniform transform = uniformScale transform /= Nothing
+
+orthonormalSign :: VectorTransform3D tag space -> Maybe Sign
+orthonormalSign transform =
+  Tolerance.using Tolerance.unitless do
+    scaleFactor <- uniformScale transform
+    if Number.abs scaleFactor ~= 1.0 then Just (Number.sign scaleFactor) else Nothing
+
+uniformScale :: VectorTransform3D tag space -> Maybe Number
+uniformScale (VectorTransform3D vx vy vz) = do
+  let xMagnitude = Vector3D.magnitude vx
+  let yMagnitude = Vector3D.magnitude vy
+  let zMagnitude = Vector3D.magnitude vz
+  let equalMagnitudes =
+        Tolerance.using (Tolerance.unitless * xMagnitude) do
+          yMagnitude ~= xMagnitude && zMagnitude ~= xMagnitude
+  let mutuallyOrthogonal =
+        Tolerance.using (Tolerance.unitless * xMagnitude * xMagnitude) do
+          vx `dot` vy ~= 0.0 && vy `dot` vz ~= 0.0 && vz `dot` vx ~= 0.0
+  if mutuallyOrthogonal && equalMagnitudes then Just xMagnitude else Nothing
+
+toRigid :: VectorTransform3D tag space -> Maybe (Rigid space)
+toRigid transform = if isRigid transform then Just (coerce transform) else Nothing
+
+toOrthonormal :: VectorTransform3D tag space -> Maybe (Orthonormal space)
+toOrthonormal transform = if isOrthonormal transform then Just (coerce transform) else Nothing
+
+toUniform :: VectorTransform3D tag space -> Maybe (Uniform space)
+toUniform transform = if isUniform transform then Just (coerce transform) else Nothing
+
 -- Helper functions to define specific/concrete transformation functions
 
 {-# INLINE scaleByImpl #-}
 scaleByImpl :: (Uniform space -> a -> b) -> Number -> a -> b
-scaleByImpl transformBy scale = transformBy (scaleBy scale)
+scaleByImpl transformBy givenScale = transformBy (scaleBy givenScale)
 
 {-# INLINE scaleInImpl #-}
 scaleInImpl :: (Affine space -> a -> b) -> Direction3D space -> Number -> a -> b
-scaleInImpl transformBy direction scale = transformBy (scaleIn direction scale)
+scaleInImpl transformBy direction givenScale = transformBy (scaleIn direction givenScale)
 
 {-# INLINE scaleAlongImpl #-}
 scaleAlongImpl :: (Affine space -> a -> b) -> Axis3D space -> Number -> a -> b
-scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)
+scaleAlongImpl transformBy axis givenScale = transformBy (scaleAlong axis givenScale)
 
 {-# INLINE rotateInImpl #-}
 rotateInImpl :: (Rigid space -> a -> b) -> Direction3D space -> Angle -> a -> b
