@@ -95,6 +95,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
@@ -427,33 +428,36 @@ new ::
   Curve dimension units space
 new givenCompiled givenDerivative =
   recursive \curve -> do
-    let (nondegenerateLength, nondegenerateUniformParameterizationValue) = do
-          let dsdt t = Vector.magnitude (derivativeValue curve t)
-          let d2sdt2 t = do
-                let tangent = Curve.Nondegenerate.tangentDirectionValue (Nondegenerate curve) t
-                secondDerivativeValue curve t `dot` tangent
-          ArcLength.parameterization dsdt d2sdt2
+    let (arcLength, parameterization) = arcLengthParameterization (Nondegenerate curve)
     Curve
       { compiled = givenCompiled
       , derivative = givenDerivative
       , startPoint = CompiledFunction.value givenCompiled 0.0
       , endPoint = CompiledFunction.value givenCompiled 1.0
       , searchTree = SearchTree.build (Curve.Segment.new curve) SearchDomain.curve
-      , nondegenerateLength
-      , nondegenerateUniformParameterization =
-          nondegenerateUniformParameterization
-            (Nondegenerate curve)
-            nondegenerateLength
-            nondegenerateUniformParameterizationValue
+      , nondegenerateLength = arcLength
+      , nondegenerateUniformParameterization = parameterization
       }
 
-nondegenerateUniformParameterization ::
+arcLengthParameterization ::
+  Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) ->
+  (Quantity units, Curve1D Unitless)
+arcLengthParameterization curve = do
+  let dsdt t = Vector.magnitude (derivativeValue (Nondegenerate.unwrap curve) t)
+  let d2sdt2 t = do
+        let tangent = Curve.Nondegenerate.tangentDirectionValue curve t
+        secondDerivativeValue (Nondegenerate.unwrap curve) t `dot` tangent
+  let (arcLength, parameterizationValue) = ArcLength.parameterization dsdt d2sdt2
+  (arcLength, uniformParameterizationCurve curve arcLength parameterizationValue)
+
+uniformParameterizationCurve ::
   Exists dimension units space =>
   Nondegenerate (Curve dimension units space) ->
   Quantity units ->
   (Number -> Number) ->
   Curve1D Unitless
-nondegenerateUniformParameterization curve curveLength parameterizationValue =
+uniformParameterizationCurve curve curveLength parameterizationValue =
   recursive \self -> do
     let parameterizationRange (Interval rLow rHigh) =
           Interval (parameterizationValue rLow) (parameterizationValue rHigh)
