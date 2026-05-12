@@ -118,17 +118,22 @@ asUniform = Data.Coerce.coerce
 asAffine :: VectorTransform2D tag -> Affine
 asAffine = Data.Coerce.coerce
 
+{-# INLINE scaleInImpl #-}
 scaleInImpl :: (Affine -> a -> b) -> Direction2D -> Number -> a -> b
 scaleInImpl transformBy direction scale = transformBy (scaleIn direction scale)
 
+{-# INLINE scaleAlongImpl #-}
 scaleAlongImpl :: (Affine -> a -> b) -> Axis2D units -> Number -> a -> b
 scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)
 
+{-# INLINE rotateByImpl #-}
 rotateByImpl :: (Rigid -> a -> b) -> Angle -> a -> b
 rotateByImpl transformBy angle = transformBy (rotateBy angle)
 
+{-# INLINE mirrorInImpl #-}
 mirrorInImpl :: (Orthonormal -> a -> b) -> Direction2D -> a -> b
 mirrorInImpl transformBy direction = transformBy (mirrorIn direction)
 
+{-# INLINE mirrorAcrossImpl #-}
 mirrorAcrossImpl :: (Orthonormal -> a -> b) -> Axis2D units -> a -> b
 mirrorAcrossImpl transformBy axis = transformBy (mirrorAcross axis)
