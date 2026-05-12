@@ -55,6 +55,7 @@ module OpenSolid.Curve
   , uniformParameterization
   , uniformParameterizationValue
   , uniformPoint
+  , transformBy
   )
 where
 
@@ -118,6 +119,8 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
+import OpenSolid.Transform (Transform)
+import OpenSolid.Transform qualified as Transform
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector)
@@ -358,6 +361,7 @@ instance Composition (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFuncti
 class
   ( Point.Exists dimension units space
   , Bounds.Exists dimension units space
+  , Transform.Exists dimension units space
   , Vector.Exists dimension units space
   , Vector.Exists dimension (Unitless ?/? units) space
   , VectorBounds.Exists dimension units space
@@ -366,6 +370,10 @@ class
   , Axis.Exists dimension units space
   , Expression.Constant Number (Point dimension units space)
   , Expression.BezierCurve (Point dimension units space)
+  , Expression.TransformBy
+      (Transform dimension Transform.Affine units space)
+      (Expression Number (Point dimension units space))
+      (Expression Number (Point dimension units space))
   , Expression.Evaluation
       Number
       (Point dimension units space)
@@ -799,3 +807,36 @@ uniformPoint ::
   Number ->
   Point dimension units space
 uniformPoint curve r = point curve (uniformParameterizationValue curve r)
+
+transformBy ::
+  Exists dimension units space =>
+  Transform dimension tag units space ->
+  Curve dimension units space ->
+  Curve dimension units space
+transformBy transform curve =
+  recursive \transformed -> do
+    let compiledTransformed =
+          CompiledFunction.map
+            (Expression.transformBy (Transform.asAffine transform))
+            (Point.transformBy transform)
+            (Bounds.transformBy transform)
+            (compiled curve)
+    let transformedDerivative =
+          VectorCurve.transformBy (Transform.vectorTransform transform) (derivative curve)
+    let (transformedLength, transformedUniformParameterization) =
+          case Transform.uniformScale transform of
+            Just uniformScale ->
+              ( Number.abs uniformScale * curve.nondegenerateLength
+              , curve.nondegenerateUniformParameterization
+              )
+            Nothing -> arcLengthParameterization (Nondegenerate transformed)
+    Curve
+      { compiled = compiledTransformed
+      , derivative = transformedDerivative
+      , startPoint = Point.transformBy transform curve.startPoint
+      , endPoint = Point.transformBy transform curve.endPoint
+      , -- TODO optimize by transforming existing search tree?
+        searchTree = SearchTree.build (Curve.Segment.new transformed) SearchDomain.curve
+      , nondegenerateLength = transformedLength
+      , nondegenerateUniformParameterization = transformedUniformParameterization
+      }

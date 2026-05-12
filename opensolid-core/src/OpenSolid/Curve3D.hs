@@ -68,7 +68,6 @@ import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.Transform3D (Transform3D)
-import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Units (InverseMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3D (Vector3D)
@@ -239,16 +238,7 @@ uniformPoint :: Tolerance Meters => Curve3D space -> Number -> Point3D space
 uniformPoint = Curve.uniformPoint
 
 transformBy :: Transform3D tag space -> Curve3D space -> Curve3D space
-transformBy transform curve = do
-  let compiledTransformed =
-        CompiledFunction.map
-          (Expression.transformBy transform)
-          (Point3D.transformBy transform)
-          (Bounds3D.transformBy transform)
-          (compiled curve)
-  let transformedDerivative =
-        VectorCurve3D.transformBy (Transform3D.vectorTransform transform) (derivative curve)
-  new compiledTransformed transformedDerivative
+transformBy = Curve.transformBy
 
 placeIn :: Frame3D global local -> Curve3D local -> Curve3D global
 placeIn frame curve = do

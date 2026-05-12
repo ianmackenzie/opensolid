@@ -614,16 +614,7 @@ placeOn :: Plane3D space -> Curve2D Meters -> Curve3D space
 placeOn plane curve = Curve3D.on plane curve
 
 transformBy :: Transform2D tag units -> Curve2D units -> Curve2D units
-transformBy transform curve = do
-  let compiledTransformed =
-        CompiledFunction.map
-          (Expression.transformBy transform)
-          (Point2D.transformBy transform)
-          (Bounds2D.transformBy transform)
-          (compiled curve)
-  let transformedDerivative =
-        VectorCurve2D.transformBy (Transform2D.vectorTransform transform) (derivative curve)
-  new compiledTransformed transformedDerivative
+transformBy = Curve.transformBy
 
 -- | Translate by the given displacement.
 translateBy :: Vector2D units -> Curve2D units -> Curve2D units
