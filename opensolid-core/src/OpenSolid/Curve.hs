@@ -675,7 +675,20 @@ reverse ::
   Exists dimension units space =>
   Curve dimension units space ->
   Curve dimension units space
-reverse curve = curve . (1.0 - Curve1D.t)
+reverse curve =
+  recursive \reversed ->
+    Curve
+      { compiled = compiled curve . Curve1D.compiled (1.0 - Curve1D.t)
+      , derivative = negate (VectorCurve.reverse (derivative curve))
+      , startPoint = curve.endPoint
+      , endPoint = curve.startPoint
+      , -- TODO optimize by adding e.g. a Segment.reverse function,
+        -- to be able to reuse the existing search tree
+        searchTree = SearchTree.build (Curve.Segment.new reversed) SearchDomain.curve
+      , nondegenerateLength = curve.nondegenerateLength
+      , nondegenerateUniformParameterization =
+          Curve1D.reverse curve.nondegenerateUniformParameterization
+      }
 
 distanceAlong ::
   Exists dimension units space =>
