@@ -8,6 +8,7 @@ module OpenSolid.Bounds
   , intersection
   , cyclicCoordinate
   , diameter
+  , transformBy
   )
 where
 
@@ -19,6 +20,7 @@ import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D (Bounds2D), Bounds3D (Bounds3D))
+import OpenSolid.Transform (Transform)
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 
@@ -54,6 +56,10 @@ class
     Maybe (Bounds dimension units space)
   cyclicCoordinate :: Int -> Bounds dimension units space -> Interval units
   diameter :: Bounds dimension units space -> Quantity units
+  transformBy ::
+    Transform dimension tag units space ->
+    Bounds dimension units space ->
+    Bounds dimension units space
 
 instance Exists 2 units Void where
   constant = Bounds2D.constant
@@ -63,6 +69,7 @@ instance Exists 2 units Void where
   intersection = Bounds2D.intersection
   cyclicCoordinate i (Bounds2D x y) = case i % 2 of 0 -> x; _ -> y
   diameter = Bounds2D.diameter
+  transformBy = Bounds2D.transformBy
 
 instance Exists 3 Meters space where
   constant = Bounds3D.constant
@@ -72,3 +79,4 @@ instance Exists 3 Meters space where
   intersection = Bounds3D.intersection
   cyclicCoordinate i (Bounds3D x y z) = case i % 3 of 0 -> x; 1 -> y; _ -> z
   diameter = Bounds3D.diameter
+  transformBy = Bounds3D.transformBy
