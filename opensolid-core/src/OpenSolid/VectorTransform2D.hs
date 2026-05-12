@@ -6,7 +6,6 @@ module OpenSolid.VectorTransform2D
   , Affine
   , identity
   , coerce
-  , handedness
   , scaleBy
   , scaleIn
   , scaleAlong
@@ -18,6 +17,15 @@ module OpenSolid.VectorTransform2D
   , asOrthonormal
   , asUniform
   , asAffine
+  , isRigid
+  , isOrthonormal
+  , isUniform
+  , toRigid
+  , toOrthonormal
+  , toUniform
+  , handedness
+  , scale
+  , uniformScale
   , scaleInImpl
   , scaleAlongImpl
   , rotateByImpl
@@ -38,7 +46,9 @@ import OpenSolid.Primitives
   , Vector2D (Vector2D)
   , VectorTransform2D (VectorTransform2D)
   )
+import OpenSolid.Tolerance qualified as Tolerance
 import {-# SOURCE #-} OpenSolid.Transform qualified as Transform
+import {-# SOURCE #-} OpenSolid.Vector2D qualified as Vector2D
 
 type Rigid = VectorTransform2D Transform.Rigid
 
@@ -60,23 +70,20 @@ identity = VectorTransform2D unitX unitY
 coerce :: VectorTransform2D tag1 -> VectorTransform2D tag2
 coerce = Data.Coerce.coerce
 
-handedness :: VectorTransform2D tag -> Sign
-handedness (VectorTransform2D vx vy) = Number.sign (vx `cross` vy)
-
 scaleBy :: Number -> Uniform
-scaleBy scale = VectorTransform2D (Vector2D scale 0.0) (Vector2D 0.0 scale)
+scaleBy givenScale = VectorTransform2D (Vector2D givenScale 0.0) (Vector2D 0.0 givenScale)
 
 scaleIn :: Direction2D -> Number -> Affine
-scaleIn (Direction2D dx dy) scale = do
+scaleIn (Direction2D dx dy) givenScale = do
   let dx2 = dx * dx
   let dy2 = dy * dy
-  let xy = (scale - 1.0) * dx * dy
-  let vx = Vector2D (scale * dx2 + dy2) xy
-  let vy = Vector2D xy (scale * dy2 + dx2)
+  let xy = (givenScale - 1.0) * dx * dy
+  let vx = Vector2D (givenScale * dx2 + dy2) xy
+  let vy = Vector2D xy (givenScale * dy2 + dx2)
   VectorTransform2D vx vy
 
 scaleAlong :: Axis2D units -> Number -> Affine
-scaleAlong (Axis2D _ direction) scale = scaleIn direction scale
+scaleAlong (Axis2D _ direction) givenScale = scaleIn direction givenScale
 
 rotateBy :: Angle -> Rigid
 rotateBy angle = do
@@ -118,13 +125,55 @@ asUniform = Data.Coerce.coerce
 asAffine :: VectorTransform2D tag -> Affine
 asAffine = Data.Coerce.coerce
 
+handedness :: VectorTransform2D tag -> Sign
+handedness (VectorTransform2D vx vy) = Number.sign (vx `cross` vy)
+
+scale :: Uniform -> Number
+scale (VectorTransform2D vx _) = Vector2D.magnitude vx
+
+isRigid :: VectorTransform2D tag -> Bool
+isRigid transform = orthonormalSign transform == Just Positive
+
+isOrthonormal :: VectorTransform2D tag -> Bool
+isOrthonormal transform = orthonormalSign transform /= Nothing
+
+isUniform :: VectorTransform2D tag -> Bool
+isUniform transform = uniformScale transform /= Nothing
+
+orthonormalSign :: VectorTransform2D tag -> Maybe Sign
+orthonormalSign transform =
+  Tolerance.using Tolerance.unitless do
+    scaleFactor <- uniformScale transform
+    if Number.abs scaleFactor ~= 1.0 then Just (Number.sign scaleFactor) else Nothing
+
+uniformScale :: VectorTransform2D tag -> Maybe Number
+uniformScale (VectorTransform2D vx vy) = do
+  let xMagnitude = Vector2D.magnitude vx
+  let yMagnitude = Vector2D.magnitude vy
+  let magnitudeTolerance = Tolerance.unitless * xMagnitude
+  let equalMagnitudes = Tolerance.using magnitudeTolerance (xMagnitude ~= yMagnitude)
+  let orthogonalityTolerance = Tolerance.unitless * xMagnitude * xMagnitude
+  let orthogonalVectors = Tolerance.using orthogonalityTolerance (vx `dot` vy ~= 0.0)
+  if orthogonalVectors && equalMagnitudes then Just xMagnitude else Nothing
+
+toRigid :: VectorTransform2D tag -> Maybe Rigid
+toRigid transform = if isRigid transform then Just (coerce transform) else Nothing
+
+toOrthonormal :: VectorTransform2D tag -> Maybe Orthonormal
+toOrthonormal transform = if isOrthonormal transform then Just (coerce transform) else Nothing
+
+toUniform :: VectorTransform2D tag -> Maybe Uniform
+toUniform transform = if isUniform transform then Just (coerce transform) else Nothing
+
+-- Helper functions to define specific/concrete transformation functions
+
 {-# INLINE scaleInImpl #-}
 scaleInImpl :: (Affine -> a -> b) -> Direction2D -> Number -> a -> b
-scaleInImpl transformBy direction scale = transformBy (scaleIn direction scale)
+scaleInImpl transformBy direction givenScale = transformBy (scaleIn direction givenScale)
 
 {-# INLINE scaleAlongImpl #-}
 scaleAlongImpl :: (Affine -> a -> b) -> Axis2D units -> Number -> a -> b
-scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)
+scaleAlongImpl transformBy axis givenScale = transformBy (scaleAlong axis givenScale)
 
 {-# INLINE rotateByImpl #-}
 rotateByImpl :: (Rigid -> a -> b) -> Angle -> a -> b
