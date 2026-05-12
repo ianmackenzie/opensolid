@@ -7,7 +7,6 @@ module OpenSolid.Transform2D
   , vectorTransform
   , identity
   , coerce
-  , handedness
   , translateBy
   , translateIn
   , translateAlong
@@ -20,6 +19,16 @@ module OpenSolid.Transform2D
   , asOrthonormal
   , asUniform
   , asAffine
+  , isRigid
+  , isOrthonormal
+  , isUniform
+  , toRigid
+  , toOrthonormal
+  , toUniform
+  , handedness
+  , scale
+  , orthonormalSign
+  , uniformScale
   , translateByImpl
   , translateInImpl
   , translateAlongImpl
@@ -64,9 +73,6 @@ identity = Transform2D Point2D.origin VectorTransform2D.identity
 coerce :: Transform2D tag1 units1 -> Transform2D tag2 units2
 coerce (Transform2D p0 vt) = Transform2D (Point2D.coerce p0) (VectorTransform2D.coerce vt)
 
-handedness :: Transform2D tag units -> Sign
-handedness = VectorTransform2D.handedness . vectorTransform
-
 withFixedPoint :: Point2D units -> VectorTransform2D tag -> Transform2D tag units
 withFixedPoint fixedPoint givenVectorTransform = do
   let VectorTransform2D vx vy = givenVectorTransform
@@ -90,10 +96,11 @@ mirrorAcross :: Axis2D units -> Orthonormal units
 mirrorAcross axis = withFixedPoint axis.originPoint (VectorTransform2D.mirrorAcross axis)
 
 scaleAbout :: Point2D units -> Number -> Uniform units
-scaleAbout point scale = withFixedPoint point (VectorTransform2D.scaleBy scale)
+scaleAbout point givenScale = withFixedPoint point (VectorTransform2D.scaleBy givenScale)
 
 scaleAlong :: Axis2D units -> Number -> Affine units
-scaleAlong axis scale = withFixedPoint axis.originPoint (VectorTransform2D.scaleAlong axis scale)
+scaleAlong axis givenScale =
+  withFixedPoint axis.originPoint (VectorTransform2D.scaleAlong axis givenScale)
 
 placeIn :: Frame2D units -> Transform2D tag units -> Transform2D tag units
 placeIn frame transform = do
@@ -114,6 +121,36 @@ asUniform = Data.Coerce.coerce
 asAffine :: Transform2D tag units -> Affine units
 asAffine = Data.Coerce.coerce
 
+handedness :: Transform2D tag units -> Sign
+handedness = VectorTransform2D.handedness . vectorTransform
+
+scale :: Uniform units -> Number
+scale = VectorTransform2D.scale . vectorTransform
+
+isRigid :: Transform2D tag units -> Bool
+isRigid = VectorTransform2D.isRigid . vectorTransform
+
+isOrthonormal :: Transform2D tag units -> Bool
+isOrthonormal = VectorTransform2D.isOrthonormal . vectorTransform
+
+isUniform :: Transform2D tag units -> Bool
+isUniform = VectorTransform2D.isUniform . vectorTransform
+
+orthonormalSign :: Transform2D tag units -> Maybe Sign
+orthonormalSign = VectorTransform2D.orthonormalSign . vectorTransform
+
+uniformScale :: Transform2D tag units -> Maybe Number
+uniformScale = VectorTransform2D.uniformScale . vectorTransform
+
+toRigid :: Transform2D tag units -> Maybe (Rigid units)
+toRigid transform = if isRigid transform then Just (coerce transform) else Nothing
+
+toOrthonormal :: Transform2D tag units -> Maybe (Orthonormal units)
+toOrthonormal transform = if isOrthonormal transform then Just (coerce transform) else Nothing
+
+toUniform :: Transform2D tag units -> Maybe (Uniform units)
+toUniform transform = if isUniform transform then Just (coerce transform) else Nothing
+
 -- Helper functions to define specific/concrete transformation functions
 
 translateByImpl :: (Rigid units -> a -> b) -> Vector2D units -> a -> b
@@ -132,7 +169,7 @@ mirrorAcrossImpl :: (Orthonormal units -> a -> b) -> Axis2D units -> a -> b
 mirrorAcrossImpl transformBy axis = transformBy (mirrorAcross axis)
 
 scaleAboutImpl :: (Uniform units -> a -> b) -> Point2D units -> Number -> a -> b
-scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoint scale)
+scaleAboutImpl transformBy centerPoint givenScale = transformBy (scaleAbout centerPoint givenScale)
 
 scaleAlongImpl :: (Affine units -> a -> b) -> Axis2D units -> Number -> a -> b
-scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)
+scaleAlongImpl transformBy axis givenScale = transformBy (scaleAlong axis givenScale)

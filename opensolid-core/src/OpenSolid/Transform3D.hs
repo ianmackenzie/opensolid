@@ -19,6 +19,16 @@ module OpenSolid.Transform3D
   , asOrthonormal
   , asUniform
   , asAffine
+  , isRigid
+  , isOrthonormal
+  , isUniform
+  , toRigid
+  , toOrthonormal
+  , toUniform
+  , handedness
+  , scale
+  , orthonormalSign
+  , uniformScale
   , translateByImpl
   , translateInImpl
   , translateAlongImpl
@@ -87,12 +97,12 @@ rotateAround axis angle =
   withFixedPoint axis.originPoint (VectorTransform3D.rotateAround axis angle)
 
 scaleAbout :: Point3D space -> Number -> Uniform space
-scaleAbout point scale =
-  withFixedPoint point (VectorTransform3D.scaleBy scale)
+scaleAbout point givenScale =
+  withFixedPoint point (VectorTransform3D.scaleBy givenScale)
 
 scaleAlong :: Axis3D space -> Number -> Affine space
-scaleAlong axis scale =
-  withFixedPoint axis.originPoint (VectorTransform3D.scaleAlong axis scale)
+scaleAlong axis givenScale =
+  withFixedPoint axis.originPoint (VectorTransform3D.scaleAlong axis givenScale)
 
 mirrorAcross :: Plane3D space -> Orthonormal space
 mirrorAcross plane = do
@@ -120,6 +130,36 @@ asUniform = Data.Coerce.coerce
 asAffine :: Transform3D tag space -> Affine space
 asAffine = Data.Coerce.coerce
 
+handedness :: Transform3D tag space -> Sign
+handedness = VectorTransform3D.handedness . vectorTransform
+
+scale :: Uniform space -> Number
+scale = VectorTransform3D.scale . vectorTransform
+
+isRigid :: Transform3D tag space -> Bool
+isRigid = VectorTransform3D.isRigid . vectorTransform
+
+isOrthonormal :: Transform3D tag space -> Bool
+isOrthonormal = VectorTransform3D.isOrthonormal . vectorTransform
+
+isUniform :: Transform3D tag space -> Bool
+isUniform = VectorTransform3D.isUniform . vectorTransform
+
+orthonormalSign :: Transform3D tag space -> Maybe Sign
+orthonormalSign = VectorTransform3D.orthonormalSign . vectorTransform
+
+uniformScale :: Transform3D tag space -> Maybe Number
+uniformScale = VectorTransform3D.uniformScale . vectorTransform
+
+toRigid :: Transform3D tag space -> Maybe (Rigid space)
+toRigid transform = if isRigid transform then Just (coerce transform) else Nothing
+
+toOrthonormal :: Transform3D tag space -> Maybe (Orthonormal space)
+toOrthonormal transform = if isOrthonormal transform then Just (coerce transform) else Nothing
+
+toUniform :: Transform3D tag space -> Maybe (Uniform space)
+toUniform transform = if isUniform transform then Just (coerce transform) else Nothing
+
 -- Helper functions to define specific/concrete transformation functions
 
 translateByImpl :: (Rigid space -> a -> b) -> Vector3D Meters space -> a -> b
@@ -138,7 +178,7 @@ mirrorAcrossImpl :: (Orthonormal space -> a -> b) -> Plane3D space -> a -> b
 mirrorAcrossImpl transformBy plane = transformBy (mirrorAcross plane)
 
 scaleAboutImpl :: (Uniform space -> a -> b) -> Point3D space -> Number -> a -> b
-scaleAboutImpl transformBy centerPoint scale = transformBy (scaleAbout centerPoint scale)
+scaleAboutImpl transformBy centerPoint givenScale = transformBy (scaleAbout centerPoint givenScale)
 
 scaleAlongImpl :: (Affine space -> a -> b) -> Axis3D space -> Number -> a -> b
-scaleAlongImpl transformBy axis scale = transformBy (scaleAlong axis scale)
+scaleAlongImpl transformBy axis givenScale = transformBy (scaleAlong axis givenScale)
