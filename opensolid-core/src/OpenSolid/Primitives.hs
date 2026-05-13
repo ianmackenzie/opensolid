@@ -412,9 +412,7 @@ instance
   Multiplication_
     (Quantity units1)
     (VectorBounds2D units2)
-    ( VectorBounds2D
-        (units1 ?*? units2)
-    )
+    (VectorBounds2D (units1 ?*? units2))
   where
   value ?*? VectorBounds2D x y = VectorBounds2D (value ?*? x) (value ?*? y)
 
