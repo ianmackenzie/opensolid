@@ -1,6 +1,5 @@
 module OpenSolid.Bounds (Bounds, Exists) where
 
-import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import {-# SOURCE #-} OpenSolid.Bounds2D (Bounds2D)
 import {-# SOURCE #-} OpenSolid.Bounds3D (Bounds3D)

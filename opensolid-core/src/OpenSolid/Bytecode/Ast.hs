@@ -75,7 +75,6 @@ module OpenSolid.Bytecode.Ast
 where
 
 import Data.Coerce qualified
-import Data.Void (Void)
 import OpenSolid.Bytecode.Compile qualified as Compile
 import OpenSolid.Bytecode.Evaluate (Compiled)
 import OpenSolid.Bytecode.Evaluate qualified as Evaluate

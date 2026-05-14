@@ -15,7 +15,6 @@ module OpenSolid.VectorCurve
   )
 where
 
-import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)

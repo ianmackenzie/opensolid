@@ -18,7 +18,6 @@ module OpenSolid.VectorBounds
   )
 where
 
-import Data.Void (Void)
 import {-# SOURCE #-} OpenSolid.DirectionBounds (DirectionBounds)
 import {-# SOURCE #-} OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Interval (Interval (Interval))

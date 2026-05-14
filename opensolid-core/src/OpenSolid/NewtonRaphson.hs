@@ -10,7 +10,6 @@ module OpenSolid.NewtonRaphson
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.NewtonRaphson1D qualified as NewtonRaphson1D
 import OpenSolid.NewtonRaphson2D qualified as NewtonRaphson2D
 import OpenSolid.NewtonRaphson3D qualified as NewtonRaphson3D

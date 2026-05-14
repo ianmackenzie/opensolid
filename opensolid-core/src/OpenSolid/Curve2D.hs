@@ -82,7 +82,6 @@ module OpenSolid.Curve2D
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Arc2D (Arc2D)

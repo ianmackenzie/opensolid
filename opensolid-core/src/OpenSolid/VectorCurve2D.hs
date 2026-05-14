@@ -52,7 +52,6 @@ module OpenSolid.VectorCurve2D
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Angle (Angle)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve1D (Curve1D)

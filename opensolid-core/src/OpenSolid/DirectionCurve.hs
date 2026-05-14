@@ -9,7 +9,6 @@ module OpenSolid.DirectionCurve
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.DirectionBounds (DirectionBounds)

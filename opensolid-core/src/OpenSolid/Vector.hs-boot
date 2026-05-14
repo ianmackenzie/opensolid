@@ -1,6 +1,5 @@
 module OpenSolid.Vector (Vector, Exists) where
 
-import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Vector2D (Vector2D)

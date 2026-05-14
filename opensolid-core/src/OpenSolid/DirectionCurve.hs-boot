@@ -8,7 +8,6 @@ module OpenSolid.DirectionCurve
   )
 where
 
-import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import OpenSolid.Direction (Direction)
 import OpenSolid.DirectionBounds (DirectionBounds)

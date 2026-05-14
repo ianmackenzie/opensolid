@@ -7,6 +7,7 @@ module OpenSolid.Prelude
   , Fuzzy (Resolved, Unresolved)
   , Result (Ok, Error)
   , Exception
+  , Void
   , pattern NonEmpty
   , type (:::) ((:::))
   , (&)
@@ -67,6 +68,7 @@ import Data.Proxy (Proxy (Proxy))
 import Data.String (fromString)
 import Data.Text (Text)
 import Data.Text qualified
+import Data.Void (Void)
 import Foreign.Storable (Storable)
 import GHC.OverloadedLabels (IsLabel (fromLabel))
 import GHC.Records (HasField (getField))

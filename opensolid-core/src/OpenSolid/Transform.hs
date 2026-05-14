@@ -14,7 +14,6 @@ module OpenSolid.Transform
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Transform2D, Transform3D)
 import OpenSolid.Transform2D qualified as Transform2D

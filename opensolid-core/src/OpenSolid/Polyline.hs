@@ -11,7 +11,6 @@ module OpenSolid.Polyline
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Line (Line (Line))

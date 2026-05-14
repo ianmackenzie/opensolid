@@ -11,7 +11,6 @@ module OpenSolid.Line
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction (Direction)

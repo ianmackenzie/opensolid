@@ -6,7 +6,6 @@ module OpenSolid.Point
   )
 where
 
-import Data.Void (Void)
 import {-# SOURCE #-} OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D

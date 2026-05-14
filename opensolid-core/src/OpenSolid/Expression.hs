@@ -58,7 +58,6 @@ module OpenSolid.Expression
 where
 
 import Data.Coerce qualified
-import Data.Void (Void)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Bytecode.Ast (Ast1D, Ast2D, Ast3D)

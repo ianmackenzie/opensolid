@@ -1,6 +1,5 @@
 module OpenSolid.VectorBounds (VectorBounds, Exists) where
 
-import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude

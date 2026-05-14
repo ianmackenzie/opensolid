@@ -44,7 +44,6 @@ module OpenSolid.VectorCurve
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.CompiledFunction (CompiledFunction)

@@ -20,7 +20,6 @@ module OpenSolid.Vector
   )
 where
 
-import Data.Void (Void)
 import {-# SOURCE #-} OpenSolid.Direction (Direction)
 import {-# SOURCE #-} OpenSolid.Direction qualified as Direction
 import OpenSolid.HasZero (HasZero)

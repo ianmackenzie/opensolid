@@ -5,7 +5,6 @@ module OpenSolid.DirectionBounds
   )
 where
 
-import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)

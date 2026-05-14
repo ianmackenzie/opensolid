@@ -5,7 +5,6 @@ module OpenSolid.VectorSurfaceFunction
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D

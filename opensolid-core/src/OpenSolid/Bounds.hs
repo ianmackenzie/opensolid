@@ -12,7 +12,6 @@ module OpenSolid.Bounds
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Interval (Interval)

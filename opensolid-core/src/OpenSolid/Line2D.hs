@@ -22,7 +22,6 @@ module OpenSolid.Line2D
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Bounds2D (Bounds2D)

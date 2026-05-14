@@ -12,7 +12,6 @@ module OpenSolid.Polyline2D
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Polyline (Polyline (Polyline))

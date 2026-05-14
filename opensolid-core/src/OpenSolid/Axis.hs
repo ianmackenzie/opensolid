@@ -6,7 +6,6 @@ module OpenSolid.Axis
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Axis3D (Axis3D)

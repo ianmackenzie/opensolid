@@ -8,7 +8,6 @@ module OpenSolid.DirectionBounds
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
 import OpenSolid.DirectionBounds2D qualified as DirectionBounds2D
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)

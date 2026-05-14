@@ -22,7 +22,6 @@ module OpenSolid.Curve
   )
 where
 
-import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)

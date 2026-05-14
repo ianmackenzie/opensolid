@@ -30,7 +30,6 @@ module OpenSolid.Set2D
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Chainable (Chainable)
 import OpenSolid.Prelude

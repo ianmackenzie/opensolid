@@ -60,7 +60,6 @@ module OpenSolid.Curve
   )
 where
 
-import Data.Void (Void)
 import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Axis (Axis)
 import OpenSolid.Axis qualified as Axis

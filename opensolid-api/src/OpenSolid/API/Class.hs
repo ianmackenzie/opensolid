@@ -92,7 +92,6 @@ where
 
 import Data.Hashable (Hashable)
 import Data.Hashable qualified
-import Data.Void (Void)
 import OpenSolid.API.AbsFunction (AbsFunction (AbsFunction))
 import OpenSolid.API.AbsFunction qualified as AbsFunction
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator

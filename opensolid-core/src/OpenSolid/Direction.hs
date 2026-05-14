@@ -8,7 +8,6 @@ module OpenSolid.Direction
   )
 where
 
-import Data.Void (Void)
 import GHC.TypeLits (Natural)
 import {-# SOURCE #-} OpenSolid.Direction2D qualified as Direction2D
 import {-# SOURCE #-} OpenSolid.Direction3D qualified as Direction3D

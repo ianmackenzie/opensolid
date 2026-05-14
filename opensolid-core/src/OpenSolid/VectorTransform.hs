@@ -7,7 +7,6 @@ module OpenSolid.VectorTransform
 where
 
 import Data.Coerce qualified
-import Data.Void (Void)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (VectorTransform2D, VectorTransform3D)
 import {-# SOURCE #-} OpenSolid.Transform qualified as Transform

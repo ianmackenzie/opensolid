@@ -20,7 +20,6 @@ module OpenSolid.Curve2D
   )
 where
 
-import Data.Void (Void)
 import {-# SOURCE #-} OpenSolid.Curve (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
