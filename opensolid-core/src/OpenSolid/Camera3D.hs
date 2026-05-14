@@ -65,7 +65,7 @@ data Camera3D space = Camera3D
   , projection :: Projection
   }
 
-instance FFI (Camera3D FFI.Space) where
+instance FFI (Camera3D Void) where
   representation = FFI.classRepresentation "Camera3D"
 
 -- | What kind of projection (perspective or orthographic) a camera should use.

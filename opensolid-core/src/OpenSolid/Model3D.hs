@@ -45,7 +45,7 @@ data Model3D space where
   BodyNode :: Tolerance Meters => List Attribute -> Body3D space -> Model3D space
   GroupNode :: List Attribute -> List (Model3D space) -> Model3D space
 
-instance FFI (Model3D FFI.Space) where
+instance FFI (Model3D Void) where
   representation = FFI.classRepresentation "Model3D"
 
 -- | An attribute that can be applied to a model.

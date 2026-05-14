@@ -1,6 +1,5 @@
 module OpenSolid.FFI
   ( FFI (representation)
-  , Space
   , Name
   , ClassName
   , name
@@ -56,8 +55,6 @@ import OpenSolid.Text qualified as Text
 
 class FFI a where
   representation :: Proxy a -> Representation a
-
-data Space deriving (Eq, Show)
 
 newtype Name = Name (NonEmpty Text) deriving (Eq, Ord, Show)
 

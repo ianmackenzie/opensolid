@@ -865,13 +865,13 @@ viewVector3D (V3D# vx# vy# vz#) = (# Q# vx#, Q# vy#, Q# vz# #)
 
 {-# COMPLETE Vector3D #-}
 
-instance FFI (Vector3D Unitless FFI.Space) where
+instance FFI (Vector3D Unitless Void) where
   representation = FFI.classRepresentation "UnitlessVector3D"
 
-instance FFI (Vector3D Meters FFI.Space) where
+instance FFI (Vector3D Meters Void) where
   representation = FFI.classRepresentation "Vector3D"
 
-instance FFI (Vector3D SquareMeters FFI.Space) where
+instance FFI (Vector3D SquareMeters Void) where
   representation = FFI.classRepresentation "AreaVector3D"
 
 instance HasUnits (Vector3D units space) units
@@ -1074,7 +1074,7 @@ newtype Direction3D space = Unit3D (Vector3D Unitless space)
 pattern Direction3D :: Number -> Number -> Number -> Direction3D space
 pattern Direction3D dR dF dU = Unit3D (Vector3D dR dF dU)
 
-instance FFI (Direction3D FFI.Space) where
+instance FFI (Direction3D Void) where
   representation = FFI.classRepresentation "Direction3D"
 
 instance ApproximateEquality (Direction3D space) () where
@@ -1136,7 +1136,7 @@ deriving instance Ord (PlaneOrientation3D space)
 
 deriving instance Show (PlaneOrientation3D space)
 
-instance FFI (PlaneOrientation3D FFI.Space) where
+instance FFI (PlaneOrientation3D Void) where
   representation = FFI.classRepresentation "PlaneOrientation3D"
 
 ----- Orientation3D -----
@@ -1154,7 +1154,7 @@ deriving instance Eq (Orientation3D space)
 
 deriving instance Show (Orientation3D space)
 
-instance FFI (Orientation3D FFI.Space) where
+instance FFI (Orientation3D Void) where
   representation = FFI.classRepresentation "Orientation3D"
 
 ----- Point3D -----
@@ -1179,7 +1179,7 @@ deriving instance Ord (Point3D space)
 
 deriving instance Show (Point3D space)
 
-instance FFI (Point3D FFI.Space) where
+instance FFI (Point3D Void) where
   representation = FFI.classRepresentation "Point3D"
 
 instance
@@ -1697,7 +1697,7 @@ pattern Bounds3D bx by bz <- PositionBounds3D (VectorBounds3D bx by bz)
 
 deriving instance Show (Bounds3D space)
 
-instance FFI (Bounds3D FFI.Space) where
+instance FFI (Bounds3D Void) where
   representation = FFI.classRepresentation "Bounds3D"
 
 instance
@@ -1805,7 +1805,7 @@ deriving instance Eq (Axis3D space)
 
 deriving instance Show (Axis3D space)
 
-instance FFI (Axis3D FFI.Space) where
+instance FFI (Axis3D Void) where
   representation = FFI.classRepresentation "Axis3D"
 
 instance Multiplication Sign (Axis3D space) (Axis3D space) where
@@ -1841,7 +1841,7 @@ deriving instance Ord (Plane3D space)
 
 deriving instance Show (Plane3D space)
 
-instance FFI (Plane3D FFI.Space) where
+instance FFI (Plane3D Void) where
   representation = FFI.classRepresentation "Plane3D"
 
 ----- Frame3D -----
@@ -1859,7 +1859,7 @@ deriving instance Eq (Frame3D global local)
 
 deriving instance Show (Frame3D global local)
 
-instance FFI (Frame3D FFI.Space FFI.Space) where
+instance FFI (Frame3D Void Void) where
   representation = FFI.classRepresentation "Frame3D"
 
 instance

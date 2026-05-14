@@ -235,10 +235,10 @@ instance FFI (VectorCurve2D Unitless) where
 instance FFI (VectorCurve2D Meters) where
   representation = FFI.classRepresentation "VectorCurve2D"
 
-instance FFI (VectorCurve3D Unitless FFI.Space) where
+instance FFI (VectorCurve3D Unitless Void) where
   representation = FFI.classRepresentation "UnitlessVectorCurve3D"
 
-instance FFI (VectorCurve3D Meters FFI.Space) where
+instance FFI (VectorCurve3D Meters Void) where
   representation = FFI.classRepresentation "VectorCurve3D"
 
 instance HasUnits (VectorCurve dimension units space) units

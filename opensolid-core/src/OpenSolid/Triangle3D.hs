@@ -18,7 +18,7 @@ data Triangle3D space
   = -- | Construct a triangle from its three vertices.
     Triangle3D (Point3D space) (Point3D space) (Point3D space)
 
-instance FFI (Triangle3D FFI.Space) where
+instance FFI (Triangle3D Void) where
   representation = FFI.classRepresentation "Triangle3D"
 
 fromVertices :: (Point3D space, Point3D space, Point3D space) -> Triangle3D space

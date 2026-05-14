@@ -105,7 +105,7 @@ instance Indexed (Body3D space) SurfaceId (Surface3D space) where
 instance Indexed (Body3D space) HalfEdge.Id (SurfaceCurve3D space) where
   body !! HalfEdge.Id{surfaceId, boundaryId, curveId} = body !! surfaceId !! boundaryId !! curveId
 
-instance FFI (Body3D FFI.Space) where
+instance FFI (Body3D Void) where
   representation = FFI.classRepresentation "Body3D"
 
 ----- CONSTRUCTION -----
