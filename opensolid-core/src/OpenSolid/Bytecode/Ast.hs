@@ -41,10 +41,14 @@ module OpenSolid.Bytecode.Ast
   , desingularized3D
   , compileCurve1D
   , compileCurve2D
+  , compileVectorCurve2D
   , compileCurve3D
+  , compileVectorCurve3D
   , compileSurface1D
   , compileSurface2D
+  , compileVectorSurface2D
   , compileSurface3D
+  , compileVectorSurface3D
   , debugCurve1D
   , debugCurve2D
   , debugCurve3D
@@ -380,7 +384,7 @@ instance Composition (Variable1D Number) (Variable1D input) (Ast1D input) where
 instance Composition (Ast2D Number) (Ast1D input) (Ast2D input) where
   Constant2D outer . _ = Constant2D outer
   Variable2D outer . Variable1D inner = outer . inner
-  outer . Constant1D inner = Constant2D (evaluateCurve2D outer inner)
+  outer . Constant1D inner = Constant2D (evaluateVectorCurve2D outer inner)
 
 instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
   input . CurveParameter = Variable2D input
@@ -398,7 +402,7 @@ instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
   Quotient2D lhs rhs . input = lhs . input / rhs . input
   QuotientConstantVariable2D lhs rhs . input = lhs / rhs . input
   BezierCurve2D controlPoints param . input = case param . input of
-    Constant1D paramVal -> Constant2D (evaluateCurve2D (bezierCurve2D controlPoints) paramVal)
+    Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (bezierCurve2D controlPoints) paramVal)
     Variable1D paramVar -> Variable2D (BezierCurve2D controlPoints paramVar)
   TransformVector2D transform vector . input =
     transformVector2D transform (vector . input)
@@ -414,7 +418,7 @@ instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
 instance Composition (Ast3D Number) (Ast1D input) (Ast3D input) where
   Constant3D outer . _ = Constant3D outer
   Variable3D outer . Variable1D inner = outer . inner
-  outer . Constant1D inner = Constant3D (evaluateCurve3D outer inner)
+  outer . Constant1D inner = Constant3D (evaluateVectorCurve3D outer inner)
 
 instance Composition (Variable3D Number) (Variable1D input) (Ast3D input) where
   input . CurveParameter = Variable3D input
@@ -429,7 +433,7 @@ instance Composition (Variable3D Number) (Variable1D input) (Ast3D input) where
   Quotient3D lhs rhs . input = lhs . input / rhs . input
   QuotientConstantVariable3D lhs rhs . input = Constant3D lhs / rhs . input
   BezierCurve3D controlPoints param . input = case param . input of
-    Constant1D paramVal -> Constant3D (evaluateCurve3D (bezierCurve3D controlPoints) paramVal)
+    Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (bezierCurve3D controlPoints) paramVal)
     Variable1D paramVar -> Variable3D (BezierCurve3D controlPoints paramVar)
   Cross3D lhs rhs . input = lhs . input `cross` rhs . input
   CrossVariableConstant3D lhs rhs . input = lhs . input `cross` rhs
@@ -548,7 +552,7 @@ instance Composition (Variable1D UvPoint) (Variable2D input) (Ast1D input) where
 instance Composition (Ast2D UvPoint) (Ast2D input) (Ast2D input) where
   Constant2D outer . _ = Constant2D outer
   Variable2D outer . Variable2D inner = outer . inner
-  outer . Constant2D parameter = Constant2D (evaluateSurface2D outer (uvPoint parameter))
+  outer . Constant2D parameter = Constant2D (evaluateVectorSurface2D outer (uvPoint parameter))
 
 instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
   input . SurfaceParameters = Variable2D input
@@ -567,7 +571,7 @@ instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
   Quotient2D lhs rhs . input = lhs . input / rhs . input
   QuotientConstantVariable2D lhs rhs . input = lhs / rhs . input
   BezierCurve2D controlPoints param . input = case param . input of
-    Constant1D paramVal -> Constant2D (evaluateCurve2D (bezierCurve2D controlPoints) paramVal)
+    Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (bezierCurve2D controlPoints) paramVal)
     Variable1D paramVar -> Variable2D (BezierCurve2D controlPoints paramVar)
   TransformVector2D transform vector . input =
     transformVector2D transform (vector . input)
@@ -583,7 +587,7 @@ instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
 instance Composition (Ast3D UvPoint) (Ast2D input) (Ast3D input) where
   Constant3D outer . _ = Constant3D outer
   Variable3D outer . Variable2D inner = outer . inner
-  outer . Constant2D parameter = Constant3D (evaluateSurface3D outer (uvPoint parameter))
+  outer . Constant2D parameter = Constant3D (evaluateVectorSurface3D outer (uvPoint parameter))
 
 instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
   input . SurfaceParameters = Variable3D input
@@ -598,7 +602,7 @@ instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
   Quotient3D lhs rhs . input = lhs . input / rhs . input
   QuotientConstantVariable3D lhs rhs . input = lhs / rhs . input
   BezierCurve3D controlPoints param . input = case param . input of
-    Constant1D paramVal -> Constant3D (evaluateCurve3D (bezierCurve3D controlPoints) paramVal)
+    Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (bezierCurve3D controlPoints) paramVal)
     Variable1D paramVar -> Variable3D (BezierCurve3D controlPoints paramVar)
   Cross3D lhs rhs . input = lhs . input `cross` rhs . input
   CrossVariableConstant3D lhs rhs . input = lhs . input `cross` rhs
@@ -1697,43 +1701,65 @@ compileCurve1D :: Ast1D Number -> Compiled Number Number
 compileCurve1D (Constant1D val) = Evaluate.Constant val
 compileCurve1D (Variable1D var) = Evaluate.Bytecode (Compile.curve1D (compileVariable1D var))
 
-compileCurve2D :: Ast2D Number -> Compiled Number (Vector2D Unitless)
-compileCurve2D (Constant2D val) = Evaluate.Constant val
+compileCurve2D :: Ast2D Number -> Compiled Number (Point2D Unitless)
+compileCurve2D (Constant2D val) = Evaluate.Constant (Position2D val)
 compileCurve2D (Variable2D var) = Evaluate.Bytecode (Compile.curve2D (compileVariable2D var))
 
-compileCurve3D :: Ast3D Number -> Compiled Number (Vector3D Unitless Void)
-compileCurve3D (Constant3D val) = Evaluate.Constant val
+compileVectorCurve2D :: Ast2D Number -> Compiled Number (Vector2D Unitless)
+compileVectorCurve2D (Constant2D val) = Evaluate.Constant val
+compileVectorCurve2D (Variable2D var) = Evaluate.Bytecode (Compile.curve2D (compileVariable2D var))
+
+compileCurve3D :: Ast3D Number -> Compiled Number (Point3D Void)
+compileCurve3D (Constant3D val) = Evaluate.Constant (Position3D (Vector3D.coerce val))
 compileCurve3D (Variable3D var) = Evaluate.Bytecode (Compile.curve3D (compileVariable3D var))
+
+compileVectorCurve3D :: Ast3D Number -> Compiled Number (Vector3D Unitless Void)
+compileVectorCurve3D (Constant3D val) = Evaluate.Constant val
+compileVectorCurve3D (Variable3D var) = Evaluate.Bytecode (Compile.curve3D (compileVariable3D var))
 
 compileSurface1D :: Ast1D UvPoint -> Compiled UvPoint Number
 compileSurface1D (Constant1D val) = Evaluate.Constant val
 compileSurface1D (Variable1D var) = Evaluate.Bytecode (Compile.surface1D (compileVariable1D var))
 
-compileSurface2D :: Ast2D UvPoint -> Compiled UvPoint (Vector2D Unitless)
-compileSurface2D (Constant2D val) = Evaluate.Constant val
-compileSurface2D (Variable2D var) = Evaluate.Bytecode (Compile.surface2D (compileVariable2D var))
+compileSurface2D :: Ast2D UvPoint -> Compiled UvPoint (Point2D Unitless)
+compileSurface2D (Constant2D val) = Evaluate.Constant (Position2D val)
+compileSurface2D (Variable2D var) =
+  Evaluate.Bytecode (Compile.surface2D (compileVariable2D var))
 
-compileSurface3D :: Ast3D UvPoint -> Compiled UvPoint (Vector3D Unitless Void)
-compileSurface3D (Constant3D val) = Evaluate.Constant val
-compileSurface3D (Variable3D var) = Evaluate.Bytecode (Compile.surface3D (compileVariable3D var))
+compileVectorSurface2D :: Ast2D UvPoint -> Compiled UvPoint (Vector2D Unitless)
+compileVectorSurface2D (Constant2D val) = Evaluate.Constant val
+compileVectorSurface2D (Variable2D var) =
+  Evaluate.Bytecode (Compile.surface2D (compileVariable2D var))
+
+compileSurface3D :: Ast3D UvPoint -> Compiled UvPoint (Point3D Void)
+compileSurface3D (Constant3D val) = Evaluate.Constant (Position3D (Vector3D.coerce val))
+compileSurface3D (Variable3D var) =
+  Evaluate.Bytecode (Compile.surface3D (compileVariable3D var))
+
+compileVectorSurface3D :: Ast3D UvPoint -> Compiled UvPoint (Vector3D Unitless Void)
+compileVectorSurface3D (Constant3D val) = Evaluate.Constant val
+compileVectorSurface3D (Variable3D var) =
+  Evaluate.Bytecode (Compile.surface3D (compileVariable3D var))
 
 evaluateCurve1D :: Ast1D Number -> Number -> Number
-evaluateCurve1D ast input = Evaluate.curve1dValue (compileCurve1D ast) input
+evaluateCurve1D ast input = Evaluate.curveValue1D (compileCurve1D ast) input
 
-evaluateCurve2D :: Ast2D Number -> Number -> Vector2D Unitless
-evaluateCurve2D ast input = Evaluate.curve2dValue (compileCurve2D ast) input
+evaluateVectorCurve2D :: Ast2D Number -> Number -> Vector2D Unitless
+evaluateVectorCurve2D ast input = Evaluate.vectorCurveValue2D (compileVectorCurve2D ast) input
 
-evaluateCurve3D :: Ast3D Number -> Number -> Vector3D Unitless Void
-evaluateCurve3D ast input = Evaluate.curve3dValue (compileCurve3D ast) input
+evaluateVectorCurve3D :: Ast3D Number -> Number -> Vector3D Unitless Void
+evaluateVectorCurve3D ast input = Evaluate.vectorCurveValue3D (compileVectorCurve3D ast) input
 
 evaluateSurface1D :: Ast1D UvPoint -> UvPoint -> Number
-evaluateSurface1D ast input = Evaluate.surface1dValue (compileSurface1D ast) input
+evaluateSurface1D ast input = Evaluate.surfaceValue1D (compileSurface1D ast) input
 
-evaluateSurface2D :: Ast2D UvPoint -> UvPoint -> Vector2D Unitless
-evaluateSurface2D ast input = Evaluate.surface2dValue (compileSurface2D ast) input
+evaluateVectorSurface2D :: Ast2D UvPoint -> UvPoint -> Vector2D Unitless
+evaluateVectorSurface2D ast input =
+  Evaluate.vectorSurfaceValue2D (compileVectorSurface2D ast) input
 
-evaluateSurface3D :: Ast3D UvPoint -> UvPoint -> Vector3D Unitless Void
-evaluateSurface3D ast input = Evaluate.surface3dValue (compileSurface3D ast) input
+evaluateVectorSurface3D :: Ast3D UvPoint -> UvPoint -> Vector3D Unitless Void
+evaluateVectorSurface3D ast input =
+  Evaluate.vectorSurfaceValue3D (compileVectorSurface3D ast) input
 
 debugCurve1D :: Ast1D Number -> Text
 debugCurve1D (Constant1D value) = "Constant: " <> Text.number value

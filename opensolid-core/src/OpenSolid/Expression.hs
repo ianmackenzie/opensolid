@@ -60,6 +60,7 @@ where
 import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Bounds2D (Bounds2D)
+import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bytecode.Ast (Ast1D, Ast2D, Ast3D)
 import OpenSolid.Bytecode.Ast qualified as Ast
 import OpenSolid.Bytecode.Evaluate (Compiled)
@@ -74,9 +75,7 @@ import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Bounds2D (PositionBounds2D)
-  , Bounds3D (PositionBounds3D)
-  , Point2D (Position2D)
+  ( Point2D (Position2D)
   , Point3D (Position3D)
   , Vector3D
   , VectorBounds3D
@@ -109,11 +108,11 @@ data Expression input output where
     Expression UvPoint (Quantity units)
   Curve2D ::
     Ast2D Number ->
-    ~(Compiled Number (Vector2D Unitless)) ->
+    ~(Compiled Number (Point2D Unitless)) ->
     Expression Number (Point2D units)
   Surface2D ::
     Ast2D UvPoint ->
-    ~(Compiled UvPoint (Vector2D Unitless)) ->
+    ~(Compiled UvPoint (Point2D Unitless)) ->
     Expression UvPoint (Point2D units)
   VectorCurve2D ::
     Ast2D Number ->
@@ -125,11 +124,11 @@ data Expression input output where
     Expression UvPoint (Vector2D units)
   Curve3D ::
     Ast3D Number ->
-    ~(Compiled Number (Vector3D Unitless Void)) ->
+    ~(Compiled Number (Point3D Void)) ->
     Expression Number (Point3D space)
   Surface3D ::
     Ast3D UvPoint ->
-    ~(Compiled UvPoint (Vector3D Unitless Void)) ->
+    ~(Compiled UvPoint (Point3D Void)) ->
     Expression UvPoint (Point3D space)
   VectorCurve3D ::
     Ast3D Number ->
@@ -153,10 +152,10 @@ surface2D :: Ast2D UvPoint -> Expression UvPoint (Point2D units)
 surface2D ast = Surface2D ast (Ast.compileSurface2D ast)
 
 vectorCurve2D :: Ast2D Number -> Expression Number (Vector2D units)
-vectorCurve2D ast = VectorCurve2D ast (Ast.compileCurve2D ast)
+vectorCurve2D ast = VectorCurve2D ast (Ast.compileVectorCurve2D ast)
 
 vectorSurface2D :: Ast2D UvPoint -> Expression UvPoint (Vector2D units)
-vectorSurface2D ast = VectorSurface2D ast (Ast.compileSurface2D ast)
+vectorSurface2D ast = VectorSurface2D ast (Ast.compileVectorSurface2D ast)
 
 curve3D :: Ast3D Number -> Expression Number (Point3D space)
 curve3D ast = Curve3D ast (Ast.compileCurve3D ast)
@@ -165,10 +164,10 @@ surface3D :: Ast3D UvPoint -> Expression UvPoint (Point3D space)
 surface3D ast = Surface3D ast (Ast.compileSurface3D ast)
 
 vectorCurve3D :: Ast3D Number -> Expression Number (Vector3D units space)
-vectorCurve3D ast = VectorCurve3D ast (Ast.compileCurve3D ast)
+vectorCurve3D ast = VectorCurve3D ast (Ast.compileVectorCurve3D ast)
 
 vectorSurface3D :: Ast3D UvPoint -> Expression UvPoint (Vector3D units space)
-vectorSurface3D ast = VectorSurface3D ast (Ast.compileSurface3D ast)
+vectorSurface3D ast = VectorSurface3D ast (Ast.compileVectorSurface3D ast)
 
 debug :: Expression input output -> Text
 debug expression = case expression of
@@ -1699,8 +1698,8 @@ instance
     (Interval Unitless)
     (Interval units)
   where
-  value (Curve1D _ compiled) tValue = Evaluate.curve1dValue compiled tValue
-  range (Curve1D _ compiled) tRange = Evaluate.curve1dRange compiled tRange
+  value (Curve1D _ compiled) tValue = Evaluate.curveValue1D compiled tValue
+  range (Curve1D _ compiled) tRange = Evaluate.curveRange1D compiled tRange
 
 instance
   Evaluation
@@ -1709,8 +1708,8 @@ instance
     UvBounds
     (Interval units)
   where
-  value (Surface1D _ compiled) uvPoint = Evaluate.surface1dValue compiled uvPoint
-  range (Surface1D _ compiled) uvRange = Evaluate.surface1dRange compiled uvRange
+  value (Surface1D _ compiled) uvPoint = Evaluate.surfaceValue1D compiled uvPoint
+  range (Surface1D _ compiled) uvRange = Evaluate.surfaceRange1D compiled uvRange
 
 instance
   Evaluation
@@ -1719,8 +1718,8 @@ instance
     (Interval Unitless)
     (Bounds2D units)
   where
-  value (Curve2D _ compiled) tValue = Position2D (Evaluate.curve2dValue compiled tValue)
-  range (Curve2D _ compiled) tRange = PositionBounds2D (Evaluate.curve2dRange compiled tRange)
+  value (Curve2D _ compiled) tValue = Evaluate.curveValue2D compiled tValue
+  range (Curve2D _ compiled) tRange = Evaluate.curveRange2D compiled tRange
 
 instance
   Evaluation
@@ -1729,8 +1728,8 @@ instance
     UvBounds
     (Bounds2D units)
   where
-  value (Surface2D _ compiled) uvPoint = Position2D (Evaluate.surface2dValue compiled uvPoint)
-  range (Surface2D _ compiled) uvRange = PositionBounds2D (Evaluate.surface2dRange compiled uvRange)
+  value (Surface2D _ compiled) uvPoint = Evaluate.surfaceValue2D compiled uvPoint
+  range (Surface2D _ compiled) uvRange = Evaluate.surfaceRange2D compiled uvRange
 
 instance
   Evaluation
@@ -1739,8 +1738,8 @@ instance
     (Interval Unitless)
     (VectorBounds2D units)
   where
-  value (VectorCurve2D _ compiled) tValue = Evaluate.curve2dValue compiled tValue
-  range (VectorCurve2D _ compiled) tRange = Evaluate.curve2dRange compiled tRange
+  value (VectorCurve2D _ compiled) tValue = Evaluate.vectorCurveValue2D compiled tValue
+  range (VectorCurve2D _ compiled) tRange = Evaluate.vectorCurveRange2D compiled tRange
 
 instance
   Evaluation
@@ -1749,8 +1748,8 @@ instance
     UvBounds
     (VectorBounds2D units)
   where
-  value (VectorSurface2D _ compiled) uvPoint = Evaluate.surface2dValue compiled uvPoint
-  range (VectorSurface2D _ compiled) uvRange = Evaluate.surface2dRange compiled uvRange
+  value (VectorSurface2D _ compiled) uvPoint = Evaluate.vectorSurfaceValue2D compiled uvPoint
+  range (VectorSurface2D _ compiled) uvRange = Evaluate.vectorSurfaceRange2D compiled uvRange
 
 instance
   Evaluation
@@ -1759,8 +1758,8 @@ instance
     (Interval Unitless)
     (Bounds3D space)
   where
-  value (Curve3D _ compiled) tValue = Position3D (Evaluate.curve3dValue compiled tValue)
-  range (Curve3D _ compiled) tRange = PositionBounds3D (Evaluate.curve3dRange compiled tRange)
+  value (Curve3D _ compiled) tValue = Evaluate.curveValue3D compiled tValue
+  range (Curve3D _ compiled) tRange = Evaluate.curveRange3D compiled tRange
 
 instance
   Evaluation
@@ -1769,8 +1768,8 @@ instance
     UvBounds
     (Bounds3D space)
   where
-  value (Surface3D _ compiled) uvPoint = Position3D (Evaluate.surface3dValue compiled uvPoint)
-  range (Surface3D _ compiled) uvRange = PositionBounds3D (Evaluate.surface3dRange compiled uvRange)
+  value (Surface3D _ compiled) uvPoint = Evaluate.surfaceValue3D compiled uvPoint
+  range (Surface3D _ compiled) uvRange = Evaluate.surfaceRange3D compiled uvRange
 
 instance
   Evaluation
@@ -1779,8 +1778,8 @@ instance
     (Interval Unitless)
     (VectorBounds3D units space)
   where
-  value (VectorCurve3D _ compiled) tValue = Evaluate.curve3dValue compiled tValue
-  range (VectorCurve3D _ compiled) tRange = Evaluate.curve3dRange compiled tRange
+  value (VectorCurve3D _ compiled) tValue = Evaluate.vectorCurveValue3D compiled tValue
+  range (VectorCurve3D _ compiled) tRange = Evaluate.vectorCurveRange3D compiled tRange
 
 instance
   Evaluation
@@ -1789,8 +1788,8 @@ instance
     UvBounds
     (VectorBounds3D units space)
   where
-  value (VectorSurface3D _ compiled) uvPoint = Evaluate.surface3dValue compiled uvPoint
-  range (VectorSurface3D _ compiled) uvRange = Evaluate.surface3dRange compiled uvRange
+  value (VectorSurface3D _ compiled) uvPoint = Evaluate.vectorSurfaceValue3D compiled uvPoint
+  range (VectorSurface3D _ compiled) uvRange = Evaluate.vectorSurfaceRange3D compiled uvRange
 
 solveMonotonicSurfaceU ::
   Tolerance units =>
