@@ -7,6 +7,8 @@ module OpenSolid.Transform3D
   , vectorTransform
   , identity
   , coerce
+  , erase
+  , unerase
   , translateBy
   , translateIn
   , translateAlong
@@ -75,6 +77,14 @@ identity = Transform3D World3D.originPoint VectorTransform3D.identity
 
 coerce :: Transform3D tag1 space1 -> Transform3D tag2 space2
 coerce (Transform3D p0 vt) = Transform3D (Point3D.coerce p0) (VectorTransform3D.coerce vt)
+
+{-# INLINE erase #-}
+erase :: Transform3D tag space -> Affine Void
+erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: Affine Void -> Transform3D tag space
+unerase = coerce
 
 withFixedPoint :: Point3D space -> VectorTransform3D tag space -> Transform3D tag space
 withFixedPoint fixedPoint givenVectorTransform = do

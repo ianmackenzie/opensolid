@@ -7,6 +7,8 @@ module OpenSolid.Transform2D
   , vectorTransform
   , identity
   , coerce
+  , erase
+  , unerase
   , translateBy
   , translateIn
   , translateAlong
@@ -72,6 +74,14 @@ identity = Transform2D Point2D.origin VectorTransform2D.identity
 
 coerce :: Transform2D tag1 units1 -> Transform2D tag2 units2
 coerce (Transform2D p0 vt) = Transform2D (Point2D.coerce p0) (VectorTransform2D.coerce vt)
+
+{-# INLINE erase #-}
+erase :: Transform2D tag units -> Affine Unitless
+erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: Affine Unitless -> Transform2D tag units
+unerase = coerce
 
 withFixedPoint :: Point2D units -> VectorTransform2D tag -> Transform2D tag units
 withFixedPoint fixedPoint givenVectorTransform = do

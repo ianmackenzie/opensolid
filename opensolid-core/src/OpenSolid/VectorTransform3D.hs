@@ -6,6 +6,8 @@ module OpenSolid.VectorTransform3D
   , Affine
   , identity
   , coerce
+  , erase
+  , unerase
   , scaleBy
   , scaleIn
   , scaleAlong
@@ -75,8 +77,17 @@ unitZ = Vector3D 0.0 0.0 1.0
 identity :: Rigid space
 identity = VectorTransform3D unitX unitY unitZ
 
+{-# INLINE coerce #-}
 coerce :: VectorTransform3D tag1 space1 -> VectorTransform3D tag2 space2
 coerce = Data.Coerce.coerce
+
+{-# INLINE erase #-}
+erase :: VectorTransform3D tag space -> Affine Void
+erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: Affine Void -> VectorTransform3D tag space
+unerase = coerce
 
 scaleBy :: Number -> Uniform space
 scaleBy givenScale = do

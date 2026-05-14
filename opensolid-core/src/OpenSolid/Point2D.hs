@@ -2,6 +2,8 @@ module OpenSolid.Point2D
   ( Point2D (Point2D)
   , origin
   , coerce
+  , erase
+  , unerase
   , x
   , y
   , along
@@ -67,6 +69,14 @@ origin = Position2D Vector2D.zero
 {-# INLINE coerce #-}
 coerce :: Point2D units1 -> Point2D units2
 coerce (Position2D p) = Position2D (Vector2D.coerce p)
+
+{-# INLINE erase #-}
+erase :: Point2D units -> Point2D Unitless
+erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: Point2D Unitless -> Point2D units
+unerase = coerce
 
 -- | Construct a point along the X axis, with the given X coordinate.
 x :: Quantity units -> Point2D units

@@ -5,6 +5,8 @@ module OpenSolid.Plane3D
   , fromYAxis
   , fromNormalAxis
   , coerce
+  , erase
+  , unerase
   , originPoint
   , orientation
   , normalDirection
@@ -68,6 +70,12 @@ fromNormalAxis (Axis3D p0 n) = fromPointAndNormal p0 n
 
 coerce :: Plane3D space1 -> Plane3D space2
 coerce (Plane3D p o) = Plane3D (Point3D.coerce p) (PlaneOrientation3D.coerce o)
+
+erase :: Plane3D space -> Plane3D Void
+erase = coerce
+
+unerase :: Plane3D Void -> Plane3D space
+unerase = coerce
 
 {-| Get the origin point of a plane.
 

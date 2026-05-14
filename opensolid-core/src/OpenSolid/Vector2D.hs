@@ -2,6 +2,8 @@ module OpenSolid.Vector2D
   ( Vector2D (Vector2D, V2D#)
   , zero
   , coerce
+  , erase
+  , unerase
   , unit
   , x
   , y
@@ -80,6 +82,14 @@ zero = Vector.zero
 {-# INLINE coerce #-}
 coerce :: Vector2D units1 -> Vector2D units2
 coerce (Vector2D vx vy) = Vector2D (Quantity.coerce vx) (Quantity.coerce vy)
+
+{-# INLINE erase #-}
+erase :: Vector2D units -> Vector2D Unitless
+erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: Vector2D Unitless -> Vector2D units
+unerase = coerce
 
 -- | Construct a unit vector in the given direction.
 {-# INLINE unit #-}

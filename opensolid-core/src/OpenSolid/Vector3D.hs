@@ -4,6 +4,8 @@ module OpenSolid.Vector3D
   ( Vector3D
   , zero
   , coerce
+  , erase
+  , unerase
   , unit
   , on
   , xyz
@@ -74,6 +76,14 @@ zero = Vector3D Quantity.zero Quantity.zero Quantity.zero
 {-# INLINE coerce #-}
 coerce :: Vector3D units1 space1 -> Vector3D units2 space2
 coerce (Vector3D vx vy vz) = Vector3D (Quantity.coerce vx) (Quantity.coerce vy) (Quantity.coerce vz)
+
+{-# INLINE erase #-}
+erase :: Vector3D units space -> Vector3D Unitless Void
+erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: Vector3D Unitless Void -> Vector3D units space
+unerase = coerce
 
 -- | Construct a unit vector in the given direction.
 {-# INLINE unit #-}

@@ -10,6 +10,8 @@ module OpenSolid.Point3D
   , on
   , along
   , coerce
+  , erase
+  , unerase
   , xyz
   , zUp
   , yUp
@@ -109,6 +111,14 @@ on (Plane3D originPoint (PlaneOrientation3D i j)) (Point2D pX pY) = do
 {-# INLINE coerce #-}
 coerce :: Point3D space1 -> Point3D space2
 coerce (Position3D p) = Position3D (Vector3D.coerce p)
+
+{-# INLINE erase #-}
+erase :: Point3D space -> Point3D Void
+erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: Point3D Void -> Point3D space
+unerase = coerce
 
 -- | Construct a point from its XYZ coordinates, given the coordinate convention to use.
 {-# INLINE xyz #-}

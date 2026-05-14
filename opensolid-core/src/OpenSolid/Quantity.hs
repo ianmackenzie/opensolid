@@ -5,6 +5,7 @@ module OpenSolid.Quantity
   , infinity
   , coerce
   , erase
+  , unerase
   , sign
   , isNaN
   , isInfinite
@@ -65,6 +66,10 @@ coerce = Data.Coerce.coerce
 {-# INLINE erase #-}
 erase :: Quantity units -> Number
 erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: Number -> Quantity units
+unerase = coerce
 
 sign :: Quantity units -> Sign
 sign value = if value >= zero then Positive else Negative

@@ -6,6 +6,8 @@ module OpenSolid.VectorTransform2D
   , Affine
   , identity
   , coerce
+  , erase
+  , unerase
   , scaleBy
   , scaleIn
   , scaleAlong
@@ -68,8 +70,17 @@ unitY = Vector2D 0.0 1.0
 identity :: Rigid
 identity = VectorTransform2D unitX unitY
 
+{-# INLINE coerce #-}
 coerce :: VectorTransform2D tag1 -> VectorTransform2D tag2
 coerce = Data.Coerce.coerce
+
+{-# INLINE erase #-}
+erase :: VectorTransform2D tag -> Affine
+erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: Affine -> VectorTransform2D tag
+unerase = coerce
 
 scaleBy :: Number -> Uniform
 scaleBy givenScale = VectorTransform2D (Vector2D givenScale 0.0) (Vector2D 0.0 givenScale)
