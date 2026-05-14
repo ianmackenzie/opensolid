@@ -275,7 +275,7 @@ deriving instance Ord (Variable3D input)
 deriving instance Show (Variable3D input)
 
 uvPoint :: Vector2D Unitless -> UvPoint
-uvPoint position = Point2D.coerce (Position2D position)
+uvPoint position = Position2D position
 
 instance Composition (Ast1D Number) (Ast1D input) (Ast1D input) where
   Constant1D outer . _ = Constant1D outer
@@ -610,13 +610,13 @@ instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
     desingularized3D (parameter . input) (left . input) (middle . input) (right . input)
 
 constant1D :: Quantity units -> Ast1D input
-constant1D value = Constant1D (Quantity.coerce value)
+constant1D value = Constant1D (Quantity.erase value)
 
 constant2D :: Vector2D units -> Ast2D input
-constant2D = Constant2D . Vector2D.coerce
+constant2D = Constant2D . Vector2D.erase
 
 constant3D :: Vector3D units space -> Ast3D input
-constant3D = Constant3D . Vector3D.coerce
+constant3D = Constant3D . Vector3D.erase
 
 curveParameter :: Ast1D Number
 curveParameter = Variable1D CurveParameter
@@ -1086,7 +1086,7 @@ magnitude3D ast = case ast of
 
 transformVector2D :: VectorTransform2D tag -> Ast2D input -> Ast2D input
 transformVector2D transform ast = do
-  let erasedTransform = VectorTransform2D.coerce transform
+  let erasedTransform = VectorTransform2D.erase transform
   case ast of
     Constant2D val -> Constant2D (Vector2D.transformBy erasedTransform val)
     Variable2D (TransformVector2D existing var) ->
@@ -1099,7 +1099,7 @@ transformVector2D transform ast = do
 
 transformVector3D :: VectorTransform3D tag space -> Ast3D input -> Ast3D input
 transformVector3D transform ast = do
-  let erasedTransform = VectorTransform3D.coerce transform
+  let erasedTransform = VectorTransform3D.erase transform
   case ast of
     Constant3D val -> Constant3D (Vector3D.transformBy erasedTransform val)
     Variable3D (TransformVector3D existing var) ->
@@ -1112,7 +1112,7 @@ transformVector3D transform ast = do
 
 transformPoint2D :: Transform2D tag units -> Ast2D input -> Ast2D input
 transformPoint2D transform ast = do
-  let erasedTransform = Transform2D.coerce transform
+  let erasedTransform = Transform2D.erase transform
   case ast of
     Constant2D val -> do
       let Position2D transformed = Point2D.transformBy erasedTransform (Position2D val)
@@ -1130,47 +1130,47 @@ transformPoint2D transform ast = do
 
 transformPoint3D :: Transform3D tag space -> Ast3D input -> Ast3D input
 transformPoint3D transform ast = do
-  let coercedTransform :: Transform3D.Affine Void = Transform3D.coerce transform
+  let erasedTransform = Transform3D.erase transform
   case ast of
     Constant3D val -> do
-      let point = Position3D (Vector3D.coerce val)
-      let Position3D transformed = Point3D.transformBy coercedTransform point
-      Constant3D (Vector3D.coerce transformed)
+      let point = Position3D (Vector3D.unerase val)
+      let Position3D transformed = Point3D.transformBy erasedTransform point
+      Constant3D (Vector3D.erase transformed)
     Variable3D (TransformPoint3D existing var) ->
-      Variable3D (TransformPoint3D (coercedTransform . existing) var)
+      Variable3D (TransformPoint3D (erasedTransform . existing) var)
     Variable3D (BezierCurve3D controlPoints param) -> do
       let transformedControlPoints =
             controlPoints
               & Data.Coerce.coerce -- convert list of Vector3D to list of Point3D
-              & NonEmpty.map (Point3D.transformBy coercedTransform)
+              & NonEmpty.map (Point3D.transformBy erasedTransform)
               & Data.Coerce.coerce -- convert list of Point3D back to list of Vector3D
       Variable3D (BezierCurve3D transformedControlPoints param)
-    Variable3D var -> Variable3D (TransformPoint3D coercedTransform var)
+    Variable3D var -> Variable3D (TransformPoint3D erasedTransform var)
 
 placementTransform2D :: Frame2D units -> Transform2D.Affine Unitless
 placementTransform2D frame =
   Transform2D
-    (Point2D.coerce (Frame2D.originPoint frame))
+    (Point2D.erase (Frame2D.originPoint frame))
     (vectorPlacementTransform2D frame)
 
 vectorPlacementTransform2D :: Frame2D units -> VectorTransform2D.Affine
 vectorPlacementTransform2D frame =
   VectorTransform2D
-    (Vector2D.coerce (Vector2D.unit (Frame2D.xDirection frame)))
-    (Vector2D.coerce (Vector2D.unit (Frame2D.yDirection frame)))
+    (Vector2D.unit (Frame2D.xDirection frame))
+    (Vector2D.unit (Frame2D.yDirection frame))
 
 placementTransform3D :: Frame3D global local -> Transform3D.Affine Void
 placementTransform3D frame =
   Transform3D
-    (Point3D.coerce (Frame3D.originPoint frame))
+    (Point3D.erase (Frame3D.originPoint frame))
     (vectorPlacementTransform3D frame)
 
 vectorPlacementTransform3D :: Frame3D global local -> VectorTransform3D.Affine Void
 vectorPlacementTransform3D frame =
   VectorTransform3D
-    (Vector3D.coerce (Vector3D.unit (Frame3D.rightwardDirection frame)))
-    (Vector3D.coerce (Vector3D.unit (Frame3D.forwardDirection frame)))
-    (Vector3D.coerce (Vector3D.unit (Frame3D.upwardDirection frame)))
+    (Vector3D.erase (Vector3D.unit (Frame3D.rightwardDirection frame)))
+    (Vector3D.erase (Vector3D.unit (Frame3D.forwardDirection frame)))
+    (Vector3D.erase (Vector3D.unit (Frame3D.upwardDirection frame)))
 
 placeVector2DIn :: Frame2D frameUnits -> Ast2D input -> Ast2D input
 placeVector2DIn frame ast = transformVector2D (vectorPlacementTransform2D frame) ast
@@ -1186,29 +1186,29 @@ placePoint3dIn frame ast = transformPoint3D (placementTransform3D frame) ast
 
 placeVector2DOn :: Plane3D space -> Ast2D input -> Ast3D input
 placeVector2DOn plane ast = case ast of
-  Constant2D val -> Constant3D (Vector2D.placeOn (Plane3D.coerce plane) val)
-  Variable2D var -> Variable3D (PlaceVector2D (Plane3D.coerce plane) var)
+  Constant2D val -> Constant3D (Vector2D.placeOn (Plane3D.erase plane) val)
+  Variable2D var -> Variable3D (PlaceVector2D (Plane3D.erase plane) var)
 
 placePoint2DOn :: Plane3D space -> Ast2D input -> Ast3D input
 placePoint2DOn plane ast = case ast of
   Constant2D val -> do
-    let point = Position2D (Vector2D.coerce val)
-    let Position3D placed = Point3D.on (Plane3D.coerce plane) point
-    Constant3D (Vector3D.coerce placed)
-  Variable2D var -> Variable3D (PlacePoint2D (Plane3D.coerce plane) var)
+    let point = Position2D (Vector2D.unerase val)
+    let Position3D placed = Point3D.on (Plane3D.erase plane) point
+    Constant3D (Vector3D.erase placed)
+  Variable2D var -> Variable3D (PlacePoint2D (Plane3D.erase plane) var)
 
 projectVector3dInto :: Plane3D space -> Ast3D input -> Ast2D input
 projectVector3dInto plane ast = case ast of
-  Constant3D val -> Constant2D (Vector3D.projectInto (Plane3D.coerce plane) val)
-  Variable3D var -> Variable2D (ProjectVector3D (Plane3D.coerce plane) var)
+  Constant3D val -> Constant2D (Vector3D.projectInto (Plane3D.erase plane) val)
+  Variable3D var -> Variable2D (ProjectVector3D (Plane3D.erase plane) var)
 
 projectPoint3dInto :: Plane3D space -> Ast3D input -> Ast2D input
 projectPoint3dInto plane ast = case ast of
   Constant3D val -> do
-    let point = Position3D (Vector3D.coerce val)
-    let Position2D projected = Point3D.projectInto (Plane3D.coerce plane) point
-    Constant2D (Vector2D.coerce projected)
-  Variable3D var -> Variable2D (ProjectPoint3D (Plane3D.coerce plane) var)
+    let point = Position3D (Vector3D.unerase val)
+    let Position2D projected = Point3D.projectInto (Plane3D.erase plane) point
+    Constant2D (Vector2D.erase projected)
+  Variable3D var -> Variable2D (ProjectPoint3D (Plane3D.erase plane) var)
 
 xy :: Ast1D input -> Ast1D input -> Ast2D input
 xy (Constant1D x) (Constant1D y) = Constant2D (Vector2D x y)
@@ -1219,17 +1219,17 @@ xy (Variable1D x) (Variable1D y) = Variable2D (XY x y)
 bezierCurve1D :: NonEmpty (Quantity units) -> Ast1D Number
 bezierCurve1D (NonEmpty.One value) = constant1D value
 bezierCurve1D controlPoints =
-  Variable1D (BezierCurve1D (NonEmpty.map Quantity.coerce controlPoints) CurveParameter)
+  Variable1D (BezierCurve1D (NonEmpty.map Quantity.erase controlPoints) CurveParameter)
 
 bezierCurve2D :: NonEmpty (Vector2D units) -> Ast2D Number
 bezierCurve2D (NonEmpty.One value) = constant2D value
 bezierCurve2D controlPoints =
-  Variable2D (BezierCurve2D (NonEmpty.map Vector2D.coerce controlPoints) CurveParameter)
+  Variable2D (BezierCurve2D (NonEmpty.map Vector2D.erase controlPoints) CurveParameter)
 
 bezierCurve3D :: NonEmpty (Vector3D units space) -> Ast3D Number
 bezierCurve3D (NonEmpty.One value) = constant3D value
 bezierCurve3D controlPoints =
-  Variable3D (BezierCurve3D (NonEmpty.map Vector3D.coerce controlPoints) CurveParameter)
+  Variable3D (BezierCurve3D (NonEmpty.map Vector3D.erase controlPoints) CurveParameter)
 
 b00 :: Ast1D Number
 b00 = Variable1D (B00 CurveParameter)
