@@ -1,3 +1,5 @@
+Switch more primitive 'coerce' functions to be aliases for Data.Coerce.coerce
+
 Cache normal direction in PlaneOrientation3D?
 - will often be a constant anyways...and can compute lazily
 
