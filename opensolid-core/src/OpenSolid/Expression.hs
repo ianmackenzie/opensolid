@@ -58,6 +58,7 @@ module OpenSolid.Expression
 where
 
 import Data.Coerce qualified
+import Data.Void (Void)
 import OpenSolid.Angle (Angle)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Bytecode.Ast (Ast1D, Ast2D, Ast3D)
@@ -125,19 +126,19 @@ data Expression input output where
     Expression UvPoint (Vector2D units)
   Curve3D ::
     Ast3D Number ->
-    ~(Compiled Number (Vector3D Unitless Ast.Space)) ->
+    ~(Compiled Number (Vector3D Unitless Void)) ->
     Expression Number (Point3D space)
   Surface3D ::
     Ast3D UvPoint ->
-    ~(Compiled UvPoint (Vector3D Unitless Ast.Space)) ->
+    ~(Compiled UvPoint (Vector3D Unitless Void)) ->
     Expression UvPoint (Point3D space)
   VectorCurve3D ::
     Ast3D Number ->
-    ~(Compiled Number (Vector3D Unitless Ast.Space)) ->
+    ~(Compiled Number (Vector3D Unitless Void)) ->
     Expression Number (Vector3D units space)
   VectorSurface3D ::
     Ast3D UvPoint ->
-    ~(Compiled UvPoint (Vector3D Unitless Ast.Space)) ->
+    ~(Compiled UvPoint (Vector3D Unitless Void)) ->
     Expression UvPoint (Vector3D units space)
 
 curve1D :: Ast1D Number -> Expression Number (Quantity units)

@@ -3,7 +3,6 @@ module OpenSolid.Bytecode.Ast
   , Ast2D
   , Ast3D
   , Compiled (Constant, Bytecode)
-  , Space
   , constant1D
   , constant2D
   , constant3D
@@ -76,6 +75,7 @@ module OpenSolid.Bytecode.Ast
 where
 
 import Data.Coerce qualified
+import Data.Void (Void)
 import OpenSolid.Bytecode.Compile qualified as Compile
 import OpenSolid.Bytecode.Evaluate (Compiled)
 import OpenSolid.Bytecode.Evaluate qualified as Evaluate
@@ -116,9 +116,7 @@ import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorTransform2D qualified as VectorTransform2D
 import OpenSolid.VectorTransform3D qualified as VectorTransform3D
 
-data Space
-
-type Plane = Plane3D Space
+type Plane = Plane3D Void
 
 data Ast1D input where
   Constant1D :: Number -> Ast1D input
@@ -159,7 +157,7 @@ data Variable1D input where
   Cross2D :: Variable2D input -> Variable2D input -> Variable1D input
   CrossVariableConstant2D :: Variable2D input -> Vector2D Unitless -> Variable1D input
   Dot3D :: Variable3D input -> Variable3D input -> Variable1D input
-  DotVariableConstant3D :: Variable3D input -> Vector3D Unitless Space -> Variable1D input
+  DotVariableConstant3D :: Variable3D input -> Vector3D Unitless Void -> Variable1D input
   Desingularized1D ::
     Variable1D input ->
     Variable1D input ->
@@ -237,7 +235,7 @@ deriving instance Ord (Variable2D input)
 deriving instance Show (Variable2D input)
 
 data Ast3D input where
-  Constant3D :: Vector3D Unitless Space -> Ast3D input
+  Constant3D :: Vector3D Unitless Void -> Ast3D input
   Variable3D :: Variable3D input -> Ast3D input
 
 deriving instance Eq (Ast3D input)
@@ -249,19 +247,19 @@ deriving instance Show (Ast3D input)
 data Variable3D input where
   Negated3D :: Variable3D input -> Variable3D input
   Sum3D :: Variable3D input -> Variable3D input -> Variable3D input
-  SumVariableConstant3D :: Variable3D input -> Vector3D Unitless Space -> Variable3D input
+  SumVariableConstant3D :: Variable3D input -> Vector3D Unitless Void -> Variable3D input
   Difference3D :: Variable3D input -> Variable3D input -> Variable3D input
-  DifferenceConstantVariable3D :: Vector3D Unitless Space -> Variable3D input -> Variable3D input
+  DifferenceConstantVariable3D :: Vector3D Unitless Void -> Variable3D input -> Variable3D input
   Product3D :: Variable3D input -> Variable1D input -> Variable3D input
   ProductVariableConstant3D :: Variable3D input -> Number -> Variable3D input
-  ProductConstantVariable3D :: Vector3D Unitless Space -> Variable1D input -> Variable3D input
+  ProductConstantVariable3D :: Vector3D Unitless Void -> Variable1D input -> Variable3D input
   Quotient3D :: Variable3D input -> Variable1D input -> Variable3D input
-  QuotientConstantVariable3D :: Vector3D Unitless Space -> Variable1D input -> Variable3D input
+  QuotientConstantVariable3D :: Vector3D Unitless Void -> Variable1D input -> Variable3D input
   Cross3D :: Variable3D input -> Variable3D input -> Variable3D input
-  CrossVariableConstant3D :: Variable3D input -> Vector3D Unitless Space -> Variable3D input
-  BezierCurve3D :: NonEmpty (Vector3D Unitless Space) -> Variable1D input -> Variable3D input
-  TransformVector3D :: VectorTransform3D.Affine Space -> Variable3D input -> Variable3D input
-  TransformPoint3D :: Transform3D.Affine Space -> Variable3D input -> Variable3D input
+  CrossVariableConstant3D :: Variable3D input -> Vector3D Unitless Void -> Variable3D input
+  BezierCurve3D :: NonEmpty (Vector3D Unitless Void) -> Variable1D input -> Variable3D input
+  TransformVector3D :: VectorTransform3D.Affine Void -> Variable3D input -> Variable3D input
+  TransformPoint3D :: Transform3D.Affine Void -> Variable3D input -> Variable3D input
   PlaceVector2D :: Plane -> Variable2D input -> Variable3D input
   PlacePoint2D :: Plane -> Variable2D input -> Variable3D input
   Desingularized3D ::
@@ -1133,7 +1131,7 @@ transformPoint2D transform ast = do
 
 transformPoint3D :: Transform3D tag space -> Ast3D input -> Ast3D input
 transformPoint3D transform ast = do
-  let coercedTransform :: Transform3D.Affine Space = Transform3D.coerce transform
+  let coercedTransform :: Transform3D.Affine Void = Transform3D.coerce transform
   case ast of
     Constant3D val -> do
       let point = Position3D (Vector3D.coerce val)
@@ -1162,13 +1160,13 @@ vectorPlacementTransform2D frame =
     (Vector2D.coerce (Vector2D.unit (Frame2D.xDirection frame)))
     (Vector2D.coerce (Vector2D.unit (Frame2D.yDirection frame)))
 
-placementTransform3D :: Frame3D global local -> Transform3D.Affine Space
+placementTransform3D :: Frame3D global local -> Transform3D.Affine Void
 placementTransform3D frame =
   Transform3D
     (Point3D.coerce (Frame3D.originPoint frame))
     (vectorPlacementTransform3D frame)
 
-vectorPlacementTransform3D :: Frame3D global local -> VectorTransform3D.Affine Space
+vectorPlacementTransform3D :: Frame3D global local -> VectorTransform3D.Affine Void
 vectorPlacementTransform3D frame =
   VectorTransform3D
     (Vector3D.coerce (Vector3D.unit (Frame3D.rightwardDirection frame)))
@@ -1327,7 +1325,7 @@ addVectorTransform2D (VectorTransform2D i j) = do
   let Vector2D jX jY = j
   Compile.addConstant (iX :| [iY, jX, jY])
 
-addVectorTransform3D :: VectorTransform3D.Affine Space -> Compile.Step ConstantIndex
+addVectorTransform3D :: VectorTransform3D.Affine Void -> Compile.Step ConstantIndex
 addVectorTransform3D (VectorTransform3D i j k) = do
   let Vector3D iX iY iZ = i
   let Vector3D jX jY jZ = j
@@ -1341,7 +1339,7 @@ addTransform2D (Transform2D origin (VectorTransform2D i j)) = do
   let Point2D x0 y0 = origin
   Compile.addConstant (iX :| [iY, jX, jY, x0, y0])
 
-addTransform3D :: Transform3D.Affine Space -> Compile.Step ConstantIndex
+addTransform3D :: Transform3D.Affine Void -> Compile.Step ConstantIndex
 addTransform3D (Transform3D origin (VectorTransform3D i j k)) = do
   let Vector3D iX iY iZ = i
   let Vector3D jX jY jZ = j
@@ -1530,7 +1528,7 @@ compileVariable1D variable = case variable of
 coordinates2D :: Vector2D Unitless -> NonEmpty Number
 coordinates2D (Vector2D x y) = NonEmpty.two x y
 
-coordinates3D :: Vector3D Unitless Space -> NonEmpty Number
+coordinates3D :: Vector3D Unitless Void -> NonEmpty Number
 coordinates3D (Vector3D r f u) = NonEmpty.three r f u
 
 compileVariable2D :: Variable2D input -> Compile.Step VariableIndex
@@ -1704,7 +1702,7 @@ compileCurve2D :: Ast2D Number -> Compiled Number (Vector2D Unitless)
 compileCurve2D (Constant2D val) = Evaluate.Constant val
 compileCurve2D (Variable2D var) = Evaluate.Bytecode (Compile.curve2D (compileVariable2D var))
 
-compileCurve3D :: Ast3D Number -> Compiled Number (Vector3D Unitless Space)
+compileCurve3D :: Ast3D Number -> Compiled Number (Vector3D Unitless Void)
 compileCurve3D (Constant3D val) = Evaluate.Constant val
 compileCurve3D (Variable3D var) = Evaluate.Bytecode (Compile.curve3D (compileVariable3D var))
 
@@ -1716,7 +1714,7 @@ compileSurface2D :: Ast2D UvPoint -> Compiled UvPoint (Vector2D Unitless)
 compileSurface2D (Constant2D val) = Evaluate.Constant val
 compileSurface2D (Variable2D var) = Evaluate.Bytecode (Compile.surface2D (compileVariable2D var))
 
-compileSurface3D :: Ast3D UvPoint -> Compiled UvPoint (Vector3D Unitless Space)
+compileSurface3D :: Ast3D UvPoint -> Compiled UvPoint (Vector3D Unitless Void)
 compileSurface3D (Constant3D val) = Evaluate.Constant val
 compileSurface3D (Variable3D var) = Evaluate.Bytecode (Compile.surface3D (compileVariable3D var))
 
@@ -1726,7 +1724,7 @@ evaluateCurve1D ast input = Evaluate.curve1dValue (compileCurve1D ast) input
 evaluateCurve2D :: Ast2D Number -> Number -> Vector2D Unitless
 evaluateCurve2D ast input = Evaluate.curve2dValue (compileCurve2D ast) input
 
-evaluateCurve3D :: Ast3D Number -> Number -> Vector3D Unitless Space
+evaluateCurve3D :: Ast3D Number -> Number -> Vector3D Unitless Void
 evaluateCurve3D ast input = Evaluate.curve3dValue (compileCurve3D ast) input
 
 evaluateSurface1D :: Ast1D UvPoint -> UvPoint -> Number
@@ -1735,7 +1733,7 @@ evaluateSurface1D ast input = Evaluate.surface1dValue (compileSurface1D ast) inp
 evaluateSurface2D :: Ast2D UvPoint -> UvPoint -> Vector2D Unitless
 evaluateSurface2D ast input = Evaluate.surface2dValue (compileSurface2D ast) input
 
-evaluateSurface3D :: Ast3D UvPoint -> UvPoint -> Vector3D Unitless Space
+evaluateSurface3D :: Ast3D UvPoint -> UvPoint -> Vector3D Unitless Void
 evaluateSurface3D ast input = Evaluate.surface3dValue (compileSurface3D ast) input
 
 debugCurve1D :: Ast1D Number -> Text
