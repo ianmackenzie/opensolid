@@ -1,5 +1,8 @@
 module OpenSolid.Bounds3D
   ( Bounds3D
+  , coerce
+  , erase
+  , unerase
   , rightwardCoordinate
   , forwardCoordinate
   , upwardCoordinate
@@ -67,6 +70,18 @@ import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.World3D qualified as World3D
+
+{-# INLINE coerce #-}
+coerce :: Bounds3D space1 -> Bounds3D space2
+coerce = Data.Coerce.coerce
+
+{-# INLINE erase #-}
+erase :: Bounds3D space -> Bounds3D Void
+erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: Bounds3D Void -> Bounds3D space
+unerase = coerce
 
 -- | Get the bounds on the rightward coordinate of a bounding box.
 rightwardCoordinate :: Bounds3D space -> Interval Meters

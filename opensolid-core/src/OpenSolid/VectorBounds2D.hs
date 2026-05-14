@@ -4,6 +4,8 @@ module OpenSolid.VectorBounds2D
   ( VectorBounds2D (VectorBounds2D)
   , constant
   , coerce
+  , erase
+  , unerase
   , aggregate2
   , aggregate3
   , aggregate
@@ -78,6 +80,14 @@ constant (Vector2D x y) = VectorBounds2D (Interval.constant x) (Interval.constan
 {-# INLINE coerce #-}
 coerce :: VectorBounds2D units1 -> VectorBounds2D units2
 coerce (VectorBounds2D x y) = VectorBounds2D (Interval.coerce x) (Interval.coerce y)
+
+{-# INLINE erase #-}
+erase :: VectorBounds2D units -> VectorBounds2D Unitless
+erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: VectorBounds2D Unitless -> VectorBounds2D units
+unerase = coerce
 
 hull2 :: Vector2D units -> Vector2D units -> VectorBounds2D units
 hull2 (Vector2D x1 y1) (Vector2D x2 y2) =

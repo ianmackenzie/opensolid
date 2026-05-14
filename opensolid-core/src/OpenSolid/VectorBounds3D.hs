@@ -4,6 +4,8 @@ module OpenSolid.VectorBounds3D
   ( VectorBounds3D
   , constant
   , coerce
+  , erase
+  , unerase
   , aggregate2
   , aggregate3
   , aggregateN
@@ -84,6 +86,14 @@ constant (Vector3D x y z) =
 {-# INLINE coerce #-}
 coerce :: VectorBounds3D units1 space1 -> VectorBounds3D units2 space2
 coerce = Data.Coerce.coerce
+
+{-# INLINE erase #-}
+erase :: VectorBounds3D units space -> VectorBounds3D Unitless Void
+erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: VectorBounds3D Unitless Void -> VectorBounds3D units space
+unerase = coerce
 
 hull2 :: Vector3D units space -> Vector3D units space -> VectorBounds3D units space
 hull2 (Vector3D x1 y1 z1) (Vector3D x2 y2 z2) =

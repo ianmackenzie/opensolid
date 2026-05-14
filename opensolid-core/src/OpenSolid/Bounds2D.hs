@@ -1,6 +1,8 @@
 module OpenSolid.Bounds2D
   ( Bounds2D (Bounds2D)
   , coerce
+  , erase
+  , unerase
   , xCoordinate
   , yCoordinate
   , coordinates
@@ -81,8 +83,17 @@ import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 
+{-# INLINE coerce #-}
 coerce :: Bounds2D units1 -> Bounds2D units2
 coerce (Bounds2D x y) = Bounds2D (Interval.coerce x) (Interval.coerce y)
+
+{-# INLINE erase #-}
+erase :: Bounds2D units -> Bounds2D Unitless
+erase = coerce
+
+{-# INLINE unerase #-}
+unerase :: Bounds2D Unitless -> Bounds2D units
+unerase = coerce
 
 -- | Get the X coordinate bounds of a bounding box.
 xCoordinate :: Bounds2D units -> Interval units
