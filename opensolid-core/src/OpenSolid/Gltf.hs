@@ -45,6 +45,12 @@ import System.FilePath qualified
 
 data Mode = Gltf {bufferUri :: Text} | Glb
 
+data IndexType = UnsignedShort | UnsignedInt
+
+indexByteSize :: IndexType -> Int
+indexByteSize UnsignedShort = 2
+indexByteSize UnsignedInt = 4
+
 convention :: Convention3D
 convention = Convention3D.yUp
 
@@ -128,6 +134,7 @@ writeText path model resolution = do
 data GltfMesh = GltfMesh
   { gltfMaterial :: Json
   , numFaces :: Int
+  , indexType :: IndexType
   , indices :: Builder
   , indicesByteLength :: Int
   , numVertices :: Int
@@ -152,6 +159,7 @@ gltfMeshes resolution model = case model of
     case Array.toList (Mesh.vertices mesh) of
       NonEmpty meshVertices -> do
         let numVertices = Array.length (Mesh.vertices mesh)
+        let indexType = if numVertices <= 65536 then UnsignedShort else UnsignedInt
         let meshFaceIndices = Mesh.faceIndices mesh
         let numFaces = List.length meshFaceIndices
         let meshBounds = Bounds3D.hullOf SurfaceVertex3D.position meshVertices
@@ -164,8 +172,9 @@ gltfMeshes resolution model = case model of
           GltfMesh
             { gltfMaterial = encodeMaterial pbrMaterial
             , numFaces
-            , indices = faceIndicesBuilder meshFaceIndices
-            , indicesByteLength = 3 * 4 * numFaces
+            , indexType
+            , indices = faceIndicesBuilder indexType meshFaceIndices
+            , indicesByteLength = 3 * indexByteSize indexType * numFaces
             , numVertices
             , vertices = verticesBuilder (Mesh.vertices mesh)
             , verticesByteLength = 6 * 4 * numVertices
@@ -199,12 +208,15 @@ encodeMeshes index offset meshes = case meshes of
             , Json.field "byteStride" $ Json.int 24
             , Json.field "target" $ Json.int 34962 -- ARRAY_BUFFER, for vertex attributes
             ]
+    let indexComponentType = case mesh.indexType of
+          UnsignedShort -> 5123
+          UnsignedInt -> 5125
     let indicesAccessor =
           Json.object
             [ Json.field "bufferView" $ Json.int indicesBufferViewIndex
             , Json.field "byteOffset" $ Json.int 0
             , Json.field "type" $ Json.text "SCALAR"
-            , Json.field "componentType" $ Json.int 5125 -- UNSIGNED_INT
+            , Json.field "componentType" $ Json.int indexComponentType
             , Json.field "count" $ Json.int (3 * mesh.numFaces)
             ]
     let positionAccessor =
@@ -268,9 +280,13 @@ encodeMaterial material = do
           ]
     ]
 
-faceIndicesBuilder :: List (Int, Int, Int) -> Builder
-faceIndicesBuilder = Binary.combine do
-  \(i, j, k) -> Binary.uint32LE i <> Binary.uint32LE j <> Binary.uint32LE k
+faceIndicesBuilder :: IndexType -> List (Int, Int, Int) -> Builder
+faceIndicesBuilder indexType indices = do
+  let encodeIndex = case indexType of
+        UnsignedShort -> Binary.uint16LE
+        UnsignedInt -> Binary.uint32LE
+  let encodeIndices (i, j, k) = encodeIndex i <> encodeIndex j <> encodeIndex k
+  Binary.combine encodeIndices indices
 
 verticesBuilder :: Array (SurfaceVertex3D space) -> Builder
 verticesBuilder = Binary.combine vertexBuilder
