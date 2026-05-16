@@ -1,7 +1,5 @@
 #pragma once
 
-#include "stdint.h"
-
 enum Opcode {
   Return = 0,
   XComponent = 1,
