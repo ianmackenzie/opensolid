@@ -316,9 +316,6 @@ Ensure target language bindings gracefully handle exceptions such as higher-orde
 Try adding -fexcess-precision as an optimization
 -> in general, try: https://wiki.haskell.org/Performance/GHC#Crank_up_the_gcc_flags
 
-Combine computeValue and computeBounds into single templated function?
--> call out to generic or overloaded helper functions as needed
-
 Try pdoc for Python documentation generation?
 -> or possibly Material for MkDocs + mkdocstrings
 
