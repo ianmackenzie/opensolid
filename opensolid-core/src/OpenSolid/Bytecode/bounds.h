@@ -193,9 +193,7 @@ operator*(Bounds lhs, Bounds rhs) {
   double lu = lhs.lower * rhs.upper;
   double ul = lhs.upper * rhs.lower;
   double uu = lhs.upper * rhs.upper;
-  double lower = std::min(std::min(std::min(ll, lu), ul), uu);
-  double upper = std::max(std::max(std::max(ll, lu), ul), uu);
-  return Bounds(lower, upper);
+  return Bounds::hull4(ll, lu, ul, uu);
 }
 
 inline Bounds
@@ -215,9 +213,7 @@ operator/(Bounds lhs, Bounds rhs) {
     double lu = lhs.lower / rhs.upper;
     double ul = lhs.upper / rhs.lower;
     double uu = lhs.upper / rhs.upper;
-    double lower = std::min(std::min(std::min(ll, lu), ul), uu);
-    double upper = std::max(std::max(std::max(ll, lu), ul), uu);
-    return Bounds(lower, upper);
+    return Bounds::hull4(ll, lu, ul, uu);
   } else {
     return Bounds::infinite();
   }
