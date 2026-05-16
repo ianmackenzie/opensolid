@@ -36,10 +36,10 @@ struct Bounds {
   }
 
   inline Bounds(double a, double b) {
-    if (std::isnan(a) || std::isnan(b)) {
+    if (std::isnan(a) || std::isnan(b)) [[unlikely]] {
       this->lower = -INFINITY;
       this->upper = INFINITY;
-    } else if (a <= b) {
+    } else if (a <= b) [[likely]] {
       this->lower = a;
       this->upper = b;
     } else {
