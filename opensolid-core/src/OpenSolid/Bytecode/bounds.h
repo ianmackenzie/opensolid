@@ -93,6 +93,11 @@ struct Bounds {
     return Bounds(min, max);
   }
 
+  inline static Bounds
+  aggregate2(Bounds a, Bounds b) {
+    return Bounds(std::min(a.lower, b.lower), std::max(a.upper, b.upper));
+  }
+
   inline double
   midpoint() const {
     return 0.5 * (lower + upper);
