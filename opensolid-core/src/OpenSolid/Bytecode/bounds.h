@@ -50,12 +50,12 @@ struct Bounds {
 
   inline static Bounds
   infinite() {
-    return Bounds(-INFINITY, INFINITY);
+    return {-INFINITY, INFINITY};
   }
 
   inline static Bounds
   invalid() {
-    return Bounds(NAN, NAN);
+    return {NAN, NAN};
   }
 
   inline static Bounds
