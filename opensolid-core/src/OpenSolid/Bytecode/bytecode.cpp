@@ -46,20 +46,138 @@ fourthPower(Bounds x) {
   return x.fourthPower();
 }
 
-template <class V>
-inline V
-lerp(V a, V b, double t) {
+inline double
+squareRoot(double x) {
+  return std::sqrt(std::max(x, 0.0));
+}
+
+inline Bounds
+squareRoot(Bounds x) {
+  return x.sqrt();
+}
+
+inline double
+sine(double x) {
+  return std::sin(x);
+}
+
+inline Bounds
+sine(Bounds x) {
+  return x.sin();
+}
+
+inline double
+cosine(double x) {
+  return std::cos(x);
+}
+
+inline Bounds
+cosine(Bounds x) {
+  return x.cos();
+}
+
+inline double
+interpolateFrom(double a, double b, double t) {
   return a + t * (b - a);
 }
 
-template <class V>
-inline auto
-lerp(V a, V b, Bounds t) {
-  if (t.midpoint() <= 0.5) {
-    return a + t * (b - a);
+inline Bounds
+interpolateFrom(double a, double b, Bounds t) {
+  if (a <= b) {
+    double lower = interpolateFrom(a, b, t.lower);
+    double upper = interpolateFrom(a, b, t.upper);
+    return Bounds(lower, upper);
   } else {
-    return b + (1.0 - t) * (a - b);
+    double lower = interpolateFrom(a, b, t.upper);
+    double upper = interpolateFrom(a, b, t.lower);
+    return Bounds(lower, upper);
   }
+}
+
+inline Bounds
+interpolateFrom(Bounds a, Bounds b, double t) {
+  if (t >= 0.0 && t <= 1.0) [[likely]] {
+    // Expected case: t is in the range [0,1]
+    double lower = interpolateFrom(a.lower, b.lower, t);
+    double upper = interpolateFrom(a.upper, b.upper, t);
+    return Bounds(lower, upper);
+  } else {
+    // Fallback case
+    double ll = interpolateFrom(a.lower, b.lower, t);
+    double lu = interpolateFrom(a.lower, b.upper, t);
+    double ul = interpolateFrom(a.upper, b.lower, t);
+    double uu = interpolateFrom(a.upper, b.upper, t);
+    return Bounds::hull4(ll, lu, ul, uu);
+  }
+}
+
+inline double
+interpolateLower(double a, double b, Bounds t) {
+  return interpolateFrom(a, b, a <= b ? t.lower : t.upper);
+}
+
+inline double
+interpolateUpper(double a, double b, Bounds t) {
+  return interpolateFrom(a, b, a <= b ? t.upper : t.lower);
+}
+
+inline Bounds
+interpolateFrom(Bounds a, Bounds b, Bounds t) {
+  if (t.lower >= 0.0 && t.upper <= 1.0) {
+    // Expected case: t is in the range [0,1]
+    double lower = interpolateFrom(a.lower, b.lower, a.lower <= b.lower ? t.lower : t.upper);
+    double upper = interpolateFrom(a.upper, b.upper, a.upper <= b.upper ? t.upper : t.lower);
+    return Bounds(lower, upper);
+  } else {
+    Bounds bounds1 = interpolateFrom(a, b, t.lower);
+    Bounds bounds2 = interpolateFrom(a, b, t.upper);
+    return Bounds::aggregate2(bounds1, bounds2);
+  }
+}
+
+inline Vector2d<double>
+interpolateFrom(Vector2d<double> a, Vector2d<double> b, double t) {
+  double x = interpolateFrom(a.x, b.x, t);
+  double y = interpolateFrom(a.y, b.y, t);
+  return Vector2d(x, y);
+}
+
+inline Vector3d<double>
+interpolateFrom(const Vector3d<double>& a, const Vector3d<double>& b, double t) {
+  double x = interpolateFrom(a.x, b.x, t);
+  double y = interpolateFrom(a.y, b.y, t);
+  double z = interpolateFrom(a.z, b.z, t);
+  return Vector3d(x, y, z);
+}
+
+inline Vector2d<Bounds>
+interpolateFrom(Vector2d<double> a, Vector2d<double> b, Bounds t) {
+  Bounds x = interpolateFrom(a.x, b.x, t);
+  Bounds y = interpolateFrom(a.y, b.y, t);
+  return Vector2d(x, y);
+}
+
+inline Vector3d<Bounds>
+interpolateFrom(const Vector3d<double>& a, const Vector3d<double>& b, Bounds t) {
+  Bounds x = interpolateFrom(a.x, b.x, t);
+  Bounds y = interpolateFrom(a.y, b.y, t);
+  Bounds z = interpolateFrom(a.z, b.z, t);
+  return Vector3d(x, y, z);
+}
+
+inline Vector2d<Bounds>
+interpolateFrom(const Vector2d<Bounds>& a, const Vector2d<Bounds>& b, Bounds t) {
+  Bounds x = interpolateFrom(a.x, b.x, t);
+  Bounds y = interpolateFrom(a.y, b.y, t);
+  return Vector2d(x, y);
+}
+
+inline Vector3d<Bounds>
+interpolateFrom(const Vector3d<Bounds>& a, const Vector3d<Bounds>& b, Bounds t) {
+  Bounds x = interpolateFrom(a.x, b.x, t);
+  Bounds y = interpolateFrom(a.y, b.y, t);
+  Bounds z = interpolateFrom(a.z, b.z, t);
+  return Vector3d(x, y, z);
 }
 
 int
@@ -95,1089 +213,147 @@ choose(int n, int k) {
   }
 }
 
-template <class V, class S>
-inline V
-quadraticBlossom(const V* p, S t1, S t2) {
-  V q0 = lerp(p[0], p[1], t1);
-  V q1 = lerp(p[1], p[2], t1);
-  return lerp(q0, q1, t2);
+template <class Vector>
+inline Vector
+quadraticBlossom(const Vector* p, double t1, double t2) {
+  Vector q0 = interpolateFrom(p[0], p[1], t1);
+  Vector q1 = interpolateFrom(p[1], p[2], t1);
+  return interpolateFrom(q0, q1, t2);
 }
 
-template <class V, class S>
-inline V
-quadraticValue(const V* p, S t) {
+inline double
+quadraticBezier(const double* p, double t) {
   return quadraticBlossom(p, t, t);
 }
 
-template <class V, class S>
-inline V
-cubicBlossom(const V* p, S t1, S t2, S t3) {
-  V q[3];
-  q[0] = lerp(p[0], p[1], t1);
-  q[1] = lerp(p[1], p[2], t1);
-  q[2] = lerp(p[2], p[3], t1);
+inline Vector2d<double>
+quadraticBezier(const Vector2d<double>* p, double t) {
+  return quadraticBlossom(p, t, t);
+}
+
+inline Vector3d<double>
+quadraticBezier(const Vector3d<double>* p, double t) {
+  return quadraticBlossom(p, t, t);
+}
+
+template <class Vector>
+inline Vector
+cubicBlossom(const Vector* p, double t1, double t2, double t3) {
+  Vector q[3];
+  q[0] = interpolateFrom(p[0], p[1], t1);
+  q[1] = interpolateFrom(p[1], p[2], t1);
+  q[2] = interpolateFrom(p[2], p[3], t1);
   return quadraticBlossom(q, t2, t3);
 }
 
-template <class V, class S>
-inline V
-cubicValue(const V* p, S t) {
+inline double
+cubicBezier(const double* p, double t) {
   return cubicBlossom(p, t, t, t);
 }
 
-template <class V, class S>
-inline V
-quarticBlossom(const V* p, S t1, S t2, S t3, S t4) {
-  V q[4];
-  q[0] = lerp(p[0], p[1], t1);
-  q[1] = lerp(p[1], p[2], t1);
-  q[2] = lerp(p[2], p[3], t1);
-  q[3] = lerp(p[3], p[4], t1);
+inline Vector2d<double>
+cubicBezier(const Vector2d<double>* p, double t) {
+  return cubicBlossom(p, t, t, t);
+}
+
+inline Vector3d<double>
+cubicBezier(const Vector3d<double>* p, double t) {
+  return cubicBlossom(p, t, t, t);
+}
+
+template <class Vector>
+inline Vector
+quarticBlossom(const Vector* p, double t1, double t2, double t3, double t4) {
+  Vector q[4];
+  q[0] = interpolateFrom(p[0], p[1], t1);
+  q[1] = interpolateFrom(p[1], p[2], t1);
+  q[2] = interpolateFrom(p[2], p[3], t1);
+  q[3] = interpolateFrom(p[3], p[4], t1);
   return cubicBlossom(q, t2, t3, t4);
 }
 
-template <class V, class S>
-inline V
-quarticValue(const V* p, S t) {
+inline double
+quarticBezier(const double* p, double t) {
   return quarticBlossom(p, t, t, t, t);
 }
 
-template <class V, class S>
-inline V
-quinticBlossom(const V* p, S t1, S t2, S t3, S t4, S t5) {
-  V q[5];
-  q[0] = lerp(p[0], p[1], t1);
-  q[1] = lerp(p[1], p[2], t1);
-  q[2] = lerp(p[2], p[3], t1);
-  q[3] = lerp(p[3], p[4], t1);
-  q[4] = lerp(p[4], p[5], t1);
+inline Vector2d<double>
+quarticBezier(const Vector2d<double>* p, double t) {
+  return quarticBlossom(p, t, t, t, t);
+}
+
+inline Vector3d<double>
+quarticBezier(const Vector3d<double>* p, double t) {
+  return quarticBlossom(p, t, t, t, t);
+}
+
+template <class Vector>
+inline Vector
+quinticBlossom(const Vector* p, double t1, double t2, double t3, double t4, double t5) {
+  Vector q[5];
+  q[0] = interpolateFrom(p[0], p[1], t1);
+  q[1] = interpolateFrom(p[1], p[2], t1);
+  q[2] = interpolateFrom(p[2], p[3], t1);
+  q[3] = interpolateFrom(p[3], p[4], t1);
+  q[4] = interpolateFrom(p[4], p[5], t1);
   return quarticBlossom(q, t2, t3, t4, t5);
 }
 
-template <class V, class S>
-inline V
-quinticValue(const V* p, S t) {
+inline double
+quinticBezier(const double* p, double t) {
   return quinticBlossom(p, t, t, t, t, t);
 }
 
-template <class V, class S>
-inline V
-bezierBlossom(int numControlPoints, const V* controlPoints, S tLower, S tUpper, int nLow) {
+inline Vector2d<double>
+quinticBezier(const Vector2d<double>* p, double t) {
+  return quinticBlossom(p, t, t, t, t, t);
+}
+
+inline Vector3d<double>
+quinticBezier(const Vector3d<double>* p, double t) {
+  return quinticBlossom(p, t, t, t, t, t);
+}
+
+template <class Vector>
+inline Vector
+bezierBlossom(
+  int numControlPoints,
+  const Vector* controlPoints,
+  double tLower,
+  double tUpper,
+  int nLow
+) {
   if (numControlPoints == 1) {
     return *controlPoints;
   }
-  V* q = (V*)alloca(sizeof(V) * (numControlPoints - 1));
+  Vector* q = (Vector*)alloca(sizeof(Vector) * (numControlPoints - 1));
   for (int m = numControlPoints - 1; m > 0; --m) { // m is number of points to collapse to
-    S t = m <= nLow ? tLower : tUpper;
+    double t = m <= nLow ? tLower : tUpper;
     for (int i = 0; i < m; ++i) { // i is index of the point to collapse to
-      q[i] = lerp(controlPoints[i], controlPoints[i + 1], t);
+      q[i] = interpolateFrom(controlPoints[i], controlPoints[i + 1], t);
     }
     controlPoints = q; // After the first loop iteration, work in place within the outputs
   }
   return *q;
 }
 
-template <class V, class S>
-inline V
-bezierValue(int numControlPoints, const V* controlPoints, S t) {
+inline double
+bezier(int numControlPoints, const double* controlPoints, double t) {
   return bezierBlossom(numControlPoints, controlPoints, t, t, 0);
 }
 
-template <class S>
-S
-b00(S t) {
-  return 3.0 * fourthPower(t) - 4.0 * cubed(t) + 1.0;
+inline Vector2d<double>
+bezier(int numControlPoints, const Vector2d<double>* controlPoints, double t) {
+  return bezierBlossom(numControlPoints, controlPoints, t, t, 0);
 }
 
-template <class S>
-S
-b00d1(S t) {
-  return 12.0 * (cubed(t) - squared(t));
-}
-
-template <class S>
-S
-b00d2(S t) {
-  return 36.0 * squared(t) - 24.0 * t;
-}
-
-template <class S>
-S
-b00d3(S t) {
-  return 72.0 * t - 24.0;
-}
-
-template <class S>
-S
-b01(S t) {
-  return 2.0 * fourthPower(t) - 3.0 * cubed(t) + t;
-}
-
-template <class S>
-S
-b01d1(S t) {
-  return 8.0 * cubed(t) - 9.0 * squared(t) + 1.0;
-}
-
-template <class S>
-S
-b01d2(S t) {
-  return 24.0 * squared(t) - 18.0 * t;
-}
-
-template <class S>
-S
-b01d3(S t) {
-  return 48.0 * t - 18.0;
-}
-
-template <class S>
-S
-b02(S t) {
-  return 0.5 * fourthPower(t) - cubed(t) + 0.5 * squared(t);
-}
-
-template <class S>
-S
-b02d1(S t) {
-  return 2.0 * cubed(t) - 3.0 * squared(t) + t;
-}
-
-template <class S>
-S
-b02d2(S t) {
-  return 6.0 * squared(t) - 6.0 * t + 1.0;
-}
-
-template <class S>
-S
-b02d3(S t) {
-  return 12.0 * t - 6.0;
-}
-
-template <class S>
-S
-b10(S t) {
-  return -3.0 * fourthPower(t) + 4.0 * cubed(t);
-}
-
-template <class S>
-S
-b10d1(S t) {
-  return 12.0 * (squared(t) - cubed(t));
-}
-
-template <class S>
-S
-b10d2(S t) {
-  return -36.0 * squared(t) + 24.0 * t;
-}
-
-template <class S>
-S
-b10d3(S t) {
-  return -72.0 * t + 24.0;
-}
-
-template <class S>
-S
-b11(S t) {
-  return fourthPower(t) - cubed(t);
-}
-
-template <class S>
-S
-b11d1(S t) {
-  return 4.0 * cubed(t) - 3.0 * squared(t);
-}
-
-template <class S>
-S
-b11d2(S t) {
-  return 12.0 * squared(t) - 6.0 * t;
-}
-
-template <class S>
-S
-b11d3(S t) {
-  return 24.0 * t - 6.0;
-}
-
-void
-computeValue(
-  const uint16_t* wordsPointer,
-  const double* constantsPointer,
-  double* variablesPointer,
-  double* returnValuesPointer
-) {
-  auto getInt = [&]() -> int {
-    int value = *wordsPointer;
-    ++wordsPointer;
-    return value;
-  };
-  auto getConstantScalarPointer = [&]() -> const double* {
-    return constantsPointer + getInt();
-  };
-  auto getConstantScalar = [&]() -> double {
-    return *getConstantScalarPointer();
-  };
-  auto getConstantVector2dPointer = [&]() -> const Vector2d<double>* {
-    return (const Vector2d<double>*)getConstantScalarPointer();
-  };
-  auto getConstantVector2d = [&]() -> Vector2d<double> {
-    return *getConstantVector2dPointer();
-  };
-  auto getConstantVector3dPointer = [&]() -> const Vector3d<double>* {
-    return (const Vector3d<double>*)getConstantScalarPointer();
-  };
-  auto getConstantVector3d = [&]() -> Vector3d<double> {
-    return *getConstantVector3dPointer();
-  };
-  auto getScalarPointer = [&]() -> double* {
-    return variablesPointer + getInt();
-  };
-  auto getScalar = [&]() -> double {
-    return *getScalarPointer();
-  };
-  auto getVector2dPointer = [&]() -> Vector2d<double>* {
-    return (Vector2d<double>*)getScalarPointer();
-  };
-  auto getVector2d = [&]() -> Vector2d<double> {
-    return *getVector2dPointer();
-  };
-  auto getVector3dPointer = [&]() -> Vector3d<double>* {
-    return (Vector3d<double>*)getScalarPointer();
-  };
-  auto getVector3d = [&]() -> Vector3d<double> {
-    return *getVector3dPointer();
-  };
-  while (true) {
-    int opcode = getInt();
-    assert(opcode < OPCODE_END && "Unrecognized opcode");
-    switch (Opcode(opcode)) {
-      case Return: {
-        int dimension = getInt();
-        double* valuesPointer = getScalarPointer();
-        std::memcpy(returnValuesPointer, valuesPointer, sizeof(double) * dimension);
-        return;
-      }
-      case XComponent: {
-        const double* vec = getScalarPointer();
-        double* output = getScalarPointer();
-        *output = vec[0];
-        break;
-      }
-      case YComponent: {
-        const double* vec = getScalarPointer();
-        double* output = getScalarPointer();
-        *output = vec[1];
-        break;
-      }
-      case ZComponent: {
-        const double* vec = getScalarPointer();
-        double* output = getScalarPointer();
-        *output = vec[2];
-        break;
-      }
-      case Negate1d: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = -input;
-        break;
-      }
-      case Add1d: {
-        double lhs = getScalar();
-        double rhs = getScalar();
-        double* output = getScalarPointer();
-        *output = lhs + rhs;
-        break;
-      }
-      case AddVariableConstant1d: {
-        double lhs = getScalar();
-        double rhs = getConstantScalar();
-        double* output = getScalarPointer();
-        *output = lhs + rhs;
-        break;
-      }
-      case Subtract1d: {
-        double lhs = getScalar();
-        double rhs = getScalar();
-        double* output = getScalarPointer();
-        *output = lhs - rhs;
-        break;
-      }
-      case SubtractConstantVariable1d: {
-        double lhs = getConstantScalar();
-        double rhs = getScalar();
-        double* output = getScalarPointer();
-        *output = lhs - rhs;
-        break;
-      }
-      case Multiply1d: {
-        double lhs = getScalar();
-        double rhs = getScalar();
-        double* output = getScalarPointer();
-        *output = lhs * rhs;
-        break;
-      }
-      case MultiplyVariableConstant1d: {
-        double lhs = getScalar();
-        double rhs = getConstantScalar();
-        double* output = getScalarPointer();
-        *output = lhs * rhs;
-        break;
-      }
-      case Divide1d: {
-        double lhs = getScalar();
-        double rhs = getScalar();
-        double* output = getScalarPointer();
-        *output = lhs / rhs;
-        break;
-      }
-      case DivideConstantVariable1d: {
-        double lhs = getConstantScalar();
-        double rhs = getScalar();
-        double* output = getScalarPointer();
-        *output = lhs / rhs;
-        break;
-      }
-      case Square1d: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = input * input;
-        break;
-      }
-      case Sqrt1d: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = std::sqrt(std::max(input, 0.0));
-        break;
-      }
-      case Sin1d: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = std::sin(input);
-        break;
-      }
-      case Cos1d: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = std::cos(input);
-        break;
-      }
-      case Linear1d: {
-        const double* endpoints = getConstantScalarPointer();
-        double parameter = getScalar();
-        double* output = getScalarPointer();
-        *output = lerp(endpoints[0], endpoints[1], parameter);
-        break;
-      }
-      case Quadratic1d: {
-        const double* controlPoints = getConstantScalarPointer();
-        const double parameter = getScalar();
-        double* output = getScalarPointer();
-        *output = quadraticValue(controlPoints, parameter);
-        break;
-      }
-      case Cubic1d: {
-        const double* controlPoints = getConstantScalarPointer();
-        double parameter = getScalar();
-        double* output = getScalarPointer();
-        *output = cubicValue(controlPoints, parameter);
-        break;
-      }
-      case Quartic1d: {
-        const double* controlPoints = getConstantScalarPointer();
-        double parameter = getScalar();
-        double* output = getScalarPointer();
-        *output = quarticValue(controlPoints, parameter);
-        break;
-      }
-      case Quintic1d: {
-        const double* controlPoints = getConstantScalarPointer();
-        double parameter = getScalar();
-        double* output = getScalarPointer();
-        *output = quinticValue(controlPoints, parameter);
-        break;
-      }
-      case Bezier1d: {
-        int numControlPoints = getInt();
-        const double* controlPoints = getConstantScalarPointer();
-        double parameter = getScalar();
-        double* output = getScalarPointer();
-        *output = bezierValue(numControlPoints, controlPoints, parameter);
-        break;
-      }
-      case XY2d: {
-        double x = getScalar();
-        double y = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = Vector2d(x, y);
-        break;
-      }
-      case XC2d: {
-        double x = getScalar();
-        double y = getConstantScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = Vector2d(x, y);
-        break;
-      }
-      case CY2d: {
-        double x = getConstantScalar();
-        double y = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = Vector2d(x, y);
-        break;
-      }
-      case Negate2d: {
-        Vector2d<double> input = getVector2d();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = -input;
-        break;
-      }
-      case Add2d: {
-        Vector2d<double> lhs = getVector2d();
-        Vector2d<double> rhs = getVector2d();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = lhs + rhs;
-        break;
-      }
-      case AddVariableConstant2d: {
-        Vector2d<double> lhs = getVector2d();
-        Vector2d<double> rhs = getConstantVector2d();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = lhs + rhs;
-        break;
-      }
-      case Subtract2d: {
-        Vector2d<double> lhs = getVector2d();
-        Vector2d<double> rhs = getVector2d();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = lhs - rhs;
-        break;
-      }
-      case SubtractConstantVariable2d: {
-        Vector2d<double> lhs = getConstantVector2d();
-        Vector2d<double> rhs = getVector2d();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = lhs - rhs;
-        break;
-      }
-      case Multiply2d: {
-        Vector2d<double> lhs = getVector2d();
-        double rhs = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = lhs * rhs;
-        break;
-      }
-      case MultiplyVariableConstant2d: {
-        Vector2d<double> lhs = getVector2d();
-        double rhs = getConstantScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = lhs * rhs;
-        break;
-      }
-      case MultiplyConstantVariable2d: {
-        Vector2d<double> lhs = getConstantVector2d();
-        double rhs = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = lhs * rhs;
-        break;
-      }
-      case Divide2d: {
-        Vector2d<double> lhs = getVector2d();
-        double rhs = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = lhs / rhs;
-        break;
-      }
-      case DivideConstantVariable2d: {
-        Vector2d<double> lhs = getConstantVector2d();
-        double rhs = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = lhs / rhs;
-        break;
-      }
-      case SquaredMagnitude2d: {
-        Vector2d<double> arg = getVector2d();
-        double* output = getScalarPointer();
-        *output = arg.squaredMagnitude();
-        break;
-      }
-      case Magnitude2d: {
-        Vector2d<double> arg = getVector2d();
-        double* output = getScalarPointer();
-        *output = arg.magnitude();
-        break;
-      }
-      case Dot2d: {
-        Vector2d<double> lhs = getVector2d();
-        Vector2d<double> rhs = getVector2d();
-        double* output = getScalarPointer();
-        *output = lhs.dot(rhs);
-        break;
-      }
-      case DotVariableConstant2d: {
-        Vector2d<double> lhs = getVector2d();
-        Vector2d<double> rhs = getConstantVector2d();
-        double* output = getScalarPointer();
-        *output = lhs.dot(rhs);
-        break;
-      }
-      case Cross2d: {
-        Vector2d<double> lhs = getVector2d();
-        Vector2d<double> rhs = getVector2d();
-        double* output = getScalarPointer();
-        *output = lhs.cross(rhs);
-        break;
-      }
-      case CrossVariableConstant2d: {
-        Vector2d<double> lhs = getVector2d();
-        Vector2d<double> rhs = getConstantVector2d();
-        double* output = getScalarPointer();
-        *output = lhs.cross(rhs);
-        break;
-      }
-      case Linear2d: {
-        const Vector2d<double>* endpoints = getConstantVector2dPointer();
-        double parameter = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = lerp(endpoints[0], endpoints[1], parameter);
-        break;
-      }
-      case Quadratic2d: {
-        const Vector2d<double>* controlPoints = getConstantVector2dPointer();
-        double parameter = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = quadraticValue(controlPoints, parameter);
-        break;
-      }
-      case Cubic2d: {
-        const Vector2d<double>* controlPoints = getConstantVector2dPointer();
-        double parameter = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = cubicValue(controlPoints, parameter);
-        break;
-      }
-      case Quartic2d: {
-        const Vector2d<double>* controlPoints = getConstantVector2dPointer();
-        double parameter = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = quarticValue(controlPoints, parameter);
-        break;
-      }
-      case Quintic2d: {
-        const Vector2d<double>* controlPoints = getConstantVector2dPointer();
-        double parameter = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = quinticValue(controlPoints, parameter);
-        break;
-      }
-      case Bezier2d: {
-        int numControlPoints = getInt();
-        const Vector2d<double>* controlPoints = getConstantVector2dPointer();
-        double parameter = getScalar();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = bezierValue(numControlPoints, controlPoints, parameter);
-        break;
-      }
-      case TransformVector2d: {
-        const double* matrix = getConstantScalarPointer();
-        Vector2d<double> input = getVector2d();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = Vector2d(
-          matrix[0] * input.x + matrix[2] * input.y,
-          matrix[1] * input.x + matrix[3] * input.y
-        );
-        break;
-      }
-      case TransformPoint2d: {
-        const double* matrix = getConstantScalarPointer();
-        Vector2d<double> input = getVector2d();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = Vector2d(
-          matrix[0] * input.x + matrix[2] * input.y + matrix[4],
-          matrix[1] * input.x + matrix[3] * input.y + matrix[5]
-        );
-        break;
-      }
-      case ProjectVector3d: {
-        const double* matrix = getConstantScalarPointer();
-        Vector3d<double> input = getVector3d();
-        Vector2d<double>* output = getVector2dPointer();
-        *output = Vector2d(
-          matrix[0] * input.x + matrix[1] * input.y + matrix[2] * input.z,
-          matrix[3] * input.x + matrix[4] * input.y + matrix[5] * input.z
-        );
-        break;
-      }
-      case ProjectPoint3d: {
-        const double* matrix = getConstantScalarPointer();
-        Vector3d<double> input = getVector3d();
-        Vector2d<double>* output = getVector2dPointer();
-        double dx = input.x - matrix[6];
-        double dy = input.y - matrix[7];
-        double dz = input.z - matrix[8];
-        *output = Vector2d(
-          matrix[0] * dx + matrix[1] * dy + matrix[2] * dz,
-          matrix[3] * dx + matrix[4] * dy + matrix[5] * dz
-        );
-        break;
-      }
-      case XYZ3d: {
-        double x = getScalar();
-        double y = getScalar();
-        double z = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = Vector3d(x, y, z);
-        break;
-      }
-      case XYC3d: {
-        double x = getScalar();
-        double y = getScalar();
-        double z = getConstantScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = Vector3d(x, y, z);
-        break;
-      }
-      case XCZ3d: {
-        double x = getScalar();
-        double y = getConstantScalar();
-        double z = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = Vector3d(x, y, z);
-        break;
-      }
-      case CYZ3d: {
-        double x = getConstantScalar();
-        double y = getScalar();
-        double z = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = Vector3d(x, y, z);
-        break;
-      }
-      case XCC3d: {
-        double x = getScalar();
-        double y = getConstantScalar();
-        double z = getConstantScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = Vector3d(x, y, z);
-        break;
-      }
-      case CYC3d: {
-        double x = getConstantScalar();
-        double y = getScalar();
-        double z = getConstantScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = Vector3d(x, y, z);
-        break;
-      }
-      case CCZ3d: {
-        double x = getConstantScalar();
-        double y = getConstantScalar();
-        double z = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = Vector3d(x, y, z);
-        break;
-      }
-      case Negate3d: {
-        Vector3d<double> input = getVector3d();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = -input;
-        break;
-      }
-      case Add3d: {
-        Vector3d<double> lhs = getVector3d();
-        Vector3d<double> rhs = getVector3d();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = lhs + rhs;
-        break;
-      }
-      case AddVariableConstant3d: {
-        Vector3d<double> lhs = getVector3d();
-        Vector3d<double> rhs = getConstantVector3d();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = lhs + rhs;
-        break;
-      }
-      case Subtract3d: {
-        Vector3d<double> lhs = getVector3d();
-        Vector3d<double> rhs = getVector3d();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = lhs - rhs;
-        break;
-      }
-      case SubtractConstantVariable3d: {
-        Vector3d<double> lhs = getConstantVector3d();
-        Vector3d<double> rhs = getVector3d();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = lhs - rhs;
-        break;
-      }
-      case Multiply3d: {
-        Vector3d<double> lhs = getVector3d();
-        double rhs = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = lhs * rhs;
-        break;
-      }
-      case MultiplyVariableConstant3d: {
-        Vector3d<double> lhs = getVector3d();
-        double rhs = getConstantScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = lhs * rhs;
-        break;
-      }
-      case MultiplyConstantVariable3d: {
-        Vector3d<double> lhs = getConstantVector3d();
-        double rhs = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = lhs * rhs;
-        break;
-      }
-      case Divide3d: {
-        Vector3d<double> lhs = getVector3d();
-        double rhs = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = lhs / rhs;
-        break;
-      }
-      case DivideConstantVariable3d: {
-        Vector3d<double> lhs = getConstantVector3d();
-        double rhs = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = lhs / rhs;
-        break;
-      }
-      case SquaredMagnitude3d: {
-        Vector3d<double> arg = getVector3d();
-        double* output = getScalarPointer();
-        *output = arg.squaredMagnitude();
-        break;
-      }
-      case Magnitude3d: {
-        Vector3d<double> arg = getVector3d();
-        double* output = getScalarPointer();
-        *output = arg.magnitude();
-        break;
-      }
-      case Dot3d: {
-        Vector3d<double> lhs = getVector3d();
-        Vector3d<double> rhs = getVector3d();
-        double* output = getScalarPointer();
-        *output = lhs.dot(rhs);
-        break;
-      }
-      case DotVariableConstant3d: {
-        Vector3d<double> lhs = getVector3d();
-        Vector3d<double> rhs = getConstantVector3d();
-        double* output = getScalarPointer();
-        *output = lhs.dot(rhs);
-        break;
-      }
-      case Cross3d: {
-        Vector3d<double> lhs = getVector3d();
-        Vector3d<double> rhs = getVector3d();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = lhs.cross(rhs);
-        break;
-      }
-      case CrossVariableConstant3d: {
-        Vector3d<double> lhs = getVector3d();
-        Vector3d<double> rhs = getConstantVector3d();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = lhs.cross(rhs);
-        break;
-      }
-      case Linear3d: {
-        const Vector3d<double>* endpoints = getConstantVector3dPointer();
-        double parameter = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = lerp(endpoints[0], endpoints[1], parameter);
-        break;
-      }
-      case Quadratic3d: {
-        const Vector3d<double>* controlPoints = getConstantVector3dPointer();
-        double parameter = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = quadraticValue(controlPoints, parameter);
-        break;
-      }
-      case Cubic3d: {
-        const Vector3d<double>* controlPoints = getConstantVector3dPointer();
-        double parameter = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = cubicValue(controlPoints, parameter);
-        break;
-      }
-      case Quartic3d: {
-        const Vector3d<double>* controlPoints = getConstantVector3dPointer();
-        double parameter = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = quarticValue(controlPoints, parameter);
-        break;
-      }
-      case Quintic3d: {
-        const Vector3d<double>* controlPoints = getConstantVector3dPointer();
-        double parameter = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = quinticValue(controlPoints, parameter);
-        break;
-      }
-      case Bezier3d: {
-        int numControlPoints = getInt();
-        const Vector3d<double>* controlPoints = getConstantVector3dPointer();
-        double parameter = getScalar();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = bezierValue(numControlPoints, controlPoints, parameter);
-        break;
-      }
-      case TransformVector3d: {
-        const double* matrix = getConstantScalarPointer();
-        Vector3d<double> input = getVector3d();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = Vector3d(
-          matrix[0] * input.x + matrix[3] * input.y + matrix[6] * input.z,
-          matrix[1] * input.x + matrix[4] * input.y + matrix[7] * input.z,
-          matrix[2] * input.x + matrix[5] * input.y + matrix[8] * input.z
-        );
-        break;
-      }
-      case TransformPoint3d: {
-        const double* matrix = getConstantScalarPointer();
-        Vector3d<double> input = getVector3d();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = Vector3d(
-          matrix[0] * input.x + matrix[3] * input.y + matrix[6] * input.z + matrix[9],
-          matrix[1] * input.x + matrix[4] * input.y + matrix[7] * input.z + matrix[10],
-          matrix[2] * input.x + matrix[5] * input.y + matrix[8] * input.z + matrix[11]
-        );
-        break;
-      }
-      case PlaceVector2d: {
-        const double* matrix = getConstantScalarPointer();
-        Vector2d<double> input = getVector2d();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = Vector3d(
-          matrix[0] * input.x + matrix[3] * input.y,
-          matrix[1] * input.x + matrix[4] * input.y,
-          matrix[2] * input.x + matrix[5] * input.y
-        );
-        break;
-      }
-      case PlacePoint2d: {
-        const double* matrix = getConstantScalarPointer();
-        Vector2d<double> input = getVector2d();
-        Vector3d<double>* output = getVector3dPointer();
-        *output = Vector3d(
-          matrix[0] * input.x + matrix[3] * input.y + matrix[6],
-          matrix[1] * input.x + matrix[4] * input.y + matrix[7],
-          matrix[2] * input.x + matrix[5] * input.y + matrix[8]
-        );
-        break;
-      }
-      case Desingularized1d: {
-        double t = getScalar();
-        double start = getScalar();
-        double middle = getScalar();
-        double end = getScalar();
-        double* output = getScalarPointer();
-        if (t <= T0) {
-          *output = start;
-        } else if (t >= T1) {
-          *output = end;
-        } else {
-          *output = middle;
-        }
-        break;
-      }
-      case Desingularized2d: {
-        double t = getScalar();
-        Vector2d<double> start = getVector2d();
-        Vector2d<double> middle = getVector2d();
-        Vector2d<double> end = getVector2d();
-        Vector2d<double>* output = getVector2dPointer();
-        if (t <= T0) {
-          *output = start;
-        } else if (t >= T1) {
-          *output = end;
-        } else {
-          *output = middle;
-        }
-        break;
-      }
-      case Desingularized3d: {
-        double t = getScalar();
-        Vector3d<double> start = getVector3d();
-        Vector3d<double> middle = getVector3d();
-        Vector3d<double> end = getVector3d();
-        Vector3d<double>* output = getVector3dPointer();
-        if (t <= T0) {
-          *output = start;
-        } else if (t >= T1) {
-          *output = end;
-        } else {
-          *output = middle;
-        }
-        break;
-      }
-      case Cube1d: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = input * input * input;
-        break;
-      }
-      case Blend00: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b00(input);
-        break;
-      }
-      case Blend00d1: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b00d1(input);
-        break;
-      }
-      case Blend00d2: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b00d2(input);
-        break;
-      }
-      case Blend00d3: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b00d3(input);
-        break;
-      }
-      case Blend01: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b01(input);
-        break;
-      }
-      case Blend01d1: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b01d1(input);
-        break;
-      }
-      case Blend01d2: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b01d2(input);
-        break;
-      }
-      case Blend01d3: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b01d3(input);
-        break;
-      }
-      case Blend02: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b02(input);
-        break;
-      }
-      case Blend02d1: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b02d1(input);
-        break;
-      }
-      case Blend02d2: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b02d2(input);
-        break;
-      }
-      case Blend02d3: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b02d3(input);
-        break;
-      }
-      case Blend10: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b10(input);
-        break;
-      }
-      case Blend10d1: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b10d1(input);
-        break;
-      }
-      case Blend10d2: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b10d2(input);
-        break;
-      }
-      case Blend10d3: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b10d3(input);
-        break;
-      }
-      case Blend11: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b11(input);
-        break;
-      }
-      case Blend11d1: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b11d1(input);
-        break;
-      }
-      case Blend11d2: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b11d2(input);
-        break;
-      }
-      case Blend11d3: {
-        double input = getScalar();
-        double* output = getScalarPointer();
-        *output = b11d3(input);
-        break;
-      }
-      case OPCODE_END: {
-        assert(false && "Should never hit dummy OPCODE_END value");
-        break;
-      }
-    }
-  }
+inline Vector3d<double>
+bezier(int numControlPoints, const Vector3d<double>* controlPoints, double t) {
+  return bezierBlossom(numControlPoints, controlPoints, t, t, 0);
 }
 
 inline Bounds
-linearBounds(const double* p, Bounds t) {
-  double a = lerp(p[0], p[1], t.lower);
-  double b = lerp(p[0], p[1], t.upper);
-  return Bounds::hull2(a, b);
-}
-
-inline Vector2d<Bounds>
-linearBounds(const Vector2d<double>* p, Bounds t) {
-  Vector2d<double> a = lerp(p[0], p[1], t.lower);
-  Vector2d<double> b = lerp(p[0], p[1], t.upper);
-  return Vector2d<Bounds>::hull2(a, b);
-}
-
-inline Vector3d<Bounds>
-linearBounds(const Vector3d<double>* p, Bounds t) {
-  Vector3d<double> a = lerp(p[0], p[1], t.lower);
-  Vector3d<double> b = lerp(p[0], p[1], t.upper);
-  return Vector3d<Bounds>::hull2(a, b);
-}
-
-inline Bounds
-quadraticBounds(const double* p, Bounds t) {
+quadraticBezier(const double* p, Bounds t) {
   double a = quadraticBlossom(p, t.lower, t.lower);
   double b = quadraticBlossom(p, t.lower, t.upper);
   double c = quadraticBlossom(p, t.upper, t.upper);
@@ -1185,7 +361,7 @@ quadraticBounds(const double* p, Bounds t) {
 }
 
 inline Vector2d<Bounds>
-quadraticBounds(const Vector2d<double>* p, Bounds t) {
+quadraticBezier(const Vector2d<double>* p, Bounds t) {
   Vector2d<double> a = quadraticBlossom(p, t.lower, t.lower);
   Vector2d<double> b = quadraticBlossom(p, t.lower, t.upper);
   Vector2d<double> c = quadraticBlossom(p, t.upper, t.upper);
@@ -1193,7 +369,7 @@ quadraticBounds(const Vector2d<double>* p, Bounds t) {
 }
 
 inline Vector3d<Bounds>
-quadraticBounds(const Vector3d<double>* p, Bounds t) {
+quadraticBezier(const Vector3d<double>* p, Bounds t) {
   Vector3d<double> a = quadraticBlossom(p, t.lower, t.lower);
   Vector3d<double> b = quadraticBlossom(p, t.lower, t.upper);
   Vector3d<double> c = quadraticBlossom(p, t.upper, t.upper);
@@ -1201,7 +377,7 @@ quadraticBounds(const Vector3d<double>* p, Bounds t) {
 }
 
 inline Bounds
-cubicBounds(const double* p, Bounds t) {
+cubicBezier(const double* p, Bounds t) {
   double a = cubicBlossom(p, t.lower, t.lower, t.lower);
   double b = cubicBlossom(p, t.lower, t.lower, t.upper);
   double c = cubicBlossom(p, t.lower, t.upper, t.upper);
@@ -1210,7 +386,7 @@ cubicBounds(const double* p, Bounds t) {
 }
 
 inline Vector2d<Bounds>
-cubicBounds(const Vector2d<double>* p, Bounds t) {
+cubicBezier(const Vector2d<double>* p, Bounds t) {
   Vector2d<double> a = cubicBlossom(p, t.lower, t.lower, t.lower);
   Vector2d<double> b = cubicBlossom(p, t.lower, t.lower, t.upper);
   Vector2d<double> c = cubicBlossom(p, t.lower, t.upper, t.upper);
@@ -1219,7 +395,7 @@ cubicBounds(const Vector2d<double>* p, Bounds t) {
 }
 
 inline Vector3d<Bounds>
-cubicBounds(const Vector3d<double>* p, Bounds t) {
+cubicBezier(const Vector3d<double>* p, Bounds t) {
   Vector3d<double> a = cubicBlossom(p, t.lower, t.lower, t.lower);
   Vector3d<double> b = cubicBlossom(p, t.lower, t.lower, t.upper);
   Vector3d<double> c = cubicBlossom(p, t.lower, t.upper, t.upper);
@@ -1228,7 +404,7 @@ cubicBounds(const Vector3d<double>* p, Bounds t) {
 }
 
 inline Bounds
-quarticBounds(const double* p, Bounds t) {
+quarticBezier(const double* p, Bounds t) {
   double a = quarticBlossom(p, t.lower, t.lower, t.lower, t.lower);
   double b = quarticBlossom(p, t.lower, t.lower, t.lower, t.upper);
   double c = quarticBlossom(p, t.lower, t.lower, t.upper, t.upper);
@@ -1238,7 +414,7 @@ quarticBounds(const double* p, Bounds t) {
 }
 
 inline Vector2d<Bounds>
-quarticBounds(const Vector2d<double>* p, Bounds t) {
+quarticBezier(const Vector2d<double>* p, Bounds t) {
   Vector2d<double> a = quarticBlossom(p, t.lower, t.lower, t.lower, t.lower);
   Vector2d<double> b = quarticBlossom(p, t.lower, t.lower, t.lower, t.upper);
   Vector2d<double> c = quarticBlossom(p, t.lower, t.lower, t.upper, t.upper);
@@ -1248,7 +424,7 @@ quarticBounds(const Vector2d<double>* p, Bounds t) {
 }
 
 inline Vector3d<Bounds>
-quarticBounds(const Vector3d<double>* p, Bounds t) {
+quarticBezier(const Vector3d<double>* p, Bounds t) {
   Vector3d<double> a = quarticBlossom(p, t.lower, t.lower, t.lower, t.lower);
   Vector3d<double> b = quarticBlossom(p, t.lower, t.lower, t.lower, t.upper);
   Vector3d<double> c = quarticBlossom(p, t.lower, t.lower, t.upper, t.upper);
@@ -1258,7 +434,7 @@ quarticBounds(const Vector3d<double>* p, Bounds t) {
 }
 
 inline Bounds
-quinticBounds(const double* p, Bounds t) {
+quinticBezier(const double* p, Bounds t) {
   double a = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.lower);
   double b = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.upper);
   double c = quinticBlossom(p, t.lower, t.lower, t.lower, t.upper, t.upper);
@@ -1269,7 +445,7 @@ quinticBounds(const double* p, Bounds t) {
 }
 
 inline Vector2d<Bounds>
-quinticBounds(const Vector2d<double>* p, Bounds t) {
+quinticBezier(const Vector2d<double>* p, Bounds t) {
   Vector2d<double> a = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.lower);
   Vector2d<double> b = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.upper);
   Vector2d<double> c = quinticBlossom(p, t.lower, t.lower, t.lower, t.upper, t.upper);
@@ -1280,7 +456,7 @@ quinticBounds(const Vector2d<double>* p, Bounds t) {
 }
 
 inline Vector3d<Bounds>
-quinticBounds(const Vector3d<double>* p, Bounds t) {
+quinticBezier(const Vector3d<double>* p, Bounds t) {
   Vector3d<double> a = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.lower);
   Vector3d<double> b = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.upper);
   Vector3d<double> c = quinticBlossom(p, t.lower, t.lower, t.lower, t.upper, t.upper);
@@ -1291,7 +467,7 @@ quinticBounds(const Vector3d<double>* p, Bounds t) {
 }
 
 inline Bounds
-bezierBounds(int numControlPoints, const double* controlPoints, Bounds t) {
+bezier(int numControlPoints, const double* controlPoints, Bounds t) {
   if (numControlPoints <= 0) {
     return Bounds::invalid();
   }
@@ -1307,7 +483,7 @@ bezierBounds(int numControlPoints, const double* controlPoints, Bounds t) {
 }
 
 inline Vector2d<Bounds>
-bezierBounds(int numControlPoints, const Vector2d<double>* controlPoints, Bounds t) {
+bezier(int numControlPoints, const Vector2d<double>* controlPoints, Bounds t) {
   if (numControlPoints <= 0) {
     return Vector2d<Bounds>::invalid();
   }
@@ -1327,7 +503,7 @@ bezierBounds(int numControlPoints, const Vector2d<double>* controlPoints, Bounds
 }
 
 inline Vector3d<Bounds>
-bezierBounds(int numControlPoints, const Vector3d<double>* controlPoints, Bounds t) {
+bezier(int numControlPoints, const Vector3d<double>* controlPoints, Bounds t) {
   if (numControlPoints <= 0) {
     return Vector3d<Bounds>::invalid();
   }
@@ -1350,12 +526,153 @@ bezierBounds(int numControlPoints, const Vector3d<double>* controlPoints, Bounds
   return Vector3d(Bounds(minX, maxX), Bounds(minY, maxY), Bounds(minZ, maxZ));
 }
 
+inline bool
+isStart(double t) {
+  return t <= T0;
+}
+
+inline bool
+isStart(Bounds t) {
+  return t.upper <= T0;
+}
+
+inline bool
+isEnd(double t) {
+  return t >= T1;
+}
+
+inline bool
+isEnd(Bounds t) {
+  return t.lower >= T1;
+}
+
+template <class Scalar>
+Scalar
+b00(Scalar t) {
+  return 3.0 * fourthPower(t) - 4.0 * cubed(t) + 1.0;
+}
+
+template <class Scalar>
+Scalar
+b00d1(Scalar t) {
+  return 12.0 * (cubed(t) - squared(t));
+}
+
+template <class Scalar>
+Scalar
+b00d2(Scalar t) {
+  return 36.0 * squared(t) - 24.0 * t;
+}
+
+template <class Scalar>
+Scalar
+b00d3(Scalar t) {
+  return 72.0 * t - 24.0;
+}
+
+template <class Scalar>
+Scalar
+b01(Scalar t) {
+  return 2.0 * fourthPower(t) - 3.0 * cubed(t) + t;
+}
+
+template <class Scalar>
+Scalar
+b01d1(Scalar t) {
+  return 8.0 * cubed(t) - 9.0 * squared(t) + 1.0;
+}
+
+template <class Scalar>
+Scalar
+b01d2(Scalar t) {
+  return 24.0 * squared(t) - 18.0 * t;
+}
+
+template <class Scalar>
+Scalar
+b01d3(Scalar t) {
+  return 48.0 * t - 18.0;
+}
+
+template <class Scalar>
+Scalar
+b02(Scalar t) {
+  return 0.5 * fourthPower(t) - cubed(t) + 0.5 * squared(t);
+}
+
+template <class Scalar>
+Scalar
+b02d1(Scalar t) {
+  return 2.0 * cubed(t) - 3.0 * squared(t) + t;
+}
+
+template <class Scalar>
+Scalar
+b02d2(Scalar t) {
+  return 6.0 * squared(t) - 6.0 * t + 1.0;
+}
+
+template <class Scalar>
+Scalar
+b02d3(Scalar t) {
+  return 12.0 * t - 6.0;
+}
+
+template <class Scalar>
+Scalar
+b10(Scalar t) {
+  return -3.0 * fourthPower(t) + 4.0 * cubed(t);
+}
+
+template <class Scalar>
+Scalar
+b10d1(Scalar t) {
+  return 12.0 * (squared(t) - cubed(t));
+}
+
+template <class Scalar>
+Scalar
+b10d2(Scalar t) {
+  return -36.0 * squared(t) + 24.0 * t;
+}
+
+template <class Scalar>
+Scalar
+b10d3(Scalar t) {
+  return -72.0 * t + 24.0;
+}
+
+template <class Scalar>
+Scalar
+b11(Scalar t) {
+  return fourthPower(t) - cubed(t);
+}
+
+template <class Scalar>
+Scalar
+b11d1(Scalar t) {
+  return 4.0 * cubed(t) - 3.0 * squared(t);
+}
+
+template <class Scalar>
+Scalar
+b11d2(Scalar t) {
+  return 12.0 * squared(t) - 6.0 * t;
+}
+
+template <class Scalar>
+Scalar
+b11d3(Scalar t) {
+  return 24.0 * t - 6.0;
+}
+
+template <class T>
 void
-computeBounds(
+evaluate(
   const uint16_t* wordsPointer,
   const double* constantsPointer,
-  Bounds* variablesPointer,
-  Bounds* returnValuesPointer
+  T* variablesPointer,
+  T* returnValuesPointer
 ) {
   auto getInt = [&]() -> int {
     int value = *wordsPointer;
@@ -1380,22 +697,22 @@ computeBounds(
   auto getConstantVector3d = [&]() -> Vector3d<double> {
     return *getConstantVector3dPointer();
   };
-  auto getScalarPointer = [&]() -> Bounds* {
+  auto getScalarPointer = [&]() -> T* {
     return variablesPointer + getInt();
   };
-  auto getScalar = [&]() -> Bounds {
+  auto getScalar = [&]() -> T {
     return *getScalarPointer();
   };
-  auto getVector2dPointer = [&]() -> Vector2d<Bounds>* {
-    return (Vector2d<Bounds>*)getScalarPointer();
+  auto getVector2dPointer = [&]() -> Vector2d<T>* {
+    return (Vector2d<T>*)getScalarPointer();
   };
-  auto getVector2d = [&]() -> Vector2d<Bounds> {
+  auto getVector2d = [&]() -> Vector2d<T> {
     return *getVector2dPointer();
   };
-  auto getVector3dPointer = [&]() -> Vector3d<Bounds>* {
-    return (Vector3d<Bounds>*)getScalarPointer();
+  auto getVector3dPointer = [&]() -> Vector3d<T>* {
+    return (Vector3d<T>*)getScalarPointer();
   };
-  auto getVector3d = [&]() -> Vector3d<Bounds> {
+  auto getVector3d = [&]() -> Vector3d<T> {
     return *getVector3dPointer();
   };
   while (true) {
@@ -1404,334 +721,334 @@ computeBounds(
     switch (Opcode(opcode)) {
       case Return: {
         int dimension = getInt();
-        Bounds* valuesPointer = getScalarPointer();
-        std::memcpy(returnValuesPointer, valuesPointer, sizeof(Bounds) * dimension);
+        T* valuesPointer = getScalarPointer();
+        std::memcpy(returnValuesPointer, valuesPointer, sizeof(T) * dimension);
         return;
       }
       case XComponent: {
-        const Bounds* vec = getScalarPointer();
-        Bounds* output = getScalarPointer();
+        const T* vec = getScalarPointer();
+        T* output = getScalarPointer();
         *output = vec[0];
         break;
       }
       case YComponent: {
-        const Bounds* vec = getScalarPointer();
-        Bounds* output = getScalarPointer();
+        const T* vec = getScalarPointer();
+        T* output = getScalarPointer();
         *output = vec[1];
         break;
       }
       case ZComponent: {
-        const Bounds* vec = getScalarPointer();
-        Bounds* output = getScalarPointer();
+        const T* vec = getScalarPointer();
+        T* output = getScalarPointer();
         *output = vec[2];
         break;
       }
       case Negate1d: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = -input;
         break;
       }
       case Add1d: {
-        Bounds lhs = getScalar();
-        Bounds rhs = getScalar();
-        Bounds* output = getScalarPointer();
+        T lhs = getScalar();
+        T rhs = getScalar();
+        T* output = getScalarPointer();
         *output = lhs + rhs;
         break;
       }
       case AddVariableConstant1d: {
-        Bounds lhs = getScalar();
+        T lhs = getScalar();
         double rhs = getConstantScalar();
-        Bounds* output = getScalarPointer();
+        T* output = getScalarPointer();
         *output = lhs + rhs;
         break;
       }
       case Subtract1d: {
-        Bounds lhs = getScalar();
-        Bounds rhs = getScalar();
-        Bounds* output = getScalarPointer();
+        T lhs = getScalar();
+        T rhs = getScalar();
+        T* output = getScalarPointer();
         *output = lhs - rhs;
         break;
       }
       case SubtractConstantVariable1d: {
         double lhs = getConstantScalar();
-        Bounds rhs = getScalar();
-        Bounds* output = getScalarPointer();
+        T rhs = getScalar();
+        T* output = getScalarPointer();
         *output = lhs - rhs;
         break;
       }
       case Multiply1d: {
-        Bounds lhs = getScalar();
-        Bounds rhs = getScalar();
-        Bounds* output = getScalarPointer();
+        T lhs = getScalar();
+        T rhs = getScalar();
+        T* output = getScalarPointer();
         *output = lhs * rhs;
         break;
       }
       case MultiplyVariableConstant1d: {
-        Bounds lhs = getScalar();
+        T lhs = getScalar();
         double rhs = getConstantScalar();
-        Bounds* output = getScalarPointer();
+        T* output = getScalarPointer();
         *output = lhs * rhs;
         break;
       }
       case Divide1d: {
-        Bounds lhs = getScalar();
-        Bounds rhs = getScalar();
-        Bounds* output = getScalarPointer();
+        T lhs = getScalar();
+        T rhs = getScalar();
+        T* output = getScalarPointer();
         *output = lhs / rhs;
         break;
       }
       case DivideConstantVariable1d: {
         double lhs = getConstantScalar();
-        Bounds rhs = getScalar();
-        Bounds* output = getScalarPointer();
+        T rhs = getScalar();
+        T* output = getScalarPointer();
         *output = lhs / rhs;
         break;
       }
       case Square1d: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
-        *output = input.squared();
+        T input = getScalar();
+        T* output = getScalarPointer();
+        *output = input * input;
         break;
       }
       case Sqrt1d: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
-        *output = input.sqrt();
+        T input = getScalar();
+        T* output = getScalarPointer();
+        *output = squareRoot(input);
         break;
       }
       case Sin1d: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
-        *output = input.sin();
+        T input = getScalar();
+        T* output = getScalarPointer();
+        *output = sine(input);
         break;
       }
       case Cos1d: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
-        *output = input.cos();
+        T input = getScalar();
+        T* output = getScalarPointer();
+        *output = cosine(input);
         break;
       }
       case Linear1d: {
         const double* endpoints = getConstantScalarPointer();
-        Bounds parameter = getScalar();
-        Bounds* output = getScalarPointer();
-        *output = linearBounds(endpoints, parameter);
+        T parameter = getScalar();
+        T* output = getScalarPointer();
+        *output = interpolateFrom(endpoints[0], endpoints[1], parameter);
         break;
       }
       case Quadratic1d: {
         const double* controlPoints = getConstantScalarPointer();
-        const Bounds parameter = getScalar();
-        Bounds* output = getScalarPointer();
-        *output = quadraticBounds(controlPoints, parameter);
+        const T parameter = getScalar();
+        T* output = getScalarPointer();
+        *output = quadraticBezier(controlPoints, parameter);
         break;
       }
       case Cubic1d: {
         const double* controlPoints = getConstantScalarPointer();
-        const Bounds parameter = getScalar();
-        Bounds* output = getScalarPointer();
-        *output = cubicBounds(controlPoints, parameter);
+        T parameter = getScalar();
+        T* output = getScalarPointer();
+        *output = cubicBezier(controlPoints, parameter);
         break;
       }
       case Quartic1d: {
         const double* controlPoints = getConstantScalarPointer();
-        const Bounds parameter = getScalar();
-        Bounds* output = getScalarPointer();
-        *output = quarticBounds(controlPoints, parameter);
+        T parameter = getScalar();
+        T* output = getScalarPointer();
+        *output = quarticBezier(controlPoints, parameter);
         break;
       }
       case Quintic1d: {
         const double* controlPoints = getConstantScalarPointer();
-        const Bounds parameter = getScalar();
-        Bounds* output = getScalarPointer();
-        *output = quinticBounds(controlPoints, parameter);
+        T parameter = getScalar();
+        T* output = getScalarPointer();
+        *output = quinticBezier(controlPoints, parameter);
         break;
       }
       case Bezier1d: {
         int numControlPoints = getInt();
         const double* controlPoints = getConstantScalarPointer();
-        const Bounds parameter = getScalar();
-        Bounds* output = getScalarPointer();
-        *output = bezierBounds(numControlPoints, controlPoints, parameter);
+        T parameter = getScalar();
+        T* output = getScalarPointer();
+        *output = bezier(numControlPoints, controlPoints, parameter);
         break;
       }
       case XY2d: {
-        Bounds x = getScalar();
-        Bounds y = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        T x = getScalar();
+        T y = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
         *output = Vector2d(x, y);
         break;
       }
       case XC2d: {
-        Bounds x = getScalar();
+        T x = getScalar();
         double y = getConstantScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
-        *output = Vector2d(x, Bounds(y));
+        Vector2d<T>* output = getVector2dPointer();
+        *output = Vector2d<T>(x, y);
         break;
       }
       case CY2d: {
         double x = getConstantScalar();
-        Bounds y = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
-        *output = Vector2d(Bounds(x), y);
+        T y = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
+        *output = Vector2d<T>(x, y);
         break;
       }
       case Negate2d: {
-        Vector2d<Bounds> input = getVector2d();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        Vector2d<T> input = getVector2d();
+        Vector2d<T>* output = getVector2dPointer();
         *output = -input;
         break;
       }
       case Add2d: {
-        Vector2d<Bounds> lhs = getVector2d();
-        Vector2d<Bounds> rhs = getVector2d();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        Vector2d<T> lhs = getVector2d();
+        Vector2d<T> rhs = getVector2d();
+        Vector2d<T>* output = getVector2dPointer();
         *output = lhs + rhs;
         break;
       }
       case AddVariableConstant2d: {
-        Vector2d<Bounds> lhs = getVector2d();
+        Vector2d<T> lhs = getVector2d();
         Vector2d<double> rhs = getConstantVector2d();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        Vector2d<T>* output = getVector2dPointer();
         *output = lhs + rhs;
         break;
       }
       case Subtract2d: {
-        Vector2d<Bounds> lhs = getVector2d();
-        Vector2d<Bounds> rhs = getVector2d();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        Vector2d<T> lhs = getVector2d();
+        Vector2d<T> rhs = getVector2d();
+        Vector2d<T>* output = getVector2dPointer();
         *output = lhs - rhs;
         break;
       }
       case SubtractConstantVariable2d: {
         Vector2d<double> lhs = getConstantVector2d();
-        Vector2d<Bounds> rhs = getVector2d();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        Vector2d<T> rhs = getVector2d();
+        Vector2d<T>* output = getVector2dPointer();
         *output = lhs - rhs;
         break;
       }
       case Multiply2d: {
-        Vector2d<Bounds> lhs = getVector2d();
-        Bounds rhs = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        Vector2d<T> lhs = getVector2d();
+        T rhs = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
         *output = lhs * rhs;
         break;
       }
       case MultiplyVariableConstant2d: {
-        Vector2d<Bounds> lhs = getVector2d();
+        Vector2d<T> lhs = getVector2d();
         double rhs = getConstantScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        Vector2d<T>* output = getVector2dPointer();
         *output = lhs * rhs;
         break;
       }
       case MultiplyConstantVariable2d: {
         Vector2d<double> lhs = getConstantVector2d();
-        Bounds rhs = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        T rhs = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
         *output = lhs * rhs;
         break;
       }
       case Divide2d: {
-        Vector2d<Bounds> lhs = getVector2d();
-        Bounds rhs = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        Vector2d<T> lhs = getVector2d();
+        T rhs = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
         *output = lhs / rhs;
         break;
       }
       case DivideConstantVariable2d: {
         Vector2d<double> lhs = getConstantVector2d();
-        Bounds rhs = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        T rhs = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
         *output = lhs / rhs;
         break;
       }
       case SquaredMagnitude2d: {
-        Vector2d<Bounds> arg = getVector2d();
-        Bounds* output = getScalarPointer();
+        Vector2d<T> arg = getVector2d();
+        T* output = getScalarPointer();
         *output = arg.squaredMagnitude();
         break;
       }
       case Magnitude2d: {
-        Vector2d<Bounds> arg = getVector2d();
-        Bounds* output = getScalarPointer();
+        Vector2d<T> arg = getVector2d();
+        T* output = getScalarPointer();
         *output = arg.magnitude();
         break;
       }
       case Dot2d: {
-        Vector2d<Bounds> lhs = getVector2d();
-        Vector2d<Bounds> rhs = getVector2d();
-        Bounds* output = getScalarPointer();
+        Vector2d<T> lhs = getVector2d();
+        Vector2d<T> rhs = getVector2d();
+        T* output = getScalarPointer();
         *output = lhs.dot(rhs);
         break;
       }
       case DotVariableConstant2d: {
-        Vector2d<Bounds> lhs = getVector2d();
+        Vector2d<T> lhs = getVector2d();
         Vector2d<double> rhs = getConstantVector2d();
-        Bounds* output = getScalarPointer();
+        T* output = getScalarPointer();
         *output = lhs.dot(rhs);
         break;
       }
       case Cross2d: {
-        Vector2d<Bounds> lhs = getVector2d();
-        Vector2d<Bounds> rhs = getVector2d();
-        Bounds* output = getScalarPointer();
+        Vector2d<T> lhs = getVector2d();
+        Vector2d<T> rhs = getVector2d();
+        T* output = getScalarPointer();
         *output = lhs.cross(rhs);
         break;
       }
       case CrossVariableConstant2d: {
-        Vector2d<Bounds> lhs = getVector2d();
+        Vector2d<T> lhs = getVector2d();
         Vector2d<double> rhs = getConstantVector2d();
-        Bounds* output = getScalarPointer();
+        T* output = getScalarPointer();
         *output = lhs.cross(rhs);
         break;
       }
       case Linear2d: {
         const Vector2d<double>* endpoints = getConstantVector2dPointer();
-        Bounds parameter = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
-        *output = linearBounds(endpoints, parameter);
+        T parameter = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
+        *output = interpolateFrom(endpoints[0], endpoints[1], parameter);
         break;
       }
       case Quadratic2d: {
         const Vector2d<double>* controlPoints = getConstantVector2dPointer();
-        Bounds parameter = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
-        *output = quadraticBounds(controlPoints, parameter);
+        T parameter = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
+        *output = quadraticBezier(controlPoints, parameter);
         break;
       }
       case Cubic2d: {
         const Vector2d<double>* controlPoints = getConstantVector2dPointer();
-        Bounds parameter = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
-        *output = cubicBounds(controlPoints, parameter);
+        T parameter = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
+        *output = cubicBezier(controlPoints, parameter);
         break;
       }
       case Quartic2d: {
         const Vector2d<double>* controlPoints = getConstantVector2dPointer();
-        Bounds parameter = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
-        *output = quarticBounds(controlPoints, parameter);
+        T parameter = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
+        *output = quarticBezier(controlPoints, parameter);
         break;
       }
       case Quintic2d: {
         const Vector2d<double>* controlPoints = getConstantVector2dPointer();
-        Bounds parameter = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
-        *output = quinticBounds(controlPoints, parameter);
+        T parameter = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
+        *output = quinticBezier(controlPoints, parameter);
         break;
       }
       case Bezier2d: {
         int numControlPoints = getInt();
         const Vector2d<double>* controlPoints = getConstantVector2dPointer();
-        Bounds parameter = getScalar();
-        Vector2d<Bounds>* output = getVector2dPointer();
-        *output = bezierBounds(numControlPoints, controlPoints, parameter);
+        T parameter = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
+        *output = bezier(numControlPoints, controlPoints, parameter);
         break;
       }
       case TransformVector2d: {
         const double* matrix = getConstantScalarPointer();
-        Vector2d<Bounds> input = getVector2d();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        Vector2d<T> input = getVector2d();
+        Vector2d<T>* output = getVector2dPointer();
         *output = Vector2d(
           matrix[0] * input.x + matrix[2] * input.y,
           matrix[1] * input.x + matrix[3] * input.y
@@ -1740,8 +1057,8 @@ computeBounds(
       }
       case TransformPoint2d: {
         const double* matrix = getConstantScalarPointer();
-        Vector2d<Bounds> input = getVector2d();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        Vector2d<T> input = getVector2d();
+        Vector2d<T>* output = getVector2dPointer();
         *output = Vector2d(
           matrix[0] * input.x + matrix[2] * input.y + matrix[4],
           matrix[1] * input.x + matrix[3] * input.y + matrix[5]
@@ -1750,8 +1067,8 @@ computeBounds(
       }
       case ProjectVector3d: {
         const double* matrix = getConstantScalarPointer();
-        Vector3d<Bounds> input = getVector3d();
-        Vector2d<Bounds>* output = getVector2dPointer();
+        Vector3d<T> input = getVector3d();
+        Vector2d<T>* output = getVector2dPointer();
         *output = Vector2d(
           matrix[0] * input.x + matrix[1] * input.y + matrix[2] * input.z,
           matrix[3] * input.x + matrix[4] * input.y + matrix[5] * input.z
@@ -1760,11 +1077,11 @@ computeBounds(
       }
       case ProjectPoint3d: {
         const double* matrix = getConstantScalarPointer();
-        Vector3d<Bounds> input = getVector3d();
-        Vector2d<Bounds>* output = getVector2dPointer();
-        Bounds dx = input.x - matrix[6];
-        Bounds dy = input.y - matrix[7];
-        Bounds dz = input.z - matrix[8];
+        Vector3d<T> input = getVector3d();
+        Vector2d<T>* output = getVector2dPointer();
+        T dx = input.x - matrix[6];
+        T dy = input.y - matrix[7];
+        T dz = input.z - matrix[8];
         *output = Vector2d(
           matrix[0] * dx + matrix[1] * dy + matrix[2] * dz,
           matrix[3] * dx + matrix[4] * dy + matrix[5] * dz
@@ -1772,217 +1089,217 @@ computeBounds(
         break;
       }
       case XYZ3d: {
-        Bounds x = getScalar();
-        Bounds y = getScalar();
-        Bounds z = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        T x = getScalar();
+        T y = getScalar();
+        T z = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
         *output = Vector3d(x, y, z);
         break;
       }
       case XYC3d: {
-        Bounds x = getScalar();
-        Bounds y = getScalar();
+        T x = getScalar();
+        T y = getScalar();
         double z = getConstantScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = Vector3d(x, y, Bounds(z));
+        Vector3d<T>* output = getVector3dPointer();
+        *output = Vector3d<T>(x, y, z);
         break;
       }
       case XCZ3d: {
-        Bounds x = getScalar();
+        T x = getScalar();
         double y = getConstantScalar();
-        Bounds z = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = Vector3d(x, Bounds(y), z);
+        T z = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
+        *output = Vector3d<T>(x, y, z);
         break;
       }
       case CYZ3d: {
         double x = getConstantScalar();
-        Bounds y = getScalar();
-        Bounds z = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = Vector3d(Bounds(x), y, z);
+        T y = getScalar();
+        T z = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
+        *output = Vector3d<T>(x, y, z);
         break;
       }
       case XCC3d: {
-        Bounds x = getScalar();
+        T x = getScalar();
         double y = getConstantScalar();
         double z = getConstantScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = Vector3d(x, Bounds(y), Bounds(z));
+        Vector3d<T>* output = getVector3dPointer();
+        *output = Vector3d<T>(x, y, z);
         break;
       }
       case CYC3d: {
         double x = getConstantScalar();
-        Bounds y = getScalar();
+        T y = getScalar();
         double z = getConstantScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = Vector3d(Bounds(x), y, Bounds(z));
+        Vector3d<T>* output = getVector3dPointer();
+        *output = Vector3d<T>(x, y, z);
         break;
       }
       case CCZ3d: {
         double x = getConstantScalar();
         double y = getConstantScalar();
-        Bounds z = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = Vector3d(Bounds(x), Bounds(y), z);
+        T z = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
+        *output = Vector3d<T>(x, y, z);
         break;
       }
       case Negate3d: {
-        Vector3d<Bounds> input = getVector3d();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector3d<T> input = getVector3d();
+        Vector3d<T>* output = getVector3dPointer();
         *output = -input;
         break;
       }
       case Add3d: {
-        Vector3d<Bounds> lhs = getVector3d();
-        Vector3d<Bounds> rhs = getVector3d();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector3d<T> lhs = getVector3d();
+        Vector3d<T> rhs = getVector3d();
+        Vector3d<T>* output = getVector3dPointer();
         *output = lhs + rhs;
         break;
       }
       case AddVariableConstant3d: {
-        Vector3d<Bounds> lhs = getVector3d();
+        Vector3d<T> lhs = getVector3d();
         Vector3d<double> rhs = getConstantVector3d();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector3d<T>* output = getVector3dPointer();
         *output = lhs + rhs;
         break;
       }
       case Subtract3d: {
-        Vector3d<Bounds> lhs = getVector3d();
-        Vector3d<Bounds> rhs = getVector3d();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector3d<T> lhs = getVector3d();
+        Vector3d<T> rhs = getVector3d();
+        Vector3d<T>* output = getVector3dPointer();
         *output = lhs - rhs;
         break;
       }
       case SubtractConstantVariable3d: {
         Vector3d<double> lhs = getConstantVector3d();
-        Vector3d<Bounds> rhs = getVector3d();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector3d<T> rhs = getVector3d();
+        Vector3d<T>* output = getVector3dPointer();
         *output = lhs - rhs;
         break;
       }
       case Multiply3d: {
-        Vector3d<Bounds> lhs = getVector3d();
-        Bounds rhs = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector3d<T> lhs = getVector3d();
+        T rhs = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
         *output = lhs * rhs;
         break;
       }
       case MultiplyVariableConstant3d: {
-        Vector3d<Bounds> lhs = getVector3d();
+        Vector3d<T> lhs = getVector3d();
         double rhs = getConstantScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector3d<T>* output = getVector3dPointer();
         *output = lhs * rhs;
         break;
       }
       case MultiplyConstantVariable3d: {
         Vector3d<double> lhs = getConstantVector3d();
-        Bounds rhs = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        T rhs = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
         *output = lhs * rhs;
         break;
       }
       case Divide3d: {
-        Vector3d<Bounds> lhs = getVector3d();
-        Bounds rhs = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector3d<T> lhs = getVector3d();
+        T rhs = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
         *output = lhs / rhs;
         break;
       }
       case DivideConstantVariable3d: {
         Vector3d<double> lhs = getConstantVector3d();
-        Bounds rhs = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        T rhs = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
         *output = lhs / rhs;
         break;
       }
       case SquaredMagnitude3d: {
-        Vector3d<Bounds> arg = getVector3d();
-        Bounds* output = getScalarPointer();
+        Vector3d<T> arg = getVector3d();
+        T* output = getScalarPointer();
         *output = arg.squaredMagnitude();
         break;
       }
       case Magnitude3d: {
-        Vector3d<Bounds> arg = getVector3d();
-        Bounds* output = getScalarPointer();
+        Vector3d<T> arg = getVector3d();
+        T* output = getScalarPointer();
         *output = arg.magnitude();
         break;
       }
       case Dot3d: {
-        Vector3d<Bounds> lhs = getVector3d();
-        Vector3d<Bounds> rhs = getVector3d();
-        Bounds* output = getScalarPointer();
+        Vector3d<T> lhs = getVector3d();
+        Vector3d<T> rhs = getVector3d();
+        T* output = getScalarPointer();
         *output = lhs.dot(rhs);
         break;
       }
       case DotVariableConstant3d: {
-        Vector3d<Bounds> lhs = getVector3d();
+        Vector3d<T> lhs = getVector3d();
         Vector3d<double> rhs = getConstantVector3d();
-        Bounds* output = getScalarPointer();
+        T* output = getScalarPointer();
         *output = lhs.dot(rhs);
         break;
       }
       case Cross3d: {
-        Vector3d<Bounds> lhs = getVector3d();
-        Vector3d<Bounds> rhs = getVector3d();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector3d<T> lhs = getVector3d();
+        Vector3d<T> rhs = getVector3d();
+        Vector3d<T>* output = getVector3dPointer();
         *output = lhs.cross(rhs);
         break;
       }
       case CrossVariableConstant3d: {
-        Vector3d<Bounds> lhs = getVector3d();
+        Vector3d<T> lhs = getVector3d();
         Vector3d<double> rhs = getConstantVector3d();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector3d<T>* output = getVector3dPointer();
         *output = lhs.cross(rhs);
         break;
       }
       case Linear3d: {
         const Vector3d<double>* endpoints = getConstantVector3dPointer();
-        Bounds parameter = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = linearBounds(endpoints, parameter);
+        T parameter = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
+        *output = interpolateFrom(endpoints[0], endpoints[1], parameter);
         break;
       }
       case Quadratic3d: {
         const Vector3d<double>* controlPoints = getConstantVector3dPointer();
-        Bounds parameter = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = quadraticBounds(controlPoints, parameter);
+        T parameter = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
+        *output = quadraticBezier(controlPoints, parameter);
         break;
       }
       case Cubic3d: {
         const Vector3d<double>* controlPoints = getConstantVector3dPointer();
-        Bounds parameter = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = cubicBounds(controlPoints, parameter);
+        T parameter = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
+        *output = cubicBezier(controlPoints, parameter);
         break;
       }
       case Quartic3d: {
         const Vector3d<double>* controlPoints = getConstantVector3dPointer();
-        Bounds parameter = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = quarticBounds(controlPoints, parameter);
+        T parameter = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
+        *output = quarticBezier(controlPoints, parameter);
         break;
       }
       case Quintic3d: {
         const Vector3d<double>* controlPoints = getConstantVector3dPointer();
-        Bounds parameter = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = quinticBounds(controlPoints, parameter);
+        T parameter = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
+        *output = quinticBezier(controlPoints, parameter);
         break;
       }
       case Bezier3d: {
         int numControlPoints = getInt();
         const Vector3d<double>* controlPoints = getConstantVector3dPointer();
-        Bounds parameter = getScalar();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        *output = bezierBounds(numControlPoints, controlPoints, parameter);
+        T parameter = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
+        *output = bezier(numControlPoints, controlPoints, parameter);
         break;
       }
       case TransformVector3d: {
         const double* matrix = getConstantScalarPointer();
-        Vector3d<Bounds> input = getVector3d();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector3d<T> input = getVector3d();
+        Vector3d<T>* output = getVector3dPointer();
         *output = Vector3d(
           matrix[0] * input.x + matrix[3] * input.y + matrix[6] * input.z,
           matrix[1] * input.x + matrix[4] * input.y + matrix[7] * input.z,
@@ -1992,8 +1309,8 @@ computeBounds(
       }
       case TransformPoint3d: {
         const double* matrix = getConstantScalarPointer();
-        Vector3d<Bounds> input = getVector3d();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector3d<T> input = getVector3d();
+        Vector3d<T>* output = getVector3dPointer();
         *output = Vector3d(
           matrix[0] * input.x + matrix[3] * input.y + matrix[6] * input.z + matrix[9],
           matrix[1] * input.x + matrix[4] * input.y + matrix[7] * input.z + matrix[10],
@@ -2003,8 +1320,8 @@ computeBounds(
       }
       case PlaceVector2d: {
         const double* matrix = getConstantScalarPointer();
-        Vector2d<Bounds> input = getVector2d();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector2d<T> input = getVector2d();
+        Vector3d<T>* output = getVector3dPointer();
         *output = Vector3d(
           matrix[0] * input.x + matrix[3] * input.y,
           matrix[1] * input.x + matrix[4] * input.y,
@@ -2014,8 +1331,8 @@ computeBounds(
       }
       case PlacePoint2d: {
         const double* matrix = getConstantScalarPointer();
-        Vector2d<Bounds> input = getVector2d();
-        Vector3d<Bounds>* output = getVector3dPointer();
+        Vector2d<T> input = getVector2d();
+        Vector3d<T>* output = getVector3dPointer();
         *output = Vector3d(
           matrix[0] * input.x + matrix[3] * input.y + matrix[6],
           matrix[1] * input.x + matrix[4] * input.y + matrix[7],
@@ -2024,14 +1341,14 @@ computeBounds(
         break;
       }
       case Desingularized1d: {
-        Bounds t = getScalar();
-        Bounds start = getScalar();
-        Bounds middle = getScalar();
-        Bounds end = getScalar();
-        Bounds* output = getScalarPointer();
-        if (t.upper <= T0) {
+        T t = getScalar();
+        T start = getScalar();
+        T middle = getScalar();
+        T end = getScalar();
+        T* output = getScalarPointer();
+        if (isStart(t)) {
           *output = start;
-        } else if (t.lower >= T1) {
+        } else if (isEnd(t)) {
           *output = end;
         } else {
           *output = middle;
@@ -2039,14 +1356,14 @@ computeBounds(
         break;
       }
       case Desingularized2d: {
-        Bounds t = getScalar();
-        Vector2d<Bounds> start = getVector2d();
-        Vector2d<Bounds> middle = getVector2d();
-        Vector2d<Bounds> end = getVector2d();
-        Vector2d<Bounds>* output = getVector2dPointer();
-        if (t.upper <= T0) {
+        T t = getScalar();
+        Vector2d<T> start = getVector2d();
+        Vector2d<T> middle = getVector2d();
+        Vector2d<T> end = getVector2d();
+        Vector2d<T>* output = getVector2dPointer();
+        if (isStart(t)) {
           *output = start;
-        } else if (t.lower >= T1) {
+        } else if (isEnd(t)) {
           *output = end;
         } else {
           *output = middle;
@@ -2054,14 +1371,14 @@ computeBounds(
         break;
       }
       case Desingularized3d: {
-        Bounds t = getScalar();
-        Vector3d<Bounds> start = getVector3d();
-        Vector3d<Bounds> middle = getVector3d();
-        Vector3d<Bounds> end = getVector3d();
-        Vector3d<Bounds>* output = getVector3dPointer();
-        if (t.upper <= T0) {
+        T t = getScalar();
+        Vector3d<T> start = getVector3d();
+        Vector3d<T> middle = getVector3d();
+        Vector3d<T> end = getVector3d();
+        Vector3d<T>* output = getVector3dPointer();
+        if (isStart(t)) {
           *output = start;
-        } else if (t.lower >= T1) {
+        } else if (isEnd(t)) {
           *output = end;
         } else {
           *output = middle;
@@ -2069,128 +1386,128 @@ computeBounds(
         break;
       }
       case Cube1d: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
-        *output = input.cubed();
+        T input = getScalar();
+        T* output = getScalarPointer();
+        *output = cubed(input);
         break;
       }
       case Blend00: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b00(input);
         break;
       }
       case Blend00d1: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b00d1(input);
         break;
       }
       case Blend00d2: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b00d2(input);
         break;
       }
       case Blend00d3: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b00d3(input);
         break;
       }
       case Blend01: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b01(input);
         break;
       }
       case Blend01d1: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b01d1(input);
         break;
       }
       case Blend01d2: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b01d2(input);
         break;
       }
       case Blend01d3: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b01d3(input);
         break;
       }
       case Blend02: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b02(input);
         break;
       }
       case Blend02d1: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b02d1(input);
         break;
       }
       case Blend02d2: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b02d2(input);
         break;
       }
       case Blend02d3: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b02d3(input);
         break;
       }
       case Blend10: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b10(input);
         break;
       }
       case Blend10d1: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b10d1(input);
         break;
       }
       case Blend10d2: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b10d2(input);
         break;
       }
       case Blend10d3: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b10d3(input);
         break;
       }
       case Blend11: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b11(input);
         break;
       }
       case Blend11d1: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b11d1(input);
         break;
       }
       case Blend11d2: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b11d2(input);
         break;
       }
       case Blend11d3: {
-        Bounds input = getScalar();
-        Bounds* output = getScalarPointer();
+        T input = getScalar();
+        T* output = getScalarPointer();
         *output = b11d3(input);
         break;
       }
@@ -2276,7 +1593,7 @@ extern "C" {
     Function function(functionPointer);
     double* variablesPointer = (double*)alloca(sizeof(double) * function.numVariableComponents);
     variablesPointer[0] = t;
-    computeValue(
+    evaluate(
       function.wordsPointer,
       function.constantsPointer,
       variablesPointer,
@@ -2294,7 +1611,7 @@ extern "C" {
     Function function(functionPointer);
     Bounds* variablesPointer = (Bounds*)alloca(sizeof(Bounds) * function.numVariableComponents);
     variablesPointer[0] = Bounds(tLower, tUpper);
-    computeBounds(
+    evaluate(
       function.wordsPointer,
       function.constantsPointer,
       variablesPointer,
@@ -2313,7 +1630,7 @@ extern "C" {
     double* variablesPointer = (double*)alloca(sizeof(double) * function.numVariableComponents);
     variablesPointer[0] = u;
     variablesPointer[1] = v;
-    computeValue(
+    evaluate(
       function.wordsPointer,
       function.constantsPointer,
       variablesPointer,
@@ -2334,7 +1651,7 @@ extern "C" {
     Bounds* variablesPointer = (Bounds*)alloca(sizeof(Bounds) * function.numVariableComponents);
     variablesPointer[0] = Bounds(uLower, uUpper);
     variablesPointer[1] = Bounds(vLower, vUpper);
-    computeBounds(
+    evaluate(
       function.wordsPointer,
       function.constantsPointer,
       variablesPointer,
@@ -2361,19 +1678,14 @@ extern "C" {
       functionVariablesPointer[0] = u;
       functionVariablesPointer[1] = v;
       double result;
-      computeValue(
-        function.wordsPointer,
-        function.constantsPointer,
-        functionVariablesPointer,
-        &result
-      );
+      evaluate(function.wordsPointer, function.constantsPointer, functionVariablesPointer, &result);
       return result;
     };
     auto d = [derivative, derivativeVariablesPointer, v](double u) {
       derivativeVariablesPointer[0] = u;
       derivativeVariablesPointer[1] = v;
       double result;
-      computeValue(
+      evaluate(
         derivative.wordsPointer,
         derivative.constantsPointer,
         derivativeVariablesPointer,
@@ -2411,19 +1723,14 @@ extern "C" {
       functionVariablesPointer[0] = u;
       functionVariablesPointer[1] = v;
       double result;
-      computeValue(
-        function.wordsPointer,
-        function.constantsPointer,
-        functionVariablesPointer,
-        &result
-      );
+      evaluate(function.wordsPointer, function.constantsPointer, functionVariablesPointer, &result);
       return result;
     };
     auto d = [derivative, derivativeVariablesPointer, u](double v) {
       derivativeVariablesPointer[0] = u;
       derivativeVariablesPointer[1] = v;
       double result;
-      computeValue(
+      evaluate(
         derivative.wordsPointer,
         derivative.constantsPointer,
         derivativeVariablesPointer,
