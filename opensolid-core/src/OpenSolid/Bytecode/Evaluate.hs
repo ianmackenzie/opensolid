@@ -51,7 +51,6 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
