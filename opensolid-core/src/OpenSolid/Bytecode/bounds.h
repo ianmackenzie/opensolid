@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <iostream>
 
 #define PI 3.14159265358979323846
 
@@ -231,4 +232,10 @@ operator/(double lhs, Bounds rhs) {
   } else {
     return Bounds::infinite();
   }
+}
+
+inline std::ostream&
+operator<<(std::ostream& stream, Bounds bounds) {
+    stream << "Bounds(" << bounds.lower << "," << bounds.upper << ")";
+    return stream;
 }
