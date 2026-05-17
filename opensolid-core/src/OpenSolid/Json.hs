@@ -1,6 +1,6 @@
 module OpenSolid.Json
-  ( Json (.., OpenSolid.Json.Int, Object)
-  , Field (Field)
+  ( Json
+  , Field
   , field
   , object
   , text
@@ -20,44 +20,23 @@ import OpenSolid.Binary qualified as Binary
 import OpenSolid.List qualified as List
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
-import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
 data Json
   = Null
   | Bool Bool
+  | Int Int
   | Number Number
   | Text Text
   | List (List Json)
   | Map (Map Text Json)
   deriving (Eq, Show)
 
-newtype Field = KeyValuePair (Text, Json)
-
-pattern Field :: Text -> Json -> Field
-pattern Field key value <- KeyValuePair (key, value)
-
-pattern Int :: Int -> Json
-pattern Int n <- (toInt -> Just n)
-
-toInt :: Json -> Maybe Int
-toInt (Number value) = do
-  let rounded = Number.round value
-  if Number.fromInt rounded == value then Just rounded else Nothing
-toInt _ = Nothing
-
-pattern Object :: List Field -> Json
-pattern Object fields <- (getFields -> Just fields)
-
-getFields :: Json -> Maybe (List Field)
-getFields (Map fields) = Just (Data.Coerce.coerce (Map.toList fields))
-getFields _ = Nothing
-
-{-# COMPLETE Null, Bool, Number, Text, List, Object #-}
+newtype Field = Field (Text, Json)
 
 int :: Int -> Json
-int = Number . Number.fromInt
+int = Int
 
 number :: Number -> Json
 number = Number
@@ -75,7 +54,7 @@ listOf :: (a -> Json) -> List a -> Json
 listOf encodeItem items = List (List.map encodeItem items)
 
 field :: Text -> Json -> Field
-field key value = KeyValuePair (key, value)
+field key value = Field (key, value)
 
 object :: List Field -> Json
 object fields = Map (Map.fromList (Data.Coerce.coerce fields))
@@ -108,6 +87,7 @@ toBinary :: Json -> Builder
 toBinary Null = Text.toUtf8 "null"
 toBinary (Bool True) = Text.toUtf8 "true"
 toBinary (Bool False) = Text.toUtf8 "false"
+toBinary (Int value) = Text.toUtf8 (Text.int value)
 toBinary (Number value) = Text.toUtf8 (Text.number value)
 toBinary (Text value) = quotedTextBuilder value
 toBinary (List value) = do
