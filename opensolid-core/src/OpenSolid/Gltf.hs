@@ -4,6 +4,7 @@ module OpenSolid.Gltf
   ( convention
   , builder
   , writeBinary
+  , writeText
   )
 where
 
@@ -38,44 +39,63 @@ import OpenSolid.Prelude
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D)
 import OpenSolid.SurfaceVertex3D qualified as SurfaceVertex3D
+import OpenSolid.Text qualified as Text
 import OpenSolid.Vector3D qualified as Vector3D
+import System.FilePath qualified
+
+data Mode = Gltf {bufferUri :: Text} | Glb
 
 convention :: Convention3D
 convention = Convention3D.yUp
 
-builder :: Resolution Meters -> Model3D space -> Builder
-builder resolution model = do
+data Compiled = Compiled
+  { json :: Builder
+  , buffer :: Builder
+  , bufferSize :: Int
+  }
+
+compile :: Mode -> Resolution Meters -> Model3D space -> Compiled
+compile mode resolution model = do
   let meshes = Model3D.inspect (gltfMeshes resolution) model
-  let sceneObject =
-        Json.object [Json.field "nodes" $ Json.listOf Json.int [0 .. List.length meshes - 1]]
-  let unpaddedBufferBuilder = Binary.combine meshBuilder meshes
-  let unpaddedBufferByteLength = Int.sumOf meshByteLength meshes
+  let buffer = Binary.combine meshBuilder meshes
+  let bufferSize = Int.sumOf meshByteLength meshes
   let encodedMeshes = encodeMeshes 0 0 meshes
-  let bufferObject = Json.object [Json.field "byteLength" $ Json.int unpaddedBufferByteLength]
+  let nodeIndices = [0 .. List.length meshes - 1]
+  let sceneObject = Json.object [Json.field "nodes" $ Json.listOf Json.int nodeIndices]
+  let bufferObject = do
+        let byteLengthField = Json.field "byteLength" $ Json.int bufferSize
+        case mode of
+          Glb -> Json.object [byteLengthField]
+          Gltf{bufferUri} -> Json.object [byteLengthField, Json.field "uri" $ Json.text bufferUri]
   let assetObject =
         Json.object
           [ Json.field "version" $ Json.text "2.0"
           , Json.field "generator" $ Json.text "OpenSolid"
           ]
   let json =
-        Json.object
-          [ Json.field "asset" $ assetObject
-          , Json.field "scene" $ Json.int 0
-          , Json.field "scenes" $ Json.list [sceneObject]
-          , Json.field "nodes" $ Json.listOf (.meshNode) encodedMeshes
-          , Json.field "meshes" $ Json.listOf (.meshObject) encodedMeshes
-          , Json.field "bufferViews" $ Json.list (List.combine (.bufferViews) encodedMeshes)
-          , Json.field "accessors" $ Json.list (List.combine (.accessors) encodedMeshes)
-          , Json.field "materials" $ Json.listOf (.materialObject) encodedMeshes
-          , Json.field "buffers" $ Json.list [bufferObject]
-          ]
-  let unpaddedJsonBuilder = Json.toBinary json
-  let unpaddedJsonByteString = Binary.bytes unpaddedJsonBuilder
+        Json.toBinary $
+          Json.object
+            [ Json.field "asset" $ assetObject
+            , Json.field "scene" $ Json.int 0
+            , Json.field "scenes" $ Json.list [sceneObject]
+            , Json.field "nodes" $ Json.listOf (.meshNode) encodedMeshes
+            , Json.field "meshes" $ Json.listOf (.meshObject) encodedMeshes
+            , Json.field "bufferViews" $ Json.list (List.combine (.bufferViews) encodedMeshes)
+            , Json.field "accessors" $ Json.list (List.combine (.accessors) encodedMeshes)
+            , Json.field "materials" $ Json.listOf (.materialObject) encodedMeshes
+            , Json.field "buffers" $ Json.list [bufferObject]
+            ]
+  Compiled{json, buffer, bufferSize}
+
+builder :: Resolution Meters -> Model3D space -> Builder
+builder resolution model = do
+  let compiled = compile Glb resolution model
+  let unpaddedJsonByteString = Binary.bytes compiled.json
   let unpaddedJsonByteLength = ByteString.length unpaddedJsonByteString
   let (paddedJsonBuilder, paddedJsonByteLength) =
         padWith ' ' (Builder.byteString unpaddedJsonByteString) unpaddedJsonByteLength
   let (paddedBufferBuilder, paddedBufferByteLength) =
-        padWith '\0' unpaddedBufferBuilder unpaddedBufferByteLength
+        padWith '\0' compiled.buffer compiled.bufferSize
   let headerByteLength = 12
   let jsonChunkByteLength = 8 + paddedJsonByteLength
   let binaryChunkByteLength = 8 + paddedBufferByteLength
@@ -95,6 +115,15 @@ builder resolution model = do
 -- | Write a model to a binary glTF file with the given resolution.
 writeBinary :: Text -> Model3D space -> Resolution Meters -> IO ()
 writeBinary path model resolution = IO.writeBinary path (builder resolution model)
+
+writeText :: Text -> Model3D space -> Resolution Meters -> IO ()
+writeText path model resolution = do
+  let pathString = Text.unpack path
+  let bufferFileName = Text.pack (System.FilePath.takeBaseName pathString) <> ".bin"
+  let bufferPath = Text.pack (System.FilePath.dropFileName pathString) <> bufferFileName
+  let compiled = compile Gltf{bufferUri = bufferFileName} resolution model
+  IO.writeBinary path compiled.json
+  IO.writeBinary bufferPath compiled.buffer
 
 data GltfMesh = GltfMesh
   { gltfMaterial :: Json
