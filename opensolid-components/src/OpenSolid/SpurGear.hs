@@ -6,11 +6,14 @@ module OpenSolid.SpurGear
   , outerDiameter
   , metric
   , profile
+  , bounds
   )
 where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2D qualified as Axis2D
+import OpenSolid.Bounds2D (Bounds2D)
+import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.FFI (FFI)
@@ -98,3 +101,6 @@ profile gear = do
         let angle = Number.fromInt i * angularSpacing
         List.map (Curve2D.rotateAround Point2D.origin angle) toothProfileCurves
   List.combine rotatedProfileCurves [0 .. n - 1]
+
+bounds :: SpurGear -> Bounds2D Meters
+bounds gear = Circle2D.bounds (Circle2D.withDiameter (outerDiameter gear) Point2D.origin)
