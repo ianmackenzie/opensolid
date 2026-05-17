@@ -51,6 +51,7 @@ module OpenSolid.Expression
   , b11d2
   , b11d3
   , desingularized
+  , involute2D
   , Evaluation (value, range)
   , solveMonotonicSurfaceU
   , solveMonotonicSurfaceV
@@ -1678,6 +1679,9 @@ desingularized
   (VectorSurface3D middle _)
   (VectorSurface3D right _) =
     vectorSurface3D (Ast.desingularized3D parameter left middle right)
+
+involute2D :: Int -> Vector2D units -> Angle -> Angle -> Expression Number (Vector2D units)
+involute2D n r theta1 theta2 = vectorCurve2D (Ast.involute2D n r theta1 theta2)
 
 -----------------
 --- COMPILING ---

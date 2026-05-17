@@ -115,6 +115,7 @@ data Instruction
   | B11d1 VariableIndex
   | B11d2 VariableIndex
   | B11d3 VariableIndex
+  | Involute2d Int ConstantIndex ConstantIndex ConstantIndex VariableIndex
   deriving (Eq, Ord, Show, Generic, Hashable)
 
 maxValues :: Int
@@ -557,6 +558,13 @@ encodeOpcodeAndArguments instruction = case instruction of
   B11d3 arg ->
     Encode.int 111
       <> encodeVariableIndex arg
+  Involute2d n r theta1 theta2 t ->
+    Encode.int 112
+      <> Encode.int n
+      <> encodeConstantIndex r
+      <> encodeConstantIndex theta1
+      <> encodeConstantIndex theta2
+      <> encodeVariableIndex t
 
 return :: Int -> VariableIndex -> Builder
 return dimension variableIndex =

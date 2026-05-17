@@ -110,6 +110,7 @@ enum Opcode {
   Blend11d1 = 109,
   Blend11d2 = 110,
   Blend11d3 = 111,
+  Involute2d = 112,
   OPCODE_END
 };
 

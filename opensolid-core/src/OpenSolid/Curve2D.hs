@@ -23,6 +23,7 @@ module OpenSolid.Curve2D
   , quadraticBezier
   , cubicBezier
   , hermite
+  , involute
   , derivativeValue
   , derivativeRange
   , secondDerivativeValue
@@ -389,6 +390,16 @@ hermite ::
   List (Vector2D units) ->
   Curve2D units
 hermite = Curve.hermite
+
+involute :: Point2D units -> Vector2D units -> Angle -> Angle -> Curve2D units
+involute centerPoint radialVector startAngle endAngle =
+  centerPoint + involuteVector 0 radialVector startAngle endAngle
+
+involuteVector :: Int -> Vector2D units -> Angle -> Angle -> VectorCurve2D units
+involuteVector n r theta1 theta2 =
+  VectorCurve2D.new
+    (CompiledFunction.concrete (Expression.involute2D n r theta1 theta2))
+    (involuteVector (n + 1) r theta1 theta2)
 
 {-# INLINE derivativeValue #-}
 derivativeValue :: Curve2D units -> Number -> Vector2D units

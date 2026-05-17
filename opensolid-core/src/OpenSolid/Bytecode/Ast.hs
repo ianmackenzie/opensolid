@@ -75,10 +75,12 @@ module OpenSolid.Bytecode.Ast
   , b11d1
   , b11d2
   , b11d3
+  , involute2D
   )
 where
 
 import Data.Coerce qualified
+import OpenSolid.Angle (Angle)
 import OpenSolid.Bytecode.Compile qualified as Compile
 import OpenSolid.Bytecode.Evaluate (Compiled)
 import OpenSolid.Bytecode.Evaluate qualified as Evaluate
@@ -230,6 +232,7 @@ data Variable2D input where
     Variable2D input ->
     Variable2D input ->
     Variable2D input
+  Involute2D :: Int -> Vector2D Unitless -> Angle -> Angle -> Variable1D input -> Variable2D input
 
 deriving instance Eq (Variable2D input)
 
@@ -414,6 +417,9 @@ instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
     projectPoint3dInto plane (point . input)
   Desingularized2D parameter left middle right . input =
     desingularized2D (parameter . input) (left . input) (middle . input) (right . input)
+  Involute2D n r theta1 theta2 param . input = case param . input of
+    Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (involute2D n r theta1 theta2) paramVal)
+    Variable1D paramVar -> Variable2D (Involute2D n r theta1 theta2 paramVar)
 
 instance Composition (Ast3D Number) (Ast1D input) (Ast3D input) where
   Constant3D outer . _ = Constant3D outer
@@ -583,6 +589,9 @@ instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
     projectPoint3dInto plane (point . input)
   Desingularized2D parameter left middle right . input =
     desingularized2D (parameter . input) (left . input) (middle . input) (right . input)
+  Involute2D n r theta1 theta2 param . input = case param . input of
+    Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (involute2D n r theta1 theta2) paramVal)
+    Variable1D paramVar -> Variable2D (Involute2D n r theta1 theta2 paramVar)
 
 instance Composition (Ast3D UvPoint) (Ast2D input) (Ast3D input) where
   Constant3D outer . _ = Constant3D outer
@@ -1295,6 +1304,9 @@ b11d2 = Variable1D (B11d2 CurveParameter)
 b11d3 :: Ast1D Number
 b11d3 = Variable1D (B11d3 CurveParameter)
 
+involute2D :: Int -> Vector2D units -> Angle -> Angle -> Ast2D Number
+involute2D n r theta1 theta2 = Variable2D (Involute2D n (Vector2D.erase r) theta1 theta2 CurveParameter)
+
 desingularized1D :: Ast1D input -> Ast1D input -> Ast1D input -> Ast1D input -> Ast1D input
 desingularized1D (Constant1D parameter) left middle right =
   Desingularization.value parameter left middle right
@@ -1617,6 +1629,12 @@ compileVariable2D variable = case variable of
     rightIndex <- compileVariable2D right
     let instruction = Instruction.Desingularized2D parameterIndex leftIndex middleIndex rightIndex
     Compile.addVariable2D instruction
+  Involute2D n r theta1 theta2 parameter -> do
+    rIndex <- Compile.addConstant2D r
+    theta1Index <- Compile.addConstant1D (Quantity.erase theta1)
+    theta2Index <- Compile.addConstant1D (Quantity.erase theta2)
+    parameterIndex <- compileVariable1D parameter
+    Compile.addVariable2D (Instruction.Involute2d n rIndex theta1Index theta2Index parameterIndex)
 
 compileVariable3D :: Variable3D input -> Compile.Step VariableIndex
 compileVariable3D variable = case variable of

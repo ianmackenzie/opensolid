@@ -526,6 +526,48 @@ bezier(int numControlPoints, const Vector3d<double>* controlPoints, Bounds t) {
   return Vector3d(Bounds(minX, maxX), Bounds(minY, maxY), Bounds(minZ, maxZ));
 }
 
+template <class Scalar>
+Vector2d<Scalar>
+involute(int n, Vector2d<double> r, double theta1, double theta2, Scalar t) {
+  Scalar theta = interpolateFrom(theta1, theta2, t);
+  Scalar sinTheta = sine(theta);
+  Scalar cosTheta = cosine(theta);
+  double scale = n == 0 ? 1.0 : std::pow(theta2 - theta1, n);
+  Scalar s0;
+  Scalar s1;
+  Scalar s2;
+  Scalar s3;
+  switch (n % 4) {
+    case 0:
+      s0 = sinTheta;
+      s1 = cosTheta;
+      s2 = -sinTheta;
+      s3 = -cosTheta;
+      break;
+    case 1:
+      s0 = cosTheta;
+      s1 = -sinTheta;
+      s2 = -cosTheta;
+      s3 = sinTheta;
+      break;
+    case 2:
+      s0 = -sinTheta;
+      s1 = -cosTheta;
+      s2 = sinTheta;
+      s3 = cosTheta;
+      break;
+    default: // 3
+      s0 = -cosTheta;
+      s1 = sinTheta;
+      s2 = cosTheta;
+      s3 = -sinTheta;
+      break;
+  }
+  Scalar x = (n - 1) * (s3 * r.x + s0 * r.y) + theta * (s0 * r.x + s1 * r.y);
+  Scalar y = (n - 1) * (s2 * r.x + s3 * r.y) + theta * (s3 * r.x + s0 * r.y);
+  return scale * Vector2d<Scalar>(x, y);
+}
+
 inline bool
 isStart(double t) {
   return t <= T0;
@@ -1509,6 +1551,16 @@ evaluate(
         T input = getScalar();
         T* output = getScalarPointer();
         *output = b11d3(input);
+        break;
+      }
+      case Involute2d: {
+        int order = getInt();
+        Vector2d<double> r = getConstantVector2d();
+        double theta1 = getConstantScalar();
+        double theta2 = getConstantScalar();
+        T parameter = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
+        *output = involute(order, r, theta1, theta2, parameter);
         break;
       }
       case OPCODE_END: {
