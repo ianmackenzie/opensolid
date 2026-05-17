@@ -21,6 +21,7 @@ module Tests.Random
   , arc2D
   , quadraticSpline2D
   , cubicSpline2D
+  , involute2D
   , rigidTransform2D
   , rigidVectorTransform2D
   , rigidTransform3D
@@ -167,6 +168,15 @@ quadraticSpline2D = Random.map3 Curve2D.quadraticBezier point2D point2D point2D
 
 cubicSpline2D :: Generator (Curve2D Meters)
 cubicSpline2D = Random.map4 Curve2D.cubicBezier point2D point2D point2D point2D
+
+involute2D :: Generator (Curve2D Meters)
+involute2D = do
+  centerPoint <- point2D
+  radialVector <- vector2D
+  angleSign <- Random.sign
+  startAngle <- Random.quantity Angle.zero (angleSign * Angle.twoPi)
+  endAngle <- Random.quantity Angle.zero (angleSign * Angle.twoPi)
+  Random.return (Curve2D.involute centerPoint radialVector startAngle endAngle)
 
 translation2D :: Generator (Transform2D.Rigid Meters)
 translation2D = Random.map Transform2D.translateBy vector2D

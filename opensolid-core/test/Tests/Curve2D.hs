@@ -46,6 +46,7 @@ curveGenerators =
   , ("Arc2D", Random.arc2D)
   , ("QuadraticSpline2D", Random.quadraticSpline2D)
   , ("CubicSpline2D", Random.cubicSpline2D)
+  , ("Involute2D", Random.involute2D)
   ]
 
 tests :: List Test
