@@ -1,3 +1,15 @@
+Rename toBinary to just 'builder'?
+
+Add Circle2D to target language API
+
+Refactor Svg.circle to take a Circle2D
+
+Refactor Svg module to take either a view box or a margin (and compute a view box automatically)
+
+Optimize transformation of involute curves in Ast module
+
+Optimize reversal of involute curves in Ast module
+
 Switch more primitive 'coerce' functions to be aliases for Data.Coerce.coerce
 
 Cache normal direction in PlaneOrientation3D?
