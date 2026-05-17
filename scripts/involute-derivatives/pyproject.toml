@@ -1,0 +1,10 @@
+[project]
+name = "involute-derivatives"
+version = "0.1.0"
+description = "SymPy"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "sympy>=1.14.0",
+    "tabulate>=0.10.0",
+]
