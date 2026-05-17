@@ -1,2 +1,4 @@
 *.glb
 *.stl
+*.gltf
+*.bin
