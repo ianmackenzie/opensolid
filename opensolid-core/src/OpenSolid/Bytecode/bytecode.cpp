@@ -315,7 +315,7 @@ quinticBezier(const Vector3d<double>* p, double t) {
 }
 
 template <class Vector>
-inline Vector
+Vector
 bezierBlossom(
   int numControlPoints,
   const Vector* controlPoints,
@@ -352,7 +352,7 @@ bezier(int numControlPoints, const Vector3d<double>* controlPoints, double t) {
   return bezierBlossom(numControlPoints, controlPoints, t, t, 0);
 }
 
-inline Bounds
+Bounds
 quadraticBezier(const double* p, Bounds t) {
   double a = quadraticBlossom(p, t.lower, t.lower);
   double b = quadraticBlossom(p, t.lower, t.upper);
@@ -360,7 +360,7 @@ quadraticBezier(const double* p, Bounds t) {
   return Bounds::hull3(a, b, c);
 }
 
-inline Vector2d<Bounds>
+Vector2d<Bounds>
 quadraticBezier(const Vector2d<double>* p, Bounds t) {
   Vector2d<double> a = quadraticBlossom(p, t.lower, t.lower);
   Vector2d<double> b = quadraticBlossom(p, t.lower, t.upper);
@@ -368,7 +368,7 @@ quadraticBezier(const Vector2d<double>* p, Bounds t) {
   return Vector2d<Bounds>::hull3(a, b, c);
 }
 
-inline Vector3d<Bounds>
+Vector3d<Bounds>
 quadraticBezier(const Vector3d<double>* p, Bounds t) {
   Vector3d<double> a = quadraticBlossom(p, t.lower, t.lower);
   Vector3d<double> b = quadraticBlossom(p, t.lower, t.upper);
@@ -376,7 +376,7 @@ quadraticBezier(const Vector3d<double>* p, Bounds t) {
   return Vector3d<Bounds>::hull3(a, b, c);
 }
 
-inline Bounds
+Bounds
 cubicBezier(const double* p, Bounds t) {
   double a = cubicBlossom(p, t.lower, t.lower, t.lower);
   double b = cubicBlossom(p, t.lower, t.lower, t.upper);
@@ -385,7 +385,7 @@ cubicBezier(const double* p, Bounds t) {
   return Bounds::hull4(a, b, c, d);
 }
 
-inline Vector2d<Bounds>
+Vector2d<Bounds>
 cubicBezier(const Vector2d<double>* p, Bounds t) {
   Vector2d<double> a = cubicBlossom(p, t.lower, t.lower, t.lower);
   Vector2d<double> b = cubicBlossom(p, t.lower, t.lower, t.upper);
@@ -394,7 +394,7 @@ cubicBezier(const Vector2d<double>* p, Bounds t) {
   return Vector2d<Bounds>::hull4(a, b, c, d);
 }
 
-inline Vector3d<Bounds>
+Vector3d<Bounds>
 cubicBezier(const Vector3d<double>* p, Bounds t) {
   Vector3d<double> a = cubicBlossom(p, t.lower, t.lower, t.lower);
   Vector3d<double> b = cubicBlossom(p, t.lower, t.lower, t.upper);
@@ -403,7 +403,7 @@ cubicBezier(const Vector3d<double>* p, Bounds t) {
   return Vector3d<Bounds>::hull4(a, b, c, d);
 }
 
-inline Bounds
+Bounds
 quarticBezier(const double* p, Bounds t) {
   double a = quarticBlossom(p, t.lower, t.lower, t.lower, t.lower);
   double b = quarticBlossom(p, t.lower, t.lower, t.lower, t.upper);
@@ -413,7 +413,7 @@ quarticBezier(const double* p, Bounds t) {
   return Bounds::hull5(a, b, c, d, e);
 }
 
-inline Vector2d<Bounds>
+Vector2d<Bounds>
 quarticBezier(const Vector2d<double>* p, Bounds t) {
   Vector2d<double> a = quarticBlossom(p, t.lower, t.lower, t.lower, t.lower);
   Vector2d<double> b = quarticBlossom(p, t.lower, t.lower, t.lower, t.upper);
@@ -433,7 +433,7 @@ quarticBezier(const Vector3d<double>* p, Bounds t) {
   return Vector3d<Bounds>::hull5(a, b, c, d, e);
 }
 
-inline Bounds
+Bounds
 quinticBezier(const double* p, Bounds t) {
   double a = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.lower);
   double b = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.upper);
@@ -444,7 +444,7 @@ quinticBezier(const double* p, Bounds t) {
   return Bounds::hull6(a, b, c, d, e, f);
 }
 
-inline Vector2d<Bounds>
+Vector2d<Bounds>
 quinticBezier(const Vector2d<double>* p, Bounds t) {
   Vector2d<double> a = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.lower);
   Vector2d<double> b = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.upper);
@@ -455,7 +455,7 @@ quinticBezier(const Vector2d<double>* p, Bounds t) {
   return Vector2d<Bounds>::hull6(a, b, c, d, e, f);
 }
 
-inline Vector3d<Bounds>
+Vector3d<Bounds>
 quinticBezier(const Vector3d<double>* p, Bounds t) {
   Vector3d<double> a = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.lower);
   Vector3d<double> b = quinticBlossom(p, t.lower, t.lower, t.lower, t.lower, t.upper);
@@ -466,7 +466,7 @@ quinticBezier(const Vector3d<double>* p, Bounds t) {
   return Vector3d<Bounds>::hull6(a, b, c, d, e, f);
 }
 
-inline Bounds
+Bounds
 bezier(int numControlPoints, const double* controlPoints, Bounds t) {
   if (numControlPoints <= 0) {
     return Bounds::invalid();
@@ -482,7 +482,7 @@ bezier(int numControlPoints, const double* controlPoints, Bounds t) {
   return Bounds(minValue, maxValue);
 }
 
-inline Vector2d<Bounds>
+Vector2d<Bounds>
 bezier(int numControlPoints, const Vector2d<double>* controlPoints, Bounds t) {
   if (numControlPoints <= 0) {
     return Vector2d<Bounds>::invalid();
@@ -502,7 +502,7 @@ bezier(int numControlPoints, const Vector2d<double>* controlPoints, Bounds t) {
   return Vector2d(Bounds(minX, maxX), Bounds(minY, maxY));
 }
 
-inline Vector3d<Bounds>
+Vector3d<Bounds>
 bezier(int numControlPoints, const Vector3d<double>* controlPoints, Bounds t) {
   if (numControlPoints <= 0) {
     return Vector3d<Bounds>::invalid();
