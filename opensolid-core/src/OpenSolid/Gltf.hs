@@ -203,7 +203,8 @@ encodeMeshes index offset meshes = case meshes of
             ]
     let meshPrimitive =
           Json.object
-            [ Json.field "attributes" $ attributes
+            [ Json.field "mode" $ Json.int 4 -- TRIANGLES
+            , Json.field "attributes" $ attributes
             , Json.field "indices" $ Json.int indicesAccessorIndex
             , Json.field "material" $ Json.int index
             ]
