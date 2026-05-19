@@ -724,6 +724,7 @@ instance input1 ~ input2 => Subtraction (Ast1D input1) (Ast1D input2) (Ast1D inp
   lhs - Constant1D 0.0 = lhs
   Constant1D 0.0 - rhs = -rhs
   Constant1D lhs - Constant1D rhs = Constant1D (lhs - rhs)
+  Constant1D 1.0 - Variable1D (DifferenceConstantVariable1D 1.0 var) = Variable1D var
   Constant1D lhs - Variable1D rhs = Variable1D (DifferenceConstantVariable1D lhs rhs)
   Variable1D lhs - Constant1D rhs = Variable1D (SumVariableConstant1D lhs -rhs)
   Variable1D lhs - Variable1D rhs = Variable1D (lhs - rhs)
