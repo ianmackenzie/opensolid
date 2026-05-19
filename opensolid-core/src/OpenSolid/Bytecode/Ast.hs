@@ -76,6 +76,9 @@ module OpenSolid.Bytecode.Ast
   , b11d2
   , b11d3
   , involute2D
+  , involute3D
+  , arc2D
+  , arc3D
   )
 where
 
@@ -232,7 +235,21 @@ data Variable2D input where
     Variable2D input ->
     Variable2D input ->
     Variable2D input
-  Involute2D :: Int -> Vector2D Unitless -> Angle -> Angle -> Variable1D input -> Variable2D input
+  Arc2D ::
+    Vector2D Unitless ->
+    Vector2D Unitless ->
+    Angle ->
+    Angle ->
+    Variable1D input ->
+    Variable2D input
+  Involute2D ::
+    Int ->
+    Vector2D Unitless ->
+    Vector2D Unitless ->
+    Angle ->
+    Angle ->
+    Variable1D input ->
+    Variable2D input
 
 deriving instance Eq (Variable2D input)
 
@@ -273,6 +290,21 @@ data Variable3D input where
     Variable3D input ->
     Variable3D input ->
     Variable3D input ->
+    Variable3D input
+  Arc3D ::
+    Vector3D Unitless Void ->
+    Vector3D Unitless Void ->
+    Angle ->
+    Angle ->
+    Variable1D input ->
+    Variable3D input
+  Involute3D ::
+    Int ->
+    Vector3D Unitless Void ->
+    Vector3D Unitless Void ->
+    Angle ->
+    Angle ->
+    Variable1D input ->
     Variable3D input
 
 deriving instance Eq (Variable3D input)
@@ -419,9 +451,14 @@ instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
     projectPoint3dInto plane (point . input)
   Desingularized2D parameter left middle right . input =
     desingularized2D (parameter . input) (left . input) (middle . input) (right . input)
-  Involute2D n r theta1 theta2 param . input = case param . input of
-    Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (involute2D n r theta1 theta2) paramVal)
-    Variable1D paramVar -> Variable2D (Involute2D n r theta1 theta2 paramVar)
+  Arc2D vx vy theta1 theta2 param . input = case param . input of
+    Constant1D paramVal ->
+      Constant2D (evaluateVectorCurve2D (arc2D vx vy theta1 theta2) paramVal)
+    Variable1D paramVar -> Variable2D (Arc2D vx vy theta1 theta2 paramVar)
+  Involute2D n vx vy theta1 theta2 param . input = case param . input of
+    Constant1D paramVal ->
+      Constant2D (evaluateVectorCurve2D (involute2D n vx vy theta1 theta2) paramVal)
+    Variable1D paramVar -> Variable2D (Involute2D n vx vy theta1 theta2 paramVar)
 
 instance Composition (Ast3D Number) (Ast1D input) (Ast3D input) where
   Constant3D outer . _ = Constant3D outer
@@ -456,6 +493,14 @@ instance Composition (Variable3D Number) (Variable1D input) (Ast3D input) where
     placePoint2DOn plane (point . input)
   Desingularized3D parameter left middle right . input =
     desingularized3D (parameter . input) (left . input) (middle . input) (right . input)
+  Arc3D vx vy theta1 theta2 param . input = case param . input of
+    Constant1D paramVal ->
+      Constant3D (evaluateVectorCurve3D (arc3D vx vy theta1 theta2) paramVal)
+    Variable1D paramVar -> Variable3D (Arc3D vx vy theta1 theta2 paramVar)
+  Involute3D n vx vy theta1 theta2 param . input = case param . input of
+    Constant1D paramVal ->
+      Constant3D (evaluateVectorCurve3D (involute3D n vx vy theta1 theta2) paramVal)
+    Variable1D paramVar -> Variable3D (Involute3D n vx vy theta1 theta2 paramVar)
 
 instance Composition (Ast1D UvPoint) (Ast2D input) (Ast1D input) where
   Constant1D outer . _ = Constant1D outer
@@ -594,9 +639,14 @@ instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
     projectPoint3dInto plane (point . input)
   Desingularized2D parameter left middle right . input =
     desingularized2D (parameter . input) (left . input) (middle . input) (right . input)
-  Involute2D n r theta1 theta2 param . input = case param . input of
-    Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (involute2D n r theta1 theta2) paramVal)
-    Variable1D paramVar -> Variable2D (Involute2D n r theta1 theta2 paramVar)
+  Arc2D vx vy theta1 theta2 param . input = case param . input of
+    Constant1D paramVal ->
+      Constant2D (evaluateVectorCurve2D (arc2D vx vy theta1 theta2) paramVal)
+    Variable1D paramVar -> Variable2D (Arc2D vx vy theta1 theta2 paramVar)
+  Involute2D n vx vy theta1 theta2 param . input = case param . input of
+    Constant1D paramVal ->
+      Constant2D (evaluateVectorCurve2D (involute2D n vx vy theta1 theta2) paramVal)
+    Variable1D paramVar -> Variable2D (Involute2D n vx vy theta1 theta2 paramVar)
 
 instance Composition (Ast3D UvPoint) (Ast2D input) (Ast3D input) where
   Constant3D outer . _ = Constant3D outer
@@ -627,6 +677,14 @@ instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
   PlacePoint2D plane point . input = placePoint2DOn plane (point . input)
   Desingularized3D parameter left middle right . input =
     desingularized3D (parameter . input) (left . input) (middle . input) (right . input)
+  Arc3D vx vy theta1 theta2 param . input = case param . input of
+    Constant1D paramVal ->
+      Constant3D (evaluateVectorCurve3D (arc3D vx vy theta1 theta2) paramVal)
+    Variable1D paramVar -> Variable3D (Arc3D vx vy theta1 theta2 paramVar)
+  Involute3D n vx vy theta1 theta2 param . input = case param . input of
+    Constant1D paramVal ->
+      Constant3D (evaluateVectorCurve3D (involute3D n vx vy theta1 theta2) paramVal)
+    Variable1D paramVar -> Variable3D (Involute3D n vx vy theta1 theta2 paramVar)
 
 constant1D :: Quantity units -> Ast1D input
 constant1D value = Constant1D (Quantity.erase value)
@@ -1107,28 +1165,36 @@ magnitude3D ast = case ast of
 transformVector2D :: VectorTransform2D tag -> Ast2D input -> Ast2D input
 transformVector2D transform ast = do
   let erasedTransform = VectorTransform2D.erase transform
+  let transformValue = Vector2D.transformBy erasedTransform
   case ast of
-    Constant2D val -> Constant2D (Vector2D.transformBy erasedTransform val)
-    Variable2D (TransformVector2D existing var) ->
-      Variable2D (TransformVector2D (erasedTransform . existing) var)
-    Variable2D (BezierCurve2D controlPoints param) -> do
-      let transformedControlPoints =
-            NonEmpty.map (Vector2D.transformBy erasedTransform) controlPoints
-      Variable2D (BezierCurve2D transformedControlPoints param)
-    Variable2D var -> Variable2D (TransformVector2D erasedTransform var)
+    Constant2D val -> Constant2D (transformValue val)
+    Variable2D var -> Variable2D $ case var of
+      TransformVector2D existingTransform underlyingVar ->
+        TransformVector2D (erasedTransform . existingTransform) underlyingVar
+      BezierCurve2D controlPoints param ->
+        BezierCurve2D (NonEmpty.map transformValue controlPoints) param
+      Arc2D vx vy theta1 theta2 param ->
+        Arc2D (transformValue vx) (transformValue vy) theta1 theta2 param
+      Involute2D n vx vy theta1 theta2 param ->
+        Involute2D n (transformValue vx) (transformValue vy) theta1 theta2 param
+      _ -> TransformVector2D erasedTransform var
 
 transformVector3D :: VectorTransform3D tag space -> Ast3D input -> Ast3D input
 transformVector3D transform ast = do
   let erasedTransform = VectorTransform3D.erase transform
+  let transformValue = Vector3D.transformBy erasedTransform
   case ast of
-    Constant3D val -> Constant3D (Vector3D.transformBy erasedTransform val)
-    Variable3D (TransformVector3D existing var) ->
-      Variable3D (TransformVector3D (erasedTransform . existing) var)
-    Variable3D (BezierCurve3D controlPoints param) -> do
-      let transformedControlPoints =
-            NonEmpty.map (Vector3D.transformBy erasedTransform) controlPoints
-      Variable3D (BezierCurve3D transformedControlPoints param)
-    Variable3D var -> Variable3D (TransformVector3D erasedTransform var)
+    Constant3D val -> Constant3D (transformValue val)
+    Variable3D var -> Variable3D $ case var of
+      TransformVector3D existing underlyingVar ->
+        TransformVector3D (erasedTransform . existing) underlyingVar
+      BezierCurve3D controlPoints param ->
+        BezierCurve3D (NonEmpty.map transformValue controlPoints) param
+      Arc3D vx vy theta1 theta2 param ->
+        Arc3D (transformValue vx) (transformValue vy) theta1 theta2 param
+      Involute3D n vx vy theta1 theta2 param ->
+        Involute3D n (transformValue vx) (transformValue vy) theta1 theta2 param
+      _ -> TransformVector3D erasedTransform var
 
 transformPoint2D :: Transform2D tag units -> Ast2D input -> Ast2D input
 transformPoint2D transform ast = do
@@ -1311,8 +1377,21 @@ b11d2 = Variable1D (B11d2 CurveParameter)
 b11d3 :: Ast1D Number
 b11d3 = Variable1D (B11d3 CurveParameter)
 
-involute2D :: Int -> Vector2D units -> Angle -> Angle -> Ast2D Number
-involute2D n r theta1 theta2 = Variable2D (Involute2D n (Vector2D.erase r) theta1 theta2 CurveParameter)
+arc2D :: Vector2D units -> Vector2D units -> Angle -> Angle -> Ast2D Number
+arc2D vx vy theta1 theta2 =
+  Variable2D (Arc2D (Vector2D.erase vx) (Vector2D.erase vy) theta1 theta2 CurveParameter)
+
+arc3D :: Vector3D units space -> Vector3D units space -> Angle -> Angle -> Ast3D Number
+arc3D vx vy theta1 theta2 =
+  Variable3D (Arc3D (Vector3D.erase vx) (Vector3D.erase vy) theta1 theta2 CurveParameter)
+
+involute2D :: Int -> Vector2D units -> Vector2D units -> Angle -> Angle -> Ast2D Number
+involute2D n vx vy theta1 theta2 =
+  Variable2D (Involute2D n (Vector2D.erase vx) (Vector2D.erase vy) theta1 theta2 CurveParameter)
+
+involute3D :: Int -> Vector3D units space -> Vector3D units space -> Angle -> Angle -> Ast3D Number
+involute3D n vx vy theta1 theta2 =
+  Variable3D (Involute3D n (Vector3D.erase vx) (Vector3D.erase vy) theta1 theta2 CurveParameter)
 
 desingularized1D :: Ast1D input -> Ast1D input -> Ast1D input -> Ast1D input -> Ast1D input
 desingularized1D (Constant1D parameter) left middle right =
@@ -1636,12 +1715,22 @@ compileVariable2D variable = case variable of
     rightIndex <- compileVariable2D right
     let instruction = Instruction.Desingularized2D parameterIndex leftIndex middleIndex rightIndex
     Compile.addVariable2D instruction
-  Involute2D n r theta1 theta2 parameter -> do
-    rIndex <- Compile.addConstant2D r
+  Arc2D vx vy theta1 theta2 parameter -> do
+    vxIndex <- Compile.addConstant2D vx
+    vyIndex <- Compile.addConstant2D vy
     theta1Index <- Compile.addConstant1D (Quantity.erase theta1)
     theta2Index <- Compile.addConstant1D (Quantity.erase theta2)
     parameterIndex <- compileVariable1D parameter
-    Compile.addVariable2D (Instruction.Involute2d n rIndex theta1Index theta2Index parameterIndex)
+    Compile.addVariable2D (Instruction.Arc2D vxIndex vyIndex theta1Index theta2Index parameterIndex)
+  Involute2D n vx vy theta1 theta2 parameter -> do
+    vxIndex <- Compile.addConstant2D vx
+    vyIndex <- Compile.addConstant2D vy
+    theta1Index <- Compile.addConstant1D (Quantity.erase theta1)
+    theta2Index <- Compile.addConstant1D (Quantity.erase theta2)
+    parameterIndex <- compileVariable1D parameter
+    let instruction =
+          Instruction.Involute2D n vxIndex vyIndex theta1Index theta2Index parameterIndex
+    Compile.addVariable2D instruction
 
 compileVariable3D :: Variable3D input -> Compile.Step VariableIndex
 compileVariable3D variable = case variable of
@@ -1720,6 +1809,22 @@ compileVariable3D variable = case variable of
     middleIndex <- compileVariable3D middle
     rightIndex <- compileVariable3D right
     let instruction = Instruction.Desingularized3D parameterIndex leftIndex middleIndex rightIndex
+    Compile.addVariable3D instruction
+  Arc3D vx vy theta1 theta2 parameter -> do
+    vxIndex <- Compile.addConstant3D vx
+    vyIndex <- Compile.addConstant3D vy
+    theta1Index <- Compile.addConstant1D (Quantity.erase theta1)
+    theta2Index <- Compile.addConstant1D (Quantity.erase theta2)
+    parameterIndex <- compileVariable1D parameter
+    Compile.addVariable3D (Instruction.Arc3D vxIndex vyIndex theta1Index theta2Index parameterIndex)
+  Involute3D n vx vy theta1 theta2 parameter -> do
+    vxIndex <- Compile.addConstant3D vx
+    vyIndex <- Compile.addConstant3D vy
+    theta1Index <- Compile.addConstant1D (Quantity.erase theta1)
+    theta2Index <- Compile.addConstant1D (Quantity.erase theta2)
+    parameterIndex <- compileVariable1D parameter
+    let instruction =
+          Instruction.Involute3D n vxIndex vyIndex theta1Index theta2Index parameterIndex
     Compile.addVariable3D instruction
 
 compileCurve1D :: Ast1D Number -> Compiled Number Number

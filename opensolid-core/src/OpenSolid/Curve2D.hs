@@ -317,9 +317,7 @@ customArc ::
   Angle ->
   Angle ->
   Curve2D units
-customArc p0 v1 v2 a b = do
-  let angle = Curve1D.interpolateFrom a b
-  p0 + v1 * Curve1D.cos angle + v2 * Curve1D.sin angle
+customArc p0 v1 v2 a b = p0 + VectorCurve2D.arc v1 v2 a b
 
 -- | Create a curve from the given circle.
 circle :: Circle2D units -> Curve2D units
@@ -393,13 +391,13 @@ hermite = Curve.hermite
 
 involute :: Point2D units -> Vector2D units -> Angle -> Angle -> Curve2D units
 involute centerPoint radialVector startAngle endAngle =
-  centerPoint + involuteVector 0 radialVector startAngle endAngle
+  centerPoint + involuteVector 0 radialVector (Vector2D.rotateLeft radialVector) startAngle endAngle
 
-involuteVector :: Int -> Vector2D units -> Angle -> Angle -> VectorCurve2D units
-involuteVector n r theta1 theta2 =
+involuteVector :: Int -> Vector2D units -> Vector2D units -> Angle -> Angle -> VectorCurve2D units
+involuteVector n vx vy theta1 theta2 =
   VectorCurve2D.new
-    (CompiledFunction.concrete (Expression.involute2D n r theta1 theta2))
-    (involuteVector (n + 1) r theta1 theta2)
+    (CompiledFunction.concrete (Expression.involute n vx vy theta1 theta2))
+    (involuteVector (n + 1) vx vy theta1 theta2)
 
 {-# INLINE derivativeValue #-}
 derivativeValue :: Curve2D units -> Number -> Vector2D units

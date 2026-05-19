@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <utility>
 
 #include "bounds.h"
 #include "bytecode.h"
@@ -528,44 +529,65 @@ bezier(int numControlPoints, const Vector3d<double>* controlPoints, Bounds t) {
 
 template <class Scalar>
 Vector2d<Scalar>
-involute(int n, Vector2d<double> r, double theta1, double theta2, Scalar t) {
+arc(Vector2d<double> vx, Vector2d<double> vy, double theta1, double theta2, Scalar t) {
   Scalar theta = interpolateFrom(theta1, theta2, t);
+  return vx * cosine(theta) + vy * sine(theta);
+}
+
+template <class Scalar>
+Vector3d<Scalar>
+arc(
+  const Vector3d<double>& vx,
+  const Vector3d<double>& vy,
+  double theta1,
+  double theta2,
+  Scalar t
+) {
+  Scalar theta = interpolateFrom(theta1, theta2, t);
+  return vx * cosine(theta) + vy * sine(theta);
+}
+
+template <class Scalar>
+inline
+std::pair<Scalar, Scalar>
+involuteCoefficients(int n, Scalar theta) {
   Scalar sinTheta = sine(theta);
   Scalar cosTheta = cosine(theta);
-  double scale = n == 0 ? 1.0 : std::pow(theta2 - theta1, n);
-  Scalar s0;
-  Scalar s1;
-  Scalar s2;
-  Scalar s3;
   switch (n % 4) {
     case 0:
-      s0 = sinTheta;
-      s1 = cosTheta;
-      s2 = -sinTheta;
-      s3 = -cosTheta;
-      break;
+      return std::make_pair(-cosTheta, -sinTheta);
     case 1:
-      s0 = cosTheta;
-      s1 = -sinTheta;
-      s2 = -cosTheta;
-      s3 = sinTheta;
-      break;
+      return std::make_pair(sinTheta, -cosTheta);
     case 2:
-      s0 = -sinTheta;
-      s1 = -cosTheta;
-      s2 = sinTheta;
-      s3 = cosTheta;
-      break;
+      return std::make_pair(cosTheta, sinTheta);
     default: // 3
-      s0 = -cosTheta;
-      s1 = sinTheta;
-      s2 = cosTheta;
-      s3 = -sinTheta;
-      break;
+      return std::make_pair(-sinTheta, cosTheta);
   }
-  Scalar x = (n - 1) * (s3 * r.x + s0 * r.y) + theta * (s0 * r.x + s1 * r.y);
-  Scalar y = (n - 1) * (s2 * r.x + s3 * r.y) + theta * (s3 * r.x + s0 * r.y);
-  return scale * Vector2d<Scalar>(x, y);
+}
+
+template <class Scalar>
+Vector2d<Scalar>
+involute(int n, Vector2d<double> vx, Vector2d<double> vy, double theta1, double theta2, Scalar t) {
+  Scalar theta = interpolateFrom(theta1, theta2, t);
+  auto [a, b] = involuteCoefficients(n, theta);
+  double scale = n == 0 ? 1.0 : std::pow(theta2 - theta1, n);
+  return scale * ((n - 1) * (a * vx + b * vy) + theta * (a * vy - b * vx));
+}
+
+template <class Scalar>
+Vector3d<Scalar>
+involute(
+  int n,
+  const Vector3d<double>& vx,
+  const Vector3d<double>& vy,
+  double theta1,
+  double theta2,
+  Scalar t
+) {
+  Scalar theta = interpolateFrom(theta1, theta2, t);
+  auto [a, b] = involuteCoefficients(n, theta);
+  double scale = n == 0 ? 1.0 : std::pow(theta2 - theta1, n);
+  return scale * ((n - 1) * (a * vx + b * vy) + theta * (a * vy - b * vx));
 }
 
 inline bool
@@ -1553,14 +1575,46 @@ evaluate(
         *output = b11d3(input);
         break;
       }
-      case Involute2d: {
-        int order = getInt();
-        Vector2d<double> r = getConstantVector2d();
+      case Arc2d: {
+        Vector2d<double> vx = getConstantVector2d();
+        Vector2d<double> vy = getConstantVector2d();
         double theta1 = getConstantScalar();
         double theta2 = getConstantScalar();
         T parameter = getScalar();
         Vector2d<T>* output = getVector2dPointer();
-        *output = involute(order, r, theta1, theta2, parameter);
+        *output = arc(vx, vy, theta1, theta2, parameter);
+        break;
+      }
+      case Arc3d: {
+        Vector3d<double> vx = getConstantVector3d();
+        Vector3d<double> vy = getConstantVector3d();
+        double theta1 = getConstantScalar();
+        double theta2 = getConstantScalar();
+        T parameter = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
+        *output = arc(vx, vy, theta1, theta2, parameter);
+        break;
+      }
+      case Involute2d: {
+        int order = getInt();
+        Vector2d<double> vx = getConstantVector2d();
+        Vector2d<double> vy = getConstantVector2d();
+        double theta1 = getConstantScalar();
+        double theta2 = getConstantScalar();
+        T parameter = getScalar();
+        Vector2d<T>* output = getVector2dPointer();
+        *output = involute(order, vx, vy, theta1, theta2, parameter);
+        break;
+      }
+      case Involute3d: {
+        int order = getInt();
+        Vector3d<double> vx = getConstantVector3d();
+        Vector3d<double> vy = getConstantVector3d();
+        double theta1 = getConstantScalar();
+        double theta2 = getConstantScalar();
+        T parameter = getScalar();
+        Vector3d<T>* output = getVector3dPointer();
+        *output = involute(order, vx, vy, theta1, theta2, parameter);
         break;
       }
       case OPCODE_END: {

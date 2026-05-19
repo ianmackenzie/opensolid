@@ -115,7 +115,10 @@ data Instruction
   | B11d1 VariableIndex
   | B11d2 VariableIndex
   | B11d3 VariableIndex
-  | Involute2d Int ConstantIndex ConstantIndex ConstantIndex VariableIndex
+  | Arc2D ConstantIndex ConstantIndex ConstantIndex ConstantIndex VariableIndex
+  | Arc3D ConstantIndex ConstantIndex ConstantIndex ConstantIndex VariableIndex
+  | Involute2D Int ConstantIndex ConstantIndex ConstantIndex ConstantIndex VariableIndex
+  | Involute3D Int ConstantIndex ConstantIndex ConstantIndex ConstantIndex VariableIndex
   deriving (Eq, Ord, Show, Generic, Hashable)
 
 maxValues :: Int
@@ -558,10 +561,33 @@ encodeOpcodeAndArguments instruction = case instruction of
   B11d3 arg ->
     Encode.int 111
       <> encodeVariableIndex arg
-  Involute2d n r theta1 theta2 t ->
+  Arc2D vx vy theta1 theta2 t ->
     Encode.int 112
+      <> encodeConstantIndex vx
+      <> encodeConstantIndex vy
+      <> encodeConstantIndex theta1
+      <> encodeConstantIndex theta2
+      <> encodeVariableIndex t
+  Arc3D vx vy theta1 theta2 t ->
+    Encode.int 113
+      <> encodeConstantIndex vx
+      <> encodeConstantIndex vy
+      <> encodeConstantIndex theta1
+      <> encodeConstantIndex theta2
+      <> encodeVariableIndex t
+  Involute2D n vx vy theta1 theta2 t ->
+    Encode.int 114
       <> Encode.int n
-      <> encodeConstantIndex r
+      <> encodeConstantIndex vx
+      <> encodeConstantIndex vy
+      <> encodeConstantIndex theta1
+      <> encodeConstantIndex theta2
+      <> encodeVariableIndex t
+  Involute3D n vx vy theta1 theta2 t ->
+    Encode.int 115
+      <> Encode.int n
+      <> encodeConstantIndex vx
+      <> encodeConstantIndex vy
       <> encodeConstantIndex theta1
       <> encodeConstantIndex theta2
       <> encodeVariableIndex t

@@ -51,7 +51,10 @@ module OpenSolid.Expression
   , b11d2
   , b11d3
   , desingularized
-  , involute2D
+  , Arc
+  , arc
+  , Involute
+  , involute
   , Evaluation (value, range)
   , solveMonotonicSurfaceU
   , solveMonotonicSurfaceV
@@ -1680,8 +1683,23 @@ desingularized
   (VectorSurface3D right _) =
     vectorSurface3D (Ast.desingularized3D parameter left middle right)
 
-involute2D :: Int -> Vector2D units -> Angle -> Angle -> Expression Number (Vector2D units)
-involute2D n r theta1 theta2 = vectorCurve2D (Ast.involute2D n r theta1 theta2)
+class Arc output where
+  arc :: output -> output -> Angle -> Angle -> Expression Number output
+
+instance Arc (Vector2D units) where
+  arc vx vy theta1 theta2 = vectorCurve2D (Ast.arc2D vx vy theta1 theta2)
+
+instance Arc (Vector3D units space) where
+  arc vx vy theta1 theta2 = vectorCurve3D (Ast.arc3D vx vy theta1 theta2)
+
+class Involute output where
+  involute :: Int -> output -> output -> Angle -> Angle -> Expression Number output
+
+instance Involute (Vector2D units) where
+  involute n vx vy theta1 theta2 = vectorCurve2D (Ast.involute2D n vx vy theta1 theta2)
+
+instance Involute (Vector3D units space) where
+  involute n vx vy theta1 theta2 = vectorCurve3D (Ast.involute3D n vx vy theta1 theta2)
 
 -----------------
 --- COMPILING ---

@@ -45,6 +45,7 @@ module OpenSolid.VectorCurve
 where
 
 import OpenSolid.Angle (Angle)
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
@@ -152,6 +153,7 @@ class
       (Expression Number (Vector dimension units space))
       (Expression Number (Vector dimension units space))
   , Expression.BezierCurve (Vector dimension units space)
+  , Expression.Arc (Vector dimension units space)
   , Expression.SquaredMagnitude_
       (Expression Number (Vector dimension units space))
       (Expression Number (Quantity (units ?*? units)))
@@ -1113,8 +1115,10 @@ arc ::
   Angle ->
   VectorCurve dimension units space
 arc vx vy theta1 theta2 = do
-  let theta = Curve1D.interpolateFrom theta1 theta2
-  vx * Curve1D.cos theta + vy * Curve1D.sin theta
+  let compiledArc = CompiledFunction.concrete (Expression.arc vx vy theta1 theta2)
+  let dTheta = Angle.inRadians (theta2 - theta1)
+  let arcDerivative = arc (dTheta * vy) (-dTheta * vx) theta1 theta2
+  new compiledArc arcDerivative
 
 {-# INLINE compiled #-}
 compiled :: VectorCurve dimension units space -> Compiled dimension units space
