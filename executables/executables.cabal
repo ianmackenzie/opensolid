@@ -44,6 +44,35 @@ common config
     RebindableSyntax
     TypeApplications
 
+library
+  default-language: GHC2024
+  ghc-options:
+    -Wall
+    -Werror
+    -Wcompat
+    -Widentities
+    -Wmissing-signatures
+    -Wmissing-exported-signatures
+    -Wmissing-export-lists
+    -Wmissing-home-modules
+    -Wsafe
+
+  default-extensions:
+    BlockArguments
+    LexicalNegation
+    OverloadedLabels
+    OverloadedRecordDot
+    OverloadedStrings
+    PatternSynonyms
+    RebindableSyntax
+    TypeApplications
+
+  exposed-modules:
+    Utils
+
+  hs-source-dirs: utils
+  build-depends: opensolid-core
+
 executable sandbox
   import: config
   main-is: Main.hs
@@ -157,6 +186,7 @@ executable gear-generation
   hs-source-dirs: gear-generation
   build-depends:
     base,
+    executables,
     opensolid-components,
     opensolid-core,
     text,
