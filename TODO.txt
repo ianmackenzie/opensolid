@@ -1,7 +1,5 @@
 Add Planar bytecode instruction
 
-Rename toBinary to just 'builder'?
-
 Add Circle2D to target language API
 
 Refactor Svg.circle to take a Circle2D
