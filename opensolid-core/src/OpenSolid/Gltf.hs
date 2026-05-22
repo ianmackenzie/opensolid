@@ -79,7 +79,7 @@ compile mode resolution model = do
           , Json.field "generator" $ Json.text "OpenSolid"
           ]
   let json =
-        Json.toBinary $
+        Json.builder $
           Json.object
             [ Json.field "asset" $ assetObject
             , Json.field "scene" $ Json.int 0

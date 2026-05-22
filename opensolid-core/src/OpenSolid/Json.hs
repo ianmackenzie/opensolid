@@ -10,7 +10,7 @@ module OpenSolid.Json
   , list
   , listOf
   , map
-  , toBinary
+  , builder
   )
 where
 
@@ -83,17 +83,17 @@ quotedTextBuilder value = do
           & Text.replace "\f" "\\f"
   quoteBuilder <> Text.toUtf8 escapedText <> quoteBuilder
 
-toBinary :: Json -> Builder
-toBinary Null = Text.toUtf8 "null"
-toBinary (Bool True) = Text.toUtf8 "true"
-toBinary (Bool False) = Text.toUtf8 "false"
-toBinary (Int value) = Text.toUtf8 (Text.int value)
-toBinary (Number value) = Text.toUtf8 (Text.number value)
-toBinary (Text value) = quotedTextBuilder value
-toBinary (List value) = do
-  let itemBuilders = List.map toBinary value
+builder :: Json -> Builder
+builder Null = Text.toUtf8 "null"
+builder (Bool True) = Text.toUtf8 "true"
+builder (Bool False) = Text.toUtf8 "false"
+builder (Int value) = Text.toUtf8 (Text.int value)
+builder (Number value) = Text.toUtf8 (Text.number value)
+builder (Text value) = quotedTextBuilder value
+builder (List value) = do
+  let itemBuilders = List.map builder value
   Text.toUtf8 "[" <> Binary.concat (List.intersperse commaBuilder itemBuilders) <> Text.toUtf8 "]"
-toBinary (Map value) = do
-  let itemBuilder (name, item) = quotedTextBuilder name <> Text.toUtf8 ":" <> toBinary item
+builder (Map value) = do
+  let itemBuilder (name, item) = quotedTextBuilder name <> Text.toUtf8 ":" <> builder item
   let itemBuilders = List.map itemBuilder (Map.toList value)
   Text.toUtf8 "{" <> Binary.concat (List.intersperse commaBuilder itemBuilders) <> Text.toUtf8 "}"

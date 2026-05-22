@@ -73,4 +73,4 @@ text :: Text -> Body
 text content = Body "text/plain" (Text.toUtf8 content)
 
 json :: Json -> Body
-json content = Body "application/json" (Json.toBinary content)
+json content = Body "application/json" (Json.builder content)

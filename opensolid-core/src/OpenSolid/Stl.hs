@@ -1,6 +1,6 @@
 module OpenSolid.Stl
   ( toText
-  , toBinary
+  , builder
   , writeText
   , writeBinary
   )
@@ -31,8 +31,8 @@ toText convention units mesh =
     , "endsolid"
     ]
 
-toBinary :: Convention3D -> (Length -> Number) -> Mesh (Point3D space) -> Builder
-toBinary convention units mesh = do
+builder :: Convention3D -> (Length -> Number) -> Mesh (Point3D space) -> Builder
+builder convention units mesh = do
   let emptyHeaderBytes = List.replicate 80 (Binary.uint8 0)
   let header = Binary.concat emptyHeaderBytes
   let triangleCount = Binary.uint32LE (Mesh.numFaces mesh)
@@ -43,7 +43,7 @@ writeText :: Text -> Convention3D -> (Length -> Number) -> Mesh (Point3D space) 
 writeText path convention units mesh = IO.writeUtf8 path (toText convention units mesh)
 
 writeBinary :: Text -> Convention3D -> (Length -> Number) -> Mesh (Point3D space) -> IO ()
-writeBinary path convention units mesh = IO.writeBinary path (toBinary convention units mesh)
+writeBinary path convention units mesh = IO.writeBinary path (builder convention units mesh)
 
 numberBuilder :: Number -> Builder
 numberBuilder (Quantity double) = Builder.floatLE (GHC.Float.double2Float double)
