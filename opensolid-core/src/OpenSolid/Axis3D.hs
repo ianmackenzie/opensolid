@@ -13,6 +13,7 @@ module OpenSolid.Axis3D
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.PlaneOrientation3D qualified as PlaneOrientation3D
@@ -26,7 +27,7 @@ import OpenSolid.Transform3D qualified as Transform3D
 
 {-# INLINE coerce #-}
 coerce :: Axis3D space1 -> Axis3D space2
-coerce (Axis3D p0 d) = Axis3D (Point3D.coerce p0) (Direction3D.coerce d)
+coerce = Data.Coerce.coerce
 
 -- | Get the origin point of an axis.
 originPoint :: Axis3D space -> Point3D space

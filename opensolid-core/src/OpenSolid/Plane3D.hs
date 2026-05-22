@@ -29,6 +29,7 @@ module OpenSolid.Plane3D
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis3D (Axis3D (Axis3D))
 import OpenSolid.Direction3D (Direction3D)
@@ -68,12 +69,15 @@ fromYAxis (Axis3D p0 dy) = Plane3D p0 (PlaneOrientation3D.fromYDirection dy)
 fromNormalAxis :: Axis3D space -> Plane3D space
 fromNormalAxis (Axis3D p0 n) = fromPointAndNormal p0 n
 
+{-# INLINE coerce #-}
 coerce :: Plane3D space1 -> Plane3D space2
-coerce (Plane3D p o) = Plane3D (Point3D.coerce p) (PlaneOrientation3D.coerce o)
+coerce = Data.Coerce.coerce
 
+{-# INLINE erase #-}
 erase :: Plane3D space -> Plane3D Void
 erase = coerce
 
+{-# INLINE unerase #-}
 unerase :: Plane3D Void -> Plane3D space
 unerase = coerce
 

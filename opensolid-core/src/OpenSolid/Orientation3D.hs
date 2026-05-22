@@ -31,6 +31,7 @@ module OpenSolid.Orientation3D
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.PlaneOrientation3D qualified as PlaneOrientation3D
@@ -44,9 +45,9 @@ import OpenSolid.Primitives
 import OpenSolid.Random qualified as Random
 import OpenSolid.VectorTransform3D qualified as VectorTransform3D
 
+{-# INLINE coerce #-}
 coerce :: Orientation3D space1 -> Orientation3D space2
-coerce (Orientation3D r f u) =
-  Orientation3D (Direction3D.coerce r) (Direction3D.coerce f) (Direction3D.coerce u)
+coerce = Data.Coerce.coerce
 
 -- | Get the rightward direction of a orientation.
 rightwardDirection :: Orientation3D space -> Direction3D space

@@ -35,6 +35,7 @@ module OpenSolid.Direction3D
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Convention3D (Convention3D)
@@ -71,7 +72,7 @@ unwrap (Unit3D vector) = vector
 
 {-# INLINE coerce #-}
 coerce :: Direction3D space1 -> Direction3D space2
-coerce (Direction3D dx dy dz) = Direction3D dx dy dz
+coerce = Data.Coerce.coerce
 
 {-# INLINE lift #-}
 lift ::

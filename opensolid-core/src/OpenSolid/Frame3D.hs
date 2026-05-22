@@ -65,6 +65,7 @@ module OpenSolid.Frame3D
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis3D (Axis3D (Axis3D))
@@ -88,8 +89,9 @@ originPoint = (.originPoint)
 orientation :: Frame3D global local -> Orientation3D global
 orientation = (.orientation)
 
+{-# INLINE coerce #-}
 coerce :: Frame3D global1 local1 -> Frame3D global2 local2
-coerce (Frame3D p o) = Frame3D (Point3D.coerce p) (Orientation3D.coerce o)
+coerce = Data.Coerce.coerce
 
 -- | Get the local rightward direction of a frame.
 rightwardDirection :: Frame3D global local -> Direction3D global

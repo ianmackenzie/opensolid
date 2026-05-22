@@ -57,6 +57,7 @@ module OpenSolid.VectorBounds2D
   )
 where
 
+import Data.Coerce qualified
 import {-# SOURCE #-} OpenSolid.DirectionBounds2D (DirectionBounds2D)
 import {-# SOURCE #-} OpenSolid.DirectionBounds2D qualified as DirectionBounds2D
 import OpenSolid.Interval (Interval (Interval))
@@ -79,7 +80,7 @@ constant (Vector2D x y) = VectorBounds2D (Interval.constant x) (Interval.constan
 
 {-# INLINE coerce #-}
 coerce :: VectorBounds2D units1 -> VectorBounds2D units2
-coerce (VectorBounds2D x y) = VectorBounds2D (Interval.coerce x) (Interval.coerce y)
+coerce = Data.Coerce.coerce
 
 {-# INLINE erase #-}
 erase :: VectorBounds2D units -> VectorBounds2D Unitless

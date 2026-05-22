@@ -20,6 +20,8 @@ module OpenSolid.Vector
   )
 where
 
+import Data.Coerce (Coercible)
+import Data.Coerce qualified
 import {-# SOURCE #-} OpenSolid.Direction (Direction)
 import {-# SOURCE #-} OpenSolid.Direction qualified as Direction
 import OpenSolid.HasZero (HasZero)
@@ -42,8 +44,8 @@ type family Vector dimension units space = vector | vector -> dimension units sp
 class
   ( HasZero (Vector dimension units space)
   , HasUnits (Vector dimension units space) units
-  , Units.Coercion (Vector dimension units space) (Vector dimension Unitless space)
-  , Units.Coercion (Vector dimension Unitless space) (Vector dimension units space)
+  , Coercible (Vector dimension units space) (Vector dimension Unitless space)
+  , Coercible (Vector dimension Unitless space) (Vector dimension units space)
   , Eq (Vector dimension units space)
   , Show (Vector dimension units space)
   , ApproximateEquality (Vector dimension units space) (Tolerance units)
@@ -172,18 +174,18 @@ erase ::
   Exists dimension units space =>
   Vector dimension units space ->
   Vector dimension Unitless space
-erase = Units.erase
+erase = coerce
 
 {-# INLINE unerase #-}
 unerase ::
   Exists dimension units space =>
   Vector dimension Unitless space ->
   Vector dimension units space
-unerase = Units.unerase
+unerase = coerce
 
 {-# INLINE coerce #-}
 coerce ::
   (Exists dimension units1 space, Exists dimension units2 space) =>
   Vector dimension units1 space ->
   Vector dimension units2 space
-coerce = unerase . erase
+coerce = Data.Coerce.coerce

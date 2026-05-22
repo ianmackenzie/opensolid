@@ -18,6 +18,7 @@ module OpenSolid.Frame2D
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Direction2D (Direction2D)
@@ -40,8 +41,9 @@ originPoint (Frame2D p0 _) = p0
 orientation :: Frame2D units -> Orientation2D
 orientation (Frame2D _ o) = o
 
+{-# INLINE coerce #-}
 coerce :: Frame2D units1 -> Frame2D units2
-coerce (Frame2D p o) = Frame2D (Point2D.coerce p) o
+coerce = Data.Coerce.coerce
 
 xDirection :: Frame2D units -> Direction2D
 xDirection frame = Orientation2D.xDirection (orientation frame)

@@ -85,7 +85,7 @@ import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 
 {-# INLINE coerce #-}
 coerce :: Bounds2D units1 -> Bounds2D units2
-coerce (Bounds2D x y) = Bounds2D (Interval.coerce x) (Interval.coerce y)
+coerce = Data.Coerce.coerce
 
 {-# INLINE erase #-}
 erase :: Bounds2D units -> Bounds2D Unitless

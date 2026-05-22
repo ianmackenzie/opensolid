@@ -18,6 +18,8 @@ module OpenSolid.VectorBounds
   )
 where
 
+import Data.Coerce (Coercible)
+import Data.Coerce qualified
 import {-# SOURCE #-} OpenSolid.DirectionBounds (DirectionBounds)
 import {-# SOURCE #-} OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Interval (Interval (Interval))
@@ -25,7 +27,6 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units (HasUnits)
-import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds2D (VectorBounds2D)
@@ -47,8 +48,8 @@ class
   , Exists dimension Unitless space
   , DirectionBounds.Exists dimension space
   , HasUnits (VectorBounds dimension units space) units
-  , Units.Coercion (VectorBounds dimension units space) (VectorBounds dimension Unitless space)
-  , Units.Coercion (VectorBounds dimension Unitless space) (VectorBounds dimension units space)
+  , Coercible (VectorBounds dimension units space) (VectorBounds dimension Unitless space)
+  , Coercible (VectorBounds dimension Unitless space) (VectorBounds dimension units space)
   , Show (VectorBounds dimension units space)
   , Negation (VectorBounds dimension units space)
   , Addition
@@ -166,18 +167,18 @@ erase ::
   Exists dimension units space =>
   VectorBounds dimension units space ->
   VectorBounds dimension Unitless space
-erase = Units.erase
+erase = coerce
 
 {-# INLINE unerase #-}
 unerase ::
   Exists dimension units space =>
   VectorBounds dimension Unitless space ->
   VectorBounds dimension units space
-unerase = Units.unerase
+unerase = coerce
 
 {-# INLINE coerce #-}
 coerce ::
   (Exists dimension units1 space, Exists dimension units2 space) =>
   VectorBounds dimension units1 space ->
   VectorBounds dimension units2 space
-coerce = unerase . erase
+coerce = Data.Coerce.coerce

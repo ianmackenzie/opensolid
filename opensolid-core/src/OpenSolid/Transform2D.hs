@@ -73,7 +73,7 @@ identity :: Rigid units
 identity = Transform2D Point2D.origin VectorTransform2D.identity
 
 coerce :: Transform2D tag1 units1 -> Transform2D tag2 units2
-coerce (Transform2D p0 vt) = Transform2D (Point2D.coerce p0) (VectorTransform2D.coerce vt)
+coerce = Data.Coerce.coerce
 
 {-# INLINE erase #-}
 erase :: Transform2D tag units -> Affine Unitless

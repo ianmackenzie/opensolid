@@ -44,7 +44,6 @@ where
 import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Length (Length)
-import {-# SOURCE #-} OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3D (..)
@@ -75,8 +74,9 @@ vectorTransform (Transform3D _ vt) = vt
 identity :: Rigid space
 identity = Transform3D World3D.originPoint VectorTransform3D.identity
 
+{-# INLINE coerce #-}
 coerce :: Transform3D tag1 space1 -> Transform3D tag2 space2
-coerce (Transform3D p0 vt) = Transform3D (Point3D.coerce p0) (VectorTransform3D.coerce vt)
+coerce = Data.Coerce.coerce
 
 {-# INLINE erase #-}
 erase :: Transform3D tag space -> Affine Void

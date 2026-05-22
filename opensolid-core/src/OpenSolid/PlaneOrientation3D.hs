@@ -18,6 +18,7 @@ module OpenSolid.PlaneOrientation3D
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Prelude
@@ -34,8 +35,9 @@ import OpenSolid.Transform qualified as Transform
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector3D qualified as Vector3D
 
+{-# INLINE coerce #-}
 coerce :: PlaneOrientation3D space1 -> PlaneOrientation3D space2
-coerce (PlaneOrientation3D i j) = PlaneOrientation3D (Direction3D.coerce i) (Direction3D.coerce j)
+coerce = Data.Coerce.coerce
 
 unsafe :: Direction3D space -> Direction3D space -> PlaneOrientation3D space
 unsafe = PlaneOrientation3D

@@ -41,6 +41,7 @@ module OpenSolid.Point2D
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Length qualified as Length
@@ -68,7 +69,7 @@ origin = Position2D Vector2D.zero
 
 {-# INLINE coerce #-}
 coerce :: Point2D units1 -> Point2D units2
-coerce (Position2D p) = Position2D (Vector2D.coerce p)
+coerce = Data.Coerce.coerce
 
 {-# INLINE erase #-}
 erase :: Point2D units -> Point2D Unitless

@@ -48,6 +48,7 @@ module OpenSolid.Vector3D
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Convention3D (Convention3D (Convention3D))
 import OpenSolid.Convention3D qualified as Convention3D
@@ -75,7 +76,7 @@ zero = Vector3D Quantity.zero Quantity.zero Quantity.zero
 
 {-# INLINE coerce #-}
 coerce :: Vector3D units1 space1 -> Vector3D units2 space2
-coerce (Vector3D vx vy vz) = Vector3D (Quantity.coerce vx) (Quantity.coerce vy) (Quantity.coerce vz)
+coerce = Data.Coerce.coerce
 
 {-# INLINE erase #-}
 erase :: Vector3D units space -> Vector3D Unitless Void

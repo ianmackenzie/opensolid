@@ -51,6 +51,7 @@ module OpenSolid.Vector2D
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
@@ -81,7 +82,7 @@ zero = Vector.zero
 
 {-# INLINE coerce #-}
 coerce :: Vector2D units1 -> Vector2D units2
-coerce (Vector2D vx vy) = Vector2D (Quantity.coerce vx) (Quantity.coerce vy)
+coerce = Data.Coerce.coerce
 
 {-# INLINE erase #-}
 erase :: Vector2D units -> Vector2D Unitless
