@@ -45,10 +45,10 @@ import OpenSolid.Set qualified as Set
 type Set3D space item = Set 3 Meters space item
 
 pattern Leaf :: Bounds3D space -> item -> Set3D space item
-pattern Leaf leafBounds item = Set.Leaf leafBounds item
+pattern Leaf leafBounds leafItem <- Set.Leaf{leafBounds, leafItem}
 
 pattern Node :: Bounds3D space -> Set3D space item -> Set3D space item -> Set3D space item
-pattern Node nodeBounds leftChild rightChild = Set.Node nodeBounds leftChild rightChild
+pattern Node nodeBounds leftChild rightChild <- Set.Node{nodeBounds, leftChild, rightChild}
 
 {-# COMPLETE Node, Leaf #-}
 

@@ -414,7 +414,7 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
           `max` interiorError12
           `max` interiorError22
   if Resolution.acceptable (#size size) (#error maxError) resolution
-    then Set2D.Leaf uvRange uvRange
+    then Set2D.singleton uvRange uvRange
     else do
       let Interval u1 u2 = uRange
       let Interval v1 v2 = vRange
@@ -434,9 +434,9 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
       let set21 = buildSurfaceSegmentSet resolution function uvRange21 pMid1 p21 pCenter p2Mid
       let set12 = buildSurfaceSegmentSet resolution function uvRange12 p1Mid pCenter p12 pMid2
       let set22 = buildSurfaceSegmentSet resolution function uvRange22 pCenter p2Mid pMid2 p22
-      let set1 = Set2D.Node (Bounds2D uRange vRange1) set11 set21
-      let set2 = Set2D.Node (Bounds2D uRange vRange2) set12 set22
-      Set2D.Node uvRange set1 set2
+      let set1 = Set2D.union set11 set21
+      let set2 = Set2D.union set12 set22
+      Set2D.union set1 set2
 
 buildLeadingEdgeVerticesMap ::
   Tolerance Meters =>
