@@ -16,7 +16,6 @@ import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude hiding (id)
@@ -57,7 +56,7 @@ findMatingHalfEdges ::
   List (HalfEdge space)
 findMatingHalfEdges halfEdgeSet halfEdge = do
   let halfEdgeBounds = bounds halfEdge
-  halfEdgeSet & Set3D.cull (intersects halfEdgeBounds) & List.filter (isMateOf halfEdge)
+  halfEdgeSet & Set3D.filter (intersects halfEdgeBounds) (isMateOf halfEdge)
 
 isMateOf :: Tolerance Meters => HalfEdge space -> HalfEdge space -> Bool
 isMateOf halfEdge1 halfEdge2 =

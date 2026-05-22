@@ -22,7 +22,13 @@ module OpenSolid.Set3D
   , combineWithIndex
   , union
   , cull
-  , cullIndexed
+  , filter
+  , filterMap
+  , filterWithIndex
+  , filterMapWithIndex
+  , subset
+  , any
+  , all
   , forEach
   , forEachWithIndex
   , reverseForEach
@@ -114,8 +120,34 @@ union = Set.union
 cull :: (Bounds3D space -> Bool) -> Set3D space item -> List item
 cull = Set.cull
 
-cullIndexed :: (Bounds3D space -> Bool) -> Set3D space item -> List (Int, item)
-cullIndexed = Set.cullIndexed
+filter :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> List item
+filter = Set.filter
+
+filterMap :: (Bounds3D space -> Bool) -> (item -> Maybe a) -> Set3D space item -> List a
+filterMap = Set.filterMap
+
+filterWithIndex ::
+  (Bounds3D space -> Bool) ->
+  (Int -> item -> Bool) ->
+  Set3D space item ->
+  List item
+filterWithIndex = Set.filterWithIndex
+
+filterMapWithIndex ::
+  (Bounds3D space -> Bool) ->
+  (Int -> item -> Maybe a) ->
+  Set3D space item ->
+  List a
+filterMapWithIndex = Set.filterMapWithIndex
+
+subset :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Maybe (Set3D space item)
+subset = Set.subset
+
+any :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bool
+any = Set.any
+
+all :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bool
+all = Set.all
 
 forEach :: Chainable action => Set3D space item -> (item -> action) -> action
 forEach = Set.forEach

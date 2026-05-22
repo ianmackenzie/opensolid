@@ -20,7 +20,13 @@ module OpenSolid.Set
   , toListWithIndex
   , union
   , cull
-  , cullIndexed
+  , filter
+  , filterMap
+  , filterWithIndex
+  , filterMapWithIndex
+  , subset
+  , any
+  , all
   , forEach
   , forEachWithIndex
   , reverseForEach
@@ -461,27 +467,110 @@ union left right = do
   SizedNode aggregateBounds (size left) (size right) left right
 
 cull :: (Bounds dimension units space -> Bool) -> Set dimension units space item -> List item
-cull predicate set = cullImpl 0 predicate (const id) set []
+cull boundsPredicate set = filterMap boundsPredicate Just set
 
-cullIndexed ::
+filter ::
   (Bounds dimension units space -> Bool) ->
+  (item -> Bool) ->
   Set dimension units space item ->
-  List (Int, item)
-cullIndexed predicate set = cullImpl 0 predicate (,) set []
+  List item
+filter boundsPredicate itemPredicate set =
+  filterWithIndex boundsPredicate (const itemPredicate) set
 
-cullImpl ::
+filterMap ::
+  (Bounds dimension units space -> Bool) ->
+  (item -> Maybe a) ->
+  Set dimension units space item ->
+  List a
+filterMap boundsPredicate callback set =
+  filterMapWithIndex boundsPredicate (const callback) set
+
+filterWithIndex ::
+  (Bounds dimension units space -> Bool) ->
+  (Int -> item -> Bool) ->
+  Set dimension units space item ->
+  List item
+filterWithIndex boundsPredicate itemPredicate set = do
+  let callback index item = if itemPredicate index item then Just item else Nothing
+  filterMapWithIndex boundsPredicate callback set
+
+filterMapWithIndex ::
+  (Bounds dimension units space -> Bool) ->
+  (Int -> item -> Maybe a) ->
+  Set dimension units space item ->
+  List a
+filterMapWithIndex boundsPredicate callback set =
+  filterMapWithIndexImpl 0 boundsPredicate callback set []
+
+filterMapWithIndexImpl ::
   Int ->
   (Bounds dimension units space -> Bool) ->
-  (Int -> item -> a) ->
+  (Int -> item -> Maybe a) ->
   Set dimension units space item ->
   List a ->
   List a
-cullImpl startIndex predicate function set accumulated =
-  case predicate (bounds set) of
-    False -> accumulated
-    True -> case set of
-      Leaf _ item -> function startIndex item : accumulated
-      SizedNode _ leftSize _ leftChild rightChild ->
+filterMapWithIndexImpl startIndex boundsPredicate callback set accumulated = case set of
+  Leaf leafBounds item ->
+    if boundsPredicate leafBounds
+      then case callback startIndex item of
+        Just result -> result : accumulated
+        Nothing -> accumulated
+      else accumulated
+  SizedNode nodeBounds leftSize _ left right ->
+    if boundsPredicate nodeBounds
+      then
         accumulated
-          & cullImpl (startIndex + leftSize) predicate function rightChild
-          & cullImpl startIndex predicate function leftChild
+          & filterMapWithIndexImpl (startIndex + leftSize) boundsPredicate callback right
+          & filterMapWithIndexImpl startIndex boundsPredicate callback left
+      else accumulated
+
+subset ::
+  Bounds.Exists dimension units space =>
+  (Bounds dimension units space -> Bool) ->
+  (item -> Bool) ->
+  Set dimension units space item ->
+  Maybe (Set dimension units space item)
+subset boundsPredicate itemPredicate set = case set of
+  Leaf leafBounds item ->
+    if boundsPredicate leafBounds && itemPredicate item then Just set else Nothing
+  SizedNode nodeBounds _ _ left right ->
+    if boundsPredicate nodeBounds
+      then do
+        let maybeLeft = subset boundsPredicate itemPredicate left
+        let maybeRight = subset boundsPredicate itemPredicate right
+        joinMaybes maybeLeft maybeRight
+      else Nothing
+
+joinMaybes ::
+  Bounds.Exists dimension units space =>
+  Maybe (Set dimension units space item) ->
+  Maybe (Set dimension units space item) ->
+  Maybe (Set dimension units space item)
+joinMaybes (Just left) (Just right) = Just (union left right)
+joinMaybes (Just left) Nothing = Just left
+joinMaybes Nothing (Just right) = Just right
+joinMaybes Nothing Nothing = Nothing
+
+any ::
+  (Bounds dimension units space -> Bool) ->
+  (item -> Bool) ->
+  Set dimension units space item ->
+  Bool
+any boundsPredicate itemPredicate set = case set of
+  Leaf leafBounds item -> boundsPredicate leafBounds && itemPredicate item
+  SizedNode nodeBounds _ _ left right ->
+    if boundsPredicate nodeBounds
+      then any boundsPredicate itemPredicate left || any boundsPredicate itemPredicate right
+      else False
+
+all ::
+  (Bounds dimension units space -> Bool) ->
+  (item -> Bool) ->
+  Set dimension units space item ->
+  Bool
+all boundsPredicate itemPredicate set = case set of
+  Leaf leafBounds item -> boundsPredicate leafBounds && itemPredicate item
+  SizedNode nodeBounds _ _ left right ->
+    if boundsPredicate nodeBounds
+      then all boundsPredicate itemPredicate left && all boundsPredicate itemPredicate right
+      else False

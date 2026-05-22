@@ -19,7 +19,6 @@ import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Frame2D (Frame2D)
-import OpenSolid.List qualified as List
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -50,10 +49,7 @@ instance Indexed (Boundary units) Int (Curve2D units) where
   boundary !! index = boundary.curves !! index
 
 instance units1 ~ units2 => Intersects (Point2D units1) (Boundary units2) (Tolerance units1) where
-  intersects point boundary =
-    curves boundary
-      & Set2D.cull (intersects point)
-      & List.any (intersects point)
+  intersects point boundary = Set2D.any (intersects point) (intersects point) (curves boundary)
 
 instance units1 ~ units2 => Intersects (Boundary units2) (Point2D units1) (Tolerance units1) where
   intersects boundary point = intersects point boundary

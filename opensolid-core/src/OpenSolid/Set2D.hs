@@ -22,7 +22,13 @@ module OpenSolid.Set2D
   , combineWithIndex
   , union
   , cull
-  , cullIndexed
+  , filter
+  , filterMap
+  , filterWithIndex
+  , filterMapWithIndex
+  , subset
+  , any
+  , all
   , forEach
   , forEachWithIndex
   , reverseForEach
@@ -114,8 +120,34 @@ union = Set.union
 cull :: (Bounds2D units -> Bool) -> Set2D units item -> List item
 cull = Set.cull
 
-cullIndexed :: (Bounds2D units -> Bool) -> Set2D units item -> List (Int, item)
-cullIndexed = Set.cullIndexed
+filter :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> List item
+filter = Set.filter
+
+filterMap :: (Bounds2D units -> Bool) -> (item -> Maybe a) -> Set2D units item -> List a
+filterMap = Set.filterMap
+
+filterWithIndex ::
+  (Bounds2D units -> Bool) ->
+  (Int -> item -> Bool) ->
+  Set2D units item ->
+  List item
+filterWithIndex = Set.filterWithIndex
+
+filterMapWithIndex ::
+  (Bounds2D units -> Bool) ->
+  (Int -> item -> Maybe a) ->
+  Set2D units item ->
+  List a
+filterMapWithIndex = Set.filterMapWithIndex
+
+subset :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Maybe (Set2D units item)
+subset = Set.subset
+
+any :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
+any = Set.any
+
+all :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
+all = Set.all
 
 forEach :: Chainable action => Set2D units item -> (item -> action) -> action
 forEach = Set.forEach
