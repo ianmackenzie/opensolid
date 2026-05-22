@@ -472,11 +472,12 @@ classify point region =
       Nothing -> Inside
       -- Need to check point against inner boundaries
       Just innerBoundarySet ->
-        Set2D.cull (intersects point) innerBoundarySet
+        innerBoundarySet
+          & Set2D.cull (intersects point)
           & classifyInner point
 
 classifyInner :: Tolerance units => Point2D units -> List (Boundary units) -> Classification
-classifyInner point holes = case holes of
+classifyInner point candidateInnerBoundaries = case candidateInnerBoundaries of
   first : rest ->
     case Boundary.classifyPoint point first of
       Boundary.Internal -> Outside -- Point is inside a hole, so outside the region
