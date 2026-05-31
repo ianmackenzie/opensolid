@@ -16,12 +16,6 @@ import OpenSolid.Prelude
 
 data Queue a = Queue Int (List a) (List a) deriving (Eq, Show)
 
-instance Addition (Queue a) a (Queue a) where
-  queue + item = queue & push item
-
-instance Addition (Queue a) (List a) (Queue a) where
-  queue + items = queue & List.forEach items push
-
 empty :: Queue a
 empty = Queue 0 [] []
 

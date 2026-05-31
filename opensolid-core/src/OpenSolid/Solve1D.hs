@@ -158,9 +158,9 @@ recurseIntoChildrenOf node callback queue solutions exclusions = do
   let continueWith updatedQueue = process callback updatedQueue solutions exclusions
   case node of
     Atomic -> Error InfiniteRecursion
-    Shrinkable child -> continueWith (queue + child)
+    Shrinkable child -> continueWith (queue & Queue.push child)
     Splittable middleChild leftChild rightChild ->
-      continueWith (queue + middleChild + leftChild + rightChild)
+      continueWith (queue & Queue.push middleChild & Queue.push leftChild & Queue.push rightChild)
 
 data Action exclusions solution where
   Return :: NonEmpty solution -> Action NoExclusions solution

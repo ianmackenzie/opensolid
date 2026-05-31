@@ -87,7 +87,7 @@ process callback queue solutions exclusions =
               Pass -> process callback remaining solutions exclusions
               Recurse updatedContext -> do
                 children <- recurseInto subdomain updatedContext recursionType
-                process callback (remaining + children) solutions exclusions
+                process callback (remaining & List.forEach children Queue.push) solutions exclusions
               Return newSolution -> do
                 let updatedSolutions = newSolution : solutions
                 let updatedExclusions = subdomain : exclusions
@@ -96,7 +96,7 @@ process callback queue solutions exclusions =
               Pass -> process callback remaining solutions exclusions
               Recurse updatedContext -> do
                 children <- recurseInto subdomain updatedContext recursionType
-                process callback (remaining + children) solutions exclusions
+                process callback (remaining & List.forEach children Queue.push) solutions exclusions
 
 convergenceDomain :: Domain2D -> RecursionType -> Domain2D
 convergenceDomain subdomain recursionType = do
