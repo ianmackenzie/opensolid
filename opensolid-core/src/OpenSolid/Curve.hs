@@ -8,6 +8,7 @@ module OpenSolid.Curve
   , Compiled
   , Segment
   , SearchTree
+  , Tree (Tree)
   , HasSingularity (HasSingularity)
   , new
   , constant
@@ -44,6 +45,7 @@ module OpenSolid.Curve
   , desingularize
   , desingularized
   , findPoint
+  , tree
   , searchTree
   , Intersections (IntersectionPoints, OverlappingSegments)
   , IntersectionPoint
@@ -148,6 +150,7 @@ data Curve dimension units space = Curve
   , startPoint :: ~(Point dimension units space)
   , endPoint :: ~(Point dimension units space)
   , searchTree :: ~(SearchTree dimension units space)
+  , tree :: ~(Tree dimension units space)
   , nondegenerateLength :: ~(Quantity units)
   , nondegenerateUniformParameterization :: ~(Curve1D Unitless)
   }
@@ -170,6 +173,33 @@ data HasSingularity = HasSingularity deriving (Eq, Show)
 type SearchTree dimension units space =
   SearchTree.SearchTree (Interval Unitless) (Segment dimension units space)
 
+data Tree dimension units space
+  = Tree
+      (Interval Unitless)
+      (Segment dimension units space)
+      ~(Tree dimension units space)
+      ~(Tree dimension units space)
+
+instance
+  Units.Coercion (Segment dimension1 units1 space1) (Segment dimension2 units2 space2) =>
+  Units.Coercion
+    (Tree dimension1 units1 space1)
+    (Tree dimension2 units2 space2)
+  where
+  coerce (Tree tRange segment left right) =
+    Tree tRange (Units.coerce segment) (Units.coerce left) (Units.coerce right)
+
+buildTree ::
+  Exists dimension units space =>
+  Curve dimension units space ->
+  Interval Unitless ->
+  Tree dimension units space
+buildTree curve tRange = do
+  let (tLeft, tRight) = Interval.bisect tRange
+  let left = buildTree curve tLeft
+  let right = buildTree curve tRight
+  Tree tRange (Curve.Segment.new curve tRange) left right
+
 instance Units.Coercion (Curve2D units1) (Curve2D units2) where
   coerce curve =
     Curve
@@ -178,6 +208,7 @@ instance Units.Coercion (Curve2D units1) (Curve2D units2) where
       , startPoint = Units.coerce curve.startPoint
       , endPoint = Units.coerce curve.endPoint
       , searchTree = Units.coerce curve.searchTree
+      , tree = Units.coerce curve.tree
       , nondegenerateLength = Quantity.coerce curve.nondegenerateLength
       , nondegenerateUniformParameterization = curve.nondegenerateUniformParameterization
       }
@@ -446,6 +477,7 @@ new givenCompiled givenDerivative =
       , startPoint = CompiledFunction.value givenCompiled 0.0
       , endPoint = CompiledFunction.value givenCompiled 1.0
       , searchTree = SearchTree.build (Curve.Segment.new curve) SearchDomain.curve
+      , tree = buildTree curve Interval.unit
       , nondegenerateLength = arcLength
       , nondegenerateUniformParameterization = parameterization
       }
@@ -588,6 +620,9 @@ range curve tRange = CompiledFunction.range (compiled curve) tRange
 bounds :: Curve dimension units space -> Bounds dimension units space
 bounds curve = Curve.Segment.range (SearchTree.value (searchTree curve))
 
+tree :: Curve dimension units space -> Tree dimension units space
+tree = (.tree)
+
 searchTree :: Curve dimension units space -> SearchTree dimension units space
 searchTree = (.searchTree)
 
@@ -684,6 +719,7 @@ reverse curve =
       , -- TODO optimize by adding e.g. a Segment.reverse function,
         -- to be able to reuse the existing search tree
         searchTree = SearchTree.build (Curve.Segment.new reversed) SearchDomain.curve
+      , tree = buildTree reversed Interval.unit
       , nondegenerateLength = curve.nondegenerateLength
       , nondegenerateUniformParameterization =
           Curve1D.reverse curve.nondegenerateUniformParameterization
@@ -853,6 +889,7 @@ transformBy transform curve =
       , endPoint = Point.transformBy transform curve.endPoint
       , -- TODO optimize by transforming existing search tree?
         searchTree = SearchTree.build (Curve.Segment.new transformed) SearchDomain.curve
+      , tree = buildTree transformed Interval.unit
       , nondegenerateLength = transformedLength
       , nondegenerateUniformParameterization = transformedUniformParameterization
       }
@@ -873,6 +910,7 @@ placeOn plane curve =
       , startPoint = Point2D.placeOn plane curve.startPoint
       , endPoint = Point2D.placeOn plane curve.endPoint
       , searchTree = SearchTree.build (Curve.Segment.new placed) SearchDomain.curve
+      , tree = buildTree placed Interval.unit
       , nondegenerateLength = curve.nondegenerateLength
       , nondegenerateUniformParameterization = curve.nondegenerateUniformParameterization
       }
