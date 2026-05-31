@@ -31,6 +31,11 @@ module OpenSolid.Set
   , forEachWithIndex
   , reverseForEach
   , reverseForEachWithIndex
+  , pairwiseFilter
+  , pairwiseFilterMap
+  , pairwiseFilterWithIndices
+  , pairwiseFilterMapWithIndices
+  , clusters
   , foldr
   , foldrWithIndex
   , foldl
@@ -42,6 +47,7 @@ module OpenSolid.Set
   )
 where
 
+import Data.Graph qualified as Graph
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Chainable (Chainable)
@@ -49,6 +55,7 @@ import OpenSolid.Chainable qualified as Chainable
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval qualified as Interval
+import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -114,6 +121,13 @@ get index set = case set of
     | index < leftSize -> get index leftChild
     | otherwise -> get (index - leftSize) rightChild
   Leaf{leafItem} -> assert (index == 0) leafItem
+
+getLeaf :: Int -> Set dimension units space item -> Set dimension units space item
+getLeaf index set = case set of
+  Node{leftSize, leftChild, rightChild}
+    | index < leftSize -> getLeaf index leftChild
+    | otherwise -> getLeaf (index - leftSize) rightChild
+  Leaf{} -> assert (index == 0) set
 
 size :: Set dimension units space item -> Int
 size Leaf{} = 1
@@ -576,3 +590,125 @@ all boundsPredicate itemPredicate set = case set of
   Node{nodeBounds, leftChild, rightChild} ->
     boundsPredicate nodeBounds && do
       all boundsPredicate itemPredicate leftChild && all boundsPredicate itemPredicate rightChild
+
+pairwiseFilter ::
+  (Bounds dimension1 units1 space1 -> Bounds dimension2 units2 space2 -> Bool) ->
+  (item1 -> item2 -> Bool) ->
+  Set dimension1 units1 space1 item1 ->
+  Set dimension2 units2 space2 item2 ->
+  List (item1, item2)
+pairwiseFilter boundsPredicate itemPredicate set1 set2 = do
+  let callback item1 item2 = if itemPredicate item1 item2 then Just (item1, item2) else Nothing
+  pairwiseFilterMap boundsPredicate callback set1 set2
+
+pairwiseFilterMap ::
+  (Bounds dimension1 units1 space1 -> Bounds dimension2 units2 space2 -> Bool) ->
+  (item1 -> item2 -> Maybe a) ->
+  Set dimension1 units1 space1 item1 ->
+  Set dimension2 units2 space2 item2 ->
+  List a
+pairwiseFilterMap boundsPredicate callback set1 set2 =
+  pairwiseFilterMapWithIndices boundsPredicate (\_ _ item1 item2 -> callback item1 item2) set1 set2
+
+pairwiseFilterWithIndices ::
+  (Bounds dimension1 units1 space1 -> Bounds dimension2 units2 space2 -> Bool) ->
+  (Int -> Int -> item1 -> item2 -> Bool) ->
+  Set dimension1 units1 space1 item1 ->
+  Set dimension2 units2 space2 item2 ->
+  List (item1, item2)
+pairwiseFilterWithIndices boundsPredicate itemPredicate set1 set2 = do
+  let callback index1 index2 item1 item2 =
+        if itemPredicate index1 index2 item1 item2 then Just (item1, item2) else Nothing
+  pairwiseFilterMapWithIndices boundsPredicate callback set1 set2
+
+pairwiseFilterMapWithIndices ::
+  (Bounds dimension1 units1 space1 -> Bounds dimension2 units2 space2 -> Bool) ->
+  (Int -> Int -> item1 -> item2 -> Maybe a) ->
+  Set dimension1 units1 space1 item1 ->
+  Set dimension2 units2 space2 item2 ->
+  List a
+pairwiseFilterMapWithIndices boundsPredicate callback set1 set2 =
+  pairwiseFilterMapWithIndicesImpl 0 0 boundsPredicate callback set1 set2 []
+
+pairwiseFilterMapWithIndicesImpl ::
+  Int ->
+  Int ->
+  (Bounds dimension1 units1 space1 -> Bounds dimension2 units2 space2 -> Bool) ->
+  (Int -> Int -> item1 -> item2 -> Maybe a) ->
+  Set dimension1 units1 space1 item1 ->
+  Set dimension2 units2 space2 item2 ->
+  List a ->
+  List a
+pairwiseFilterMapWithIndicesImpl startIndex1 startIndex2 boundsPredicate callback set1 set2 accumulated =
+  if boundsPredicate (bounds set1) (bounds set2)
+    then case (set1, set2) of
+      (Leaf{}, Leaf{}) ->
+        case callback startIndex1 startIndex2 set1.leafItem set2.leafItem of
+          Just result -> result : accumulated
+          Nothing -> accumulated
+      (Leaf{}, Node{}) -> do
+        let leftChild2 = set2.leftChild
+        let rightChild2 = set2.rightChild
+        let rightStartIndex2 = startIndex2 + set2.leftSize
+        accumulated
+          & pairwiseFilterMapWithIndicesImpl startIndex1 rightStartIndex2 boundsPredicate callback set1 rightChild2
+          & pairwiseFilterMapWithIndicesImpl startIndex1 startIndex2 boundsPredicate callback set1 leftChild2
+      (Node{}, Leaf{}) -> do
+        let leftChild1 = set1.leftChild
+        let rightChild1 = set1.rightChild
+        let rightStartIndex1 = startIndex1 + set1.leftSize
+        accumulated
+          & pairwiseFilterMapWithIndicesImpl rightStartIndex1 startIndex2 boundsPredicate callback rightChild1 set2
+          & pairwiseFilterMapWithIndicesImpl startIndex1 startIndex2 boundsPredicate callback leftChild1 set2
+      (Node{}, Node{}) -> do
+        let leftChild1 = set1.leftChild
+        let rightChild1 = set1.rightChild
+        let leftChild2 = set2.leftChild
+        let rightChild2 = set2.rightChild
+        let rightStartIndex1 = startIndex1 + set1.leftSize
+        let rightStartIndex2 = startIndex2 + set2.leftSize
+        accumulated
+          & pairwiseFilterMapWithIndicesImpl rightStartIndex1 rightStartIndex2 boundsPredicate callback rightChild1 rightChild2
+          & pairwiseFilterMapWithIndicesImpl rightStartIndex1 startIndex2 boundsPredicate callback rightChild1 leftChild2
+          & pairwiseFilterMapWithIndicesImpl startIndex1 rightStartIndex2 boundsPredicate callback leftChild1 rightChild2
+          & pairwiseFilterMapWithIndicesImpl startIndex1 startIndex2 boundsPredicate callback leftChild1 leftChild2
+    else accumulated
+
+clusters ::
+  Bounds.Exists dimension units space =>
+  (Bounds dimension units space -> Bounds dimension units space -> Bool) ->
+  (item -> item -> Bool) ->
+  Set dimension units space item ->
+  Set dimension units space (Set dimension units space item)
+clusters boundsPredicate itemPredicate set = do
+  let callback index1 index2 item1 item2 =
+        if index1 /= index2 && itemPredicate item1 item2
+          then Just (index1, index2)
+          else Nothing
+  let edges = pairwiseFilterMapWithIndices boundsPredicate callback set set
+  let graph = Graph.buildG (0, size set - 1) edges
+  case Graph.components graph of
+    NonEmpty components -> do
+      let subsets = NonEmpty.map (buildCluster set) components
+      build bounds subsets
+    [] -> InternalError.throw "Should have at least one cluster (since sets cannot be empty)"
+
+buildCluster ::
+  Bounds.Exists dimension units space =>
+  Set dimension units space item ->
+  Graph.Tree Int ->
+  Set dimension units space item
+buildCluster set (Graph.Node vertex connected) =
+  NonEmpty.one (getLeaf vertex set)
+    & List.forEach connected (collectClusterItems set)
+    & aggregate
+
+collectClusterItems ::
+  Set dimension units space item ->
+  Graph.Tree Int ->
+  NonEmpty (Set dimension units space item) ->
+  NonEmpty (Set dimension units space item)
+collectClusterItems set (Graph.Node vertex connected) accumulated =
+  accumulated
+    & NonEmpty.push (getLeaf vertex set)
+    & List.forEach connected (collectClusterItems set)

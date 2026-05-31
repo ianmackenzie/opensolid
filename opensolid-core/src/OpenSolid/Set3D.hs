@@ -33,6 +33,11 @@ module OpenSolid.Set3D
   , forEachWithIndex
   , reverseForEach
   , reverseForEachWithIndex
+  , pairwiseFilter
+  , pairwiseFilterMap
+  , pairwiseFilterWithIndices
+  , pairwiseFilterMapWithIndices
+  , clusters
   )
 where
 
@@ -164,3 +169,42 @@ reverseForEachWithIndex ::
   (Int -> item -> action) ->
   action
 reverseForEachWithIndex = Set.reverseForEachWithIndex
+
+pairwiseFilter ::
+  (Bounds3D space1 -> Bounds3D space2 -> Bool) ->
+  (item1 -> item2 -> Bool) ->
+  Set3D space1 item1 ->
+  Set3D space2 item2 ->
+  List (item1, item2)
+pairwiseFilter = Set.pairwiseFilter
+
+pairwiseFilterMap ::
+  (Bounds3D space1 -> Bounds3D space2 -> Bool) ->
+  (item1 -> item2 -> Maybe a) ->
+  Set3D space1 item1 ->
+  Set3D space2 item2 ->
+  List a
+pairwiseFilterMap = Set.pairwiseFilterMap
+
+pairwiseFilterWithIndices ::
+  (Bounds3D space1 -> Bounds3D space2 -> Bool) ->
+  (Int -> Int -> item1 -> item2 -> Bool) ->
+  Set3D space1 item1 ->
+  Set3D space2 item2 ->
+  List (item1, item2)
+pairwiseFilterWithIndices = Set.pairwiseFilterWithIndices
+
+pairwiseFilterMapWithIndices ::
+  (Bounds3D space1 -> Bounds3D space2 -> Bool) ->
+  (Int -> Int -> item1 -> item2 -> Maybe a) ->
+  Set3D space1 item1 ->
+  Set3D space2 item2 ->
+  List a
+pairwiseFilterMapWithIndices = Set.pairwiseFilterMapWithIndices
+
+clusters ::
+  (Bounds3D space -> Bounds3D space -> Bool) ->
+  (item -> item -> Bool) ->
+  Set3D space item ->
+  Set3D space (Set3D space item)
+clusters = Set.clusters

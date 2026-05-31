@@ -33,6 +33,11 @@ module OpenSolid.Set2D
   , forEachWithIndex
   , reverseForEach
   , reverseForEachWithIndex
+  , pairwiseFilter
+  , pairwiseFilterMap
+  , pairwiseFilterWithIndices
+  , pairwiseFilterMapWithIndices
+  , clusters
   )
 where
 
@@ -164,3 +169,42 @@ reverseForEachWithIndex ::
   (Int -> item -> action) ->
   action
 reverseForEachWithIndex = Set.reverseForEachWithIndex
+
+pairwiseFilter ::
+  (Bounds2D units1 -> Bounds2D units2 -> Bool) ->
+  (item1 -> item2 -> Bool) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2 ->
+  List (item1, item2)
+pairwiseFilter = Set.pairwiseFilter
+
+pairwiseFilterMap ::
+  (Bounds2D units1 -> Bounds2D units2 -> Bool) ->
+  (item1 -> item2 -> Maybe a) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2 ->
+  List a
+pairwiseFilterMap = Set.pairwiseFilterMap
+
+pairwiseFilterWithIndices ::
+  (Bounds2D units1 -> Bounds2D units2 -> Bool) ->
+  (Int -> Int -> item1 -> item2 -> Bool) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2 ->
+  List (item1, item2)
+pairwiseFilterWithIndices = Set.pairwiseFilterWithIndices
+
+pairwiseFilterMapWithIndices ::
+  (Bounds2D units1 -> Bounds2D units2 -> Bool) ->
+  (Int -> Int -> item1 -> item2 -> Maybe a) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2 ->
+  List a
+pairwiseFilterMapWithIndices = Set.pairwiseFilterMapWithIndices
+
+clusters ::
+  (Bounds2D units -> Bounds2D units -> Bool) ->
+  (item -> item -> Bool) ->
+  Set2D units item ->
+  Set2D units (Set2D units item)
+clusters = Set.clusters
