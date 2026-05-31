@@ -47,7 +47,7 @@ import OpenSolid.Prelude
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
 
-type Set2D units item = Set 2 units Void item
+type Set2D units item = Set (Bounds2D units) item
 
 pattern Leaf :: Bounds2D units -> item -> Set2D units item
 pattern Leaf leafBounds leafItem <- Set.Leaf{leafBounds, leafItem}

@@ -48,8 +48,6 @@ module OpenSolid.Set
 where
 
 import Data.Graph qualified as Graph
-import OpenSolid.Bounds (Bounds)
-import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Chainable (Chainable)
 import OpenSolid.Chainable qualified as Chainable
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
@@ -59,42 +57,35 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Set.Bounds (Bounds)
+import OpenSolid.Set.Bounds qualified as Set.Bounds
 import OpenSolid.Units qualified as Units
 import Prelude qualified
 
-data Set dimension units space item where
+data Set b a where
   Leaf ::
-    { leafBounds :: Bounds dimension units space
-    , leafItem :: item
+    { leafBounds :: b
+    , leafItem :: a
     } ->
-    Set dimension units space item
+    Set b a
   Node ::
-    { nodeBounds :: Bounds dimension units space
+    { nodeBounds :: b
     , leftSize :: Int
     , rightSize :: Int
-    , leftChild :: Set dimension units space item
-    , rightChild :: Set dimension units space item
+    , leftChild :: Set b a
+    , rightChild :: Set b a
     } ->
-    Set dimension units space item
+    Set b a
 
-deriving instance
-  (Bounds.Exists dimension units space, Show item) =>
-  Show (Set dimension units space item)
+deriving instance (Show b, Show a) => Show (Set b a)
 
-instance Foldable (Set dimension units space) where
+instance Foldable (Set b) where
   foldl = foldl
   foldr = foldr
 
 instance
-  ( dimension1 ~ dimension2
-  , space1 ~ space2
-  , Units.Coercion (Bounds dimension1 units1 space1) (Bounds dimension2 units2 space2)
-  , Units.Coercion item1 item2
-  , HasUnits item1 units1
-  , HasUnits item2 units2
-  ) =>
-  Units.Coercion (Set dimension1 units1 space1 item1) (Set dimension2 units2 space2 item2)
+  (Units.Coercion b1 b2, Units.Coercion a1 a2) =>
+  Units.Coercion (Set b1 a1) (Set b2 a2)
   where
   coerce Leaf{leafBounds, leafItem} =
     Leaf
@@ -110,99 +101,73 @@ instance
       , rightChild = Units.coerce rightChild
       }
 
-instance Indexed (Set dimension units space item) Int item where
+instance Indexed (Set b a) Int a where
   set !! index
     | index >= 0 && index <= size set = get index set
     | otherwise = throw IndexOutOfBounds{index = index, size = size set}
 
-get :: Int -> Set dimension units space item -> item
+get :: Int -> Set b a -> a
 get index set = case set of
   Node{leftSize, leftChild, rightChild}
     | index < leftSize -> get index leftChild
     | otherwise -> get (index - leftSize) rightChild
   Leaf{leafItem} -> assert (index == 0) leafItem
 
-getLeaf :: Int -> Set dimension units space item -> Set dimension units space item
+getLeaf :: Int -> Set b a -> Set b a
 getLeaf index set = case set of
   Node{leftSize, leftChild, rightChild}
     | index < leftSize -> getLeaf index leftChild
     | otherwise -> getLeaf (index - leftSize) rightChild
   Leaf{} -> assert (index == 0) set
 
-size :: Set dimension units space item -> Int
+size :: Set b a -> Int
 size Leaf{} = 1
 size Node{leftSize, rightSize} = leftSize + rightSize
 
-bounds :: Set dimension units space item -> Bounds dimension units space
+bounds :: Set b a -> b
 bounds Node{nodeBounds} = nodeBounds
 bounds Leaf{leafBounds} = leafBounds
 
-singleton ::
-  Bounds.Exists dimension units space =>
-  Bounds dimension units space ->
-  item ->
-  Set dimension units space item
+singleton :: b -> a -> Set b a
 singleton = Leaf
 
-build ::
-  Bounds.Exists dimension units space =>
-  (item -> Bounds dimension units space) ->
-  NonEmpty item ->
-  Set dimension units space item
+build :: Bounds b => (a -> b) -> NonEmpty a -> Set b a
 build boundsFunction items = do
   let toLeaf item = Leaf (boundsFunction item) item
   aggregate (NonEmpty.map toLeaf items)
 
-linear ::
-  Bounds.Exists dimension units space =>
-  (item -> Bounds dimension units space) ->
-  NonEmpty item ->
-  Set dimension units space item
+linear :: Bounds b => (a -> b) -> NonEmpty a -> Set b a
 linear boundsFunction items = do
   let toLeaf item = Leaf (boundsFunction item) item
   buildLinear (NonEmpty.map toLeaf items)
 
-buildLinear ::
-  Bounds.Exists dimension units space =>
-  NonEmpty (Set dimension units space item) ->
-  Set dimension units space item
+buildLinear :: Bounds b => NonEmpty (Set b a) -> Set b a
 buildLinear sets =
   case reduceLinear sets of
     NonEmpty.One set -> set
     reduced -> buildLinear reduced
 
-reduceLinear ::
-  Bounds.Exists dimension units space =>
-  NonEmpty (Set dimension units space item) ->
-  NonEmpty (Set dimension units space item)
+reduceLinear :: Bounds b => NonEmpty (Set b a) -> NonEmpty (Set b a)
 reduceLinear (first :| []) = NonEmpty.one first
 reduceLinear (first :| second : []) = NonEmpty.one (union first second)
 reduceLinear (first :| second : NonEmpty rest) =
   NonEmpty.push (union first second) (reduceLinear rest)
 
-aggregate ::
-  Bounds.Exists dimension units space =>
-  NonEmpty (Set dimension units space item) ->
-  Set dimension units space item
+aggregate :: Bounds b => NonEmpty (Set b a) -> Set b a
 aggregate subsets = aggregateImpl (NonEmpty.length subsets) subsets 0
 
-aggregateImpl ::
-  Bounds.Exists dimension units space =>
-  Int ->
-  NonEmpty (Set dimension units space item) ->
-  Int ->
-  Set dimension units space item
+aggregateImpl :: Bounds b => Int -> NonEmpty (Set b a) -> Int -> Set b a
 aggregateImpl count subsets index
   | count == 1 = assert (NonEmpty.length subsets == 1) (NonEmpty.first subsets)
   | otherwise = assert (count >= 2 && NonEmpty.length subsets == count) do
-      let indexedCoordinateMidpoint = Interval.midpoint . Bounds.cyclicCoordinate index . bounds
+      let indexedCoordinateMidpoint = Interval.midpoint . Set.Bounds.cycle index . bounds
       let sorted = NonEmpty.sortBy indexedCoordinateMidpoint subsets
       let leftSize = count // 2
       let rightSize = count - leftSize
       let (leftSubsets, rightSubsets) = splitAtIndex leftSize sorted
       let leftChild = aggregateImpl leftSize leftSubsets (index + 1)
       let rightChild = aggregateImpl rightSize rightSubsets (index + 1)
-      let nodeBounds = Bounds.aggregate2 (bounds leftChild) (bounds rightChild)
+      let nodeBounds = Set.Bounds.aggregate (bounds leftChild) (bounds rightChild)
       Node{nodeBounds, leftSize, rightSize, leftChild, rightChild}
 
 splitAtIndex :: Int -> NonEmpty a -> (NonEmpty a, NonEmpty a)
@@ -212,7 +177,7 @@ splitAtIndex 1 (first :| NonEmpty rest) = (NonEmpty.one first, rest)
 splitAtIndex n (first :| NonEmpty rest) =
   Pair.mapFirst (NonEmpty.push first) (splitAtIndex (n - 1) rest)
 
-flatten :: Set dimension units space (Set dimension units space item) -> Set dimension units space item
+flatten :: Set b (Set b a) -> Set b a
 flatten Leaf{leafItem} = leafItem
 flatten Node{nodeBounds, leftChild, rightChild} = do
   let flattenedLeft = flatten leftChild
@@ -225,32 +190,17 @@ flatten Node{nodeBounds, leftChild, rightChild} = do
     , rightChild = flattenedRight
     }
 
-map ::
-  Bounds.Exists dimension2 units2 space2 =>
-  (item1 -> item2) ->
-  (item2 -> Bounds dimension2 units2 space2) ->
-  Set dimension1 units1 space1 item1 ->
-  Set dimension2 units2 space2 item2
+map :: Bounds b2 => (a1 -> a2) -> (a2 -> b2) -> Set b1 a1 -> Set b2 a2
 map function boundsFunction set = mapWithIndex (const function) boundsFunction set
 
-mapWithIndex ::
-  Bounds.Exists dimension2 units2 space2 =>
-  (Int -> item1 -> item2) ->
-  (item2 -> Bounds dimension2 units2 space2) ->
-  Set dimension1 units1 space1 item1 ->
-  Set dimension2 units2 space2 item2
+mapWithIndex :: Bounds b2 => (Int -> a1 -> a2) -> (a2 -> b2) -> Set b1 a1 -> Set b2 a2
 mapWithIndex function boundsFunction =
   combineWithIndex \index item1 -> do
     let item2 = function index item1
     let bounds2 = boundsFunction item2
     singleton bounds2 item2
 
-reverseMap ::
-  Bounds.Exists dimension2 units2 space2 =>
-  (item1 -> item2) ->
-  (item2 -> Bounds dimension2 units2 space2) ->
-  Set dimension1 units1 space1 item1 ->
-  Set dimension2 units2 space2 item2
+reverseMap :: Bounds b2 => (a1 -> a2) -> (a2 -> b2) -> Set b1 a1 -> Set b2 a2
 reverseMap function boundsFunction set = case set of
   Leaf{leafItem} -> do
     let mappedItem = function leafItem
@@ -261,26 +211,13 @@ reverseMap function boundsFunction set = case set of
     let reverseMappedRight = reverseMap function boundsFunction rightChild
     union reverseMappedRight reverseMappedLeft
 
-combine ::
-  Bounds.Exists dimension2 units2 space2 =>
-  (item1 -> Set dimension2 units2 space2 item2) ->
-  Set dimension1 units1 space1 item1 ->
-  Set dimension2 units2 space2 item2
+combine :: Bounds b2 => (a1 -> Set b2 a2) -> Set b1 a1 -> Set b2 a2
 combine function set = combineWithIndex (const function) set
 
-combineWithIndex ::
-  Bounds.Exists dimension2 units2 space2 =>
-  (Int -> item1 -> Set dimension2 units2 space2 item2) ->
-  Set dimension1 units1 space1 item1 ->
-  Set dimension2 units2 space2 item2
+combineWithIndex :: Bounds b2 => (Int -> a1 -> Set b2 a2) -> Set b1 a1 -> Set b2 a2
 combineWithIndex function set = combineWithIndexImpl 0 function set
 
-combineWithIndexImpl ::
-  Bounds.Exists dimension2 units2 space2 =>
-  Int ->
-  (Int -> item1 -> Set dimension2 units2 space2 item2) ->
-  Set dimension1 units1 space1 item1 ->
-  Set dimension2 units2 space2 item2
+combineWithIndexImpl :: Bounds b2 => Int -> (Int -> a1 -> Set b2 a2) -> Set b1 a1 -> Set b2 a2
 combineWithIndexImpl startIndex function set = case set of
   Leaf{leafItem} -> function startIndex leafItem
   Node{leftSize, leftChild, rightChild} -> do
@@ -288,26 +225,13 @@ combineWithIndexImpl startIndex function set = case set of
     let combinedRight = combineWithIndexImpl (startIndex + leftSize) function rightChild
     union combinedLeft combinedRight
 
-forEach ::
-  Chainable action =>
-  Set dimension units space item ->
-  (item -> action) ->
-  action
+forEach :: Chainable action => Set b a -> (a -> action) -> action
 forEach set function = forEachWithIndex set (const function)
 
-forEachWithIndex ::
-  Chainable action =>
-  Set dimension units space item ->
-  (Int -> item -> action) ->
-  action
+forEachWithIndex :: Chainable action => Set b a -> (Int -> a -> action) -> action
 forEachWithIndex = forEachWithIndexImpl 0
 
-forEachWithIndexImpl ::
-  Chainable action =>
-  Int ->
-  Set dimension units space item ->
-  (Int -> item -> action) ->
-  action
+forEachWithIndexImpl :: Chainable action => Int -> Set b a -> (Int -> a -> action) -> action
 forEachWithIndexImpl startIndex set function = case set of
   Leaf{leafItem} -> function startIndex leafItem
   Node{leftSize, leftChild, rightChild} -> do
@@ -315,26 +239,13 @@ forEachWithIndexImpl startIndex set function = case set of
     let rightAction = forEachWithIndexImpl (startIndex + leftSize) rightChild function
     Chainable.chain leftAction rightAction
 
-reverseForEach ::
-  Chainable action =>
-  Set dimension units space item ->
-  (item -> action) ->
-  action
+reverseForEach :: Chainable action => Set b a -> (a -> action) -> action
 reverseForEach set function = reverseForEachWithIndex set (const function)
 
-reverseForEachWithIndex ::
-  Chainable action =>
-  Set dimension units space item ->
-  (Int -> item -> action) ->
-  action
+reverseForEachWithIndex :: Chainable action => Set b a -> (Int -> a -> action) -> action
 reverseForEachWithIndex = reverseForEachWithIndexImpl 0
 
-reverseForEachWithIndexImpl ::
-  Chainable action =>
-  Int ->
-  Set dimension units space item ->
-  (Int -> item -> action) ->
-  action
+reverseForEachWithIndexImpl :: Chainable action => Int -> Set b a -> (Int -> a -> action) -> action
 reverseForEachWithIndexImpl startIndex set function = case set of
   Leaf{leafItem} -> function startIndex leafItem
   Node{leftSize, leftChild, rightChild} -> do
@@ -342,67 +253,33 @@ reverseForEachWithIndexImpl startIndex set function = case set of
     let leftAction = reverseForEachWithIndexImpl startIndex leftChild function
     Chainable.chain rightAction leftAction
 
-foldr ::
-  (item -> accumulated -> accumulated) ->
-  accumulated ->
-  Set dimension units space item ->
-  accumulated
+foldr :: (a -> acc -> acc) -> acc -> Set b a -> acc
 foldr function init set = foldrWithIndex (const function) init set
 
-foldl ::
-  (accumulated -> item -> accumulated) ->
-  accumulated ->
-  Set dimension units space item ->
-  accumulated
+foldl :: (acc -> a -> acc) -> acc -> Set b a -> acc
 foldl function init set = foldlWithIndex (const function) init set
 
-foldrWithIndex ::
-  (Int -> item -> accumulated -> accumulated) ->
-  accumulated ->
-  Set dimension units space item ->
-  accumulated
+foldrWithIndex :: (Int -> a -> acc -> acc) -> acc -> Set b a -> acc
 foldrWithIndex function init set = reverseForEachWithIndex set function init
 
-foldlWithIndex ::
-  (Int -> accumulated -> item -> accumulated) ->
-  accumulated ->
-  Set dimension units space item ->
-  accumulated
+foldlWithIndex :: (Int -> acc -> a -> acc) -> acc -> Set b a -> acc
 foldlWithIndex function init set =
   init & forEachWithIndex set \index item accumulated -> function index accumulated item
 
-foldrMap ::
-  (item -> accumulated) ->
-  (item -> accumulated -> accumulated) ->
-  Set dimension units space item ->
-  accumulated
+foldrMap :: (a -> acc) -> (a -> acc -> acc) -> Set b a -> acc
 foldrMap init function set = foldrMapWithIndex (const init) (const function) set
 
-foldrMapWithIndex ::
-  (Int -> item -> accumulated) ->
-  (Int -> item -> accumulated -> accumulated) ->
-  Set dimension units space item ->
-  accumulated
+foldrMapWithIndex :: (Int -> a -> acc) -> (Int -> a -> acc -> acc) -> Set b a -> acc
 foldrMapWithIndex = foldrMapWithIndexStart 0
 
-foldrMapWithIndexStart ::
-  Int ->
-  (Int -> item -> accumulated) ->
-  (Int -> item -> accumulated -> accumulated) ->
-  Set dimension units space item ->
-  accumulated
+foldrMapWithIndexStart :: Int -> (Int -> a -> acc) -> (Int -> a -> acc -> acc) -> Set b a -> acc
 foldrMapWithIndexStart startIndex init function set = case set of
   Leaf{leafItem} -> init startIndex leafItem
   Node{leftSize, leftChild, rightChild} ->
     foldrMapWithIndexStart (startIndex + leftSize) init function rightChild
       & foldrMapWithIndexContinue startIndex function leftChild
 
-foldrMapWithIndexContinue ::
-  Int ->
-  (Int -> item -> accumulated -> accumulated) ->
-  Set dimension units space item ->
-  accumulated ->
-  accumulated
+foldrMapWithIndexContinue :: Int -> (Int -> a -> acc -> acc) -> Set b a -> acc -> acc
 foldrMapWithIndexContinue startIndex function set accumulated = case set of
   Leaf{leafItem} -> function startIndex leafItem accumulated
   Node{leftSize, leftChild, rightChild} ->
@@ -410,38 +287,20 @@ foldrMapWithIndexContinue startIndex function set accumulated = case set of
       & foldrMapWithIndexContinue (startIndex + leftSize) function rightChild
       & foldrMapWithIndexContinue startIndex function leftChild
 
-foldlMap ::
-  (item -> accumulated) ->
-  (accumulated -> item -> accumulated) ->
-  Set dimension units space item ->
-  accumulated
+foldlMap :: (a -> acc) -> (acc -> a -> acc) -> Set b a -> acc
 foldlMap init function set = foldlMapWithIndex (const init) (const function) set
 
-foldlMapWithIndex ::
-  (Int -> item -> accumulated) ->
-  (Int -> accumulated -> item -> accumulated) ->
-  Set dimension units space item ->
-  accumulated
+foldlMapWithIndex :: (Int -> a -> acc) -> (Int -> acc -> a -> acc) -> Set b a -> acc
 foldlMapWithIndex init function set = foldlMapWithIndexStart 0 init function set
 
-foldlMapWithIndexStart ::
-  Int ->
-  (Int -> item -> accumulated) ->
-  (Int -> accumulated -> item -> accumulated) ->
-  Set dimension units space item ->
-  accumulated
+foldlMapWithIndexStart :: Int -> (Int -> a -> acc) -> (Int -> acc -> a -> acc) -> Set b a -> acc
 foldlMapWithIndexStart startIndex init function set = case set of
   Leaf{leafItem} -> init startIndex leafItem
   Node{leftSize, leftChild, rightChild} ->
     foldlMapWithIndexStart startIndex init function leftChild
       & foldlMapWithIndexContinue (startIndex + leftSize) function rightChild
 
-foldlMapWithIndexContinue ::
-  Int ->
-  (Int -> accumulated -> item -> accumulated) ->
-  Set dimension units space item ->
-  accumulated ->
-  accumulated
+foldlMapWithIndexContinue :: Int -> (Int -> acc -> a -> acc) -> Set b a -> acc -> acc
 foldlMapWithIndexContinue startIndex function set accumulated = case set of
   Leaf{leafItem} -> function startIndex accumulated leafItem
   Node{leftSize, leftChild, rightChild} ->
@@ -449,84 +308,64 @@ foldlMapWithIndexContinue startIndex function set accumulated = case set of
       & foldlMapWithIndexContinue startIndex function leftChild
       & foldlMapWithIndexContinue (startIndex + leftSize) function rightChild
 
-toNonEmpty :: Set dimension units space item -> NonEmpty item
+toNonEmpty :: Set b a -> NonEmpty a
 toNonEmpty = foldrMap NonEmpty.one NonEmpty.push
 
-toNonEmptyOf :: (item -> a) -> Set dimension units space item -> NonEmpty a
+toNonEmptyOf :: (a1 -> a2) -> Set b a1 -> NonEmpty a2
 toNonEmptyOf function = foldrMap (NonEmpty.one . function) (NonEmpty.push . function)
 
-toNonEmptyWithIndex :: (Int -> item -> a) -> Set dimension units space item -> NonEmpty a
+toNonEmptyWithIndex :: (Int -> a1 -> a2) -> Set b a1 -> NonEmpty a2
 toNonEmptyWithIndex function =
   foldrMapWithIndex
     (\index item -> NonEmpty.one (function index item))
     (\index item accumulated -> NonEmpty.push (function index item) accumulated)
 
-toList :: Set dimension units space item -> List item
+toList :: Set b a -> List a
 toList = NonEmpty.toList . toNonEmpty
 
-toListOf :: (item -> a) -> Set dimension units space item -> List a
+toListOf :: (a1 -> a2) -> Set b a1 -> List a2
 toListOf function = NonEmpty.toList . toNonEmptyOf function
 
-toListWithIndex :: (Int -> item -> a) -> Set dimension units space item -> List a
+toListWithIndex :: (Int -> a1 -> a2) -> Set b a1 -> List a2
 toListWithIndex function = NonEmpty.toList . toNonEmptyWithIndex function
 
-union ::
-  Bounds.Exists dimension units space =>
-  Set dimension units space item ->
-  Set dimension units space item ->
-  Set dimension units space item
+union :: Bounds b => Set b a -> Set b a -> Set b a
 union leftChild rightChild =
   Node
-    { nodeBounds = Bounds.aggregate2 (bounds leftChild) (bounds rightChild)
+    { nodeBounds = Set.Bounds.aggregate (bounds leftChild) (bounds rightChild)
     , leftSize = size leftChild
     , rightSize = size rightChild
     , leftChild
     , rightChild
     }
 
-cull :: (Bounds dimension units space -> Bool) -> Set dimension units space item -> List item
+cull :: (b -> Bool) -> Set b a -> List a
 cull boundsPredicate set = filterMap boundsPredicate Just set
 
-filter ::
-  (Bounds dimension units space -> Bool) ->
-  (item -> Bool) ->
-  Set dimension units space item ->
-  List item
+filter :: (b -> Bool) -> (a -> Bool) -> Set b a -> List a
 filter boundsPredicate itemPredicate set =
   filterWithIndex boundsPredicate (const itemPredicate) set
 
-filterMap ::
-  (Bounds dimension units space -> Bool) ->
-  (item -> Maybe a) ->
-  Set dimension units space item ->
-  List a
+filterMap :: (b -> Bool) -> (a1 -> Maybe a2) -> Set b a1 -> List a2
 filterMap boundsPredicate callback set =
   filterMapWithIndex boundsPredicate (const callback) set
 
-filterWithIndex ::
-  (Bounds dimension units space -> Bool) ->
-  (Int -> item -> Bool) ->
-  Set dimension units space item ->
-  List item
+filterWithIndex :: (b -> Bool) -> (Int -> a -> Bool) -> Set b a -> List a
 filterWithIndex boundsPredicate itemPredicate set = do
   let callback index item = if itemPredicate index item then Just item else Nothing
   filterMapWithIndex boundsPredicate callback set
 
-filterMapWithIndex ::
-  (Bounds dimension units space -> Bool) ->
-  (Int -> item -> Maybe a) ->
-  Set dimension units space item ->
-  List a
+filterMapWithIndex :: (b -> Bool) -> (Int -> a1 -> Maybe a2) -> Set b a1 -> List a2
 filterMapWithIndex boundsPredicate callback set =
   filterMapWithIndexImpl 0 boundsPredicate callback set []
 
 filterMapWithIndexImpl ::
   Int ->
-  (Bounds dimension units space -> Bool) ->
-  (Int -> item -> Maybe a) ->
-  Set dimension units space item ->
-  List a ->
-  List a
+  (b -> Bool) ->
+  (Int -> a1 -> Maybe a2) ->
+  Set b a1 ->
+  List a2 ->
+  List a2
 filterMapWithIndexImpl startIndex boundsPredicate callback set accumulated = case set of
   Leaf{leafBounds, leafItem} ->
     if boundsPredicate leafBounds
@@ -542,12 +381,7 @@ filterMapWithIndexImpl startIndex boundsPredicate callback set accumulated = cas
           & filterMapWithIndexImpl startIndex boundsPredicate callback leftChild
       else accumulated
 
-subset ::
-  Bounds.Exists dimension units space =>
-  (Bounds dimension units space -> Bool) ->
-  (item -> Bool) ->
-  Set dimension units space item ->
-  Maybe (Set dimension units space item)
+subset :: Bounds b => (b -> Bool) -> (a -> Bool) -> Set b a -> Maybe (Set b a)
 subset boundsPredicate itemPredicate set = case set of
   Leaf{leafBounds, leafItem} ->
     if boundsPredicate leafBounds && itemPredicate leafItem then Just set else Nothing
@@ -559,32 +393,20 @@ subset boundsPredicate itemPredicate set = case set of
         joinMaybes maybeLeft maybeRight
       else Nothing
 
-joinMaybes ::
-  Bounds.Exists dimension units space =>
-  Maybe (Set dimension units space item) ->
-  Maybe (Set dimension units space item) ->
-  Maybe (Set dimension units space item)
+joinMaybes :: Bounds b => Maybe (Set b a) -> Maybe (Set b a) -> Maybe (Set b a)
 joinMaybes (Just left) (Just right) = Just (union left right)
 joinMaybes (Just left) Nothing = Just left
 joinMaybes Nothing (Just right) = Just right
 joinMaybes Nothing Nothing = Nothing
 
-any ::
-  (Bounds dimension units space -> Bool) ->
-  (item -> Bool) ->
-  Set dimension units space item ->
-  Bool
+any :: (b -> Bool) -> (a -> Bool) -> Set b a -> Bool
 any boundsPredicate itemPredicate set = case set of
   Leaf{leafBounds, leafItem} -> boundsPredicate leafBounds && itemPredicate leafItem
   Node{nodeBounds, leftChild, rightChild} ->
     boundsPredicate nodeBounds && do
       any boundsPredicate itemPredicate leftChild || any boundsPredicate itemPredicate rightChild
 
-all ::
-  (Bounds dimension units space -> Bool) ->
-  (item -> Bool) ->
-  Set dimension units space item ->
-  Bool
+all :: (b -> Bool) -> (a -> Bool) -> Set b a -> Bool
 all boundsPredicate itemPredicate set = case set of
   Leaf{leafBounds, leafItem} -> boundsPredicate leafBounds && itemPredicate leafItem
   Node{nodeBounds, leftChild, rightChild} ->
@@ -592,53 +414,53 @@ all boundsPredicate itemPredicate set = case set of
       all boundsPredicate itemPredicate leftChild && all boundsPredicate itemPredicate rightChild
 
 pairwiseFilter ::
-  (Bounds dimension1 units1 space1 -> Bounds dimension2 units2 space2 -> Bool) ->
-  (item1 -> item2 -> Bool) ->
-  Set dimension1 units1 space1 item1 ->
-  Set dimension2 units2 space2 item2 ->
-  List (item1, item2)
+  (b1 -> b2 -> Bool) ->
+  (a1 -> a2 -> Bool) ->
+  Set b1 a1 ->
+  Set b2 a2 ->
+  List (a1, a2)
 pairwiseFilter boundsPredicate itemPredicate set1 set2 = do
   let callback item1 item2 = if itemPredicate item1 item2 then Just (item1, item2) else Nothing
   pairwiseFilterMap boundsPredicate callback set1 set2
 
 pairwiseFilterMap ::
-  (Bounds dimension1 units1 space1 -> Bounds dimension2 units2 space2 -> Bool) ->
-  (item1 -> item2 -> Maybe a) ->
-  Set dimension1 units1 space1 item1 ->
-  Set dimension2 units2 space2 item2 ->
-  List a
+  (b1 -> b2 -> Bool) ->
+  (a1 -> a2 -> Maybe a3) ->
+  Set b1 a1 ->
+  Set b2 a2 ->
+  List a3
 pairwiseFilterMap boundsPredicate callback set1 set2 =
   pairwiseFilterMapWithIndices boundsPredicate (\_ _ item1 item2 -> callback item1 item2) set1 set2
 
 pairwiseFilterWithIndices ::
-  (Bounds dimension1 units1 space1 -> Bounds dimension2 units2 space2 -> Bool) ->
-  (Int -> Int -> item1 -> item2 -> Bool) ->
-  Set dimension1 units1 space1 item1 ->
-  Set dimension2 units2 space2 item2 ->
-  List (item1, item2)
+  (b1 -> b2 -> Bool) ->
+  (Int -> Int -> a1 -> a2 -> Bool) ->
+  Set b1 a1 ->
+  Set b2 a2 ->
+  List (a1, a2)
 pairwiseFilterWithIndices boundsPredicate itemPredicate set1 set2 = do
   let callback index1 index2 item1 item2 =
         if itemPredicate index1 index2 item1 item2 then Just (item1, item2) else Nothing
   pairwiseFilterMapWithIndices boundsPredicate callback set1 set2
 
 pairwiseFilterMapWithIndices ::
-  (Bounds dimension1 units1 space1 -> Bounds dimension2 units2 space2 -> Bool) ->
-  (Int -> Int -> item1 -> item2 -> Maybe a) ->
-  Set dimension1 units1 space1 item1 ->
-  Set dimension2 units2 space2 item2 ->
-  List a
+  (b1 -> b2 -> Bool) ->
+  (Int -> Int -> a1 -> a2 -> Maybe a3) ->
+  Set b1 a1 ->
+  Set b2 a2 ->
+  List a3
 pairwiseFilterMapWithIndices boundsPredicate callback set1 set2 =
   pairwiseFilterMapWithIndicesImpl 0 0 boundsPredicate callback set1 set2 []
 
 pairwiseFilterMapWithIndicesImpl ::
   Int ->
   Int ->
-  (Bounds dimension1 units1 space1 -> Bounds dimension2 units2 space2 -> Bool) ->
-  (Int -> Int -> item1 -> item2 -> Maybe a) ->
-  Set dimension1 units1 space1 item1 ->
-  Set dimension2 units2 space2 item2 ->
-  List a ->
-  List a
+  (b1 -> b2 -> Bool) ->
+  (Int -> Int -> a1 -> a2 -> Maybe a3) ->
+  Set b1 a1 ->
+  Set b2 a2 ->
+  List a3 ->
+  List a3
 pairwiseFilterMapWithIndicesImpl startIndex1 startIndex2 boundsPredicate callback set1 set2 accumulated =
   if boundsPredicate (bounds set1) (bounds set2)
     then case (set1, set2) of
@@ -674,12 +496,7 @@ pairwiseFilterMapWithIndicesImpl startIndex1 startIndex2 boundsPredicate callbac
           & pairwiseFilterMapWithIndicesImpl startIndex1 startIndex2 boundsPredicate callback leftChild1 leftChild2
     else accumulated
 
-clusters ::
-  Bounds.Exists dimension units space =>
-  (Bounds dimension units space -> Bounds dimension units space -> Bool) ->
-  (item -> item -> Bool) ->
-  Set dimension units space item ->
-  Set dimension units space (Set dimension units space item)
+clusters :: Bounds b => (b -> b -> Bool) -> (a -> a -> Bool) -> Set b a -> Set b (Set b a)
 clusters boundsPredicate itemPredicate set = do
   let callback index1 index2 item1 item2 =
         if index1 /= index2 && itemPredicate item1 item2
@@ -693,21 +510,13 @@ clusters boundsPredicate itemPredicate set = do
       build bounds subsets
     [] -> InternalError.throw "Should have at least one cluster (since sets cannot be empty)"
 
-buildCluster ::
-  Bounds.Exists dimension units space =>
-  Set dimension units space item ->
-  Graph.Tree Int ->
-  Set dimension units space item
+buildCluster :: Bounds b => Set b a -> Graph.Tree Int -> Set b a
 buildCluster set (Graph.Node vertex connected) =
   NonEmpty.one (getLeaf vertex set)
     & List.forEach connected (collectClusterItems set)
     & aggregate
 
-collectClusterItems ::
-  Set dimension units space item ->
-  Graph.Tree Int ->
-  NonEmpty (Set dimension units space item) ->
-  NonEmpty (Set dimension units space item)
+collectClusterItems :: Set b a -> Graph.Tree Int -> NonEmpty (Set b a) -> NonEmpty (Set b a)
 collectClusterItems set (Graph.Node vertex connected) accumulated =
   accumulated
     & NonEmpty.push (getLeaf vertex set)

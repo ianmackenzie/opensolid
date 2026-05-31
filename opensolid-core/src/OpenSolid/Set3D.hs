@@ -47,7 +47,7 @@ import OpenSolid.Prelude
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
 
-type Set3D space item = Set 3 Meters space item
+type Set3D space item = Set (Bounds3D space) item
 
 pattern Leaf :: Bounds3D space -> item -> Set3D space item
 pattern Leaf leafBounds leafItem <- Set.Leaf{leafBounds, leafItem}

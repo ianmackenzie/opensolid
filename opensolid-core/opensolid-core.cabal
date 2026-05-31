@@ -211,6 +211,7 @@ library
     OpenSolid.SearchDomain
     OpenSolid.SearchTree
     OpenSolid.Set
+    OpenSolid.Set.Bounds
     OpenSolid.Set2D
     OpenSolid.Set3D
     OpenSolid.Sign
