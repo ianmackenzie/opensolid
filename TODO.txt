@@ -1,12 +1,14 @@
+Reimplement curve intersection using plain trees and subdomain clusters
+
+Rename Curve.Segment.[monotonic,singular] to [isMonotonic,isSingular]
+- part of general trend to add 'is', 'has' etc. to clarify
+
+Remove SearchDomain.[overlapping,isSmall,isPrimary]
+- also split, bisect, classify...
+
 Add Planar bytecode instruction
 
-Add Circle2D to target language API
-
-Refactor Svg.circle to take a Circle2D
-
 Refactor Svg module to take either a view box or a margin (and compute a view box automatically)
-
-Switch more primitive 'coerce' functions to be aliases for Data.Coerce.coerce
 
 Cache normal direction in PlaneOrientation3D?
 - will often be a constant anyways...and can compute lazily
