@@ -2,6 +2,8 @@ module OpenSolid.Queue
   ( Queue
   , empty
   , singleton
+  , fromList
+  , fromNonEmpty
   , isEmpty
   , length
   , push
@@ -21,6 +23,12 @@ empty = Queue 0 [] []
 
 singleton :: a -> Queue a
 singleton value = Queue 1 [value] []
+
+fromList :: List a -> Queue a
+fromList values = Queue (List.length values) values []
+
+fromNonEmpty :: NonEmpty a -> Queue a
+fromNonEmpty = fromList . NonEmpty.toList
 
 isEmpty :: Queue a -> Bool
 isEmpty queue = length queue == 0
