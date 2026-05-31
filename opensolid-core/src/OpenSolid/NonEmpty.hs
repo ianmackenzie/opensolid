@@ -190,28 +190,35 @@ seven a1 a2 a3 a4 a5 a6 a7 = a1 :| [a2, a3, a4, a5, a6, a7]
 eight :: a -> a -> a -> a -> a -> a -> a -> a -> NonEmpty a
 eight a1 a2 a3 a4 a5 a6 a7 a8 = a1 :| [a2, a3, a4, a5, a6, a7, a8]
 
+{-# INLINE toList #-}
 toList :: NonEmpty a -> List a
-toList (x :| xs) = x : xs
+toList = Data.List.NonEmpty.toList
 
 {-# INLINE push #-}
 push :: a -> NonEmpty a -> NonEmpty a
-push x (y :| ys) = x :| (y : ys)
+push = Data.List.NonEmpty.cons
 
+{-# INLINE extend #-}
 extend :: NonEmpty a -> List a -> NonEmpty a
 extend = Data.List.NonEmpty.appendList
 
+{-# INLINE length #-}
 length :: NonEmpty a -> Int
 length = Data.List.NonEmpty.length
 
+{-# INLINE first #-}
 first :: NonEmpty a -> a
 first = Data.List.NonEmpty.head
 
+{-# INLINE rest #-}
 rest :: NonEmpty a -> List a
 rest = Data.List.NonEmpty.tail
 
+{-# INLINE last #-}
 last :: NonEmpty a -> a
 last = Data.List.NonEmpty.last
 
+{-# INLINE map #-}
 map :: (a -> b) -> NonEmpty a -> NonEmpty b
 map = Data.List.NonEmpty.map
 
@@ -285,15 +292,18 @@ concat = Data.Semigroup.sconcat
 combine :: (a -> NonEmpty b) -> NonEmpty a -> NonEmpty b
 combine = Foldable1.foldMap1'
 
+{-# INLINE foldl #-}
 foldl :: (b -> a -> b) -> b -> NonEmpty a -> b
 foldl = Prelude.foldl'
 
+{-# INLINE foldr #-}
 foldr :: (a -> b -> b) -> b -> NonEmpty a -> b
 foldr = Prelude.foldr
 
 reduce :: (a -> a -> a) -> NonEmpty a -> a
 reduce function nonEmpty = first nonEmpty & List.forEach (rest nonEmpty) function
 
+{-# INLINE reverse #-}
 reverse :: NonEmpty a -> NonEmpty a
 reverse = Data.List.NonEmpty.reverse
 
