@@ -246,7 +246,7 @@ drawDot :: Color -> UvPoint -> Svg
 drawDot color point = do
   let centerPoint = Point2D.convert toDrawing point
   let diameter = Length.millimeters 1.0
-  Svg.circleWith [Svg.fillColor color] (#centerPoint centerPoint) (#diameter diameter)
+  Svg.circleWith [Svg.fillColor color] (Circle2D.withDiameter diameter centerPoint)
 
 delayedPrint :: Int -> Duration -> IO ()
 delayedPrint n delay = do
@@ -291,7 +291,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let curve = Curve2D.bezier drawingControlPoints
   let drawCurveRange tRange = drawBounds (Curve2D.range curve tRange)
   let controlPointDiameter = Length.millimeters 10.0
-  let drawControlPoint point = Svg.circle (#centerPoint point) (#diameter controlPointDiameter)
+  let drawControlPoint point = Svg.circle (Circle2D.withDiameter controlPointDiameter point)
   let resolution = Resolution.maxError Length.millimeter
   Svg.groupWith
     [ Svg.strokeColor color

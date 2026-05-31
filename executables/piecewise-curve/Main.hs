@@ -1,6 +1,7 @@
 module Main (main) where
 
 import OpenSolid.Bounds2D qualified as Bounds2D
+import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.IO qualified as IO
@@ -42,7 +43,7 @@ main = Tolerance.using Length.defaultTolerance do
   let circle = Curve2D.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
   let drawDot point = do
         let diameter = Length.millimeters 4.0
-        Svg.circleWith [Svg.whiteFill] (#centerPoint point) (#diameter diameter)
+        Svg.circleWith [Svg.whiteFill] (Circle2D.withDiameter diameter point)
   let drawCurve n curve =
         Svg.group
           [ Svg.curve (Resolution.maxError Length.micrometer) curve

@@ -44,6 +44,8 @@ where
 
 import OpenSolid.Axis2D (Axis2D (Axis2D))
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
+import OpenSolid.Circle2D (Circle2D)
+import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2D (Curve2D)
@@ -225,17 +227,17 @@ boundsWith attributes (Bounds2D xInterval yInterval) = do
   let heightAttribute = Attribute "height" (lengthText (Interval.width yInterval))
   Node "rect" (xAttribute : yAttribute : widthAttribute : heightAttribute : attributes) []
 
--- | Draw a circle with the given attributes, center point and diameter.
-circleWith :: List Attribute -> "centerPoint" ::: Point2D Meters -> "diameter" ::: Length -> Svg
-circleWith attributes ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) = do
-  let Point2D cx cy = centerPoint
+-- | Draw a circle with the given attributes.
+circleWith :: List Attribute -> Circle2D Meters -> Svg
+circleWith attributes givenCircle = do
+  let Point2D cx cy = Circle2D.centerPoint givenCircle
   let cxAttribute = Attribute "cx" (lengthText cx)
   let cyAttribute = Attribute "cy" (lengthText -cy)
-  let rAttribute = Attribute "r" (lengthText (0.5 * diameter))
+  let rAttribute = Attribute "r" (lengthText (Circle2D.radius givenCircle))
   Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
 
--- | Draw a circle with the given center point and diameter.
-circle :: "centerPoint" ::: Point2D Meters -> "diameter" ::: Length -> Svg
+-- | Draw a circle.
+circle :: Circle2D Meters -> Svg
 circle = circleWith []
 
 -- | Draw a curve with the given attributes and resolution.
