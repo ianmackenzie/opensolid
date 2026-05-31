@@ -83,6 +83,9 @@ instance Foldable (Set b) where
   foldl = foldl
   foldr = foldr
 
+instance Bounds b => Prelude.Semigroup (Set b a) where
+  (<>) = union
+
 instance
   (Units.Coercion b1 b2, Units.Coercion a1 a2) =>
   Units.Coercion (Set b1 a1) (Set b2 a2)
@@ -383,14 +386,8 @@ subset boundsPredicate itemPredicate set = case set of
       then do
         let maybeLeft = subset boundsPredicate itemPredicate leftChild
         let maybeRight = subset boundsPredicate itemPredicate rightChild
-        joinMaybes maybeLeft maybeRight
+        maybeLeft <> maybeRight
       else Nothing
-
-joinMaybes :: Bounds b => Maybe (Set b a) -> Maybe (Set b a) -> Maybe (Set b a)
-joinMaybes (Just left) (Just right) = Just (union left right)
-joinMaybes (Just left) Nothing = Just left
-joinMaybes Nothing (Just right) = Just right
-joinMaybes Nothing Nothing = Nothing
 
 any :: (b -> Bool) -> (a -> Bool) -> Set b a -> Bool
 any boundsPredicate itemPredicate set = case set of
