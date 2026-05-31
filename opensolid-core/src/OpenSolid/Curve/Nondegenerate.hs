@@ -17,17 +17,17 @@ import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.DirectionCurve (DirectionCurve)
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
-import OpenSolid.Number qualified as Number
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
-import OpenSolid.Search qualified as Search
+import OpenSolid.Queue qualified as Queue
 import OpenSolid.SearchDomain qualified as SearchDomain
-import OpenSolid.Vector qualified as Vector
+import OpenSolid.Set qualified as Set
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 
@@ -57,35 +57,37 @@ findPoint ::
   Point dimension units space ->
   Nondegenerate (Curve dimension units space) ->
   List Number
-findPoint givenPoint (Nondegenerate curve) = do
-  let evaluate tValue =
-        (# Curve.point curve tValue - givenPoint, Curve.derivativeValue curve tValue #)
-  let isSolution tValue = Curve.point curve tValue ~= givenPoint
-  let isDegenerate tValue = Curve.derivativeValue curve tValue ~= Vector.zero
-  let endpointSolutions = List.filter isSolution [0.0, 1.0]
-  let solveMonotonic tRange = do
-        let tMid = Interval.midpoint tRange
-        let tSolution = NewtonRaphson.curve evaluate tMid
-        if Search.isInterior tSolution tRange && isSolution tSolution
-          then Resolved (Just tSolution)
-          else Unresolved
-  let interiorSolution tRange segment
-        | not (givenPoint `intersects` Curve.Segment.range segment) = Resolved Nothing
-        | otherwise = do
-            let isMonotonic = Curve.Segment.monotonic segment
-            let isSmall = SearchDomain.isSmall tRange
-            let endpointSolution = List.find (Number.includedIn tRange) endpointSolutions
-            let hasEndpointSolution = endpointSolution /= Nothing
+findPoint point (Nondegenerate curve) = do
+  let findCandidateSegments tree = do
+        let Curve.Tree tRange segment left right = tree
+        if
+          | not (point `intersects` Curve.Segment.range segment) -> Nothing
+          | Curve.Segment.monotonic segment -> Just (Set.singleton tRange tree)
+          | Curve.Segment.singular segment -> Just (Set.singleton tRange tree)
+          | otherwise -> findCandidateSegments left <> findCandidateSegments right
+  case findCandidateSegments (Curve.tree curve) of
+    Nothing -> []
+    Just candidateSegments -> do
+      let clusters = Set.clusters SearchDomain.touching (\_ _ -> True) candidateSegments
+      let f tValue = Curve.point curve tValue - point
+      let f' tValue = Curve.derivativeValue curve tValue
+      let evaluate tValue = (# f tValue, f' tValue #)
+      let findSolution queue = do
+            (subtree, remaining) <- Queue.pop queue
+            let Curve.Tree tRange segment left right = subtree
+            let Interval t1 t2 = tRange
             if
-              | isMonotonic && hasEndpointSolution -> Resolved Nothing
-              | isSmall, Just tValue <- endpointSolution, isDegenerate tValue -> Resolved Nothing
-              | isMonotonic -> solveMonotonic tRange
-              | otherwise -> Unresolved
-  let isDuplicate (tRange1, _) (tRange2, _) = SearchDomain.overlapping tRange1 tRange2
-  let interiorSolutions =
-        Search.exclusive interiorSolution isDuplicate (Curve.searchTree curve)
-          & List.map Pair.second
-  List.sort (endpointSolutions <> interiorSolutions)
+              | not (point `intersects` Curve.Segment.range segment) -> findSolution remaining
+              | t1 == 0.0 && Curve.startPoint curve ~= point -> Just 0.0
+              | t2 == 1.0 && Curve.endPoint curve ~= point -> Just 1.0
+              | otherwise -> do
+                  let tSolution = NewtonRaphson.curve evaluate (Interval.midpoint tRange)
+                  if Tolerance.using Tolerance.unitless (tSolution `intersects` tRange)
+                    then Just tSolution
+                    else findSolution (remaining & Queue.push left & Queue.push right)
+      clusters
+        & NonEmpty.map Queue.fromNonEmpty
+        & NonEmpty.filterMap findSolution
 
 intersections ::
   ( Curve.Exists dimension units space
