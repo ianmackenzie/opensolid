@@ -496,7 +496,7 @@ pairwiseFilterMapWithIndicesImpl startIndex1 startIndex2 boundsPredicate callbac
           & pairwiseFilterMapWithIndicesImpl startIndex1 startIndex2 boundsPredicate callback leftChild1 leftChild2
     else accumulated
 
-clusters :: Bounds b => (b -> b -> Bool) -> (a -> a -> Bool) -> Set b a -> Set b (Set b a)
+clusters :: Bounds b => (b -> b -> Bool) -> (a -> a -> Bool) -> Set b a -> NonEmpty (Set b a)
 clusters boundsPredicate itemPredicate set = do
   let callback index1 index2 item1 item2 =
         if index1 /= index2 && itemPredicate item1 item2
@@ -505,9 +505,7 @@ clusters boundsPredicate itemPredicate set = do
   let edges = pairwiseFilterMapWithIndices boundsPredicate callback set set
   let graph = Graph.buildG (0, size set - 1) edges
   case Graph.components graph of
-    NonEmpty components -> do
-      let subsets = NonEmpty.map (buildCluster set) components
-      build bounds subsets
+    NonEmpty components -> NonEmpty.map (buildCluster set) components
     [] -> InternalError.throw "Should have at least one cluster (since sets cannot be empty)"
 
 buildCluster :: Bounds b => Set b a -> Graph.Tree Int -> Set b a

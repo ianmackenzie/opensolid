@@ -206,5 +206,5 @@ clusters ::
   (Bounds3D space -> Bounds3D space -> Bool) ->
   (item -> item -> Bool) ->
   Set3D space item ->
-  Set3D space (Set3D space item)
+  NonEmpty (Set3D space item)
 clusters = Set.clusters

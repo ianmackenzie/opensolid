@@ -59,13 +59,12 @@ clusters = Test.verify "clusters" do
   let set = Set2D.build id items
   let boundsPredicate bounds1 bounds2 = Bounds2D.overlap bounds1 bounds2 >= 0.0
   let itemPredicate _ _ = True
-  let clusterSet = Set2D.clusters boundsPredicate itemPredicate set
-  let sortedClusters = clusterSet & Set2D.toList & List.sortBy Set2D.size
-  case sortedClusters of
-    [first, second, third] ->
+  case NonEmpty.sortBy Set2D.size (Set2D.clusters boundsPredicate itemPredicate set) of
+    NonEmpty.Three first second third ->
       Test.all
         [ Test.expect (equalSets first (Set2D.build id (NonEmpty.one f)))
         , Test.expect (equalSets second (Set2D.build id (NonEmpty.two d e)))
         , Test.expect (equalSets third (Set2D.build id (NonEmpty.three a b c)))
         ]
-    _ -> Test.fail $ "Expected three clusters, got " <> Text.int (Set2D.size clusterSet)
+    unexpected ->
+      Test.fail $ "Expected three clusters, got " <> Text.int (NonEmpty.length unexpected)
