@@ -334,8 +334,7 @@ type VectorBounds2D :: Type -> Type
 data VectorBounds2D units
   = -- | Construct a vector bounding box from its X and Y coordinate bounds.
     VectorBounds2D (Interval units) (Interval units)
-
-deriving instance Show (VectorBounds2D units)
+  deriving (Eq, Show)
 
 instance HasUnits (VectorBounds2D units) units
 
@@ -592,7 +591,7 @@ instance
 
 type role Bounds2D phantom
 
-newtype Bounds2D units = PositionBounds2D (VectorBounds2D units)
+newtype Bounds2D units = PositionBounds2D (VectorBounds2D units) deriving (Eq, Show)
 
 {-# COMPLETE Bounds2D #-}
 
@@ -603,8 +602,6 @@ pattern Bounds2D :: Interval units -> Interval units -> Bounds2D units
 pattern Bounds2D bx by <- PositionBounds2D (VectorBounds2D bx by)
   where
     Bounds2D bx by = PositionBounds2D (VectorBounds2D bx by)
-
-deriving instance Show (Bounds2D units)
 
 instance HasUnits (Bounds2D units) units
 
@@ -1256,7 +1253,7 @@ type role VectorBounds3D phantom phantom
 
 type VectorBounds3D :: Type -> Type -> Type
 data VectorBounds3D units space = VB3D# Double# Double# Double# Double# Double# Double#
-  deriving (Show)
+  deriving (Eq, Show)
 
 -- | Construct a vector bounds from its rightward, forward and upward components.
 {-# INLINE VectorBounds3D #-}
@@ -1684,6 +1681,7 @@ type role Bounds3D phantom
 -- | A bounding box in 3D.
 newtype Bounds3D space
   = PositionBounds3D (VectorBounds3D Meters space)
+  deriving (Eq, Show)
 
 {-# COMPLETE Bounds3D #-}
 
@@ -1694,8 +1692,6 @@ pattern Bounds3D :: Interval Meters -> Interval Meters -> Interval Meters -> Bou
 pattern Bounds3D bx by bz <- PositionBounds3D (VectorBounds3D bx by bz)
   where
     Bounds3D bx by bz = PositionBounds3D (VectorBounds3D bx by bz)
-
-deriving instance Show (Bounds3D space)
 
 instance FFI (Bounds3D Void) where
   representation = FFI.classRepresentation "Bounds3D"
