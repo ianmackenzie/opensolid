@@ -5,6 +5,7 @@ module OpenSolid.Curve.Segment
   , secondDerivativeRange
   , curvatureVectorRange_
   , tangentDirectionRange
+  , singular
   , new
   , monotonic
   , crossingTangents
@@ -17,6 +18,7 @@ import OpenSolid.Bounds qualified as Bounds
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.CurvatureVector qualified as Curve.CurvatureVector
+import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Interval (Interval (Interval))
@@ -37,6 +39,7 @@ data Segment dimension units space = Segment
   , secondDerivativeRange :: ~(VectorBounds dimension units space)
   , tangentDirectionRange :: ~(DirectionBounds dimension space)
   , curvatureVectorRange_ :: ~(VectorBounds dimension (Unitless ?/? units) space)
+  , singular :: ~Bool
   }
 
 instance HasUnits (Segment dimension units space) units
@@ -62,6 +65,7 @@ instance
       , secondDerivativeRange = VectorBounds.coerce segment.secondDerivativeRange
       , tangentDirectionRange = segment.tangentDirectionRange
       , curvatureVectorRange_ = VectorBounds.coerce segment.curvatureVectorRange_
+      , singular = segment.singular
       }
 
 range :: Segment dimension units space -> Bounds dimension units space
@@ -79,7 +83,10 @@ curvatureVectorRange_ ::
 curvatureVectorRange_ = (.curvatureVectorRange_)
 
 tangentDirectionRange :: Segment dimension units space -> DirectionBounds dimension space
-tangentDirectionRange segment = segment.tangentDirectionRange
+tangentDirectionRange = (.tangentDirectionRange)
+
+singular :: Segment dimension units space -> Bool
+singular = (.singular)
 
 monotonic :: VectorBounds.Exists dimension units space => Segment dimension units space -> Bool
 monotonic segment = Interval.isResolved (VectorBounds.magnitude segment.derivativeRange)
@@ -152,10 +159,13 @@ new givenCurve tRange = do
         Curve.CurvatureVector.range_
           segmentDerivativeRange
           segmentSecondDerivativeRange
+  let singularStart = t2 <= Desingularization.t0 && Curve.singular0 givenCurve
+  let singularEnd = t1 >= Desingularization.t1 && Curve.singular1 givenCurve
   Segment
     { range = segmentRange
     , derivativeRange = segmentDerivativeRange
     , secondDerivativeRange = segmentSecondDerivativeRange
     , tangentDirectionRange = segmentTangentDirectionRange
     , curvatureVectorRange_ = segmentCurvatureVectorRange_
+    , singular = singularStart || singularEnd
     }
