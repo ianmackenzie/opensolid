@@ -353,9 +353,9 @@ separation (VectorBounds3D x1 y1 z1) (VectorBounds3D x2 y2 z2) = do
   let separationX = Interval.separation x1 x2
   let separationY = Interval.separation y1 y2
   let separationZ = Interval.separation z1 z2
-  let positiveX = separationX >= Quantity.zero
-  let positiveY = separationY >= Quantity.zero
-  let positiveZ = separationZ >= Quantity.zero
+  let positiveX = separationX > Quantity.zero
+  let positiveY = separationY > Quantity.zero
+  let positiveZ = separationZ > Quantity.zero
   if
     | positiveX && positiveY && positiveZ -> Quantity.hypot3 separationX separationY separationZ
     | positiveX && positiveY -> Quantity.hypot2 separationX separationY

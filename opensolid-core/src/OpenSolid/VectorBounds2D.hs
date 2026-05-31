@@ -285,8 +285,8 @@ separation# :: VectorBounds2D units -> VectorBounds2D units -> Double#
 separation# (VectorBounds2D x1 y1) (VectorBounds2D x2 y2) = do
   let separationX# = Interval.separation# x1 x2
   let separationY# = Interval.separation# y1 y2
-  let positiveX# = separationX# >=# 0.0##
-  let positiveY# = separationY# >=# 0.0##
+  let positiveX# = separationX# ># 0.0##
+  let positiveY# = separationY# ># 0.0##
   case (# positiveX#, positiveY# #) of
     (# 1#, 1# #) -> hypot2# separationX# separationY#
     (# 1#, _ #) -> separationX#
