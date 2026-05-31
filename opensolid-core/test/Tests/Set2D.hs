@@ -49,7 +49,7 @@ equalSets set1 set2 = Set2D.toList set1 == Set2D.toList set2
 
 clusters :: Test
 clusters = Test.verify "clusters" do
-  let a = UvBounds (Interval 0.1 0.2) (Interval 0.2 0.3)
+  let a = UvBounds (Interval 0.0 0.2) (Interval 0.2 0.3)
   let b = UvBounds (Interval 0.1 0.2) (Interval 0.1 0.2)
   let c = UvBounds (Interval 0.2 0.3) (Interval 0.1 0.2)
   let d = UvBounds (Interval 0.2 0.3) (Interval 0.4 0.5)
@@ -59,12 +59,15 @@ clusters = Test.verify "clusters" do
   let set = Set2D.build id items
   let boundsPredicate bounds1 bounds2 = Bounds2D.overlap bounds1 bounds2 >= 0.0
   let itemPredicate _ _ = True
-  case NonEmpty.sortBy Set2D.size (Set2D.clusters boundsPredicate itemPredicate set) of
+  case NonEmpty.sortBy NonEmpty.length (Set2D.clusters boundsPredicate itemPredicate set) of
     NonEmpty.Three first second third ->
       Test.all
-        [ Test.expect (equalSets first (Set2D.build id (NonEmpty.one f)))
-        , Test.expect (equalSets second (Set2D.build id (NonEmpty.two d e)))
-        , Test.expect (equalSets third (Set2D.build id (NonEmpty.three a b c)))
+        [ Test.expect (equalSets (Set2D.build id first) (Set2D.build id (NonEmpty.one f)))
+            & Test.output "first" first
+        , Test.expect (equalSets (Set2D.build id second) (Set2D.build id (NonEmpty.two d e)))
+            & Test.output "second" second
+        , Test.expect (equalSets (Set2D.build id third) (Set2D.build id (NonEmpty.three a b c)))
+            & Test.output "third" third
         ]
     unexpected ->
       Test.fail $ "Expected three clusters, got " <> Text.int (NonEmpty.length unexpected)

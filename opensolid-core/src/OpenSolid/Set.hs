@@ -47,13 +47,13 @@ module OpenSolid.Set
   )
 where
 
+import Data.Foldable1 qualified
 import Data.Graph qualified as Graph
 import OpenSolid.Chainable (Chainable)
 import OpenSolid.Chainable qualified as Chainable
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -112,13 +112,6 @@ get index set = case set of
     | index < leftSize -> get index leftChild
     | otherwise -> get (index - leftSize) rightChild
   Leaf{leafItem} -> assert (index == 0) leafItem
-
-getLeaf :: Int -> Set b a -> Set b a
-getLeaf index set = case set of
-  Node{leftSize, leftChild, rightChild}
-    | index < leftSize -> getLeaf index leftChild
-    | otherwise -> getLeaf (index - leftSize) rightChild
-  Leaf{} -> assert (index == 0) set
 
 size :: Set b a -> Int
 size Leaf{} = 1
@@ -496,7 +489,7 @@ pairwiseFilterMapWithIndicesImpl startIndex1 startIndex2 boundsPredicate callbac
           & pairwiseFilterMapWithIndicesImpl startIndex1 startIndex2 boundsPredicate callback leftChild1 leftChild2
     else accumulated
 
-clusters :: Bounds b => (b -> b -> Bool) -> (a -> a -> Bool) -> Set b a -> NonEmpty (Set b a)
+clusters :: Bounds b => (b -> b -> Bool) -> (a -> a -> Bool) -> Set b a -> NonEmpty (NonEmpty a)
 clusters boundsPredicate itemPredicate set = do
   let callback index1 index2 item1 item2 =
         if index1 /= index2 && itemPredicate item1 item2
@@ -508,14 +501,5 @@ clusters boundsPredicate itemPredicate set = do
     NonEmpty components -> NonEmpty.map (buildCluster set) components
     [] -> InternalError.throw "Should have at least one cluster (since sets cannot be empty)"
 
-buildCluster :: Bounds b => Set b a -> Graph.Tree Int -> Set b a
-buildCluster set (Graph.Node vertex connected) =
-  NonEmpty.one (getLeaf vertex set)
-    & List.forEach connected (collectClusterItems set)
-    & aggregate
-
-collectClusterItems :: Set b a -> Graph.Tree Int -> NonEmpty (Set b a) -> NonEmpty (Set b a)
-collectClusterItems set (Graph.Node vertex connected) accumulated =
-  accumulated
-    & NonEmpty.push (getLeaf vertex set)
-    & List.forEach connected (collectClusterItems set)
+buildCluster :: Bounds b => Set b a -> Graph.Tree Int -> NonEmpty a
+buildCluster set tree = NonEmpty.map (set !!) (Data.Foldable1.toNonEmpty tree)

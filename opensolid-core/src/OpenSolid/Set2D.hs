@@ -206,5 +206,5 @@ clusters ::
   (Bounds2D units -> Bounds2D units -> Bool) ->
   (item -> item -> Bool) ->
   Set2D units item ->
-  NonEmpty (Set2D units item)
+  NonEmpty (NonEmpty item)
 clusters = Set.clusters
