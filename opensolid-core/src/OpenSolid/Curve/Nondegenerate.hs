@@ -9,6 +9,7 @@ module OpenSolid.Curve.Nondegenerate
   )
 where
 
+import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
@@ -17,16 +18,12 @@ import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.DirectionCurve (DirectionCurve)
-import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
+import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
-import OpenSolid.Queue qualified as Queue
-import OpenSolid.SearchDomain qualified as SearchDomain
-import OpenSolid.Set qualified as Set
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
@@ -52,42 +49,33 @@ tangentDirectionValue ::
 tangentDirectionValue (Nondegenerate curve) tValue =
   VectorCurve.Nondegenerate.directionValue (Nondegenerate (Curve.derivative curve)) tValue
 
+data Monotonic = Monotonic deriving (Eq)
+
 findPoint ::
   (Curve.Exists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Nondegenerate (Curve dimension units space) ->
   List Number
 findPoint point (Nondegenerate curve) = do
-  let findCandidateSegments tree = do
-        let Curve.Tree tRange segment left right = tree
-        if
-          | not (point `intersects` Curve.Segment.range segment) -> Nothing
-          | Curve.Segment.monotonic segment -> Just (Set.leaf tRange tree)
-          | Curve.Segment.singular segment -> Just (Set.leaf tRange tree)
-          | otherwise -> findCandidateSegments left <> findCandidateSegments right
-  case findCandidateSegments (Curve.tree curve) of
-    Nothing -> []
-    Just candidateSegments -> do
-      let clusters = Set.clusters SearchDomain.touching (\_ _ -> True) candidateSegments
-      let f tValue = Curve.point curve tValue - point
-      let f' tValue = Curve.derivativeValue curve tValue
-      let evaluate tValue = (# f tValue, f' tValue #)
-      let findSolution queue = do
-            (subtree, remaining) <- Queue.pop queue
-            let Curve.Tree tRange segment left right = subtree
-            let Interval t1 t2 = tRange
-            if
-              | not (point `intersects` Curve.Segment.range segment) -> findSolution remaining
-              | t1 == 0.0 && Curve.startPoint curve ~= point -> Just 0.0
-              | t2 == 1.0 && Curve.endPoint curve ~= point -> Just 1.0
-              | otherwise -> do
-                  let tSolution = NewtonRaphson.curve evaluate (Interval.midpoint tRange)
-                  if Tolerance.using Tolerance.unitless (tSolution `intersects` tRange)
-                    then Just tSolution
-                    else findSolution (remaining & Queue.push left & Queue.push right)
-      clusters
-        & NonEmpty.map Queue.fromNonEmpty
-        & NonEmpty.filterMap findSolution
+  let isDistant segment = not (point `intersects` Curve.Segment.range segment)
+  let resolvedMonotonicity _ segment
+        | isDistant segment = Resolved Nothing
+        | Curve.Segment.monotonic segment = Resolved (Just Monotonic)
+        | Curve.Segment.singular segment = Resolved (Just Monotonic)
+        | otherwise = Unresolved
+  let evaluate tValue =
+        (# Curve.point curve tValue - point, Curve.derivativeValue curve tValue #)
+  let resolvedSolution tRange segment
+        | isDistant segment = Resolved Nothing
+        | Interval.lower tRange == 0.0 && Curve.startPoint curve ~= point = Resolved (Just 0.0)
+        | Interval.upper tRange == 1.0 && Curve.endPoint curve ~= point = Resolved (Just 1.0)
+        | otherwise = do
+            let tSolution = NewtonRaphson.curve evaluate (Interval.midpoint tRange)
+            if Tolerance.using Tolerance.unitless (tSolution `intersects` tRange)
+              then Resolved (Just tSolution)
+              else Unresolved
+  Bisection.clusters resolvedMonotonicity (Curve.bisectionTree curve)
+    & List.filterMap (\(Monotonic, cluster) -> Bisection.find resolvedSolution cluster)
 
 intersections ::
   ( Curve.Exists dimension units space

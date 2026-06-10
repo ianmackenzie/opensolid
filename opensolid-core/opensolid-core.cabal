@@ -101,6 +101,7 @@ library
     OpenSolid.Axis3D
     OpenSolid.Bezier
     OpenSolid.Binary
+    OpenSolid.Bisection
     OpenSolid.Body3D
     OpenSolid.Body3D.BoundedBy
     OpenSolid.Bounds
