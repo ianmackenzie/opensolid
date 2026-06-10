@@ -89,8 +89,8 @@ findEndpointSolutions = do
         Curve.Nondegenerate.findPoint (Curve.point curve t) nondegenerateSearchCurve
   let endpoints1On2 = [(t1, t2) | t1 <- [0.0, 1.0], t2 <- findPoint curve1 t1 nondegenerate2]
   let endpoints2On1 = [(t1, t2) | t2 <- [0.0, 1.0], t1 <- findPoint curve2 t2 nondegenerate1]
-  let toIntersectionPoint (t1, t2) = IntersectionPoint (endpointSolutionKind t1 t2) t1 t2
-  List.map toIntersectionPoint (List.uniqueValues (endpoints1On2 <> endpoints2On1))
+  List.uniqueValues (endpoints1On2 <> endpoints2On1)
+    & List.map \(t1, t2) -> IntersectionPoint (endpointSolutionKind t1 t2) t1 t2
 
 endpointSolutionKind :: Problem dimension units space => Number -> Number -> IntersectionPoint.Kind
 endpointSolutionKind t1 t2 = do
