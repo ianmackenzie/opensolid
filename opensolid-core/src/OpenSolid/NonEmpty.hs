@@ -85,6 +85,7 @@ module OpenSolid.NonEmpty
   , pickMaximumBy
   , random
   , shuffle
+  , pairwise
   )
 where
 
@@ -449,3 +450,7 @@ shuffle original = do
   keys <- random (length original) keyGenerator
   let shuffledPairs = sortBy Pair.second (zip2 original keys)
   Random.return (map Pair.first shuffledPairs)
+
+pairwise :: (a -> b -> c) -> NonEmpty a -> NonEmpty b -> NonEmpty c
+pairwise function nonEmptyA nonEmptyB =
+  combine (\itemA -> map (function itemA) nonEmptyB) nonEmptyA
