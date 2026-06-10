@@ -115,6 +115,34 @@ findInteriorSolution evaluate tRange1 tRange2 = do
   let pointsAreEqual = Curve.point curve1 t1 ~= Curve.point curve2 t2
   if isInterior1 && isInterior2 && pointsAreEqual then Just (t1, t2) else Nothing
 
+evaluateCrossing ::
+  Problem dimension units space =>
+  NewtonRaphson.EvaluateSurface dimension units space
+evaluateCrossing (UvPoint t1 t2) = do
+  let displacement = Curve.point curve2 t2 - Curve.point curve1 t1
+  let uDerivative = negate (Curve.derivativeValue curve1 t1)
+  let vDerivative = Curve.derivativeValue curve2 t2
+  (# displacement, uDerivative, vDerivative #)
+
+evaluateTangent ::
+  Problem dimension units space =>
+  NewtonRaphson.EvaluateSurface 2 (units ?*? units) Void
+evaluateTangent (UvPoint u v) = do
+  let f = Curve.point curve1 u
+  let g = Curve.point curve2 v
+  let d = g - f
+  let fu = Curve.derivativeValue curve1 u
+  let fuu = Curve.secondDerivativeValue curve1 u
+  let gv = Curve.derivativeValue curve2 v
+  let gvv = Curve.secondDerivativeValue curve2 v
+  let x = d `dot_` fu
+  let y = d `dot_` gv
+  let xu = negate (fu `dot_` fu) + d `dot_` fuu
+  let xv = fu `dot_` gv
+  let yu = negate xv
+  let yv = gv `dot_` gv + d `dot_` gvv
+  (# Vector2D x y, Vector2D xu yu, Vector2D xv yv #)
+
 findInteriorSolutions ::
   Problem dimension units space =>
   List IntersectionPoint ->
@@ -123,26 +151,6 @@ findInteriorSolutions endpointSolutions = do
   let nonzero1 = Nondegenerate.interior nondegenerate1
   let nonzero2 = Nondegenerate.interior nondegenerate2
   let searchTree = SearchTree.pairwise (,) (Curve.searchTree curve1) (Curve.searchTree curve2)
-  let evaluateCrossing (UvPoint t1 t2) = do
-        let displacement = Curve.point curve2 t2 - Curve.point curve1 t1
-        let uDerivative = negate (Curve.derivativeValue curve1 t1)
-        let vDerivative = Curve.derivativeValue curve2 t2
-        (# displacement, uDerivative, vDerivative #)
-  let evaluateTangent (UvPoint u v) = do
-        let f = Curve.point curve1 u
-        let g = Curve.point curve2 v
-        let d = g - f
-        let fu = Curve.derivativeValue curve1 u
-        let fuu = Curve.secondDerivativeValue curve1 u
-        let gv = Curve.derivativeValue curve2 v
-        let gvv = Curve.secondDerivativeValue curve2 v
-        let x = d `dot_` fu
-        let y = d `dot_` gv
-        let xu = negate (fu `dot_` fu) + d `dot_` fuu
-        let xv = fu `dot_` gv
-        let yu = negate xv
-        let yv = gv `dot_` gv + d `dot_` gvv
-        (# Vector2D x y, Vector2D xu yu, Vector2D xv yv #)
   let interiorIntersectionPoint (tRange1, tRange2) (segment1, segment2)
         | not (Curve.Segment.range segment1 `intersects` Curve.Segment.range segment2) =
             Resolved Nothing
