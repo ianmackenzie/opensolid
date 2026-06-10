@@ -101,9 +101,8 @@ endpointSolutionKind t1 t2 = do
     | otherwise -> Crossing
 
 endpointSolutionIsDegenerate :: Problem dimension units space => Number -> Number -> Bool
-endpointSolutionIsDegenerate t1 t2 = do
-  Curve.derivativeValue curve1 t1 ~= Vector.zero
-    || Curve.derivativeValue curve2 t2 ~= Vector.zero
+endpointSolutionIsDegenerate t1 t2 =
+  Curve.derivativeValue curve1 t1 ~= Vector.zero || Curve.derivativeValue curve2 t2 ~= Vector.zero
 
 findInteriorSolution ::
   (Problem dimension units space, NewtonRaphson.Surface solveDimension solveUnits solveSpace) =>
