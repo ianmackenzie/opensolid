@@ -8,7 +8,10 @@ where
 
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.IntersectionPoint (IntersectionPoint, Kind (Crossing, Tangent))
+import OpenSolid.Curve.IntersectionPoint
+  ( IntersectionPoint (IntersectionPoint)
+  , Kind (Crossing, Tangent)
+  )
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections (..))
 import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
@@ -86,7 +89,7 @@ findEndpointSolutions = do
         Curve.Nondegenerate.findPoint (Curve.point curve t) nondegenerateSearchCurve
   let endpoints1On2 = [(t1, t2) | t1 <- [0.0, 1.0], t2 <- findPoint curve1 t1 nondegenerate2]
   let endpoints2On1 = [(t1, t2) | t2 <- [0.0, 1.0], t1 <- findPoint curve2 t2 nondegenerate1]
-  let toIntersectionPoint (t1, t2) = IntersectionPoint.new (endpointSolutionKind t1 t2) t1 t2
+  let toIntersectionPoint (t1, t2) = IntersectionPoint (endpointSolutionKind t1 t2) t1 t2
   List.map toIntersectionPoint (List.uniqueValues (endpoints1On2 <> endpoints2On1))
 
 endpointSolutionKind :: Problem dimension units space => Number -> Number -> IntersectionPoint.Kind
@@ -152,8 +155,7 @@ findInteriorSolutions endpointSolutions = do
                   DirectionBounds.areIndependent tangentDirectionRange1 tangentDirectionRange2
             let curvatureVectorsAreDistinct =
                   VectorBounds.areDistinct curvatureVectorRange1_ curvatureVectorRange2_
-            let isLocal endpointSolution = do
-                  let (t1, t2) = IntersectionPoint.parameterValues endpointSolution
+            let isLocal (IntersectionPoint _ t1 t2) =
                   Interval.member t1 tRange1 && Interval.member t2 tRange2
             let singleEndpointSolution =
                   case List.filter isLocal endpointSolutions of
@@ -166,14 +168,12 @@ findInteriorSolutions endpointSolutions = do
                     Tangent _ -> False
                   Nothing -> False
             let hasContinuation = case singleEndpointSolution of
-                  Just endpointSolution -> do
-                    let (t1, t2) = IntersectionPoint.parameterValues endpointSolution
-                    if
-                      | (t1 == 0.0 && t2 == 0.0) || (t1 == 1.0 && t2 == 1.0) ->
-                          DirectionBounds.areDistinct tangentDirectionRange1 tangentDirectionRange2
-                      | (t1 == 0.0 && t2 == 1.0) || (t1 == 1.0 && t2 == 0.0) ->
-                          DirectionBounds.areDistinct tangentDirectionRange1 -tangentDirectionRange2
-                      | otherwise -> False
+                  Just (IntersectionPoint _ t1 t2)
+                    | (t1 == 0.0 && t2 == 0.0) || (t1 == 1.0 && t2 == 1.0) ->
+                        DirectionBounds.areDistinct tangentDirectionRange1 tangentDirectionRange2
+                    | (t1 == 0.0 && t2 == 1.0) || (t1 == 1.0 && t2 == 0.0) ->
+                        DirectionBounds.areDistinct tangentDirectionRange1 -tangentDirectionRange2
+                    | otherwise -> False
                   Nothing -> False
             let hasTangentEndpointSolution = case singleEndpointSolution of
                   Just endpointSolution -> case IntersectionPoint.kind endpointSolution of
@@ -181,8 +181,7 @@ findInteriorSolutions endpointSolutions = do
                     Crossing -> False
                   Nothing -> False
             let hasDegenerateEndpointSolution = case singleEndpointSolution of
-                  Just endpointSolution -> do
-                    let (t1, t2) = IntersectionPoint.parameterValues endpointSolution
+                  Just (IntersectionPoint _ t1 t2) ->
                     Curve.derivativeValue curve1 t1 ~= Vector.zero
                       || Curve.derivativeValue curve2 t2 ~= Vector.zero
                   Nothing -> False
@@ -204,9 +203,9 @@ findInteriorSolutions endpointSolutions = do
                       Tolerance.using Tolerance.unitless do
                         if
                           | tangentVector1 ~= tangentVector2 ->
-                              Resolved (Just (IntersectionPoint.tangent t1 t2 Positive))
+                              Resolved (Just (IntersectionPoint.tangent Positive t1 t2))
                           | tangentVector1 ~= -tangentVector2 ->
-                              Resolved (Just (IntersectionPoint.tangent t1 t2 Negative))
+                              Resolved (Just (IntersectionPoint.tangent Negative t1 t2))
                           | otherwise -> Unresolved
                     Nothing -> Unresolved
               | otherwise -> Unresolved
@@ -219,29 +218,24 @@ findOverlappingSegments ::
   Maybe (Sign, NonEmpty (Interval Unitless, Interval Unitless))
 findOverlappingSegments [] = Nothing
 findOverlappingSegments (NonEmpty endpointSolutions) = do
-  let alignmentAt intersectionPoint = case IntersectionPoint.kind intersectionPoint of
+  let alignmentAt endpointSolution = case IntersectionPoint.kind endpointSolution of
         Tangent alignment -> Just alignment
         Crossing -> Nothing
   endpointSolutionAlignments <- Maybe.collect alignmentAt endpointSolutions
   alignment <- NonEmpty.uniqueValue endpointSolutionAlignments
-  let isContinuation intersectionPoint = do
-        let (t1, t2) = IntersectionPoint.parameterValues intersectionPoint
+  let isContinuation (IntersectionPoint _ t1 t2) =
         case alignment of
           Positive -> (t1 == 0.0 && t2 == 1.0) || (t1 == 1.0 && t2 == 0.0)
           Negative -> (t1 == 0.0 && t2 == 0.0) || (t1 == 1.0 && t2 == 1.0)
   let candidateEndpoints =
         endpointSolutions
           & NonEmpty.filter (not . isContinuation)
-          & List.sortBy (Pair.first . IntersectionPoint.parameterValues)
-  let isOverlappingSegment start end = do
-        let (start1, _) = IntersectionPoint.parameterValues start
-        let (end1, _) = IntersectionPoint.parameterValues end
+          & List.sortBy IntersectionPoint.firstParameterValue
+  let isOverlappingSegment (IntersectionPoint _ start1 _) (IntersectionPoint _ end1 _) = do
         let tValues1 = Interval.sampleValues (Interval start1 end1)
         let samplePoints1 = NonEmpty.map (Curve.point curve1) tValues1
         NonEmpty.all (intersects curve2) samplePoints1
-  let overlappingSegment start end = do
-        let (start1, start2) = IntersectionPoint.parameterValues start
-        let (end1, end2) = IntersectionPoint.parameterValues end
+  let overlappingSegment (IntersectionPoint _ start1 start2) (IntersectionPoint _ end1 end2) =
         (Interval start1 end1, Interval start2 end2)
   case candidateEndpoints of
     [first, second] ->

@@ -1,9 +1,10 @@
 module OpenSolid.Curve.IntersectionPoint
   ( Kind (Crossing, Tangent)
-  , IntersectionPoint
-  , parameterValues
+  , IntersectionPoint (IntersectionPoint)
   , kind
-  , new
+  , firstParameterValue
+  , secondParameterValue
+  , parameterValues
   , crossing
   , tangent
   )
@@ -14,28 +15,31 @@ import OpenSolid.Tolerance qualified as Tolerance
 
 data Kind = Crossing | Tangent Sign deriving (Eq, Ord, Show)
 
-data IntersectionPoint = IntersectionPoint
-  { parameterValues :: (Number, Number)
-  , kind :: Kind
-  }
+data IntersectionPoint = IntersectionPoint Kind Number Number
   deriving (Eq, Ord, Show)
 
 instance ApproximateEquality IntersectionPoint () where
-  point1 ~= point2 =
-    Tolerance.using Tolerance.unitless (point1.parameterValues ~= point2.parameterValues)
-      && point1.kind == point2.kind
+  IntersectionPoint kind1 u1 v1 ~= IntersectionPoint kind2 u2 v2 =
+    kind1 == kind2 && Tolerance.using Tolerance.unitless (u1 ~= u2 && v1 ~= v2)
 
-parameterValues :: IntersectionPoint -> (Number, Number)
-parameterValues = (.parameterValues)
-
+{-# INLINE kind #-}
 kind :: IntersectionPoint -> Kind
-kind = (.kind)
+kind (IntersectionPoint k _ _) = k
 
-new :: Kind -> Number -> Number -> IntersectionPoint
-new givenKind t1 t2 = IntersectionPoint{parameterValues = (t1, t2), kind = givenKind}
+{-# INLINE firstParameterValue #-}
+firstParameterValue :: IntersectionPoint -> Number
+firstParameterValue (IntersectionPoint _ t1 _) = t1
+
+{-# INLINE secondParameterValue #-}
+secondParameterValue :: IntersectionPoint -> Number
+secondParameterValue (IntersectionPoint _ _ t2) = t2
+
+{-# INLINE parameterValues #-}
+parameterValues :: IntersectionPoint -> (Number, Number)
+parameterValues (IntersectionPoint _ t1 t2) = (t1, t2)
 
 crossing :: Number -> Number -> IntersectionPoint
-crossing t1 t2 = IntersectionPoint{parameterValues = (t1, t2), kind = Crossing}
+crossing = IntersectionPoint Crossing
 
-tangent :: Number -> Number -> Sign -> IntersectionPoint
-tangent t1 t2 sign = IntersectionPoint{parameterValues = (t1, t2), kind = Tangent sign}
+tangent :: Sign -> Number -> Number -> IntersectionPoint
+tangent sign = IntersectionPoint (Tangent sign)

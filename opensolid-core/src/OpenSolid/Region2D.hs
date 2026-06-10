@@ -42,7 +42,7 @@ import OpenSolid.CDT qualified as CDT
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
+import OpenSolid.Curve.IntersectionPoint (IntersectionPoint (IntersectionPoint))
 import OpenSolid.Curve.IntersectionPoint qualified as Curve.IntersectionPoint
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
@@ -251,15 +251,13 @@ addFillet radius point curves = do
         Just Curve.OverlappingSegments{} -> couldNotSolveForFilletLocation
         Just (Curve.IntersectionPoints intersectionPoints) -> do
           let intersection1 =
-                intersectionPoints
-                  & NonEmpty.maximumBy (Pair.first . Curve.IntersectionPoint.parameterValues)
+                NonEmpty.maximumBy Curve.IntersectionPoint.firstParameterValue intersectionPoints
           let intersection2 =
-                intersectionPoints
-                  & NonEmpty.minimumBy (Pair.second . Curve.IntersectionPoint.parameterValues)
+                NonEmpty.minimumBy Curve.IntersectionPoint.secondParameterValue intersectionPoints
           if intersection1 /= intersection2
             then couldNotSolveForFilletLocation
             else do
-              let (t1, t2) = Curve.IntersectionPoint.parameterValues intersection1
+              let IntersectionPoint _ t1 t2 = intersection1
               let centerPoint = Curve2D.point firstOffsetCurve t1
               let startPoint = Curve2D.point firstCurve t1
               let sweptAngle =
@@ -323,8 +321,7 @@ checkCurvesForInnerIntersection curve1 curve2 =
         else Error BoundedBy.BoundaryIntersectsItself
 
 isEndpointIntersection :: IntersectionPoint -> Bool
-isEndpointIntersection intersectionPoint = do
-  let (t1, t2) = Curve.IntersectionPoint.parameterValues intersectionPoint
+isEndpointIntersection (IntersectionPoint _ t1 t2) =
   Parameter.isEndpoint t1 && Parameter.isEndpoint t2
 
 connect :: Tolerance units => List (Curve2D units) -> Result BoundedBy.Error (List (Loop units))
