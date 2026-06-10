@@ -65,10 +65,10 @@ intersections ::
 intersections givenNondegenerate1 givenNondegenerate2 = do
   let ?nondegenerate1 = givenNondegenerate1
   let ?nondegenerate2 = givenNondegenerate2
-  intersectionsImpl
+  findIntersections
 
-intersectionsImpl :: Problem dimension units space => Maybe Intersections
-intersectionsImpl
+findIntersections :: Problem dimension units space => Maybe Intersections
+findIntersections
   | not (Curve.bounds curve1 `intersects` Curve.bounds curve2) = Nothing
   | otherwise = do
       let endpointSolutions = findEndpointSolutions
