@@ -1,5 +1,6 @@
 module OpenSolid.Set
   ( Set (..)
+  , Bounds
   , size
   , bounds
   , leaf
