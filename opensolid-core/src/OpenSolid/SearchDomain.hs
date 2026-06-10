@@ -24,6 +24,7 @@ import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
+import OpenSolid.Set qualified as Set
 import OpenSolid.UvBounds (UvBounds, pattern UvBounds)
 
 data SearchDomain bounds = SearchDomain
@@ -33,7 +34,7 @@ data SearchDomain bounds = SearchDomain
 
 data InfiniteRecursion = InfiniteRecursion deriving (Show, Exception)
 
-class Bounds bounds where
+class Set.Bounds bounds => Bounds bounds where
   contains :: bounds -> bounds -> Bool
   overlap :: bounds -> bounds -> Number
   isSmall :: bounds -> Bool
