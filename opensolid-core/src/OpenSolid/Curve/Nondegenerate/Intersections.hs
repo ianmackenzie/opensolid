@@ -35,7 +35,7 @@ import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.VectorBounds qualified as VectorBounds
 
-type Context dimension units space =
+type Problem dimension units space =
   ( Curve.Exists dimension units space
   , NewtonRaphson.Surface dimension units space
   , Tolerance units
@@ -43,16 +43,16 @@ type Context dimension units space =
   , ?nondegenerate2 :: Nondegenerate (Curve dimension units space)
   )
 
-nondegenerate1 :: Context dimension units space => Nondegenerate (Curve dimension units space)
+nondegenerate1 :: Problem dimension units space => Nondegenerate (Curve dimension units space)
 nondegenerate1 = ?nondegenerate1
 
-nondegenerate2 :: Context dimension units space => Nondegenerate (Curve dimension units space)
+nondegenerate2 :: Problem dimension units space => Nondegenerate (Curve dimension units space)
 nondegenerate2 = ?nondegenerate2
 
-curve1 :: Context dimension units space => Curve dimension units space
+curve1 :: Problem dimension units space => Curve dimension units space
 curve1 = Nondegenerate.unwrap nondegenerate1
 
-curve2 :: Context dimension units space => Curve dimension units space
+curve2 :: Problem dimension units space => Curve dimension units space
 curve2 = Nondegenerate.unwrap nondegenerate2
 
 intersections ::
@@ -68,7 +68,7 @@ intersections givenNondegenerate1 givenNondegenerate2 = do
   let ?nondegenerate2 = givenNondegenerate2
   intersectionsImpl
 
-intersectionsImpl :: Context dimension units space => Maybe Intersections
+intersectionsImpl :: Problem dimension units space => Maybe Intersections
 intersectionsImpl
   | not (Curve.bounds curve1 `intersects` Curve.bounds curve2) = Nothing
   | otherwise = do
@@ -88,7 +88,7 @@ intersectionsImpl
             NonEmpty intersectionPoints -> Just (IntersectionPoints intersectionPoints)
             [] -> Nothing
 
-findEndpointSolutions :: Context dimension units space => List (Number, Number)
+findEndpointSolutions :: Problem dimension units space => List (Number, Number)
 findEndpointSolutions = do
   let findPoint curve t nondegenerateSearchCurve =
         Curve.Nondegenerate.findPoint (Curve.point curve t) nondegenerateSearchCurve
@@ -96,7 +96,7 @@ findEndpointSolutions = do
   let endpoints2On1 = [(t1, t2) | t2 <- [0.0, 1.0], t1 <- findPoint curve2 t2 nondegenerate1]
   List.uniqueValues (endpoints1On2 <> endpoints2On1)
 
-endpointSolutionKind :: Context dimension units space => Number -> Number -> IntersectionPoint.Kind
+endpointSolutionKind :: Problem dimension units space => Number -> Number -> IntersectionPoint.Kind
 endpointSolutionKind t1 t2 = do
   let tangentDirection1 = Curve.Nondegenerate.tangentDirectionValue nondegenerate1 t1
   let tangentDirection2 = Curve.Nondegenerate.tangentDirectionValue nondegenerate2 t2
@@ -105,13 +105,13 @@ endpointSolutionKind t1 t2 = do
     | tangentDirection1 ~= -tangentDirection2 -> Tangent Negative
     | otherwise -> Crossing
 
-endpointSolutionIsDegenerate :: Context dimension units space => Number -> Number -> Bool
+endpointSolutionIsDegenerate :: Problem dimension units space => Number -> Number -> Bool
 endpointSolutionIsDegenerate t1 t2 = do
   Curve.derivativeValue curve1 t1 ~= Vector.zero
     || Curve.derivativeValue curve2 t2 ~= Vector.zero
 
 findInteriorSolution ::
-  (Context dimension units space, NewtonRaphson.Surface solveDimension solveUnits solveSpace) =>
+  (Problem dimension units space, NewtonRaphson.Surface solveDimension solveUnits solveSpace) =>
   NewtonRaphson.EvaluateSurface solveDimension solveUnits solveSpace ->
   Interval Unitless ->
   Interval Unitless ->
@@ -125,7 +125,7 @@ findInteriorSolution evaluate tRange1 tRange2 = do
   if isInterior1 && isInterior2 && pointsAreEqual then Just (t1, t2) else Nothing
 
 findInteriorIntersectionPoints ::
-  Context dimension units space =>
+  Problem dimension units space =>
   Nonzero (Curve dimension units space) ->
   Nonzero (Curve dimension units space) ->
   List (Number, Number) ->
@@ -219,7 +219,7 @@ findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
   List.map Pair.second (Search.exclusive interiorIntersectionPoint isDuplicate searchTree)
 
 findOverlappingSegments ::
-  Context dimension units space =>
+  Problem dimension units space =>
   List (Number, Number) ->
   Maybe (Sign, NonEmpty (Interval Unitless, Interval Unitless))
 findOverlappingSegments [] = Nothing
