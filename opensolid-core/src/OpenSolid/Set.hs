@@ -49,14 +49,13 @@ where
 
 import Data.Foldable1 qualified
 import Data.Graph qualified as Graph
+import Data.List.NonEmpty qualified
 import Data.Proxy (Proxy (Proxy))
 import OpenSolid.Chainable (Chainable)
 import OpenSolid.Chainable qualified as Chainable
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.InternalError qualified as InternalError
-import OpenSolid.Interval qualified as Interval
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Set.Bounds (Bounds)
 import OpenSolid.Set.Bounds qualified as Set.Bounds
@@ -161,49 +160,39 @@ aggregate :: forall b a. Bounds b => NonEmpty (Set b a) -> Set b a
 aggregate subsets = do
   let dimension = Set.Bounds.dimension @b Proxy
   let count = NonEmpty.length subsets
-  node (nSect dimension count subsets 0)
+  node (split dimension count subsets 0)
 
-{-| Divide a list of subsets into subgroups as appropriate:
-
-    - bisect into two subgroups in 1D
-    - quadrisect into four subgroups in 2D
-    - "octasect" into eight subgroups in 3D, etc.
-
-So in general "n-sect" the list, where n = 2 ^ dimension
-(2 ^ 1 = 2 in 1D, 2 ^ 2 = 4 in 2D, 2 ^ 3 = 8 in 3D, etc.)
--}
-nSect :: Bounds b => Int -> Int -> NonEmpty (Set b a) -> Int -> NonEmpty (Set b a)
-nSect dimension count subsets dimensionIndex
-  | count == 1 = assert (NonEmpty.length subsets == 1) subsets -- Can't split a one-element list
-  | otherwise = assert (count >= 2 && NonEmpty.length subsets == count) do
-      -- Split the given list into two sublists based on sorting by the current dimension index
-      let indexedComponentMidpoint =
-            Interval.midpoint . Set.Bounds.component dimensionIndex . bounds
-      let sorted = NonEmpty.sortBy indexedComponentMidpoint subsets
-      let leftSize = count // 2
-      let rightSize = count - leftSize
-      let (leftSubsets, rightSubsets) = splitAtIndex leftSize sorted
-      if dimensionIndex == dimension - 1
-        then do
-          -- We've split on the final dimension index,
-          -- so restart the process at dimension index 0 within each sublist
-          -- by calling the top-level 'aggregate' function
-          let leftNode = aggregate leftSubsets
-          let rightNode = aggregate rightSubsets
-          NonEmpty.two leftNode rightNode
-        else do
-          -- Further split each sublist based on the remaining dimension indices
+-- Given a non-empty (possibly large) list of 'leaf' sets,
+-- construct a fixed number of subsets suitable for use as node children:
+-- 2 subsets in dimension 1, 4 subsets in dimension 2, 8 subsets in dimension 3, etc.
+split :: Bounds b => Int -> Int -> NonEmpty (Set b a) -> Int -> NonEmpty (Set b a)
+split dimension count subsets dimensionIndex =
+  if dimensionIndex == dimension
+    then
+      -- We've run out of dimensions to split by,
+      -- so create a new node from the current list of subsets
+      -- (adding a level to the tree, and restarting the splitting process within the new node)
+      NonEmpty.one (node (split dimension count subsets 0))
+    else
+      if count == 1
+        then subsets -- Can't split a one-element list, so just return it
+        else assert (count >= 2) do
+          -- Split the given list into two sublists based on sorting by the current dimension index
+          let sorted = NonEmpty.sortBy (Set.Bounds.sortValue dimensionIndex . bounds) subsets
+          let leftSize = count // 2
+          let rightSize = count - leftSize
+          let (leftSubsets, rightSubsets) = splitAtIndex leftSize sorted
+          -- Recursively split each sublist based on the remaining dimension indices
           -- (e.g. after splitting based on X, recursively split sublists based on Y and then Z)
-          let leftSubgroups = nSect dimension leftSize leftSubsets (dimensionIndex + 1)
-          let rightSubgroups = nSect dimension rightSize rightSubsets (dimensionIndex + 1)
+          let leftSubgroups = split dimension leftSize leftSubsets (dimensionIndex + 1)
+          let rightSubgroups = split dimension rightSize rightSubsets (dimensionIndex + 1)
           leftSubgroups <> rightSubgroups
 
 splitAtIndex :: Int -> NonEmpty a -> (NonEmpty a, NonEmpty a)
-splitAtIndex 0 _ = InternalError.throw "Bad split index in Set.nSect"
-splitAtIndex _ (_ :| []) = InternalError.throw "Bad split index in Set.nSect"
-splitAtIndex 1 (first :| NonEmpty rest) = (NonEmpty.one first, rest)
-splitAtIndex n (first :| NonEmpty rest) =
-  Pair.mapFirst (NonEmpty.push first) (splitAtIndex (n - 1) rest)
+splitAtIndex index nonEmpty =
+  case Data.List.NonEmpty.splitAt index nonEmpty of
+    (NonEmpty first, NonEmpty second) -> (first, second)
+    _ -> InternalError.throw "Bad split index in Set.split"
 
 flatten :: Set b (Set b a) -> Set b a
 flatten Leaf{leafItem} = leafItem
