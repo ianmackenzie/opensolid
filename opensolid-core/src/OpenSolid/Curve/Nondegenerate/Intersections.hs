@@ -34,11 +34,9 @@ import OpenSolid.UvPoint (pattern UvPoint)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.VectorBounds qualified as VectorBounds
-import OpenSolid.VectorCurve qualified as VectorCurve
 
 type Context dimension units space =
   ( Curve.Exists dimension units space
-  , VectorCurve.Exists dimension units space
   , NewtonRaphson.Surface dimension units space
   , Tolerance units
   , ?nondegenerate1 :: Nondegenerate (Curve dimension units space)
