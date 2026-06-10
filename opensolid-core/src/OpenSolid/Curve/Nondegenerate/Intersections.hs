@@ -23,7 +23,6 @@ import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Nondegenerate qualified as Nondegenerate
-import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Search qualified as Search
@@ -79,11 +78,7 @@ intersectionsImpl
           let toIntersectionPoint (t1, t2) =
                 IntersectionPoint.new (endpointSolutionKind t1 t2) t1 t2
           let endpointIntersectionPoints = List.map toIntersectionPoint endpointSolutions
-          let interiorIntersectionPoints =
-                findInteriorIntersectionPoints
-                  (Nondegenerate.interior nondegenerate1)
-                  (Nondegenerate.interior nondegenerate2)
-                  endpointSolutions
+          let interiorIntersectionPoints = findInteriorIntersectionPoints endpointSolutions
           case List.sort (endpointIntersectionPoints <> interiorIntersectionPoints) of
             NonEmpty intersectionPoints -> Just (IntersectionPoints intersectionPoints)
             [] -> Nothing
@@ -126,11 +121,11 @@ findInteriorSolution evaluate tRange1 tRange2 = do
 
 findInteriorIntersectionPoints ::
   Problem dimension units space =>
-  Nonzero (Curve dimension units space) ->
-  Nonzero (Curve dimension units space) ->
   List (Number, Number) ->
   List IntersectionPoint
-findInteriorIntersectionPoints nonzero1 nonzero2 endpointSolutions = do
+findInteriorIntersectionPoints endpointSolutions = do
+  let nonzero1 = Nondegenerate.interior nondegenerate1
+  let nonzero2 = Nondegenerate.interior nondegenerate2
   let searchTree = SearchTree.pairwise (,) (Curve.searchTree curve1) (Curve.searchTree curve2)
   let evaluateCrossing (UvPoint t1 t2) = do
         let displacement = Curve.point curve2 t2 - Curve.point curve1 t1
