@@ -15,6 +15,8 @@ Cache normal direction in PlaneOrientation3D?
 
 Switch transforms to be flat structs of unboxed Double# components
 
+Implement Foldable1 for Set?
+
 Optimize curves to reuse arc lengths and uniform parameterizations where possible
 - can simply reuse as is for rigid transformations and coordinate conversions
 - can scale arc length (by absolute value of uniform scale) for uniform transformations, and reuse uniform parameterization
