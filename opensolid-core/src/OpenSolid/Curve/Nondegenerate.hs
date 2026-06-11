@@ -62,8 +62,8 @@ findPoint point (Nondegenerate curve) = do
         let Curve.Tree tRange segment left right = tree
         if
           | not (point `intersects` Curve.Segment.range segment) -> Nothing
-          | Curve.Segment.monotonic segment -> Just (Set.singleton tRange tree)
-          | Curve.Segment.singular segment -> Just (Set.singleton tRange tree)
+          | Curve.Segment.monotonic segment -> Just (Set.leaf tRange tree)
+          | Curve.Segment.singular segment -> Just (Set.leaf tRange tree)
           | otherwise -> findCandidateSegments left <> findCandidateSegments right
   case findCandidateSegments (Curve.tree curve) of
     Nothing -> []

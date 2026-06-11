@@ -132,9 +132,9 @@ unsafe givenOuterBoundary givenInnerBoundaries =
     { outerBoundary = givenOuterBoundary
     , innerBoundaries = givenInnerBoundaries
     , boundaries = do
-        let outerSet = Set2D.singleton (Boundary.bounds givenOuterBoundary) givenOuterBoundary
+        let outerSet = Set2D.leaf (Boundary.bounds givenOuterBoundary) givenOuterBoundary
         case givenInnerBoundaries of
-          Just innerSet -> Set2D.union outerSet innerSet
+          Just innerSet -> Set2D.node (NonEmpty.two outerSet innerSet)
           Nothing -> outerSet
     }
 

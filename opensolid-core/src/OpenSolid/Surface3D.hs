@@ -36,6 +36,7 @@ import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D
@@ -102,10 +103,10 @@ parametric givenFunction givenDomain = do
   let surfaceOuterBoundary = surfaceBoundary (Region2D.outerBoundary givenDomain)
   let surfaceInnerBoundaries =
         Maybe.map (Set.map surfaceBoundary Set.bounds) (Region2D.innerBoundaries givenDomain)
-  let outerBoundarySet = Set3D.singleton (Set3D.bounds surfaceOuterBoundary) surfaceOuterBoundary
+  let outerBoundarySet = Set3D.leaf (Set3D.bounds surfaceOuterBoundary) surfaceOuterBoundary
   let surfaceBoundaries =
         case surfaceInnerBoundaries of
-          Just innerBoundarySet -> Set3D.union outerBoundarySet innerBoundarySet
+          Just innerBoundarySet -> Set3D.node (NonEmpty.two outerBoundarySet innerBoundarySet)
           Nothing -> outerBoundarySet
   Surface3D
     { function = givenFunction

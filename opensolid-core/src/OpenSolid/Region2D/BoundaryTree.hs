@@ -12,8 +12,10 @@ import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
@@ -26,8 +28,7 @@ data BoundaryTree units = BoundaryTree
   { bounds :: Bounds2D units
   , startPoint :: Point2D units
   , endPoint :: Point2D units
-  , left :: ~(BoundaryTree units)
-  , right :: ~(BoundaryTree units)
+  , children :: ~(NonEmpty (BoundaryTree units))
   }
 
 instance Units.Coercion (BoundaryTree units1) (BoundaryTree units2) where
@@ -36,17 +37,17 @@ instance Units.Coercion (BoundaryTree units1) (BoundaryTree units2) where
       { bounds = Units.coerce tree.bounds
       , startPoint = Units.coerce tree.startPoint
       , endPoint = Units.coerce tree.endPoint
-      , left = Units.coerce tree.left
-      , right = Units.coerce tree.right
+      , children = NonEmpty.map Units.coerce tree.children
       }
 
 build :: Set2D units (Curve2D units) -> BoundaryTree units
 build curves = case curves of
   Set2D.Leaf _ curve -> buildCurve curve
-  Set2D.Node nodeBounds leftCurves rightCurves -> do
-    let leftChild = build leftCurves
-    let rightChild = build rightCurves
-    BoundaryTree nodeBounds leftChild.startPoint rightChild.endPoint leftChild rightChild
+  Set2D.Node nodeBounds subsets -> do
+    let children = NonEmpty.map build subsets
+    let startPoint = (NonEmpty.first children).startPoint
+    let endPoint = (NonEmpty.last children).endPoint
+    BoundaryTree{bounds = nodeBounds, startPoint, endPoint, children}
 
 buildCurve :: Curve2D units -> BoundaryTree units
 buildCurve curve =
@@ -64,7 +65,8 @@ buildCurveImpl curve tRange startPoint endPoint = do
   let midpoint = Curve2D.point curve tMid
   let leftChild = buildCurveImpl curve (Interval tLow tMid) startPoint midpoint
   let rightChild = buildCurveImpl curve (Interval tMid tHigh) midpoint endPoint
-  BoundaryTree (Curve2D.range curve tRange) startPoint endPoint leftChild rightChild
+  let children = NonEmpty.two leftChild rightChild
+  BoundaryTree{bounds = Curve2D.range curve tRange, startPoint, endPoint, children}
 
 bounds :: BoundaryTree units -> Bounds2D units
 bounds = (.bounds)
@@ -76,7 +78,7 @@ distinctSweptAngle point tree =
 pointSweptAngle :: Point2D units -> BoundaryTree units -> Angle
 pointSweptAngle point tree
   | Bounds2D.isDistinctFrom point tree.bounds = distinctSweptAngle point tree
-  | otherwise = pointSweptAngle point tree.left + pointSweptAngle point tree.right
+  | otherwise = NonEmpty.sumOf (pointSweptAngle point) tree.children
 
 boundsSweptAngle :: Bounds2D units -> BoundaryTree units -> Fuzzy Angle
 boundsSweptAngle givenBounds tree = do
@@ -94,6 +96,6 @@ boundsSweptAngleImpl givenBounds centerPoint diameter tree
   | Bounds2D.areDistinct givenBounds tree.bounds = Resolved (distinctSweptAngle centerPoint tree)
   | Bounds2D.diameter tree.bounds < diameter = Unresolved
   | otherwise = do
-      resolvedLeftSweptAngle <- boundsSweptAngleImpl givenBounds centerPoint diameter tree.left
-      resolvedRightSweptAngle <- boundsSweptAngleImpl givenBounds centerPoint diameter tree.right
-      Resolved (resolvedLeftSweptAngle + resolvedRightSweptAngle)
+      let childSweptAngle child = boundsSweptAngleImpl givenBounds centerPoint diameter child
+      childSweptAngles <- Fuzzy.collect childSweptAngle tree.children
+      Resolved (NonEmpty.sum childSweptAngles)

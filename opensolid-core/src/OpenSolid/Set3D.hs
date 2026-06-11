@@ -2,7 +2,8 @@ module OpenSolid.Set3D
   ( Set3D
   , pattern Leaf
   , pattern Node
-  , singleton
+  , leaf
+  , node
   , size
   , bounds
   , build
@@ -20,7 +21,6 @@ module OpenSolid.Set3D
   , reverseMap
   , combine
   , combineWithIndex
-  , union
   , cull
   , filter
   , filterMap
@@ -52,8 +52,8 @@ type Set3D space item = Set (Bounds3D space) item
 pattern Leaf :: Bounds3D space -> item -> Set3D space item
 pattern Leaf leafBounds leafItem <- Set.Leaf{leafBounds, leafItem}
 
-pattern Node :: Bounds3D space -> Set3D space item -> Set3D space item -> Set3D space item
-pattern Node nodeBounds leftChild rightChild <- Set.Node{nodeBounds, leftChild, rightChild}
+pattern Node :: Bounds3D space -> NonEmpty (Set3D space item) -> Set3D space item
+pattern Node nodeBounds children <- Set.Node{nodeBounds, children}
 
 {-# COMPLETE Node, Leaf #-}
 
@@ -63,8 +63,11 @@ size = Set.size
 bounds :: Set3D space item -> Bounds3D space
 bounds = Set.bounds
 
-singleton :: Bounds3D space -> item -> Set3D space item
-singleton = Set.singleton
+leaf :: Bounds3D space -> item -> Set3D space item
+leaf = Set.leaf
+
+node :: NonEmpty (Set3D space item) -> Set3D space item
+node = Set.node
 
 build :: (item -> Bounds3D space) -> NonEmpty item -> Set3D space item
 build = Set.build
@@ -118,9 +121,6 @@ combine = Set.combine
 
 combineWithIndex :: (Int -> item1 -> Set3D space2 item2) -> Set3D space1 item1 -> Set3D space2 item2
 combineWithIndex = Set.combineWithIndex
-
-union :: Set3D space item -> Set3D space item -> Set3D space item
-union = Set.union
 
 cull :: (Bounds3D space -> Bool) -> Set3D space item -> List item
 cull = Set.cull

@@ -300,7 +300,7 @@ buildHalfEdgeSet surfaceSet =
         let curveId = CurveId curveIndex
         let halfEdgeId = HalfEdge.Id{surfaceId, boundaryId, curveId}
         let halfEdge = HalfEdge{id = halfEdgeId, surfaceCurve}
-        Set3D.singleton (HalfEdge.bounds halfEdge) halfEdge
+        Set3D.leaf (HalfEdge.bounds halfEdge) halfEdge
 
 registerSeam ::
   Tolerance Meters =>
@@ -370,7 +370,7 @@ surfaceSegmentsEntry resolution surfaceIndex surface = do
             let p12 = SurfaceFunction3D.Nondegenerate.point function (UvPoint u1 v2)
             let p22 = SurfaceFunction3D.Nondegenerate.point function (UvPoint u2 v2)
             buildSurfaceSegmentSet resolution function uvBounds p11 p21 p12 p22
-          Error IsDegenerate -> Set2D.singleton uvBounds uvBounds
+          Error IsDegenerate -> Set2D.leaf uvBounds uvBounds
   (SurfaceId surfaceIndex, surfaceSegmentSet)
 
 buildSurfaceSegmentSet ::
@@ -414,7 +414,7 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
           `max` interiorError12
           `max` interiorError22
   if Resolution.acceptable (#size size) (#error maxError) resolution
-    then Set2D.singleton uvRange uvRange
+    then Set2D.leaf uvRange uvRange
     else do
       let Interval u1 u2 = uRange
       let Interval v1 v2 = vRange
@@ -434,9 +434,7 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
       let set21 = buildSurfaceSegmentSet resolution function uvRange21 pMid1 p21 pCenter p2Mid
       let set12 = buildSurfaceSegmentSet resolution function uvRange12 p1Mid pCenter p12 pMid2
       let set22 = buildSurfaceSegmentSet resolution function uvRange22 pCenter p2Mid pMid2 p22
-      let set1 = Set2D.union set11 set21
-      let set2 = Set2D.union set12 set22
-      Set2D.union set1 set2
+      Set2D.node (NonEmpty.four set11 set21 set12 set22)
 
 buildLeadingEdgeVerticesMap ::
   Tolerance Meters =>
@@ -558,9 +556,9 @@ degenerateEdgeLinearizationPredicate uvCurve surfaceSegments (Interval tStart tE
 validEdge :: UvBounds -> Number -> Set2D Unitless UvBounds -> Bool
 validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Tolerance.unitless do
   case surfaceSegments of
-    Set2D.Node nodeBounds left right ->
+    Set2D.Node nodeBounds children ->
       not (intersects edgeBounds nodeBounds)
-        || (validEdge edgeBounds edgeLength left && validEdge edgeBounds edgeLength right)
+        || NonEmpty.all (validEdge edgeBounds edgeLength) children
     Set2D.Leaf leafBounds _ ->
       not (intersects edgeBounds leafBounds)
         || edgeLength <= Number.sqrt 2.0 * Bounds2D.diameter leafBounds
@@ -621,14 +619,14 @@ getLeadingEdgeVertices leadingEdgeVerticesMap surfaceId boundaryId curveIndex _ 
 steinerPoint :: Set2D Unitless (Line2D Unitless) -> UvBounds -> Maybe UvPoint
 steinerPoint boundarySegmentSet uvRange = do
   let uvPoint = Bounds2D.centerPoint uvRange
-  if isValidSteinerPoint boundarySegmentSet uvPoint then Just uvPoint else Nothing
+  if isValidSteinerPoint uvPoint boundarySegmentSet then Just uvPoint else Nothing
 
-isValidSteinerPoint :: Set2D Unitless (Line2D Unitless) -> UvPoint -> Bool
-isValidSteinerPoint edgeSet uvPoint = case edgeSet of
+isValidSteinerPoint :: UvPoint -> Set2D Unitless (Line2D Unitless) -> Bool
+isValidSteinerPoint uvPoint edgeSet = case edgeSet of
   Set2D.Leaf _ edge -> Line2D.distanceTo uvPoint edge >= 0.5 * Line2D.length edge
-  Set2D.Node nodeBounds left right ->
+  Set2D.Node nodeBounds children ->
     Bounds2D.exclusion uvPoint nodeBounds >= 0.5 * Bounds2D.diameter nodeBounds
-      || (isValidSteinerPoint left uvPoint && isValidSteinerPoint right uvPoint)
+      || NonEmpty.all (isValidSteinerPoint uvPoint) children
 
 surfaces :: Body3D space -> Set3D space (Surface3D space)
 surfaces = (.surfaces)

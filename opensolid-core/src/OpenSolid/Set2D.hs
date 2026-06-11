@@ -2,7 +2,8 @@ module OpenSolid.Set2D
   ( Set2D
   , pattern Leaf
   , pattern Node
-  , singleton
+  , leaf
+  , node
   , size
   , bounds
   , build
@@ -20,7 +21,6 @@ module OpenSolid.Set2D
   , reverseMap
   , combine
   , combineWithIndex
-  , union
   , cull
   , filter
   , filterMap
@@ -52,16 +52,19 @@ type Set2D units item = Set (Bounds2D units) item
 pattern Leaf :: Bounds2D units -> item -> Set2D units item
 pattern Leaf leafBounds leafItem <- Set.Leaf{leafBounds, leafItem}
 
-pattern Node :: Bounds2D units -> Set2D units item -> Set2D units item -> Set2D units item
-pattern Node nodeBounds leftChild rightChild <- Set.Node{nodeBounds, leftChild, rightChild}
+pattern Node :: Bounds2D units -> NonEmpty (Set2D units item) -> Set2D units item
+pattern Node nodeBounds children <- Set.Node{nodeBounds, children}
 
 {-# COMPLETE Node, Leaf #-}
 
 bounds :: Set2D units item -> Bounds2D units
 bounds = Set.bounds
 
-singleton :: Bounds2D units -> item -> Set2D units item
-singleton = Set.singleton
+leaf :: Bounds2D units -> item -> Set2D units item
+leaf = Set.leaf
+
+node :: NonEmpty (Set2D units item) -> Set2D units item
+node = Set.node
 
 size :: Set2D units item -> Int
 size = Set.size
@@ -118,9 +121,6 @@ combine = Set.combine
 
 combineWithIndex :: (Int -> item1 -> Set2D units2 item2) -> Set2D units1 item1 -> Set2D units2 item2
 combineWithIndex = Set.combineWithIndex
-
-union :: Set2D units item -> Set2D units item -> Set2D units item
-union = Set.union
 
 cull :: (Bounds2D units -> Bool) -> Set2D units item -> List item
 cull = Set.cull
