@@ -9,9 +9,7 @@ module OpenSolid.Bisection
   )
 where
 
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
@@ -73,25 +71,19 @@ resolve callback tree =
         NonEmpty resolvedChildren -> Just (Set.node resolvedChildren)
         [] -> Nothing
 
-equalTags :: Eq tag => (tag, a) -> (tag, a) -> Bool
-equalTags (tag1, _) (tag2, _) = tag1 == tag2
-
-extractCommonTag :: Eq tag => (NonEmpty (tag, a)) -> (tag, NonEmpty a)
-extractCommonTag ((tag, first) :| taggedRest) = (tag, first :| List.map Pair.second taggedRest)
-
 clusters ::
   forall subdomain segment tag.
-  (SearchDomain.Bounds subdomain, Eq tag) =>
+  SearchDomain.Bounds subdomain =>
   (subdomain -> segment -> Fuzzy (Maybe tag)) ->
+  (tag -> tag -> Bool) ->
   Tree subdomain segment ->
-  List (tag, NonEmpty (Tree subdomain segment))
-clusters callback tree =
-  case resolve callback tree of
+  List (NonEmpty (tag, Tree subdomain segment))
+clusters resolveFunction tagPredicate tree =
+  case resolve resolveFunction tree of
     Nothing -> []
-    Just resolved ->
-      resolved
-        & Set.clusters SearchDomain.touching equalTags
-        & NonEmpty.map extractCommonTag
+    Just resolved -> do
+      let itemPredicate (tag1, _) (tag2, _) = tagPredicate tag1 tag2
+      Set.clusters SearchDomain.touching itemPredicate resolved
         & NonEmpty.toList
 
 find ::

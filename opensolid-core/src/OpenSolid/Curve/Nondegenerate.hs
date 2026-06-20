@@ -67,6 +67,7 @@ findPoint point nondegenerateCurve = do
         | Curve.Segment.isMonotonic segment = Resolved (Just Monotonic)
         | Curve.Segment.isDegenerate segment = Resolved (Just Monotonic)
         | otherwise = Unresolved
+  let areNeighbours Monotonic Monotonic = True
   let evaluate tValue =
         (# Curve.point curve tValue - point, Curve.derivativeValue curve tValue #)
   let resolvedSolution tRange segment
@@ -77,12 +78,14 @@ findPoint point nondegenerateCurve = do
               then Resolved (Just tSolution)
               else Unresolved
   let hasEndpointSolution tRange = List.any (Number.includedIn tRange) endpointSolutions
-  let clusterHasEndpointSolution (Monotonic, cluster) =
-        cluster & NonEmpty.any (Bisection.subdomain >> hasEndpointSolution)
-  let clusters = Curve.bisectionTree nondegenerateCurve & Bisection.clusters resolvedMonotonicity
-  let interiorClusters = clusters & List.filter (not . clusterHasEndpointSolution)
-  let clusterSolution (Monotonic, cluster) = Bisection.find resolvedSolution cluster
-  let interiorSolutions = List.filterMap clusterSolution interiorClusters
+  let clusterHasEndpointSolution cluster =
+        NonEmpty.any (Bisection.subdomain >> hasEndpointSolution) cluster
+  let clusters =
+        Curve.bisectionTree nondegenerateCurve
+          & Bisection.clusters resolvedMonotonicity areNeighbours
+          & List.map (NonEmpty.map (\(Monotonic, cluster) -> cluster))
+  let interiorClusters = List.filter (not . clusterHasEndpointSolution) clusters
+  let interiorSolutions = List.filterMap (Bisection.find resolvedSolution) interiorClusters
   List.sort (endpointSolutions <> interiorSolutions)
 
 intersections ::
