@@ -14,8 +14,8 @@ import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 
-data Intersections
-  = IntersectionPoints (NonEmpty IntersectionPoint)
+data Intersections dimension units space
+  = IntersectionPoints (NonEmpty (IntersectionPoint dimension units space))
   | OverlappingSegments Sign (NonEmpty (Interval Unitless, Interval Unitless))
   deriving (Show)
 
@@ -26,7 +26,7 @@ intersections ::
   ) =>
   Curve dimension units space ->
   Curve dimension units space ->
-  Result IsDegenerate (Maybe Intersections)
+  Result IsDegenerate (Maybe (Intersections dimension units space))
 intersections curve1 curve2 =
   Result.map2
     Curve.Nondegenerate.Intersections.intersections

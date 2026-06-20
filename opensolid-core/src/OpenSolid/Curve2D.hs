@@ -47,6 +47,8 @@ module OpenSolid.Curve2D
   , reverse
   , bounds
   , g2
+  , IntersectionPoint
+  , Intersections
   , intersections
   , findPoint
   , distanceAlong
@@ -549,11 +551,15 @@ coordinates curve = (xCoordinate curve, yCoordinate curve)
 findPoint :: Tolerance units => Point2D units -> Curve2D units -> Result IsDegenerate (List Number)
 findPoint = Curve.findPoint
 
+type IntersectionPoint units = Curve.IntersectionPoint 2 units Void
+
+type Intersections units = Curve.Intersections 2 units Void
+
 intersections ::
   Tolerance units =>
   Curve2D units ->
   Curve2D units ->
-  Result IsDegenerate (Maybe Curve.Intersections)
+  Result IsDegenerate (Maybe (Intersections units))
 intersections = Curve.intersections
 
 g2 ::

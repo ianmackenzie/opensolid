@@ -14,4 +14,4 @@ intersections ::
   ) =>
   Nondegenerate (Curve dimension units space) ->
   Nondegenerate (Curve dimension units space) ->
-  Maybe Intersections
+  Maybe (Intersections dimension units space)

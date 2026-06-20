@@ -6,14 +6,14 @@ where
 
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
+import {-# SOURCE #-} OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
 import OpenSolid.Prelude
 
-data Intersections
-  = IntersectionPoints (NonEmpty IntersectionPoint)
+data Intersections dimension units space
+  = IntersectionPoints (NonEmpty (IntersectionPoint dimension units space))
   | OverlappingSegments Sign (NonEmpty (Interval Unitless, Interval Unitless))
 
 intersections ::
@@ -23,4 +23,4 @@ intersections ::
   ) =>
   Curve dimension units space ->
   Curve dimension units space ->
-  Result IsDegenerate (Maybe Intersections)
+  Result IsDegenerate (Maybe (Intersections dimension units space))

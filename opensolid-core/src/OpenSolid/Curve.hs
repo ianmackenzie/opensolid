@@ -73,7 +73,7 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
+import {-# SOURCE #-} OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections qualified as Intersections
 import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
@@ -761,7 +761,7 @@ intersections ::
   ) =>
   Curve dimension units space ->
   Curve dimension units space ->
-  Result IsDegenerate (Maybe Intersections)
+  Result IsDegenerate (Maybe (Intersections dimension units space))
 intersections = Intersections.intersections
 
 linearDeviation ::

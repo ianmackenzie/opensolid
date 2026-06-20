@@ -15,6 +15,7 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.CurvePoint qualified as CurvePoint
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import OpenSolid.Interval (Interval (Interval))
@@ -38,6 +39,7 @@ import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import Test (Expectation, Test)
 import Test qualified
+import Tests.Matching (matching)
 import Tests.Random qualified as Random
 
 curveGenerators :: List (Text, Generator (Curve2D Meters))
@@ -177,13 +179,19 @@ crossingIntersection :: Test
 crossingIntersection = Test.verify "crossingIntersection" do
   let arc1 = Curve2D.arcFrom Point2D.origin (Point2D.meters 0.0 1.0) Angle.halfTurn
   let arc2 = Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
+  nondegenerate1 <- Curve.nondegenerate arc1 & Result.orFail
+  nondegenerate2 <- Curve.nondegenerate arc2 & Result.orFail
+  let curvePoint1 t1 = CurvePoint.on nondegenerate1 t1
+  let curvePoint2 t2 = CurvePoint.on nondegenerate2 t2
   intersections <- Curve2D.intersections arc1 arc2 & Result.orFail
   let expectedIntersectionPoints =
-        NonEmpty.two (IntersectionPoint.crossing 0.0 0.0) (IntersectionPoint.crossing 0.5 0.5)
+        NonEmpty.two
+          (IntersectionPoint.Crossing (curvePoint1 0.0, curvePoint2 0.0))
+          (IntersectionPoint.Crossing (curvePoint1 0.5, curvePoint2 0.5))
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
-      Test.expect (actualIntersectionPoints ~= expectedIntersectionPoints)
+      Test.expect (matching actualIntersectionPoints expectedIntersectionPoints)
         & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
         & Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just Curve.OverlappingSegments{} ->
@@ -203,12 +211,17 @@ tangentIntersection = Test.verify "tangentIntersection" do
           (#radius (Length.meters 0.5))
           (#startAngle -Angle.pi)
           (#endAngle Angle.zero)
+  nondegenerate1 <- Curve.nondegenerate arc1 & Result.orFail
+  nondegenerate2 <- Curve.nondegenerate arc2 & Result.orFail
+  let curvePoint1 t1 = CurvePoint.on nondegenerate1 t1
+  let curvePoint2 t2 = CurvePoint.on nondegenerate2 t2
   intersections <- Curve2D.intersections arc1 arc2 & Result.orFail
-  let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent Negative 0.5 0.5)
+  let expectedIntersectionPoints =
+        NonEmpty.one (IntersectionPoint.Tangent Negative (curvePoint1 0.5, curvePoint2 0.5))
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
-      Test.expect (actualIntersectionPoints ~= expectedIntersectionPoints)
+      Test.expect (matching actualIntersectionPoints expectedIntersectionPoints)
         & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
         & Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just Curve.OverlappingSegments{} ->

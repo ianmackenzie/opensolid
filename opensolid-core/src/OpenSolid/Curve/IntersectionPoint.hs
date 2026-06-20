@@ -1,45 +1,50 @@
 module OpenSolid.Curve.IntersectionPoint
-  ( Kind (Crossing, Tangent)
-  , IntersectionPoint (IntersectionPoint)
-  , kind
+  ( IntersectionPoint (Crossing, Tangent)
   , firstParameterValue
   , secondParameterValue
   , parameterValues
-  , crossing
-  , tangent
+  , point
+  , curvePoints
+  , firstCurvePoint
+  , secondCurvePoint
   )
 where
 
+import OpenSolid.Curve qualified as Curve
+import OpenSolid.CurvePoint (CurvePoint)
+import OpenSolid.CurvePoint qualified as CurvePoint
+import OpenSolid.Pair qualified as Pair
+import OpenSolid.Point (Point)
 import OpenSolid.Prelude
-import OpenSolid.Tolerance qualified as Tolerance
 
-data Kind = Crossing | Tangent Sign deriving (Eq, Ord, Show)
+data IntersectionPoint dimension units space
+  = Crossing (CurvePoint dimension units space, CurvePoint dimension units space)
+  | Tangent Sign (CurvePoint dimension units space, CurvePoint dimension units space)
 
-data IntersectionPoint = IntersectionPoint Kind Number Number
-  deriving (Eq, Ord, Show)
+deriving instance
+  Curve.Exists dimension units space =>
+  Show (IntersectionPoint dimension units space)
 
-instance ApproximateEquality IntersectionPoint () where
-  IntersectionPoint kind1 u1 v1 ~= IntersectionPoint kind2 u2 v2 =
-    kind1 == kind2 && Tolerance.using Tolerance.unitless (u1 ~= u2 && v1 ~= v2)
+parameterValues :: IntersectionPoint dimension units space -> (Number, Number)
+parameterValues = Pair.map CurvePoint.parameterValue . curvePoints
 
-{-# INLINE kind #-}
-kind :: IntersectionPoint -> Kind
-kind (IntersectionPoint k _ _) = k
+firstParameterValue :: IntersectionPoint dimension units space -> Number
+firstParameterValue = CurvePoint.parameterValue . firstCurvePoint
 
-{-# INLINE firstParameterValue #-}
-firstParameterValue :: IntersectionPoint -> Number
-firstParameterValue (IntersectionPoint _ t1 _) = t1
+secondParameterValue :: IntersectionPoint dimension units space -> Number
+secondParameterValue = CurvePoint.parameterValue . secondCurvePoint
 
-{-# INLINE secondParameterValue #-}
-secondParameterValue :: IntersectionPoint -> Number
-secondParameterValue (IntersectionPoint _ _ t2) = t2
+point :: IntersectionPoint dimension units space -> Point dimension units space
+point = CurvePoint.point . firstCurvePoint
 
-{-# INLINE parameterValues #-}
-parameterValues :: IntersectionPoint -> (Number, Number)
-parameterValues (IntersectionPoint _ t1 t2) = (t1, t2)
+curvePoints ::
+  IntersectionPoint dimension units space ->
+  (CurvePoint dimension units space, CurvePoint dimension units space)
+curvePoints (Crossing points) = points
+curvePoints (Tangent _ points) = points
 
-crossing :: Number -> Number -> IntersectionPoint
-crossing = IntersectionPoint Crossing
+firstCurvePoint :: IntersectionPoint dimension units space -> CurvePoint dimension units space
+firstCurvePoint = Pair.first . curvePoints
 
-tangent :: Sign -> Number -> Number -> IntersectionPoint
-tangent sign = IntersectionPoint (Tangent sign)
+secondCurvePoint :: IntersectionPoint dimension units space -> CurvePoint dimension units space
+secondCurvePoint = Pair.first . curvePoints

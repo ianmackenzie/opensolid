@@ -39,6 +39,8 @@ module OpenSolid.Curve3D
   , placeIn
   , relativeTo
   , findPoint
+  , IntersectionPoint
+  , Intersections
   , intersections
   , searchTree
   )
@@ -247,11 +249,15 @@ relativeTo frame curve = placeIn (Frame3D.inverse frame) curve
 findPoint :: Tolerance Meters => Point3D space -> Curve3D space -> Result IsDegenerate (List Number)
 findPoint = Curve.findPoint
 
+type IntersectionPoint space = Curve.IntersectionPoint 3 Meters space
+
+type Intersections space = Curve.Intersections 3 Meters space
+
 intersections ::
   Tolerance Meters =>
   Curve3D space ->
   Curve3D space ->
-  Result IsDegenerate (Maybe Curve.Intersections)
+  Result IsDegenerate (Maybe (Intersections space))
 intersections = Curve.intersections
 
 searchTree :: Curve3D space -> SearchTree space
