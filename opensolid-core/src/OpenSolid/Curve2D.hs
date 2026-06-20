@@ -76,6 +76,7 @@ module OpenSolid.Curve2D
   , curvature_
   , toPolyline
   , medialAxis
+  , arcLengthParameterization
   , length
   , uniformParameterization
   , uniformParameterizationValue
@@ -115,6 +116,7 @@ import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.List qualified as List
+import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Orientation2D (Orientation2D)
 import OpenSolid.Orientation2D qualified as Orientation2D
@@ -732,6 +734,9 @@ medialAxis curve1 curve2 = do
                 }
         Ok (List.map toSegment zeros.crossingCurves)
 
+arcLengthParameterization :: Tolerance units => Curve2D units -> (Quantity units, Curve1D Unitless)
+arcLengthParameterization = Curve.arcLengthParameterization
+
 length :: Tolerance units => Curve2D units -> Quantity units
 length = Curve.length
 
@@ -884,5 +889,5 @@ piecewiseDerivativeRange tree s1 s2 = case tree of
     let rRange = Interval (s1 / segmentLength) (s2 / segmentLength)
     VectorCurve2D.range curve rRange
 
-searchTree :: Curve2D units -> SearchTree units
+searchTree :: Nondegenerate (Curve2D units) -> SearchTree units
 searchTree = Curve.searchTree

@@ -56,7 +56,8 @@ findPoint ::
   Point dimension units space ->
   Nondegenerate (Curve dimension units space) ->
   List Number
-findPoint point (Nondegenerate curve) = do
+findPoint point nondegenerateCurve = do
+  let Nondegenerate curve = nondegenerateCurve
   let isDistant segment = not (point `intersects` Curve.Segment.range segment)
   let resolvedMonotonicity _ segment
         | isDistant segment = Resolved Nothing
@@ -74,7 +75,7 @@ findPoint point (Nondegenerate curve) = do
             if Tolerance.using Tolerance.unitless (tSolution `intersects` tRange)
               then Resolved (Just tSolution)
               else Unresolved
-  Bisection.clusters resolvedMonotonicity (Curve.bisectionTree curve)
+  Bisection.clusters resolvedMonotonicity (Curve.bisectionTree nondegenerateCurve)
     & List.filterMap (\(Monotonic, cluster) -> Bisection.find resolvedSolution cluster)
 
 intersections ::

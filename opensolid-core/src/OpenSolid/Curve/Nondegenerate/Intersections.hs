@@ -156,7 +156,9 @@ findInteriorSolutions ::
   List (IntersectionPoint dimension units space) ->
   List (IntersectionPoint dimension units space)
 findInteriorSolutions endpointSolutions = do
-  let searchTree = SearchTree.pairwise (,) (Curve.searchTree curve1) (Curve.searchTree curve2)
+  let searchTree1 = Curve.searchTree nondegenerate1
+  let searchTree2 = Curve.searchTree nondegenerate2
+  let searchTree = SearchTree.pairwise (,) searchTree1 searchTree2
   let interiorIntersectionPoint (tRange1, tRange2) (segment1, segment2)
         | areDistinct segment1 segment2 = Resolved Nothing
         | otherwise = do

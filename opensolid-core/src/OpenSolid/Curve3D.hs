@@ -30,6 +30,7 @@ module OpenSolid.Curve3D
   , range
   , bounds
   , reverse
+  , arcLengthParameterization
   , length
   , uniformParameterization
   , uniformParameterizationValue
@@ -61,6 +62,7 @@ import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.Length (Length)
 import OpenSolid.Line3D (Line3D)
+import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
@@ -215,6 +217,9 @@ bounds = Curve.bounds
 reverse :: Curve3D space -> Curve3D space
 reverse = Curve.reverse
 
+arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Length, Curve1D Unitless)
+arcLengthParameterization = Curve.arcLengthParameterization
+
 length :: Tolerance Meters => Curve3D space -> Length
 length = Curve.length
 
@@ -257,5 +262,5 @@ intersections ::
   Result IsDegenerate (Maybe (Intersections space))
 intersections = Curve.intersections
 
-searchTree :: Curve3D space -> SearchTree space
+searchTree :: Nondegenerate (Curve3D space) -> SearchTree space
 searchTree = Curve.searchTree

@@ -53,6 +53,7 @@ module OpenSolid.Curve
   , linearDeviation
   , linearize
   , toPolyline
+  , arcLengthParameterization
   , length
   , uniformParameterization
   , uniformParameterizationValue
@@ -104,6 +105,7 @@ import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point (Point)
@@ -151,10 +153,10 @@ data Curve dimension units space = Curve
   , derivative :: ~(VectorCurve dimension units space)
   , startPoint :: ~(Point dimension units space)
   , endPoint :: ~(Point dimension units space)
-  , searchTree :: ~(SearchTree dimension units space)
-  , bisectionTree :: ~(BisectionTree dimension units space)
-  , nondegenerateLength :: ~(Quantity units)
-  , nondegenerateUniformParameterization :: ~(Curve1D Unitless)
+  , bounds :: ~(Bounds dimension units space)
+  , searchTree :: Nondegenerate.Field (SearchTree dimension units space)
+  , bisectionTree :: Nondegenerate.Field (BisectionTree dimension units space)
+  , arcLengthParameterization :: Nondegenerate.Field (Quantity units, Curve1D Unitless)
   }
 
 -- | A parametric curve in 2D space.
@@ -180,13 +182,13 @@ type BisectionTree dimension units space =
 
 buildBisectionTree ::
   Exists dimension units space =>
-  Curve dimension units space ->
   Interval Unitless ->
+  Nondegenerate (Curve dimension units space) ->
   BisectionTree dimension units space
-buildBisectionTree curve tRange = do
+buildBisectionTree tRange curve = do
   let (tLeft, tRight) = Interval.bisect tRange
-  let left = buildBisectionTree curve tLeft
-  let right = buildBisectionTree curve tRight
+  let left = buildBisectionTree tLeft curve
+  let right = buildBisectionTree tRight curve
   Tree tRange (Curve.Segment.new curve tRange) (NonEmpty.two left right)
 
 instance Units.Coercion (Curve2D units1) (Curve2D units2) where
@@ -196,10 +198,11 @@ instance Units.Coercion (Curve2D units1) (Curve2D units2) where
       , derivative = Units.coerce curve.derivative
       , startPoint = Units.coerce curve.startPoint
       , endPoint = Units.coerce curve.endPoint
+      , bounds = Units.coerce curve.bounds
       , searchTree = Units.coerce curve.searchTree
       , bisectionTree = Units.coerce curve.bisectionTree
-      , nondegenerateLength = Quantity.coerce curve.nondegenerateLength
-      , nondegenerateUniformParameterization = curve.nondegenerateUniformParameterization
+      , arcLengthParameterization =
+          Nondegenerate.map (Pair.mapFirst Units.coerce) curve.arcLengthParameterization
       }
 
 instance FFI (Curve2D Meters) where
@@ -458,24 +461,25 @@ new ::
   VectorCurve dimension units space ->
   Curve dimension units space
 new givenCompiled givenDerivative =
-  recursive \curve -> do
-    let (arcLength, parameterization) = arcLengthParameterization (Nondegenerate curve)
+  recursive \curve ->
     Curve
       { compiled = givenCompiled
       , derivative = givenDerivative
       , startPoint = CompiledFunction.value givenCompiled 0.0
       , endPoint = CompiledFunction.value givenCompiled 1.0
-      , searchTree = SearchTree.build (Curve.Segment.new curve) SearchDomain.curve
-      , bisectionTree = buildBisectionTree curve Interval.unit
-      , nondegenerateLength = arcLength
-      , nondegenerateUniformParameterization = parameterization
+      , bounds = CompiledFunction.range givenCompiled Interval.unit
+      , searchTree =
+          curve & Nondegenerate.field do
+            \nondegenerateCurve -> SearchTree.build (Curve.Segment.new nondegenerateCurve) SearchDomain.curve
+      , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) curve
+      , arcLengthParameterization = Nondegenerate.field buildArcLengthParameterization curve
       }
 
-arcLengthParameterization ::
+buildArcLengthParameterization ::
   Exists dimension units space =>
   Nondegenerate (Curve dimension units space) ->
   (Quantity units, Curve1D Unitless)
-arcLengthParameterization curve = do
+buildArcLengthParameterization curve = do
   let dsdt t = Vector.magnitude (derivativeValue (Nondegenerate.unwrap curve) t)
   let d2sdt2 t = do
         let tangent = Curve.Nondegenerate.tangentDirectionValue curve t
@@ -607,13 +611,13 @@ range :: Curve dimension units space -> Interval Unitless -> Bounds dimension un
 range curve tRange = CompiledFunction.range (compiled curve) tRange
 
 bounds :: Curve dimension units space -> Bounds dimension units space
-bounds curve = Curve.Segment.range (SearchTree.value (searchTree curve))
+bounds = (.bounds)
 
-bisectionTree :: Curve dimension units space -> BisectionTree dimension units space
-bisectionTree = (.bisectionTree)
+bisectionTree :: Nondegenerate (Curve dimension units space) -> BisectionTree dimension units space
+bisectionTree = Nondegenerate.get (.bisectionTree)
 
-searchTree :: Curve dimension units space -> SearchTree dimension units space
-searchTree = (.searchTree)
+searchTree :: Nondegenerate (Curve dimension units space) -> SearchTree dimension units space
+searchTree = Nondegenerate.get (.searchTree)
 
 hasDegenerateStart :: Exists dimension units space => Curve dimension units space -> Bool
 hasDegenerateStart curve = VectorCurve.hasDegenerateStart (derivative curve)
@@ -705,13 +709,17 @@ reverse curve =
       , derivative = negate (VectorCurve.reverse (derivative curve))
       , startPoint = curve.endPoint
       , endPoint = curve.startPoint
+      , bounds = curve.bounds
       , -- TODO optimize by adding e.g. a Segment.reverse function,
         -- to be able to reuse the existing search tree
-        searchTree = SearchTree.build (Curve.Segment.new reversed) SearchDomain.curve
-      , bisectionTree = buildBisectionTree reversed Interval.unit
-      , nondegenerateLength = curve.nondegenerateLength
-      , nondegenerateUniformParameterization =
-          Curve1D.reverse curve.nondegenerateUniformParameterization
+        searchTree =
+          reversed & Nondegenerate.field do
+            \nondegenerateReversed ->
+              SearchTree.build (Curve.Segment.new nondegenerateReversed) SearchDomain.curve
+      , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) reversed
+      , arcLengthParameterization =
+          curve.arcLengthParameterization
+            & Nondegenerate.map (Pair.mapSecond Curve1D.reverse)
       }
 
 distanceAlong ::
@@ -822,18 +830,26 @@ leftRightError curve t1 t2 p1 p2 = do
   let rightError = Line.distanceTo (point curve tRight) (Line p1 p2)
   max leftError rightError
 
+arcLengthParameterization ::
+  (Exists dimension units space, Tolerance units) =>
+  Curve dimension units space ->
+  (Quantity units, Curve1D Unitless)
+arcLengthParameterization curve =
+  case nondegenerate curve of
+    Ok nondegenerateCurve -> Nondegenerate.get (.arcLengthParameterization) nondegenerateCurve
+    Error IsDegenerate -> (Quantity.zero, Curve1D.t)
+
 length ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   Quantity units
-length curve = if isPoint curve then Quantity.zero else curve.nondegenerateLength
+length = Pair.first . arcLengthParameterization
 
 uniformParameterization ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   Curve1D Unitless
-uniformParameterization curve =
-  if isPoint curve then Curve1D.t else curve.nondegenerateUniformParameterization
+uniformParameterization = Pair.second . arcLengthParameterization
 
 uniformParameterizationValue ::
   (Exists dimension units space, Tolerance units) =>
@@ -864,23 +880,24 @@ transformBy transform curve =
             (compiled curve)
     let transformedDerivative =
           VectorCurve.transformBy (Transform.vectorTransform transform) (derivative curve)
-    let (transformedLength, transformedUniformParameterization) =
-          case Transform.uniformScale transform of
-            Just uniformScale ->
-              ( Number.abs uniformScale * curve.nondegenerateLength
-              , curve.nondegenerateUniformParameterization
-              )
-            Nothing -> arcLengthParameterization (Nondegenerate transformed)
     Curve
       { compiled = compiledTransformed
       , derivative = transformedDerivative
       , startPoint = Point.transformBy transform curve.startPoint
       , endPoint = Point.transformBy transform curve.endPoint
+      , bounds = CompiledFunction.range compiledTransformed Interval.unit
       , -- TODO optimize by transforming existing search tree?
-        searchTree = SearchTree.build (Curve.Segment.new transformed) SearchDomain.curve
-      , bisectionTree = buildBisectionTree transformed Interval.unit
-      , nondegenerateLength = transformedLength
-      , nondegenerateUniformParameterization = transformedUniformParameterization
+        searchTree =
+          transformed & Nondegenerate.field do
+            \nondegenerateTransformed ->
+              SearchTree.build (Curve.Segment.new nondegenerateTransformed) SearchDomain.curve
+      , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) transformed
+      , arcLengthParameterization =
+          case Transform.uniformScale transform of
+            Just uniformScale ->
+              curve.arcLengthParameterization
+                & Nondegenerate.map (Pair.mapFirst (* Number.abs uniformScale))
+            Nothing -> Nondegenerate.field buildArcLengthParameterization transformed
       }
 
 placeOn :: Plane3D space -> Curve2D Meters -> Curve3D space
@@ -898,8 +915,11 @@ placeOn plane curve =
       , derivative = placedDerivative
       , startPoint = Point2D.placeOn plane curve.startPoint
       , endPoint = Point2D.placeOn plane curve.endPoint
-      , searchTree = SearchTree.build (Curve.Segment.new placed) SearchDomain.curve
-      , bisectionTree = buildBisectionTree placed Interval.unit
-      , nondegenerateLength = curve.nondegenerateLength
-      , nondegenerateUniformParameterization = curve.nondegenerateUniformParameterization
+      , bounds = CompiledFunction.range compiledPlaced Interval.unit
+      , searchTree =
+          placed & Nondegenerate.field do
+            \nondegeneratePlaced ->
+              SearchTree.build (Curve.Segment.new nondegeneratePlaced) SearchDomain.curve
+      , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) placed
+      , arcLengthParameterization = curve.arcLengthParameterization
       }

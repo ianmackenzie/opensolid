@@ -25,6 +25,7 @@ import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Nonzero (Nonzero (Nonzero))
+import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.Units (HasUnits)
@@ -132,10 +133,11 @@ new ::
       (VectorBounds dimension units space)
       (Bounds dimension units space)
   ) =>
-  Curve dimension units space ->
+  Nondegenerate (Curve dimension units space) ->
   Interval Unitless ->
   Segment dimension units space
-new givenCurve tRange = do
+new nondegenerateCurve tRange = do
+  let Nondegenerate givenCurve = nondegenerateCurve
   let Interval t1 t2 = tRange
   let p1 = Curve.point givenCurve t1
   let p2 = Curve.point givenCurve t2
