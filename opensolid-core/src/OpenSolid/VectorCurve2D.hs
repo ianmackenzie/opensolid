@@ -64,7 +64,7 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval)
-import OpenSolid.NewtonRaphson2D qualified as NewtonRaphson2D
+import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
@@ -298,7 +298,7 @@ convert factor curve = Units.simplify (curve ?*? factor)
 unconvert :: Quantity (units2 ?/? units1) -> VectorCurve2D units2 -> VectorCurve2D units1
 unconvert factor curve = Units.simplify (curve ?/? factor)
 
-newtonRaphson :: VectorCurve2D units -> Number -> Number
+newtonRaphson :: VectorCurve2D units -> Number -> Fuzzy Number
 newtonRaphson curve t1 = do
   let evaluate tValue = (# value curve tValue, derivativeValue curve tValue #)
-  NewtonRaphson2D.curve evaluate t1
+  NewtonRaphson.Curve.solveFrom t1 evaluate

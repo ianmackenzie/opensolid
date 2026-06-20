@@ -75,7 +75,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Interval (Interval)
 import OpenSolid.List qualified as List
-import OpenSolid.NewtonRaphson qualified as NewtonRaphson
+import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nondegenerate qualified as Nondegenerate
@@ -224,7 +224,7 @@ class
       (Direction dimension space)
       (VectorCurve dimension units space)
       (Curve1D units)
-  , NewtonRaphson.Curve dimension units space
+  , NewtonRaphson.Curve.Solver dimension units space
   , Desingularization.Curve
       (VectorCurve dimension units space)
       (Vector dimension units space)

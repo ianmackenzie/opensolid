@@ -178,10 +178,8 @@ library
     OpenSolid.Mesh
     OpenSolid.Mitsuba
     OpenSolid.Model3D
-    OpenSolid.NewtonRaphson
-    OpenSolid.NewtonRaphson1D
-    OpenSolid.NewtonRaphson2D
-    OpenSolid.NewtonRaphson3D
+    OpenSolid.NewtonRaphson.Curve
+    OpenSolid.NewtonRaphson.Surface
     OpenSolid.NonEmpty
     OpenSolid.Nondegenerate
     OpenSolid.Nonzero

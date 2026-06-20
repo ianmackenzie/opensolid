@@ -43,7 +43,7 @@ import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
-import OpenSolid.NewtonRaphson2D qualified as NewtonRaphson2D
+import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
@@ -602,10 +602,10 @@ direction function = case quotient function (magnitude function) of
   Error DivisionByZero -> Error IsDegenerate
   Ok normalizedFunction -> Ok (DirectionSurfaceFunction2D.unsafe normalizedFunction)
 
-newtonRaphson :: VectorSurfaceFunction2D units -> UvPoint -> UvPoint
+newtonRaphson :: VectorSurfaceFunction2D units -> UvPoint -> Fuzzy UvPoint
 newtonRaphson function uvPoint0 = do
   let uDerivative = derivative U function
   let vDerivative = derivative V function
   let evaluate uvPoint =
         (# value function uvPoint, value uDerivative uvPoint, value vDerivative uvPoint #)
-  NewtonRaphson2D.surface evaluate uvPoint0
+  NewtonRaphson.Surface.solveFrom uvPoint0 evaluate

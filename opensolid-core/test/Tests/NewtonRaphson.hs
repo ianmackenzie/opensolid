@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-unused-local-binds #-}
-
 module Tests.NewtonRaphson (tests) where
 
 import OpenSolid.Angle qualified as Angle
@@ -7,6 +5,7 @@ import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Length qualified as Length
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D (Point2D))
@@ -82,7 +81,7 @@ pointOnSphere3D = Test.verify "Point on sphere" do
 curve1D :: Text -> Curve1D Unitless -> Number -> Number -> Test
 curve1D name curve t0 tExpected =
   Test.verify name do
-    let tSolution = Curve1D.newtonRaphson curve t0
+    tSolution <- Curve1D.newtonRaphson curve t0 & Fuzzy.orFail "Expected a solution"
     Test.expect (Tolerance.using Tolerance.unitless (tSolution ~= tExpected))
       & Test.output "Expected solution" tExpected
       & Test.output "Actual solution" tSolution
@@ -90,7 +89,7 @@ curve1D name curve t0 tExpected =
 curve2D :: Text -> VectorCurve2D Unitless -> Number -> Number -> Test
 curve2D name curve t0 tExpected =
   Test.verify name do
-    let tSolution = VectorCurve2D.newtonRaphson curve t0
+    tSolution <- VectorCurve2D.newtonRaphson curve t0 & Fuzzy.orFail "Expected a solution"
     Test.expect (Tolerance.using Tolerance.unitless (tSolution ~= tExpected))
       & Test.output "Expected solution" tExpected
       & Test.output "Actual solution" tSolution
@@ -101,7 +100,7 @@ surface2D ::
   UvPoint ->
   Test.Expectation
 surface2D surface uv0 uvExpected = do
-  let uvSolution = VectorSurfaceFunction2D.newtonRaphson surface uv0
+  uvSolution <- VectorSurfaceFunction2D.newtonRaphson surface uv0 & Fuzzy.orFail "Expected a solution"
   Test.expect (Tolerance.using Tolerance.unitless (uvSolution ~= uvExpected))
     & Test.output "Expected solution" uvExpected
     & Test.output "Actual solution" uvSolution
@@ -113,7 +112,7 @@ surface3D ::
   UvPoint ->
   Test.Expectation
 surface3D surface uv0 uvExpected = do
-  let uvSolution = VectorSurfaceFunction3D.newtonRaphson surface uv0
+  uvSolution <- VectorSurfaceFunction3D.newtonRaphson surface uv0 & Fuzzy.orFail "Expected a solution"
   Test.expect (Tolerance.using Tolerance.unitless (uvSolution ~= uvExpected))
     & Test.output "Expected solution" uvExpected
     & Test.output "Actual solution" uvSolution

@@ -80,7 +80,7 @@ import OpenSolid.Int qualified as Int
 import OpenSolid.Interval (Interval (Interval), (+/-))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
-import OpenSolid.NewtonRaphson1D qualified as NewtonRaphson1D
+import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nondegenerate qualified as Nondegenerate
@@ -773,10 +773,10 @@ b11 =
         concrete Expression.b11d3 $
           constant 24.0
 
-newtonRaphson :: Curve1D units -> Number -> Number
+newtonRaphson :: Curve1D units -> Number -> Fuzzy Number
 newtonRaphson curve t0 = do
   let evaluate tValue = (# value curve tValue, derivativeValue curve tValue #)
-  NewtonRaphson1D.curve evaluate t0
+  NewtonRaphson.Curve.solveFrom t0 evaluate
 
 erase :: Curve1D units -> Curve1D Unitless
 erase = Units.erase

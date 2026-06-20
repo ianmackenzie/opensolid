@@ -99,7 +99,7 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Line (Line (Line))
 import OpenSolid.Line qualified as Line
 import OpenSolid.List qualified as List
-import OpenSolid.NewtonRaphson qualified as NewtonRaphson
+import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nondegenerate qualified as Nondegenerate
@@ -764,7 +764,7 @@ findPoint givenPoint curve =
 
 intersections ::
   ( Exists dimension units space
-  , NewtonRaphson.Surface dimension units space
+  , NewtonRaphson.Surface.Solver dimension units space
   , Tolerance units
   ) =>
   Curve dimension units space ->

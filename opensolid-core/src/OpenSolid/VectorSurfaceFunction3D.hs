@@ -48,7 +48,7 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval (Interval))
-import OpenSolid.NewtonRaphson3D qualified as NewtonRaphson3D
+import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Parameter qualified as Parameter
@@ -708,10 +708,10 @@ directionRange function uvRange = do
       | vHigh == 1.0 && function.degenerateV1 -> negate (range (derivative V function) uvRange)
       | otherwise -> range function uvRange
 
-newtonRaphson :: VectorSurfaceFunction3D units space -> UvPoint -> UvPoint
+newtonRaphson :: VectorSurfaceFunction3D units space -> UvPoint -> Fuzzy UvPoint
 newtonRaphson function uvPoint0 = do
   let uDerivative = derivative U function
   let vDerivative = derivative V function
   let evaluate uvPoint =
         (# value function uvPoint, value uDerivative uvPoint, value vDerivative uvPoint #)
-  NewtonRaphson3D.surface evaluate uvPoint0
+  NewtonRaphson.Surface.solveFrom uvPoint0 evaluate

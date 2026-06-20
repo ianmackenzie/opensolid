@@ -20,7 +20,7 @@ import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
-import OpenSolid.NewtonRaphson qualified as NewtonRaphson
+import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Nondegenerate qualified as Nondegenerate
@@ -30,13 +30,14 @@ import OpenSolid.Search qualified as Search
 import OpenSolid.SearchDomain qualified as SearchDomain
 import OpenSolid.SearchTree qualified as SearchTree
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.UvBounds (pattern UvBounds)
 import OpenSolid.UvPoint (pattern UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.VectorBounds qualified as VectorBounds
 
 type Problem dimension units space =
   ( Curve.Exists dimension units space
-  , NewtonRaphson.Surface dimension units space
+  , NewtonRaphson.Surface.Solver dimension units space
   , Tolerance units
   , ?nondegenerate1 :: Nondegenerate (Curve dimension units space)
   , ?nondegenerate2 :: Nondegenerate (Curve dimension units space)
@@ -56,7 +57,7 @@ curve2 = Nondegenerate.unwrap nondegenerate2
 
 intersections ::
   ( Curve.Exists dimension units space
-  , NewtonRaphson.Surface dimension units space
+  , NewtonRaphson.Surface.Solver dimension units space
   , Tolerance units
   ) =>
   Nondegenerate (Curve dimension units space) ->
@@ -100,24 +101,24 @@ findEndpointSolutions = do
         | otherwise -> IntersectionPoint.Crossing (p1, p2)
 
 findInteriorSolution ::
-  (Problem dimension units space, NewtonRaphson.Surface solveDimension solveUnits solveSpace) =>
-  NewtonRaphson.EvaluateSurface solveDimension solveUnits solveSpace ->
+  ( Problem dimension units space
+  , NewtonRaphson.Surface.Solver solveDimension solveUnits solveSpace
+  ) =>
+  NewtonRaphson.Surface.Function solveDimension solveUnits solveSpace ->
   Interval Unitless ->
   Interval Unitless ->
   Maybe (CurvePoint dimension units space, CurvePoint dimension units space)
-findInteriorSolution evaluate tRange1 tRange2 = do
-  let uvPoint0 = UvPoint (Interval.midpoint tRange1) (Interval.midpoint tRange2)
-  let UvPoint t1 t2 = NewtonRaphson.surface evaluate uvPoint0
-  let isInterior1 = Search.isInterior t1 tRange1
-  let isInterior2 = Search.isInterior t2 tRange2
-  let pointsAreEqual = Curve.point curve1 t1 ~= Curve.point curve2 t2
-  if isInterior1 && isInterior2 && pointsAreEqual
-    then Just (CurvePoint.on nondegenerate1 t1, CurvePoint.on nondegenerate2 t2)
-    else Nothing
+findInteriorSolution evaluate tRange1 tRange2 =
+  case NewtonRaphson.Surface.solveIn (UvBounds tRange1 tRange2) evaluate of
+    Unresolved -> Nothing
+    Resolved (UvPoint t1 t2) ->
+      if Curve.point curve1 t1 ~= Curve.point curve2 t2
+        then Just (CurvePoint.on nondegenerate1 t1, CurvePoint.on nondegenerate2 t2)
+        else Nothing
 
 evaluateCrossing ::
   Problem dimension units space =>
-  NewtonRaphson.EvaluateSurface dimension units space
+  NewtonRaphson.Surface.Function dimension units space
 evaluateCrossing (UvPoint t1 t2) = do
   let displacement = Curve.point curve2 t2 - Curve.point curve1 t1
   let uDerivative = negate (Curve.derivativeValue curve1 t1)
@@ -126,7 +127,7 @@ evaluateCrossing (UvPoint t1 t2) = do
 
 evaluateTangent ::
   Problem dimension units space =>
-  NewtonRaphson.EvaluateSurface 2 (units ?*? units) Void
+  NewtonRaphson.Surface.Function 2 (units ?*? units) Void
 evaluateTangent (UvPoint u v) = do
   let f = Curve.point curve1 u
   let g = Curve.point curve2 v

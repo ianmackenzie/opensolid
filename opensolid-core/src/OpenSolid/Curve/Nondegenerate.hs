@@ -18,15 +18,15 @@ import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.DirectionCurve (DirectionCurve)
-import OpenSolid.Interval qualified as Interval
+import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.List qualified as List
-import OpenSolid.NewtonRaphson qualified as NewtonRaphson
+import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
+import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 
@@ -72,11 +72,7 @@ findPoint point nondegenerateCurve = do
         (# Curve.point curve tValue - point, Curve.derivativeValue curve tValue #)
   let resolvedSolution tRange segment
         | isDistant segment = Resolved Nothing
-        | otherwise = do
-            let tSolution = NewtonRaphson.curve evaluate (Interval.midpoint tRange)
-            if Tolerance.using Tolerance.unitless (tSolution `intersects` tRange)
-              then Resolved (Just tSolution)
-              else Unresolved
+        | otherwise = Fuzzy.map Just (NewtonRaphson.Curve.solveIn tRange evaluate)
   let hasEndpointSolution tRange = List.any (Number.includedIn tRange) endpointSolutions
   let clusterHasEndpointSolution cluster =
         NonEmpty.any (Bisection.subdomain >> hasEndpointSolution) cluster
@@ -90,7 +86,7 @@ findPoint point nondegenerateCurve = do
 
 intersections ::
   ( Curve.Exists dimension units space
-  , NewtonRaphson.Surface dimension units space
+  , NewtonRaphson.Surface.Solver dimension units space
   , Tolerance units
   ) =>
   Nondegenerate (Curve dimension units space) ->
