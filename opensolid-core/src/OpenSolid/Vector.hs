@@ -47,6 +47,7 @@ class
   , Coercible (Vector dimension units space) (Vector dimension Unitless space)
   , Coercible (Vector dimension Unitless space) (Vector dimension units space)
   , Eq (Vector dimension units space)
+  , Ord (Vector dimension units space)
   , Show (Vector dimension units space)
   , ApproximateEquality (Vector dimension units space) (Tolerance units)
   , Negation (Vector dimension units space)

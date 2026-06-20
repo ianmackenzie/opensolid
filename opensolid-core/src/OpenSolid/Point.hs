@@ -27,6 +27,7 @@ class
   ( Vector.Exists dimension units space
   , Bounds.Exists dimension units space
   , Eq (Point dimension units space)
+  , Ord (Point dimension units space)
   , Show (Point dimension units space)
   , ApproximateEquality (Point dimension units space) (Tolerance units)
   , Addition

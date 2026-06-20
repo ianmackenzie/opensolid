@@ -28,6 +28,9 @@ type family
 
 class
   ( Vector.Exists dimension Unitless space
+  , Eq (Direction dimension space)
+  , Ord (Direction dimension space)
+  , Show (Direction dimension space)
   , Negation (Direction dimension space)
   , ApproximateEquality (Direction dimension space) ()
   , DotMultiplication (Direction dimension space) (Direction dimension space) Number
