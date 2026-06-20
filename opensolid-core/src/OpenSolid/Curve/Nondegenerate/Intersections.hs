@@ -99,14 +99,6 @@ findEndpointSolutions = do
         | tangentDirection1 ~= -tangentDirection2 -> IntersectionPoint.Tangent Negative (p1, p2)
         | otherwise -> IntersectionPoint.Crossing (p1, p2)
 
-areDistinct ::
-  Problem dimension units space =>
-  Curve.Segment dimension units space ->
-  Curve.Segment dimension units space ->
-  Bool
-areDistinct segment1 segment2 =
-  not (Curve.Segment.range segment1 `intersects` Curve.Segment.range segment2)
-
 findInteriorSolution ::
   (Problem dimension units space, NewtonRaphson.Surface solveDimension solveUnits solveSpace) =>
   NewtonRaphson.EvaluateSurface solveDimension solveUnits solveSpace ->
@@ -160,7 +152,7 @@ findInteriorSolutions endpointSolutions = do
   let searchTree2 = Curve.searchTree nondegenerate2
   let searchTree = SearchTree.pairwise (,) searchTree1 searchTree2
   let interiorIntersectionPoint (tRange1, tRange2) (segment1, segment2)
-        | areDistinct segment1 segment2 = Resolved Nothing
+        | Curve.Segment.areDistinct segment1 segment2 = Resolved Nothing
         | otherwise = do
             let tangentDirectionRange1 = Curve.Segment.tangentDirectionRange segment1
             let tangentDirectionRange2 = Curve.Segment.tangentDirectionRange segment2

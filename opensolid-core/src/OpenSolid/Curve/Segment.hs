@@ -8,8 +8,9 @@ module OpenSolid.Curve.Segment
   , isDegenerate
   , new
   , isMonotonic
-  , crossingTangents
-  , distinctCurvatures
+  , areDistinct
+  , haveCrossingTangents
+  , haveDistinctCurvatures
   )
 where
 
@@ -24,7 +25,6 @@ import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
@@ -93,29 +93,35 @@ isDegenerate = (.isDegenerate)
 isMonotonic :: VectorBounds.Exists dimension units space => Segment dimension units space -> Bool
 isMonotonic segment = Interval.isResolved (VectorBounds.magnitude segment.derivativeRange)
 
-crossingTangents ::
-  DirectionBounds.Exists dimension space =>
-  Nonzero (Segment dimension units space) ->
-  Nonzero (Segment dimension units space) ->
+areDistinct ::
+  (Bounds.Exists dimension units space, Tolerance units) =>
+  Segment dimension units space ->
+  Segment dimension units space ->
   Bool
-crossingTangents (Nonzero segment1) (Nonzero segment2) = do
-  let range1 = DirectionBounds.unwrap segment1.tangentDirectionRange
-  let range2 = DirectionBounds.unwrap segment2.tangentDirectionRange
-  let notEqual = Interval.isResolved (VectorBounds.magnitude (range1 - range2))
-  let notOpposite = Interval.isResolved (VectorBounds.magnitude (range1 + range2))
-  notEqual && notOpposite
+areDistinct segment1 segment2 =
+  not (range segment1 `intersects` range segment2)
 
-distinctCurvatures ::
+haveCrossingTangents ::
+  VectorBounds.Exists dimension units space =>
+  Segment dimension units space ->
+  Segment dimension units space ->
+  Bool
+haveCrossingTangents segment1 segment2 =
+  DirectionBounds.areIndependent
+    (tangentDirectionRange segment1)
+    (tangentDirectionRange segment2)
+
+haveDistinctCurvatures ::
   ( Curve.Exists dimension units space
   , VectorBounds.Exists dimension (Unitless ?/? units) space
   ) =>
   Segment dimension units space ->
   Segment dimension units space ->
   Bool
-distinctCurvatures segment1 segment2 = do
-  let range1 = curvatureVectorRange_ segment1
-  let range2 = curvatureVectorRange_ segment2
-  Interval.isResolved (VectorBounds.magnitude (range1 - range2))
+haveDistinctCurvatures segment1 segment2 =
+  VectorBounds.areDistinct
+    (curvatureVectorRange_ segment1)
+    (curvatureVectorRange_ segment2)
 
 new ::
   ( Curve.Exists dimension units space
