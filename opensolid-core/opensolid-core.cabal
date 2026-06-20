@@ -113,6 +113,7 @@ library
     OpenSolid.Circle3D
     OpenSolid.Color
     OpenSolid.CompiledFunction
+    OpenSolid.Continuity
     OpenSolid.Convention3D
     OpenSolid.Csg
     OpenSolid.Curve
