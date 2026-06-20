@@ -11,6 +11,7 @@ module OpenSolid.Nondegenerate
 where
 
 import OpenSolid.Nonzero (Nonzero (Nonzero))
+import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 
 newtype Nondegenerate a = Nondegenerate a
@@ -32,7 +33,7 @@ interior (Nondegenerate value) = Nonzero value
 exterior :: Nonzero a -> Nondegenerate a
 exterior (Nonzero value) = Nondegenerate value
 
-data Field value = Field ~value
+data Field value = Field ~value deriving (Eq, Ord, Show)
 
 instance Units.Coercion a b => Units.Coercion (Field a) (Field b) where
   coerce (Field value) = Field (Units.coerce value)
