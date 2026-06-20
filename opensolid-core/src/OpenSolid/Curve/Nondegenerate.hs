@@ -21,7 +21,9 @@ import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson qualified as NewtonRaphson
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Number qualified as Number
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
@@ -58,6 +60,7 @@ findPoint ::
   List Number
 findPoint point nondegenerateCurve = do
   let Nondegenerate curve = nondegenerateCurve
+  let endpointSolutions = [t | t <- [0.0, 1.0], Curve.point curve t ~= point]
   let isDistant segment = not (point `intersects` Curve.Segment.range segment)
   let resolvedMonotonicity _ segment
         | isDistant segment = Resolved Nothing
@@ -68,15 +71,19 @@ findPoint point nondegenerateCurve = do
         (# Curve.point curve tValue - point, Curve.derivativeValue curve tValue #)
   let resolvedSolution tRange segment
         | isDistant segment = Resolved Nothing
-        | Interval.lower tRange == 0.0 && Curve.startPoint curve ~= point = Resolved (Just 0.0)
-        | Interval.upper tRange == 1.0 && Curve.endPoint curve ~= point = Resolved (Just 1.0)
         | otherwise = do
             let tSolution = NewtonRaphson.curve evaluate (Interval.midpoint tRange)
             if Tolerance.using Tolerance.unitless (tSolution `intersects` tRange)
               then Resolved (Just tSolution)
               else Unresolved
-  Bisection.clusters resolvedMonotonicity (Curve.bisectionTree nondegenerateCurve)
-    & List.filterMap (\(Monotonic, cluster) -> Bisection.find resolvedSolution cluster)
+  let hasEndpointSolution tRange = List.any (Number.includedIn tRange) endpointSolutions
+  let clusterHasEndpointSolution (Monotonic, cluster) =
+        cluster & NonEmpty.any (Bisection.subdomain >> hasEndpointSolution)
+  let clusters = Curve.bisectionTree nondegenerateCurve & Bisection.clusters resolvedMonotonicity
+  let interiorClusters = clusters & List.filter (not . clusterHasEndpointSolution)
+  let clusterSolution (Monotonic, cluster) = Bisection.find resolvedSolution cluster
+  let interiorSolutions = List.filterMap clusterSolution interiorClusters
+  List.sort (endpointSolutions <> interiorSolutions)
 
 intersections ::
   ( Curve.Exists dimension units space
