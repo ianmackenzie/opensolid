@@ -1,3 +1,10 @@
+Add Unwrap typeclass?
+
+Combine Composition and Chainable?
+- but then how to prevent building up big thunks in forEach?
+
+Run multiple type checkers on generated Python library
+
 Reimplement curve intersection using plain trees and subdomain clusters
 
 Rename Curve.Segment.[monotonic,singular] to [isMonotonic,isSingular]
