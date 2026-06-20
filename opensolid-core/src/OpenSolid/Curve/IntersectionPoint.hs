@@ -7,12 +7,15 @@ module OpenSolid.Curve.IntersectionPoint
   , curvePoints
   , firstCurvePoint
   , secondCurvePoint
+  , isConsistentWithOverlap
   )
 where
 
+import OpenSolid.Continuity qualified as Continuity
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.CurvePoint (CurvePoint)
 import OpenSolid.CurvePoint qualified as CurvePoint
+import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
@@ -48,3 +51,15 @@ firstCurvePoint = Pair.first . curvePoints
 
 secondCurvePoint :: IntersectionPoint dimension units space -> CurvePoint dimension units space
 secondCurvePoint = Pair.first . curvePoints
+
+isConsistentWithOverlap ::
+  (Curve.Exists dimension units space, Tolerance units) =>
+  IntersectionPoint dimension units space ->
+  Bool
+isConsistentWithOverlap (Crossing _) = False
+isConsistentWithOverlap (Tangent _ (p1, p2)) =
+  case (CurvePoint.nondegenerate p1, CurvePoint.nondegenerate p2) of
+    (Error IsDegenerate, _) -> True
+    (_, Error IsDegenerate) -> True
+    (Ok nondegenerate1, Ok nondegenerate2) ->
+      CurvePoint.continuity nondegenerate1 nondegenerate2 == Just Continuity.G2
