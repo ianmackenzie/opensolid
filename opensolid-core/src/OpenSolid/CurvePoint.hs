@@ -1,5 +1,3 @@
-{-# LANGUAGE FieldSelectors #-}
-
 module OpenSolid.CurvePoint
   ( CurvePoint
   , point
@@ -43,6 +41,18 @@ on givenCurve givenParameterValue =
     , derivative = Curve.derivativeValue (Nondegenerate.unwrap givenCurve) givenParameterValue
     , tangentDirection = Curve.Nondegenerate.tangentDirectionValue givenCurve givenParameterValue
     }
+
+parameterValue :: CurvePoint dimension units space -> Number
+parameterValue = (.parameterValue)
+
+point :: CurvePoint dimension units space -> Point dimension units space
+point = (.point)
+
+derivative :: CurvePoint dimension units space -> Vector dimension units space
+derivative = (.derivative)
+
+tangentDirection :: CurvePoint dimension units space -> Direction dimension space
+tangentDirection = (.tangentDirection)
 
 isDegenerate ::
   (Curve.Exists dimension units space, Tolerance units) =>
