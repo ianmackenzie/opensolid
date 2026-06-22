@@ -29,8 +29,8 @@ squared = Units.specialize . squared_
 
 sqrt_ :: Nondegenerate (Curve1D (units ?*? units)) -> Nondegenerate (Curve1D units)
 sqrt_ (Nondegenerate curve) = Nondegenerate do
-  let curveTolerance = Curve1D.singularityTolerance curve
-  let derivativeTolerance = Curve1D.singularityTolerance (Curve1D.derivative curve)
+  let curveTolerance = Curve1D.degeneracyTolerance curve
+  let derivativeTolerance = Curve1D.degeneracyTolerance (Curve1D.derivative curve)
   let singularity tValue sign =
         ( Quantity.zero
         , sign * Quantity.sqrt_ (0.5 * Curve1D.secondDerivativeValue curve tValue)

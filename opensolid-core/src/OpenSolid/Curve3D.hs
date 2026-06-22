@@ -1,6 +1,5 @@
 module OpenSolid.Curve3D
   ( Curve3D
-  , HasDegeneracy (HasDegeneracy)
   , Compiled
   , Segment
   , SearchTree
@@ -49,7 +48,7 @@ where
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve3D, HasSingularity)
+import OpenSolid.Curve (Curve3D, HasDegeneracy)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve2D (Curve2D)
@@ -80,8 +79,6 @@ type Compiled space = Curve.Compiled 3 Meters space
 type Segment space = Curve.Segment 3 Meters space
 
 type SearchTree space = Curve.SearchTree 3 Meters space
-
-data HasDegeneracy = HasDegeneracy deriving (Eq, Show)
 
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 new = Curve.new
@@ -191,7 +188,7 @@ tangentDirectionRange = Curve.tangentDirectionRange
 curvatureVector ::
   Tolerance Meters =>
   Curve3D space ->
-  Result HasSingularity (VectorCurve3D InverseMeters space)
+  Result HasDegeneracy (VectorCurve3D InverseMeters space)
 curvatureVector curve = Result.map Units.specialize (Curve.curvatureVector_ curve)
 
 isPoint :: Tolerance Meters => Curve3D space -> Bool

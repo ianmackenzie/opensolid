@@ -17,8 +17,8 @@ module OpenSolid.Curve
   , secondDerivativeRange
   , tangentDirection
   , curvatureVector_
-  , singular0
-  , singular1
+  , degenerateStart
+  , degenerateEnd
   )
 where
 
@@ -62,7 +62,7 @@ type Compiled dimension units space =
     (Interval Unitless)
     (Bounds dimension units space)
 
-data HasSingularity
+data HasDegeneracy
 
 instance
   (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
@@ -170,6 +170,6 @@ curvatureVector_ ::
   , Tolerance units
   ) =>
   Curve dimension units space ->
-  Result HasSingularity (VectorCurve dimension (Unitless ?/? units) space)
-singular0 :: Exists dimension units space => Curve dimension units space -> Bool
-singular1 :: Exists dimension units space => Curve dimension units space -> Bool
+  Result HasDegeneracy (VectorCurve dimension (Unitless ?/? units) space)
+degenerateStart :: Exists dimension units space => Curve dimension units space -> Bool
+degenerateEnd :: Exists dimension units space => Curve dimension units space -> Bool

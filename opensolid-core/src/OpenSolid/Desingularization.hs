@@ -26,11 +26,11 @@ import OpenSolid.Tolerance qualified as Tolerance
 
 t0 :: Number
 -- Should be kept in sync with T0 in bytecode.cpp
-t0 = 0.0625 -- 1/16
+t0 = 0.00390625 -- 1/256
 
 t1 :: Number
 -- Should be kept in sync with T1 in bytecode.cpp
-t1 = 0.9375 -- 15/16
+t1 = 0.99609375 -- 255/256
 
 value :: Number -> a -> a -> a -> a
 value t start middle end
@@ -99,9 +99,9 @@ curveQuotient_ ::
   Nondegenerate (Curve1D units) ->
   c2
 curveQuotient_ numerator (Nondegenerate denominator) = do
-  let singularityTolerance = Curve1D.singularityTolerance denominator
+  let denominatorTolerance = Curve1D.degeneracyTolerance denominator
   let maybeSingularity tValue =
-        if Tolerance.using singularityTolerance (Curve1D.value denominator tValue ~= Quantity.zero)
+        if Tolerance.using denominatorTolerance (Curve1D.value denominator tValue ~= Quantity.zero)
           then Just (lHopital_ numerator denominator tValue)
           else Nothing
   let interiorQuotient = numerator ?/? Nonzero denominator

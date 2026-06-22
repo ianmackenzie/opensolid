@@ -5,8 +5,9 @@ module OpenSolid.VectorCurve
   , Exists
   , Compiled
   , isZero
-  , singular0
-  , singular1
+  , degenerateStart
+  , degenerateEnd
+  , degenerateAt
   , constant
   , new
   , zero
@@ -1214,16 +1215,16 @@ directionRange curve tRange =
 isZero :: Tolerance units => VectorCurve dimension units space -> Bool
 isZero curve = curve.maxSampledMagnitude <= ?tolerance
 
-singular0 :: Exists dimension units space => VectorCurve dimension units space -> Bool
-singular0 curve = singularAt 0.0 curve
+degenerateStart :: Exists dimension units space => VectorCurve dimension units space -> Bool
+degenerateStart = degenerateAt 0.0
 
-singular1 :: Exists dimension units space => VectorCurve dimension units space -> Bool
-singular1 curve = singularAt 1.0 curve
+degenerateEnd :: Exists dimension units space => VectorCurve dimension units space -> Bool
+degenerateEnd = degenerateAt 1.0
 
-singularAt :: Exists dimension units space => Number -> VectorCurve dimension units space -> Bool
-singularAt tValue curve = do
-  let singularityTolerance = Tolerance.unitless * curve.maxSampledMagnitude
-  Tolerance.using singularityTolerance (value curve tValue ~= Vector.zero)
+degenerateAt :: Exists dimension units space => Number -> VectorCurve dimension units space -> Bool
+degenerateAt tValue curve = do
+  let degeneracyTolerance = Tolerance.unitless * curve.maxSampledMagnitude
+  Tolerance.using degeneracyTolerance (value curve tValue ~= Vector.zero)
 
 quotient_ ::
   ( Exists dimension units1 space

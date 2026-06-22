@@ -9,7 +9,7 @@ module OpenSolid.Curve
   , Segment
   , SearchTree
   , Tree (Tree)
-  , HasSingularity (HasSingularity)
+  , HasDegeneracy (HasDegeneracy)
   , new
   , constant
   , line
@@ -34,8 +34,8 @@ module OpenSolid.Curve
   , tangentDirectionRange
   , reverse
   , isPoint
-  , singular0
-  , singular1
+  , degenerateStart
+  , degenerateEnd
   , isOnAxis
   , nondegenerate
   , nonzero
@@ -170,7 +170,7 @@ type Compiled dimension units space =
     (Interval Unitless)
     (Bounds dimension units space)
 
-data HasSingularity = HasSingularity deriving (Eq, Show)
+data HasDegeneracy = HasDegeneracy deriving (Eq, Show)
 
 type SearchTree dimension units space =
   SearchTree.SearchTree (Interval Unitless) (Segment dimension units space)
@@ -615,11 +615,11 @@ bisectionTree = (.bisectionTree)
 searchTree :: Curve dimension units space -> SearchTree dimension units space
 searchTree = (.searchTree)
 
-singular0 :: Exists dimension units space => Curve dimension units space -> Bool
-singular0 curve = VectorCurve.singular0 (derivative curve)
+degenerateStart :: Exists dimension units space => Curve dimension units space -> Bool
+degenerateStart curve = VectorCurve.degenerateStart (derivative curve)
 
-singular1 :: Exists dimension units space => Curve dimension units space -> Bool
-singular1 curve = VectorCurve.singular1 (derivative curve)
+degenerateEnd :: Exists dimension units space => Curve dimension units space -> Bool
+degenerateEnd curve = VectorCurve.degenerateEnd (derivative curve)
 
 isOnAxis ::
   (Exists dimension units space, Tolerance units) =>
@@ -638,10 +638,10 @@ nondegenerate curve =
 nonzero ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  Result HasSingularity (Nonzero (Curve dimension units space))
+  Result HasDegeneracy (Nonzero (Curve dimension units space))
 nonzero curve =
   if derivativeValue curve 0.0 ~= Vector.zero || derivativeValue curve 1.0 ~= Vector.zero
-    then Error HasSingularity
+    then Error HasDegeneracy
     else Ok (Nonzero curve)
 
 tangentDirection ::
@@ -656,7 +656,7 @@ curvatureVector_ ::
   , Tolerance units
   ) =>
   Curve dimension units space ->
-  Result HasSingularity (VectorCurve dimension (Unitless ?/? units) space)
+  Result HasDegeneracy (VectorCurve dimension (Unitless ?/? units) space)
 curvatureVector_ curve = Result.map Curve.Nonzero.curvatureVector_ (nonzero curve)
 
 derivativeValue ::

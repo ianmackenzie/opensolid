@@ -18,7 +18,7 @@ import OpenSolid.Bounds qualified as Bounds
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.CurvatureVector qualified as Curve.CurvatureVector
-import OpenSolid.Desingularization qualified as Desingularization
+import OpenSolid.Degeneracy qualified as Degeneracy
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Interval (Interval (Interval))
@@ -159,13 +159,13 @@ new givenCurve tRange = do
         Curve.CurvatureVector.range_
           segmentDerivativeRange
           segmentSecondDerivativeRange
-  let degenerateStart = t2 <= Desingularization.t0 && Curve.singular0 givenCurve
-  let degenerateEnd = t1 >= Desingularization.t1 && Curve.singular1 givenCurve
+  let isDegenerateStart = t2 <= Degeneracy.tStart && Curve.degenerateStart givenCurve
+  let isDegenerateEnd = t1 >= Degeneracy.tEnd && Curve.degenerateEnd givenCurve
   Segment
     { range = segmentRange
     , derivativeRange = segmentDerivativeRange
     , secondDerivativeRange = segmentSecondDerivativeRange
     , tangentDirectionRange = segmentTangentDirectionRange
     , curvatureVectorRange_ = segmentCurvatureVectorRange_
-    , isDegenerate = degenerateStart || degenerateEnd
+    , isDegenerate = isDegenerateStart || isDegenerateEnd
     }

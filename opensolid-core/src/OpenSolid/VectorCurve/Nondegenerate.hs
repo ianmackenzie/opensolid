@@ -50,9 +50,9 @@ directionValue (Nondegenerate curve) tValue =
     Tolerance.using Quantity.zero $
       Vector.normalize $
         if
-          | tValue == 0.0 && VectorCurve.singular0 curve ->
+          | tValue == 0.0 && VectorCurve.degenerateStart curve ->
               VectorCurve.derivativeValue curve 0.0
-          | tValue == 1.0 && VectorCurve.singular1 curve ->
+          | tValue == 1.0 && VectorCurve.degenerateEnd curve ->
               negate (VectorCurve.derivativeValue curve 1.0)
           | otherwise -> VectorCurve.value curve tValue
 

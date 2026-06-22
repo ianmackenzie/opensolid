@@ -22,13 +22,13 @@ directionValue (Nondegenerate function) uvPoint = do
     Tolerance.using Quantity.zero $
       Vector3D.normalize $
         if
-          | uValue == 0.0 && VectorSurfaceFunction3D.singularU0 function ->
+          | uValue == 0.0 && VectorSurfaceFunction3D.degenerateU0 function ->
               VectorSurfaceFunction3D.derivativeValue U function uvPoint
-          | uValue == 1.0 && VectorSurfaceFunction3D.singularU1 function ->
+          | uValue == 1.0 && VectorSurfaceFunction3D.degenerateU1 function ->
               negate (VectorSurfaceFunction3D.derivativeValue U function uvPoint)
-          | vValue == 0.0 && VectorSurfaceFunction3D.singularV0 function ->
+          | vValue == 0.0 && VectorSurfaceFunction3D.degenerateV0 function ->
               VectorSurfaceFunction3D.derivativeValue V function uvPoint
-          | vValue == 1.0 && VectorSurfaceFunction3D.singularV1 function ->
+          | vValue == 1.0 && VectorSurfaceFunction3D.degenerateV1 function ->
               negate (VectorSurfaceFunction3D.derivativeValue V function uvPoint)
           | otherwise ->
               VectorSurfaceFunction3D.value function uvPoint

@@ -133,6 +133,7 @@ library
     OpenSolid.CurvePoint
     OpenSolid.Debug
     OpenSolid.Debug.Plot
+    OpenSolid.Degeneracy
     OpenSolid.Desingularization
     OpenSolid.Desingularization.Curve
     OpenSolid.Direction

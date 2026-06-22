@@ -97,7 +97,7 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve2D, HasSingularity)
+import OpenSolid.Curve (Curve2D, HasDegeneracy)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
@@ -476,13 +476,13 @@ tangentDirectionRange = Curve.tangentDirectionRange
 curvatureVector_ ::
   Tolerance units =>
   Curve2D units ->
-  Result HasSingularity (VectorCurve2D (Unitless ?/? units))
+  Result HasDegeneracy (VectorCurve2D (Unitless ?/? units))
 curvatureVector_ = Curve.curvatureVector_
 
 curvatureVector ::
   (Tolerance units1, Units.Inverse units1 units2) =>
   Curve2D units1 ->
-  Result HasSingularity (VectorCurve2D units2)
+  Result HasDegeneracy (VectorCurve2D units2)
 curvatureVector curve = Result.map Units.specialize (curvatureVector_ curve)
 
 offsetLeftwardBy ::

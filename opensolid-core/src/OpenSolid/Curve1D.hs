@@ -38,7 +38,7 @@ module OpenSolid.Curve1D
   , cubed
   , sin
   , cos
-  , singularityTolerance
+  , degeneracyTolerance
   , IsZero (IsZero)
   , zeros
   , CrossesZero (CrossesZero)
@@ -552,8 +552,8 @@ instance Estimate.Interface (Integral units) units where
     let (tLeft, tRight) = Interval.bisect tRange
     Estimate.new (Integral curve tLeft) + Estimate.new (Integral curve tRight)
 
-singularityTolerance :: Curve1D units -> Quantity units
-singularityTolerance curve =
+degeneracyTolerance :: Curve1D units -> Quantity units
+degeneracyTolerance curve =
   Tolerance.unitless * NonEmpty.maximumOf (Quantity.abs . value curve) Parameter.samples
 
 ----- ZERO FINDING -----
