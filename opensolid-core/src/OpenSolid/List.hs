@@ -18,8 +18,6 @@ module OpenSolid.List
   , indexed
   , reverseMap
   , filterMap
-  , forEach
-  , forEachWithIndex
   , map2
   , map3
   , map4
@@ -65,8 +63,6 @@ where
 
 import Data.List qualified
 import Data.Maybe qualified
-import OpenSolid.Chainable (Chainable)
-import OpenSolid.Chainable qualified as Chainable
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Random qualified as Random
@@ -136,18 +132,6 @@ reverseMap function list = go list []
  where
   go (first : rest) acc = go rest (function first : acc)
   go [] acc = acc
-
-forEach :: Chainable action => List a -> (a -> action) -> action
-forEach [] _ = Chainable.empty
-forEach (first : rest) function = Chainable.chain (function first) (forEach rest function)
-
-forEachWithIndex :: Chainable action => List a -> (Int -> a -> action) -> action
-forEachWithIndex = forEachWithIndexImpl 0
-
-forEachWithIndexImpl :: Chainable action => Int -> List a -> (Int -> a -> action) -> action
-forEachWithIndexImpl _ [] _ = Chainable.empty
-forEachWithIndexImpl index (first : rest) function =
-  Chainable.chain (function index first) (forEachWithIndexImpl (index + 1) rest function)
 
 zip2 :: List a -> List b -> List (a, b)
 zip2 = Data.List.zip

@@ -49,6 +49,9 @@ module OpenSolid.Prelude
   , throw
   , pattern TODO
   , recursive
+  , forEach
+  , forEachWithIndex
+  , reverseForEach
   )
 where
 
@@ -606,3 +609,14 @@ todoImpl = Prelude.error "Not implemented"
 {-# INLINE recursive #-}
 recursive :: (a -> a) -> a
 recursive = Data.Function.fix
+
+forEach :: Foldable list => list a -> (a -> b -> b) -> b -> b
+forEach list function init = Prelude.foldl' (Prelude.flip function) init list
+
+forEachWithIndex :: Foldable list => list a -> (Int -> a -> b -> b) -> b -> b
+forEachWithIndex list function init = do
+  let callback (i, acc) item = (i + 1, function i item acc)
+  Prelude.snd (Prelude.foldl' callback (0, init) list)
+
+reverseForEach :: Foldable list => list a -> (a -> b -> b) -> b -> b
+reverseForEach list function init = Prelude.foldr function init list

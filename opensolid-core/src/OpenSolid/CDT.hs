@@ -5,7 +5,6 @@ import Foreign.Marshal qualified
 import Foreign.Marshal.Array qualified
 import OpenSolid.Array qualified as Array
 import OpenSolid.IO qualified as IO
-import OpenSolid.Int qualified as Int
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -53,7 +52,7 @@ collectEdgeIndices (first : rest) startIndex accumulated = do
 
 collectLoopEdgeIndices :: Int -> Int -> List Int -> List Int
 collectLoopEdgeIndices startIndex loopLength =
-  Int.reverseForEachIndex loopLength \i accumulated -> do
+  reverseForEach [0 .. loopLength - 1] \i accumulated -> do
     let edgeStart = startIndex + i
     let edgeEnd = startIndex + (i + 1) % loopLength
     edgeStart : edgeEnd : accumulated

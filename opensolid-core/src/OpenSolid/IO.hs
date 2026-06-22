@@ -5,6 +5,8 @@ module OpenSolid.IO
   , run
   , maybe
   , collect
+  , forEach
+  , forEachWithIndex
   , sleep
   , onError
   , attempt
@@ -28,7 +30,8 @@ import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude
+import OpenSolid.Pair qualified as Pair
+import OpenSolid.Prelude hiding (forEach, forEachWithIndex)
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import System.Directory
@@ -54,6 +57,14 @@ maybe callback (Just value) = callback value
 
 collect :: Traversable list => (a -> IO b) -> list a -> IO (list b)
 collect = Prelude.mapM
+
+forEach :: Foldable list => list a -> (a -> IO ()) -> IO ()
+forEach list function = Data.Foldable.foldMap function list
+
+forEachWithIndex :: Foldable list => list a -> (Int -> a -> IO ()) -> IO ()
+forEachWithIndex list function = do
+  let callback (i, acc) item = (i + 1, acc >> function i item)
+  Pair.second (Prelude.foldl' callback (0, succeed ()) list)
 
 sleep :: Duration -> IO ()
 sleep duration = Control.Concurrent.threadDelay (Number.round (Duration.inMicroseconds duration))

@@ -444,13 +444,13 @@ buildLeadingEdgeVerticesMap ::
   HashMap HalfEdge.Id (NonEmpty UvPoint)
 buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
   HashMap.empty & do
-    Set3D.forEachWithIndex (surfaces body) \surfaceIndex surface -> do
+    forEachWithIndex (surfaces body) \surfaceIndex surface -> do
       let surfaceId = SurfaceId surfaceIndex
       let surfaceSegments = surfaceSegmentsMap !! surfaceId
       let surfaceBoundaries = Surface3D.boundaries surface
-      Set3D.forEachWithIndex surfaceBoundaries \boundaryIndex boundary -> do
+      forEachWithIndex surfaceBoundaries \boundaryIndex boundary -> do
         let boundaryId = BoundaryId boundaryIndex
-        Set3D.forEachWithIndex boundary \curveIndex surfaceCurve accumulated -> do
+        forEachWithIndex boundary \curveIndex surfaceCurve accumulated -> do
           let curveId = CurveId curveIndex
           let halfEdgeId = HalfEdge.Id{surfaceId, boundaryId, curveId}
           let curve = SurfaceCurve3D.curve surfaceCurve

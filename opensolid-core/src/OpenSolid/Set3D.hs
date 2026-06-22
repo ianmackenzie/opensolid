@@ -29,10 +29,6 @@ module OpenSolid.Set3D
   , subset
   , any
   , all
-  , forEach
-  , forEachWithIndex
-  , reverseForEach
-  , reverseForEachWithIndex
   , pairwiseFilter
   , pairwiseFilterMap
   , pairwiseFilterWithIndices
@@ -42,7 +38,6 @@ module OpenSolid.Set3D
 where
 
 import OpenSolid.Bounds3D (Bounds3D)
-import OpenSolid.Chainable (Chainable)
 import OpenSolid.Prelude
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
@@ -153,22 +148,6 @@ any = Set.any
 
 all :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bool
 all = Set.all
-
-forEach :: Chainable action => Set3D space item -> (item -> action) -> action
-forEach = Set.forEach
-
-forEachWithIndex :: Chainable action => Set3D space item -> (Int -> item -> action) -> action
-forEachWithIndex = Set.forEachWithIndex
-
-reverseForEach :: Chainable action => Set3D space item -> (item -> action) -> action
-reverseForEach = Set.reverseForEach
-
-reverseForEachWithIndex ::
-  Chainable action =>
-  Set3D space item ->
-  (Int -> item -> action) ->
-  action
-reverseForEachWithIndex = Set.reverseForEachWithIndex
 
 pairwiseFilter ::
   (Bounds3D space1 -> Bounds3D space2 -> Bool) ->

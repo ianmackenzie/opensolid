@@ -128,7 +128,7 @@ midpoint :: Quantity units -> Quantity units -> Quantity units
 midpoint a b = 0.5 * (a + b)
 
 sum :: List (Quantity units) -> Quantity units
-sum values = zero & List.forEach values (+)
+sum values = zero & forEach values (+)
 
 sumOf :: (a -> Quantity units) -> List a -> Quantity units
 sumOf f list = sum (List.map f list)

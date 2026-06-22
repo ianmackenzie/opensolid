@@ -28,23 +28,13 @@ module OpenSolid.Set
   , subset
   , any
   , all
-  , forEach
-  , forEachWithIndex
-  , reverseForEach
-  , reverseForEachWithIndex
   , pairwiseFilter
   , pairwiseFilterMap
   , pairwiseFilterWithIndices
   , pairwiseFilterMapWithIndices
   , clusters
   , foldr
-  , foldrWithIndex
   , foldl
-  , foldlWithIndex
-  , foldrMap
-  , foldrMapWithIndex
-  , foldlMap
-  , foldlMapWithIndex
   )
 where
 
@@ -52,8 +42,6 @@ import Data.Foldable1 qualified
 import Data.Graph qualified as Graph
 import Data.List.NonEmpty qualified
 import Data.Proxy (Proxy (Proxy))
-import OpenSolid.Chainable (Chainable)
-import OpenSolid.Chainable qualified as Chainable
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -253,160 +241,51 @@ combineChildrenWithIndex startIndex function children = case children of
       (combineWithIndexImpl startIndex function first)
       (combineChildrenWithIndex (startIndex + size first) function remaining)
 
-forEach :: Chainable action => Set b a -> (a -> action) -> action
-forEach set function = forEachWithIndex set (const function)
-
-forEachWithIndex :: Chainable action => Set b a -> (Int -> a -> action) -> action
-forEachWithIndex = forEachWithIndexImpl 0
-
-forEachWithIndexImpl :: Chainable action => Int -> Set b a -> (Int -> a -> action) -> action
-forEachWithIndexImpl startIndex set function = case set of
-  Leaf{leafItem} -> function startIndex leafItem
-  Node{children} -> forEachChildWithIndex startIndex children function
-
-forEachChildWithIndex ::
-  Chainable action =>
-  Int ->
-  NonEmpty (Set b a) ->
-  (Int -> a -> action) ->
-  action
-forEachChildWithIndex startIndex children function = case children of
-  child :| [] -> forEachWithIndexImpl startIndex child function
-  first :| NonEmpty remaining -> do
-    let firstAction = forEachWithIndexImpl startIndex first function
-    let remainingAction = forEachChildWithIndex (startIndex + size first) remaining function
-    Chainable.chain firstAction remainingAction
-
-reverseForEach :: Chainable action => Set b a -> (a -> action) -> action
-reverseForEach set function = reverseForEachWithIndex set (const function)
-
-reverseForEachWithIndex :: Chainable action => Set b a -> (Int -> a -> action) -> action
-reverseForEachWithIndex = reverseForEachWithIndexImpl 0
-
-reverseForEachWithIndexImpl :: Chainable action => Int -> Set b a -> (Int -> a -> action) -> action
-reverseForEachWithIndexImpl startIndex set function = case set of
-  Leaf{leafItem} -> function startIndex leafItem
-  Node{children} -> reverseForEachChildWithIndex startIndex children function
-
-reverseForEachChildWithIndex ::
-  Chainable action =>
-  Int ->
-  NonEmpty (Set b a) ->
-  (Int -> a -> action) ->
-  action
-reverseForEachChildWithIndex startIndex children function = case children of
-  child :| [] -> forEachWithIndexImpl startIndex child function
-  first :| NonEmpty remaining -> do
-    let remainingAction = reverseForEachChildWithIndex (startIndex + size first) remaining function
-    let firstAction = reverseForEachWithIndexImpl startIndex first function
-    Chainable.chain remainingAction firstAction
-
 foldr :: (a -> acc -> acc) -> acc -> Set b a -> acc
-foldr function init set = foldrWithIndex (const function) init set
+foldr function init Leaf{leafItem} = function leafItem init
+foldr function init Node{children} = Prelude.foldr (Prelude.flip (foldr function)) init children
 
 foldl :: (acc -> a -> acc) -> acc -> Set b a -> acc
-foldl function init set = foldlWithIndex (const function) init set
-
-foldrWithIndex :: (Int -> a -> acc -> acc) -> acc -> Set b a -> acc
-foldrWithIndex function init set = reverseForEachWithIndex set function init
-
-foldlWithIndex :: (Int -> acc -> a -> acc) -> acc -> Set b a -> acc
-foldlWithIndex function init set =
-  init & forEachWithIndex set \index item accumulated -> function index accumulated item
-
-foldrMap :: (a -> acc) -> (a -> acc -> acc) -> Set b a -> acc
-foldrMap init function set = foldrMapWithIndex (const init) (const function) set
-
-foldrMapWithIndex :: (Int -> a -> acc) -> (Int -> a -> acc -> acc) -> Set b a -> acc
-foldrMapWithIndex = foldrMapWithIndexStart 0
-
-foldrMapWithIndexStart :: Int -> (Int -> a -> acc) -> (Int -> a -> acc -> acc) -> Set b a -> acc
-foldrMapWithIndexStart startIndex init function set = case set of
-  Leaf{leafItem} -> init startIndex leafItem
-  Node{children} -> foldrMapChildrenWithIndexStart startIndex init function children
-
-foldrMapChildrenWithIndexStart ::
-  Int ->
-  (Int -> a -> acc) ->
-  (Int -> a -> acc -> acc) ->
-  NonEmpty (Set b a) ->
-  acc
-foldrMapChildrenWithIndexStart startIndex init function children = case children of
-  child :| [] -> foldrMapWithIndexStart startIndex init function child
-  first :| NonEmpty rest ->
-    foldrMapChildrenWithIndexStart (startIndex + size first) init function rest
-      & foldrMapWithIndexContinue startIndex function first
-
-foldrMapWithIndexContinue :: Int -> (Int -> a -> acc -> acc) -> Set b a -> acc -> acc
-foldrMapWithIndexContinue startIndex function set accumulated = case set of
-  Leaf{leafItem} -> function startIndex leafItem accumulated
-  Node{children} -> foldrMapChildrenWithIndexContinue startIndex function children accumulated
-
-foldrMapChildrenWithIndexContinue ::
-  Int ->
-  (Int -> a -> acc -> acc) ->
-  NonEmpty (Set b a) ->
-  acc ->
-  acc
-foldrMapChildrenWithIndexContinue startIndex function children accumulated = case children of
-  child :| [] -> foldrMapWithIndexContinue startIndex function child accumulated
-  first :| NonEmpty rest ->
-    accumulated
-      & foldrMapChildrenWithIndexContinue (startIndex + size first) function rest
-      & foldrMapWithIndexContinue startIndex function first
-
-foldlMap :: (a -> acc) -> (acc -> a -> acc) -> Set b a -> acc
-foldlMap init function set = foldlMapWithIndex (const init) (const function) set
-
-foldlMapWithIndex :: (Int -> a -> acc) -> (Int -> acc -> a -> acc) -> Set b a -> acc
-foldlMapWithIndex init function set = foldlMapWithIndexStart 0 init function set
-
-foldlMapWithIndexStart :: Int -> (Int -> a -> acc) -> (Int -> acc -> a -> acc) -> Set b a -> acc
-foldlMapWithIndexStart startIndex init function set = case set of
-  Leaf{leafItem} -> init startIndex leafItem
-  Node{children} -> foldlMapChildrenWithIndexStart startIndex init function children
-
-foldlMapChildrenWithIndexStart ::
-  Int ->
-  (Int -> a -> acc) ->
-  (Int -> acc -> a -> acc) ->
-  NonEmpty (Set b a) ->
-  acc
-foldlMapChildrenWithIndexStart startIndex init function children = case children of
-  child :| [] -> foldlMapWithIndexStart startIndex init function child
-  first :| NonEmpty rest ->
-    foldlMapWithIndexStart startIndex init function first
-      & foldlMapChildrenWithIndexContinue (startIndex + size first) function rest
-
-foldlMapWithIndexContinue :: Int -> (Int -> acc -> a -> acc) -> Set b a -> acc -> acc
-foldlMapWithIndexContinue startIndex function set accumulated = case set of
-  Leaf{leafItem} -> function startIndex accumulated leafItem
-  Node{children} -> foldlMapChildrenWithIndexContinue startIndex function children accumulated
-
-foldlMapChildrenWithIndexContinue ::
-  Int ->
-  (Int -> acc -> a -> acc) ->
-  NonEmpty (Set b a) ->
-  acc ->
-  acc
-foldlMapChildrenWithIndexContinue startIndex function children accumulated = case children of
-  child :| [] -> foldlMapWithIndexContinue startIndex function child accumulated
-  first :| NonEmpty rest ->
-    accumulated
-      & foldlMapWithIndexContinue startIndex function first
-      & foldlMapChildrenWithIndexContinue (startIndex + size first) function rest
+foldl function init Leaf{leafItem} = function init leafItem
+foldl function init Node{children} = Prelude.foldl (foldl function) init children
 
 toNonEmpty :: Set b a -> NonEmpty a
-toNonEmpty = foldrMap NonEmpty.one NonEmpty.push
+toNonEmpty = toNonEmptyOf id
 
 toNonEmptyOf :: (a1 -> a2) -> Set b a1 -> NonEmpty a2
-toNonEmptyOf function = foldrMap (NonEmpty.one . function) (NonEmpty.push . function)
+toNonEmptyOf function = toNonEmptyWithIndex (const function)
 
 toNonEmptyWithIndex :: (Int -> a1 -> a2) -> Set b a1 -> NonEmpty a2
-toNonEmptyWithIndex function =
-  foldrMapWithIndex
-    (\index item -> NonEmpty.one (function index item))
-    (\index item accumulated -> NonEmpty.push (function index item) accumulated)
+toNonEmptyWithIndex = toNonEmptyImpl 0
+
+toNonEmptyImpl :: Int -> (Int -> a1 -> a2) -> Set b a1 -> NonEmpty a2
+toNonEmptyImpl startIndex function set = case set of
+  Leaf{leafItem} -> NonEmpty.one (function startIndex leafItem)
+  Node{children} -> childrenToNonEmpty startIndex function children
+
+childrenToNonEmpty :: Int -> (Int -> a1 -> a2) -> NonEmpty (Set b a1) -> NonEmpty a2
+childrenToNonEmpty startIndex function children = case children of
+  child :| [] -> toNonEmptyImpl startIndex function child
+  first :| NonEmpty rest ->
+    childrenToNonEmpty (startIndex + size first) function rest
+      & prependToNonEmpty startIndex function first
+
+prependToNonEmpty :: Int -> (Int -> a1 -> a2) -> Set b a1 -> NonEmpty a2 -> NonEmpty a2
+prependToNonEmpty startIndex function set = case set of
+  Leaf{leafItem} -> NonEmpty.push (function startIndex leafItem)
+  Node{children} -> prependChildrenToNonEmpty startIndex function children
+
+prependChildrenToNonEmpty ::
+  Int ->
+  (Int -> a1 -> a2) ->
+  NonEmpty (Set b a1) ->
+  NonEmpty a2 ->
+  NonEmpty a2
+prependChildrenToNonEmpty startIndex function children = case children of
+  child :| [] -> prependToNonEmpty startIndex function child
+  first :| NonEmpty rest -> do
+    prependChildrenToNonEmpty (startIndex + size first) function rest
+    prependToNonEmpty startIndex function first
 
 toList :: Set b a -> List a
 toList = NonEmpty.toList . toNonEmpty

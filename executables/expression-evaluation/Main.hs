@@ -3,8 +3,6 @@ module Main (main) where
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.IO qualified as IO
-import OpenSolid.Int qualified as Int
-import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
@@ -18,15 +16,15 @@ main = do
   let tSquared = Expression.squared t
   let one :: Expression Number Number = Expression.constant 1.0
   let fraction = tSquared / (one + tSquared)
-  Int.forEach 0 5 \i -> do
+  IO.forEach [0 .. 5] \i -> do
     let evaluated = Expression.value fraction (Number.fromInt i)
     IO.printLine (Text.number evaluated)
 
   IO.printLine "Bezier curve"
   let bezier = Expression.bezierCurve (0.0 :| [0.5, 1.0, 1.0, 1.0, 1.0, 0.5, 0.0])
-  List.forEach (Parameter.steps 10) \tValue -> do
+  IO.forEach (Parameter.steps 10) \tValue -> do
     let evaluated = Expression.value bezier tValue
     IO.printLine (Text.number evaluated)
-  List.forEach (Parameter.intervals 10) \tRange -> do
+  IO.forEach (Parameter.intervals 10) \tRange -> do
     let evaluated = Expression.range bezier tRange
     IO.printLine (Text.show evaluated)

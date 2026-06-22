@@ -50,7 +50,6 @@ import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
@@ -589,7 +588,7 @@ zeros function
       let dvdu = unsafeQuotient -fu fv
       case Solve2D.search (findZeros function dudv dvdu) AllZeroTypes of
         Ok solutions -> do
-          let partialZeros = PartialZeros.empty & List.forEach solutions addSolution
+          let partialZeros = PartialZeros.empty & forEach solutions addSolution
           Ok (PartialZeros.finalize function dvdu dudv partialZeros)
         Error Solve2D.InfiniteRecursion -> throw HigherOrderZero
 

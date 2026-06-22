@@ -399,7 +399,7 @@ store ptr offset value = do
       let numItems = List.length value
       let itemSize = sizeOf item
       itemsPtr <- Foreign.Marshal.Alloc.callocBytes (numItems * itemSize)
-      List.forEachWithIndex value \index item -> store itemsPtr (index * itemSize) item
+      IO.forEachWithIndex value \index item -> store itemsPtr (index * itemSize) item
       store @Int ptr offset numItems
       Foreign.pokeByteOff ptr (offset + 8) itemsPtr
     NonEmptyRep -> store ptr offset (NonEmpty.toList value)

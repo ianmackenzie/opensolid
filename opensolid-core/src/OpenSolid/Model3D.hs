@@ -95,7 +95,7 @@ inChildContext childAttributes callback = do
           , ownOpacity = 1.0
           , currentMultipliedOpacity = parentContext.currentMultipliedOpacity
           }
-  let appliedContext = initialContext & List.forEach childAttributes applyAttribute
+  let appliedContext = initialContext & forEach childAttributes applyAttribute
   -- After applying attribute values, update the current multiplied opacity
   -- (just in case the current node has multiple opacity attribute values,
   -- we should only multiply the current opacity by the *last*/active one;

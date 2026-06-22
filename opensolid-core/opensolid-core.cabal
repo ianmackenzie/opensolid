@@ -109,7 +109,6 @@ library
     OpenSolid.Bounds3D
     OpenSolid.Bytecode.Ast
     OpenSolid.Camera3D
-    OpenSolid.Chainable
     OpenSolid.Circle2D
     OpenSolid.Circle3D
     OpenSolid.Color

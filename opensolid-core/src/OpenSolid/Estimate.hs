@@ -300,7 +300,7 @@ refinePairs pairs = do
   NonEmpty.map (Pair.mapSecond (refineWiderThan widthCutoff)) pairs
 
 addItems :: List (a, Estimate units) -> List a -> List a
-addItems pairs = List.forEach pairs \(item, _) accumulated -> item : accumulated
+addItems pairs = forEach pairs \(item, _) accumulated -> item : accumulated
 
 isResolved :: Tolerance units => Estimate units -> Bool
 isResolved estimate = boundsWidth estimate ~= Quantity.zero

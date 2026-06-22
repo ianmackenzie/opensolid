@@ -18,7 +18,6 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D qualified as Point2D
@@ -93,7 +92,7 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
   let curveRange = implicitCurveRange boxes
   let clampedVRange uValue =
         ImplicitCurveRange.at uValue curveRange & do
-          List.forEach boundingAxes \boundingAxis (Interval vLow vHigh) -> do
+          forEach boundingAxes \boundingAxis (Interval vLow vHigh) -> do
             let UvPoint u0 v0 = Axis2D.originPoint boundingAxis
             let Direction2D du dv = Axis2D.direction boundingAxis
             let v = v0 + (uValue - u0) * dv / du

@@ -194,9 +194,9 @@ finalize function dvdu dudv partialZeros = do
   let piecewiseCurveSegments =
         List.map (piecewiseCurve function dvdu dudv) crossingSegments
   let (piecewiseCurves, crossingLoopSegments) =
-        ([], []) & List.forEach piecewiseCurveSegments insertPiecewiseCurve
+        ([], []) & forEach piecewiseCurveSegments insertPiecewiseCurve
   let extendedPiecewiseCurves =
-        List.map (List.forEach saddleRegions extendPiecewiseCurve) piecewiseCurves
+        List.map (forEach saddleRegions extendPiecewiseCurve) piecewiseCurves
   let crossingCurveSegments =
         List.map (\(PiecewiseCurve _ _ segments) -> segments) extendedPiecewiseCurves
   Zeros

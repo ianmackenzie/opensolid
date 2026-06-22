@@ -29,10 +29,6 @@ module OpenSolid.Set2D
   , subset
   , any
   , all
-  , forEach
-  , forEachWithIndex
-  , reverseForEach
-  , reverseForEachWithIndex
   , pairwiseFilter
   , pairwiseFilterMap
   , pairwiseFilterWithIndices
@@ -42,7 +38,6 @@ module OpenSolid.Set2D
 where
 
 import OpenSolid.Bounds2D (Bounds2D)
-import OpenSolid.Chainable (Chainable)
 import OpenSolid.Prelude
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
@@ -153,22 +148,6 @@ any = Set.any
 
 all :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
 all = Set.all
-
-forEach :: Chainable action => Set2D units item -> (item -> action) -> action
-forEach = Set.forEach
-
-forEachWithIndex :: Chainable action => Set2D units item -> (Int -> item -> action) -> action
-forEachWithIndex = Set.forEachWithIndex
-
-reverseForEach :: Chainable action => Set2D units item -> (item -> action) -> action
-reverseForEach = Set.reverseForEach
-
-reverseForEachWithIndex ::
-  Chainable action =>
-  Set2D units item ->
-  (Int -> item -> action) ->
-  action
-reverseForEachWithIndex = Set.reverseForEachWithIndex
 
 pairwiseFilter ::
   (Bounds2D units1 -> Bounds2D units2 -> Bool) ->

@@ -21,7 +21,7 @@ emptyMap :: EntityMap
 emptyMap = EntityMap{nextId = 1, idMap = Map.empty}
 
 buildMap :: List Entity -> EntityMap
-buildMap entities = emptyMap & List.forEach entities \entity -> Pair.second . addEntity entity
+buildMap entities = emptyMap & forEach entities \entity -> Pair.second . addEntity entity
 
 encodeEntityRecord :: (TypeName, List Builder) -> Builder
 encodeEntityRecord (typeName, encodedAttributes) =
@@ -59,7 +59,7 @@ addAttributes :: List Attribute -> EntityMap -> (List Builder, EntityMap)
 addAttributes attributes entityMap = do
   let (finalAttributeValues, finalMap) =
         ([], entityMap) & do
-          List.forEach attributes \attribute (currentAttributeValues, currentMap) -> do
+          forEach attributes \attribute (currentAttributeValues, currentMap) -> do
             let (attributeValue, updatedMap) = addAttribute attribute currentMap
             let updatedAttributeValues = attributeValue : currentAttributeValues
             (updatedAttributeValues, updatedMap)

@@ -13,7 +13,7 @@ module OpenSolid.Result
 where
 
 import Data.Foldable qualified
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (forEach)
 import Prelude qualified
 
 map :: (a -> b) -> Result x a -> Result x b

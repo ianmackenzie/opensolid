@@ -5,9 +5,9 @@ import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Body3D qualified as Body3D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Convention3D qualified as Convention3D
+import OpenSolid.IO qualified as IO
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Length qualified as Length
-import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
@@ -34,6 +34,6 @@ main = Tolerance.using Length.defaultTolerance do
       ]
       & Result.orFail
   let resolution = Resolution.maxError (Length.millimeters 0.1)
-  List.forEachWithIndex bodies \index body -> do
+  IO.forEachWithIndex bodies \index body -> do
     let path = "executables/revolved-normals/mesh" <> Text.int (index + 1) <> ".stl"
     Stl.writeBinary path Convention3D.yUp Length.inMillimeters (Body3D.toPointMesh resolution body)

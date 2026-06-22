@@ -48,7 +48,7 @@ main = Tolerance.using Length.defaultTolerance do
         IO.printLine ("Elapsed for " <> Text.int numTeeth <> " teeth: " <> elapsedText)
   overallTimer <- Timer.start
   let toothCounts = [32, 48, 64, 80, 96, 112, 128]
-  -- List.forEach toothCounts writeGlb
+  -- IO.forEach toothCounts writeGlb
   IO.Parallel.forEach toothCounts writeGlb
   overallElapsed <- Timer.elapsed overallTimer
   IO.printLine ("Overall elapsed time: " <> Text.number (Duration.inSeconds overallElapsed) <> "s")

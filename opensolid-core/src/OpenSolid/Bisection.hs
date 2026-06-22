@@ -112,5 +112,5 @@ findImpl callback queue = do
     Resolved Nothing -> findImpl callback remaining
     Resolved (Just solution) -> Just solution
     Unresolved -> do
-      let updatedQueue = remaining & NonEmpty.forEach subtree.children Queue.push
+      let updatedQueue = remaining & forEach subtree.children Queue.push
       findImpl callback updatedQueue

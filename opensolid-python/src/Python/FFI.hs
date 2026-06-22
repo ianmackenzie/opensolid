@@ -239,7 +239,7 @@ registerTuple tupleType type1 type2 rest registry = do
   let itemTypes = type1 : type2 : rest
   let declaration = structDeclaration tupleTypeName (List.map typeName itemTypes)
   registry
-    & List.forEach itemTypes registerType
+    & forEach itemTypes registerType
     & Python.Type.Registry.add tupleTypeName declaration
 
 registerMaybe :: FFI.Type -> FFI.Type -> Registry -> Registry

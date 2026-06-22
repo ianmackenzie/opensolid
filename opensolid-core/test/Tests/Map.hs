@@ -8,16 +8,16 @@ import Test qualified
 
 tests :: List Test
 tests =
-  [ forEach
+  [ iteration
   , take
   ]
 
 simpleMap :: Map Int Text
 simpleMap = Map.fromList [(1, "a"), (2, "b"), (3, "c")]
 
-forEach :: Test
-forEach = Test.verify "forEach" do
-  let actual = "" & Map.forEach simpleMap \value accumulated -> accumulated <> value
+iteration :: Test
+iteration = Test.verify "forEach" do
+  let actual = "" & forEach simpleMap \value accumulated -> accumulated <> value
   let expected = "abc"
   Test.expect (actual == expected)
 

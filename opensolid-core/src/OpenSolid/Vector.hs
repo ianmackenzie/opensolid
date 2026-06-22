@@ -26,7 +26,6 @@ import {-# SOURCE #-} OpenSolid.Direction (Direction)
 import {-# SOURCE #-} OpenSolid.Direction qualified as Direction
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.HasZero qualified as HasZero
-import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units (HasUnits)
@@ -168,7 +167,7 @@ sum ::
   Exists dimension units space =>
   List (Vector dimension units space) ->
   Vector dimension units space
-sum vectors = zero & List.forEach vectors (+)
+sum vectors = zero & forEach vectors (+)
 
 {-# INLINE erase #-}
 erase ::

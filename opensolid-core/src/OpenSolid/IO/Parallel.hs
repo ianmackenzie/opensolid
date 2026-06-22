@@ -12,7 +12,7 @@ where
 import Control.Concurrent.Async (Concurrently (Concurrently))
 import Control.Concurrent.Async qualified as Async
 import OpenSolid.List qualified as List
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (forEach, forEachWithIndex)
 
 map2 :: (a -> b -> c) -> IO a -> IO b -> IO c
 map2 function taskA taskB =

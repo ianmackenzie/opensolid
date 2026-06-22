@@ -32,8 +32,7 @@ collectPrimary callback searchTree accumulated = do
     then case callback domainBounds (SearchTree.value searchTree) of
       Resolved Nothing -> accumulated
       Resolved (Just solution) -> (domainBounds, solution) : accumulated
-      Unresolved ->
-        accumulated & List.forEach (SearchTree.children searchTree) (collectPrimary callback)
+      Unresolved -> accumulated & forEach (SearchTree.children searchTree) (collectPrimary callback)
     else accumulated
 
 data SolutionTree bounds solution
@@ -98,8 +97,7 @@ collectSolutions ::
   List (bounds, solution)
 collectSolutions (Leaf _ Nothing) accumulated = accumulated
 collectSolutions (Leaf bounds (Just solution)) accumulated = (bounds, solution) : accumulated
-collectSolutions (Node _ children) accumulated =
-  accumulated & List.forEach children collectSolutions
+collectSolutions (Node _ children) accumulated = accumulated & forEach children collectSolutions
 
 deduplicate ::
   ((bounds, solution) -> (bounds, solution) -> Bool) ->
