@@ -20,6 +20,6 @@ range ::
   VectorBounds dimension units space ->
   DirectionBounds dimension space
 range curve (Interval tLow tHigh) curveRange derivativeRange
-  | tLow == 0.0 && VectorCurve.degenerateStart curve = VectorBounds.direction derivativeRange
-  | tHigh == 1.0 && VectorCurve.degenerateEnd curve = VectorBounds.direction -derivativeRange
+  | tLow == 0.0 && VectorCurve.hasDegenerateStart curve = VectorBounds.direction derivativeRange
+  | tHigh == 1.0 && VectorCurve.hasDegenerateEnd curve = VectorBounds.direction -derivativeRange
   | otherwise = VectorBounds.direction curveRange

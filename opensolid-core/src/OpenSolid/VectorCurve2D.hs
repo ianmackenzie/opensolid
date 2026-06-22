@@ -37,8 +37,8 @@ module OpenSolid.VectorCurve2D
   , squaredMagnitude_
   , reverse
   , isZero
-  , degenerateStart
-  , degenerateEnd
+  , hasDegenerateStart
+  , hasDegenerateEnd
   , zeros
   , direction
   , placeIn
@@ -264,11 +264,11 @@ magnitude = VectorCurve.magnitude
 isZero :: Tolerance units => VectorCurve2D units -> Bool
 isZero = VectorCurve.isZero
 
-degenerateStart :: VectorCurve2D units -> Bool
-degenerateStart = VectorCurve.degenerateStart
+hasDegenerateStart :: VectorCurve2D units -> Bool
+hasDegenerateStart = VectorCurve.hasDegenerateStart
 
-degenerateEnd :: VectorCurve2D units -> Bool
-degenerateEnd = VectorCurve.degenerateEnd
+hasDegenerateEnd :: VectorCurve2D units -> Bool
+hasDegenerateEnd = VectorCurve.hasDegenerateEnd
 
 zeros :: Tolerance units => VectorCurve2D units -> Result IsDegenerate (List Number)
 zeros = VectorCurve.zeros

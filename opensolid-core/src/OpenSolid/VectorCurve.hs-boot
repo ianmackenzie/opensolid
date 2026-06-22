@@ -5,8 +5,8 @@ module OpenSolid.VectorCurve
   , Exists
   , Compiled
   , constant
-  , degenerateStart
-  , degenerateEnd
+  , hasDegenerateStart
+  , hasDegenerateEnd
   , value
   , range
   , derivative
@@ -217,8 +217,8 @@ constant ::
   Exists dimension units space =>
   Vector dimension units space ->
   VectorCurve dimension units space
-degenerateStart :: Exists dimension units space => VectorCurve dimension units space -> Bool
-degenerateEnd :: Exists dimension units space => VectorCurve dimension units space -> Bool
+hasDegenerateStart :: Exists dimension units space => VectorCurve dimension units space -> Bool
+hasDegenerateEnd :: Exists dimension units space => VectorCurve dimension units space -> Bool
 value ::
   Exists dimension units space =>
   VectorCurve dimension units space ->

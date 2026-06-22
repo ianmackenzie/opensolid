@@ -6,8 +6,8 @@ module OpenSolid.VectorCurve3D
   , on
   , compiled
   , isZero
-  , degenerateStart
-  , degenerateEnd
+  , hasDegenerateStart
+  , hasDegenerateEnd
   , derivative
   , nondegenerate
   , startValue
@@ -87,11 +87,11 @@ nondegenerate = VectorCurve.nondegenerate
 isZero :: Tolerance units => VectorCurve3D units space -> Bool
 isZero = VectorCurve.isZero
 
-degenerateStart :: VectorCurve3D units space -> Bool
-degenerateStart = VectorCurve.degenerateStart
+hasDegenerateStart :: VectorCurve3D units space -> Bool
+hasDegenerateStart = VectorCurve.hasDegenerateStart
 
-degenerateEnd :: VectorCurve3D units space -> Bool
-degenerateEnd = VectorCurve.degenerateEnd
+hasDegenerateEnd :: VectorCurve3D units space -> Bool
+hasDegenerateEnd = VectorCurve.hasDegenerateEnd
 
 transformBy :: VectorTransform3D tag space -> VectorCurve3D units space -> VectorCurve3D units space
 transformBy transform curve = do

@@ -159,8 +159,8 @@ new givenCurve tRange = do
         Curve.CurvatureVector.range_
           segmentDerivativeRange
           segmentSecondDerivativeRange
-  let isDegenerateStart = t2 <= Degeneracy.tStart && Curve.degenerateStart givenCurve
-  let isDegenerateEnd = t1 >= Degeneracy.tEnd && Curve.degenerateEnd givenCurve
+  let isDegenerateStart = t2 <= Degeneracy.tStart && Curve.hasDegenerateStart givenCurve
+  let isDegenerateEnd = t1 >= Degeneracy.tEnd && Curve.hasDegenerateEnd givenCurve
   Segment
     { range = segmentRange
     , derivativeRange = segmentDerivativeRange

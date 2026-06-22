@@ -34,8 +34,8 @@ module OpenSolid.Curve
   , tangentDirectionRange
   , reverse
   , isPoint
-  , degenerateStart
-  , degenerateEnd
+  , hasDegenerateStart
+  , hasDegenerateEnd
   , isOnAxis
   , nondegenerate
   , nonzero
@@ -615,11 +615,11 @@ bisectionTree = (.bisectionTree)
 searchTree :: Curve dimension units space -> SearchTree dimension units space
 searchTree = (.searchTree)
 
-degenerateStart :: Exists dimension units space => Curve dimension units space -> Bool
-degenerateStart curve = VectorCurve.degenerateStart (derivative curve)
+hasDegenerateStart :: Exists dimension units space => Curve dimension units space -> Bool
+hasDegenerateStart curve = VectorCurve.hasDegenerateStart (derivative curve)
 
-degenerateEnd :: Exists dimension units space => Curve dimension units space -> Bool
-degenerateEnd curve = VectorCurve.degenerateEnd (derivative curve)
+hasDegenerateEnd :: Exists dimension units space => Curve dimension units space -> Bool
+hasDegenerateEnd curve = VectorCurve.hasDegenerateEnd (derivative curve)
 
 isOnAxis ::
   (Exists dimension units space, Tolerance units) =>
