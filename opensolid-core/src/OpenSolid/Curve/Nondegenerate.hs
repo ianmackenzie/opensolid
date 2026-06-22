@@ -60,8 +60,8 @@ findPoint point (Nondegenerate curve) = do
   let isDistant segment = not (point `intersects` Curve.Segment.range segment)
   let resolvedMonotonicity _ segment
         | isDistant segment = Resolved Nothing
-        | Curve.Segment.monotonic segment = Resolved (Just Monotonic)
-        | Curve.Segment.singular segment = Resolved (Just Monotonic)
+        | Curve.Segment.isMonotonic segment = Resolved (Just Monotonic)
+        | Curve.Segment.isDegenerate segment = Resolved (Just Monotonic)
         | otherwise = Unresolved
   let evaluate tValue =
         (# Curve.point curve tValue - point, Curve.derivativeValue curve tValue #)
