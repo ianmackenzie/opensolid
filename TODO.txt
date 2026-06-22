@@ -1,8 +1,5 @@
 Add Unwrap typeclass?
 
-Combine Composition and Chainable?
-- but then how to prevent building up big thunks in forEach?
-
 Run multiple type checkers on generated Python library
 
 Reimplement curve intersection using plain trees and subdomain clusters
@@ -21,8 +18,6 @@ Cache normal direction in PlaneOrientation3D?
 - will often be a constant anyways...and can compute lazily
 
 Switch transforms to be flat structs of unboxed Double# components
-
-Implement Foldable1 for Set?
 
 Optimize curves to reuse arc lengths and uniform parameterizations where possible
 - can simply reuse as is for rigid transformations and coordinate conversions
