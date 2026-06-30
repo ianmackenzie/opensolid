@@ -33,6 +33,7 @@ module OpenSolid.Prelude
   , (!=)
   , Indexed ((!!))
   , Intersects (intersects)
+  , (^)
   , Quantity (Quantity)
   , Unitless
   , Radians
@@ -529,6 +530,11 @@ class Intersects b a constraint => Intersects a b constraint | a b -> constraint
   intersects :: constraint => a -> b -> Bool
 
 infix 4 `intersects`
+
+(^) :: Intersects a b (Tolerance Unitless) => a -> b -> Bool
+first ^ second = let ?tolerance = 1e-9 in first `intersects` second
+
+infix 4 ^
 
 ----- Sign -----
 
