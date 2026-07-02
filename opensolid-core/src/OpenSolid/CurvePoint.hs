@@ -23,6 +23,7 @@ import OpenSolid.Direction qualified as Direction
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nondegenerate qualified as Nondegenerate
+import OpenSolid.Number qualified as Number
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -99,9 +100,12 @@ continuity nondegenerate1 nondegenerate2 = do
   let Nondegenerate p1 = nondegenerate1
   let Nondegenerate p2 = nondegenerate2
   if point p1 ~= point p2
-    then
-      if Direction.parallel (tangentDirection p1) (tangentDirection p2)
+    then do
+      let tangent1 = tangentDirection p1
+      let tangent2 = tangentDirection p2
+      if Direction.parallel tangent1 tangent2
         then do
+          let sign = Number.sign (tangent1 `dot` tangent2)
           let l1 = Vector.magnitude (derivative p1)
           let l2 = Vector.magnitude (derivative p2)
           let l = Quantity.erase (min l1 l2)
@@ -109,7 +113,7 @@ continuity nondegenerate1 nondegenerate2 = do
           let k2 = curvatureVector_ nondegenerate2
           let k = Vector.erase (k1 - k2)
           if Vector.unerase (k * l * l / 2.0) ~= Vector.zero
-            then Just Continuity.G2
-            else Just Continuity.G1
+            then Just (Continuity.G2 sign)
+            else Just (Continuity.G1 sign)
         else Just Continuity.G0
     else Nothing

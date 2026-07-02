@@ -62,6 +62,6 @@ overlapAlignment (Tangent sign (p1, p2)) =
     (Error IsDegenerate, _) -> Just sign
     (_, Error IsDegenerate) -> Just sign
     (Ok nondegenerate1, Ok nondegenerate2) ->
-      if CurvePoint.continuity nondegenerate1 nondegenerate2 == Just Continuity.G2
+      if CurvePoint.continuity nondegenerate1 nondegenerate2 == Just (Continuity.G2 sign)
         then Just sign
         else Nothing
