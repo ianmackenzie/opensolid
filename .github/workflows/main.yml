@@ -44,9 +44,6 @@ jobs:
       - name: Install Python tooling
         run: |
           pipx install uv==0.7.13
-          uv tool install ruff==0.12.3
-          uv tool install pyright==1.1.402
-          uv tool install delvewheel==1.9.0
       - name: Update Cabal package index
         run: |
           cabal update
@@ -67,7 +64,7 @@ jobs:
         run: |
           Get-ChildItem -Path dist-newstyle -Filter opensolid-ffi.dll -Recurse | Copy-Item -Destination .\opensolid-python\lib\src\opensolid\
           cabal run opensolid-python
-          ruff format opensolid-python\lib\src\opensolid\__init__.py
+          uvx ruff@0.12.3 format opensolid-python\lib\src\opensolid\__init__.py
       - name: Run test Python script
         working-directory: opensolid-python/lib
         run: |
@@ -77,7 +74,7 @@ jobs:
           cd opensolid-python\lib
           uv build --wheel
           $WheelPath = Get-ChildItem -Path .\dist -Filter *.whl
-          delvewheel repair $WheelPath
+          uvx delvewheel@1.9.0 repair $WheelPath
       - name: Save wheel as artifact
         uses: actions/upload-artifact@v4
         with:
