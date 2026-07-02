@@ -186,8 +186,8 @@ crossingIntersection = Test.verify "crossingIntersection" do
   intersections <- Curve2D.intersections arc1 arc2 & Result.orFail
   let expectedIntersectionPoints =
         NonEmpty.two
-          (IntersectionPoint.Crossing (curvePoint1 0.0, curvePoint2 0.0))
-          (IntersectionPoint.Crossing (curvePoint1 0.5, curvePoint2 0.5))
+          (IntersectionPoint.g0 (curvePoint1 0.0, curvePoint2 0.0))
+          (IntersectionPoint.g0 (curvePoint1 0.5, curvePoint2 0.5))
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
@@ -217,7 +217,7 @@ tangentIntersection = Test.verify "tangentIntersection" do
   let curvePoint2 t2 = CurvePoint.on nondegenerate2 t2
   intersections <- Curve2D.intersections arc1 arc2 & Result.orFail
   let expectedIntersectionPoints =
-        NonEmpty.one (IntersectionPoint.Tangent Negative (curvePoint1 0.5, curvePoint2 0.5))
+        NonEmpty.one (IntersectionPoint.g1 Negative (curvePoint1 0.5, curvePoint2 0.5))
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
