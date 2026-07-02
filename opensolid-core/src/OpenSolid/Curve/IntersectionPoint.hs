@@ -15,7 +15,6 @@ import OpenSolid.Continuity qualified as Continuity
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.CurvePoint (CurvePoint)
 import OpenSolid.CurvePoint qualified as CurvePoint
-import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
@@ -57,11 +56,7 @@ overlapAlignment ::
   IntersectionPoint dimension units space ->
   Maybe Sign
 overlapAlignment (Crossing _) = Nothing
-overlapAlignment (Tangent sign (p1, p2)) =
-  case (CurvePoint.nondegenerate p1, CurvePoint.nondegenerate p2) of
-    (Error IsDegenerate, _) -> Just sign
-    (_, Error IsDegenerate) -> Just sign
-    (Ok nondegenerate1, Ok nondegenerate2) ->
-      if CurvePoint.continuity nondegenerate1 nondegenerate2 == Just (Continuity.G2 sign)
-        then Just sign
-        else Nothing
+overlapAlignment (Tangent sign (p1, p2))
+  | CurvePoint.isDegenerate p1 || CurvePoint.isDegenerate p2 = Just sign
+  | CurvePoint.continuity p1 p2 == Just (Continuity.G2 sign) = Just sign
+  | otherwise = Nothing

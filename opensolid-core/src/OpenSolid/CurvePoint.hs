@@ -27,6 +27,7 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Result qualified as Result
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 
@@ -93,12 +94,10 @@ nondegenerate curvePoint =
 
 continuity ::
   (Curve.Exists dimension units space, Tolerance units) =>
-  Nondegenerate (CurvePoint dimension units space) ->
-  Nondegenerate (CurvePoint dimension units space) ->
+  CurvePoint dimension units space ->
+  CurvePoint dimension units space ->
   Maybe Continuity
-continuity nondegenerate1 nondegenerate2 = do
-  let Nondegenerate p1 = nondegenerate1
-  let Nondegenerate p2 = nondegenerate2
+continuity p1 p2 = do
   if point p1 ~= point p2
     then do
       let tangent1 = tangentDirection p1
@@ -106,14 +105,17 @@ continuity nondegenerate1 nondegenerate2 = do
       if Direction.parallel tangent1 tangent2
         then do
           let sign = Number.sign (tangent1 `dot` tangent2)
-          let l1 = Vector.magnitude (derivative p1)
-          let l2 = Vector.magnitude (derivative p2)
-          let l = Quantity.erase (min l1 l2)
-          let k1 = curvatureVector_ nondegenerate1
-          let k2 = curvatureVector_ nondegenerate2
-          let k = Vector.erase (k1 - k2)
-          if Vector.unerase (k * l * l / 2.0) ~= Vector.zero
-            then Just (Continuity.G2 sign)
-            else Just (Continuity.G1 sign)
+          case Result.map2 (,) (nondegenerate p1) (nondegenerate p2) of
+            Error IsDegenerate -> Just (Continuity.G1 sign)
+            Ok (nondegenerate1, nondegenerate2) -> do
+              let l1 = Vector.magnitude (derivative p1)
+              let l2 = Vector.magnitude (derivative p2)
+              let l = Quantity.erase (min l1 l2)
+              let k1_ = curvatureVector_ nondegenerate1
+              let k2_ = curvatureVector_ nondegenerate2
+              let k = Vector.erase (k1_ - k2_)
+              if Vector.unerase (k * l * l / 2.0) ~= Vector.zero
+                then Just (Continuity.G2 sign)
+                else Just (Continuity.G1 sign)
         else Just Continuity.G0
     else Nothing
