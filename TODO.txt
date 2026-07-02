@@ -1,5 +1,8 @@
 Remove 'or is NaN' checks from Newton-Raphson solvers
 
+Clean up error modules
+- InternalError vs Error, Nondegenerate vs IsDegenerate...
+
 Do a pass to make sure anything using Tolerance.unitless is normalized
 - normalize NURBS points and weights (divide all points and weights by the largest weight)?
 
