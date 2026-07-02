@@ -64,7 +64,7 @@ jobs:
         run: |
           Get-ChildItem -Path dist-newstyle -Filter opensolid-ffi.dll -Recurse | Copy-Item -Destination .\opensolid-python\lib\src\opensolid\
           cabal run opensolid-python
-          uvx ruff@0.12.3 format opensolid-python\lib\src\opensolid\__init__.py
+          uvx ruff@0.15.20 format opensolid-python\lib\src\opensolid\__init__.py
       - name: Run test Python script
         working-directory: opensolid-python/lib
         run: |
@@ -112,9 +112,6 @@ jobs:
       - name: Install Python tooling
         run: |
           pipx install uv==0.7.13
-          uv tool install ruff==0.12.3
-          uv tool install pyright==1.1.402
-          uv tool install auditwheel==6.1.0
       - name: Update Cabal index
         run: |
           cabal update
@@ -137,7 +134,7 @@ jobs:
         run: |
           cd opensolid-python/lib
           uv build --wheel
-          auditwheel repair --plat manylinux_2_35_x86_64 dist/*.whl
+          uvx auditwheel@6.1.0 repair --plat manylinux_2_35_x86_64 dist/*.whl
       - name: Save wheel as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -188,9 +185,6 @@ jobs:
       - name: Install Python tooling
         run: |
           pipx install uv==0.7.13
-          uv tool install ruff==0.12.3
-          uv tool install pyright==1.1.402
-          uv tool install delocate==0.12.0
       - name: Update Cabal index
         run: |
           cabal update
@@ -211,7 +205,7 @@ jobs:
         run: |
           cd opensolid-python/lib
           uv build --wheel
-          delocate-wheel --require-archs x86_64 -w wheelhouse dist/*.whl
+          uvx --from delocate@0.12.0 delocate-wheel --require-archs x86_64 -w wheelhouse dist/*.whl
       - name: Save wheel as artifact
         uses: actions/upload-artifact@v4
         with:
@@ -262,9 +256,6 @@ jobs:
       - name: Install Python tooling
         run: |
           pipx install uv==0.7.13
-          uv tool install ruff==0.12.3
-          uv tool install pyright==1.1.402
-          uv tool install delocate==0.12.0
       - name: Update Cabal index
         run: |
           cabal update
@@ -285,7 +276,7 @@ jobs:
         run: |
           cd opensolid-python/lib
           uv build --wheel
-          delocate-wheel --require-archs arm64 -w wheelhouse dist/*.whl
+          uvx --from delocate@0.12.0 delocate-wheel --require-archs arm64 -w wheelhouse dist/*.whl
       - name: Save wheel as artifact
         uses: actions/upload-artifact@v4
         with:
