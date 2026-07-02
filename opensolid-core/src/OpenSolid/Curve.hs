@@ -78,6 +78,7 @@ import {-# SOURCE #-} OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections qualified as Intersections
 import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
+import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate.Intersections qualified as Curve.Nondegenerate.Intersections
 import {-# SOURCE #-} OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve.Segment (Segment)
 import OpenSolid.Curve.Segment qualified as Curve.Segment
@@ -770,7 +771,10 @@ intersections ::
   Curve dimension units space ->
   Curve dimension units space ->
   Result IsDegenerate (Maybe (Intersections dimension units space))
-intersections = Intersections.intersections
+intersections curve1 curve2 = do
+  nondegenerate1 <- nondegenerate curve1
+  nondegenerate2 <- nondegenerate curve2
+  Ok (Curve.Nondegenerate.Intersections.intersections nondegenerate1 nondegenerate2)
 
 linearDeviation ::
   Exists dimension units space =>
