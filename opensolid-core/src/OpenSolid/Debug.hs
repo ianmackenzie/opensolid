@@ -1,5 +1,6 @@
 module OpenSolid.Debug
   ( trace
+  , show
   , log
   , callStack
   )
@@ -13,6 +14,9 @@ import OpenSolid.Text qualified as Text
 
 trace :: Text -> a -> a
 trace message value = Debug.Trace.trace (Text.unpack message) value
+
+show :: Show a => a -> Text
+show = Text.show
 
 log :: Show a => Text -> a -> a
 log label value = trace (label <> ": " <> Text.show value) value
