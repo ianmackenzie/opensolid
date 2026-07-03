@@ -16,6 +16,7 @@ module OpenSolid.Curve.IntersectionPoint
   , isJoin
   , isCrossing
   , isTangent
+  , overlapSign
   )
 where
 
@@ -124,3 +125,12 @@ isTangent ::
   IntersectionPoint dimension units space ->
   Bool
 isTangent intersectionPoint = classify intersectionPoint == Tangent
+
+overlapSign ::
+  (Curve.Exists dimension units space, Tolerance units) =>
+  IntersectionPoint dimension units space ->
+  Maybe Sign
+overlapSign intersectionPoint =
+  case classify intersectionPoint of
+    Overlap sign -> Just sign
+    _ -> Nothing
