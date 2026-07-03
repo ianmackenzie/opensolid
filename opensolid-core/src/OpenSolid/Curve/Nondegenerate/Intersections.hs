@@ -73,7 +73,9 @@ findIntersections
   | otherwise = do
       let endpointSolutions = findEndpointSolutions
       case findOverlappingSegments endpointSolutions of
-        Just (alignment, segments) -> Just (OverlappingSegments alignment segments)
+        Just (alignment, segments) -> do
+          let joins = List.filter IntersectionPoint.isJoin endpointSolutions
+          Just (OverlappingSegments alignment segments joins)
         Nothing -> do
           let interiorIntersectionPoints = findInteriorSolutions endpointSolutions
           case List.sortBy IntersectionPoint.parameterValues (endpointSolutions <> interiorIntersectionPoints) of

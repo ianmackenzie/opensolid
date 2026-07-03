@@ -35,7 +35,7 @@ overlappingSegments ::
   Result Text (Sign, NonEmpty (Interval Unitless, Interval Unitless))
 overlappingSegments curve1 curve2 =
   case Curve3D.intersections curve1 curve2 of
-    Ok (Just (Curve.OverlappingSegments sign segments)) -> Ok (sign, segments)
+    Ok (Just (Curve.OverlappingSegments sign segments _)) -> Ok (sign, segments)
     Ok (Just (Curve.IntersectionPoints _)) ->
       Error "Should have found some overlapping segments, got intersection points instead"
     Ok Nothing -> Error "Should have found some overlapping segments"

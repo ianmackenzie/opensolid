@@ -57,6 +57,7 @@ tests =
   , findOwnPoint
   , curveOverlap1
   , curveOverlap2
+  , overlapAndJoin
   , crossingIntersection
   , tangentIntersection
   , solving
@@ -113,10 +114,11 @@ overlappingSegments ::
   Tolerance Meters =>
   Curve2D Meters ->
   Curve2D Meters ->
-  Result Text (Sign, NonEmpty (Interval Unitless, Interval Unitless))
+  Result Text (Sign, NonEmpty (Interval Unitless, Interval Unitless), List (Curve2D.IntersectionPoint Meters))
 overlappingSegments curve1 curve2 =
   case Curve2D.intersections curve1 curve2 of
-    Ok (Just (Curve.OverlappingSegments sign segments)) -> Ok (sign, segments)
+    Ok (Just (Curve.OverlappingSegments sign segments intersectionPoints)) ->
+      Ok (sign, segments, intersectionPoints)
     Ok (Just (Curve.IntersectionPoints _)) ->
       Error "Should have found some overlapping segments, got intersection points instead"
     Ok Nothing -> Error "Should have found some overlapping segments"
@@ -144,11 +146,12 @@ curveOverlap1 :: Test
 curveOverlap1 = Test.verify "curveOverlap1" do
   let arc1 = Curve2D.arcFrom (Point2D.meters 1.0 0.0) (Point2D.meters -1.0 0.0) Angle.halfTurn
   let arc2 = Curve2D.arcFrom (Point2D.meters 0.0 -1.0) (Point2D.meters 0.0 1.0) Angle.halfTurn
-  (sign, actualSegments) <- overlappingSegments arc1 arc2 & Result.orFail
+  (sign, actualSegments, points) <- overlappingSegments arc1 arc2 & Result.orFail
   let expectedSegments = NonEmpty.one (Interval 0.0 0.5, Interval 0.5 1.0)
   Test.all
     [ Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
     , Test.expect (sign == Positive)
+    , Test.expect (List.isEmpty points)
     ]
 
 curveOverlap2 :: Test
@@ -165,7 +168,7 @@ curveOverlap2 = Test.verify "curveOverlap2" do
           (#radius Length.meter)
           (#startAngle (Angle.degrees -45.0))
           (#endAngle (Angle.degrees 225.0))
-  (sign, segments) <- overlappingSegments arc1 arc2 & Result.orFail
+  (sign, segments, points) <- overlappingSegments arc1 arc2 & Result.orFail
   let expectedSegments =
         NonEmpty.two
           (Interval 0.0 (1 / 4), Interval 0.0 (1 / 6))
@@ -173,6 +176,38 @@ curveOverlap2 = Test.verify "curveOverlap2" do
   Test.all
     [ Test.expect (equalOverlapSegmentLists segments expectedSegments)
     , Test.expect (sign == Negative)
+    , Test.expect (List.isEmpty points)
+    ]
+
+overlapAndJoin :: Test
+overlapAndJoin = Test.verify "overlapAndJoin" do
+  let arc1 =
+        Curve2D.polarArc
+          (#centerPoint Point2D.origin)
+          (#radius Length.meter)
+          (#startAngle Angle.zero)
+          (#endAngle -Angle.pi)
+  let arc2 =
+        Curve2D.polarArc
+          (#centerPoint Point2D.origin)
+          (#radius Length.meter)
+          (#startAngle (Angle.degrees -45.0))
+          (#endAngle Angle.pi)
+  nondegenerate1 <- Curve.nondegenerate arc1 & Result.orFail
+  nondegenerate2 <- Curve.nondegenerate arc2 & Result.orFail
+  let curvePoint1 t1 = CurvePoint.on nondegenerate1 t1
+  let curvePoint2 t2 = CurvePoint.on nondegenerate2 t2
+  (sign, segments, points) <- overlappingSegments arc1 arc2 & Result.orFail
+  let expectedSegments = NonEmpty.one (Interval 0.0 (1 / 4), Interval 0.0 (1 / 5))
+  let expectedPoints = [IntersectionPoint.g2 Negative (curvePoint1 1.0, curvePoint2 1.0)]
+  Test.all
+    [ Test.expect (equalOverlapSegmentLists segments expectedSegments)
+        & Test.output "segments" segments
+        & Test.output "expectedSegments" expectedSegments
+    , Test.expect (sign == Negative)
+    , Test.expect (points `matching` expectedPoints)
+        & Test.output "points" (List.map IntersectionPoint.parameterValues points)
+        & Test.output "expectedPoints" (List.map IntersectionPoint.parameterValues expectedPoints)
     ]
 
 crossingIntersection :: Test
