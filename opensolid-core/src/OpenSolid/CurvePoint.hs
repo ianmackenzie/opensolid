@@ -6,6 +6,7 @@ module OpenSolid.CurvePoint
   , curvatureVector_
   , parameterValue
   , on
+  , isEndpoint
   , isDegenerate
   , nondegenerate
   , continuity
@@ -24,6 +25,7 @@ import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Number qualified as Number
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -78,6 +80,9 @@ tangentDirection = (.tangentDirection)
 
 curvatureVector_ :: Nondegenerate (CurvePoint dimension units space) -> Vector dimension (Unitless ?/? units) space
 curvatureVector_ = Nondegenerate.get (.curvatureVector_)
+
+isEndpoint :: CurvePoint dimension units space -> Bool
+isEndpoint = Parameter.isEndpoint . parameterValue
 
 isDegenerate ::
   (Curve.Exists dimension units space, Tolerance units) =>
