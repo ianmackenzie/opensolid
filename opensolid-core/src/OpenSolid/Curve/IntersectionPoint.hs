@@ -13,6 +13,9 @@ module OpenSolid.Curve.IntersectionPoint
   , secondCurvePoint
   , Classification (..)
   , classify
+  , isJoin
+  , isCrossing
+  , isTangent
   )
 where
 
@@ -103,3 +106,21 @@ classify intersectionPoint = do
     Continuity.G1 Negative -> if hasDegeneracy then joinOrNegativeOverlap else Tangent
     Continuity.G2 Positive -> joinOrPositiveOverlap
     Continuity.G2 Negative -> joinOrNegativeOverlap
+
+isJoin ::
+  (Curve.Exists dimension units space, Tolerance units) =>
+  IntersectionPoint dimension units space ->
+  Bool
+isJoin intersectionPoint = classify intersectionPoint == Join
+
+isCrossing ::
+  (Curve.Exists dimension units space, Tolerance units) =>
+  IntersectionPoint dimension units space ->
+  Bool
+isCrossing intersectionPoint = classify intersectionPoint == Crossing
+
+isTangent ::
+  (Curve.Exists dimension units space, Tolerance units) =>
+  IntersectionPoint dimension units space ->
+  Bool
+isTangent intersectionPoint = classify intersectionPoint == Tangent
