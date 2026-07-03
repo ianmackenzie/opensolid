@@ -72,10 +72,9 @@ findIntersections
   | not (Curve.bounds curve1 `intersects` Curve.bounds curve2) = Nothing
   | otherwise = do
       let endpointSolutions = findEndpointSolutions
-      case findOverlappingSegments endpointSolutions of
-        Just (alignment, segments) -> do
-          let joins = List.filter IntersectionPoint.isJoin endpointSolutions
-          Just (OverlappingSegments alignment segments joins)
+      let (joins, nonJoins) = List.partition IntersectionPoint.isJoin endpointSolutions
+      case findOverlappingSegments nonJoins of
+        Just (alignment, segments) -> Just (OverlappingSegments alignment segments joins)
         Nothing -> do
           let interiorIntersectionPoints = findInteriorSolutions endpointSolutions
           case List.sortBy IntersectionPoint.parameterValues (endpointSolutions <> interiorIntersectionPoints) of
@@ -218,43 +217,18 @@ findOverlappingSegments ::
   List (IntersectionPoint dimension units space) ->
   Maybe (Sign, NonEmpty (Interval Unitless, Interval Unitless))
 findOverlappingSegments [] = Nothing
-findOverlappingSegments (NonEmpty endpointSolutions) = do
-  let alignmentAt endpointSolution = case IntersectionPoint.continuity endpointSolution of
-        Continuity.G0 -> Nothing
-        Continuity.G1 alignment -> Just alignment
-        Continuity.G2 alignment -> Just alignment
-  endpointSolutionAlignments <- Maybe.collect alignmentAt endpointSolutions
-  alignment <- NonEmpty.uniqueValue endpointSolutionAlignments
-  let isContinuation intersectionPoint = do
-        let (t1, t2) = IntersectionPoint.parameterValues intersectionPoint
-        case alignment of
-          Positive -> (t1 == 0.0 && t2 == 1.0) || (t1 == 1.0 && t2 == 0.0)
-          Negative -> (t1 == 0.0 && t2 == 0.0) || (t1 == 1.0 && t2 == 1.0)
-  let candidateEndpoints =
-        endpointSolutions
-          & NonEmpty.filter (not . isContinuation)
-          & List.sortBy IntersectionPoint.firstParameterValue
-  let isOverlappingSegment startIntersectionPoint endIntersectionPoint = do
-        let tStart1 = IntersectionPoint.firstParameterValue startIntersectionPoint
-        let tEnd1 = IntersectionPoint.firstParameterValue endIntersectionPoint
-        let tRange1 = Interval tStart1 tEnd1
-        let tValues1 = Interval.sampleValues tRange1
-        let samplePoints1 = NonEmpty.map (Curve.point curve1) tValues1
-        NonEmpty.all (intersects curve2) samplePoints1
+findOverlappingSegments (NonEmpty candidateEndpoints) = do
+  overlapSigns <- Maybe.collect IntersectionPoint.overlapSign candidateEndpoints
+  alignment <- NonEmpty.uniqueValue overlapSigns
   let overlappingSegment startIntersectionPoint endIntersectionPoint = do
         let (tStart1, tStart2) = IntersectionPoint.parameterValues startIntersectionPoint
         let (tEnd1, tEnd2) = IntersectionPoint.parameterValues endIntersectionPoint
         (Interval tStart1 tEnd1, Interval tStart2 tEnd2)
-  case candidateEndpoints of
-    [first, second] ->
-      if isOverlappingSegment first second
-        then Just (alignment, NonEmpty.one (overlappingSegment first second))
-        else Nothing
-    [first, second, third, fourth] ->
-      if isOverlappingSegment first second
-        then do
-          let segment1 = overlappingSegment first second
-          let segment2 = overlappingSegment third fourth
-          Just (alignment, NonEmpty.two segment1 segment2)
-        else Nothing
+  case NonEmpty.sortBy IntersectionPoint.firstParameterValue candidateEndpoints of
+    NonEmpty.Two first second ->
+      Just (alignment, NonEmpty.one (overlappingSegment first second))
+    NonEmpty.Four first second third fourth -> do
+      let segment1 = overlappingSegment first second
+      let segment2 = overlappingSegment third fourth
+      Just (alignment, NonEmpty.two segment1 segment2)
     _ -> Nothing
