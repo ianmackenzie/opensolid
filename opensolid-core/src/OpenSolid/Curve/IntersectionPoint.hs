@@ -11,7 +11,8 @@ module OpenSolid.Curve.IntersectionPoint
   , curvePoints
   , firstCurvePoint
   , secondCurvePoint
-  , overlapAlignment
+  , Classification (..)
+  , classify
   )
 where
 
@@ -21,6 +22,7 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.CurvePoint (CurvePoint)
 import OpenSolid.CurvePoint qualified as CurvePoint
 import OpenSolid.Pair qualified as Pair
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 
@@ -76,11 +78,28 @@ firstCurvePoint = Pair.first . curvePoints
 secondCurvePoint :: IntersectionPoint dimension units space -> CurvePoint dimension units space
 secondCurvePoint = Pair.first . curvePoints
 
-overlapAlignment ::
+data Classification
+  = Join
+  | Crossing
+  | Tangent
+  | Overlap Sign
+  deriving (Eq, Show)
+
+classify ::
   (Curve.Exists dimension units space, Tolerance units) =>
   IntersectionPoint dimension units space ->
-  Maybe Sign
-overlapAlignment (IntersectionPoint Continuity.G0 _) = Nothing
-overlapAlignment (IntersectionPoint (Continuity.G2 sign) _) = Just sign
-overlapAlignment (IntersectionPoint (Continuity.G1 sign) (p1, p2)) =
-  if CurvePoint.isDegenerate p1 || CurvePoint.isDegenerate p2 then Just sign else Nothing
+  Classification
+classify intersectionPoint = do
+  let (p1, p2) = curvePoints intersectionPoint
+  let (t1, t2) = parameterValues intersectionPoint
+  let joinOrPositiveOverlap =
+        if (t1 == 0.0 && t2 == 1.0) || (t1 == 1.0 && t2 == 0.0) then Join else Overlap Positive
+  let joinOrNegativeOverlap =
+        if (t1 == 0.0 && t2 == 0.0) || (t1 == 1.0 && t2 == 1.0) then Join else Overlap Negative
+  let hasDegeneracy = CurvePoint.isDegenerate p1 || CurvePoint.isDegenerate p2
+  case continuity intersectionPoint of
+    Continuity.G0 -> if Parameter.isEndpoint t1 && Parameter.isEndpoint t2 then Join else Crossing
+    Continuity.G1 Positive -> if hasDegeneracy then joinOrPositiveOverlap else Tangent
+    Continuity.G1 Negative -> if hasDegeneracy then joinOrNegativeOverlap else Tangent
+    Continuity.G2 Positive -> joinOrPositiveOverlap
+    Continuity.G2 Negative -> joinOrNegativeOverlap
