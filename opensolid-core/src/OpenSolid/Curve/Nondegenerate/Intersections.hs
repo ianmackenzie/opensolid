@@ -71,13 +71,14 @@ findIntersections :: Problem dimension units space => Maybe (Intersections dimen
 findIntersections
   | not (Curve.bounds curve1 `intersects` Curve.bounds curve2) = Nothing
   | otherwise = do
-      let endpointSolutions = findEndpointSolutions
-      let (joins, nonJoins) = List.partition IntersectionPoint.isJoin endpointSolutions
+      let endpointIntersections = findEndpointIntersections
+      let (joins, nonJoins) = List.partition IntersectionPoint.isJoin endpointIntersections
       case findOverlappingSegments nonJoins of
         Just (alignment, segments) -> Just (OverlappingSegments alignment segments joins)
         Nothing -> do
-          let interiorIntersectionPoints = findInteriorSolutions endpointSolutions
-          case List.sortBy IntersectionPoint.parameterValues (endpointSolutions <> interiorIntersectionPoints) of
+          let interiorIntersections = findInteriorIntersections endpointIntersections
+          let allIntersections = endpointIntersections <> interiorIntersections
+          case List.sortBy IntersectionPoint.parameterValues allIntersections of
             NonEmpty intersectionPoints -> Just (IntersectionPoints intersectionPoints)
             [] -> Nothing
 
@@ -92,10 +93,10 @@ validateIntersection t1 t2 = do
   continuity <- CurvePoint.continuity p1 p2
   Just (IntersectionPoint continuity (p1, p2))
 
-findEndpointSolutions ::
+findEndpointIntersections ::
   Problem dimension units space =>
   List (IntersectionPoint dimension units space)
-findEndpointSolutions = do
+findEndpointIntersections = do
   let findPoint curve t nondegenerateSearchCurve =
         Curve.Nondegenerate.findPoint (Curve.point curve t) nondegenerateSearchCurve
   let endpoints1On2 = [(t1, t2) | t1 <- [0.0, 1.0], t2 <- findPoint curve1 t1 nondegenerate2]
@@ -103,7 +104,7 @@ findEndpointSolutions = do
   List.uniqueValues (endpoints1On2 <> endpoints2On1)
     & List.filterMap \(t1, t2) -> validateIntersection t1 t2
 
-findInteriorSolution ::
+findInteriorIntersection ::
   ( Problem dimension units space
   , NewtonRaphson.Surface.Solver solveDimension solveUnits solveSpace
   ) =>
@@ -111,7 +112,7 @@ findInteriorSolution ::
   Interval Unitless ->
   Interval Unitless ->
   Maybe (IntersectionPoint dimension units space)
-findInteriorSolution evaluate tRange1 tRange2 =
+findInteriorIntersection evaluate tRange1 tRange2 =
   case NewtonRaphson.Surface.solveIn (UvBounds tRange1 tRange2) evaluate of
     Unresolved -> Nothing
     Resolved (UvPoint t1 t2) -> validateIntersection t1 t2
@@ -144,11 +145,11 @@ evaluateTangent (UvPoint u v) = do
   let yv = gv `dot_` gv + d `dot_` gvv
   (# Vector2D x y, Vector2D xu yu, Vector2D xv yv #)
 
-findInteriorSolutions ::
+findInteriorIntersections ::
   Problem dimension units space =>
   List (IntersectionPoint dimension units space) ->
   List (IntersectionPoint dimension units space)
-findInteriorSolutions endpointSolutions = do
+findInteriorIntersections endpointIntersections = do
   let searchTree1 = Curve.searchTree nondegenerate1
   let searchTree2 = Curve.searchTree nondegenerate2
   let searchTree = SearchTree.pairwise (,) searchTree1 searchTree2
@@ -166,16 +167,16 @@ findInteriorSolutions endpointSolutions = do
             let isLocal intersectionPoint = do
                   let (t1, t2) = IntersectionPoint.parameterValues intersectionPoint
                   Interval.member t1 tRange1 && Interval.member t2 tRange2
-            let singleEndpointSolution =
-                  case List.filter isLocal endpointSolutions of
-                    List.One endpointSolution -> Just endpointSolution
+            let singleEndpointIntersection =
+                  case List.filter isLocal endpointIntersections of
+                    List.One endpointIntersection -> Just endpointIntersection
                     [] -> Nothing
                     List.TwoOrMore -> Nothing
-            let hasCrossingEndpointSolution = case singleEndpointSolution of
+            let hasCrossingEndpointIntersection = case singleEndpointIntersection of
                   Just intersectionPoint ->
                     IntersectionPoint.continuity intersectionPoint == Continuity.G0
                   Nothing -> False
-            let hasContinuation = case singleEndpointSolution of
+            let hasContinuation = case singleEndpointIntersection of
                   Just intersectionPoint -> do
                     let (t1, t2) = IntersectionPoint.parameterValues intersectionPoint
                     if
@@ -185,11 +186,11 @@ findInteriorSolutions endpointSolutions = do
                           DirectionBounds.areDistinct tangentDirectionRange1 -tangentDirectionRange2
                       | otherwise -> False
                   Nothing -> False
-            let hasTangentEndpointSolution = case singleEndpointSolution of
+            let hasTangentEndpointIntersection = case singleEndpointIntersection of
                   Just intersectionPoint ->
                     IntersectionPoint.continuity intersectionPoint > Continuity.G0
                   Nothing -> False
-            let hasDegenerateEndpointSolution = case singleEndpointSolution of
+            let hasDegenerateEndpointIntersection = case singleEndpointIntersection of
                   Just intersectionPoint -> do
                     let (p1, p2) = IntersectionPoint.curvePoints intersectionPoint
                     CurvePoint.isDegenerate p1 || CurvePoint.isDegenerate p2
@@ -197,15 +198,15 @@ findInteriorSolutions endpointSolutions = do
             let isSmall = SearchDomain.isSmall tRange1
             if
               | hasContinuation -> Resolved Nothing
-              | isCrossing && hasCrossingEndpointSolution -> Resolved Nothing
-              | curvatureVectorsAreDistinct && hasTangentEndpointSolution -> Resolved Nothing
-              | isSmall && hasDegenerateEndpointSolution -> Resolved Nothing
+              | isCrossing && hasCrossingEndpointIntersection -> Resolved Nothing
+              | curvatureVectorsAreDistinct && hasTangentEndpointIntersection -> Resolved Nothing
+              | isSmall && hasDegenerateEndpointIntersection -> Resolved Nothing
               | isCrossing ->
-                  case findInteriorSolution evaluateCrossing tRange1 tRange2 of
+                  case findInteriorIntersection evaluateCrossing tRange1 tRange2 of
                     Just intersectionPoint -> Resolved (Just intersectionPoint)
                     Nothing -> Unresolved
               | curvatureVectorsAreDistinct ->
-                  case findInteriorSolution evaluateTangent tRange1 tRange2 of
+                  case findInteriorIntersection evaluateTangent tRange1 tRange2 of
                     Just intersectionPoint -> Resolved (Just intersectionPoint)
                     Nothing -> Unresolved
               | otherwise -> Unresolved
