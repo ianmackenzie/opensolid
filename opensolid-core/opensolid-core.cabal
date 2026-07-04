@@ -286,6 +286,9 @@ library
     OpenSolid.Curve.CurvatureVector
     OpenSolid.Curve.Intersections
     OpenSolid.Curve.Nondegenerate.Intersections
+    OpenSolid.Curve.TangentSolver
+    OpenSolid.Curve.TangentSolver2D
+    OpenSolid.Curve.TangentSolver3D
     OpenSolid.Curve1D.Bisection
     OpenSolid.HasZero
     OpenSolid.Lobatto

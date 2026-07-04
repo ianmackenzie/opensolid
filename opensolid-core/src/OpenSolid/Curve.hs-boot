@@ -3,6 +3,7 @@ module OpenSolid.Curve
   , Curve2D
   , Curve3D
   , Exists
+  , Solver
   , Compiled
   , constant
   , point
@@ -50,6 +51,10 @@ type Curve2D units = Curve 2 units Void
 type Curve3D space = Curve 3 Meters space
 
 class Exists (dimension :: Natural) (units :: Type) (space :: Type)
+
+type role Solver nominal nominal nominal
+
+data Solver (dimension :: Natural) (units :: Type) (space :: Type)
 
 instance Exists 2 units Void
 

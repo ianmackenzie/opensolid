@@ -4,7 +4,8 @@ module OpenSolid.Curve
   ( Curve
   , Curve2D
   , Curve3D
-  , Exists
+  , Exists (..)
+  , Solver (..)
   , Compiled
   , Segment
   , SearchTree
@@ -82,6 +83,8 @@ import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate.Intersections qualified as C
 import {-# SOURCE #-} OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve.Segment (Segment)
 import OpenSolid.Curve.Segment qualified as Curve.Segment
+import {-# SOURCE #-} OpenSolid.Curve.TangentSolver2D qualified as Curve.TangentSolver2D
+import {-# SOURCE #-} OpenSolid.Curve.TangentSolver3D qualified as Curve.TangentSolver3D
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Desingularization qualified as Desingularization
@@ -385,6 +388,23 @@ instance Composition (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFuncti
       (compiled curve . SurfaceFunction1D.compiled function)
       (\p -> (derivative curve . function) * SurfaceFunction1D.derivative p function)
 
+data Solver dimension units space where
+  Solver ::
+    { resolve ::
+        Tolerance units =>
+        (Segment dimension units space, Segment dimension units space) ->
+        Fuzzy (Maybe tag)
+    , solve ::
+        Tolerance units =>
+        tag ->
+        Nondegenerate (Curve dimension units space) ->
+        Nondegenerate (Curve dimension units space) ->
+        (Interval Unitless, Interval Unitless) ->
+        (Segment dimension units space, Segment dimension units space) ->
+        Fuzzy (Maybe (IntersectionPoint dimension units space))
+    } ->
+    Solver dimension units space
+
 class
   ( Point.Exists dimension units space
   , Bounds.Exists dimension units space
@@ -437,6 +457,8 @@ class
   , Intersects (Point dimension units space) (Curve dimension units space) (Tolerance units)
   ) =>
   Exists dimension units space
+  where
+  tangentSolver :: Solver dimension units space
 
 instance Desingularization.Curve (Curve2D units) (Point2D units) (Vector2D units) where
   value = point
@@ -452,9 +474,11 @@ instance Desingularization.Curve (Curve3D space) (Point3D space) (Vector3D Meter
   bezier = bezier
   desingularized = desingularized
 
-instance Exists 2 units Void
+instance Exists 2 units Void where
+  tangentSolver = Curve.TangentSolver2D.solver
 
-instance Exists 3 Meters space
+instance Exists 3 Meters space where
+  tangentSolver = Curve.TangentSolver3D.solver
 
 new ::
   Exists dimension units space =>
