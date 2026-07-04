@@ -19,14 +19,14 @@ import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.Fuzzy qualified as Fuzzy
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
-import OpenSolid.Number qualified as Number
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
+import OpenSolid.Set qualified as Set
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 
@@ -61,26 +61,25 @@ findPoint ::
 findPoint point nondegenerateCurve = do
   let Nondegenerate curve = nondegenerateCurve
   let endpointSolutions = [t | t <- [0.0, 1.0], Curve.point curve t ~= point]
+  let endpointSolutionSet =
+        case endpointSolutions of
+          [] -> Nothing
+          NonEmpty existing -> Just (Set.build Interval.constant existing)
   let isDistant segment = not (point `intersects` Curve.Segment.range segment)
   let resolvedMonotonicity _ segment
         | isDistant segment = Resolved Nothing
         | Curve.Segment.isMonotonic segment = Resolved (Just Monotonic)
         | Curve.Segment.isDegenerate segment = Resolved (Just Monotonic)
         | otherwise = Unresolved
-  let areNeighbours Monotonic Monotonic = True
   let evaluate tValue =
         (# Curve.point curve tValue - point, Curve.derivativeValue curve tValue #)
   let resolvedSolution Monotonic tRange segment
         | isDistant segment = Resolved Nothing
         | otherwise = Fuzzy.map Just (NewtonRaphson.Curve.solveIn tRange evaluate)
-  let hasEndpointSolution tRange = List.any (Number.includedIn tRange) endpointSolutions
-  let clusterHasEndpointSolution cluster =
-        NonEmpty.any (\(Monotonic, tree) -> hasEndpointSolution (Bisection.subdomain tree)) cluster
   let clusters =
         Curve.bisectionTree nondegenerateCurve
-          & Bisection.clusters resolvedMonotonicity areNeighbours
-  let interiorClusters = List.filter (not . clusterHasEndpointSolution) clusters
-  let interiorSolutions = List.filterMap (Bisection.find resolvedSolution) interiorClusters
+          & Bisection.clusters endpointSolutionSet resolvedMonotonicity
+  let interiorSolutions = List.filterMap (Bisection.find resolvedSolution) clusters
   List.sort (endpointSolutions <> interiorSolutions)
 
 intersections ::
