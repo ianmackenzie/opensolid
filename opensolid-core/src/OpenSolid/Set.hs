@@ -32,6 +32,7 @@ module OpenSolid.Set
   , pairwiseFilterMap
   , pairwiseFilterWithIndices
   , pairwiseFilterMapWithIndices
+  , pairwiseAny
   , clusters
   , foldr
   , foldl
@@ -44,6 +45,7 @@ import Data.List.NonEmpty qualified
 import Data.Proxy (Proxy (Proxy))
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.InternalError qualified as InternalError
+import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Set.Bounds (Bounds)
@@ -374,6 +376,10 @@ all boundsPredicate itemPredicate set = case set of
     boundsPredicate leafBounds && itemPredicate leafItem
   Node{nodeBounds, children} ->
     boundsPredicate nodeBounds && NonEmpty.all (all boundsPredicate itemPredicate) children
+
+pairwiseAny :: (b1 -> b2 -> Bool) -> (a1 -> a2 -> Bool) -> Set b1 a1 -> Set b2 a2 -> Bool
+pairwiseAny boundsPredicate itemPredicate set1 set2 =
+  not (List.isEmpty (pairwiseFilter boundsPredicate itemPredicate set1 set2))
 
 pairwiseFilter ::
   (b1 -> b2 -> Bool) ->
