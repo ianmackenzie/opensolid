@@ -1,5 +1,19 @@
 Remove 'or is NaN' checks from Newton-Raphson solvers
 
+Allow Set values to be empty?
+- check where 'bounds' and 'toNonEmpty' are used...
+
+Refactor tolerance handling to allow implicitly comparing unitless values, via a typeclass like:
+
+  class Epsilon units constraint | units -> constraint where
+    epsilon :: constraint => Quantity units
+
+  instance Epsilon Unitless () where
+    epsilon = 1e-9
+
+  instance Epsilon Meters (?tolerance :: Quantity Meters) where
+    epsilon = ?tolerance
+
 Clean up error modules
 - InternalError vs Error, Nondegenerate vs IsDegenerate...
 
