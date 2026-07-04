@@ -87,22 +87,22 @@ clusters resolveFunction tagPredicate tree =
         & NonEmpty.toList
 
 find ::
-  forall subdomain segment solution.
-  (subdomain -> segment -> Fuzzy (Maybe solution)) ->
-  NonEmpty (Tree subdomain segment) ->
+  forall subdomain segment tag solution.
+  (tag -> subdomain -> segment -> Fuzzy (Maybe solution)) ->
+  NonEmpty (tag, Tree subdomain segment) ->
   Maybe solution
 find callback cluster = findImpl callback (Queue.fromNonEmpty cluster)
 
 findImpl ::
-  forall subdomain segment solution.
-  (subdomain -> segment -> Fuzzy (Maybe solution)) ->
-  Queue (Tree subdomain segment) ->
+  forall subdomain segment tag solution.
+  (tag -> subdomain -> segment -> Fuzzy (Maybe solution)) ->
+  Queue (tag, Tree subdomain segment) ->
   Maybe solution
 findImpl callback queue = do
-  (subtree, remaining) <- Queue.pop queue
-  case callback subtree.subdomain subtree.segment of
+  ((tag, subtree), remaining) <- Queue.pop queue
+  case callback tag subtree.subdomain subtree.segment of
     Resolved Nothing -> findImpl callback remaining
     Resolved (Just solution) -> Just solution
     Unresolved -> do
-      let updatedQueue = remaining & forEach subtree.children Queue.push
+      let updatedQueue = remaining & forEach subtree.children \child -> Queue.push (tag, child)
       findImpl callback updatedQueue

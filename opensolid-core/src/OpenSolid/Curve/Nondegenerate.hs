@@ -70,16 +70,15 @@ findPoint point nondegenerateCurve = do
   let areNeighbours Monotonic Monotonic = True
   let evaluate tValue =
         (# Curve.point curve tValue - point, Curve.derivativeValue curve tValue #)
-  let resolvedSolution tRange segment
+  let resolvedSolution Monotonic tRange segment
         | isDistant segment = Resolved Nothing
         | otherwise = Fuzzy.map Just (NewtonRaphson.Curve.solveIn tRange evaluate)
   let hasEndpointSolution tRange = List.any (Number.includedIn tRange) endpointSolutions
   let clusterHasEndpointSolution cluster =
-        NonEmpty.any (Bisection.subdomain >> hasEndpointSolution) cluster
+        NonEmpty.any (\(Monotonic, tree) -> hasEndpointSolution (Bisection.subdomain tree)) cluster
   let clusters =
         Curve.bisectionTree nondegenerateCurve
           & Bisection.clusters resolvedMonotonicity areNeighbours
-          & List.map (NonEmpty.map (\(Monotonic, cluster) -> cluster))
   let interiorClusters = List.filter (not . clusterHasEndpointSolution) clusters
   let interiorSolutions = List.filterMap (Bisection.find resolvedSolution) interiorClusters
   List.sort (endpointSolutions <> interiorSolutions)
