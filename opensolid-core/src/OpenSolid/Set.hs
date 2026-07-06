@@ -9,6 +9,7 @@ module OpenSolid.Set
   , linear
   , aggregate
   , flatten
+  , fromList
   , map
   , mapWithIndex
   , reverseMap
@@ -194,6 +195,10 @@ flatten Node{nodeBounds, children} = do
     , nodeSize = NonEmpty.sumOf size flattenedChildren
     , children = flattenedChildren
     }
+
+fromList :: Bounds b => (a -> b) -> List a -> Maybe (Set b a)
+fromList _ [] = Nothing
+fromList boundsFunction (NonEmpty items) = Just (build boundsFunction items)
 
 map :: Bounds b2 => (a1 -> a2) -> (a2 -> b2) -> Set b1 a1 -> Set b2 a2
 map function boundsFunction set = mapWithIndex (const function) boundsFunction set

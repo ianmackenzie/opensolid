@@ -10,6 +10,7 @@ module OpenSolid.Set2D
   , linear
   , aggregate
   , flatten
+  , fromList
   , toNonEmpty
   , toNonEmptyOf
   , toNonEmptyWithIndex
@@ -75,6 +76,9 @@ aggregate = Set.aggregate
 
 flatten :: Set2D units (Set2D units item) -> Set2D units item
 flatten = Set.flatten
+
+fromList :: (item -> Bounds2D units) -> List item -> Maybe (Set2D units item)
+fromList = Set.fromList
 
 toNonEmpty :: Set2D units item -> NonEmpty item
 toNonEmpty = Set.toNonEmpty

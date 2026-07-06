@@ -10,6 +10,7 @@ module OpenSolid.Set3D
   , linear
   , aggregate
   , flatten
+  , fromList
   , toNonEmpty
   , toNonEmptyOf
   , toNonEmptyWithIndex
@@ -75,6 +76,9 @@ aggregate = Set.aggregate
 
 flatten :: Set3D space (Set3D space item) -> Set3D space item
 flatten = Set.flatten
+
+fromList :: (item -> Bounds3D space) -> List item -> Maybe (Set3D space item)
+fromList = Set.fromList
 
 toNonEmpty :: Set3D space item -> NonEmpty item
 toNonEmpty = Set.toNonEmpty
