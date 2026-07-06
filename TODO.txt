@@ -1,5 +1,7 @@
 Remove 'or is NaN' checks from Newton-Raphson solvers
 
+Ensure curve intersection works when curves with degenerate endpoints have tangent joins
+
 Allow Set values to be empty?
 - check where 'bounds' and 'toNonEmpty' are used...
 
