@@ -103,6 +103,7 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Line (Line (Line))
 import OpenSolid.Line qualified as Line
 import OpenSolid.List qualified as List
+import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
@@ -455,6 +456,8 @@ class
       (Vector dimension units space)
   , Intersects (Curve dimension units space) (Point dimension units space) (Tolerance units)
   , Intersects (Point dimension units space) (Curve dimension units space) (Tolerance units)
+  , NewtonRaphson.Curve.Solver dimension units space
+  , NewtonRaphson.Surface.Solver dimension units space
   ) =>
   Exists dimension units space
   where
