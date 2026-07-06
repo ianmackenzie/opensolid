@@ -392,14 +392,15 @@ instance Composition (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFuncti
 data Solver dimension units space where
   Solver ::
     { resolve ::
-        Tolerance units =>
+        (Exists dimension units space, Tolerance units) =>
+        (Interval Unitless, Interval Unitless) ->
         (Segment dimension units space, Segment dimension units space) ->
         Fuzzy (Maybe tag)
     , solve ::
-        Tolerance units =>
+        (Exists dimension units space, Tolerance units) =>
+        Nondegenerate (Curve dimension units space) ->
+        Nondegenerate (Curve dimension units space) ->
         tag ->
-        Nondegenerate (Curve dimension units space) ->
-        Nondegenerate (Curve dimension units space) ->
         (Interval Unitless, Interval Unitless) ->
         (Segment dimension units space, Segment dimension units space) ->
         Fuzzy (Maybe (IntersectionPoint dimension units space))

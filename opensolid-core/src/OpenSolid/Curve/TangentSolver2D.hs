@@ -24,9 +24,10 @@ data Orientation = X | Y
 
 resolve ::
   Tolerance units =>
+  (Interval Unitless, Interval Unitless) ->
   (Curve.Segment 2 units Void, Curve.Segment 2 units Void) ->
   Fuzzy (Maybe Orientation)
-resolve (segmentA, segmentB) =
+resolve _ (segmentA, segmentB) =
   if TangentSolver.areDistinctOrCrossing segmentA segmentB
     then Resolved Nothing
     else do
@@ -55,13 +56,13 @@ d2xdy2Range segment = do
 
 solve ::
   Tolerance units =>
+  Nondegenerate (Curve2D units) ->
+  Nondegenerate (Curve2D units) ->
   Orientation ->
-  Nondegenerate (Curve2D units) ->
-  Nondegenerate (Curve2D units) ->
   (Interval Unitless, Interval Unitless) ->
   (Curve.Segment 2 units Void, Curve.Segment 2 units Void) ->
   Fuzzy (Maybe (IntersectionPoint 2 units Void))
-solve orientation nondegenerateA nondegenerateB (tRangeA, tRangeB) (segmentA, segmentB) =
+solve nondegenerateA nondegenerateB orientation (tRangeA, tRangeB) (segmentA, segmentB) =
   if TangentSolver.areDistinctOrCrossing segmentA segmentB
     then Resolved Nothing
     else do
