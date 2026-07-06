@@ -18,6 +18,7 @@ import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Point (Point)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
+import OpenSolid.Set qualified as Set
 import OpenSolid.Transform (Transform)
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
@@ -30,6 +31,7 @@ class
   ( Point.Exists dimension units space
   , VectorBounds.Exists dimension units space
   , Show (Bounds dimension units space)
+  , Set.Bounds (Bounds dimension units space)
   , Intersects (Point dimension units space) (Bounds dimension units space) (Tolerance units)
   , Intersects (Bounds dimension units space) (Point dimension units space) (Tolerance units)
   , Intersects (Bounds dimension units space) (Bounds dimension units space) (Tolerance units)
