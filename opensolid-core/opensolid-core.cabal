@@ -283,6 +283,7 @@ library
     OpenSolid.Bytecode.Evaluate
     OpenSolid.Bytecode.Instruction
     OpenSolid.CDT
+    OpenSolid.Curve.CrossingSolver
     OpenSolid.Curve.CurvatureVector
     OpenSolid.Curve.Intersections
     OpenSolid.Curve.Nondegenerate.Intersections

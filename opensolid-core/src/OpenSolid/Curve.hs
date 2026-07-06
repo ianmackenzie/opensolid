@@ -4,7 +4,7 @@ module OpenSolid.Curve
   ( Curve
   , Curve2D
   , Curve3D
-  , Exists (..)
+  , Exists
   , Solver (..)
   , Compiled
   , Segment
@@ -48,6 +48,8 @@ module OpenSolid.Curve
   , findPoint
   , bisectionTree
   , searchTree
+  , crossingSolver
+  , tangentSolver
   , Intersections (IntersectionPoints, OverlappingSegments)
   , IntersectionPoint
   , intersections
@@ -75,6 +77,7 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
+import {-# SOURCE #-} OpenSolid.Curve.CrossingSolver qualified as Curve.CrossingSolver
 import {-# SOURCE #-} OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections qualified as Intersections
@@ -463,6 +466,9 @@ class
   Exists dimension units space
   where
   tangentSolver :: Solver dimension units space
+
+crossingSolver :: Solver dimension units space
+crossingSolver = Curve.CrossingSolver.solver
 
 instance Desingularization.Curve (Curve2D units) (Point2D units) (Vector2D units) where
   value = point
