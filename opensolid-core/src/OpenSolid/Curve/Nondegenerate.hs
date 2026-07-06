@@ -61,10 +61,7 @@ findPoint ::
 findPoint point nondegenerateCurve = do
   let Nondegenerate curve = nondegenerateCurve
   let endpointSolutions = [t | t <- [0.0, 1.0], Curve.point curve t ~= point]
-  let endpointSolutionSet =
-        case endpointSolutions of
-          [] -> Nothing
-          NonEmpty existing -> Just (Set.build Interval.constant existing)
+  let endpointSolutionSet = Set.fromList Interval.constant endpointSolutions
   let isDistant segment = not (point `intersects` Curve.Segment.range segment)
   let resolvedMonotonicity _ segment
         | isDistant segment = Resolved Nothing
