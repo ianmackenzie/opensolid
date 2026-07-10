@@ -2,6 +2,7 @@ module OpenSolid.Debug
   ( trace
   , show
   , log
+  , intercept
   , callStack
   )
 where
@@ -18,8 +19,11 @@ trace message value = Debug.Trace.trace (Text.unpack message) value
 show :: Show a => a -> Text
 show = Text.show
 
-log :: Show a => Text -> a -> a
-log label value = trace (label <> ": " <> Text.show value) value
+log :: Show b => Text -> (a -> b) -> a -> a
+log label function value = trace (label <> ": " <> show (function value)) value
+
+intercept :: Show a => Text -> a -> a
+intercept label value = log label id value
 
 callStack :: HasCallStack => Text
 callStack = do
