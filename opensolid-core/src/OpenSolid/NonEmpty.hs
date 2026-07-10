@@ -26,6 +26,7 @@ module OpenSolid.NonEmpty
   , seven
   , eight
   , toList
+  , fromList
   , push
   , extend
   , length
@@ -191,6 +192,9 @@ eight a1 a2 a3 a4 a5 a6 a7 a8 = a1 :| [a2, a3, a4, a5, a6, a7, a8]
 {-# INLINE toList #-}
 toList :: NonEmpty a -> List a
 toList = Data.List.NonEmpty.toList
+
+fromList :: List a -> Maybe (NonEmpty a)
+fromList = Data.List.NonEmpty.nonEmpty
 
 {-# INLINE push #-}
 push :: a -> NonEmpty a -> NonEmpty a
