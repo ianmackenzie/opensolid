@@ -2,6 +2,9 @@ Refactor Set.cull and Set.filter to return Bag values
 
 Remove Sign pattern?
 
+Add Show helper module with e.g. Show.constructor, Show.record?
+- also maybe Show.partial for records where some fields are left out and replaced with an ellipsis
+
 Remove 'or is NaN' checks from Newton-Raphson solvers
 
 Ensure curve intersection works when curves with degenerate endpoints have tangent joins
