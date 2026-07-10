@@ -531,6 +531,15 @@ class Intersects b a constraint => Intersects a b constraint | a b -> constraint
 
 infix 4 `intersects`
 
+instance
+  ( Intersects a1 a2 constraintA
+  , Intersects b1 b2 constraintB
+  , constraintA ~ constraintB
+  ) =>
+  Intersects (a1, b1) (a2, b2) constraintA
+  where
+  intersects (a1, b1) (a2, b2) = intersects a1 a2 && intersects b1 b2
+
 (^) :: Intersects a b (Tolerance Unitless) => a -> b -> Bool
 first ^ second = let ?tolerance = 1e-9 in first `intersects` second
 
