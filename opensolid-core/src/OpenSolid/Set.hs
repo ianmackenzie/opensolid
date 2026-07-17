@@ -9,7 +9,7 @@ module OpenSolid.Set
   , linear
   , aggregate
   , flatten
-  , fromList
+  , extend
   , map
   , mapWithIndex
   , reverseMap
@@ -44,6 +44,8 @@ import Data.Foldable1 qualified
 import Data.Graph qualified as Graph
 import Data.List.NonEmpty qualified
 import Data.Proxy (Proxy (Proxy))
+import {-# SOURCE #-} OpenSolid.Bag (Bag)
+import {-# SOURCE #-} OpenSolid.Bag qualified as Bag
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.List qualified as List
@@ -196,9 +198,9 @@ flatten Node{nodeBounds, children} = do
     , children = flattenedChildren
     }
 
-fromList :: Bounds b => (a -> b) -> List a -> Maybe (Set b a)
-fromList _ [] = Nothing
-fromList boundsFunction (NonEmpty items) = Just (build boundsFunction items)
+extend :: Bounds b => Set b a -> Bag b a -> Set b a
+extend set Bag.Empty = set
+extend set1 (Bag.Full set2) = node2 set1 set2
 
 map :: Bounds b2 => (a1 -> a2) -> (a2 -> b2) -> Set b1 a1 -> Set b2 a2
 map function boundsFunction set = mapWithIndex (const function) boundsFunction set

@@ -26,6 +26,9 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
+import OpenSolid.Bag qualified as Bag
+import OpenSolid.Bag3D (Bag3D)
+import OpenSolid.Bag3D qualified as Bag3D
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Curve1D qualified as Curve1D
@@ -35,8 +38,6 @@ import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
-import OpenSolid.Maybe qualified as Maybe
-import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D
@@ -62,7 +63,7 @@ data Surface3D space = Surface3D
   { function :: SurfaceFunction3D space
   , domain :: UvRegion
   , outerBoundary :: ~(Boundary space)
-  , innerBoundaries :: ~(Maybe (Set3D space (Boundary space)))
+  , innerBoundaries :: ~(Bag3D space (Boundary space))
   , boundaries :: ~(Set3D space (Boundary space))
   }
 
@@ -80,14 +81,11 @@ outerBoundary = (.outerBoundary)
 outerLoop :: Surface3D space -> NonEmpty (SurfaceCurve3D space)
 outerLoop = Set3D.toNonEmpty . outerBoundary
 
-innerBoundaries :: Surface3D space -> Maybe (Set3D space (Boundary space))
+innerBoundaries :: Surface3D space -> Bag3D space (Boundary space)
 innerBoundaries = (.innerBoundaries)
 
 innerLoops :: Surface3D space -> List (NonEmpty (SurfaceCurve3D space))
-innerLoops surface =
-  case innerBoundaries surface of
-    Nothing -> []
-    Just innerBoundarySet -> Set3D.toListOf Set3D.toNonEmpty innerBoundarySet
+innerLoops surface = Bag3D.toListOf Set3D.toNonEmpty (innerBoundaries surface)
 
 boundaries :: Surface3D space -> Set3D space (Boundary space)
 boundaries = (.boundaries)
@@ -102,12 +100,11 @@ parametric givenFunction givenDomain = do
           & Set.map (SurfaceCurve3D.new givenFunction) SurfaceCurve3D.bounds
   let surfaceOuterBoundary = surfaceBoundary (Region2D.outerBoundary givenDomain)
   let surfaceInnerBoundaries =
-        Maybe.map (Set.map surfaceBoundary Set.bounds) (Region2D.innerBoundaries givenDomain)
-  let outerBoundarySet = Set3D.leaf (Set3D.bounds surfaceOuterBoundary) surfaceOuterBoundary
+        Bag.map surfaceBoundary Set.bounds (Region2D.innerBoundaries givenDomain)
   let surfaceBoundaries =
-        case surfaceInnerBoundaries of
-          Just innerBoundarySet -> Set3D.node (NonEmpty.two outerBoundarySet innerBoundarySet)
-          Nothing -> outerBoundarySet
+        Set3D.extend
+          (Set3D.leaf (Set3D.bounds surfaceOuterBoundary) surfaceOuterBoundary)
+          surfaceInnerBoundaries
   Surface3D
     { function = givenFunction
     , domain = givenDomain

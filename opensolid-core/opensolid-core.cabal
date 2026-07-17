@@ -99,6 +99,9 @@ library
     OpenSolid.Axis
     OpenSolid.Axis2D
     OpenSolid.Axis3D
+    OpenSolid.Bag
+    OpenSolid.Bag2D
+    OpenSolid.Bag3D
     OpenSolid.Bezier
     OpenSolid.Binary
     OpenSolid.Bisection

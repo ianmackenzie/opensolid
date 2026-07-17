@@ -9,6 +9,9 @@ module OpenSolid.Bisection
   )
 where
 
+import OpenSolid.Bag (Bag)
+import OpenSolid.Bag qualified as Bag
+import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -60,55 +63,48 @@ children = (.children)
 resolve ::
   forall subdomain segment existing tag.
   SearchDomain.Bounds subdomain =>
-  Maybe (Set subdomain existing) ->
+  Bag subdomain existing ->
   (subdomain -> segment -> Fuzzy (Maybe tag)) ->
   Tree subdomain segment ->
-  Maybe (Set subdomain (tag, Tree subdomain segment))
+  Bag subdomain (tag, Tree subdomain segment)
 resolve existing callback tree =
   if containedIn existing tree.subdomain
-    then Nothing
+    then Bag.empty
     else case callback tree.subdomain tree.segment of
-      Resolved Nothing -> Nothing
-      Resolved (Just tag) -> Just (Set.leaf tree.subdomain (tag, tree))
-      Unresolved ->
-        case NonEmpty.filterMap (resolve existing callback) tree.children of
-          NonEmpty resolvedChildren -> Just (Set.node resolvedChildren)
-          [] -> Nothing
+      Resolved Nothing -> Bag.empty
+      Resolved (Just tag) -> Bag.singleton tree.subdomain (tag, tree)
+      Unresolved -> Bag.group (List.map (resolve existing callback) (NonEmpty.toList tree.children))
 
 containedIn ::
   forall subdomain existing.
   SearchDomain.Bounds subdomain =>
-  Maybe (Set subdomain existing) ->
+  Bag subdomain existing ->
   subdomain ->
   Bool
-containedIn Nothing _ = False
-containedIn (Just existing) candidate =
-  Set.any (SearchDomain.contains candidate) (const True) existing
+containedIn existing candidate =
+  Bag.any (SearchDomain.contains candidate) (const True) existing
 
 touching ::
   forall subdomain segment existing tag.
   SearchDomain.Bounds subdomain =>
-  Maybe (Set subdomain existing) ->
+  Bag subdomain existing ->
   Set subdomain (tag, Tree subdomain segment) ->
   Bool
-touching Nothing _ = False
-touching (Just existing) set =
-  Set.pairwiseAny SearchDomain.touching (\_ _ -> True) existing set
+touching existing set =
+  Bag.pairwiseAny SearchDomain.touching (\_ _ -> True) existing (Bag.full set)
 
 clusters ::
   forall subdomain segment existing tag.
   SearchDomain.Bounds subdomain =>
-  Maybe (Set subdomain existing) ->
+  Bag subdomain existing ->
   (subdomain -> segment -> Fuzzy (Maybe tag)) ->
   Tree subdomain segment ->
   List (Set subdomain (tag, Tree subdomain segment))
-clusters existing resolveFunction tree =
-  case resolve existing resolveFunction tree of
-    Nothing -> []
-    Just resolved ->
-      Set.clusters SearchDomain.touching (\_ _ -> True) resolved
-        & NonEmpty.map (Set.build (subdomain . Pair.second))
-        & NonEmpty.filter (not . touching existing)
+clusters existing resolveFunction tree = do
+  resolve existing resolveFunction tree
+    & Bag.clusters SearchDomain.touching (\_ _ -> True)
+    & List.map (Set.build (subdomain . Pair.second))
+    & List.filter (not . touching existing)
 
 find ::
   forall subdomain segment tag solution.

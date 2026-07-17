@@ -10,7 +10,7 @@ module OpenSolid.Set3D
   , linear
   , aggregate
   , flatten
-  , fromList
+  , extend
   , toNonEmpty
   , toNonEmptyOf
   , toNonEmptyWithIndex
@@ -38,6 +38,7 @@ module OpenSolid.Set3D
   )
 where
 
+import {-# SOURCE #-} OpenSolid.Bag3D (Bag3D)
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Prelude
 import OpenSolid.Set (Set)
@@ -77,8 +78,8 @@ aggregate = Set.aggregate
 flatten :: Set3D space (Set3D space item) -> Set3D space item
 flatten = Set.flatten
 
-fromList :: (item -> Bounds3D space) -> List item -> Maybe (Set3D space item)
-fromList = Set.fromList
+extend :: Set3D space item -> Bag3D space item -> Set3D space item
+extend = Set.extend
 
 toNonEmpty :: Set3D space item -> NonEmpty item
 toNonEmpty = Set.toNonEmpty

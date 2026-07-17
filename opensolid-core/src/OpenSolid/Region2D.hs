@@ -37,6 +37,8 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis2D (Axis2D)
+import OpenSolid.Bag2D (Bag2D)
+import OpenSolid.Bag2D qualified as Bag2D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.CDT qualified as CDT
 import OpenSolid.Circle2D (Circle2D)
@@ -91,7 +93,7 @@ type role Region2D nominal
 -- | A closed 2D region (possibly with holes), defined by a set of boundary curves.
 data Region2D units = Region2D
   { outerBoundary :: Boundary units
-  , innerBoundaries :: Maybe (Set2D units (Boundary units))
+  , innerBoundaries :: Bag2D units (Boundary units)
   , boundaries :: ~(Set2D units (Boundary units))
   }
 
@@ -125,16 +127,15 @@ instance Intersects (Point2D units) (Region2D units) (Tolerance units) where
 instance Intersects (Region2D units) (Point2D units) (Tolerance units) where
   intersects region point = intersects point region
 
-unsafe :: Boundary units -> Maybe (Set2D units (Boundary units)) -> Region2D units
+unsafe :: Boundary units -> Bag2D units (Boundary units) -> Region2D units
 unsafe givenOuterBoundary givenInnerBoundaries =
   Region2D
     { outerBoundary = givenOuterBoundary
     , innerBoundaries = givenInnerBoundaries
-    , boundaries = do
-        let outerSet = Set2D.leaf (Boundary.bounds givenOuterBoundary) givenOuterBoundary
-        case givenInnerBoundaries of
-          Just innerSet -> Set2D.node (NonEmpty.two outerSet innerSet)
-          Nothing -> outerSet
+    , boundaries =
+        Set2D.extend
+          (Set2D.leaf (Boundary.bounds givenOuterBoundary) givenOuterBoundary)
+          givenInnerBoundaries
     }
 
 {-| Create a region bounded by the given curves.
@@ -175,7 +176,7 @@ rectangle (Bounds2D xBounds yBounds) =
               (Curve2D.lineFrom p21 p22)
               (Curve2D.lineFrom p22 p12)
               (Curve2D.lineFrom p12 p11)
-      unsafe (Boundary.unsafe edges) Nothing
+      unsafe (Boundary.unsafe edges) Bag2D.empty
 
 -- | Create a region from the given circle.
 circle :: Tolerance units => Circle2D units -> Result EmptyRegion (Region2D units)
@@ -184,7 +185,7 @@ circle givenCircle =
     then Error EmptyRegion
     else do
       let edges = NonEmpty.one (Curve2D.circle givenCircle)
-      Ok (unsafe (Boundary.unsafe edges) Nothing)
+      Ok (unsafe (Boundary.unsafe edges) Bag2D.empty)
 
 -- | Create a region from the given polygon.
 polygon :: Tolerance units => Polygon2D units -> Result BoundedBy.Error (Region2D units)
@@ -391,7 +392,7 @@ outerLoop = Boundary.loop . outerBoundary
 The boundary curves will be in clockwise order,
 and each curve will be in the clockwise direction.
 -}
-innerBoundaries :: Region2D units -> Maybe (Set2D units (Boundary units))
+innerBoundaries :: Region2D units -> Bag2D units (Boundary units)
 innerBoundaries = (.innerBoundaries)
 
 {-| The lists of curves forming the inner boundaries / holes (if any) of the region.
@@ -400,10 +401,7 @@ The curves will be in clockwise order,
 and each curve will be in the clockwise direction.
 -}
 innerLoops :: Region2D units -> List (NonEmpty (Curve2D units))
-innerLoops region =
-  case innerBoundaries region of
-    Nothing -> []
-    Just innerBoundarySet -> Set2D.toListOf Boundary.loop innerBoundarySet
+innerLoops region = Bag2D.toListOf Boundary.loop (innerBoundaries region)
 
 boundaries :: Region2D units -> Set2D units (Boundary units)
 boundaries = (.boundaries)
@@ -421,7 +419,7 @@ boundaryCurves region =
 map :: (Boundary units1 -> Boundary units2) -> Region2D units1 -> Region2D units2
 map function region = do
   let mappedOuterBoundary = function region.outerBoundary
-  let mappedInnerBoundaries = Maybe.map (Set2D.map function Boundary.bounds) region.innerBoundaries
+  let mappedInnerBoundaries = Bag2D.map function Boundary.bounds region.innerBoundaries
   unsafe mappedOuterBoundary mappedInnerBoundaries
 
 placeIn :: Frame2D units -> Region2D units -> Region2D units
@@ -468,14 +466,10 @@ classify point region =
     -- Point is on outer boundary
     Boundary.Intersected -> OnBoundary
     -- Point is enclosed within outer boundary, so have to check inner boundaries
-    Boundary.Internal -> case region.innerBoundaries of
-      -- No inner boundaries, so inside outer boundary means inside region
-      Nothing -> Inside
-      -- Need to check point against inner boundaries
-      Just innerBoundarySet ->
-        innerBoundarySet
-          & Set2D.cull (intersects point)
-          & classifyInner point
+    Boundary.Internal ->
+      region.innerBoundaries
+        & Bag2D.cull (intersects point)
+        & classifyInner point
 
 classifyInner :: Tolerance units => Point2D units -> List (Boundary units) -> Classification
 classifyInner point candidateInnerBoundaries = case candidateInnerBoundaries of
@@ -491,14 +485,12 @@ classifyLoops [] = Error BoundedBy.EmptyRegion
 classifyLoops (NonEmpty loops) = do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
   let outerBoundaryCandidate = Boundary.unsafe (fixSign Positive largestLoop)
-  case List.map (Boundary.unsafe . fixSign Negative) smallerLoops of
-    [] -> Ok (unsafe outerBoundaryCandidate Nothing) -- No inner loops
-    NonEmpty innerBoundaryCandidates ->
-      if NonEmpty.all (boundaryIsInside outerBoundaryCandidate) innerBoundaryCandidates
-        then do
-          let innerBoundarySet = Set2D.build Boundary.bounds innerBoundaryCandidates
-          Ok (unsafe outerBoundaryCandidate (Just innerBoundarySet))
-        else Error BoundedBy.MultipleDisjointRegions
+  let innerBoundaryCandidates = List.map (Boundary.unsafe . fixSign Negative) smallerLoops
+  if List.all (boundaryIsInside outerBoundaryCandidate) innerBoundaryCandidates
+    then do
+      let innerBoundaryBag = Bag2D.pack Boundary.bounds innerBoundaryCandidates
+      Ok (unsafe outerBoundaryCandidate innerBoundaryBag)
+    else Error BoundedBy.MultipleDisjointRegions
 
 fixSign :: Tolerance units => Sign -> Loop units -> Loop units
 fixSign desiredSign loop =

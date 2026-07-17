@@ -10,7 +10,7 @@ module OpenSolid.Set2D
   , linear
   , aggregate
   , flatten
-  , fromList
+  , extend
   , toNonEmpty
   , toNonEmptyOf
   , toNonEmptyWithIndex
@@ -38,6 +38,7 @@ module OpenSolid.Set2D
   )
 where
 
+import {-# SOURCE #-} OpenSolid.Bag2D (Bag2D)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Prelude
 import OpenSolid.Set (Set)
@@ -77,8 +78,8 @@ aggregate = Set.aggregate
 flatten :: Set2D units (Set2D units item) -> Set2D units item
 flatten = Set.flatten
 
-fromList :: (item -> Bounds2D units) -> List item -> Maybe (Set2D units item)
-fromList = Set.fromList
+extend :: Set2D units item -> Bag2D units item -> Set2D units item
+extend = Set.extend
 
 toNonEmpty :: Set2D units item -> NonEmpty item
 toNonEmpty = Set.toNonEmpty

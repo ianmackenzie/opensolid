@@ -9,6 +9,7 @@ module OpenSolid.Curve.Nondegenerate
   )
 where
 
+import OpenSolid.Bag qualified as Bag
 import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
@@ -26,7 +27,6 @@ import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
-import OpenSolid.Set qualified as Set
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 
@@ -61,7 +61,7 @@ findPoint ::
 findPoint point nondegenerateCurve = do
   let Nondegenerate curve = nondegenerateCurve
   let endpointSolutions = [t | t <- [0.0, 1.0], Curve.point curve t ~= point]
-  let endpointSolutionSet = Set.fromList Interval.constant endpointSolutions
+  let endpointSolutionSet = Bag.pack Interval.constant endpointSolutions
   let isDistant segment = not (point `intersects` Curve.Segment.range segment)
   let resolvedMonotonicity _ segment
         | isDistant segment = Resolved Nothing
