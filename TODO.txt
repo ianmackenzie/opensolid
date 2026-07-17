@@ -1,3 +1,7 @@
+Refactor Set.cull and Set.filter to return Bag values
+
+Remove Sign pattern?
+
 Remove 'or is NaN' checks from Newton-Raphson solvers
 
 Ensure curve intersection works when curves with degenerate endpoints have tangent joins
