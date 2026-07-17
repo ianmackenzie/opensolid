@@ -6,6 +6,7 @@ module OpenSolid.Bag3D
   , full
   , toMaybeSet
   , fromMaybeSet
+  , isEmpty
   , size
   , singleton
   , group
@@ -49,6 +50,9 @@ toMaybeSet = Bag.toMaybeSet
 
 fromMaybeSet :: Maybe (Set3D space item) -> Bag3D space item
 fromMaybeSet = Bag.fromMaybeSet
+
+isEmpty :: Bag3D space item -> Bool
+isEmpty = Bag.isEmpty
 
 size :: Bag3D space item -> Int
 size = Bag.size

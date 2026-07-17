@@ -6,6 +6,7 @@ module OpenSolid.Bag2D
   , full
   , toMaybeSet
   , fromMaybeSet
+  , isEmpty
   , size
   , singleton
   , group
@@ -49,6 +50,9 @@ toMaybeSet = Bag.toMaybeSet
 
 fromMaybeSet :: Maybe (Set2D units item) -> Bag2D units item
 fromMaybeSet = Bag.fromMaybeSet
+
+isEmpty :: Bag2D units item -> Bool
+isEmpty = Bag.isEmpty
 
 size :: Bag2D units item -> Int
 size = Bag.size

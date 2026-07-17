@@ -4,6 +4,7 @@ module OpenSolid.Bag
   , full
   , toMaybeSet
   , fromMaybeSet
+  , isEmpty
   , size
   , singleton
   , group
@@ -60,6 +61,10 @@ toMaybeSet (Full set) = Just set
 fromMaybeSet :: Maybe (Set b a) -> Bag b a
 fromMaybeSet Nothing = Empty
 fromMaybeSet (Just set) = Full set
+
+isEmpty :: Bag b a -> Bool
+isEmpty Empty = True
+isEmpty Full{} = False
 
 size :: Bag b a -> Int
 size Empty = 0
