@@ -34,7 +34,7 @@ data SearchDomain bounds = SearchDomain
 
 data InfiniteRecursion = InfiniteRecursion deriving (Show, Exception)
 
-class Set.Bounds bounds => Bounds bounds where
+class (Set.Bounds bounds, Intersects bounds bounds (Tolerance Unitless)) => Bounds bounds where
   contains :: bounds -> bounds -> Bool
   overlap :: bounds -> bounds -> Number
   isSmall :: bounds -> Bool

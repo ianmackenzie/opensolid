@@ -47,4 +47,4 @@ solveNonOverlapping
     List.concat [boundaryIntersections, tangentIntersections, crossingIntersections]
 
 touching :: SearchDomain.Bounds subdomain => Bag subdomain a -> Set subdomain b -> Bool
-touching bag set = Bag.pairwiseAny SearchDomain.touching (\_ _ -> True) bag (Bag.full set)
+touching bag set = Bag.full set & Bag.pairwiseAny (^) (\_ _ -> True) bag
