@@ -1,8 +1,8 @@
 module OpenSolid.Curve.IntersectionPoint
   ( IntersectionPoint (IntersectionPoint)
-  , g0
-  , g1
-  , g2
+  , crossing
+  , tangent
+  , indistinguishable
   , continuity
   , firstParameterValue
   , secondParameterValue
@@ -11,11 +11,10 @@ module OpenSolid.Curve.IntersectionPoint
   , curvePoints
   , firstCurvePoint
   , secondCurvePoint
-  , Classification (..)
-  , classify
   , isJoin
   , isCrossing
   , isTangent
+  , isIndistinguishable
   , overlapSign
   )
 where
@@ -39,22 +38,22 @@ deriving instance
   Curve.Exists dimension units space =>
   Show (IntersectionPoint dimension units space)
 
-g0 ::
+crossing ::
   (CurvePoint dimension units space, CurvePoint dimension units space) ->
   IntersectionPoint dimension units space
-g0 = IntersectionPoint Continuity.G0
+crossing = IntersectionPoint Continuity.Crossing
 
-g1 ::
+tangent ::
   Sign ->
   (CurvePoint dimension units space, CurvePoint dimension units space) ->
   IntersectionPoint dimension units space
-g1 alignment = IntersectionPoint (Continuity.G1 alignment)
+tangent alignment = IntersectionPoint (Continuity.Tangent alignment)
 
-g2 ::
+indistinguishable ::
   Sign ->
   (CurvePoint dimension units space, CurvePoint dimension units space) ->
   IntersectionPoint dimension units space
-g2 alignment = IntersectionPoint (Continuity.G2 alignment)
+indistinguishable alignment = IntersectionPoint (Continuity.Indistinguishable alignment)
 
 continuity :: IntersectionPoint dimension units space -> Continuity
 continuity = (.continuity)
@@ -82,55 +81,50 @@ firstCurvePoint = Pair.first . curvePoints
 secondCurvePoint :: IntersectionPoint dimension units space -> CurvePoint dimension units space
 secondCurvePoint = Pair.first . curvePoints
 
-data Classification
-  = Join
-  | Crossing
-  | Tangent
-  | Overlap Sign
-  deriving (Eq, Show)
-
-classify ::
-  (Curve.Exists dimension units space, Tolerance units) =>
-  IntersectionPoint dimension units space ->
-  Classification
-classify intersectionPoint = do
-  let (p1, p2) = curvePoints intersectionPoint
-  let (t1, t2) = parameterValues intersectionPoint
-  let joinOrPositiveOverlap =
-        if (t1 == 0.0 && t2 == 1.0) || (t1 == 1.0 && t2 == 0.0) then Join else Overlap Positive
-  let joinOrNegativeOverlap =
-        if (t1 == 0.0 && t2 == 0.0) || (t1 == 1.0 && t2 == 1.0) then Join else Overlap Negative
-  let hasDegeneracy = CurvePoint.isDegenerate p1 || CurvePoint.isDegenerate p2
-  case continuity intersectionPoint of
-    Continuity.G0 -> if Parameter.isEndpoint t1 && Parameter.isEndpoint t2 then Join else Crossing
-    Continuity.G1 Positive -> if hasDegeneracy then joinOrPositiveOverlap else Tangent
-    Continuity.G1 Negative -> if hasDegeneracy then joinOrNegativeOverlap else Tangent
-    Continuity.G2 Positive -> joinOrPositiveOverlap
-    Continuity.G2 Negative -> joinOrNegativeOverlap
-
 isJoin ::
   (Curve.Exists dimension units space, Tolerance units) =>
   IntersectionPoint dimension units space ->
   Bool
-isJoin intersectionPoint = classify intersectionPoint == Join
+isJoin intersectionPoint = do
+  let (t1, t2) = parameterValues intersectionPoint
+  Parameter.isEndpoint t1 && Parameter.isEndpoint t2 && case continuity intersectionPoint of
+    Continuity.Crossing -> True
+    Continuity.Tangent _ -> True
+    Continuity.Indistinguishable Positive -> t1 /= t2
+    Continuity.Indistinguishable Negative -> t1 == t2
 
 isCrossing ::
   (Curve.Exists dimension units space, Tolerance units) =>
   IntersectionPoint dimension units space ->
   Bool
-isCrossing intersectionPoint = classify intersectionPoint == Crossing
+isCrossing intersectionPoint =
+  case continuity intersectionPoint of
+    Continuity.Crossing -> True
+    _ -> False
 
 isTangent ::
   (Curve.Exists dimension units space, Tolerance units) =>
   IntersectionPoint dimension units space ->
   Bool
-isTangent intersectionPoint = classify intersectionPoint == Tangent
+isTangent intersectionPoint =
+  case continuity intersectionPoint of
+    Continuity.Tangent _ -> True
+    _ -> False
+
+isIndistinguishable ::
+  (Curve.Exists dimension units space, Tolerance units) =>
+  IntersectionPoint dimension units space ->
+  Bool
+isIndistinguishable intersectionPoint =
+  case continuity intersectionPoint of
+    Continuity.Indistinguishable _ -> True
+    _ -> False
 
 overlapSign ::
   (Curve.Exists dimension units space, Tolerance units) =>
   IntersectionPoint dimension units space ->
   Maybe Sign
 overlapSign intersectionPoint =
-  case classify intersectionPoint of
-    Overlap sign -> Just sign
+  case continuity intersectionPoint of
+    Continuity.Indistinguishable sign -> Just sign
     _ -> Nothing

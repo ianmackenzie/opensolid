@@ -199,7 +199,8 @@ overlapAndJoin = Test.verify "overlapAndJoin" do
   let curvePoint2 t2 = CurvePoint.on nondegenerate2 t2
   (sign, segments, points) <- overlappingSegments arc1 arc2 & Result.orFail
   let expectedSegments = NonEmpty.one (Interval 0.0 (1 / 4), Interval 0.0 (1 / 5))
-  let expectedPoints = [IntersectionPoint.g2 Negative (curvePoint1 1.0, curvePoint2 1.0)]
+  let expectedPoints =
+        [IntersectionPoint.indistinguishable Negative (curvePoint1 1.0, curvePoint2 1.0)]
   Test.all
     [ Test.expect (equalOverlapSegmentLists segments expectedSegments)
         & Test.output "segments" segments
@@ -221,8 +222,8 @@ crossingIntersection = Test.verify "crossingIntersection" do
   intersections <- Curve2D.intersections arc1 arc2 & Result.orFail
   let expectedIntersectionPoints =
         NonEmpty.two
-          (IntersectionPoint.g0 (curvePoint1 0.0, curvePoint2 0.0))
-          (IntersectionPoint.g0 (curvePoint1 0.5, curvePoint2 0.5))
+          (IntersectionPoint.crossing (curvePoint1 0.0, curvePoint2 0.0))
+          (IntersectionPoint.crossing (curvePoint1 0.5, curvePoint2 0.5))
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
@@ -252,7 +253,7 @@ tangentIntersection = Test.verify "tangentIntersection" do
   let curvePoint2 t2 = CurvePoint.on nondegenerate2 t2
   intersections <- Curve2D.intersections arc1 arc2 & Result.orFail
   let expectedIntersectionPoints =
-        NonEmpty.one (IntersectionPoint.g1 Negative (curvePoint1 0.5, curvePoint2 0.5))
+        NonEmpty.one (IntersectionPoint.tangent Negative (curvePoint1 0.5, curvePoint2 0.5))
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->

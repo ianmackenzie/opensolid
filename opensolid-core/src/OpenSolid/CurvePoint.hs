@@ -111,7 +111,7 @@ continuity p1 p2 = do
         then do
           let sign = Number.sign (tangent1 `dot` tangent2)
           case Result.map2 (,) (nondegenerate p1) (nondegenerate p2) of
-            Error IsDegenerate -> Just (Continuity.G1 sign)
+            Error IsDegenerate -> Just (Continuity.Indistinguishable sign)
             Ok (nondegenerate1, nondegenerate2) -> do
               let l1 = Vector.magnitude (derivative p1)
               let l2 = Vector.magnitude (derivative p2)
@@ -120,7 +120,7 @@ continuity p1 p2 = do
               let k2_ = curvatureVector_ nondegenerate2
               let k = Vector.erase (k1_ - k2_)
               if Vector.unerase (k * l * l / 2.0) ~= Vector.zero
-                then Just (Continuity.G2 sign)
-                else Just (Continuity.G1 sign)
-        else Just Continuity.G0
+                then Just (Continuity.Indistinguishable sign)
+                else Just (Continuity.Tangent sign)
+        else Just Continuity.Crossing
     else Nothing

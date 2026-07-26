@@ -56,6 +56,5 @@ solve nondegenerateA nondegenerateB Crossing (tRangeA, tRangeB) (segmentA, segme
       let p2 = CurvePoint.on nondegenerateB tB
       case CurvePoint.continuity p1 p2 of
         Nothing -> Unresolved
-        Just Continuity.G0 -> Resolved (Just (IntersectionPoint.g0 (p1, p2)))
-        Just _ ->
-          InternalError.throw "Should have guaranteed by this point that continuity is at most G0"
+        Just Continuity.Crossing -> Resolved (Just (IntersectionPoint.crossing (p1, p2)))
+        Just _ -> InternalError.throw "Should have guaranteed by this point that all intersection points are crossing ones"

@@ -173,7 +173,7 @@ findInteriorIntersections endpointIntersections = do
                     List.TwoOrMore -> Nothing
             let hasCrossingEndpointIntersection = case singleEndpointIntersection of
                   Just intersectionPoint ->
-                    IntersectionPoint.continuity intersectionPoint == Continuity.G0
+                    IntersectionPoint.continuity intersectionPoint == Continuity.Crossing
                   Nothing -> False
             let hasContinuation = case singleEndpointIntersection of
                   Just intersectionPoint -> do
@@ -187,7 +187,7 @@ findInteriorIntersections endpointIntersections = do
                   Nothing -> False
             let hasTangentEndpointIntersection = case singleEndpointIntersection of
                   Just intersectionPoint ->
-                    IntersectionPoint.continuity intersectionPoint > Continuity.G0
+                    IntersectionPoint.continuity intersectionPoint > Continuity.Crossing
                   Nothing -> False
             let hasDegenerateEndpointIntersection = case singleEndpointIntersection of
                   Just intersectionPoint -> do

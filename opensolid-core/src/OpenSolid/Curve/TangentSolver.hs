@@ -12,7 +12,8 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Continuity qualified as Continuity
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.IntersectionPoint (IntersectionPoint (IntersectionPoint))
+import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
+import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.CurvePoint qualified as CurvePoint
 import OpenSolid.InternalError qualified as InternalError
@@ -68,7 +69,7 @@ solve nondegenerateA nondegenerateB tRangeA tRangeB function = do
   case CurvePoint.continuity p1 p2 of
     Nothing -> Unresolved
     Just continuity -> case continuity of
-      Continuity.G0 -> Unresolved
-      Continuity.G1 _ -> Resolved (Just (IntersectionPoint continuity (p1, p2)))
-      Continuity.G2 _ ->
+      Continuity.Crossing -> Unresolved
+      Continuity.Tangent sign -> Resolved (Just (IntersectionPoint.tangent sign (p1, p2)))
+      Continuity.Indistinguishable _ ->
         InternalError.throw "Should have guaranteed by this point that curvatures are not equal"
