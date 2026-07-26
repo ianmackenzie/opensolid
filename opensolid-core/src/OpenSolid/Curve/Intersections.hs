@@ -9,5 +9,8 @@ import OpenSolid.Prelude
 
 data Intersections dimension units space
   = IntersectionPoints (NonEmpty (IntersectionPoint dimension units space))
-  | OverlappingSegments Sign (NonEmpty (Interval Unitless, Interval Unitless)) (List (IntersectionPoint dimension units space))
+  | OverlappingSegments
+      Sign
+      (NonEmpty (Interval Unitless, Interval Unitless))
+      (List (IntersectionPoint dimension units space))
   deriving (Show)
