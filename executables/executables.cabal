@@ -242,3 +242,12 @@ executable revolved-normals
   build-depends:
     base,
     opensolid-core,
+
+executable degenerate-join
+  import: config
+  main-is: Main.hs
+  hs-source-dirs: degenerate-join
+  build-depends:
+    base,
+    opensolid-components,
+    opensolid-core,
