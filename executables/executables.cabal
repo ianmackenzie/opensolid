@@ -186,11 +186,8 @@ executable gear-generation
   hs-source-dirs: gear-generation
   build-depends:
     base,
-    executables,
     opensolid-components,
     opensolid-core,
-    text,
-    time,
 
 executable blended-surface
   import: config
