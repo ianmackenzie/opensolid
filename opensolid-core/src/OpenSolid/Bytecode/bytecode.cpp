@@ -872,7 +872,7 @@ evaluate(
       case Square1d: {
         T input = getScalar();
         T* output = getScalarPointer();
-        *output = input * input;
+        *output = squared(input);
         break;
       }
       case Sqrt1d: {
