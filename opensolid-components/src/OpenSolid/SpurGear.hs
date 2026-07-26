@@ -93,7 +93,9 @@ profile gear = do
   let leftEnd = Curve2D.endPoint involuteLeft
   let connector
         | rd > rb = Curve2D.lineFrom leftEnd nextToothStart
-        | otherwise = Curve2D.arcFrom leftEnd nextToothStart -Angle.pi
+        | otherwise = do
+            let angularWidth = 2.0 * Angle.asin (0.5 * Point2D.distanceFrom leftEnd nextToothStart / rb)
+            Curve2D.arcFrom leftEnd nextToothStart -(Angle.pi - angularWidth)
   let toothProfileCurves = [involuteRight, tip, involuteLeft, connector]
 
   -- Overall profile
