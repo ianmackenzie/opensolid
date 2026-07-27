@@ -211,9 +211,7 @@ library
     OpenSolid.Region2D.BoundedBy
     OpenSolid.Resolution
     OpenSolid.Result
-    OpenSolid.Search
     OpenSolid.SearchDomain
-    OpenSolid.SearchTree
     OpenSolid.Set
     OpenSolid.Set.Bounds
     OpenSolid.Set2D
