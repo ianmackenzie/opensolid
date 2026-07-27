@@ -2,7 +2,6 @@ module OpenSolid.Curve2D
   ( Curve2D
   , Compiled
   , Segment
-  , SearchTree
   , new
   , constant
   , xy
@@ -82,7 +81,6 @@ module OpenSolid.Curve2D
   , uniformParameterizationValue
   , uniformPoint
   , piecewise
-  , searchTree
   )
 where
 
@@ -116,7 +114,6 @@ import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.List qualified as List
-import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Orientation2D (Orientation2D)
 import OpenSolid.Orientation2D qualified as Orientation2D
@@ -148,8 +145,6 @@ import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 type Compiled units = Curve.Compiled 2 units Void
 
 type Segment units = Curve.Segment 2 units Void
-
-type SearchTree units = Curve.SearchTree 2 units Void
 
 new :: Compiled units -> VectorCurve2D units -> Curve2D units
 new = Curve.new
@@ -888,6 +883,3 @@ piecewiseDerivativeRange tree s1 s2 = case tree of
   PiecewiseDerivativeLeaf segmentLength curve -> do
     let rRange = Interval (s1 / segmentLength) (s2 / segmentLength)
     VectorCurve2D.range curve rRange
-
-searchTree :: Nondegenerate (Curve2D units) -> SearchTree units
-searchTree = Curve.searchTree

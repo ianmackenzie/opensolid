@@ -2,7 +2,6 @@ module OpenSolid.Curve3D
   ( Curve3D
   , Compiled
   , Segment
-  , SearchTree
   , new
   , constant
   , on
@@ -42,7 +41,6 @@ module OpenSolid.Curve3D
   , IntersectionPoint
   , Intersections
   , intersections
-  , searchTree
   )
 where
 
@@ -62,7 +60,6 @@ import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.Length (Length)
 import OpenSolid.Line3D (Line3D)
-import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
@@ -79,8 +76,6 @@ import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 type Compiled space = Curve.Compiled 3 Meters space
 
 type Segment space = Curve.Segment 3 Meters space
-
-type SearchTree space = Curve.SearchTree 3 Meters space
 
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 new = Curve.new
@@ -261,6 +256,3 @@ intersections ::
   Curve3D space ->
   Result IsDegenerate (Maybe (Intersections space))
 intersections = Curve.intersections
-
-searchTree :: Nondegenerate (Curve3D space) -> SearchTree space
-searchTree = Curve.searchTree

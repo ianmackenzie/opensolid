@@ -8,7 +8,6 @@ module OpenSolid.Curve
   , Solver (..)
   , Compiled
   , Segment
-  , SearchTree
   , Tree (Tree)
   , HasDegeneracy (HasDegeneracy)
   , new
@@ -47,7 +46,6 @@ module OpenSolid.Curve
   , desingularized
   , findPoint
   , bisectionTree
-  , searchTree
   , crossingSolver
   , tangentSolver
   , Intersections (IntersectionPoints, OverlappingSegments)
@@ -127,8 +125,6 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
-import OpenSolid.SearchDomain qualified as SearchDomain
-import OpenSolid.SearchTree qualified as SearchTree
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
@@ -162,7 +158,6 @@ data Curve dimension units space = Curve
   , startPoint :: ~(Point dimension units space)
   , endPoint :: ~(Point dimension units space)
   , bounds :: ~(Bounds dimension units space)
-  , searchTree :: Nondegenerate.Field (SearchTree dimension units space)
   , bisectionTree :: Nondegenerate.Field (BisectionTree dimension units space)
   , arcLengthParameterization :: Nondegenerate.Field (Quantity units, Curve1D Unitless)
   }
@@ -181,9 +176,6 @@ type Compiled dimension units space =
     (Bounds dimension units space)
 
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show)
-
-type SearchTree dimension units space =
-  SearchTree.SearchTree (Interval Unitless) (Segment dimension units space)
 
 type BisectionTree dimension units space =
   Bisection.Tree (Interval Unitless) (Segment dimension units space)
@@ -207,7 +199,6 @@ instance Units.Coercion (Curve2D units1) (Curve2D units2) where
       , startPoint = Units.coerce curve.startPoint
       , endPoint = Units.coerce curve.endPoint
       , bounds = Units.coerce curve.bounds
-      , searchTree = Units.coerce curve.searchTree
       , bisectionTree = Units.coerce curve.bisectionTree
       , arcLengthParameterization =
           Nondegenerate.map (Pair.mapFirst Units.coerce) curve.arcLengthParameterization
@@ -503,9 +494,6 @@ new givenCompiled givenDerivative =
       , startPoint = CompiledFunction.value givenCompiled 0.0
       , endPoint = CompiledFunction.value givenCompiled 1.0
       , bounds = CompiledFunction.range givenCompiled Interval.unit
-      , searchTree =
-          curve & Nondegenerate.field do
-            \nondegenerateCurve -> SearchTree.build (Curve.Segment.new nondegenerateCurve) SearchDomain.curve
       , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) curve
       , arcLengthParameterization = Nondegenerate.field buildArcLengthParameterization curve
       }
@@ -651,9 +639,6 @@ bounds = (.bounds)
 bisectionTree :: Nondegenerate (Curve dimension units space) -> BisectionTree dimension units space
 bisectionTree = Nondegenerate.get (.bisectionTree)
 
-searchTree :: Nondegenerate (Curve dimension units space) -> SearchTree dimension units space
-searchTree = Nondegenerate.get (.searchTree)
-
 hasDegenerateStart :: Exists dimension units space => Curve dimension units space -> Bool
 hasDegenerateStart curve = VectorCurve.hasDegenerateStart (derivative curve)
 
@@ -745,12 +730,6 @@ reverse curve =
       , startPoint = curve.endPoint
       , endPoint = curve.startPoint
       , bounds = curve.bounds
-      , -- TODO optimize by adding e.g. a Segment.reverse function,
-        -- to be able to reuse the existing search tree
-        searchTree =
-          reversed & Nondegenerate.field do
-            \nondegenerateReversed ->
-              SearchTree.build (Curve.Segment.new nondegenerateReversed) SearchDomain.curve
       , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) reversed
       , arcLengthParameterization =
           curve.arcLengthParameterization
@@ -924,11 +903,6 @@ transformBy transform curve =
       , startPoint = Point.transformBy transform curve.startPoint
       , endPoint = Point.transformBy transform curve.endPoint
       , bounds = CompiledFunction.range compiledTransformed Interval.unit
-      , -- TODO optimize by transforming existing search tree?
-        searchTree =
-          transformed & Nondegenerate.field do
-            \nondegenerateTransformed ->
-              SearchTree.build (Curve.Segment.new nondegenerateTransformed) SearchDomain.curve
       , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) transformed
       , arcLengthParameterization =
           case Transform.uniformScale transform of
@@ -954,10 +928,6 @@ placeOn plane curve =
       , startPoint = Point2D.placeOn plane curve.startPoint
       , endPoint = Point2D.placeOn plane curve.endPoint
       , bounds = CompiledFunction.range compiledPlaced Interval.unit
-      , searchTree =
-          placed & Nondegenerate.field do
-            \nondegeneratePlaced ->
-              SearchTree.build (Curve.Segment.new nondegeneratePlaced) SearchDomain.curve
       , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) placed
       , arcLengthParameterization = curve.arcLengthParameterization
       }
