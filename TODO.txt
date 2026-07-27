@@ -1,5 +1,7 @@
 Refactor Set.cull and Set.filter to return Bag values
 
+Remove SearchDomain module?
+
 Remove Sign pattern?
 
 Add Show helper module with e.g. Show.constructor, Show.record?
@@ -8,9 +10,6 @@ Add Show helper module with e.g. Show.constructor, Show.record?
 Remove 'or is NaN' checks from Newton-Raphson solvers
 
 Ensure curve intersection works when curves with degenerate endpoints have tangent joins
-
-Allow Set values to be empty?
-- check where 'bounds' and 'toNonEmpty' are used...
 
 Refactor tolerance handling to allow implicitly comparing unitless values, via a typeclass like:
 
