@@ -31,8 +31,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Vector2D qualified as Vector2D
 
 -- | An arc in 2D.
-data Arc2D units
-  = Arc2D
+data Arc2D units = Arc2D
   { centerPoint :: Point2D units
   , radius :: Quantity units
   , startAngle :: Angle
