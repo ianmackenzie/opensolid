@@ -6,6 +6,7 @@ module OpenSolid.Bisection
   , pairwise
   , clusters
   , find
+  , touching
   )
 where
 

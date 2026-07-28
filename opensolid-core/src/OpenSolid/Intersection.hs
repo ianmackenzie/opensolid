@@ -37,14 +37,11 @@ solveNonOverlapping
     } = do
     let allTangentClusters = Bisection.clusters Bag.empty resolveTangent searchTree
     let candidateTangentClusters =
-          allTangentClusters & List.filter (not . touching boundaryTangentSubdomains)
+          allTangentClusters & List.filter (not . Bisection.touching boundaryTangentSubdomains)
     let tangentIntersections = List.combine solveTangent candidateTangentClusters
     let tangentExclusions = Bag.aggregate (List.map Bag.full allTangentClusters)
     let allCrossingClusters = Bisection.clusters tangentExclusions resolveCrossing searchTree
     let candidateCrossingClusters =
-          allCrossingClusters & List.filter (not . touching boundaryCrossingSubdomains)
+          allCrossingClusters & List.filter (not . Bisection.touching boundaryCrossingSubdomains)
     let crossingIntersections = List.combine solveCrossing candidateCrossingClusters
     List.concat [boundaryIntersections, tangentIntersections, crossingIntersections]
-
-touching :: SearchDomain.Bounds subdomain => Bag subdomain a -> Set subdomain b -> Bool
-touching bag set = Bag.full set & Bag.pairwiseAny (^) (\_ _ -> True) bag
