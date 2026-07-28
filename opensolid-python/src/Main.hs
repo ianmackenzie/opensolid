@@ -308,7 +308,7 @@ topLevelClassName class_ = do
 
 allExportsDefinition :: Text
 allExportsDefinition = do
-  let names = List.sort ("Tolerance" : List.filterMap topLevelClassName API.classes)
+  let names = List.sort (List.filterMap topLevelClassName API.classes)
   Python.lines
     [ "__all__ = ["
     , Python.indent
