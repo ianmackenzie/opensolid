@@ -45,7 +45,6 @@ module OpenSolid.Curve2D
   , offsetRightwardBy
   , reverse
   , bounds
-  , g2
   , IntersectionPoint
   , Intersections
   , intersections
@@ -115,8 +114,6 @@ import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
-import OpenSolid.Orientation2D (Orientation2D)
-import OpenSolid.Orientation2D qualified as Orientation2D
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
@@ -134,7 +131,7 @@ import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector qualified as Vector
-import OpenSolid.Vector2D (Vector2D (Vector2D))
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D)
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
@@ -558,54 +555,6 @@ intersections ::
   Curve2D units ->
   Result IsDegenerate (Maybe (Intersections units))
 intersections = Curve.intersections
-
-g2 ::
-  Tolerance units =>
-  (Curve2D units, Number) ->
-  (Curve2D units, Number) ->
-  Quantity units ->
-  Bool
-g2 (curve1, t1) (curve2, t2) radius =
-  point curve1 t1 ~= point curve2 t2 && do
-    let Vector2D dxdt1 dydt1 = derivativeValue curve1 t1
-    let Vector2D dxdt2 dydt2 = derivativeValue curve2 t2
-    let dxdtMin = min (Quantity.abs dxdt1) (Quantity.abs dxdt2)
-    let dydtMin = min (Quantity.abs dydt1) (Quantity.abs dydt2)
-    let orientation =
-          if dxdtMin >= dydtMin
-            then Orientation2D.horizontal
-            else Orientation2D.vertical
-    let signature1 = signature orientation curve1 t1 radius
-    let signature2 = signature orientation curve2 t2 radius
-    signature1 ~= signature2
-
-signature ::
-  Tolerance units =>
-  Orientation2D ->
-  Curve2D units ->
-  Number ->
-  Quantity units ->
-  (Quantity units, Quantity units)
-signature orientation curve tValue radius = do
-  let local vector = Vector2D.relativeToOrientation orientation vector
-  let Vector2D x' y' = local (derivativeValue curve tValue)
-  let Vector2D x'' y'' = local (secondDerivativeValue curve tValue)
-  let dydx = if x' != Quantity.zero then y' / x' else y'' / x''
-  let firstOrder = dydx * radius
-  let d2ydx2 =
-        if x' != Quantity.zero
-          then (y'' ?*? x' - y' ?*? x'') ?/? (x' ?*? x' ?*? x')
-          else do
-            let fourthDerivative =
-                  curve
-                    & derivative
-                    & VectorCurve2D.derivative
-                    & VectorCurve2D.derivative
-                    & VectorCurve2D.derivative
-            let Vector2D x'''' y'''' = local (VectorCurve2D.value fourthDerivative tValue)
-            (y'''' ?*? x'' - y'' ?*? x'''') ?/? (x'' ?*? x'' ?*? x'')
-  let secondOrder = Units.simplify (0.5 * d2ydx2 ?*? Quantity.squared_ radius)
-  (firstOrder, secondOrder)
 
 placeIn :: Frame2D units -> Curve2D units -> Curve2D units
 placeIn frame curve = do

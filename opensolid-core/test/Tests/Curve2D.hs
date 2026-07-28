@@ -8,6 +8,7 @@ module Tests.Curve2D
 where
 
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Continuity qualified as Continuity
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
@@ -486,8 +487,14 @@ g2 = Test.check 100 "G2 continuity" do
   let signedRadius = 1.0 / Curve1D.value curvatureCurve t
   let normalDirection = Direction2D.rotateLeft tangentDirection
   let arcCenter = point + signedRadius * normalDirection
-  let arc = Curve2D.sweptArc arcCenter point (Angle.degrees 30.0)
-  Test.expect (Curve2D.g2 (spline, t) (arc, 0.0) Length.meter)
+  let arc = Curve2D.sweptArc arcCenter point (Quantity.sign signedRadius * Angle.degrees 30.0)
+  nondegenerateSpline <- Curve.nondegenerate spline & Result.orFail
+  nondegenerateArc <- Curve.nondegenerate arc & Result.orFail
+  let splinePoint = CurvePoint.on nondegenerateSpline t
+  let arcPoint = CurvePoint.on nondegenerateArc 0.0
+  let continuity = CurvePoint.continuity splinePoint arcPoint
+  Test.expect (continuity == Just (Continuity.Indistinguishable Positive))
+    & Test.output "continuity" continuity
 
 curvatureVectorIsTangentDerivative :: Test
 curvatureVectorIsTangentDerivative =
