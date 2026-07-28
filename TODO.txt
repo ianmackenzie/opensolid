@@ -4,6 +4,18 @@ Remove SearchDomain module?
 
 Remove Sign pattern?
 
+Try having 'fromConstraints' functions?
+- and corresponding 'withSomething' functions?
+  - e.g. Arc2D.withRadius returns an Arc2D.Constraint value
+- try to figure out a way to automatically report simple overconstrained/underconstrained errors
+  - e.g. every constraint has a name and list supported combinations of constraint names, then:
+    - if provided constraints are a subset of one or more supported combinations,
+      report unconstrained (and report which constraints could be added)
+    - if provided constraints are a superset of one or more supported combinations,
+      report overconstrained (and report which constraints could be removed)
+    - if provided constraints are disjoint from all supported combinations,
+      report that the provided combination is not supported at all
+
 Add Show helper module with e.g. Show.constructor, Show.record?
 - also maybe Show.partial for records where some fields are left out and replaced with an ellipsis
 
