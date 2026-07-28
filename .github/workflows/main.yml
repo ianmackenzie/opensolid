@@ -64,7 +64,7 @@ jobs:
         run: |
           Get-ChildItem -Path dist-newstyle -Filter opensolid-ffi.dll -Recurse | Copy-Item -Destination .\opensolid-python\lib\src\opensolid\
           cabal run opensolid-python
-          uvx ruff@0.15.20 format opensolid-python\lib\src\opensolid\__init__.py
+          uvx ruff@0.16.0 format opensolid-python\lib\src\opensolid\__init__.py
       - name: Run test Python script
         working-directory: opensolid-python/lib
         run: |

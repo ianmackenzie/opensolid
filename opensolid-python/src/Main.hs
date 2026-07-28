@@ -95,7 +95,7 @@ preamble =
     , "    buffer = ctypes.create_string_buffer(encoded)"
     , "    return _Text(as_char=ctypes.cast(buffer, c_char_p))"
     , ""
-    , "def _list_argument(list_type: Any, array: Any) -> Any: # noqa: ANN401"
+    , "def _list_argument(list_type: Any, array: Any) -> Any:"
     , "    return list_type(len(array), array)"
     , ""
     , "def _sign_argument(value: int) -> int:"
