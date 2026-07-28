@@ -6,20 +6,19 @@ import OpenSolid.Bisection (Tree)
 import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
-import OpenSolid.SearchDomain qualified as SearchDomain
 import OpenSolid.Set (Set)
 
 data Problem intersection where
   Problem ::
-    SearchDomain.Bounds subdomain =>
+    Bisection.Domain domain =>
     { boundaryIntersections :: List intersection
-    , boundaryTangentSubdomains :: Bag subdomain boundarySegment
-    , boundaryCrossingSubdomains :: Bag subdomain boundarySegment
-    , searchTree :: Tree subdomain segment
-    , resolveTangent :: subdomain -> segment -> Fuzzy (Maybe tangentTag)
-    , resolveCrossing :: subdomain -> segment -> Fuzzy (Maybe crossingTag)
-    , solveTangent :: Set subdomain (tangentTag, Tree subdomain segment) -> List intersection
-    , solveCrossing :: Set subdomain (crossingTag, Tree subdomain segment) -> List intersection
+    , boundaryTangentSubdomains :: Bag domain boundarySegment
+    , boundaryCrossingSubdomains :: Bag domain boundarySegment
+    , searchTree :: Tree domain segment
+    , resolveTangent :: domain -> segment -> Fuzzy (Maybe tangentTag)
+    , resolveCrossing :: domain -> segment -> Fuzzy (Maybe crossingTag)
+    , solveTangent :: Set domain (tangentTag, Tree domain segment) -> List intersection
+    , solveCrossing :: Set domain (crossingTag, Tree domain segment) -> List intersection
     } ->
     Problem intersection
 

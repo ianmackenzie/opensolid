@@ -1,5 +1,6 @@
 module OpenSolid.Bisection
-  ( Tree (Tree)
+  ( Domain
+  , Tree (Tree)
   , subdomain
   , segment
   , children
@@ -12,28 +13,43 @@ where
 
 import OpenSolid.Bag (Bag)
 import OpenSolid.Bag qualified as Bag
+import OpenSolid.Bounds2D qualified as Bounds2D
+import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
-import OpenSolid.SearchDomain qualified as SearchDomain
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
 import OpenSolid.Units qualified as Units
+import OpenSolid.UvBounds (UvBounds)
 
-data Tree subdomain segment = Tree
-  { subdomain :: subdomain
+class (Set.Bounds domain, Intersects domain domain (Tolerance Unitless)) => Domain domain where
+  contains :: domain -> domain -> Bool
+
+instance Domain (Interval Unitless) where
+  contains = Interval.contains
+
+instance Domain UvBounds where
+  contains = Bounds2D.contains
+
+instance (Domain domain1, Domain domain2) => Domain (domain1, domain2) where
+  contains (b1, b2) (a1, a2) = contains b1 a1 && contains b2 a2
+
+data Tree domain segment = Tree
+  { subdomain :: domain
   , segment :: segment
-  , children :: ~(NonEmpty (Tree subdomain segment))
+  , children :: ~(NonEmpty (Tree domain segment))
   }
 
 instance
-  ( Units.Coercion subdomain1 subdomain2
+  ( Units.Coercion domain1 domain2
   , Units.Coercion segment1 segment2
   ) =>
-  Units.Coercion (Tree subdomain1 segment1) (Tree subdomain2 segment2)
+  Units.Coercion (Tree domain1 segment1) (Tree domain2 segment2)
   where
   coerce tree =
     Tree
@@ -43,31 +59,31 @@ instance
       }
 
 pairwise ::
-  Tree subdomain1 segment1 ->
-  Tree subdomain2 segment2 ->
-  Tree (subdomain1, subdomain2) (segment1, segment2)
+  Tree domain1 segment1 ->
+  Tree domain2 segment2 ->
+  Tree (domain1, domain2) (segment1, segment2)
 pairwise tree1 tree2 = do
   let Tree subdomain1 segment1 children1 = tree1
   let Tree subdomain2 segment2 children2 = tree2
   let pairwiseChildren = NonEmpty.pairwise pairwise children1 children2
   Tree (subdomain1, subdomain2) (segment1, segment2) pairwiseChildren
 
-subdomain :: forall subdomain segment. Tree subdomain segment -> subdomain
+subdomain :: forall domain segment. Tree domain segment -> domain
 subdomain = (.subdomain)
 
-segment :: forall subdomain segment. Tree subdomain segment -> segment
+segment :: forall domain segment. Tree domain segment -> segment
 segment = (.segment)
 
-children :: forall subdomain segment. Tree subdomain segment -> NonEmpty (Tree subdomain segment)
+children :: forall domain segment. Tree domain segment -> NonEmpty (Tree domain segment)
 children = (.children)
 
 resolve ::
-  forall subdomain segment existing tag.
-  SearchDomain.Bounds subdomain =>
-  Bag subdomain existing ->
-  (subdomain -> segment -> Fuzzy (Maybe tag)) ->
-  Tree subdomain segment ->
-  Bag subdomain (tag, Tree subdomain segment)
+  forall domain segment existing tag.
+  Domain domain =>
+  Bag domain existing ->
+  (domain -> segment -> Fuzzy (Maybe tag)) ->
+  Tree domain segment ->
+  Bag domain (tag, Tree domain segment)
 resolve existing callback tree =
   if containedIn existing tree.subdomain
     then Bag.empty
@@ -76,30 +92,24 @@ resolve existing callback tree =
       Resolved (Just tag) -> Bag.singleton tree.subdomain (tag, tree)
       Unresolved -> Bag.group (List.map (resolve existing callback) (NonEmpty.toList tree.children))
 
-containedIn ::
-  forall subdomain existing.
-  SearchDomain.Bounds subdomain =>
-  Bag subdomain existing ->
-  subdomain ->
-  Bool
-containedIn existing candidate =
-  Bag.any (SearchDomain.contains candidate) (const True) existing
+containedIn :: forall domain existing. Domain domain => Bag domain existing -> domain -> Bool
+containedIn existing candidate = Bag.any (contains candidate) (const True) existing
 
 touching ::
-  forall subdomain segment existing tag.
-  SearchDomain.Bounds subdomain =>
-  Bag subdomain existing ->
-  Set subdomain (tag, Tree subdomain segment) ->
+  forall domain segment existing tag.
+  Domain domain =>
+  Bag domain existing ->
+  Set domain (tag, Tree domain segment) ->
   Bool
 touching existing set = Bag.full set & Bag.pairwiseAny (^) (\_ _ -> True) existing
 
 clusters ::
-  forall subdomain segment existing tag.
-  SearchDomain.Bounds subdomain =>
-  Bag subdomain existing ->
-  (subdomain -> segment -> Fuzzy (Maybe tag)) ->
-  Tree subdomain segment ->
-  List (Set subdomain (tag, Tree subdomain segment))
+  forall domain segment existing tag.
+  Domain domain =>
+  Bag domain existing ->
+  (domain -> segment -> Fuzzy (Maybe tag)) ->
+  Tree domain segment ->
+  List (Set domain (tag, Tree domain segment))
 clusters existing resolveFunction tree = do
   resolve existing resolveFunction tree
     & Bag.clusters (^) (\_ _ -> True)
@@ -107,16 +117,16 @@ clusters existing resolveFunction tree = do
     & List.filter (not . touching existing)
 
 find ::
-  forall subdomain segment tag solution.
-  (tag -> subdomain -> segment -> Fuzzy (Maybe solution)) ->
-  Set subdomain (tag, Tree subdomain segment) ->
+  forall domain segment tag solution.
+  (tag -> domain -> segment -> Fuzzy (Maybe solution)) ->
+  Set domain (tag, Tree domain segment) ->
   Maybe solution
 find callback cluster = findImpl callback (Queue.fromNonEmpty (Set.toNonEmpty cluster))
 
 findImpl ::
-  forall subdomain segment tag solution.
-  (tag -> subdomain -> segment -> Fuzzy (Maybe solution)) ->
-  Queue (tag, Tree subdomain segment) ->
+  forall domain segment tag solution.
+  (tag -> domain -> segment -> Fuzzy (Maybe solution)) ->
+  Queue (tag, Tree domain segment) ->
   Maybe solution
 findImpl callback queue = do
   ((tag, subtree), remaining) <- Queue.pop queue
