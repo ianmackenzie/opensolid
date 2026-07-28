@@ -1296,8 +1296,12 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (VectorBounds3D units1 space1) (VectorBounds3D units2 space2) (Tolerance units1)
   where
-  VectorBounds3D r1 f1 u1 `intersects` VectorBounds3D r2 f2 u2 =
-    r1 `intersects` r2 && f1 `intersects` f2 && u1 `intersects` u2
+  VB3D# xl1# xh1# yl1# yh1# zl1# zh1# `intersects` VB3D# xl2# xh2# yl2# yh2# zl2# zh2# = do
+    let !(Q# tolerance#) = ?tolerance
+    let xIntersection# = intervalIntersectsInterval# tolerance# xl1# xh1# xl2# xh2#
+    let yIntersection# = intervalIntersectsInterval# tolerance# yl1# yh1# yl2# yh2#
+    let zIntersection# = intervalIntersectsInterval# tolerance# zl1# zh1# zl2# zh2#
+    B# (xIntersection# &&# yIntersection# &&# zIntersection#)
 
 instance Negation (VectorBounds3D units space) where
   negate (VB3D# xl# xh# yl# yh# zl# zh#) = do
