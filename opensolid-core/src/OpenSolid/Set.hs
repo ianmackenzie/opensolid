@@ -91,6 +91,15 @@ instance Indexed (Set b a) Int a where
       Just item -> item
       Nothing -> throw IndexOutOfBounds{index = index, size = size set}
 
+instance
+  ( Intersects b1 b2 boundsUnits
+  , Intersects a1 a2 itemUnits
+  , boundsUnits ~ itemUnits
+  ) =>
+  Intersects (Set b1 a1) (Set b2 a2) boundsUnits
+  where
+  intersects = pairwiseAny intersects intersects
+
 get :: Int -> Set b a -> Maybe a
 get index set = case set of
   Node{children} -> getInChildren index children

@@ -48,6 +48,17 @@ instance Indexed (Bag b a) Int a where
   Empty !! index = throw IndexOutOfBounds{index, size = 0}
   Full set !! index = set !! index
 
+instance
+  ( Intersects b1 b2 boundsUnits
+  , Intersects a1 a2 itemUnits
+  , boundsUnits ~ itemUnits
+  ) =>
+  Intersects (Bag b1 a1) (Bag b2 a2) boundsUnits
+  where
+  intersects Empty _ = False
+  intersects _ Empty = False
+  intersects (Full set1) (Full set2) = intersects set1 set2
+
 empty :: Bag b a
 empty = Empty
 
