@@ -32,9 +32,6 @@ Clean up error modules
 Do a pass to make sure anything using Tolerance.unitless is normalized
 - normalize NURBS points and weights (divide all points and weights by the largest weight)?
 
-Remove != in favour of just using 'not (x ~= y)'
-- too easy to confuse with /=
-
 Run multiple type checkers on generated Python library
 
 Reimplement curve intersection using plain trees and subdomain clusters
