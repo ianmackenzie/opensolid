@@ -68,7 +68,6 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Direction2D (Direction2D), Direction3D (Direction3D), Frame2D, Orientation2D (Orientation2D), Plane3D, PlaneOrientation3D (PlaneOrientation3D), Vector3D (Vector3D), VectorBounds2D (VectorBounds2D), VectorBounds3D (VectorBounds3D), VectorTransform2D (VectorTransform2D))
 import OpenSolid.Primitives qualified as Primitives
-import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units

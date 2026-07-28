@@ -48,11 +48,11 @@ import Prelude qualified
 
 {-# INLINE fromDouble #-}
 fromDouble :: Double -> Number
-fromDouble = Quantity
+fromDouble = Number
 
 {-# INLINE toDouble #-}
 toDouble :: Number -> Double
-toDouble (Quantity x) = x
+toDouble (Number double) = double
 
 {-# INLINE fromInt #-}
 fromInt :: Int -> Number

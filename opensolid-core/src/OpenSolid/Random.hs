@@ -74,11 +74,10 @@ int :: Int -> Int -> Generator Int
 int low high = Generator (System.Random.uniformR (low, high))
 
 number :: Number -> Number -> Generator Number
-number = quantity
+number (Number low) (Number high) = map Number (Generator (System.Random.uniformR (low, high)))
 
 quantity :: Quantity units -> Quantity units -> Generator (Quantity units)
-quantity (Quantity low) (Quantity high) =
-  map Quantity (Generator (System.Random.uniformR (low, high)))
+quantity (Quantity low) (Quantity high) = map Quantity (number low high)
 
 bool :: Generator Bool
 bool = Generator System.Random.uniform

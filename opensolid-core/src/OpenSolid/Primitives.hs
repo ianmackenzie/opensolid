@@ -34,8 +34,8 @@ import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.Interval (Interval (I#))
 import OpenSolid.Length (Length)
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Show qualified as Show
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units (HasUnits, SquareMeters)
@@ -47,7 +47,7 @@ type role Vector2D phantom
 
 type Vector2D :: Type -> Type
 data Vector2D units = V2D# Double# Double#
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord)
 
 -- | Construct a vector from its X and Y components.
 {-# INLINE Vector2D #-}
@@ -61,6 +61,10 @@ viewVector2D :: Vector2D units -> (# Quantity units, Quantity units #)
 viewVector2D (V2D# vx# vy#) = (# Q# vx#, Q# vy# #)
 
 {-# COMPLETE Vector2D #-}
+
+instance Show (Vector2D units) where
+  showsPrec precedence (Vector2D vx vy) =
+    Show.constructor2 precedence "Vector2D" vx vy
 
 instance FFI (Vector2D Unitless) where
   representation = FFI.classRepresentation "UnitlessVector2D"
@@ -207,13 +211,17 @@ instance CrossMultiplication Direction2D (Vector2D units) (Quantity units) where
 This is effectively a type-safe unit vector.
 -}
 newtype Direction2D = Unit2D (Vector2D Unitless)
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord)
 
 {-# COMPLETE Direction2D #-}
 
 {-# INLINE Direction2D #-}
 pattern Direction2D :: Number -> Number -> Direction2D
 pattern Direction2D dX dY = Unit2D (Vector2D dX dY)
+
+instance Show Direction2D where
+  showsPrec precedence (Direction2D dx dy) =
+    Show.constructor2 precedence "Direction2D" dx dy
 
 instance FFI Direction2D where
   representation = FFI.classRepresentation "Direction2D"
@@ -277,7 +285,9 @@ deriving instance Eq (Point2D units)
 
 deriving instance Ord (Point2D units)
 
-deriving instance Show (Point2D units)
+instance Show (Point2D units) where
+  showsPrec precedence (Point2D px py) =
+    Show.constructor2 precedence "Point2D" px py
 
 instance FFI (Point2D Meters) where
   representation = FFI.classRepresentation "Point2D"
@@ -588,7 +598,7 @@ instance
 
 type role Bounds2D phantom
 
-newtype Bounds2D units = PositionBounds2D (VectorBounds2D units) deriving (Eq, Show)
+newtype Bounds2D units = PositionBounds2D (VectorBounds2D units) deriving (Eq)
 
 {-# COMPLETE Bounds2D #-}
 
@@ -599,6 +609,10 @@ pattern Bounds2D :: Interval units -> Interval units -> Bounds2D units
 pattern Bounds2D bx by <- PositionBounds2D (VectorBounds2D bx by)
   where
     Bounds2D bx by = PositionBounds2D (VectorBounds2D bx by)
+
+instance Show (Bounds2D units) where
+  showsPrec precedence (Bounds2D bx by) =
+    Show.constructor2 precedence "Bounds2D" bx by
 
 instance HasUnits (Bounds2D units) units
 
@@ -844,7 +858,7 @@ type role Vector3D phantom phantom
 
 type Vector3D :: Type -> Type -> Type
 data Vector3D units space = V3D# Double# Double# Double#
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord)
 
 -- | Construct a vector from its X and Y components.
 {-# INLINE Vector3D #-}
@@ -858,6 +872,10 @@ viewVector3D :: Vector3D units space -> (# Quantity units, Quantity units, Quant
 viewVector3D (V3D# vx# vy# vz#) = (# Q# vx#, Q# vy#, Q# vz# #)
 
 {-# COMPLETE Vector3D #-}
+
+instance Show (Vector3D units space) where
+  showsPrec precedence (Vector3D vx vy vz) =
+    Show.constructor3 precedence "Vector3D" vx vy vz
 
 instance FFI (Vector3D Unitless Void) where
   representation = FFI.classRepresentation "UnitlessVector3D"
@@ -1060,13 +1078,17 @@ type role Direction3D phantom
 This is effectively a type-safe unit vector.
 -}
 newtype Direction3D space = Unit3D (Vector3D Unitless space)
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord)
 
 {-# COMPLETE Direction3D #-}
 
 {-# INLINE Direction3D #-}
 pattern Direction3D :: Number -> Number -> Number -> Direction3D space
 pattern Direction3D dR dF dU = Unit3D (Vector3D dR dF dU)
+
+instance Show (Direction3D space) where
+  showsPrec precedence (Direction3D dx dy dz) =
+    Show.constructor3 precedence "Direction3D" dx dy dz
 
 instance FFI (Direction3D Void) where
   representation = FFI.classRepresentation "Direction3D"
@@ -1171,7 +1193,9 @@ deriving instance Eq (Point3D space)
 
 deriving instance Ord (Point3D space)
 
-deriving instance Show (Point3D space)
+instance Show (Point3D space) where
+  showsPrec precedence (Point3D px py pz) =
+    Show.constructor3 precedence "Point3D" px py pz
 
 instance FFI (Point3D Void) where
   representation = FFI.classRepresentation "Point3D"
@@ -1250,7 +1274,7 @@ type role VectorBounds3D phantom phantom
 
 type VectorBounds3D :: Type -> Type -> Type
 data VectorBounds3D units space = VB3D# Double# Double# Double# Double# Double# Double#
-  deriving (Eq, Show)
+  deriving (Eq)
 
 -- | Construct a vector bounds from its rightward, forward and upward components.
 {-# INLINE VectorBounds3D #-}
@@ -1270,6 +1294,10 @@ viewVectorBounds3D (VB3D# xl# xh# yl# yh# zl# zh#) =
   (# I# xl# xh#, I# yl# yh#, I# zl# zh# #)
 
 {-# COMPLETE VectorBounds3D #-}
+
+instance Show (VectorBounds3D units space) where
+  showsPrec precedence (VectorBounds3D x y z) =
+    Show.constructor3 precedence "VectorBounds3D" x y z
 
 instance HasUnits (VectorBounds3D units space) units
 
@@ -1682,7 +1710,7 @@ type role Bounds3D phantom
 -- | A bounding box in 3D.
 newtype Bounds3D space
   = PositionBounds3D (VectorBounds3D Meters space)
-  deriving (Eq, Show)
+  deriving (Eq)
 
 {-# COMPLETE Bounds3D #-}
 
@@ -1693,6 +1721,10 @@ pattern Bounds3D :: Interval Meters -> Interval Meters -> Interval Meters -> Bou
 pattern Bounds3D bx by bz <- PositionBounds3D (VectorBounds3D bx by bz)
   where
     Bounds3D bx by bz = PositionBounds3D (VectorBounds3D bx by bz)
+
+instance Show (Bounds3D space) where
+  showsPrec precedence (Bounds3D bx by bz) =
+    Show.constructor3 precedence "Bounds3D" bx by bz
 
 instance FFI (Bounds3D Void) where
   representation = FFI.classRepresentation "Bounds3D"

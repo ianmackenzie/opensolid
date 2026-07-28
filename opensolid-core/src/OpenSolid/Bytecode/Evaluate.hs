@@ -49,7 +49,6 @@ import OpenSolid.Primitives
   , VectorBounds2D (VectorBounds2D)
   , VectorBounds3D (VB3D#)
   )
-import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.UvBounds (UvBounds)

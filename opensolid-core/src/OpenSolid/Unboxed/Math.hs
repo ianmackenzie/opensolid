@@ -125,7 +125,7 @@ infix 4 <=#
 
 {-# INLINE (~=#) #-}
 (~=#) :: Tolerance units => Double# -> Double# -> Int#
-(~=#) x# y# = let !(Quantity (D# tolerance#)) = ?tolerance in abs# (x# -# y#) <=# tolerance#
+(~=#) x# y# = let !(Q# tolerance#) = ?tolerance in abs# (x# -# y#) <=# tolerance#
 
 infix 4 ~=#
 

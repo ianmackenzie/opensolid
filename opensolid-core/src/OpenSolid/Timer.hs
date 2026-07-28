@@ -9,7 +9,7 @@ import OpenSolid.Prelude
 newtype Timer = Timer Number
 
 getMonotonicTime :: IO Number
-getMonotonicTime = IO.map Quantity GHC.Clock.getMonotonicTime
+getMonotonicTime = IO.map Number GHC.Clock.getMonotonicTime
 
 start :: IO Timer
 start = IO.map Timer getMonotonicTime

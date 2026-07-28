@@ -46,7 +46,7 @@ writeBinary :: Text -> Convention3D -> (Length -> Number) -> Mesh (Point3D space
 writeBinary path convention units mesh = IO.writeBinary path (builder convention units mesh)
 
 numberBuilder :: Number -> Builder
-numberBuilder (Quantity double) = Builder.floatLE (GHC.Float.double2Float double)
+numberBuilder (Number double) = Builder.floatLE (GHC.Float.double2Float double)
 
 vectorBuilder :: Convention3D -> Vector3D Unitless space -> Builder
 vectorBuilder convention vector = do

@@ -33,11 +33,12 @@ module OpenSolid.Prelude
   , Indexed ((!!))
   , Intersects (intersects)
   , (^)
-  , Quantity (Quantity)
+  , Quantity (Quantity, Q#)
   , Unitless
   , Radians
   , Meters
   , Number
+  , pattern Number
   , Sign (Sign, Positive, Negative)
   , fromInteger
   , fromRational
@@ -73,12 +74,14 @@ import Data.Text (Text)
 import Data.Text qualified
 import Data.Void (Void)
 import Foreign.Storable (Storable)
+import GHC.Exts (Double (D#), Double#)
 import GHC.OverloadedLabels (IsLabel (fromLabel))
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
 import GHC.TypeLits (KnownSymbol, Symbol)
 import GHC.TypeLits qualified
+import OpenSolid.Show qualified as Show
 import OpenSolid.Units (HasUnits, Meters, Radians, Unitless, type (?*?), type (?/?))
 import OpenSolid.Units qualified as Units
 import System.Random.Stateful qualified
@@ -100,7 +103,7 @@ import Prelude
   , MonadFail
   , Ord
   , Ordering (EQ, GT, LT)
-  , Show
+  , Show (..)
   , Traversable
   , compare
   , const
@@ -415,11 +418,35 @@ instance MonadFail (Result Text) where
 ----- Quantity -----
 
 type Quantity :: Type -> Type
-newtype Quantity units = Quantity Prelude.Double
-  deriving (Eq, Ord, Show)
+newtype Quantity units = Quantity_ Prelude.Double
+  deriving (Eq, Ord)
   deriving newtype (Storable, Hashable)
 
+instance Show (Quantity units) where
+  showsPrec precedence (Quantity_ double) =
+    Show.constructor precedence "Quantity" double
+
 type Number = Quantity Unitless
+
+{-# COMPLETE Quantity #-}
+
+{-# INLINE Quantity #-}
+pattern Quantity :: Number -> Quantity units
+pattern Quantity number <- (Data.Coerce.coerce -> number)
+  where
+    Quantity (Quantity_ double) = Quantity_ double
+
+{-# COMPLETE Q# #-}
+
+{-# INLINE Q# #-}
+pattern Q# :: Double# -> Quantity units
+pattern Q# x# = Quantity_ (D# x#)
+
+{-# COMPLETE Number #-}
+
+{-# INLINE Number #-}
+pattern Number :: Double -> Number
+pattern Number double = Quantity_ double
 
 deriving newtype instance Prelude.Num Number
 
@@ -443,7 +470,7 @@ instance Units.Coercion (Quantity units1) (Quantity units2) where
 
 instance Negation (Quantity units) where
   {-# INLINE negate #-}
-  negate (Quantity x) = Quantity (Prelude.negate x)
+  negate (Quantity_ x) = Quantity_ (Prelude.negate x)
 
 instance Multiplication Sign (Quantity units) (Quantity units) where
   {-# INLINE (*) #-}
@@ -455,22 +482,22 @@ instance Multiplication (Quantity units) Sign (Quantity units) where
 
 instance units1 ~ units2 => Addition (Quantity units1) (Quantity units2) (Quantity units1) where
   {-# INLINE (+) #-}
-  Quantity x + Quantity y = Quantity (x Prelude.+ y)
+  Quantity_ x + Quantity_ y = Quantity_ (x Prelude.+ y)
 
 instance units1 ~ units2 => Subtraction (Quantity units1) (Quantity units2) (Quantity units1) where
   {-# INLINE (-) #-}
-  Quantity x - Quantity y = Quantity (x Prelude.- y)
+  Quantity_ x - Quantity_ y = Quantity_ (x Prelude.- y)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Quantity units2) (Quantity units3)
   where
   {-# INLINE (*) #-}
-  Quantity x * Quantity y = Quantity (x Prelude.* y)
+  Quantity_ x * Quantity_ y = Quantity_ (x Prelude.* y)
 
 instance Multiplication_ (Quantity units1) (Quantity units2) (Quantity (units1 ?*? units2)) where
   {-# INLINE (?*?) #-}
-  Quantity x ?*? Quantity y = Quantity (x Prelude.* y)
+  Quantity_ x ?*? Quantity_ y = Quantity_ (x Prelude.* y)
 
 instance DotMultiplication_ (Quantity units1) (Quantity units2) (Quantity (units1 ?*? units2)) where
   {-# INLINE dot_ #-}
@@ -485,14 +512,14 @@ instance
 
 instance Division_ (Quantity units1) (Quantity units2) (Quantity (units1 ?/? units2)) where
   {-# INLINE (?/?) #-}
-  Quantity x ?/? Quantity y = Quantity (x Prelude./ y)
+  Quantity_ x ?/? Quantity_ y = Quantity_ (x Prelude./ y)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Quantity units1) (Quantity units2) (Quantity units3)
   where
   {-# INLINE (/) #-}
-  Quantity x / Quantity y = Quantity (x Prelude./ y)
+  Quantity_ x / Quantity_ y = Quantity_ (x Prelude./ y)
 
 instance DivMod (Quantity units) where
   x // y = Prelude.floor (x / y)
@@ -540,7 +567,11 @@ infix 4 ^
 
 ----- Sign -----
 
-newtype Sign = Sign_ Number deriving (Eq, Ord, Show)
+newtype Sign = Sign_ Number deriving (Eq, Ord)
+
+instance Show Sign where
+  show Positive = "Positive"
+  show Negative = "Negative"
 
 instance HasUnits Sign Unitless
 

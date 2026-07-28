@@ -10,7 +10,6 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.VectorSurfaceFunction (VectorSurfaceFunction)
 import OpenSolid.VectorSurfaceFunction qualified as VectorSurfaceFunction
-import Prelude qualified
 
 data UnsupportedCombinationOfSingularities
   = UnsupportedCombinationOfSingularities

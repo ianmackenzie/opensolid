@@ -42,22 +42,16 @@ import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
 import Prelude qualified
 
-{-# COMPLETE Q# #-}
-
-{-# INLINE Q# #-}
-pattern Q# :: Double# -> Quantity units
-pattern Q# x# = Quantity (D# x#)
-
 {-# INLINE zero #-}
 zero :: Quantity units
-zero = Quantity (D# 0.0##)
+zero = Quantity 0.0
 
 {-# INLINE unit #-}
 unit :: Quantity units
-unit = Quantity (D# 1.0##)
+unit = Quantity 1.0
 
 infinity :: Quantity units
-infinity = Quantity (D# (1.0## /# 0.0##))
+infinity = Quantity (1.0 / 0.0)
 
 {-# INLINE coerce #-}
 coerce :: Quantity units1 -> Quantity units2

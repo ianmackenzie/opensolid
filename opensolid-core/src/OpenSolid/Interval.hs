@@ -78,9 +78,9 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import {-# SOURCE #-} OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude hiding (max, min)
-import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
+import OpenSolid.Show qualified as Show
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units (HasUnits, SquareMeters)
 import OpenSolid.Units qualified as Units
@@ -91,8 +91,11 @@ type role Interval phantom
 type Interval :: Type -> Type
 
 -- | A range of possible values, with a lower bound and upper bound.
-data Interval units = Ordered# Double# Double#
-  deriving (Eq, Show)
+data Interval units = Ordered# Double# Double# deriving (Eq)
+
+instance Show (Interval units) where
+  showsPrec precedence (Interval low high) =
+    Show.constructor2 precedence "Interval" low high
 
 {-| Construct a bounding range from two given values (endpoints).
 

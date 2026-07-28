@@ -5,7 +5,6 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math

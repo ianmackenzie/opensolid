@@ -72,7 +72,6 @@ import OpenSolid.Primitives
   , VectorBounds3D (VB3D#, VectorBounds3D)
   , VectorTransform3D (VectorTransform3D)
   )
-import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units

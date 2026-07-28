@@ -75,7 +75,6 @@ import OpenSolid.Primitives
   , Point3D (Point3D)
   , VectorTransform2D (VectorTransform2D)
   )
-import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Unboxed.Math

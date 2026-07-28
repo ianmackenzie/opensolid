@@ -20,7 +20,7 @@ import OpenSolid.Binary qualified as Binary
 import OpenSolid.List qualified as List
 import OpenSolid.Map (Map)
 import OpenSolid.Map qualified as Map
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (pattern Number)
 import OpenSolid.Text qualified as Text
 
 data Json

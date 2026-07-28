@@ -5,7 +5,6 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Lobatto qualified as Lobatto
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
-import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math

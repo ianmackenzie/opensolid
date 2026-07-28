@@ -8,7 +8,7 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Area (Area)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Length (Length)
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (data Number)
 
 data ImplicitArgument
   = ToleranceUnitless

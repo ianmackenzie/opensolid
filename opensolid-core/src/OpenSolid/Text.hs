@@ -36,7 +36,7 @@ import Data.Text qualified
 import Data.Text.Encoding qualified
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.List qualified as List
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (show)
 import Prelude qualified
 
 concat :: List Text -> Text
@@ -55,7 +55,7 @@ int :: Int -> Text
 int = show
 
 number :: Number -> Text
-number (Quantity x) = show x
+number (Number x) = show x
 
 char :: Char -> Text
 char c = pack [c]

@@ -215,6 +215,7 @@ library
     OpenSolid.Set.Bounds
     OpenSolid.Set2D
     OpenSolid.Set3D
+    OpenSolid.Show
     OpenSolid.Sign
     OpenSolid.Solve1D
     OpenSolid.Solve2D

@@ -10,7 +10,7 @@ where
 import Debug.Trace qualified
 import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (show)
 import OpenSolid.Text qualified as Text
 
 trace :: Text -> a -> a

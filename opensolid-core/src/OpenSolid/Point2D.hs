@@ -56,7 +56,6 @@ import OpenSolid.Primitives
   , Point3D
   , Transform2D
   )
-import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Unboxed.Math

@@ -32,7 +32,7 @@ double = case GHC.ByteOrder.targetByteOrder of
   GHC.ByteOrder.BigEndian -> Builder.doubleBE
 
 number :: Number -> Builder
-number (Quantity value) = double value
+number (Number value) = double value
 
 list :: (a -> Builder) -> List a -> Builder
 list encodeItem items = int (List.length items) <> Binary.combine encodeItem items

@@ -54,7 +54,6 @@ import OpenSolid.Primitives
   , Transform3D
   , Vector3D
   )
-import OpenSolid.Quantity (Quantity (Q#))
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Unboxed.Math
 import OpenSolid.Vector3D qualified as Vector3D
