@@ -77,10 +77,7 @@ instance Units.Coercion (Vector2D units1) (Vector2D units2) where
   coerce = Data.Coerce.coerce
 
 instance ApproximateEquality (Vector2D units) (Tolerance units) where
-  V2D# x1# y1# ~= V2D# x2# y2# =
-    case hypot2# (x2# -# x1#) (y2# -# y1#) ~=# 0.0## of
-      1# -> True
-      _ -> False
+  V2D# x1# y1# ~= V2D# x2# y2# = B# (hypot2# (x2# -# x1#) (y2# -# y1#) ~=# 0.0##)
 
 instance HasZero (Vector2D units) where
   zero = V2D# 0.0## 0.0##
