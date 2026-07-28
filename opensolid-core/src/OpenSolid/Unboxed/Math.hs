@@ -48,6 +48,8 @@ module OpenSolid.Unboxed.Math
   , cubicBezier#
   , quarticBezier#
   , quinticBezier#
+  , intervalSeparation#
+  , intervalIntersectsInterval#
   )
 where
 
@@ -369,3 +371,12 @@ quinticBezier# p1# p2# p3# p4# p5# p6# t# = do
   let q4# = interpolateFrom# p4# p5# t#
   let q5# = interpolateFrom# p5# p6# t#
   quarticBezier# q1# q2# q3# q4# q5# t#
+
+{-# INLINEABLE intervalSeparation# #-}
+intervalSeparation# :: Double# -> Double# -> Double# -> Double# -> Double#
+intervalSeparation# low1# high1# low2# high2# = max# (low1# -# high2#) (low2# -# high1#)
+
+{-# INLINEABLE intervalIntersectsInterval# #-}
+intervalIntersectsInterval# :: Double# -> Double# -> Double# -> Double# -> Double# -> Int#
+intervalIntersectsInterval# tolerance# low1# high1# low2# high2# =
+  intervalSeparation# low1# high1# low2# high2# <=# tolerance#

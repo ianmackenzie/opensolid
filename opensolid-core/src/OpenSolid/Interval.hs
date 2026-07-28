@@ -491,8 +491,7 @@ separation interval1 interval2 = Q# (separation# interval1 interval2)
 
 {-# INLINE separation# #-}
 separation# :: Interval units -> Interval units -> Double#
-separation# (I# low1# high1#) (I# low2# high2#) =
-  max# (low1# -# high2#) (low2# -# high1#)
+separation# (I# low1# high1#) (I# low2# high2#) = intervalSeparation# low1# high1# low2# high2#
 
 overlap :: Interval units -> Interval units -> Quantity units
 overlap first second = negate (separation first second)
