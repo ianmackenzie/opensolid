@@ -15,7 +15,7 @@ declaration :: (Name, Constant) -> Text
 declaration (name, (Constant @t _ documentation)) = do
   let typeName = Python.Type.qualifiedName (FFI.typeOf t)
   Python.lines
-    [ FFI.snakeCase name <> ": " <> typeName <> " = None # type: ignore[assignment]"
+    [ FFI.snakeCase name <> ": " <> typeName
     , Python.docstring documentation
     , ""
     ]
