@@ -1,3 +1,15 @@
+Switch from 'pattern' to 'data' in import/export lists
+
+Have Quantity import Number instead of the other way around?
+- avoid calling built-in Prelude functions on Number values in Quantity module, slightly icky
+
+Clean up LD_LIBRARY_PATH in flake.nix
+- inline ld_library_path expression instead of using a variable
+- fix comment (doesn't seem to be about libopensolid-ffi.so any more...)
+- try removing LD_LIBRARY_PATH config entirely to see if it's actually still necessary?
+
+Switch to Pyrefly 'strict' preset
+
 Try having 'fromConstraints' functions?
 - and corresponding 'withSomething' functions?
   - e.g. Arc2D.withRadius returns an Arc2D.Constraint value
@@ -10,29 +22,19 @@ Try having 'fromConstraints' functions?
     - if provided constraints are disjoint from all supported combinations,
       report that the provided combination is not supported at all
 
-Add Show helper module with e.g. Show.constructor, Show.record?
-- also maybe Show.partial for records where some fields are left out and replaced with an ellipsis
-
-Refactor tolerance handling to allow implicitly comparing unitless values, via a typeclass like:
-
-  class Epsilon units constraint | units -> constraint where
-    epsilon :: constraint => Quantity units
-
-  instance Epsilon Unitless () where
-    epsilon = 1e-9
-
-  instance Epsilon Meters (?tolerance :: Quantity Meters) where
-    epsilon = ?tolerance
+Add Show.partialRecord function
+- use for records where some fields are left out and replaced with an ellipsis
 
 Clean up error modules
 - InternalError vs Error, Nondegenerate vs IsDegenerate...
 
+Move IndexOutOfBounds into Error module?
+- search for other error types ('deriving (Show, Exception)' or just search for Exception)
+  - HigherOrderZero, InfiniteRecursion, InternalError?
+- rename Error module to Exception?
+
 Do a pass to make sure anything using Tolerance.unitless is normalized
 - normalize NURBS points and weights (divide all points and weights by the largest weight)?
-
-Run multiple type checkers on generated Python library
-
-Reimplement curve intersection using plain trees and subdomain clusters
 
 Add Planar bytecode instruction
 
@@ -47,14 +49,7 @@ Optimize curves to reuse arc lengths and uniform parameterizations where possibl
 - can simply reuse as is for rigid transformations and coordinate conversions
 - can scale arc length (by absolute value of uniform scale) for uniform transformations, and reuse uniform parameterization
 
-Add one or more Curve2D constructors for involute curves
-
 Rework CDT code to encode arrays using Builder and then Data.ByteString.Unsafe.unsafeUseAsCStringLen
-
-Move IndexOutOfBounds into Error module?
-- search for other error types ('deriving (Show, Exception)' or just search for Exception)
-  - HigherOrderZero, InfiniteRecursion, InternalError?
-- rename Error module to Exception?
 
 Add support for 'Nondegenerate Surface3D'
 - then refactor Body3D to store a set of 'Nondegenerate Surface3D'
