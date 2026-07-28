@@ -125,25 +125,25 @@ hypot3 :: Number -> Number -> Number -> Number
 hypot3 = Quantity.hypot3
 
 sin :: Number -> Number
-sin (Quantity x) = Quantity (Prelude.sin x)
+sin = Prelude.sin
 
 cos :: Number -> Number
-cos (Quantity x) = Quantity (Prelude.cos x)
+cos = Prelude.cos
 
 tan :: Number -> Number
-tan (Quantity x) = Quantity (Prelude.tan x)
+tan = Prelude.tan
 
 asin :: Number -> Number
-asin (Quantity x) = Quantity (Prelude.asin x)
+asin = Prelude.asin
 
 acos :: Number -> Number
-acos (Quantity x) = Quantity (Prelude.acos x)
+acos = Prelude.acos
 
 atan :: Number -> Number
-atan (Quantity x) = Quantity (Prelude.atan x)
+atan = Prelude.atan
 
 atan2 :: Quantity units -> Quantity units -> Number
-atan2 (Quantity y) (Quantity x) = Quantity (Prelude.atan2 y x)
+atan2 (Quantity y) (Quantity x) = Prelude.atan2 y x
 
 log :: Number -> Number
 log = Prelude.log
