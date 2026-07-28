@@ -31,7 +31,6 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
-import Prelude qualified
 
 {-|  An angle in degrees, radians, turns etc.
 
@@ -57,27 +56,27 @@ tolerance = radians Tolerance.unitless
 
 -- | Compute the sine of an angle.
 sin :: Angle -> Number
-sin (Quantity x) = Quantity (Prelude.sin x)
+sin (Quantity x) = Number.sin x
 
 -- | Compute the cosine of an angle.
 cos :: Angle -> Number
-cos (Quantity x) = Quantity (Prelude.cos x)
+cos (Quantity x) = Number.cos x
 
 -- | Compute the tangent of an angle.
 tan :: Angle -> Number
-tan (Quantity x) = Quantity (Prelude.tan x)
+tan (Quantity x) = Number.tan x
 
 -- | Compute the inverse sine of a value.
 asin :: Number -> Angle
-asin (Quantity x) = Quantity (Prelude.asin x)
+asin x = Quantity (Number.asin x)
 
 -- | Compute the inverse cosine of a value.
 acos :: Number -> Angle
-acos (Quantity x) = Quantity (Prelude.acos x)
+acos x = Quantity (Number.acos x)
 
 -- | Compute the inverse tangent of a value.
 atan :: Number -> Angle
-atan (Quantity x) = Quantity (Prelude.atan x)
+atan x = Quantity (Number.atan x)
 
 {-| Compute an angle from Y and X values.
 
@@ -87,7 +86,7 @@ or equivalently the angle of the vector with components (X,Y).
 Note the argument order - by convention, Y is given first and X second.
 -}
 atan2 :: Quantity units -> Quantity units -> Angle
-atan2 (Quantity y) (Quantity x) = Quantity (Prelude.atan2 y x)
+atan2 y x = Quantity (Number.atan2 y x)
 
 -- | One radian.
 radian :: Angle
