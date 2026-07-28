@@ -305,8 +305,23 @@ toListOf function = NonEmpty.toList . toNonEmptyOf function
 toListWithIndex :: (Int -> a1 -> a2) -> Set b a1 -> List a2
 toListWithIndex function = NonEmpty.toList . toNonEmptyWithIndex function
 
-cull :: (b -> Bool) -> Set b a -> List a
-cull boundsPredicate set = filterMap boundsPredicate Just set
+cull :: Bounds b => (b -> Bool) -> Set b a -> Bag b a
+cull boundsPredicate set = case set of
+  Leaf{leafBounds} -> if boundsPredicate leafBounds then Bag.Full set else Bag.Empty
+  Node{nodeBounds, children} ->
+    if boundsPredicate nodeBounds
+      then case cullChildren boundsPredicate (NonEmpty.toList children) of
+        [] -> Bag.Empty
+        [culled] -> Bag.Full culled
+        NonEmpty culled -> Bag.Full (node culled)
+      else Bag.Empty
+
+cullChildren :: Bounds b => (b -> Bool) -> List (Set b a) -> List (Set b a)
+cullChildren _ [] = []
+cullChildren boundsPredicate (first : rest) =
+  case cull boundsPredicate first of
+    Bag.Empty -> cullChildren boundsPredicate rest
+    Bag.Full culledFirst -> culledFirst : cullChildren boundsPredicate rest
 
 filter :: (b -> Bool) -> (a -> Bool) -> Set b a -> List a
 filter boundsPredicate itemPredicate set =

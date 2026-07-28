@@ -122,7 +122,7 @@ combine = Set.combine
 combineWithIndex :: (Int -> item1 -> Set2D units2 item2) -> Set2D units1 item1 -> Set2D units2 item2
 combineWithIndex = Set.combineWithIndex
 
-cull :: (Bounds2D units -> Bool) -> Set2D units item -> List item
+cull :: (Bounds2D units -> Bool) -> Set2D units item -> Bag2D units item
 cull = Set.cull
 
 filter :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> List item

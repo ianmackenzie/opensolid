@@ -469,6 +469,7 @@ classify point region =
     Boundary.Internal ->
       region.innerBoundaries
         & Bag2D.cull (intersects point)
+        & Bag2D.toList
         & classifyInner point
 
 classifyInner :: Tolerance units => Point2D units -> List (Boundary units) -> Classification

@@ -78,7 +78,7 @@ toListOf = Bag.toListOf
 map :: (item1 -> item2) -> (item2 -> Bounds2D units2) -> Bag2D units1 item1 -> Bag2D units2 item2
 map = Bag.map
 
-cull :: (Bounds2D units -> Bool) -> Bag2D units item -> List item
+cull :: (Bounds2D units -> Bool) -> Bag2D units item -> Bag2D units item
 cull = Bag.cull
 
 any :: (Bounds2D units -> Bool) -> (item -> Bool) -> Bag2D units item -> Bool

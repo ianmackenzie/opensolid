@@ -1,5 +1,6 @@
 module Tests.Set2D (tests) where
 
+import OpenSolid.Bag2D qualified as Bag2D
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.List qualified as List
@@ -40,7 +41,7 @@ testSet =
 findAll :: Test
 findAll = Test.verify "findAll" do
   let searchBounds = Bounds2D.hull2 (point 2 2) (point 6 6)
-  let foundPoints = Set2D.cull (intersects searchBounds) testSet
+  let foundPoints = Set2D.cull (intersects searchBounds) testSet & Bag2D.toList
   let expectedPoints = [point 3 5, point 5 5]
   Test.expect (List.sort foundPoints == List.sort expectedPoints)
 

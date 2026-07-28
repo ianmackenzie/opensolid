@@ -100,8 +100,8 @@ map :: Set.Bounds b2 => (a1 -> a2) -> (a2 -> b2) -> Bag b1 a1 -> Bag b2 a2
 map _ _ Empty = Empty
 map function boundsFunction (Full set) = Full (Set.map function boundsFunction set)
 
-cull :: (b -> Bool) -> Bag b a -> List a
-cull _ Empty = []
+cull :: Set.Bounds b => (b -> Bool) -> Bag b a -> Bag b a
+cull _ Empty = Empty
 cull boundsFunction (Full set) = Set.cull boundsFunction set
 
 any :: (b -> Bool) -> (a -> Bool) -> Bag b a -> Bool
