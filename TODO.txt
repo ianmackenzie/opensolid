@@ -1,5 +1,3 @@
-Remove SearchDomain module?
-
 Try having 'fromConstraints' functions?
 - and corresponding 'withSomething' functions?
   - e.g. Arc2D.withRadius returns an Arc2D.Constraint value
@@ -35,9 +33,6 @@ Do a pass to make sure anything using Tolerance.unitless is normalized
 Run multiple type checkers on generated Python library
 
 Reimplement curve intersection using plain trees and subdomain clusters
-
-Remove SearchDomain.[overlapping,isSmall,isPrimary]
-- also split, bisect, classify...
 
 Add Planar bytecode instruction
 
