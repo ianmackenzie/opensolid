@@ -1,8 +1,4 @@
-Refactor Set.cull and Set.filter to return Bag values
-
 Remove SearchDomain module?
-
-Remove Sign pattern?
 
 Try having 'fromConstraints' functions?
 - and corresponding 'withSomething' functions?
@@ -18,10 +14,6 @@ Try having 'fromConstraints' functions?
 
 Add Show helper module with e.g. Show.constructor, Show.record?
 - also maybe Show.partial for records where some fields are left out and replaced with an ellipsis
-
-Remove 'or is NaN' checks from Newton-Raphson solvers
-
-Ensure curve intersection works when curves with degenerate endpoints have tangent joins
 
 Refactor tolerance handling to allow implicitly comparing unitless values, via a typeclass like:
 
