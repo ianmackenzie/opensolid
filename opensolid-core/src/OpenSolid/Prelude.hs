@@ -30,7 +30,6 @@ module OpenSolid.Prelude
   , Composition ((.), (>>))
   , Tolerance
   , ApproximateEquality ((~=))
-  , (!=)
   , Indexed ((!!))
   , Intersects (intersects)
   , (^)
@@ -256,12 +255,6 @@ class ApproximateEquality a constraint | a -> constraint where
   (~=) :: constraint => a -> a -> Bool
 
 infix 4 ~=
-
-{-# INLINE (!=) #-}
-(!=) :: (ApproximateEquality a constraint, constraint) => a -> a -> Bool
-(!=) first second = not (first ~= second)
-
-infix 4 !=
 
 instance ApproximateEquality (Quantity units) (Tolerance units) where
   x ~= y = x >= y - ?tolerance && x <= y + ?tolerance

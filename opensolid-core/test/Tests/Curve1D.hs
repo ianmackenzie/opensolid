@@ -44,8 +44,8 @@ approximateEquality = Test.verifyWith Tolerance.unitless "approximateEquality" d
   let cosTheta = Curve1D.cos theta
   let sumOfSquares = Curve1D.squared sinTheta + Curve1D.squared cosTheta
   Test.all
-    [ Test.expect (sinTheta != cosTheta)
+    [ Test.expect (not $ sinTheta ~= cosTheta)
     , Test.expect (sinTheta ~= Curve1D.cos (Angle.degrees 90.0 - theta))
     , Test.expect (sumOfSquares ~= Curve1D.constant 1.0)
-    , Test.expect (sumOfSquares != Curve1D.constant 2.0)
+    , Test.expect (not $ sumOfSquares ~= Curve1D.constant 2.0)
     ]
