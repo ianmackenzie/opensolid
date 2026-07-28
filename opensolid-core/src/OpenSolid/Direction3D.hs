@@ -141,9 +141,17 @@ upwardComponent (Unit3D vector) = Vector3D.upwardComponent vector
 downwardComponent :: Direction3D space -> Number
 downwardComponent (Unit3D vector) = Vector3D.downwardComponent vector
 
+{-| Get the XYZ components of a direction using a Z-up coordinate convention.
+
+This is a convention where positive X is rightward, positive Y is forward and positive Z is upward.
+-}
 zUpComponents :: Direction3D space -> (Number, Number, Number)
 zUpComponents (Unit3D vector) = Vector3D.zUpComponents vector
 
+{-| Get the XYZ components of a direction using a Y-up coordinate convention.
+
+This is a convention where positive X is leftward, positive Y is upward, and positive Z is forward.
+-}
 yUpComponents :: Direction3D space -> (Number, Number, Number)
 yUpComponents (Unit3D vector) = Vector3D.yUpComponents vector
 
