@@ -43,14 +43,6 @@
               # (somehow Zed wants *both* of these)
               pkgs.nixd
               pkgs.nil
-              # For formatting/linting Python files
-              # (used in the opensolid-python executable
-              # for formatting the generated code)
-              pkgs.ruff
-              # For type-checking Python files
-              # (used in the opensolid-python executable
-              # for type-checking the generated code)
-              pkgs.pyright
             ];
             # Executed when entering the development shell
             shellHook = builtins.concatStringsSep "\n" [
