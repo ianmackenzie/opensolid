@@ -533,9 +533,11 @@ unitlessVector2D =
     , Class.times @Area Self
     , Class.divByNumber
     , Class.dotSelf
+    , Class.dotProduct @Direction2D Self
     , Class.dotProduct @Vector2D Self
     , Class.dotProduct @AreaVector2D Self
     , Class.crossSelf
+    , Class.crossProduct @Direction2D Self
     , Class.crossProduct @Vector2D Self
     , Class.crossProduct @AreaVector2D Self
     ]
@@ -575,8 +577,10 @@ vector2D =
     , Class.divByNumber
     , Class.divBy @Length Self
     , Class.dotSelf
+    , Class.dotProduct @Direction2D Self
     , Class.dotProduct @UnitlessVector2D Self
     , Class.crossSelf
+    , Class.crossProduct @Direction2D Self
     , Class.crossProduct @UnitlessVector2D Self
     ]
       <> vectorTransformations2D
@@ -609,7 +613,9 @@ areaVector2D =
     , Class.divByNumber
     , Class.divBy @Length Self
     , Class.divBy @Area Self
+    , Class.dotProduct @Direction2D Self
     , Class.dotProduct @UnitlessVector2D Self
+    , Class.crossProduct @Direction2D Self
     , Class.crossProduct @UnitlessVector2D Self
     ]
       <> vectorTransformations2D
@@ -619,12 +625,16 @@ type Direction2D = Direction2D.Direction2D
 direction2D :: Class
 direction2D =
   Class.new @Direction2D $(docs ''Direction2D.Direction2D) $
-    [ Class.upcast Vector2D.unit
-    , Class.constant "X" Direction2D.x $(docs 'Direction2D.x)
+    [ Class.constant "X" Direction2D.x $(docs 'Direction2D.x)
     , Class.constant "Y" Direction2D.y $(docs 'Direction2D.y)
     , Class.factory1 "From Angle" "Angle" Direction2D.fromAngle $(docs 'Direction2D.fromAngle)
     , Class.factory1 "Degrees" "Value" Direction2D.degrees $(docs 'Direction2D.degrees)
     , Class.factory1 "Radians" "Value" Direction2D.radians $(docs 'Direction2D.radians)
+    , Class.property "Components" Direction2D.components $(docs 'Direction2D.components)
+    , Class.property "X Component" Direction2D.xComponent $(docs 'Direction2D.xComponent)
+    , Class.property "Y Component" Direction2D.yComponent $(docs 'Direction2D.yComponent)
+    , Class.property "Angle" Direction2D.angle $(docs 'Direction2D.angle)
+    , Class.member1 "Angle To" "Other" (flip Direction2D.angleFrom) $(docs 'Direction2D.angleFrom)
     , Class.member0 "Rotate Left" Direction2D.rotateLeft $(docs 'Direction2D.rotateLeft)
     , Class.member0 "Rotate Right" Direction2D.rotateRight $(docs 'Direction2D.rotateRight)
     , Class.member1 "Rotate By" "Angle" Direction2D.rotateBy $(docs 'Direction2D.rotateBy)
@@ -632,6 +642,18 @@ direction2D =
     , Class.member1 "Mirror Across" "Axis" (Direction2D.mirrorAcross :: Axis2D -> Direction2D -> Direction2D) $(docs 'Direction2D.mirrorAcross)
     , Class.member1 "Place On" "Plane" (Direction2D.placeOn :: Plane3D -> Direction2D -> Direction3D) $(docs 'Direction2D.placeOn)
     , Class.negateSelf
+    , Class.numberTimes
+    , Class.timesNumber
+    , Class.times @Length Self
+    , Class.times @Area Self
+    , Class.dotSelf
+    , Class.dotProduct @UnitlessVector2D Self
+    , Class.dotProduct @Vector2D Self
+    , Class.dotProduct @AreaVector2D Self
+    , Class.crossSelf
+    , Class.crossProduct @UnitlessVector2D Self
+    , Class.crossProduct @Vector2D Self
+    , Class.crossProduct @AreaVector2D Self
     ]
 
 type Point2D = Point2D.Point2D Meters
@@ -1086,9 +1108,11 @@ unitlessVector3D =
     , Class.times @Area Self
     , Class.divByNumber
     , Class.dotSelf
+    , Class.dotProduct @Direction3D Self
     , Class.dotProduct @Vector3D Self
     , Class.dotProduct @AreaVector3D Self
     , Class.crossSelf
+    , Class.crossProduct @Direction3D Self
     , Class.crossProduct @Vector3D Self
     , Class.crossProduct @AreaVector3D Self
     ]
@@ -1124,8 +1148,10 @@ vector3D =
     , Class.divByNumber
     , Class.divBy @Length Self
     , Class.dotSelf
+    , Class.dotProduct @Direction3D Self
     , Class.dotProduct @UnitlessVector3D Self
     , Class.crossSelf
+    , Class.crossProduct @Direction3D Self
     , Class.crossProduct @UnitlessVector3D Self
     ]
 
@@ -1159,7 +1185,9 @@ areaVector3D =
     , Class.divByNumber
     , Class.divBy @Length Self
     , Class.divBy @Area Self
+    , Class.dotProduct @Direction3D Self
     , Class.dotProduct @UnitlessVector3D Self
+    , Class.crossProduct @Direction3D Self
     , Class.crossProduct @UnitlessVector3D Self
     ]
 
@@ -1168,7 +1196,9 @@ type Direction3D = Direction3D.Direction3D Void
 direction3D :: Class
 direction3D =
   Class.new @Direction3D $(docs ''Direction3D.Direction3D) $
-    [ Class.upcast Vector3D.unit
+    [ Class.member1 "Components" "Convention" Direction3D.components $(docs 'Direction3D.components)
+    , Class.member0 "Z Up Components" Direction3D.zUpComponents $(docs 'Direction3D.zUpComponents)
+    , Class.member0 "Y Up Components" Direction3D.yUpComponents $(docs 'Direction3D.yUpComponents)
     , Class.member0 "Perpendicular Direction" Direction3D.perpendicularDirection $(docs 'Direction3D.perpendicularDirection)
     , Class.member1 "Angle To" "Other" Direction3D.angleFrom $(docs 'Direction3D.angleFrom)
     , Class.member2 "Rotate In" "Direction" "Angle" Direction3D.rotateIn $(docs 'Direction3D.rotateIn)
@@ -1178,6 +1208,18 @@ direction3D =
     , Class.member1 "Place In" "Frame" (Direction3D.placeIn :: Frame3D -> Direction3D -> Direction3D) $(docs 'Direction3D.placeIn)
     , Class.member1 "Relative To" "Frame" (Direction3D.relativeTo :: Frame3D -> Direction3D -> Direction3D) $(docs 'Direction3D.relativeTo)
     , Class.negateSelf
+    , Class.numberTimes
+    , Class.timesNumber
+    , Class.times @Length Self
+    , Class.times @Area Self
+    , Class.dotSelf
+    , Class.dotProduct @UnitlessVector3D Self
+    , Class.dotProduct @Vector3D Self
+    , Class.dotProduct @AreaVector3D Self
+    , Class.crossSelf
+    , Class.crossProduct @UnitlessVector3D Self
+    , Class.crossProduct @Vector3D Self
+    , Class.crossProduct @AreaVector3D Self
     ]
 
 type Point3D = Point3D.Point3D Void
