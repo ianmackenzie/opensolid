@@ -9,7 +9,6 @@ module OpenSolid.NewtonRaphson.Surface
 where
 
 import OpenSolid.Bounds2D qualified as Bounds2D
-import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
@@ -65,11 +64,8 @@ solve2D evaluate uvPoint1 v1 du1 dv1 = do
     else validateSolution uvPoint1 uvStep
 
 validateSolution :: UvPoint -> Vector2D Unitless -> Fuzzy UvPoint
-validateSolution uvPoint uvStep = do
-  let stepSize = Vector2D.magnitude uvStep
-  if stepSize <= Tolerance.unitless || Number.isNaN stepSize
-    then Resolved uvPoint
-    else Unresolved
+validateSolution uvPoint uvStep =
+  if Vector2D.magnitude uvStep <= Tolerance.unitless then Resolved uvPoint else Unresolved
 
 instance Solver 3 units space where
   solveFrom uvPoint1 evaluate = do

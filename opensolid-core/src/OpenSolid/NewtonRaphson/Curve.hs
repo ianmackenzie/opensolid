@@ -39,7 +39,7 @@ solveIn tRange evaluate = do
 
 validateSolution :: Number -> Number -> Fuzzy Number
 validateSolution t1 tStep =
-  if Number.abs tStep <= Tolerance.unitless || Number.isNaN tStep then Resolved t1 else Unresolved
+  if Number.abs tStep <= Tolerance.unitless then Resolved t1 else Unresolved
 
 instance Solver 1 units Void where
   solveFrom t1 evaluate = do
