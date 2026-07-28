@@ -4,6 +4,7 @@ module OpenSolid.Unboxed.Math
   ( Double#
   , Int#
   , Double (D#)
+  , pattern B#
   , negate#
   , (+#)
   , (-#)
@@ -53,6 +54,18 @@ where
 import GHC.Exts (Double (D#), Double#, Int#)
 import GHC.Exts qualified
 import OpenSolid.Prelude
+
+{-# INLINE B# #-}
+pattern B# :: Int# -> Bool
+pattern B# i# <- (bool# -> i#)
+  where
+    B# 0# = False
+    B# _ = True
+
+{-# INLINE bool# #-}
+bool# :: Bool -> Int#
+bool# False = 0#
+bool# True = 1#
 
 {-# INLINE (+#) #-}
 (+#) :: Double# -> Double# -> Double#
