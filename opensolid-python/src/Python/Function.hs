@@ -109,10 +109,12 @@ argument :: (Name, FFI.Type) -> Text
 argument (argName, argType) = FFI.snakeCase argName <> ": " <> Python.Type.qualifiedName argType
 
 body :: Text -> List (Text, FFI.Type) -> FFI.Type -> Text
-body ffiFunctionName ffiArguments returnType =
+body ffiFunctionName ffiArguments returnType = do
+  let inputsName = ffiFunctionName <> "_inputs"
+  let outputName = ffiFunctionName <> "_output"
   Python.lines
-    [ "inputs = " <> Python.FFI.argumentValue ffiArguments
-    , "output = " <> Python.FFI.dummyValue returnType
-    , Python.FFI.invoke ffiFunctionName "ctypes.byref(inputs)" "ctypes.byref(output)"
-    , "return " <> Python.FFI.outputValue returnType "output"
+    [ inputsName <> " = " <> Python.FFI.argumentValue ffiArguments
+    , outputName <> " = " <> Python.FFI.dummyValue returnType
+    , Python.FFI.invoke ffiFunctionName ("ctypes.byref(" <> inputsName <> ")") ("ctypes.byref(" <> outputName <> ")")
+    , "return " <> Python.FFI.outputValue returnType outputName
     ]
