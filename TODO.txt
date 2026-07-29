@@ -1,9 +1,4 @@
-Switch from 'pattern' to 'data' in import/export lists
-
 Rename 'solveNonOverlapping' to 'solveInterior' in Intersection module?
-
-Have Quantity import Number instead of the other way around?
-- avoid calling built-in Prelude functions on Number values in Quantity module, slightly icky
 
 Try having 'fromConstraints' functions?
 - and corresponding 'withSomething' functions?
@@ -17,8 +12,15 @@ Try having 'fromConstraints' functions?
     - if provided constraints are disjoint from all supported combinations,
       report that the provided combination is not supported at all
 
+Switch Curve1D solving over to using bisection and clusters
+- then remove Solve1D module
+
+Switch SurfaceFunction1D solving over to using bisection and clusters
+- then remove Solve2D module
+
 Add Show.partialRecord function
 - use for records where some fields are left out and replaced with an ellipsis
+- use for CurvePoint, IntersectionPoint, maybe Segment types (anything with lazily-computed fields that may not even be valid)
 
 Clean up error modules
 - InternalError vs Error, Nondegenerate vs IsDegenerate...
