@@ -18,9 +18,17 @@ build-backend = "setuptools.build_meta"
 dev = ["setuptools>=75.6.0"]
 
 [tool.ty.rules]
+blanket-ignore-comment = "error"
 missing-type-argument = "error"
 possibly-unresolved-reference = "error"
+unsupported-dynamic-base = "error"
+division-by-zero = "error"
+possibly-missing-attribute = "error"
+possibly-missing-import = "error"
+
+[tool.ty.analysis]
+strict-literal-narrowing = true
 
 [tool.ruff.lint]
-extend-select = ["ANN", "PYI"]
+extend-select = ["ANN", "PYI", "PGH003"]
 preview = true
