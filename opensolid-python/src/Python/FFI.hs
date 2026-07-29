@@ -182,10 +182,11 @@ fieldArgumentValue varName ffiType = case ffiType of
 
 listArgumentValue :: FFI.Type -> FFI.Type -> Text -> Text
 listArgumentValue listType itemType varName = do
-  let arrayType = "(" <> typeName itemType <> " * len(" <> varName <> "))"
+  let numItems = "len(" <> varName <> ")"
+  let arrayType = "(" <> typeName itemType <> " * " <> numItems <> ")"
   let arrayItems = "[" <> singleArgument "item" itemType <> " for item in " <> varName <> "]"
   let array = arrayType <> "(*" <> arrayItems <> ")"
-  "_list_argument(" <> typeName listType <> "," <> array <> ")"
+  typeName listType <> "(" <> numItems <> ", " <> array <> ")"
 
 nonEmptyArgumentValue :: FFI.Type -> Text -> Text
 nonEmptyArgumentValue itemType varName = do
