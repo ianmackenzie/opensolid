@@ -434,7 +434,7 @@ type Number = Quantity Unitless
 pattern Quantity :: Number -> Quantity units
 pattern Quantity number <- (Data.Coerce.coerce -> number)
   where
-    Quantity (Quantity_ double) = Quantity_ double
+    Quantity = Data.Coerce.coerce
 
 {-# COMPLETE Q# #-}
 
