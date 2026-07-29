@@ -88,6 +88,7 @@ preamble =
     , "def _text_to_str(ptr: _Text) -> str:"
     , "    decoded = ptr.as_char.decode('utf-8')"
     , "    _lib.opensolid_free(ptr.as_void)"
+    , "    assert isinstance(decoded, str)"
     , "    return decoded"
     , ""
     , "def _str_to_text(s: str) -> _Text:"
