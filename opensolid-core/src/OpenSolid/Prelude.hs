@@ -39,6 +39,7 @@ module OpenSolid.Prelude
   , Meters
   , Number
   , data Number
+  , data N#
   , Sign (Sign, Positive, Negative)
   , fromInteger
   , fromRational
@@ -447,6 +448,12 @@ pattern Q# x# = Quantity_ (D# x#)
 {-# INLINE Number #-}
 pattern Number :: Double -> Number
 pattern Number double = Quantity_ double
+
+{-# COMPLETE N# #-}
+
+{-# INLINE N# #-}
+pattern N# :: Double# -> Number
+pattern N# x# = Number (D# x#)
 
 deriving newtype instance Prelude.Num Number
 
