@@ -19,8 +19,6 @@ module OpenSolid.Quantity
   , hypot3
   , abs
   , minmax
-  , clampTo
-  , includedIn
   , convert
   , unconvert
   , sum
@@ -34,8 +32,6 @@ module OpenSolid.Quantity
 where
 
 import Data.Coerce qualified
-import {-# SOURCE #-} OpenSolid.Interval (Interval)
-import {-# SOURCE #-} OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Unboxed.Math
@@ -101,12 +97,6 @@ hypot3 (Q# x#) (Q# y#) (Q# z#) = Q# (hypot3# x# y# z#)
 {-# INLINE abs #-}
 abs :: Quantity units -> Quantity units
 abs (Quantity x) = Quantity (Prelude.abs x)
-
-clampTo :: Interval units -> Quantity units -> Quantity units
-clampTo interval value = min (max (Interval.lower interval) value) (Interval.upper interval)
-
-includedIn :: Interval units -> Quantity units -> Bool
-includedIn interval value = Interval.lower interval <= value && value <= Interval.upper interval
 
 {-# INLINE minmax #-}
 minmax :: (Quantity units, Quantity units) -> (Quantity units, Quantity units)
