@@ -1,14 +1,9 @@
 Switch from 'pattern' to 'data' in import/export lists
 
+Rename 'solveNonOverlapping' to 'solveInterior' in Intersection module?
+
 Have Quantity import Number instead of the other way around?
 - avoid calling built-in Prelude functions on Number values in Quantity module, slightly icky
-
-Clean up LD_LIBRARY_PATH in flake.nix
-- inline ld_library_path expression instead of using a variable
-- fix comment (doesn't seem to be about libopensolid-ffi.so any more...)
-- try removing LD_LIBRARY_PATH config entirely to see if it's actually still necessary?
-
-Switch to Pyrefly 'strict' preset
 
 Try having 'fromConstraints' functions?
 - and corresponding 'withSomething' functions?
