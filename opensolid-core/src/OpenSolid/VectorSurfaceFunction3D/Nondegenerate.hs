@@ -7,7 +7,7 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D

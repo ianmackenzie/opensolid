@@ -14,7 +14,7 @@ import OpenSolid.SurfaceFunction1D.Zeros qualified as SurfaceFunction1D.Zeros
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.World3D qualified as World3D

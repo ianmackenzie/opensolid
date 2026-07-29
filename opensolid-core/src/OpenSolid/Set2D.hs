@@ -1,7 +1,7 @@
 module OpenSolid.Set2D
   ( Set2D
-  , pattern Leaf
-  , pattern Node
+  , data Leaf
+  , data Node
   , leaf
   , node
   , size

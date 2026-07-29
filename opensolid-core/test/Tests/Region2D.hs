@@ -10,7 +10,7 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
-import OpenSolid.Point2D (pattern Point2D)
+import OpenSolid.Point2D (data Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity (zero)

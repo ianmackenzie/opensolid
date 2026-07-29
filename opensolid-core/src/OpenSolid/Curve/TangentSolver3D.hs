@@ -17,7 +17,7 @@ import OpenSolid.Primitives
   , VectorBounds3D (VectorBounds3D)
   )
 import OpenSolid.Units qualified as Units
-import OpenSolid.UvPoint (pattern UvPoint)
+import OpenSolid.UvPoint (data UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 
 solver :: Curve.Solver 3 Meters space

@@ -1,6 +1,6 @@
 module OpenSolid.Line3D
   ( Line3D
-  , pattern Line3D
+  , data Line3D
   , on
   , startPoint
   , endPoint
@@ -27,7 +27,7 @@ import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Length (Length)
 import OpenSolid.Line (Line (Line))
 import OpenSolid.Line qualified as Line
-import OpenSolid.Line2D (Line2D, pattern Line2D)
+import OpenSolid.Line2D (Line2D, data Line2D)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude

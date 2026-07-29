@@ -1,7 +1,7 @@
 module OpenSolid.Set3D
   ( Set3D
-  , pattern Leaf
-  , pattern Node
+  , data Leaf
+  , data Node
   , leaf
   , node
   , size

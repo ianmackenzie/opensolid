@@ -1,7 +1,7 @@
 module OpenSolid.Int
   ( parse
-  , pattern Even
-  , pattern Odd
+  , data Even
+  , data Odd
   , isEven
   , isOdd
   , sign

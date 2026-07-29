@@ -66,7 +66,7 @@ import OpenSolid.Orientation3D (Orientation3D)
 import OpenSolid.Plane3D (Plane3D (Plane3D))
 import OpenSolid.PlaneOrientation3D (PlaneOrientation3D)
 import OpenSolid.PlaneOrientation3D qualified as PlaneOrientation3D
-import OpenSolid.Point2D (Point2D, pattern Point2D)
+import OpenSolid.Point2D (Point2D, data Point2D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -81,7 +81,7 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Transform3D qualified as Transform3D
-import OpenSolid.Vector2D (Vector2D, pattern Vector2D)
+import OpenSolid.Vector2D (Vector2D, data Vector2D)
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 import OpenSolid.VectorTransform2D qualified as VectorTransform2D
 import OpenSolid.VectorTransform3D qualified as VectorTransform3D

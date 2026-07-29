@@ -13,7 +13,7 @@ import OpenSolid.Stl qualified as Stl
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.UvPoint (pattern UvPoint)
+import OpenSolid.UvPoint (data UvPoint)
 import OpenSolid.World3D qualified as World3D
 
 main :: IO ()

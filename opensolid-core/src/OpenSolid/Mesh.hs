@@ -21,7 +21,7 @@ import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
-import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvPoint (UvPoint, data UvPoint)
 
 data Mesh vertex = Mesh
   { vertices :: Array vertex

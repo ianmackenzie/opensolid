@@ -4,7 +4,7 @@ module OpenSolid.Unboxed.Math
   ( Double#
   , Int#
   , Double (D#)
-  , pattern B#
+  , data B#
   , negate#
   , (+#)
   , (-#)

@@ -8,7 +8,7 @@ module OpenSolid.Prelude
   , Result (Ok, Error)
   , Exception
   , Void
-  , pattern NonEmpty
+  , data NonEmpty
   , type (:::) ((:::))
   , (&)
   , Negation (negate)
@@ -38,7 +38,7 @@ module OpenSolid.Prelude
   , Radians
   , Meters
   , Number
-  , pattern Number
+  , data Number
   , Sign (Sign, Positive, Negative)
   , fromInteger
   , fromRational
@@ -48,7 +48,7 @@ module OpenSolid.Prelude
   , ifThenElse
   , assert
   , throw
-  , pattern TODO
+  , data TODO
   , recursive
   , forEach
   , forEachWithIndex

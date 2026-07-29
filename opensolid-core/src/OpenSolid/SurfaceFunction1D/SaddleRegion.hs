@@ -34,7 +34,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as Ver
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 

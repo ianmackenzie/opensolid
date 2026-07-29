@@ -14,8 +14,8 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Prelude
-import OpenSolid.UvBounds (pattern UvBounds)
-import OpenSolid.UvPoint (pattern UvPoint)
+import OpenSolid.UvBounds (data UvBounds)
+import OpenSolid.UvPoint (data UvPoint)
 
 solver :: Curve.Solver dimension units space
 solver = Curve.Solver resolve solve

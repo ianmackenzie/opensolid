@@ -29,7 +29,7 @@ import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Result qualified as Result
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D)

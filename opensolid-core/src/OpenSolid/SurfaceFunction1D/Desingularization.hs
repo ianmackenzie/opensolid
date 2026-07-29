@@ -8,7 +8,7 @@ import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
-import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvPoint (UvPoint, data UvPoint)
 
 {-| Generate a list of test points at a given fixed U or V value, varying the other parameter.
 

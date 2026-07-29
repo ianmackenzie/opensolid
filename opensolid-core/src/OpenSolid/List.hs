@@ -1,14 +1,14 @@
 module OpenSolid.List
   ( List
-  , pattern One
-  , pattern Two
-  , pattern Three
-  , pattern Four
-  , pattern OneOrMore
-  , pattern TwoOrMore
-  , pattern ThreeOrMore
-  , pattern FourOrMore
-  , pattern FiveOrMore
+  , data One
+  , data Two
+  , data Three
+  , data Four
+  , data OneOrMore
+  , data TwoOrMore
+  , data ThreeOrMore
+  , data FourOrMore
+  , data FiveOrMore
   , singleton
   , maybe
   , isEmpty

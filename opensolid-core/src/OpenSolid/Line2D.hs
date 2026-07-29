@@ -1,6 +1,6 @@
 module OpenSolid.Line2D
   ( Line2D
-  , pattern Line2D
+  , data Line2D
   , startPoint
   , endPoint
   , endpoints

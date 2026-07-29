@@ -23,8 +23,8 @@ import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units qualified as Units
-import OpenSolid.UvBounds (pattern UvBounds)
-import OpenSolid.UvPoint (pattern UvPoint)
+import OpenSolid.UvBounds (data UvBounds)
+import OpenSolid.UvPoint (data UvPoint)
 
 lengthScale ::
   Curve.Exists dimension units space =>

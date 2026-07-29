@@ -13,7 +13,7 @@ import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
-import OpenSolid.UvPoint (pattern UvPoint)
+import OpenSolid.UvPoint (data UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 

@@ -1,6 +1,6 @@
 module OpenSolid.UvBounds
   ( UvBounds
-  , pattern UvBounds
+  , data UvBounds
   , unitSquare
   )
 where

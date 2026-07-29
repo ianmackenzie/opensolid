@@ -1,7 +1,7 @@
 module OpenSolid.Bag2D
   ( Bag2D
-  , pattern Empty
-  , pattern Full
+  , data Empty
+  , data Full
   , empty
   , full
   , toMaybeSet

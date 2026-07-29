@@ -1,6 +1,6 @@
 module OpenSolid.UvPoint
   ( UvPoint
-  , pattern UvPoint
+  , data UvPoint
   , samples
   , random
   )

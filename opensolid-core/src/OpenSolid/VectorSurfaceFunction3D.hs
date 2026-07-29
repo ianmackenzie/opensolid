@@ -65,8 +65,8 @@ import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.UvBounds (UvBounds, pattern UvBounds)
-import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvBounds (UvBounds, data UvBounds)
+import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D

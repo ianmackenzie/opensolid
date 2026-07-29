@@ -41,7 +41,7 @@ import OpenSolid.Convention3D (Convention3D)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Length (Length)
 import {-# SOURCE #-} OpenSolid.Plane3D qualified as Plane3D
-import OpenSolid.Point2D (Point2D, pattern Point2D)
+import OpenSolid.Point2D (Point2D, data Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3D (Axis3D)

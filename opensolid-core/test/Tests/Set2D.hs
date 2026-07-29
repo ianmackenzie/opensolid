@@ -12,7 +12,7 @@ import OpenSolid.Prelude
 import OpenSolid.Set2D (Set2D)
 import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.Text qualified as Text
-import OpenSolid.UvBounds (pattern UvBounds)
+import OpenSolid.UvBounds (data UvBounds)
 import Test (Test)
 import Test qualified
 

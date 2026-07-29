@@ -50,7 +50,7 @@ import OpenSolid.Length (Length)
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
-import OpenSolid.Point2D (pattern Point2D)
+import OpenSolid.Point2D (data Point2D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Primitives

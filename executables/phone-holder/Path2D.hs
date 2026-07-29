@@ -22,7 +22,7 @@ import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Length (Length)
-import OpenSolid.Line2D (pattern Line2D)
+import OpenSolid.Line2D (data Line2D)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude

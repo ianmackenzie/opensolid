@@ -8,7 +8,7 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Model3D qualified as Model3D
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.PbrMaterial qualified as PbrMaterial
-import OpenSolid.Point2D (pattern Point2D)
+import OpenSolid.Point2D (data Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Polygon2D (Polygon2D (Polygon2D))
 import OpenSolid.Prelude

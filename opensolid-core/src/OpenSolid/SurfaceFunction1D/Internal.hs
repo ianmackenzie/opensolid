@@ -13,7 +13,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve1D qualified as Solve1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import OpenSolid.UvPoint (pattern UvPoint)
+import OpenSolid.UvPoint (data UvPoint)
 
 solveForU ::
   Tolerance units =>

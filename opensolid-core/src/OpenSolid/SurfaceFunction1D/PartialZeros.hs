@@ -30,7 +30,7 @@ import OpenSolid.SurfaceFunction1D.Zeros (Zeros (Zeros))
 import OpenSolid.SurfaceFunction1D.Zeros qualified as Zeros
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvPoint (UvPoint, data UvPoint)
 
 data PartialZeros units = PartialZeros
   { crossingSegments :: List CrossingSegment

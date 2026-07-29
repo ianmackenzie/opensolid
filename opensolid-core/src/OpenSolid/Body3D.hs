@@ -85,8 +85,8 @@ import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceFunction3D.Nondegenerate qualified as SurfaceFunction3D.Nondegenerate
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D))
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.UvBounds (UvBounds, pattern UvBounds)
-import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvBounds (UvBounds, data UvBounds)
+import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorCurve3D (VectorCurve3D)

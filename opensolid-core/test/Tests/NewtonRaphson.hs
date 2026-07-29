@@ -15,7 +15,7 @@ import OpenSolid.Prelude
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.UvPoint (UvPoint, pattern UvPoint)
+import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)

@@ -29,7 +29,7 @@ import OpenSolid.SurfaceFunction1D.ImplicitCurveRange qualified as ImplicitCurve
 import OpenSolid.SurfaceFunction1D.Internal qualified as Internal
 import OpenSolid.SurfaceParameter (SurfaceParameter (U))
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvPoint (pattern UvPoint)
+import OpenSolid.UvPoint (data UvPoint)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 data Monotonicity

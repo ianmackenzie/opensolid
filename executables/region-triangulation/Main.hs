@@ -7,7 +7,7 @@ import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Length qualified as Length
 import OpenSolid.Mesh qualified as Mesh
-import OpenSolid.Point2D (pattern Point2D)
+import OpenSolid.Point2D (data Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D

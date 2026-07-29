@@ -1,22 +1,22 @@
 module OpenSolid.NonEmpty
   ( NonEmpty ((:|))
-  , pattern NonEmpty
-  , pattern One
-  , pattern Two
-  , pattern Three
-  , pattern Four
-  , pattern Five
-  , pattern Six
-  , pattern Seven
-  , pattern Eight
-  , pattern TwoOrMore
-  , pattern ThreeOrMore
-  , pattern FourOrMore
-  , pattern FiveOrMore
-  , pattern SixOrMore
-  , pattern SevenOrMore
-  , pattern EightOrMore
-  , pattern NineOrMore
+  , data NonEmpty
+  , data One
+  , data Two
+  , data Three
+  , data Four
+  , data Five
+  , data Six
+  , data Seven
+  , data Eight
+  , data TwoOrMore
+  , data ThreeOrMore
+  , data FourOrMore
+  , data FiveOrMore
+  , data SixOrMore
+  , data SevenOrMore
+  , data EightOrMore
+  , data NineOrMore
   , one
   , two
   , three

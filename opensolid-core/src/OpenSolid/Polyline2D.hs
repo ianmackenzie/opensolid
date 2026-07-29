@@ -1,6 +1,6 @@
 module OpenSolid.Polyline2D
   ( Polyline2D
-  , pattern Polyline2D
+  , data Polyline2D
   , vertices
   , numVertices
   , startPoint

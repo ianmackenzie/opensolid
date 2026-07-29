@@ -52,7 +52,6 @@ common config
     -haddock
     -dcmm-lint
     -dcore-lint
-    -Wno-pattern-namespace-specifier
 
   default-extensions:
     BlockArguments
