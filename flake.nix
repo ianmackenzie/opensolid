@@ -18,8 +18,6 @@
         # Get the Nix packages for the current platform/architecture
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          # Allow Python packages to be built against libstdc++.so
-          ld_library_path = pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ];
         in
         {
           # Define the configuration for an OpenSolid development shell
@@ -49,9 +47,6 @@
               # Add the 'scripts' directory to PATH for convenience,
               # to allow e.g. format-cabal-files to be run directly
               "export PATH=$PATH:./scripts"
-              # Set LD_LIBRARY_PATH to the build directory containing libopensolid-ffi.so,
-              # so that it can be found by Python when loading the 'opensolid' module
-              "export LD_LIBRARY_PATH=${ld_library_path}"
               # Allow clangd to find GHC's Rts.h
               "export CPATH=$(find $(ghc --print-libdir) -name Rts.h | sed -r 's|Rts.h||')"
             ];
