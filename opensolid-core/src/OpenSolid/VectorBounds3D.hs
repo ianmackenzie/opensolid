@@ -313,7 +313,7 @@ normalizedBounds = Interval -1.0 1.0
 
 clampNormalized :: Interval Unitless -> Interval Unitless
 clampNormalized (Interval low high) =
-  Interval (Quantity.clampTo normalizedBounds low) (Quantity.clampTo normalizedBounds high)
+  Interval (Number.clampTo normalizedBounds low) (Number.clampTo normalizedBounds high)
 
 exclusion :: Vector3D units space -> VectorBounds3D units space -> Quantity units
 exclusion (Vector3D x y z) (VectorBounds3D bx by bz) = do

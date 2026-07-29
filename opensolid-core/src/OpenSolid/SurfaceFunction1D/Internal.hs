@@ -10,6 +10,7 @@ import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Number qualified as Number
 import OpenSolid.Solve1D qualified as Solve1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
@@ -51,8 +52,8 @@ curveRangeAt x1 x2 y1 y2 (Interval mLow mHigh)
   | otherwise = do
       let dX = x2 - x1
       let dY = y2 - y1
-      let dXValley = Quantity.clampTo (Interval 0.0 dX) ((mHigh * dX - dY) / (mHigh - mLow))
-      let dXPeak = Quantity.clampTo (Interval 0.0 dX) ((dY - mLow * dX) / (mHigh - mLow))
+      let dXValley = Number.clampTo (Interval 0.0 dX) ((mHigh * dX - dY) / (mHigh - mLow))
+      let dXPeak = Number.clampTo (Interval 0.0 dX) ((dY - mLow * dX) / (mHigh - mLow))
       let yValley =
             if Quantity.isInfinite mLow
               then -Quantity.infinity
@@ -72,8 +73,8 @@ curveRangeOver x1 x2 y1 y2 (Interval mLow mHigh)
       let Interval low2 high2 = y2
       let dYLow = low2 - low1
       let dYHigh = high2 - high1
-      let dXValley = Quantity.clampTo (Interval 0.0 dX) ((mHigh * dX - dYLow) / (mHigh - mLow))
-      let dXPeak = Quantity.clampTo (Interval 0.0 dX) ((dYHigh - mLow * dX) / (mHigh - mLow))
+      let dXValley = Number.clampTo (Interval 0.0 dX) ((mHigh * dX - dYLow) / (mHigh - mLow))
+      let dXPeak = Number.clampTo (Interval 0.0 dX) ((dYHigh - mLow * dX) / (mHigh - mLow))
       let yValley =
             if Quantity.isInfinite mLow
               then -Quantity.infinity

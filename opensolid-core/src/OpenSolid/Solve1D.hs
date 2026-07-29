@@ -249,7 +249,7 @@ newtonRaphson function derivative interval x y iterations =
                 -- Newton step went outside interval,
                 -- attempt to recover by making another step
                 -- starting at the boundary
-                let xClamped = Quantity.clampTo interval xStepped
+                let xClamped = Number.clampTo interval xStepped
                 let yClamped = function xClamped
                 let dyClamped = derivative xClamped
                 if dyClamped == Quantity.zero

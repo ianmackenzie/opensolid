@@ -20,6 +20,7 @@ import OpenSolid.Domain2D (Domain2D (Domain2D))
 import OpenSolid.Domain2D qualified as Domain2D
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
+import OpenSolid.Number qualified as Number
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2D qualified as Point2D
@@ -274,8 +275,8 @@ boundedStep uvRange p1 p2 =
       let Bounds2D uRange vRange = uvRange
       let UvPoint u1 v1 = p1
       let UvPoint u2 v2 = p2
-      let clampedU = Quantity.clampTo uRange u2
-      let clampedV = Quantity.clampTo vRange v2
+      let clampedU = Number.clampTo uRange u2
+      let clampedV = Number.clampTo vRange v2
       let uScale = if u1 == u2 then 1.0 else (clampedU - u1) / (u2 - u1)
       let vScale = if v1 == v2 then 1.0 else (clampedV - v1) / (v2 - v1)
       let scale = min uScale vScale
@@ -283,4 +284,4 @@ boundedStep uvRange p1 p2 =
       -- Perform a final clamping step
       -- in case numerical roundoff during interpolation
       -- left the point *slightly* outside uvRange
-      UvPoint (Quantity.clampTo uRange u) (Quantity.clampTo vRange v)
+      UvPoint (Number.clampTo uRange u) (Number.clampTo vRange v)

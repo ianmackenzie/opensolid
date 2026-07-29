@@ -241,7 +241,7 @@ normalizedBounds = Interval -1.0 1.0
 
 clampNormalized :: Interval Unitless -> Interval Unitless
 clampNormalized (Interval low high) =
-  Interval (Quantity.clampTo normalizedBounds low) (Quantity.clampTo normalizedBounds high)
+  Interval (Number.clampTo normalizedBounds low) (Number.clampTo normalizedBounds high)
 
 exclusion :: Vector2D units -> VectorBounds2D units -> Quantity units
 exclusion vector bounds = Q# (exclusion# vector bounds)

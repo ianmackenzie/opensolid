@@ -45,14 +45,14 @@ evaluate tree s = case tree of
     | s < leftLength -> evaluate leftTree s
     | otherwise -> evaluate rightTree (s - leftLength)
   Leaf segmentLength t1# t2# t3# t4# t5# t6# -> do
-    let !(Q# r#) = Quantity.clampTo Interval.unit (s / segmentLength)
-    Q# (quinticBezier# t1# t2# t3# t4# t5# t6# r#)
+    let !(N# r#) = Number.clampTo Interval.unit (s / segmentLength)
+    N# (quinticBezier# t1# t2# t3# t4# t5# t6# r#)
   DegenerateStart segmentLength q1# q2# q3# q4# -> do
-    let !(Q# r#) = Quantity.clampTo Interval.unit (s / segmentLength)
-    Q# (sqrt# (cubicBezier# q1# q2# q3# q4# r#))
+    let !(N# r#) = Number.clampTo Interval.unit (s / segmentLength)
+    N# (sqrt# (cubicBezier# q1# q2# q3# q4# r#))
   DegenerateEnd segmentLength q1# q2# q3# q4# -> do
-    let !(Q# r#) = 1.0 - Quantity.clampTo Interval.unit (s / segmentLength)
-    Q# (1.0## -# sqrt# (cubicBezier# q1# q2# q3# q4# r#))
+    let !(N# r#) = 1.0 - Number.clampTo Interval.unit (s / segmentLength)
+    N# (1.0## -# sqrt# (cubicBezier# q1# q2# q3# q4# r#))
 
 buildTree ::
   Int ->
