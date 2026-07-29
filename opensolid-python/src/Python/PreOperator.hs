@@ -32,7 +32,7 @@ definition className (operatorId, operators) = do
       let overloadCase (_, matchPattern, body) = Python.Function.overloadCase matchPattern [body]
       Python.lines
         [ Python.lines (List.map overloadDeclaration overloads)
-        , "def " <> functionName operatorId <> "(self, " <> lhsArgName <> "):"
+        , "def " <> functionName operatorId <> "(self, " <> lhsArgName <> ": Any) -> Any:"
         , Python.indent
             [ documentation operatorId
             , "match " <> lhsArgName <> ":"
