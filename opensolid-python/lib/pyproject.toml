@@ -16,3 +16,11 @@ build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 dev = ["setuptools>=75.6.0"]
+
+[tool.ty.rules]
+missing-type-argument = "error"
+possibly-unresolved-reference = "error"
+
+[tool.ruff.lint]
+extend-select = ["ANN", "PYI"]
+preview = true

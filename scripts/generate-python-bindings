@@ -14,11 +14,11 @@ uvx ruff@0.16.0 check $INIT_PY
 echo "Running ty..."
 uvx ty@0.0.64 check $INIT_PY
 echo "Running Zuban..."
-uvx zuban@0.9.0 check $INIT_PY
+uvx zuban@0.9.0 check --strict $INIT_PY
 echo "Running mypy..."
-uvx mypy@2.3.0 $INIT_PY
+uvx mypy@2.3.0 --strict $INIT_PY
 echo "Running Pyrefly..."
-uvx pyrefly@1.1.1 check --preset basic $INIT_PY
+uvx pyrefly@1.1.1 check --preset strict $INIT_PY
 # Generate the opensolid-ffi.def file with all API functions listed
 # (necessary for Windows builds)
 # Use zero verbosity to disable "Configuration is affected by..." lines, already printed above
