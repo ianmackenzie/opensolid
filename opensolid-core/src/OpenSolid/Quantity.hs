@@ -32,11 +32,9 @@ module OpenSolid.Quantity
 where
 
 import Data.Coerce qualified
-import OpenSolid.List qualified as List
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
-import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
-import Prelude qualified
 
 {-# INLINE zero #-}
 zero :: Quantity units
@@ -47,7 +45,7 @@ unit :: Quantity units
 unit = Quantity 1.0
 
 infinity :: Quantity units
-infinity = Quantity (1.0 / 0.0)
+infinity = Quantity Number.infinity
 
 {-# INLINE coerce #-}
 coerce :: Quantity units1 -> Quantity units2
@@ -61,42 +59,45 @@ erase = coerce
 unerase :: Number -> Quantity units
 unerase = coerce
 
+{-# INLINE sign #-}
 sign :: Quantity units -> Sign
-sign value = if value >= zero then Positive else Negative
+sign = Data.Coerce.coerce Number.sign
 
 {-# INLINE isNaN #-}
 isNaN :: Quantity units -> Bool
-isNaN (Quantity x) = Prelude.isNaN x
+isNaN = Data.Coerce.coerce Number.isNaN
 
 {-# INLINE isInfinite #-}
 isInfinite :: Quantity units -> Bool
-isInfinite (Quantity x) = Prelude.isInfinite x
+isInfinite = Data.Coerce.coerce Number.isInfinite
 
 {-# INLINE squared #-}
 squared :: Units.Squared units1 units2 => Quantity units1 -> Quantity units2
-squared x = x * x
+squared = coerce . squared_
 
 {-# INLINE squared_ #-}
 squared_ :: Quantity units -> Quantity (units ?*? units)
-squared_ x = x ?*? x
+squared_ = Data.Coerce.coerce Number.squared
 
+{-# INLINE sqrt #-}
 sqrt :: Units.Squared units1 units2 => Quantity units2 -> Quantity units1
-sqrt x | x <= zero = zero
-sqrt (Quantity x) = Quantity (Prelude.sqrt x)
+sqrt = sqrt_ . coerce
 
+{-# INLINE sqrt_ #-}
 sqrt_ :: Quantity (units ?*? units) -> Quantity units
-sqrt_ x | x <= zero = zero
-sqrt_ (Quantity x) = Quantity (Prelude.sqrt x)
+sqrt_ = Data.Coerce.coerce Number.sqrt
 
+{-# INLINE hypot2 #-}
 hypot2 :: Quantity units -> Quantity units -> Quantity units
-hypot2 (Q# x#) (Q# y#) = Q# (hypot2# x# y#)
+hypot2 = Data.Coerce.coerce Number.hypot2
 
+{-# INLINE hypot3 #-}
 hypot3 :: Quantity units -> Quantity units -> Quantity units -> Quantity units
-hypot3 (Q# x#) (Q# y#) (Q# z#) = Q# (hypot3# x# y# z#)
+hypot3 = Data.Coerce.coerce Number.hypot3
 
 {-# INLINE abs #-}
 abs :: Quantity units -> Quantity units
-abs (Quantity x) = Quantity (Prelude.abs x)
+abs = Data.Coerce.coerce Number.abs
 
 {-# INLINE minmax #-}
 minmax :: (Quantity units, Quantity units) -> (Quantity units, Quantity units)
@@ -105,17 +106,17 @@ minmax (a, b) = if a <= b then (a, b) else (b, a)
 -- | Interpolate from one value to another, based on a parameter that ranges from 0 to 1.
 {-# INLINE interpolateFrom #-}
 interpolateFrom :: Quantity units -> Quantity units -> Number -> Quantity units
-interpolateFrom a b t = a + (b - a) * t
+interpolateFrom = Data.Coerce.coerce Number.interpolateFrom
 
 {-# INLINE midpoint #-}
 midpoint :: Quantity units -> Quantity units -> Quantity units
-midpoint a b = 0.5 * (a + b)
+midpoint = Data.Coerce.coerce Number.midpoint
 
 sum :: List (Quantity units) -> Quantity units
-sum values = zero & forEach values (+)
+sum = Data.Coerce.coerce Number.sum
 
 sumOf :: (a -> Quantity units) -> List a -> Quantity units
-sumOf f list = sum (List.map f list)
+sumOf = Data.Coerce.coerce Number.sumOf
 
 convert :: Quantity (units2 ?/? units1) -> Quantity units1 -> Quantity units2
 convert factor value = Units.simplify (value ?*? factor)
@@ -131,28 +132,23 @@ For example, for one step the returned values will just be the given start and e
 for two steps the returned values will be the start value, the midpoint and then the end value.
 -}
 steps :: Quantity units -> Quantity units -> Int -> List (Quantity units)
-steps start end n = if n > 0 then range start end n [0 .. n] else []
+steps = Data.Coerce.coerce Number.steps
 
 -- | Interpolate between two values like 'steps', but skip the first value.
 leading :: Quantity units -> Quantity units -> Int -> List (Quantity units)
-leading start end n = range start end n [0 .. n - 1]
+leading = Data.Coerce.coerce Number.leading
 
 -- | Interpolate between two values like 'steps', but skip the last value.
 trailing :: Quantity units -> Quantity units -> Int -> List (Quantity units)
-trailing start end n = range start end n [1 .. n]
+trailing = Data.Coerce.coerce Number.trailing
 
 -- | Interpolate between two values like 'steps', but skip the first and last values.
 inBetween :: Quantity units -> Quantity units -> Int -> List (Quantity units)
-inBetween start end n = range start end n [1 .. n - 1]
+inBetween = Data.Coerce.coerce Number.inBetween
 
 {-| Subdivide a given range into the given number of steps, and return the midpoint of each step.
 
 This can be useful if you want to sample a curve or other function at the midpoint of several intervals.
 -}
 midpoints :: Quantity units -> Quantity units -> Int -> List (Quantity units)
-midpoints start end n = range start end (2 * n) [1, 3 .. 2 * n - 1]
-
-range :: Quantity units -> Quantity units -> Int -> List Int -> List (Quantity units)
-range start end n indices = do
-  let delta = end - start
-  [start + (i / n) * delta | i <- indices]
+midpoints = Data.Coerce.coerce Number.midpoints
