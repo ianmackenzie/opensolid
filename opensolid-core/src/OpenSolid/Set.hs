@@ -169,27 +169,24 @@ aggregate subsets = do
 -- construct a fixed number of subsets suitable for use as node children:
 -- 2 subsets in dimension 1, 4 subsets in dimension 2, 8 subsets in dimension 3, etc.
 split :: Bounds b => Int -> Int -> NonEmpty (Set b a) -> Int -> NonEmpty (Set b a)
-split dimension count subsets dimensionIndex =
-  if dimensionIndex == dimension
-    then
+split dimension count subsets dimensionIndex
+  | count == 1 = subsets -- Can't split a one-element list, so just return it
+  | dimensionIndex == dimension =
       -- We've run out of dimensions to split by,
       -- so create a new node from the current list of subsets
       -- (adding a level to the tree, and restarting the splitting process within the new node)
       NonEmpty.one (node (split dimension count subsets 0))
-    else
-      if count == 1
-        then subsets -- Can't split a one-element list, so just return it
-        else assert (count >= 2) do
-          -- Split the given list into two sublists based on sorting by the current dimension index
-          let sorted = NonEmpty.sortBy (Set.Bounds.sortValue dimensionIndex . bounds) subsets
-          let leftSize = count // 2
-          let rightSize = count - leftSize
-          let (leftSubsets, rightSubsets) = splitAtIndex leftSize sorted
-          -- Recursively split each sublist based on the remaining dimension indices
-          -- (e.g. after splitting based on X, recursively split sublists based on Y and then Z)
-          let leftSubgroups = split dimension leftSize leftSubsets (dimensionIndex + 1)
-          let rightSubgroups = split dimension rightSize rightSubsets (dimensionIndex + 1)
-          leftSubgroups <> rightSubgroups
+  | otherwise = assert (count >= 2) do
+      -- Split the given list into two sublists based on sorting by the current dimension index
+      let sorted = NonEmpty.sortBy (Set.Bounds.sortValue dimensionIndex . bounds) subsets
+      let leftSize = count // 2
+      let rightSize = count - leftSize
+      let (leftSubsets, rightSubsets) = splitAtIndex leftSize sorted
+      -- Recursively split each sublist based on the remaining dimension indices
+      -- (e.g. after splitting based on X, recursively split sublists based on Y and then Z)
+      let leftSubgroups = split dimension leftSize leftSubsets (dimensionIndex + 1)
+      let rightSubgroups = split dimension rightSize rightSubsets (dimensionIndex + 1)
+      leftSubgroups <> rightSubgroups
 
 splitAtIndex :: Int -> NonEmpty a -> (NonEmpty a, NonEmpty a)
 splitAtIndex index nonEmpty =
