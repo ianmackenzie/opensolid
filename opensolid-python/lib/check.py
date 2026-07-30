@@ -48,4 +48,4 @@ triangle = Triangle2D(
     Point2D.centimeters(25, 15),
 )
 triangle = Svg.triangle(triangle)
-print(triangle.to_text(bounds))
+print(triangle.to_text(Svg.view_box(bounds)))

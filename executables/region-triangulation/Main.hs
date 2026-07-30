@@ -1,7 +1,6 @@
 module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2D qualified as Curve2D
@@ -39,10 +38,11 @@ main = Tolerance.using Length.defaultTolerance do
       , Curve2D.circle (Circle2D.withDiameter holeDiameter holeCenter)
       ]
       & Result.orFail
-  let resolution = Resolution.maxError (Length.millimeters 1.0)
+  let resolution = Resolution.maxError (Length.millimeters 0.1)
+  Svg.write "executables/region-triangulation/region.svg" (Svg.padding Length.centimeter) do
+    Svg.regionWith [Svg.blackStroke, Svg.fillColor Color.lightGrey] resolution region
   let mesh = Region2D.toMesh resolution region
   let triangles = Mesh.faceVertices mesh
-  let drawingBounds = Bounds2D.hull2 (Point2D.centimeters -3.0 -3.0) (Point2D.centimeters 21.0 15.0)
   let drawTriangle (a, b, c) =
         Svg.triangleWith
           [ Svg.fillColor Color.lightGrey
@@ -51,5 +51,5 @@ main = Tolerance.using Length.defaultTolerance do
           , Svg.roundStrokeJoins
           ]
           (Triangle2D a b c)
-  Svg.write "executables/region-triangulation/triangulated.svg" drawingBounds do
+  Svg.write "executables/region-triangulation/triangulated.svg" (Svg.padding Length.centimeter) do
     Svg.combine drawTriangle triangles

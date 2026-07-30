@@ -989,8 +989,10 @@ type Svg = Svg.Svg
 svg :: Class
 svg =
   Class.new @Svg $(docs ''Svg.Svg) $
-    [ Class.member1 "To Text" "View Box" Svg.toText $(docs 'Svg.toText)
-    , Class.member2 "Write" "Path" "View Box" Svg.write $(docs 'Svg.write)
+    [ Class.member1 "To Text" "Layout" Svg.toText $(docs 'Svg.toText)
+    , Class.member2 "Write" "Path" "Layout" Svg.write $(docs 'Svg.write)
+    , Class.static1 "View Box" "View Box" Svg.viewBox $(docs 'Svg.viewBox)
+    , Class.static1 "Padding" "Padding" Svg.padding $(docs 'Svg.padding)
     , Class.factory1 "Group" "Children" Svg.group $(docs 'Svg.group)
     , Class.factory2 "Group With" "Attributes" "Children" Svg.groupWith $(docs 'Svg.groupWith)
     , Class.factory1 "Line" "Line" Svg.line $(docs 'Svg.line)
@@ -1010,6 +1012,7 @@ svg =
     , Class.constant "No Fill" Svg.noFill $(docs 'Svg.noFill)
     , Class.static1 "Fill Color" "Color" Svg.fillColor $(docs 'Svg.fillColor)
     , Class.nested @Svg.Attribute $(docs ''Svg.Attribute) []
+    , Class.nested @Svg.Layout $(docs ''Svg.Layout) []
     ]
 
 type Axis2D = Axis2D.Axis2D Meters

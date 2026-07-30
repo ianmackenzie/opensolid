@@ -51,6 +51,7 @@ main = Tolerance.using Length.defaultTolerance do
           ]
   let drawingBounds =
         Bounds2D.hull2 (Point2D.centimeters -12.0 -12.0) (Point2D.centimeters 12.0 12.0)
-  Svg.write "executables/piecewise-curve/circle.svg" drawingBounds (drawCurve 40 circle)
-  Svg.write "executables/piecewise-curve/arcs.svg" drawingBounds $
+  Svg.write "executables/piecewise-curve/circle.svg" (Svg.viewBox drawingBounds) $
+    drawCurve 40 circle
+  Svg.write "executables/piecewise-curve/arcs.svg" (Svg.viewBox drawingBounds) $
     Svg.combine (drawCurve 10) [arc1, arc2, arc3, arc4]

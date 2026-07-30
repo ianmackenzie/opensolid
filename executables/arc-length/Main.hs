@@ -1,7 +1,6 @@
 module Main (main) where
 
 import OpenSolid.Area qualified as Area
-import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
@@ -72,9 +71,8 @@ testCubicSplineParameterization = Tolerance.using Length.defaultTolerance do
         let drawPoint point = do
               let diameter = Length.millimeters 3.0
               Svg.circleWith [Svg.whiteFill] (Circle2D.withDiameter diameter point)
-        let drawingBounds = Bounds2D.hull2 Point2D.origin (Point2D.centimeters 30.0 15.0)
         let resolution = Resolution.maxError Length.micrometer
-        Svg.write fileName drawingBounds $
+        Svg.write fileName (Svg.padding Length.centimeter) $
           Svg.group
             [ Svg.curve resolution curve
             , Svg.combine drawPoint pointLocations

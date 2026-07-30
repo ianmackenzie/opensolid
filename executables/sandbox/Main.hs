@@ -214,7 +214,7 @@ drawZeros :: Text -> SurfaceFunction1D.Zeros -> IO ()
 drawZeros path zeros = do
   let uvBounds = Interval.convert toDrawing (Interval -0.05 1.05)
   let viewBox = Bounds2D uvBounds uvBounds
-  Svg.write path viewBox $
+  Svg.write path (Svg.viewBox viewBox) $
     Svg.groupWith [Svg.strokeWidth strokeWidth] $
       [ drawBounds (Bounds2D.convert toDrawing UvBounds.unitSquare)
       , Svg.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
@@ -317,7 +317,7 @@ testBezierSegment = do
   let coordinateBounds = Interval.convert toDrawing (Interval -1.0 11.0)
   let drawingBounds = Bounds2D coordinateBounds coordinateBounds
   let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6
-  Svg.write "executables/sandbox/test-bezier-segment.svg" drawingBounds curveEntity
+  Svg.write "executables/sandbox/test-bezier-segment.svg" (Svg.viewBox drawingBounds) curveEntity
 
 testHermiteBezier :: IO ()
 testHermiteBezier = do
@@ -334,7 +334,7 @@ testHermiteBezier = do
   let curveEntity = Svg.curveWith curveAttributes curveResolution curve
   let coordinateBounds = Interval (Length.centimeters -1.0) (Length.centimeters 11.0)
   let drawingBounds = Bounds2D coordinateBounds coordinateBounds
-  Svg.write "executables/sandbox/test-hermite-bezier.svg" drawingBounds curveEntity
+  Svg.write "executables/sandbox/test-hermite-bezier.svg" (Svg.viewBox drawingBounds) curveEntity
 
 testExplicitRandomStep :: IO ()
 testExplicitRandomStep = do
@@ -418,7 +418,7 @@ testCurveSqrt = Tolerance.using 1e-6 do
   let curve' = Curve1D.derivative curve
   Svg.write
     "executables/sandbox/cos-sqrt.svg"
-    (Debug.Plot.viewBox (Point2D -0.1 -4.1) (Point2D 1.1 4.1))
+    (Svg.viewBox (Debug.Plot.viewBox (Point2D -0.1 -4.1) (Point2D 1.1 4.1)))
     $ Svg.group
       [ Debug.Plot.xAxis 0.0 1.0
       , Debug.Plot.yAxis 0.0 1.0

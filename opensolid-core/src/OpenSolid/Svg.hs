@@ -1,6 +1,9 @@
 module OpenSolid.Svg
   ( Svg
   , Attribute
+  , Layout
+  , viewBox
+  , padding
   , toText
   , write
   , nothing
@@ -44,6 +47,7 @@ where
 
 import OpenSolid.Axis2D (Axis2D (Axis2D))
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
+import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Color (Color)
@@ -78,10 +82,36 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Triangle2D (Triangle2D (Triangle2D))
 
 -- | Some SVG drawing content such as a shape with attributes.
-data Svg = Empty | Node Text (List Attribute) (List Svg)
+data Svg = Svg Node | Empty
+
+data Node = Node
+  { bounds :: Bounds2D Meters
+  , tag :: Text
+  , attributes :: List Attribute
+  , children :: List Node
+  }
+
+toNode :: Svg -> Maybe Node
+toNode (Svg node) = Just node
+toNode Empty = Nothing
 
 -- | An SVG attribute such as fill color or stroke width.
 data Attribute = Attribute Text Text deriving (Show)
+
+-- | The definition of the overall size and shape of an SVG drawing.
+data Layout = ViewBox (Bounds2D Meters) | Padding Length
+
+-- | Specify the exact view box that should be used for the drawing.
+viewBox :: Bounds2D Meters -> Layout
+viewBox = ViewBox
+
+{-| Specify a padding that should be used around drawing entities.
+
+The overall view box will be determined by adding this padding
+to the overall bounding box around all drawing entities.
+-}
+padding :: Length -> Layout
+padding = Padding
 
 instance FFI Svg where
   representation = FFI.classRepresentation "Svg"
@@ -89,16 +119,15 @@ instance FFI Svg where
 instance FFI Attribute where
   representation = FFI.nestedClassRepresentation "Svg" "Attribute"
 
-svgText :: Text -> Svg -> Maybe Text
-svgText _ Empty = Nothing
-svgText indent (Node name attributes children) = Just (nodeText indent name attributes children)
+instance FFI Layout where
+  representation = FFI.nestedClassRepresentation "Svg" "Layout"
 
-nodeText :: Text -> Text -> List Attribute -> List Svg -> Text
-nodeText indent name attributes children = do
+nodeText :: Text -> Node -> Text
+nodeText indent Node{tag, attributes, children} = do
   let attributeLines = List.map (attributeText ("\n" <> indent <> "   ")) attributes
-  let openingTag = indent <> "<" <> name <> Text.concat attributeLines <> ">"
-  let childLines = List.filterMap (svgText (indent <> "  ")) children
-  let closingTag = indent <> "</" <> name <> ">"
+  let openingTag = indent <> "<" <> tag <> Text.concat attributeLines <> ">"
+  let childLines = List.map (nodeText (indent <> "  ")) children
+  let closingTag = indent <> "</" <> tag <> ">"
   Text.multiline (openingTag : childLines) <> "\n" <> closingTag
 
 attributeText :: Text -> Attribute -> Text
@@ -112,9 +141,19 @@ anything outside of this will be cropped.
 In most cases it's more convenient to write a file directly using 'write',
 but 'toText' can be useful if you want to e.g. return the SVG text as part of an HTTP response.
 -}
-toText :: Bounds2D Meters -> Svg -> Text
-toText viewBox entity = do
-  let Bounds2D xBounds yBounds = viewBox
+toText :: Layout -> Svg -> Text
+toText layout entity = do
+  let computedViewBox =
+        case layout of
+          ViewBox givenViewBox -> givenViewBox
+          Padding givenPadding ->
+            case entity of
+              Svg Node{bounds = Bounds2D (Interval xLow xHigh) (Interval yLow yHigh)} ->
+                Bounds2D
+                  (Interval (xLow - givenPadding) (xHigh + givenPadding))
+                  (Interval (yLow - givenPadding) (yHigh + givenPadding))
+              Empty -> Bounds2D.constant Point2D.origin
+  let Bounds2D xBounds yBounds = computedViewBox
   let Interval x1 x2 = xBounds
   let Interval y1 y2 = yBounds
   let width = x2 - x1
@@ -135,9 +174,16 @@ toText viewBox entity = do
         , strokeWidth (Length.pixels 1.0)
         , noFill
         ]
+  let svgNode =
+        Node
+          { bounds = computedViewBox
+          , tag = "svg"
+          , attributes
+          , children = List.maybe (toNode entity)
+          }
   Text.multiline
     [ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
-    , nodeText "" "svg" attributes [entity]
+    , nodeText "" svgNode
     , "" -- Ensure file has trailing newline
     ]
 
@@ -146,8 +192,8 @@ toText viewBox entity = do
 The given bounding box defines the overall size of the drawing;
 anything outside of this will be cropped.
 -}
-write :: Text -> Bounds2D Meters -> Svg -> IO ()
-write path viewBox entity = IO.writeUtf8 path (toText viewBox entity)
+write :: Text -> Layout -> Svg -> IO ()
+write path layout entity = IO.writeUtf8 path (toText layout entity)
 
 {-| Don't draw anything at all.
 
@@ -158,7 +204,17 @@ nothing = Empty
 
 -- | Group several SVG entities into a single entity, applying the given attributes to the group.
 groupWith :: List Attribute -> List Svg -> Svg
-groupWith = Node "g"
+groupWith attributes children =
+  case List.filterMap toNode children of
+    [] -> Empty
+    NonEmpty childNodes ->
+      Svg
+        Node
+          { bounds = Bounds2D.aggregateOf (.bounds) childNodes
+          , tag = "g"
+          , attributes
+          , children = NonEmpty.toList childNodes
+          }
 
 -- | Group several SVG entities into a single entity.
 group :: List Svg -> Svg
@@ -180,7 +236,13 @@ lineWith attributes (Line2D p1 p2) = do
   let y1Attribute = Attribute "y1" (lengthText -y1)
   let x2Attribute = Attribute "x2" (lengthText x2)
   let y2Attribute = Attribute "y2" (lengthText -y2)
-  Node "line" (x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes) []
+  Svg
+    Node
+      { bounds = Bounds2D.hull2 p1 p2
+      , tag = "line"
+      , attributes = x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes
+      , children = []
+      }
 
 -- | Draw a line.
 line :: Line2D Meters -> Svg
@@ -190,7 +252,13 @@ line = lineWith []
 polylineWith :: List Attribute -> Polyline2D Meters -> Svg
 polylineWith attributes givenPolyline = do
   let points = NonEmpty.toList (Polyline2D.vertices givenPolyline)
-  Node "polyline" (noFill : pointsAttribute points : attributes) []
+  Svg
+    Node
+      { bounds = Polyline2D.bounds givenPolyline
+      , tag = "polyline"
+      , attributes = noFill : pointsAttribute points : attributes
+      , children = []
+      }
 
 -- | Draw a polyline.
 polyline :: Polyline2D Meters -> Svg
@@ -200,7 +268,13 @@ polyline = polylineWith []
 polygonWith :: List Attribute -> Polygon2D Meters -> Svg
 polygonWith attributes givenPolygon = do
   let points = NonEmpty.toList (Polygon2D.vertices givenPolygon)
-  Node "polygon" (pointsAttribute points : attributes) []
+  Svg
+    Node
+      { bounds = Polygon2D.bounds givenPolygon
+      , tag = "polygon"
+      , attributes = pointsAttribute points : attributes
+      , children = []
+      }
 
 -- | Draw a polygon.
 polygon :: Polygon2D Meters -> Svg
@@ -220,12 +294,19 @@ bounds :: Bounds2D Meters -> Svg
 bounds = boundsWith []
 
 boundsWith :: List Attribute -> Bounds2D Meters -> Svg
-boundsWith attributes (Bounds2D xInterval yInterval) = do
+boundsWith attributes givenBounds = do
+  let Bounds2D xInterval yInterval = givenBounds
   let xAttribute = Attribute "x" (lengthText (Interval.lower xInterval))
   let yAttribute = Attribute "y" (lengthText (negate (Interval.upper yInterval)))
   let widthAttribute = Attribute "width" (lengthText (Interval.width xInterval))
   let heightAttribute = Attribute "height" (lengthText (Interval.width yInterval))
-  Node "rect" (xAttribute : yAttribute : widthAttribute : heightAttribute : attributes) []
+  Svg
+    Node
+      { bounds = givenBounds
+      , tag = "rect"
+      , attributes = xAttribute : yAttribute : widthAttribute : heightAttribute : attributes
+      , children = []
+      }
 
 -- | Draw a circle with the given attributes.
 circleWith :: List Attribute -> Circle2D Meters -> Svg
@@ -234,7 +315,13 @@ circleWith attributes givenCircle = do
   let cxAttribute = Attribute "cx" (lengthText cx)
   let cyAttribute = Attribute "cy" (lengthText -cy)
   let rAttribute = Attribute "r" (lengthText (Circle2D.radius givenCircle))
-  Node "circle" (cxAttribute : cyAttribute : rAttribute : attributes) []
+  Svg
+    Node
+      { bounds = Circle2D.bounds givenCircle
+      , tag = "circle"
+      , attributes = cxAttribute : cyAttribute : rAttribute : attributes
+      , children = []
+      }
 
 -- | Draw a circle.
 circle :: Circle2D Meters -> Svg
@@ -254,27 +341,30 @@ region = regionWith []
 
 regionWith :: List Attribute -> Resolution Meters -> Region2D Meters -> Svg
 regionWith attributes resolution givenRegion = do
-  let loops = NonEmpty.toList (Region2D.boundaryLoops givenRegion)
-  let dAttribute = Attribute "d" (Text.join " " (List.map (loopCommands resolution) loops))
-  Node "path" (dAttribute : attributes) []
+  let outerPolygon = loopPolygon resolution (Region2D.outerLoop givenRegion)
+  let innerPolygons = List.map (loopPolygon resolution) (Region2D.innerLoops givenRegion)
+  let allPolygons = outerPolygon : innerPolygons
+  let dAttribute = Attribute "d" (Text.join " " (List.map polygonCommands allPolygons))
+  Svg
+    Node
+      { bounds = Polygon2D.bounds outerPolygon
+      , tag = "path"
+      , attributes = dAttribute : attributes
+      , children = []
+      }
 
-loopCommands :: Resolution Meters -> NonEmpty (Curve2D Meters) -> Text
-loopCommands resolution curves = do
-  let startPoint = Curve2D.startPoint (NonEmpty.first curves)
-  let numCurves = NonEmpty.length curves
-  let drawCurve curveIndex loopCurve = do
-        let points =
-              Curve2D.toPolyline resolution loopCurve
-                & Polyline2D.vertices
-                & NonEmpty.rest -- drop the first point, we're assumed to be there already
-        let numPoints = List.length points
-        let isLastCurve = curveIndex == numCurves - 1
-        let pointCommand pointIndex curvePoint = do
-              let isLastPoint = pointIndex == numPoints - 1
-              if isLastCurve && isLastPoint then "Z" else lineTo curvePoint
-        let pointCommands = List.mapWithIndex pointCommand points
-        Text.join " " pointCommands
-  Text.join " " (moveTo startPoint : List.mapWithIndex drawCurve (NonEmpty.toList curves))
+loopPolygon :: Resolution Meters -> NonEmpty (Curve2D Meters) -> Polygon2D Meters
+loopPolygon resolution loop = do
+  let curvePoints = Curve2D.toPolyline resolution >> Polyline2D.vertices >> NonEmpty.rest
+  Polygon2D $
+    case List.combine curvePoints loop of
+      NonEmpty vertices -> vertices
+      [] -> NonEmpty.one (Curve2D.startPoint (NonEmpty.first loop)) -- Shouldn't happen for a valid region
+
+polygonCommands :: Polygon2D Meters -> Text
+polygonCommands givenPolygon = do
+  let first :| rest = Polygon2D.vertices givenPolygon
+  Text.join " " [moveTo first, Text.join " " (List.map lineTo rest), "Z"]
 
 moveTo :: Point2D Meters -> Text
 moveTo (Point2D x y) = Text.join " " ["M", lengthText x, lengthText -y]
