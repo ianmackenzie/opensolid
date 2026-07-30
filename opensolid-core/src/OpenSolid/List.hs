@@ -175,7 +175,7 @@ member = Data.List.elem
 indexOf :: Eq a => a -> List a -> Maybe Int
 indexOf = Data.List.elemIndex
 
-combine :: (a -> List b) -> List a -> List b
+combine :: Foldable list => (a -> List b) -> list a -> List b
 combine = Prelude.foldMap
 
 concat :: List (List a) -> List a
