@@ -1,5 +1,3 @@
-{-# LANGUAGE UnboxedTuples #-}
-
 module OpenSolid.Curve.Nondegenerate.Intersections
   ( Intersections (..)
   , intersections

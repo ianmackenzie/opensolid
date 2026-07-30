@@ -97,9 +97,9 @@ sweptAround givenCenterPoint givenStartPoint givenSweptAngle = do
   let computedStartAngle = Point2D.angleFrom givenCenterPoint givenStartPoint
   Arc2D
     { centerPoint = givenCenterPoint
-    , radius = (Point2D.distanceFrom givenCenterPoint givenStartPoint)
+    , radius = Point2D.distanceFrom givenCenterPoint givenStartPoint
     , startAngle = computedStartAngle
-    , endAngle = (computedStartAngle + givenSweptAngle)
+    , endAngle = computedStartAngle + givenSweptAngle
     }
 
 reverse :: Arc2D units -> Arc2D units

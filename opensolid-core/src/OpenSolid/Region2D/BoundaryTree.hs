@@ -45,8 +45,10 @@ build curves = case curves of
   Set2D.Leaf _ curve -> buildCurve curve
   Set2D.Node nodeBounds subsets -> do
     let children = NonEmpty.map build subsets
-    let startPoint = (NonEmpty.first children).startPoint
-    let endPoint = (NonEmpty.last children).endPoint
+    let firstChild = NonEmpty.first children
+    let lastChild = NonEmpty.last children
+    let startPoint = firstChild.startPoint
+    let endPoint = lastChild.endPoint
     BoundaryTree{bounds = nodeBounds, startPoint, endPoint, children}
 
 buildCurve :: Curve2D units -> BoundaryTree units

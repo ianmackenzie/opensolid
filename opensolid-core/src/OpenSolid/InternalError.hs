@@ -1,7 +1,7 @@
 module OpenSolid.InternalError (InternalError (InternalError), throw) where
 
 import OpenSolid.Prelude hiding (throw)
-import OpenSolid.Prelude qualified as OpenSolid.Prelude
+import OpenSolid.Prelude qualified
 
 newtype InternalError = InternalError Text deriving (Show)
 

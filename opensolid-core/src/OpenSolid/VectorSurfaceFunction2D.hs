@@ -597,7 +597,7 @@ magnitude function = SurfaceFunction1D.sqrt_ (squaredMagnitude_ function)
 direction ::
   Tolerance units =>
   VectorSurfaceFunction2D units ->
-  Result IsDegenerate (DirectionSurfaceFunction2D)
+  Result IsDegenerate DirectionSurfaceFunction2D
 direction function = case quotient function (magnitude function) of
   Error DivisionByZero -> Error IsDegenerate
   Ok normalizedFunction -> Ok (DirectionSurfaceFunction2D.unsafe normalizedFunction)
