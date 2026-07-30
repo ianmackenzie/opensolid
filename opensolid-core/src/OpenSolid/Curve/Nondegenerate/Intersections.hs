@@ -77,13 +77,8 @@ findIntersections
   | otherwise = do
       let endpointIntersections = findEndpointIntersections
       if List.any IntersectionPoint.isIndistinguishable endpointIntersections
-        then assert (List.all IntersectionPoint.isIndistinguishable endpointIntersections) do
-          findOverlappingIntersections endpointIntersections
-        else
-          findNonOverlappingIntersections
-            endpointIntersections
-            Curve.tangentSolver
-            Curve.crossingSolver
+        then findOverlappingIntersections endpointIntersections
+        else findNonOverlappingIntersections endpointIntersections
 
 findEndpointIntersections ::
   Problem dimension units space =>
@@ -104,54 +99,65 @@ findOverlappingIntersections ::
   Problem dimension units space =>
   List (IntersectionPoint dimension units space) ->
   Maybe (Intersections dimension units space)
-findOverlappingIntersections endpointIntersections = do
-  let (joins, nonJoins) = List.partition IntersectionPoint.isJoin endpointIntersections
-  case nonJoins of
-    [] -> maybeIntersectionPoints joins
-    NonEmpty candidateEndpoints -> do
-      overlapSigns <- Maybe.collect IntersectionPoint.overlapSign candidateEndpoints
-      alignment <- NonEmpty.uniqueValue overlapSigns
-      let overlappingSegment startIntersectionPoint endIntersectionPoint = do
-            let (tStart1, tStart2) = IntersectionPoint.parameterValues startIntersectionPoint
-            let (tEnd1, tEnd2) = IntersectionPoint.parameterValues endIntersectionPoint
-            (Interval tStart1 tEnd1, Interval tStart2 tEnd2)
-      let overlappingSegments segments = OverlappingSegments alignment segments joins
-      case NonEmpty.sortBy IntersectionPoint.firstParameterValue candidateEndpoints of
-        NonEmpty.Two first second -> do
-          let segment = overlappingSegment first second
-          Just (overlappingSegments (NonEmpty.one segment))
-        NonEmpty.Four first second third fourth -> do
-          let segment1 = overlappingSegment first second
-          let segment2 = overlappingSegment third fourth
-          Just (overlappingSegments (NonEmpty.two segment1 segment2))
-        _ -> Nothing
+findOverlappingIntersections endpointIntersections =
+  assert (List.all IntersectionPoint.isIndistinguishable endpointIntersections) do
+    let (joins, nonJoins) = List.partition IntersectionPoint.isJoin endpointIntersections
+    case nonJoins of
+      [] -> maybeIntersectionPoints endpointIntersections
+      NonEmpty candidateEndpoints -> do
+        overlapSigns <- Maybe.collect IntersectionPoint.overlapSign candidateEndpoints
+        alignment <- NonEmpty.uniqueValue overlapSigns
+        let overlappingSegment startIntersectionPoint endIntersectionPoint = do
+              let (tStart1, tStart2) = IntersectionPoint.parameterValues startIntersectionPoint
+              let (tEnd1, tEnd2) = IntersectionPoint.parameterValues endIntersectionPoint
+              (Interval tStart1 tEnd1, Interval tStart2 tEnd2)
+        let overlappingSegments segments = OverlappingSegments alignment segments joins
+        case NonEmpty.sortBy IntersectionPoint.firstParameterValue candidateEndpoints of
+          NonEmpty.Two first second -> do
+            let segment = overlappingSegment first second
+            Just (overlappingSegments (NonEmpty.one segment))
+          NonEmpty.Four first second third fourth -> do
+            let segment1 = overlappingSegment first second
+            let segment2 = overlappingSegment third fourth
+            Just (overlappingSegments (NonEmpty.two segment1 segment2))
+          _ -> Nothing
 
 findNonOverlappingIntersections ::
   Problem dimension units space =>
   List (IntersectionPoint dimension units space) ->
-  Curve.Solver dimension units space ->
-  Curve.Solver dimension units space ->
   Maybe (Intersections dimension units space)
-findNonOverlappingIntersections
+findNonOverlappingIntersections endpointIntersections = do
+  let interiorIntersections =
+        findInteriorIntersections
+          endpointIntersections
+          Curve.tangentSolver
+          Curve.crossingSolver
+  maybeIntersectionPoints (endpointIntersections <> interiorIntersections)
+
+findInteriorIntersections ::
+  Problem dimension units space =>
+  List (IntersectionPoint dimension units space) ->
+  Curve.Solver dimension units space ->
+  Curve.Solver dimension units space ->
+  List (IntersectionPoint dimension units space)
+findInteriorIntersections
   endpointIntersections
   (Curve.Solver resolveTangent solveTangent)
   (Curve.Solver resolveCrossing solveCrossing) =
-    maybeIntersectionPoints $
-      Intersection.solveNonOverlapping $
-        Intersection.Problem
-          { boundaryIntersections = endpointIntersections
-          , boundaryTangentSubdomains =
-              boundarySubdomains (List.filter IntersectionPoint.isTangent endpointIntersections)
-          , boundaryCrossingSubdomains =
-              boundarySubdomains (List.filter IntersectionPoint.isCrossing endpointIntersections)
-          , searchTree = bisectionTree
-          , resolveTangent = resolveTangent
-          , solveTangent =
-              List.maybe . Bisection.find (solveTangent nondegenerate1 nondegenerate2)
-          , resolveCrossing = resolveCrossing
-          , solveCrossing =
-              List.maybe . Bisection.find (solveCrossing nondegenerate1 nondegenerate2)
-          }
+    Intersection.solveInterior $
+      Intersection.Problem
+        { boundaryTangentSubdomains =
+            boundarySubdomains (List.filter IntersectionPoint.isTangent endpointIntersections)
+        , boundaryCrossingSubdomains =
+            boundarySubdomains (List.filter IntersectionPoint.isCrossing endpointIntersections)
+        , searchTree = bisectionTree
+        , resolveTangent = resolveTangent
+        , solveTangent =
+            List.maybe . Bisection.find (solveTangent nondegenerate1 nondegenerate2)
+        , resolveCrossing = resolveCrossing
+        , solveCrossing =
+            List.maybe . Bisection.find (solveCrossing nondegenerate1 nondegenerate2)
+        }
 
 boundarySubdomains ::
   List (IntersectionPoint dimension units space) ->

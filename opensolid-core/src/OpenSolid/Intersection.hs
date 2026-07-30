@@ -1,4 +1,4 @@
-module OpenSolid.Intersection (Problem (..), solveNonOverlapping) where
+module OpenSolid.Intersection (Problem (..), solveInterior) where
 
 import OpenSolid.Bag (Bag)
 import OpenSolid.Bag qualified as Bag
@@ -11,8 +11,7 @@ import OpenSolid.Set (Set)
 data Problem intersection where
   Problem ::
     Bisection.Domain domain =>
-    { boundaryIntersections :: List intersection
-    , boundaryTangentSubdomains :: Bag domain boundarySegment
+    { boundaryTangentSubdomains :: Bag domain boundarySegment
     , boundaryCrossingSubdomains :: Bag domain boundarySegment
     , searchTree :: Tree domain segment
     , resolveTangent :: domain -> segment -> Fuzzy (Maybe tangentTag)
@@ -22,11 +21,10 @@ data Problem intersection where
     } ->
     Problem intersection
 
-solveNonOverlapping :: Problem intersection -> List intersection
-solveNonOverlapping
+solveInterior :: Problem intersection -> List intersection
+solveInterior
   Problem
-    { boundaryIntersections
-    , boundaryTangentSubdomains
+    { boundaryTangentSubdomains
     , boundaryCrossingSubdomains
     , searchTree
     , resolveTangent
@@ -43,4 +41,4 @@ solveNonOverlapping
     let candidateCrossingClusters =
           allCrossingClusters & List.filter (not . Bisection.touching boundaryCrossingSubdomains)
     let crossingIntersections = List.combine solveCrossing candidateCrossingClusters
-    List.concat [boundaryIntersections, tangentIntersections, crossingIntersections]
+    List.concat [tangentIntersections, crossingIntersections]
