@@ -60,9 +60,9 @@ import OpenSolid.Prelude
 {-# INLINE B# #-}
 pattern B# :: Int# -> Bool
 pattern B# i# <- (bool# -> i#)
-  where
-    B# 0# = False
-    B# _ = True
+ where
+  B# 0# = False
+  B# _ = True
 
 {-# INLINE bool# #-}
 bool# :: Bool -> Int#

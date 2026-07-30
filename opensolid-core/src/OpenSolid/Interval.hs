@@ -109,8 +109,8 @@ If either argument is NaN, then the result will be open/infinite
 {-# INLINE Interval #-}
 pattern Interval :: Quantity units -> Quantity units -> Interval units
 pattern Interval low high <- (viewInterval -> (# low, high #))
-  where
-    Interval (Q# a#) (Q# b#) = I# a# b#
+ where
+  Interval (Q# a#) (Q# b#) = I# a# b#
 
 {-# INLINE viewInterval #-}
 viewInterval :: Interval units -> (# Quantity units, Quantity units #)
@@ -121,8 +121,8 @@ viewInterval (Ordered# low# high#) = (# Q# low#, Q# high# #)
 {-# INLINE I# #-}
 pattern I# :: Double# -> Double# -> Interval units
 pattern I# low# high# <- Ordered# low# high#
-  where
-    I# a# b# = let !(# low#, high# #) = hull2# a# b# in Ordered# low# high#
+ where
+  I# a# b# = let !(# low#, high# #) = hull2# a# b# in Ordered# low# high#
 
 {-# COMPLETE I# #-}
 

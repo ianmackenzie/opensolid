@@ -27,8 +27,6 @@
               # Get Nix to provide a proper Bash shell with builtins like 'complete', see e.g.
               # https://discourse.nixos.org/t/non-interactive-bash-errors-from-flake-nix-mkshell/33310
               pkgs.bashInteractive
-              # For formatting Haskell files
-              pkgs.haskellPackages.fourmolu
               # For formatting .cabal files;
               # only needed if you're editing .cabal files,
               # e.g. when adding/removing/renaming Haskell source files

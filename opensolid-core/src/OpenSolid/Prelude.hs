@@ -434,8 +434,8 @@ type Number = Quantity Unitless
 {-# INLINE Quantity #-}
 pattern Quantity :: Number -> Quantity units
 pattern Quantity number <- (Data.Coerce.coerce -> number)
-  where
-    Quantity = Data.Coerce.coerce
+ where
+  Quantity = Data.Coerce.coerce
 
 {-# COMPLETE Q# #-}
 
@@ -646,8 +646,8 @@ ifThenElse False _ second = second
 
 pattern TODO :: HasCallStack => a
 pattern TODO <- (GHC.Stack.withFrozenCallStack todoImpl -> ())
-  where
-    TODO = GHC.Stack.withFrozenCallStack todoImpl
+ where
+  TODO = GHC.Stack.withFrozenCallStack todoImpl
 
 todoImpl :: a
 todoImpl = Prelude.error "Not implemented"

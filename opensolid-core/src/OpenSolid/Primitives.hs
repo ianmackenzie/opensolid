@@ -53,8 +53,8 @@ data Vector2D units = V2D# Double# Double#
 {-# INLINE Vector2D #-}
 pattern Vector2D :: Quantity units -> Quantity units -> Vector2D units
 pattern Vector2D vx vy <- (viewVector2D -> (# vx, vy #))
-  where
-    Vector2D (Q# vx#) (Q# vy#) = V2D# vx# vy#
+ where
+  Vector2D (Q# vx#) (Q# vy#) = V2D# vx# vy#
 
 {-# INLINE viewVector2D #-}
 viewVector2D :: Vector2D units -> (# Quantity units, Quantity units #)
@@ -278,8 +278,8 @@ newtype Point2D units = Position2D (Vector2D units)
 -- | Construct a point from its X and Y coordinates.
 pattern Point2D :: Quantity units -> Quantity units -> Point2D units
 pattern Point2D px py <- Position2D (Vector2D px py)
-  where
-    Point2D px py = Position2D (Vector2D px py)
+ where
+  Point2D px py = Position2D (Vector2D px py)
 
 deriving instance Eq (Point2D units)
 
@@ -607,8 +607,8 @@ newtype Bounds2D units = PositionBounds2D (VectorBounds2D units) deriving (Eq)
 -- | Construct a bounding box from its X and Y coordinate bounds.
 pattern Bounds2D :: Interval units -> Interval units -> Bounds2D units
 pattern Bounds2D bx by <- PositionBounds2D (VectorBounds2D bx by)
-  where
-    Bounds2D bx by = PositionBounds2D (VectorBounds2D bx by)
+ where
+  Bounds2D bx by = PositionBounds2D (VectorBounds2D bx by)
 
 instance Show (Bounds2D units) where
   showsPrec precedence (Bounds2D bx by) =
@@ -864,8 +864,8 @@ data Vector3D units space = V3D# Double# Double# Double#
 {-# INLINE Vector3D #-}
 pattern Vector3D :: Quantity units -> Quantity units -> Quantity units -> Vector3D units space
 pattern Vector3D vx vy vz <- (viewVector3D -> (# vx, vy, vz #))
-  where
-    Vector3D (Q# vx#) (Q# vy#) (Q# vz#) = V3D# vx# vy# vz#
+ where
+  Vector3D (Q# vx#) (Q# vy#) (Q# vz#) = V3D# vx# vy# vz#
 
 {-# INLINE viewVector3D #-}
 viewVector3D :: Vector3D units space -> (# Quantity units, Quantity units, Quantity units #)
@@ -1186,8 +1186,8 @@ newtype Point3D space = Position3D (Vector3D Meters space)
 -- | Construct a point from its X and Y coordinates.
 pattern Point3D :: Length -> Length -> Length -> Point3D space
 pattern Point3D px py pz <- Position3D (Vector3D px py pz)
-  where
-    Point3D px py pz = Position3D (Vector3D px py pz)
+ where
+  Point3D px py pz = Position3D (Vector3D px py pz)
 
 deriving instance Eq (Point3D space)
 
@@ -1284,8 +1284,8 @@ pattern VectorBounds3D ::
   Interval units ->
   VectorBounds3D units space
 pattern VectorBounds3D x y z <- (viewVectorBounds3D -> (# x, y, z #))
-  where
-    VectorBounds3D (I# xl# xh#) (I# yl# yh#) (I# zl# zh#) = VB3D# xl# xh# yl# yh# zl# zh#
+ where
+  VectorBounds3D (I# xl# xh#) (I# yl# yh#) (I# zl# zh#) = VB3D# xl# xh# yl# yh# zl# zh#
 
 viewVectorBounds3D ::
   VectorBounds3D units space ->
@@ -1719,8 +1719,8 @@ newtype Bounds3D space
 -- | Construct a point from its X and Y coordinates.
 pattern Bounds3D :: Interval Meters -> Interval Meters -> Interval Meters -> Bounds3D space
 pattern Bounds3D bx by bz <- PositionBounds3D (VectorBounds3D bx by bz)
-  where
-    Bounds3D bx by bz = PositionBounds3D (VectorBounds3D bx by bz)
+ where
+  Bounds3D bx by bz = PositionBounds3D (VectorBounds3D bx by bz)
 
 instance Show (Bounds3D space) where
   showsPrec precedence (Bounds3D bx by bz) =
