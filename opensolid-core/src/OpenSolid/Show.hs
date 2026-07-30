@@ -1,10 +1,11 @@
 module OpenSolid.Show (constructor, constructor2, constructor3) where
 
+import Data.List qualified
 import Data.String (fromString)
 import Data.Text (Text)
 import Data.Text qualified
 import Text.Show qualified
-import Prelude
+import Prelude hiding (concat)
 
 constructor :: Show a => Int -> Text -> a -> ShowS
 constructor precedence name value =
@@ -21,7 +22,7 @@ constructor3 precedence name value1 value2 value3 =
 constructorN :: Int -> Text -> [ShowS] -> ShowS
 constructorN precedence name fields =
   Text.Show.showParen (precedence > 10) $
-    literal name . foldr (.) id (fmap (space .) fields)
+    join space (literal name : fields)
 
 literal :: Text -> ShowS
 literal = Text.Show.showString . Data.Text.unpack
@@ -31,3 +32,9 @@ space = Text.Show.showString " "
 
 field :: Show a => a -> ShowS
 field = Text.Show.showsPrec 11
+
+concat :: [ShowS] -> ShowS
+concat = foldr (.) id
+
+join :: ShowS -> [ShowS] -> ShowS
+join separator components = concat (Data.List.intersperse separator components)
