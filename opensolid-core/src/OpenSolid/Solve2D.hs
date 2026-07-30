@@ -20,8 +20,8 @@ import OpenSolid.Domain2D (Domain2D (Domain2D))
 import OpenSolid.Domain2D qualified as Domain2D
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
-import OpenSolid.Number qualified as Number
 import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude

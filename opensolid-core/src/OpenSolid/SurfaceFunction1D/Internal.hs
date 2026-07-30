@@ -8,9 +8,9 @@ where
 
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Number qualified as Number
 import OpenSolid.Solve1D qualified as Solve1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
