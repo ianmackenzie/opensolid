@@ -1,23 +1,3 @@
-Rename 'solveNonOverlapping' to 'solveInterior' in Intersection module?
-
-Try having 'fromConstraints' functions?
-- and corresponding 'withSomething' functions?
-  - e.g. Arc2D.withRadius returns an Arc2D.Constraint value
-- try to figure out a way to automatically report simple overconstrained/underconstrained errors
-  - e.g. every constraint has a name and list supported combinations of constraint names, then:
-    - if provided constraints are a subset of one or more supported combinations,
-      report unconstrained (and report which constraints could be added)
-    - if provided constraints are a superset of one or more supported combinations,
-      report overconstrained (and report which constraints could be removed)
-    - if provided constraints are disjoint from all supported combinations,
-      report that the provided combination is not supported at all
-
-Switch Curve1D solving over to using bisection and clusters
-- then remove Solve1D module
-
-Switch SurfaceFunction1D solving over to using bisection and clusters
-- then remove Solve2D module
-
 Add Show.partialRecord function
 - use for records where some fields are left out and replaced with an ellipsis
 - use for CurvePoint, IntersectionPoint, maybe Segment types (anything with lazily-computed fields that may not even be valid)
@@ -34,8 +14,6 @@ Do a pass to make sure anything using Tolerance.unitless is normalized
 - normalize NURBS points and weights (divide all points and weights by the largest weight)?
 
 Add Planar bytecode instruction
-
-Refactor Svg module to take either a view box or a margin (and compute a view box automatically)
 
 Cache normal direction in PlaneOrientation3D?
 - will often be a constant anyways...and can compute lazily
