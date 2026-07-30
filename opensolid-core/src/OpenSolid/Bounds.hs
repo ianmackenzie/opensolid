@@ -3,7 +3,9 @@ module OpenSolid.Bounds
   , Exists
   , constant
   , contains
+  , hull
   , hull2
+  , aggregate
   , aggregate2
   , intersection
   , diameter
@@ -45,7 +47,9 @@ class
   where
   constant :: Point dimension units space -> Bounds dimension units space
   contains :: Bounds dimension units space -> Bounds dimension units space -> Bool
+  hull :: NonEmpty (Point dimension units space) -> Bounds dimension units space
   hull2 :: Point dimension units space -> Point dimension units space -> Bounds dimension units space
+  aggregate :: NonEmpty (Bounds dimension units space) -> Bounds dimension units space
   aggregate2 ::
     Bounds dimension units space ->
     Bounds dimension units space ->
@@ -63,7 +67,9 @@ class
 instance Exists 2 units Void where
   constant = Bounds2D.constant
   contains = Bounds2D.contains
+  hull = Bounds2D.hull
   hull2 = Bounds2D.hull2
+  aggregate = Bounds2D.aggregate
   aggregate2 = Bounds2D.aggregate2
   intersection = Bounds2D.intersection
   diameter = Bounds2D.diameter
@@ -72,7 +78,9 @@ instance Exists 2 units Void where
 instance Exists 3 Meters space where
   constant = Bounds3D.constant
   contains = Bounds3D.contains
+  hull = Bounds3D.hull
   hull2 = Bounds3D.hull2
+  aggregate = Bounds3D.aggregate
   aggregate2 = Bounds3D.aggregate2
   intersection = Bounds3D.intersection
   diameter = Bounds3D.diameter
