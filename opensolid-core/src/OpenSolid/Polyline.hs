@@ -7,10 +7,13 @@ module OpenSolid.Polyline
   , endpoints
   , segments
   , length
+  , bounds
   , map
   )
 where
 
+import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Line (Line (Line))
@@ -61,6 +64,12 @@ segments polyline = NonEmpty.successive Line (vertices polyline)
 -- | Get the total length of a polyline (the sum of the lengths of its segments).
 length :: Point.Exists dimension units space => Polyline dimension units space -> Quantity units
 length polyline = Quantity.sumOf Line.length (segments polyline)
+
+bounds ::
+  Bounds.Exists dimension units space =>
+  Polyline dimension units space ->
+  Bounds dimension units space
+bounds polyline = Bounds.hull (vertices polyline)
 
 map ::
   (Point dimension units1 space1 -> Point dimension units2 space2) ->

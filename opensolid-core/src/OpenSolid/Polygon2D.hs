@@ -5,6 +5,7 @@ module OpenSolid.Polygon2D
   , hexagon
   , vertices
   , edges
+  , bounds
   , signedArea
   , signedArea_
   , map
@@ -12,6 +13,8 @@ module OpenSolid.Polygon2D
 where
 
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Bounds2D (Bounds2D)
+import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.FFI (FFI)
@@ -95,6 +98,9 @@ edges :: Polygon2D units -> NonEmpty (Line2D units)
 edges polygon = do
   let v0 :| vs = vertices polygon
   collectEdges v0 v0 vs
+
+bounds :: Polygon2D units -> Bounds2D units
+bounds polygon = Bounds2D.hull (vertices polygon)
 
 signedArea_ :: Polygon2D units -> Quantity (units ?*? units)
 signedArea_ polygon = do

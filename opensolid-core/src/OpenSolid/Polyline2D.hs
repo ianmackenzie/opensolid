@@ -8,10 +8,12 @@ module OpenSolid.Polyline2D
   , endpoints
   , segments
   , length
+  , bounds
   , map
   )
 where
 
+import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Polyline (Polyline (Polyline))
@@ -52,6 +54,10 @@ segments = Polyline.segments
 -- | Get the total length of a polyline (the sum of the lengths of its segments).
 length :: Polyline2D units -> Quantity units
 length = Polyline.length
+
+-- | Get the bounding box of a polyline.
+bounds :: Polyline2D units -> Bounds2D units
+bounds = Polyline.bounds
 
 map :: (Point2D units1 -> Point2D units2) -> Polyline2D units1 -> Polyline2D units2
 map = Polyline.map
