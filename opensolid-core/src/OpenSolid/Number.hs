@@ -65,19 +65,19 @@ toDouble (Number double) = double
 
 {-# INLINE fromInt #-}
 fromInt :: Int -> Number
-fromInt = Prelude.fromIntegral
+fromInt int = Number (Prelude.fromIntegral int)
 
 {-# INLINE floor #-}
 floor :: Number -> Int
-floor = Prelude.floor
+floor (Number double) = Prelude.floor double
 
 {-# INLINE ceiling #-}
 ceiling :: Number -> Int
-ceiling = Prelude.ceiling
+ceiling (Number double) = Prelude.ceiling double
 
 {-# INLINE round #-}
 round :: Number -> Int
-round = Prelude.round
+round (Number double) = Prelude.round double
 
 parse :: Text -> Result Text Number
 parse = Text.Parse.number
@@ -91,11 +91,11 @@ sign value = if value < 0.0 then Negative else Positive
 
 {-# INLINE isNaN #-}
 isNaN :: Number -> Bool
-isNaN = Prelude.isNaN
+isNaN (Number double) = Prelude.isNaN double
 
 {-# INLINE isInfinite #-}
 isInfinite :: Number -> Bool
-isInfinite = Prelude.isInfinite
+isInfinite (Number double) = Prelude.isInfinite double
 
 {-# INLINE squared #-}
 squared :: Number -> Number
@@ -107,7 +107,7 @@ cubed value = value * value * value
 
 {-# INLINE abs #-}
 abs :: Number -> Number
-abs = Prelude.abs
+abs (Number double) = Number (Prelude.abs double)
 
 clampTo :: Interval Unitless -> Number -> Number
 clampTo interval value = min (max (Interval.lower interval) value) (Interval.upper interval)
@@ -121,7 +121,7 @@ midpoint :: Number -> Number -> Number
 midpoint a b = 0.5 * (a + b)
 
 pi :: Number
-pi = Prelude.pi
+pi = Number Prelude.pi
 
 halfPi :: Number
 halfPi = 0.5 * pi
@@ -146,39 +146,39 @@ hypot3 (N# x#) (N# y#) (N# z#) = N# (hypot3# x# y# z#)
 
 {-# INLINE sin #-}
 sin :: Number -> Number
-sin = Prelude.sin
+sin (Number double) = Number (Prelude.sin double)
 
 {-# INLINE cos #-}
 cos :: Number -> Number
-cos = Prelude.cos
+cos (Number double) = Number (Prelude.cos double)
 
 {-# INLINE tan #-}
 tan :: Number -> Number
-tan = Prelude.tan
+tan (Number double) = Number (Prelude.tan double)
 
 {-# INLINE asin #-}
 asin :: Number -> Number
-asin = Prelude.asin
+asin (Number double) = Number (Prelude.asin double)
 
 {-# INLINE acos #-}
 acos :: Number -> Number
-acos = Prelude.acos
+acos (Number double) = Number (Prelude.acos double)
 
 {-# INLINE atan #-}
 atan :: Number -> Number
-atan = Prelude.atan
+atan (Number double) = Number (Prelude.atan double)
 
 {-# INLINE atan2 #-}
 atan2 :: Quantity units -> Quantity units -> Number
-atan2 (Quantity y) (Quantity x) = Prelude.atan2 y x
+atan2 (Quantity (Number y)) (Quantity (Number x)) = Number (Prelude.atan2 y x)
 
 {-# INLINE log #-}
 log :: Number -> Number
-log = Prelude.log
+log (Number double) = Number (Prelude.log double)
 
 {-# INLINE logBase #-}
 logBase :: Number -> Number -> Number
-logBase = Prelude.logBase
+logBase (Number base) (Number value) = Number (Prelude.logBase base value)
 
 sum :: List Number -> Number
 sum = Prelude.sum
