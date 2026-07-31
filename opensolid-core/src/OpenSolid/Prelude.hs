@@ -260,6 +260,12 @@ instance DivMod Int where
   {-# INLINE (%) #-}
   (%) = Prelude.mod
 
+instance DivMod Double where
+  {-# INLINE (//) #-}
+  x // y = Prelude.floor (x / y)
+  {-# INLINE (%) #-}
+  x % y = let n :: Double = fromIntegral (x // y) in x - n * y
+
 class Exponentiation a b c | a b -> c where
   (**) :: a -> b -> c
 
@@ -557,8 +563,10 @@ instance
   Quantity_ x / Quantity_ y = Quantity_ (x / y)
 
 instance DivMod (Quantity units) where
-  x // y = Prelude.floor (x / y)
-  x % y = x - y * (fromIntegral (x // y) :: Number)
+  {-# INLINE (//) #-}
+  Quantity_ x // Quantity_ y = x // y
+  {-# INLINE (%) #-}
+  Quantity_ x % Quantity_ y = Quantity_ (x % y)
 
 ----- Indexed -----
 
