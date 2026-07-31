@@ -87,7 +87,7 @@ infinity = 1.0 / 0.0
 
 {-# INLINE sign #-}
 sign :: Number -> Sign
-sign value = if value >= 0.0 then Positive else Negative
+sign value = if value < 0.0 then Negative else Positive
 
 {-# INLINE isNaN #-}
 isNaN :: Number -> Bool
