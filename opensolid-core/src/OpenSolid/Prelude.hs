@@ -649,7 +649,7 @@ pattern TODO <- (GHC.Stack.withFrozenCallStack todoImpl -> ())
  where
   TODO = GHC.Stack.withFrozenCallStack todoImpl
 
-todoImpl :: a
+todoImpl :: HasCallStack => a
 todoImpl = Prelude.error "Not implemented"
 
 {-# INLINE recursive #-}
