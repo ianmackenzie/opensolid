@@ -140,12 +140,20 @@ instance Negation Int where
   {-# INLINE negate #-}
   negate = Prelude.negate
 
+instance Negation Double where
+  {-# INLINE negate #-}
+  negate = Prelude.negate
+
 class Addition a b c | a b -> c where
   (+) :: a -> b -> c
 
 infixl 6 +
 
 instance Addition Int Int Int where
+  {-# INLINE (+) #-}
+  (+) = (Prelude.+)
+
+instance Addition Double Double Double where
   {-# INLINE (+) #-}
   (+) = (Prelude.+)
 
@@ -159,6 +167,10 @@ subtract :: Subtraction a b c => b -> a -> c
 subtract value = (- value)
 
 instance Subtraction Int Int Int where
+  {-# INLINE (-) #-}
+  (-) = (Prelude.-)
+
+instance Subtraction Double Double Double where
   {-# INLINE (-) #-}
   (-) = (Prelude.-)
 
@@ -184,6 +196,18 @@ instance Multiplication Int Sign Int where
   value * Positive = value
   value * Negative = -value
 
+instance Multiplication Double Double Double where
+  {-# INLINE (*) #-}
+  (*) = (Prelude.*)
+
+instance Multiplication Sign Double Double where
+  Positive * value = value
+  Negative * value = -value
+
+instance Multiplication Double Sign Double where
+  value * Positive = value
+  value * Negative = -value
+
 class Division_ a b c | a b -> c where
   (?/?) :: a -> b -> c
 
@@ -197,6 +221,10 @@ infixl 7 /
 instance Division Int Int Number where
   {-# INLINE (/) #-}
   n / m = Number (fromIntegral n) / Number (fromIntegral m)
+
+instance Division Double Double Double where
+  {-# INLINE (/) #-}
+  (/) = (Prelude./)
 
 class DotMultiplication_ a b c | a b -> c where
   dot_ :: a -> b -> c
