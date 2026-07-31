@@ -50,8 +50,6 @@ common config
     -fwrite-ide-info
     -hiedir=.hie
     -haddock
-    -dcmm-lint
-    -dcore-lint
 
   default-extensions:
     BlockArguments
