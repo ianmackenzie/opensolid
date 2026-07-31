@@ -52,7 +52,7 @@ collectEdgeIndices (first : rest) startIndex accumulated = do
 
 collectLoopEdgeIndices :: Int -> Int -> List Int -> List Int
 collectLoopEdgeIndices startIndex loopLength =
-  reverseForEach [0 .. loopLength - 1] \i accumulated -> do
+  forEach [loopLength - 1, loopLength - 2 .. 0] \i accumulated -> do
     let edgeStart = startIndex + i
     let edgeEnd = startIndex + (i + 1) % loopLength
     edgeStart : edgeEnd : accumulated
