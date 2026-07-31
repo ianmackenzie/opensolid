@@ -42,14 +42,14 @@ instance Applicative Generator where
 
   functionGenerator <*> valueGenerator =
     Generator \stdGen1 -> do
-      let (function, stdGen2) = run functionGenerator stdGen1
-      let (value, stdGen3) = run valueGenerator stdGen2
+      let (function, !stdGen2) = run functionGenerator stdGen1
+      let (value, !stdGen3) = run valueGenerator stdGen2
       (function value, stdGen3)
 
 instance Monad Generator where
   valueGenerator >>= function =
     Generator \stdGen1 -> do
-      let (value, stdGen2) = run valueGenerator stdGen1
+      let (value, !stdGen2) = run valueGenerator stdGen1
       let newGenerator = function value
       run newGenerator stdGen2
 
