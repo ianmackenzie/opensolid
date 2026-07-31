@@ -204,7 +204,7 @@ class DotMultiplication_ a b c | a b -> c where
 infixl 7 `dot_`
 
 class DotMultiplication b a c => DotMultiplication a b c | a b -> c where
-  dot :: DotMultiplication a b c => a -> b -> c
+  dot :: a -> b -> c
 
 infixl 7 `dot`
 
