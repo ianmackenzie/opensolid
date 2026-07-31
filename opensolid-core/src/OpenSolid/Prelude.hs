@@ -195,8 +195,8 @@ class Division a b c | a b -> c where
 infixl 7 /
 
 instance Division Int Int Number where
-  {-# INLINEABLE (/) #-}
-  n / m = (fromIntegral n :: Number) / (fromIntegral m :: Number)
+  {-# INLINE (/) #-}
+  n / m = Number (fromIntegral n) / Number (fromIntegral m)
 
 class DotMultiplication_ a b c | a b -> c where
   dot_ :: a -> b -> c
