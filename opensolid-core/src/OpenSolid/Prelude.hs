@@ -517,22 +517,22 @@ instance Multiplication (Quantity units) Sign (Quantity units) where
 
 instance units1 ~ units2 => Addition (Quantity units1) (Quantity units2) (Quantity units1) where
   {-# INLINE (+) #-}
-  Quantity_ x + Quantity_ y = Quantity_ (x Prelude.+ y)
+  Quantity_ x + Quantity_ y = Quantity_ (x + y)
 
 instance units1 ~ units2 => Subtraction (Quantity units1) (Quantity units2) (Quantity units1) where
   {-# INLINE (-) #-}
-  Quantity_ x - Quantity_ y = Quantity_ (x Prelude.- y)
+  Quantity_ x - Quantity_ y = Quantity_ (x - y)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Quantity units2) (Quantity units3)
   where
   {-# INLINE (*) #-}
-  Quantity_ x * Quantity_ y = Quantity_ (x Prelude.* y)
+  Quantity_ x * Quantity_ y = Quantity_ (x * y)
 
 instance Multiplication_ (Quantity units1) (Quantity units2) (Quantity (units1 ?*? units2)) where
   {-# INLINE (?*?) #-}
-  Quantity_ x ?*? Quantity_ y = Quantity_ (x Prelude.* y)
+  Quantity_ x ?*? Quantity_ y = Quantity_ (x * y)
 
 instance DotMultiplication_ (Quantity units1) (Quantity units2) (Quantity (units1 ?*? units2)) where
   {-# INLINE dot_ #-}
@@ -547,14 +547,14 @@ instance
 
 instance Division_ (Quantity units1) (Quantity units2) (Quantity (units1 ?/? units2)) where
   {-# INLINE (?/?) #-}
-  Quantity_ x ?/? Quantity_ y = Quantity_ (x Prelude./ y)
+  Quantity_ x ?/? Quantity_ y = Quantity_ (x / y)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Quantity units1) (Quantity units2) (Quantity units3)
   where
   {-# INLINE (/) #-}
-  Quantity_ x / Quantity_ y = Quantity_ (x Prelude./ y)
+  Quantity_ x / Quantity_ y = Quantity_ (x / y)
 
 instance DivMod (Quantity units) where
   x // y = Prelude.floor (x / y)
