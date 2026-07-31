@@ -294,6 +294,7 @@ class ApproximateEquality a constraint | a -> constraint where
 infix 4 ~=
 
 instance ApproximateEquality (Quantity units) (Tolerance units) where
+  {-# INLINE (~=) #-}
   x ~= y = x >= y - ?tolerance && x <= y + ?tolerance
 
 instance ApproximateEquality a units => ApproximateEquality (List a) units where
@@ -381,12 +382,15 @@ class Composition f g h | f g -> h where
   {-# MINIMAL (.) | (>>) #-}
 
 instance b1 ~ b2 => Composition (b2 -> c) (a -> b1) (a -> c) where
+  {-# INLINE (.) #-}
   (.) = (Prelude..)
 
 instance Composition (Result x a) (Result x ()) (Result x a) where
+  {-# INLINE (>>) #-}
   (>>) = (Prelude.>>)
 
 instance Composition (IO a) (IO ()) (IO a) where
+  {-# INLINE (>>) #-}
   (>>) = (Prelude.>>)
 
 infixr 9 .
@@ -407,17 +411,21 @@ pattern NonEmpty nonEmpty <- (Data.List.NonEmpty.nonEmpty -> Just nonEmpty)
 data Fuzzy a = Resolved a | Unresolved deriving (Eq, Show)
 
 instance Functor Fuzzy where
+  {-# INLINE fmap #-}
   fmap function (Resolved value) = Resolved (function value)
   fmap _ Unresolved = Unresolved
 
 instance Applicative Fuzzy where
+  {-# INLINE pure #-}
   pure = Resolved
 
+  {-# INLINE (<*>) #-}
   Resolved function <*> Resolved value = Resolved (function value)
   Unresolved <*> _ = Unresolved
   Resolved _ <*> Unresolved = Unresolved
 
 instance Monad Fuzzy where
+  {-# INLINE (>>=) #-}
   Resolved value >>= function = function value
   Unresolved >>= _ = Unresolved
 
@@ -432,21 +440,26 @@ deriving instance (Eq x, Eq a) => Eq (Result x a)
 deriving instance (Show x, Show a) => Show (Result x a)
 
 instance Functor (Result x) where
+  {-# INLINE fmap #-}
   fmap function (Ok value) = Ok (function value)
   fmap _ (Error error) = Error error
 
 instance Applicative (Result x) where
+  {-# INLINE pure #-}
   pure = Ok
 
+  {-# INLINE (<*>) #-}
   Ok function <*> Ok value = Ok (function value)
   Error error <*> _ = Error error
   _ <*> Error error = Error error
 
 instance Monad (Result x) where
+  {-# INLINE (>>=) #-}
   Ok value >>= function = function value
   Error error >>= _ = Error error
 
 instance MonadFail (Result Text) where
+  {-# INLINE fail #-}
   fail message = Error (Data.Text.pack message)
 
 ----- Quantity -----
@@ -517,7 +530,7 @@ instance Multiplication Sign (Quantity units) (Quantity units) where
   Sign sign_ * value = sign_ * value
 
 instance Multiplication (Quantity units) Sign (Quantity units) where
-  {-# INLINEABLE (*) #-}
+  {-# INLINE (*) #-}
   value * Sign sign_ = value * sign_
 
 instance units1 ~ units2 => Addition (Quantity units1) (Quantity units2) (Quantity units1) where
@@ -575,15 +588,19 @@ class Indexed container index item | container index -> item where
 infixl 9 !!
 
 instance Indexed (List item) Int item where
+  {-# INLINE (!!) #-}
   (!!) = (Prelude.!!)
 
 instance Indexed (NonEmpty item) Int item where
+  {-# INLINE (!!) #-}
   (!!) = (Data.List.NonEmpty.!!)
 
 instance Ord key => Indexed (Map key value) key value where
+  {-# INLINE (!!) #-}
   (!!) = (Data.Map.Strict.!)
 
 instance Hashable key => Indexed (HashMap key value) key value where
+  {-# INLINE (!!) #-}
   (!!) = (Data.HashMap.Strict.!)
 
 ----- Intersection -----
@@ -602,6 +619,7 @@ instance
   where
   intersects (a1, b1) (a2, b2) = intersects a1 a2 && intersects b1 b2
 
+{-# INLINE (^) #-}
 (^) :: Intersects a b (Tolerance Unitless) => a -> b -> Bool
 first ^ second = let ?tolerance = 1e-9 in first `intersects` second
 
@@ -621,17 +639,17 @@ instance ApproximateEquality Sign () where (~=) = (==)
 
 {-# COMPLETE Sign #-}
 
-{-# INLINEABLE Sign #-}
+{-# INLINE Sign #-}
 pattern Sign :: Number -> Sign
 pattern Sign x <- Sign_ x
 
 {-# COMPLETE Negative, Positive #-}
 
-{-# INLINEABLE Negative #-}
+{-# INLINE Negative #-}
 pattern Negative :: Sign
 pattern Negative = Sign_ -1.0
 
-{-# INLINEABLE Positive #-}
+{-# INLINE Positive #-}
 pattern Positive :: Sign
 pattern Positive = Sign_ 1.0
 
