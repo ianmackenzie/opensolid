@@ -67,7 +67,7 @@ choose n k = do
     | otherwise -> prod (n - d + 1) (n - d + 2) n // prod 2 3 d
 
 ratio :: Int -> Int -> Number
-ratio a b = (fromIntegral a :: Number) / (fromIntegral b :: Number)
+ratio a b = Number (fromIntegral a) / Number (fromIntegral b)
 
 prod :: Int -> Int -> Int -> Int
 prod !acc a b = case compare a b of
