@@ -437,7 +437,7 @@ data Result x a where
 
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
-deriving instance (Show x, Show a) => Show (Result x a)
+deriving instance Show a => Show (Result x a)
 
 instance Functor (Result x) where
   {-# INLINE fmap #-}
