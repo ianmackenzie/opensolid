@@ -86,7 +86,7 @@ findEndpointIntersections = do
         Curve.Nondegenerate.findPoint (Curve.point curve t) nondegenerateSearchCurve
   let endpoints1On2 = [(t1, t2) | t1 <- [0.0, 1.0], t2 <- findPoint curve1 t1 nondegenerate2]
   let endpoints2On1 = [(t1, t2) | t2 <- [0.0, 1.0], t1 <- findPoint curve2 t2 nondegenerate1]
-  List.uniqueValues (endpoints1On2 <> endpoints2On1)
+  List.sortAndDeduplicate (endpoints1On2 <> endpoints2On1)
     & List.filterMap \(t1, t2) -> do
       let p1 = CurvePoint.on nondegenerate1 t1
       let p2 = CurvePoint.on nondegenerate2 t2
