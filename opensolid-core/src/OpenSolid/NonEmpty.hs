@@ -319,7 +319,7 @@ sort :: Ord a => NonEmpty a -> NonEmpty a
 sort = Data.List.NonEmpty.sort
 
 sortBy :: Ord b => (a -> b) -> NonEmpty a -> NonEmpty a
-sortBy property = sortWith (\a b -> compare (property a) (property b))
+sortBy property = sortWith (\a1 a2 -> compare (property a1) (property a2))
 
 sortWith :: (a -> a -> Ordering) -> NonEmpty a -> NonEmpty a
 sortWith = Data.List.NonEmpty.sortBy

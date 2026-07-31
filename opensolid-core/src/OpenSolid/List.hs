@@ -200,7 +200,7 @@ sort :: Ord a => List a -> List a
 sort = Data.List.sort
 
 sortBy :: Ord b => (a -> b) -> List a -> List a
-sortBy = Data.List.sortOn
+sortBy property = sortWith (\a1 a2 -> compare (property a1) (property a2))
 
 sortWith :: (a -> a -> Ordering) -> List a -> List a
 sortWith = Data.List.sortBy
