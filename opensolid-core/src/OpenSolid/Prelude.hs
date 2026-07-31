@@ -710,11 +710,11 @@ recursive :: (a -> a) -> a
 recursive = Data.Function.fix
 
 {-# INLINE forEach #-}
-forEach :: Foldable list => list a -> (a -> b -> b) -> b -> b
+forEach :: Foldable list => list item -> (item -> acc -> acc) -> acc -> acc
 forEach list function init = Prelude.foldl' (Prelude.flip function) init list
 
 {-# INLINE forEachWithIndex #-}
-forEachWithIndex :: Foldable list => list a -> (Int -> a -> b -> b) -> b -> b
+forEachWithIndex :: Foldable list => list item -> (Int -> item -> acc -> acc) -> acc -> acc
 forEachWithIndex list function init = do
   let callback (i, acc) item = (i + 1, function i item acc)
   Prelude.snd (Prelude.foldl' callback (0, init) list)
