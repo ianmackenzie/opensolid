@@ -656,13 +656,16 @@ todoImpl = Prelude.error "Not implemented"
 recursive :: (a -> a) -> a
 recursive = Data.Function.fix
 
+{-# INLINE forEach #-}
 forEach :: Foldable list => list a -> (a -> b -> b) -> b -> b
 forEach list function init = Prelude.foldl' (Prelude.flip function) init list
 
+{-# INLINE forEachWithIndex #-}
 forEachWithIndex :: Foldable list => list a -> (Int -> a -> b -> b) -> b -> b
 forEachWithIndex list function init = do
   let callback (i, acc) item = (i + 1, function i item acc)
   Prelude.snd (Prelude.foldl' callback (0, init) list)
 
+{-# INLINE reverseForEach #-}
 reverseForEach :: Foldable list => list a -> (a -> b -> b) -> b -> b
 reverseForEach list function init = Prelude.foldr function init list
