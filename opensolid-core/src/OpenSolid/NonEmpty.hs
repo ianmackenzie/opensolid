@@ -63,7 +63,6 @@ module OpenSolid.NonEmpty
   , sortBy
   , sortWith
   , uniqueValues
-  , uniqueValuesOf
   , uniqueValue
   , uniqueValueOf
   , intersperse
@@ -335,9 +334,6 @@ dedup current [] = current :| []
 dedup current (next : remaining)
   | current == next = dedup current remaining
   | otherwise = push current (dedup next remaining)
-
-uniqueValuesOf :: Ord b => (a -> b) -> NonEmpty a -> NonEmpty b
-uniqueValuesOf function nonEmpty = uniqueValues (map function nonEmpty)
 
 uniqueValue :: Eq a => NonEmpty a -> Maybe a
 uniqueValue = uniqueValueOf id

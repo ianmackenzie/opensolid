@@ -42,7 +42,6 @@ module OpenSolid.List
   , sortBy
   , sortWith
   , uniqueValues
-  , uniqueValuesOf
   , isOrdered
   , isNonDescending
   , isAscending
@@ -217,9 +216,6 @@ dedup current [] = [current]
 dedup current (next : remaining)
   | current == next = dedup current remaining
   | otherwise = current : dedup next remaining
-
-uniqueValuesOf :: Ord b => (a -> b) -> List a -> List b
-uniqueValuesOf function list = uniqueValues (map function list)
 
 isOrdered :: (a -> a -> Bool) -> List a -> Bool
 isOrdered _ [] = True
