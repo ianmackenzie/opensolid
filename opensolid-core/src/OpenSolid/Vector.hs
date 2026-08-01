@@ -65,7 +65,9 @@ class
   , Division (Vector dimension units space) Number (Vector dimension units space)
   , Division (Vector dimension units space) (Quantity units) (Vector dimension Unitless space)
   , DotMultiplication (Vector dimension units space) (Vector dimension Unitless space) (Quantity units)
+  , DotMultiplication (Vector dimension Unitless space) (Vector dimension units space) (Quantity units)
   , DotMultiplication (Vector dimension units space) (Direction dimension space) (Quantity units)
+  , DotMultiplication (Direction dimension space) (Vector dimension units space) (Quantity units)
   , DotMultiplication_ (Vector dimension units space) (Vector dimension units space) (Quantity (units ?*? units))
   , Exists dimension Unitless space
   , Direction.Exists dimension space

@@ -45,7 +45,7 @@ instance HasUnits a units => HasUnits [a] units
 instance HasUnits a units => HasUnits (NonEmpty a) units
 
 type Coercion :: Type -> Type -> Constraint
-class Coercion b a => Coercion a b where
+class Coercion a b where
   coerce :: a -> b
 
 instance Coercion a b => Coercion (Maybe a) (Maybe b) where
@@ -83,7 +83,7 @@ specialize = coerce
 
 {-# INLINE unspecialize #-}
 unspecialize ::
-  ( Coercion a b
+  ( Coercion b a
   , HasUnits a unitsA
   , HasUnits b unitsB
   , Specialize unitsA unitsB

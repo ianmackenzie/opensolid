@@ -132,7 +132,7 @@ import Prelude qualified
 
 ----- Arithmetic -----
 
-class (Multiplication Sign a a, Multiplication a Sign a) => Negation a where
+class Negation a where
   negate :: a -> a
 
 instance Negation Int where
@@ -178,7 +178,7 @@ class Multiplication_ a b c | a b -> c where
 
 infixl 7 ?*?
 
-class Multiplication b a c => Multiplication a b c | a b -> c where
+class Multiplication a b c | a b -> c where
   (*) :: a -> b -> c
 
 infixl 7 *
@@ -230,7 +230,7 @@ class DotMultiplication_ a b c | a b -> c where
 
 infixl 7 `dot_`
 
-class DotMultiplication b a c => DotMultiplication a b c | a b -> c where
+class DotMultiplication a b c | a b -> c where
   dot :: a -> b -> c
 
 infixl 7 `dot`
@@ -240,7 +240,7 @@ class CrossMultiplication_ a b c | a b -> c where
 
 infixl 7 `cross_`
 
-class CrossMultiplication b a c => CrossMultiplication a b c | a b -> c where
+class CrossMultiplication a b c | a b -> c where
   cross :: a -> b -> c
 
 infixl 7 `cross`
@@ -605,7 +605,7 @@ instance Hashable key => Indexed (HashMap key value) key value where
 
 ----- Intersection -----
 
-class Intersects b a constraint => Intersects a b constraint | a b -> constraint where
+class Intersects a b constraint | a b -> constraint where
   intersects :: constraint => a -> b -> Bool
 
 infix 4 `intersects`
