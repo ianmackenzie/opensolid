@@ -1,1 +1,2 @@
 packages: */*.cabal
+optimization: 2
