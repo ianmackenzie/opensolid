@@ -1,7 +1,6 @@
 module Python.PostOperator (definition) where
 
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator
-import OpenSolid.API.Class (FallbackFunction)
 import OpenSolid.API.ImplicitTolerance (ImplicitTolerance)
 import OpenSolid.API.PostOperatorOverload (PostOperatorOverload (..))
 import OpenSolid.API.PostOperatorOverload qualified as PostOperatorOverload
@@ -16,7 +15,7 @@ import Python.Type qualified
 rhsArgName :: Text
 rhsArgName = FFI.snakeCase PostOperatorOverload.rhsName
 
-definition :: FFI.ClassName -> (BinaryOperator.Id, List (PostOperatorOverload, Maybe FallbackFunction)) -> Text
+definition :: FFI.ClassName -> (BinaryOperator.Id, List PostOperatorOverload) -> Text
 definition className (operatorId, operators) = do
   case List.map (overloadComponents className operatorId) operators of
     [(signature, _, body)] ->
@@ -71,9 +70,9 @@ functionName operatorId = case operatorId of
 overloadComponents ::
   FFI.ClassName ->
   BinaryOperator.Id ->
-  (PostOperatorOverload, Maybe FallbackFunction) ->
+  PostOperatorOverload ->
   (Text, Text, Text)
-overloadComponents className operatorId (overload, _) = do
+overloadComponents className operatorId overload = do
   let ffiFunctionName = PostOperatorOverload.ffiName className operatorId overload
   let selfType = FFI.Class className
   let (implicitTolerance, rhsType, returnType) = PostOperatorOverload.signature overload

@@ -174,27 +174,27 @@ length =
     , Class.negation
     , Class.abs Quantity.abs
     , Class.numberTimes
-    , Class.plus @Length Class.fallbackMemberPlus
-    , Class.plus @LengthInterval Class.noFallback
-    , Class.plus @LengthCurve Class.noFallback
-    , Class.minus @Length Class.fallbackMemberMinus
-    , Class.minus @LengthInterval Class.noFallback
-    , Class.minus @LengthCurve Class.noFallback
-    , Class.times @Number Class.fallbackMemberTimes
-    , Class.times @Length Class.fallbackStaticProduct
-    , Class.times @Interval Class.noFallback
-    , Class.times @LengthInterval Class.noFallback
-    , Class.times @Curve Class.noFallback
-    , Class.times @LengthCurve Class.noFallback
-    , Class.times @Direction2D Class.noFallback
-    , Class.times @Vector2D Class.noFallback
-    , Class.times @Displacement2D Class.noFallback
-    , Class.divideBy @Number Class.fallbackMemberDivideBy
-    , Class.divideBy @Length Class.fallbackStaticRatio
-    , Class.divideBy @Interval Class.noFallback
-    , Class.divideBy @LengthInterval Class.noFallback
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.noFallback
-    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero Class.noFallback
+    , Class.plus @Length
+    , Class.plus @LengthInterval
+    , Class.plus @LengthCurve
+    , Class.minus @Length
+    , Class.minus @LengthInterval
+    , Class.minus @LengthCurve
+    , Class.times @Number
+    , Class.times @Length
+    , Class.times @Interval
+    , Class.times @LengthInterval
+    , Class.times @Curve
+    , Class.times @LengthCurve
+    , Class.times @Direction2D
+    , Class.times @Vector2D
+    , Class.times @Displacement2D
+    , Class.divideBy @Number
+    , Class.divideBy @Length
+    , Class.divideBy @Interval
+    , Class.divideBy @LengthInterval
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero
     , Class.divMod
     ]
 
@@ -217,25 +217,25 @@ area =
     , Class.negation
     , Class.abs Quantity.abs
     , Class.numberTimes
-    , Class.plus @Area Class.fallbackMemberPlus
-    , Class.plus @AreaInterval Class.noFallback
-    , Class.plus @AreaCurve Class.noFallback
-    , Class.minus @Area Class.fallbackMemberMinus
-    , Class.minus @AreaInterval Class.noFallback
-    , Class.minus @AreaCurve Class.noFallback
-    , Class.times @Number Class.fallbackMemberTimes
-    , Class.times @Interval Class.noFallback
-    , Class.times @Curve Class.noFallback
-    , Class.times @Direction2D Class.noFallback
-    , Class.times @Vector2D Class.noFallback
-    , Class.divideBy @Number Class.fallbackMemberDivideBy
-    , Class.divideBy @Area Class.fallbackStaticRatio
-    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
-    , Class.divideBy @Interval Class.noFallback
-    , Class.divideBy @LengthInterval Class.noFallback
-    , Class.divideBy @AreaInterval Class.noFallback
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.noFallback
-    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero Class.noFallback
+    , Class.plus @Area
+    , Class.plus @AreaInterval
+    , Class.plus @AreaCurve
+    , Class.minus @Area
+    , Class.minus @AreaInterval
+    , Class.minus @AreaCurve
+    , Class.times @Number
+    , Class.times @Interval
+    , Class.times @Curve
+    , Class.times @Direction2D
+    , Class.times @Vector2D
+    , Class.divideBy @Number
+    , Class.divideBy @Area
+    , Class.divideBy @Length
+    , Class.divideBy @Interval
+    , Class.divideBy @LengthInterval
+    , Class.divideBy @AreaInterval
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero
     , Class.divMod
     ]
 
@@ -275,21 +275,21 @@ angle =
     , Class.negation
     , Class.abs Quantity.abs
     , Class.numberTimes
-    , Class.plus @Angle Class.fallbackMemberPlus
-    , Class.plus @AngleInterval Class.noFallback
-    , Class.plus @AngleCurve Class.noFallback
-    , Class.minus @Angle Class.fallbackMemberMinus
-    , Class.minus @AngleInterval Class.noFallback
-    , Class.minus @AngleCurve Class.noFallback
-    , Class.times @Number Class.fallbackMemberTimes
-    , Class.times @Interval Class.noFallback
-    , Class.times @Curve Class.noFallback
-    , Class.divideBy @Number Class.fallbackMemberDivideBy
-    , Class.divideBy @Angle Class.fallbackStaticRatio
-    , Class.divideBy @Interval Class.noFallback
-    , Class.divideBy @AngleInterval Class.noFallback
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.noFallback
-    , Class.divideByNonzeroR @AngleCurve Curve1D.nonzero Class.noFallback
+    , Class.plus @Angle
+    , Class.plus @AngleInterval
+    , Class.plus @AngleCurve
+    , Class.minus @Angle
+    , Class.minus @AngleInterval
+    , Class.minus @AngleCurve
+    , Class.times @Number
+    , Class.times @Interval
+    , Class.times @Curve
+    , Class.divideBy @Number
+    , Class.divideBy @Angle
+    , Class.divideBy @Interval
+    , Class.divideBy @AngleInterval
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideByNonzeroR @AngleCurve Curve1D.nonzero
     , Class.divMod
     ]
 
@@ -323,20 +323,20 @@ interval =
     , Class.numberMinus
     , Class.numberTimes
     , Class.numberDivideBy
-    , Class.plus @Number (Class.fallbackMember "Plus Number")
-    , Class.plus @Interval Class.fallbackMemberPlus
-    , Class.minus @Number (Class.fallbackMember "Minus Number")
-    , Class.minus @Interval Class.fallbackMemberMinus
-    , Class.times @Number (Class.fallbackMember "Times Number")
-    , Class.times @Interval Class.fallbackMemberTimes
-    , Class.times @Length (Class.fallbackMember "Times Length")
-    , Class.times @Area (Class.fallbackMember "Times Area")
-    , Class.times @Angle (Class.fallbackMember "Times Angle")
-    , Class.times @LengthInterval Class.noFallback
-    , Class.times @AreaInterval Class.noFallback
-    , Class.times @AngleInterval Class.noFallback
-    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
-    , Class.divideBy @Interval Class.fallbackMemberDivideBy
+    , Class.plus @Number
+    , Class.plus @Interval
+    , Class.minus @Number
+    , Class.minus @Interval
+    , Class.times @Number
+    , Class.times @Interval
+    , Class.times @Length
+    , Class.times @Area
+    , Class.times @Angle
+    , Class.times @LengthInterval
+    , Class.times @AreaInterval
+    , Class.times @AngleInterval
+    , Class.divideBy @Number
+    , Class.divideBy @Interval
     ]
 
 type LengthInterval = Interval.Interval Meters
@@ -359,18 +359,18 @@ lengthInterval =
     , Class.negation
     , Class.abs Interval.abs
     , Class.numberTimes
-    , Class.plus @LengthInterval Class.fallbackMemberPlus
-    , Class.plus @Length (Class.fallbackMember "Plus Length")
-    , Class.minus @LengthInterval Class.fallbackMemberMinus
-    , Class.minus @Length (Class.fallbackMember "Minus Length")
-    , Class.times @Number (Class.fallbackMember "Times Number")
-    , Class.times @LengthInterval Class.fallbackStaticProduct
-    , Class.times @Length (Class.fallbackMember "Times Length")
-    , Class.times @Interval Class.fallbackMemberTimes
-    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
-    , Class.divideBy @LengthInterval Class.fallbackStaticRatio
-    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
-    , Class.divideBy @Interval Class.fallbackMemberDivideBy
+    , Class.plus @LengthInterval
+    , Class.plus @Length
+    , Class.minus @LengthInterval
+    , Class.minus @Length
+    , Class.times @Number
+    , Class.times @LengthInterval
+    , Class.times @Length
+    , Class.times @Interval
+    , Class.divideBy @Number
+    , Class.divideBy @LengthInterval
+    , Class.divideBy @Length
+    , Class.divideBy @Interval
     ]
 
 type AreaInterval = Interval.Interval SquareMeters
@@ -393,18 +393,18 @@ areaInterval =
     , Class.negation
     , Class.abs Interval.abs
     , Class.numberTimes
-    , Class.plus @AreaInterval Class.fallbackMemberPlus
-    , Class.plus @Area (Class.fallbackMember "Plus Area")
-    , Class.minus @AreaInterval Class.fallbackMemberMinus
-    , Class.minus @Area (Class.fallbackMember "Minus Area")
-    , Class.times @Number (Class.fallbackMember "Times Number")
-    , Class.times @Interval Class.fallbackMemberTimes
-    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
-    , Class.divideBy @AreaInterval Class.fallbackStaticRatio
-    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
-    , Class.divideBy @Area (Class.fallbackMember "Divide By Area")
-    , Class.divideBy @Interval Class.fallbackMemberDivideBy
-    , Class.divideBy @LengthInterval (Class.fallbackMember "Divide By Length Interval")
+    , Class.plus @AreaInterval
+    , Class.plus @Area
+    , Class.minus @AreaInterval
+    , Class.minus @Area
+    , Class.times @Number
+    , Class.times @Interval
+    , Class.divideBy @Number
+    , Class.divideBy @AreaInterval
+    , Class.divideBy @Length
+    , Class.divideBy @Area
+    , Class.divideBy @Interval
+    , Class.divideBy @LengthInterval
     ]
 
 type AngleInterval = Interval.Interval Radians
@@ -427,16 +427,16 @@ angleInterval =
     , Class.negation
     , Class.abs Interval.abs
     , Class.numberTimes
-    , Class.plus @AngleInterval Class.fallbackMemberPlus
-    , Class.plus @Angle (Class.fallbackMember "Plus Angle")
-    , Class.minus @AngleInterval Class.fallbackMemberMinus
-    , Class.minus @Angle (Class.fallbackMember "Minus Angle")
-    , Class.times @Number (Class.fallbackMember "Times Number")
-    , Class.times @Interval Class.fallbackMemberTimes
-    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
-    , Class.divideBy @AngleInterval Class.fallbackStaticRatio
-    , Class.divideBy @Angle (Class.fallbackMember "Divide By Angle")
-    , Class.divideBy @Interval Class.fallbackMemberDivideBy
+    , Class.plus @AngleInterval
+    , Class.plus @Angle
+    , Class.minus @AngleInterval
+    , Class.minus @Angle
+    , Class.times @Number
+    , Class.times @Interval
+    , Class.divideBy @Number
+    , Class.divideBy @AngleInterval
+    , Class.divideBy @Angle
+    , Class.divideBy @Interval
     ]
 
 color :: Class
@@ -522,20 +522,20 @@ vector2D =
     , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> Vector2D -> Vector3D) $(docs 'Vector2D.placeOn)
     , Class.negation
     , Class.numberTimes
-    , Class.plus @Vector2D Class.fallbackMemberPlus
-    , Class.minus @Vector2D Class.fallbackMemberMinus
-    , Class.times @Number Class.fallbackMemberTimes
-    , Class.times @Length (Class.fallbackMember "Times Length")
-    , Class.times @Area (Class.fallbackMember "Times Area")
-    , Class.divideBy @Number Class.fallbackMemberDivideBy
-    , Class.dot @Vector2D Class.fallbackStaticDotProduct
-    , Class.dot @Direction2D Class.fallbackMemberDot
-    , Class.dot @Displacement2D Class.noFallback
-    , Class.dot @AreaVector2D Class.noFallback
-    , Class.cross @Vector2D Class.fallbackStaticCrossProduct
-    , Class.cross @Direction2D Class.fallbackMemberCross
-    , Class.cross @Displacement2D (Class.fallbackMember "Cross Displacement")
-    , Class.cross @AreaVector2D (Class.fallbackMember "Cross Area Vector")
+    , Class.plus @Vector2D
+    , Class.minus @Vector2D
+    , Class.times @Number
+    , Class.times @Length
+    , Class.times @Area
+    , Class.divideBy @Number
+    , Class.dot @Vector2D
+    , Class.dot @Direction2D
+    , Class.dot @Displacement2D
+    , Class.dot @AreaVector2D
+    , Class.cross @Vector2D
+    , Class.cross @Direction2D
+    , Class.cross @Displacement2D
+    , Class.cross @AreaVector2D
     ]
       <> vectorTransformations2D
 
@@ -567,18 +567,18 @@ displacement2D =
     , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> Displacement2D -> Displacement3D) $(docs 'Vector2D.placeOn)
     , Class.negation
     , Class.numberTimes
-    , Class.plus @Displacement2D Class.fallbackMemberPlus
-    , Class.minus @Displacement2D Class.fallbackMemberMinus
-    , Class.times @Number Class.fallbackMemberTimes
-    , Class.times @Length (Class.fallbackMember "Times Length")
-    , Class.divideBy @Number Class.fallbackMemberDivideBy
-    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
-    , Class.dot @Displacement2D Class.fallbackStaticDotProduct
-    , Class.dot @Direction2D Class.fallbackMemberDot
-    , Class.dot @Vector2D (Class.fallbackMember "Dot Vector")
-    , Class.cross @Displacement2D Class.fallbackStaticCrossProduct
-    , Class.cross @Direction2D Class.fallbackMemberCross
-    , Class.cross @Vector2D (Class.fallbackMember "Cross Vector")
+    , Class.plus @Displacement2D
+    , Class.minus @Displacement2D
+    , Class.times @Number
+    , Class.times @Length
+    , Class.divideBy @Number
+    , Class.divideBy @Length
+    , Class.dot @Displacement2D
+    , Class.dot @Direction2D
+    , Class.dot @Vector2D
+    , Class.cross @Displacement2D
+    , Class.cross @Direction2D
+    , Class.cross @Vector2D
     ]
       <> vectorTransformations2D
 
@@ -602,16 +602,16 @@ areaVector2D =
     , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> AreaVector2D -> AreaVector3D) $(docs 'Vector2D.placeOn)
     , Class.negation
     , Class.numberTimes
-    , Class.plus @AreaVector2D Class.fallbackMemberPlus
-    , Class.minus @AreaVector2D Class.fallbackMemberMinus
-    , Class.times @Number Class.fallbackMemberTimes
-    , Class.divideBy @Number Class.fallbackMemberDivideBy
-    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
-    , Class.divideBy @Area (Class.fallbackMember "Divide By Area")
-    , Class.dot @Direction2D Class.fallbackMemberDot
-    , Class.dot @Vector2D (Class.fallbackMember "Dot Vector")
-    , Class.cross @Direction2D Class.fallbackMemberCross
-    , Class.cross @Vector2D (Class.fallbackMember "Cross Vector")
+    , Class.plus @AreaVector2D
+    , Class.minus @AreaVector2D
+    , Class.times @Number
+    , Class.divideBy @Number
+    , Class.divideBy @Length
+    , Class.divideBy @Area
+    , Class.dot @Direction2D
+    , Class.dot @Vector2D
+    , Class.cross @Direction2D
+    , Class.cross @Vector2D
     ]
       <> vectorTransformations2D
 
@@ -638,17 +638,17 @@ direction2D =
     , Class.member1 "Place On" "Plane" (Direction2D.placeOn :: Plane3D -> Direction2D -> Direction3D) $(docs 'Direction2D.placeOn)
     , Class.negation
     , Class.numberTimes
-    , Class.times @Number Class.fallbackMemberTimes
-    , Class.times @Length (Class.fallbackMember "Times Length")
-    , Class.times @Area (Class.fallbackMember "Times Area")
-    , Class.dot @Direction2D Class.fallbackMemberDot
-    , Class.dot @Vector2D Class.noFallback
-    , Class.dot @Displacement2D Class.noFallback
-    , Class.dot @AreaVector2D Class.noFallback
-    , Class.cross @Direction2D Class.fallbackMemberCross
-    , Class.cross @Vector2D (Class.fallbackMember "Cross Vector")
-    , Class.cross @Displacement2D (Class.fallbackMember "Cross Displacement")
-    , Class.cross @AreaVector2D (Class.fallbackMember "Cross Area Vector")
+    , Class.times @Number
+    , Class.times @Length
+    , Class.times @Area
+    , Class.dot @Direction2D
+    , Class.dot @Vector2D
+    , Class.dot @Displacement2D
+    , Class.dot @AreaVector2D
+    , Class.cross @Direction2D
+    , Class.cross @Vector2D
+    , Class.cross @Displacement2D
+    , Class.cross @AreaVector2D
     ]
 
 type Point2D = Point2D.Point2D Meters
@@ -673,10 +673,10 @@ point2D =
     , Class.member1 "Distance To" "Other" Point2D.distanceFrom $(docs 'Point2D.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point2D.midpoint $(docs 'Point2D.midpoint)
     , Class.member1 "Place On" "Plane" (Point2D.placeOn @Void) $(docs 'Point2D.placeOn)
-    , Class.plus @Displacement2D Class.noFallback
-    , Class.minus @Displacement2D Class.noFallback
-    , Class.minus @Point2D Class.fallbackMemberMinus
-    , Class.minus @Curve2D Class.noFallback
+    , Class.plus @Displacement2D
+    , Class.minus @Displacement2D
+    , Class.minus @Point2D
+    , Class.minus @Curve2D
     ]
       <> affineTransformations2D Point2D.transformBy
 
@@ -690,10 +690,10 @@ uvPoint =
     , Class.property "V Coordinate" Point2D.yCoordinate $(docs 'Point2D.yCoordinate)
     , Class.member1 "Distance To" "Other" Point2D.distanceFrom $(docs 'Point2D.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point2D.midpoint $(docs 'Point2D.midpoint)
-    , Class.plus @Vector2D Class.noFallback
-    , Class.minus @Vector2D Class.noFallback
-    , Class.minus @UvPoint Class.fallbackMemberMinus
-    , Class.minus @UvCurve Class.noFallback
+    , Class.plus @Vector2D
+    , Class.minus @Vector2D
+    , Class.minus @UvPoint
+    , Class.minus @UvCurve
     ] -- TODO add affine transformations
 
 type Bounds2D = Bounds2D.Bounds2D Meters
@@ -709,8 +709,8 @@ bounds2D =
     , Class.property "Coordinates" Bounds2D.coordinates $(docs 'Bounds2D.coordinates)
     , Class.property "X Coordinate" Bounds2D.xCoordinate $(docs 'Bounds2D.xCoordinate)
     , Class.property "Y Coordinate" Bounds2D.yCoordinate $(docs 'Bounds2D.yCoordinate)
-    , Class.plus @Displacement2D Class.noFallback
-    , Class.minus @Displacement2D Class.noFallback
+    , Class.plus @Displacement2D
+    , Class.minus @Displacement2D
     ]
       <> affineTransformations2D Bounds2D.transformBy
 
@@ -725,8 +725,8 @@ uvBounds =
     , Class.property "Coordinates" Bounds2D.coordinates $(docs 'Bounds2D.coordinates)
     , Class.property "U Coordinate" Bounds2D.xCoordinate "Get the U coordinate bounds of a bounding box."
     , Class.property "V Coordinate" Bounds2D.yCoordinate "Get the V coordinate bounds of a bounding box."
-    , Class.plus @Vector2D Class.noFallback
-    , Class.minus @Vector2D Class.noFallback
+    , Class.plus @Vector2D
+    , Class.minus @Vector2D
     ] -- TODO add affine transformations
 
 type Line2D = Line2D.Line2D Meters
@@ -867,20 +867,20 @@ curve =
     , Class.numberMinus
     , Class.numberTimes
     , Class.numberDivideByNonzeroU Curve1D.nonzero
-    , Class.plus @Number (Class.fallbackMember "Plus Number")
-    , Class.plus @Curve Class.fallbackMemberPlus
-    , Class.minus @Number (Class.fallbackMember "Minus Number")
-    , Class.minus @Curve Class.fallbackMemberMinus
-    , Class.times @Number (Class.fallbackMember "Times Number")
-    , Class.times @Curve Class.fallbackMemberTimes
-    , Class.times @Length (Class.fallbackMember "Times Length")
-    , Class.times @Area (Class.fallbackMember "Times Area")
-    , Class.times @Angle (Class.fallbackMember "Times Angle")
-    , Class.times @LengthCurve Class.noFallback
-    , Class.times @AreaCurve Class.noFallback
-    , Class.times @AngleCurve Class.noFallback
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.fallbackMemberDivideBy
-    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
+    , Class.plus @Number
+    , Class.plus @Curve
+    , Class.minus @Number
+    , Class.minus @Curve
+    , Class.times @Number
+    , Class.times @Curve
+    , Class.times @Length
+    , Class.times @Area
+    , Class.times @Angle
+    , Class.times @LengthCurve
+    , Class.times @AreaCurve
+    , Class.times @AngleCurve
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideBy @Number
     , Class.nested @Curve1D.Root "A point where a given curve is equal to zero." $
         [ Class.property "Location" (Curve1D.Root.location) "The parameter value at which the curve is zero."
         , Class.property "Order" (Curve1D.Root.order) "The order of the solution: 0 for crossing, 1 for tangent, etc."
@@ -904,16 +904,16 @@ angleCurve =
     , Class.memberR0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negation
     , Class.numberTimes
-    , Class.plus @AngleCurve Class.fallbackMemberPlus
-    , Class.plus @Angle (Class.fallbackMember "Plus Angle")
-    , Class.minus @AngleCurve Class.fallbackMemberMinus
-    , Class.minus @Angle (Class.fallbackMember "Minus Angle")
-    , Class.times @Number (Class.fallbackMember "Times Number")
-    , Class.times @Curve Class.fallbackMemberTimes
-    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.fallbackMemberDivideBy
-    , Class.divideBy @Angle (Class.fallbackMember "Divide By Angle")
-    , Class.divideByNonzeroR @AngleCurve Curve1D.nonzero Class.fallbackStaticRatio
+    , Class.plus @AngleCurve
+    , Class.plus @Angle
+    , Class.minus @AngleCurve
+    , Class.minus @Angle
+    , Class.times @Number
+    , Class.times @Curve
+    , Class.divideBy @Number
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideBy @Angle
+    , Class.divideByNonzeroR @AngleCurve Curve1D.nonzero
     ]
 
 type LengthCurve = Curve1D.Curve1D Meters
@@ -931,18 +931,18 @@ lengthCurve =
     , Class.memberM0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negation
     , Class.numberTimes
-    , Class.plus @LengthCurve Class.fallbackMemberPlus
-    , Class.plus @Length (Class.fallbackMember "Plus Length")
-    , Class.minus @LengthCurve Class.fallbackMemberMinus
-    , Class.minus @Length (Class.fallbackMember "Minus Length")
-    , Class.times @Number (Class.fallbackMember "Times Number")
-    , Class.times @LengthCurve Class.fallbackStaticProduct
-    , Class.times @Length (Class.fallbackMember "Times Length")
-    , Class.times @Curve Class.fallbackMemberTimes
-    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
-    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.fallbackMemberDivideBy
-    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero Class.fallbackStaticRatio
+    , Class.plus @LengthCurve
+    , Class.plus @Length
+    , Class.minus @LengthCurve
+    , Class.minus @Length
+    , Class.times @Number
+    , Class.times @LengthCurve
+    , Class.times @Length
+    , Class.times @Curve
+    , Class.divideBy @Number
+    , Class.divideBy @Length
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero
     ]
 
 type AreaCurve = Curve1D.Curve1D SquareMeters
@@ -957,17 +957,17 @@ areaCurve =
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
     , Class.negation
     , Class.numberTimes
-    , Class.plus @AreaCurve Class.fallbackMemberPlus
-    , Class.plus @Area (Class.fallbackMember "Plus Area")
-    , Class.minus @AreaCurve Class.fallbackMemberMinus
-    , Class.minus @Area (Class.fallbackMember "Minus Area")
-    , Class.times @Curve Class.fallbackMemberTimes
-    , Class.times @Number (Class.fallbackMember "Times Number")
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.fallbackMemberDivideBy
-    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
-    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero (Class.fallbackMember "Divide By Length Curve")
-    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
-    , Class.divideBy @Area (Class.fallbackMember "Divide By Area")
+    , Class.plus @AreaCurve
+    , Class.plus @Area
+    , Class.minus @AreaCurve
+    , Class.minus @Area
+    , Class.times @Curve
+    , Class.times @Number
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideBy @Number
+    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero
+    , Class.divideBy @Length
+    , Class.divideBy @Area
     ]
 
 type Svg = Svg.Svg
@@ -1091,20 +1091,20 @@ vector3D =
     , Class.member1 "Relative To" "Frame" (Vector3D.relativeTo :: Frame3D -> Vector3D -> Vector3D) $(docs 'Vector3D.relativeTo)
     , Class.negation
     , Class.numberTimes
-    , Class.plus @Vector3D Class.fallbackMemberPlus
-    , Class.minus @Vector3D Class.fallbackMemberMinus
-    , Class.times @Number Class.fallbackMemberTimes
-    , Class.times @Length (Class.fallbackMember "Times Length")
-    , Class.times @Area (Class.fallbackMember "Times Area")
-    , Class.divideBy @Number Class.fallbackMemberDivideBy
-    , Class.dot @Vector3D Class.fallbackStaticDotProduct
-    , Class.dot @Direction3D Class.fallbackMemberDot
-    , Class.dot @Displacement3D Class.noFallback
-    , Class.dot @AreaVector3D Class.noFallback
-    , Class.cross @Vector3D Class.fallbackStaticCrossProduct
-    , Class.cross @Direction3D Class.fallbackMemberCross
-    , Class.cross @Displacement3D (Class.fallbackMember "Cross Displacement")
-    , Class.cross @AreaVector3D (Class.fallbackMember "Cross Area Vector")
+    , Class.plus @Vector3D
+    , Class.minus @Vector3D
+    , Class.times @Number
+    , Class.times @Length
+    , Class.times @Area
+    , Class.divideBy @Number
+    , Class.dot @Vector3D
+    , Class.dot @Direction3D
+    , Class.dot @Displacement3D
+    , Class.dot @AreaVector3D
+    , Class.cross @Vector3D
+    , Class.cross @Direction3D
+    , Class.cross @Displacement3D
+    , Class.cross @AreaVector3D
     ]
 
 type Displacement3D = Vector3D.Vector3D Meters Void
@@ -1132,18 +1132,18 @@ displacement3D =
     , Class.member1 "Relative To" "Frame" (Vector3D.relativeTo :: Frame3D -> Displacement3D -> Displacement3D) $(docs 'Vector3D.relativeTo)
     , Class.negation
     , Class.numberTimes
-    , Class.plus @Displacement3D Class.fallbackMemberPlus
-    , Class.minus @Displacement3D Class.fallbackMemberMinus
-    , Class.times @Number Class.fallbackMemberTimes
-    , Class.times @Length (Class.fallbackMember "Times Length")
-    , Class.divideBy @Number Class.fallbackMemberDivideBy
-    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
-    , Class.dot @Displacement3D Class.fallbackStaticDotProduct
-    , Class.dot @Direction3D Class.fallbackMemberDot
-    , Class.dot @Vector3D (Class.fallbackMember "Dot Vector")
-    , Class.cross @Displacement3D Class.fallbackStaticCrossProduct
-    , Class.cross @Direction3D Class.fallbackMemberCross
-    , Class.cross @Vector3D (Class.fallbackMember "Cross Vector")
+    , Class.plus @Displacement3D
+    , Class.minus @Displacement3D
+    , Class.times @Number
+    , Class.times @Length
+    , Class.divideBy @Number
+    , Class.divideBy @Length
+    , Class.dot @Displacement3D
+    , Class.dot @Direction3D
+    , Class.dot @Vector3D
+    , Class.cross @Displacement3D
+    , Class.cross @Direction3D
+    , Class.cross @Vector3D
     ]
 
 type AreaVector3D = Vector3D.Vector3D SquareMeters Void
@@ -1169,16 +1169,16 @@ areaVector3D =
     , Class.member1 "Relative To" "Frame" (Vector3D.relativeTo :: Frame3D -> AreaVector3D -> AreaVector3D) $(docs 'Vector3D.relativeTo)
     , Class.negation
     , Class.numberTimes
-    , Class.plus @AreaVector3D Class.fallbackMemberPlus
-    , Class.minus @AreaVector3D Class.fallbackMemberMinus
-    , Class.times @Number Class.fallbackMemberTimes
-    , Class.divideBy @Number Class.fallbackMemberDivideBy
-    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
-    , Class.divideBy @Area (Class.fallbackMember "Divide By Area")
-    , Class.dot @Direction3D Class.fallbackMemberDot
-    , Class.dot @Vector3D (Class.fallbackMember "Dot Vector")
-    , Class.cross @Direction3D Class.fallbackMemberCross
-    , Class.cross @Vector3D (Class.fallbackMember "Cross Vector")
+    , Class.plus @AreaVector3D
+    , Class.minus @AreaVector3D
+    , Class.times @Number
+    , Class.divideBy @Number
+    , Class.divideBy @Length
+    , Class.divideBy @Area
+    , Class.dot @Direction3D
+    , Class.dot @Vector3D
+    , Class.cross @Direction3D
+    , Class.cross @Vector3D
     ]
 
 type Direction3D = Direction3D.Direction3D Void
@@ -1199,17 +1199,17 @@ direction3D =
     , Class.member1 "Relative To" "Frame" (Direction3D.relativeTo :: Frame3D -> Direction3D -> Direction3D) $(docs 'Direction3D.relativeTo)
     , Class.negation
     , Class.numberTimes
-    , Class.times @Number Class.fallbackMemberTimes
-    , Class.times @Length (Class.fallbackMember "Times Length")
-    , Class.times @Area (Class.fallbackMember "Times Area")
-    , Class.dot @Direction3D Class.fallbackMemberDot
-    , Class.dot @Vector3D Class.noFallback
-    , Class.dot @Displacement3D Class.noFallback
-    , Class.dot @AreaVector3D Class.noFallback
-    , Class.cross @Direction3D Class.fallbackMemberCross
-    , Class.cross @Vector3D (Class.fallbackMember "Cross Vector")
-    , Class.cross @Displacement3D (Class.fallbackMember "Cross Displacement")
-    , Class.cross @AreaVector3D (Class.fallbackMember "Cross Area Vector")
+    , Class.times @Number
+    , Class.times @Length
+    , Class.times @Area
+    , Class.dot @Direction3D
+    , Class.dot @Vector3D
+    , Class.dot @Displacement3D
+    , Class.dot @AreaVector3D
+    , Class.cross @Direction3D
+    , Class.cross @Vector3D
+    , Class.cross @Displacement3D
+    , Class.cross @AreaVector3D
     ]
 
 type Point3D = Point3D.Point3D Void
@@ -1228,9 +1228,9 @@ point3D =
     , Class.member1 "Midpoint" "Other" Point3D.midpoint $(docs 'Point3D.midpoint)
     , Class.member1 "Project Onto" "Plane" Point3D.projectOnto $(docs 'Point3D.projectOnto)
     , Class.member1 "Project Into" "Plane" (Point3D.projectInto @Void) $(docs 'Point3D.projectInto)
-    , Class.minus @Point3D Class.fallbackMemberMinus
-    , Class.minus @Displacement3D Class.noFallback
-    , Class.plus @Displacement3D Class.noFallback
+    , Class.minus @Point3D
+    , Class.minus @Displacement3D
+    , Class.plus @Displacement3D
     , Class.member1 "Place In" "Frame" (Point3D.placeIn :: Frame3D -> Point3D -> Point3D) $(docs 'Point3D.placeIn)
     , Class.member1 "Relative To" "Frame" (Point3D.relativeTo :: Frame3D -> Point3D -> Point3D) $(docs 'Point3D.relativeTo)
     ]
@@ -1246,8 +1246,8 @@ bounds3D =
     , Class.factory1 @(NonEmpty Point3D) "Hull" "Points" Bounds3D.hull $(docs 'Bounds3D.hull)
     , Class.factory1 "Aggregate" "Bounds" Bounds3D.aggregate $(docs 'Bounds3D.aggregate)
     , Class.member1 "Coordinates" "Convention" Bounds3D.coordinates $(docs 'Bounds3D.coordinates)
-    , Class.plus @Displacement3D Class.noFallback
-    , Class.minus @Displacement3D Class.noFallback
+    , Class.plus @Displacement3D
+    , Class.minus @Displacement3D
     ]
       <> affineTransformations3D Bounds3D.transformBy
 
@@ -1509,12 +1509,12 @@ curve2D =
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "X Coordinate" (Curve2D.xCoordinate) $(docs 'Curve2D.xCoordinate)
     , Class.property "Y Coordinate" (Curve2D.yCoordinate) $(docs 'Curve2D.yCoordinate)
-    , Class.plus @Displacement2D Class.noFallback
-    , Class.minus @Displacement2D Class.noFallback
-    , Class.plus @DisplacementCurve2D (Class.fallbackMember "Plus Displacement Curve")
-    , Class.minus @DisplacementCurve2D (Class.fallbackMember "Minus Displacement Curve")
-    , Class.minus @Curve2D Class.fallbackMemberMinus
-    , Class.minus @Point2D (Class.fallbackMember "Minus Point")
+    , Class.plus @Displacement2D
+    , Class.minus @Displacement2D
+    , Class.plus @DisplacementCurve2D
+    , Class.minus @DisplacementCurve2D
+    , Class.minus @Curve2D
+    , Class.minus @Point2D
     ]
       <> affineTransformations2D Curve2D.transformBy
 
@@ -1541,12 +1541,12 @@ uvCurve =
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "U Coordinate" (Curve2D.xCoordinate) "Get the U coordinate of a UV curve as a scalar curve."
     , Class.property "V Coordinate" (Curve2D.yCoordinate) "Get the V coordinate of a UV curve as a scalar curve."
-    , Class.plus @Vector2D Class.noFallback
-    , Class.minus @Vector2D Class.noFallback
-    , Class.plus @VectorCurve2D (Class.fallbackMember "Plus Vector Curve")
-    , Class.minus @VectorCurve2D (Class.fallbackMember "Minus Vector Curve")
-    , Class.minus @UvCurve Class.fallbackMemberMinus
-    , Class.minus @UvPoint (Class.fallbackMember "Minus Point")
+    , Class.plus @Vector2D
+    , Class.minus @Vector2D
+    , Class.plus @VectorCurve2D
+    , Class.minus @VectorCurve2D
+    , Class.minus @UvCurve
+    , Class.minus @UvPoint
     ]
 
 type Region2D = Region2D.Region2D Meters

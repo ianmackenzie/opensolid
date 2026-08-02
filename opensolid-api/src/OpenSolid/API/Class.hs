@@ -4,8 +4,6 @@
 module OpenSolid.API.Class
   ( Class (..)
   , Member
-  , PostOperatorFallback
-  , FallbackFunction (FallbackMemberFunction, FallbackStaticFunction)
   , new
   , static
   , upcast
@@ -70,19 +68,6 @@ module OpenSolid.API.Class
   , divMod
   , dot
   , cross
-  , noFallback
-  , fallbackMember
-  , fallbackMemberPlus
-  , fallbackMemberMinus
-  , fallbackMemberTimes
-  , fallbackMemberDivideBy
-  , fallbackMemberDot
-  , fallbackMemberCross
-  , fallbackStatic
-  , fallbackStaticProduct
-  , fallbackStaticRatio
-  , fallbackStaticDotProduct
-  , fallbackStaticCrossProduct
   , nested
   , functions
   )
@@ -128,7 +113,6 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude hiding (cross, dot)
 import OpenSolid.Prelude qualified
 import OpenSolid.Tolerance qualified as Tolerance
-import Prelude (flip)
 
 data Class where
   Class ::
@@ -145,8 +129,7 @@ data Class where
     , negationFunction :: Maybe NegationFunction
     , absFunction :: Maybe AbsFunction
     , preOperators :: List (BinaryOperator.Id, List PreOperatorOverload)
-    , postOperatorsWithFallbacks ::
-        List (BinaryOperator.Id, List (PostOperatorOverload, Maybe FallbackFunction))
+    , postOperators :: List (BinaryOperator.Id, List PostOperatorOverload)
     , nestedClasses :: List Class
     } ->
     Class
@@ -164,21 +147,8 @@ data Member value where
   Abs :: AbsFunction -> Member value
   DivMod :: FFI (Quantity units) => Member (Quantity units)
   PreOverload :: BinaryOperator.Id -> PreOperatorOverload -> Member value
-  PostOverload ::
-    BinaryOperator.Id ->
-    PostOperatorOverload ->
-    Maybe FallbackFunction ->
-    Member value
+  PostOverload :: BinaryOperator.Id -> PostOperatorOverload -> Member value
   Nested :: FFI nested => Text -> List (Member nested) -> Member value
-
-data PostOperatorFallback
-  = NoFallback
-  | FallbackMember FFI.Name
-  | FallbackStatic FFI.Name
-
-data FallbackFunction
-  = FallbackMemberFunction FFI.Name MemberFunction
-  | FallbackStaticFunction FFI.Name StaticFunction
 
 new :: forall t. FFI t => Text -> List (Member t) -> Class
 new givenDocumentation members =
@@ -840,128 +810,77 @@ numberDivideByNonzeroU nonzero = do
         Ok (number / nonzeroValue)
   PreOverload BinaryOperator.Div (PreOperatorOverload implementation)
 
-toFallbackFunction ::
-  (FFI value, FFI rhs, FFI result) =>
-  (value -> rhs -> result) ->
-  Text ->
-  PostOperatorFallback ->
-  Maybe FallbackFunction
-toFallbackFunction operator docs fallback = case fallback of
-  NoFallback -> Nothing
-  FallbackMember fallbackName -> do
-    let memberFunction = MemberFunction1 (FFI.name "Other") (flip operator) docs
-    Just (FallbackMemberFunction fallbackName memberFunction)
-  FallbackStatic fallbackName -> do
-    let staticFunction = StaticFunction2 (FFI.name "Lhs") (FFI.name "Rhs") operator docs
-    Just (FallbackStaticFunction fallbackName staticFunction)
-
-toFallbackFunctionM ::
-  (FFI value, FFI rhs, FFI result) =>
-  (Tolerance Meters => value -> rhs -> result) ->
-  Text ->
-  PostOperatorFallback ->
-  Maybe FallbackFunction
-toFallbackFunctionM operator docs fallback = case fallback of
-  NoFallback -> Nothing
-  FallbackMember fallbackName -> do
-    let memberFunction = MemberFunctionM1 (FFI.name "Other") (flip operator) docs
-    Just (FallbackMemberFunction fallbackName memberFunction)
-  FallbackStatic fallbackName -> do
-    let staticFunction = StaticFunctionM2 (FFI.name "Lhs") (FFI.name "Rhs") operator docs
-    Just (FallbackStaticFunction fallbackName staticFunction)
-
 plus ::
   forall rhs value result.
   (Addition value rhs result, FFI value, FFI rhs, FFI result) =>
-  PostOperatorFallback ->
   Member value
-plus fallback = do
+plus = do
   let operator :: value -> rhs -> result = (+)
   let overload = PostOperatorOverload operator
-  let docs = "Add two values."
-  let fallbackFunction = toFallbackFunction operator docs fallback
-  PostOverload BinaryOperator.Add overload fallbackFunction
+  PostOverload BinaryOperator.Add overload
 
 minus ::
   forall rhs value result.
   (Subtraction value rhs result, FFI value, FFI rhs, FFI result) =>
-  PostOperatorFallback ->
   Member value
-minus fallback = do
+minus = do
   let operator :: value -> rhs -> result = (-)
   let overload = PostOperatorOverload operator
-  let docs = "Subtract two values."
-  let fallbackFunction = toFallbackFunction operator docs fallback
-  PostOverload BinaryOperator.Sub overload fallbackFunction
+  PostOverload BinaryOperator.Sub overload
 
 times ::
   forall rhs value result.
   (Multiplication value rhs result, FFI value, FFI rhs, FFI result) =>
-  PostOperatorFallback ->
   Member value
-times fallback = do
+times = do
   let operator :: value -> rhs -> result = (*)
   let overload = PostOperatorOverload operator
-  let docs = "Multiply two values."
-  let fallbackFunction = toFallbackFunction operator docs fallback
-  PostOverload BinaryOperator.Mul overload fallbackFunction
+  PostOverload BinaryOperator.Mul overload
 
 divideBy ::
   forall rhs value result.
   (Division value rhs result, FFI value, FFI rhs, FFI result) =>
-  PostOperatorFallback ->
   Member value
-divideBy fallback = do
+divideBy = do
   let operator :: value -> rhs -> result = (/)
   let overload = PostOperatorOverload operator
-  let docs = "Divide two values."
-  let fallbackFunction = toFallbackFunction operator docs fallback
-  PostOverload BinaryOperator.Div overload fallbackFunction
+  PostOverload BinaryOperator.Div overload
 
 divideByNonzeroU ::
   forall rhs value result.
   (Division value (Nonzero rhs) result, FFI value, FFI rhs, FFI result) =>
   (Tolerance Unitless => rhs -> Result HasZero (Nonzero rhs)) ->
-  PostOperatorFallback ->
   Member value
-divideByNonzeroU nonzero fallback = do
+divideByNonzeroU nonzero = do
   let implementation :: value -> rhs -> Result HasZero result
       implementation value rhs = do
         nonzeroRhs <- Tolerance.using Tolerance.unitless (nonzero rhs)
         Ok (value / nonzeroRhs)
-  let docs = "Divide one value by another (which must not be zero anywhere)."
-  let fallbackFunction = toFallbackFunction implementation docs fallback
-  PostOverload BinaryOperator.Div (PostOperatorOverload implementation) fallbackFunction
+  PostOverload BinaryOperator.Div (PostOperatorOverload implementation)
 
 divideByNonzeroR ::
   forall rhs value result.
   (Division value (Nonzero rhs) result, FFI value, FFI rhs, FFI result) =>
   (Tolerance Radians => rhs -> Result HasZero (Nonzero rhs)) ->
-  PostOperatorFallback ->
   Member value
-divideByNonzeroR nonzero fallback = do
+divideByNonzeroR nonzero = do
   let implementation :: value -> rhs -> Result HasZero result
       implementation value rhs = do
         nonzeroRhs <- Tolerance.using Angle.tolerance (nonzero rhs)
         Ok (value / nonzeroRhs)
-  let docs = "Divide one value by another (which must not be zero anywhere)."
-  let fallbackFunction = toFallbackFunction implementation docs fallback
-  PostOverload BinaryOperator.Div (PostOperatorOverload implementation) fallbackFunction
+  PostOverload BinaryOperator.Div (PostOperatorOverload implementation)
 
 divideByNonzeroM ::
   forall rhs value result.
   (Division value (Nonzero rhs) result, FFI value, FFI rhs, FFI result) =>
   (Tolerance Meters => rhs -> Result HasZero (Nonzero rhs)) ->
-  PostOperatorFallback ->
   Member value
-divideByNonzeroM nonzero fallback = do
+divideByNonzeroM nonzero = do
   let implementation :: Tolerance Meters => value -> rhs -> Result HasZero result
       implementation value rhs = do
         nonzeroRhs <- nonzero rhs
         Ok (value / nonzeroRhs)
-  let docs = "Divide one value by another (which must not be zero anywhere)."
-  let fallbackFunction = toFallbackFunctionM implementation docs fallback
-  PostOverload BinaryOperator.Div (PostOperatorOverloadM implementation) fallbackFunction
+  PostOverload BinaryOperator.Div (PostOperatorOverloadM implementation)
 
 divMod :: FFI (Quantity units) => Member (Quantity units)
 divMod = DivMod
@@ -969,65 +888,20 @@ divMod = DivMod
 dot ::
   forall rhs value result.
   (DotMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
-  PostOperatorFallback ->
   Member value
-dot fallback = do
+dot = do
   let operator :: value -> rhs -> result = OpenSolid.Prelude.dot
   let overload = PostOperatorOverload operator
-  let docs = "Compute the dot product of two values."
-  let fallbackFunction = toFallbackFunction operator docs fallback
-  PostOverload BinaryOperator.Dot overload fallbackFunction
+  PostOverload BinaryOperator.Dot overload
 
 cross ::
   forall rhs value result.
   (CrossMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
-  PostOperatorFallback ->
   Member value
-cross fallback = do
+cross = do
   let operator :: value -> rhs -> result = OpenSolid.Prelude.cross
   let overload = PostOperatorOverload operator
-  let docs = "Compute the cross product of two values."
-  let fallbackFunction = toFallbackFunction operator docs fallback
-  PostOverload BinaryOperator.Cross overload fallbackFunction
-
-noFallback :: PostOperatorFallback
-noFallback = NoFallback
-
-fallbackMember :: Text -> PostOperatorFallback
-fallbackMember name = FallbackMember (FFI.name name)
-
-fallbackMemberPlus :: PostOperatorFallback
-fallbackMemberPlus = fallbackMember "Plus"
-
-fallbackMemberMinus :: PostOperatorFallback
-fallbackMemberMinus = fallbackMember "Minus"
-
-fallbackMemberTimes :: PostOperatorFallback
-fallbackMemberTimes = fallbackMember "Times"
-
-fallbackMemberDivideBy :: PostOperatorFallback
-fallbackMemberDivideBy = fallbackMember "Divide By"
-
-fallbackMemberDot :: PostOperatorFallback
-fallbackMemberDot = fallbackMember "Dot"
-
-fallbackMemberCross :: PostOperatorFallback
-fallbackMemberCross = fallbackMember "Cross"
-
-fallbackStatic :: Text -> PostOperatorFallback
-fallbackStatic name = FallbackStatic (FFI.name name)
-
-fallbackStaticProduct :: PostOperatorFallback
-fallbackStaticProduct = fallbackStatic "Product"
-
-fallbackStaticRatio :: PostOperatorFallback
-fallbackStaticRatio = fallbackStatic "Ratio"
-
-fallbackStaticDotProduct :: PostOperatorFallback
-fallbackStaticDotProduct = fallbackStatic "Dot Product"
-
-fallbackStaticCrossProduct :: PostOperatorFallback
-fallbackStaticCrossProduct = fallbackStatic "Cross Product"
+  PostOverload BinaryOperator.Cross overload
 
 nested :: FFI nestedValue => Text -> List (Member nestedValue) -> Member value
 nested = Nested
@@ -1044,19 +918,17 @@ addPreOverload operatorId overload (first : rest) = do
     then (existingId, existingOverloads <> [overload]) : rest
     else first : addPreOverload operatorId overload rest
 
-addPostOverloadWithFallback ::
+addPostOverload ::
   BinaryOperator.Id ->
   PostOperatorOverload ->
-  Maybe FallbackFunction ->
-  List (BinaryOperator.Id, List (PostOperatorOverload, Maybe FallbackFunction)) ->
-  List (BinaryOperator.Id, List (PostOperatorOverload, Maybe FallbackFunction))
-addPostOverloadWithFallback operatorId overload maybeFallback [] =
-  [(operatorId, [(overload, maybeFallback)])]
-addPostOverloadWithFallback operatorId overload maybeFallback (first : rest) = do
+  List (BinaryOperator.Id, List PostOperatorOverload) ->
+  List (BinaryOperator.Id, List PostOperatorOverload)
+addPostOverload operatorId overload [] = [(operatorId, [overload])]
+addPostOverload operatorId overload (first : rest) = do
   let (existingId, existingOverloads) = first
   if operatorId == existingId
-    then (existingId, existingOverloads <> [(overload, maybeFallback)]) : rest
-    else first : addPostOverloadWithFallback operatorId overload maybeFallback rest
+    then (existingId, existingOverloads <> [overload]) : rest
+    else first : addPostOverload operatorId overload rest
 
 init :: FFI.ClassName -> Text -> Class
 init givenName givenDocumentation =
@@ -1074,7 +946,7 @@ init givenName givenDocumentation =
     , negationFunction = Nothing
     , absFunction = Nothing
     , preOperators = []
-    , postOperatorsWithFallbacks = []
+    , postOperators = []
     , nestedClasses = []
     }
 
@@ -1104,29 +976,17 @@ buildClass members built = case members of
       built{absFunction = Just absFunction}
     DivMod @units -> do
       let divOperator :: Quantity units -> Quantity units -> Int = (//)
-      let divOverload = PostOperatorOverload divOperator
-      let divDocs = "Divide two quantities, rounding down."
-      let divFallbackMember = fallbackMember "Floor Divide By"
-      let divFallbackFunction = toFallbackFunction divOperator divDocs divFallbackMember
       let modOperator :: Quantity units -> Quantity units -> Quantity units = (%)
-      let modOverload = PostOperatorOverload modOperator
-      let modDocs = "Compute the modulus (remainder) of one quantity relative to another."
-      let modFallbackMember = fallbackMember "Mod By"
-      let modFallbackFunction = toFallbackFunction modOperator modDocs modFallbackMember
       built
-        { postOperatorsWithFallbacks =
-            built.postOperatorsWithFallbacks
-              & addPostOverloadWithFallback BinaryOperator.FloorDiv divOverload divFallbackFunction
-              & addPostOverloadWithFallback BinaryOperator.Mod modOverload modFallbackFunction
+        { postOperators =
+            built.postOperators
+              & addPostOverload BinaryOperator.FloorDiv (PostOperatorOverload divOperator)
+              & addPostOverload BinaryOperator.Mod (PostOperatorOverload modOperator)
         }
     PreOverload operatorId overload ->
       built{preOperators = addPreOverload operatorId overload built.preOperators}
-    PostOverload operatorId overload maybeFallback ->
-      built
-        { postOperatorsWithFallbacks =
-            built.postOperatorsWithFallbacks
-              & addPostOverloadWithFallback operatorId overload maybeFallback
-        }
+    PostOverload operatorId overload ->
+      built{postOperators = addPostOverload operatorId overload built.postOperators}
     Nested nestedDocstring nestedMembers ->
       built{nestedClasses = built.nestedClasses <> [new nestedDocstring nestedMembers]}
 
@@ -1148,16 +1008,9 @@ functions
       negationFunction
       absFunction
       preOperators
-      postOperatorsWithFallbacks
+      postOperators
       nestedClasses
     ) = do
-    -- For the purpose of generating a flat list of all FFI functions,
-    -- we don't need or want the fallbacks defined for any post operators
-    -- since they should invoke the same underlying Haskell function as the operator itself
-    -- (and including them would therefore lead to duplicates in the resulting list)
-    let operatorsOnly (operatorId, operatorsWithFallbacks) =
-          (operatorId, List.map Pair.first operatorsWithFallbacks)
-    let postOperators = List.map operatorsOnly postOperatorsWithFallbacks
     List.concat
       [ upcastInfo className toParent
       , List.map (constantFunctionInfo className) constants
