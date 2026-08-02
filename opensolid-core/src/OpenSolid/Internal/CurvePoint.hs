@@ -13,7 +13,7 @@ import OpenSolid.Vector qualified as Vector
 data CurvePoint dimension units space = CurvePoint
   { location :: CurveLocation
   , point :: ~(Point dimension units space)
-  , derivative :: ~(Vector dimension units space)
+  , derivativeValue :: ~(Vector dimension units space)
   , tangentDirection :: ~(Direction dimension space)
   , curvatureVector_ :: Nondegenerate.Field (Vector dimension (Unitless ?/? units) space)
   }

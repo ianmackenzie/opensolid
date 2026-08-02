@@ -1,7 +1,7 @@
 module OpenSolid.CurvePoint
   ( CurvePoint
   , point
-  , derivative
+  , derivativeValue
   , tangentDirection
   , curvatureVector_
   , location
@@ -41,8 +41,8 @@ parameterValue = CurveLocation.toParameterValue . location
 point :: CurvePoint dimension units space -> Point dimension units space
 point = (.point)
 
-derivative :: CurvePoint dimension units space -> Vector dimension units space
-derivative = (.derivative)
+derivativeValue :: CurvePoint dimension units space -> Vector dimension units space
+derivativeValue = (.derivativeValue)
 
 tangentDirection :: CurvePoint dimension units space -> Direction dimension space
 tangentDirection = (.tangentDirection)
@@ -59,7 +59,7 @@ isDegenerate ::
   (Vector.Exists dimension units space, Tolerance units) =>
   CurvePoint dimension units space ->
   Bool
-isDegenerate curvePoint = derivative curvePoint ~= Vector.zero
+isDegenerate curvePoint = derivativeValue curvePoint ~= Vector.zero
 
 nondegenerate ::
   (Vector.Exists dimension units space, Tolerance units) =>
@@ -87,8 +87,8 @@ continuity p1 p2 = do
           let sign = Number.sign (tangent1 `dot` tangent2)
           case (nondegenerate p1, nondegenerate p2) of
             (Ok nondegenerate1, Ok nondegenerate2) -> do
-              let l1 = Vector.magnitude (derivative p1)
-              let l2 = Vector.magnitude (derivative p2)
+              let l1 = Vector.magnitude (derivativeValue p1)
+              let l2 = Vector.magnitude (derivativeValue p2)
               let l = Quantity.erase (min l1 l2)
               let k1_ = curvatureVector_ nondegenerate1
               let k2_ = curvatureVector_ nondegenerate2

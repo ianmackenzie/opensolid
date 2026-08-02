@@ -58,7 +58,7 @@ curvePoint curve tValue =
     CurvePoint
       { location = CurveLocation.fromParameterValue tValue
       , point = point curve tValue
-      , derivative = derivativeValue curve tValue
+      , derivativeValue = derivativeValue curve tValue
       , tangentDirection = tangentDirection curve tValue
       , curvatureVector_ =
           result
