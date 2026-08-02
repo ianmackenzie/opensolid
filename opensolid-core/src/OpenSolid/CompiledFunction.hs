@@ -310,7 +310,7 @@ expression ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   Result IsAbstract (Expression inputValue outputValue)
 expression (Concrete expr) = Ok expr
-expression Abstract{} = Error IsAbstract
+expression Abstract{} = Err IsAbstract
 
 map ::
   Expression.Evaluation inputValue outputValue2 inputBounds outputBounds2 =>

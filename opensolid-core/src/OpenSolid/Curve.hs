@@ -334,7 +334,7 @@ intersectsPoint ::
   Curve dimension units space ->
   Bool
 intersectsPoint givenPoint curve = case nondegenerate curve of
-  Error IsDegenerate -> givenPoint ~= startPoint curve
+  Err IsDegenerate -> givenPoint ~= startPoint curve
   Ok nondegenerateCurve ->
     Curve.Nondegenerate.findPoint givenPoint nondegenerateCurve
       & not . List.isEmpty
@@ -603,7 +603,7 @@ nondegenerate ::
   Curve dimension units space ->
   Result IsDegenerate (Nondegenerate (Curve dimension units space))
 nondegenerate curve =
-  if VectorCurve.isZero (derivative curve) then Error IsDegenerate else Ok (Nondegenerate curve)
+  if VectorCurve.isZero (derivative curve) then Err IsDegenerate else Ok (Nondegenerate curve)
 
 nonzero ::
   (Exists dimension units space, Tolerance units) =>
@@ -611,7 +611,7 @@ nonzero ::
   Result HasDegeneracy (Nonzero (Curve dimension units space))
 nonzero curve =
   if derivativeValue curve 0.0 ~= Vector.zero || derivativeValue curve 1.0 ~= Vector.zero
-    then Error HasDegeneracy
+    then Err HasDegeneracy
     else Ok (Nonzero curve)
 
 derivativeValue ::
@@ -764,9 +764,9 @@ linearize resolution curve = do
         let tMid = Number.midpoint t1 t2
         let pMid = point curve tMid
         let midError = Line.distanceTo pMid (Line p1 p2)
-        let error = max midError (leftRightError curve t1 t2 p1 p2)
+        let linearizationError = max midError (leftRightError curve t1 t2 p1 p2)
         let size = Point.distanceFrom p1 p2
-        if Resolution.acceptable ("size" ::: size) ("error" ::: error) resolution
+        if Resolution.acceptable ("size" ::: size) ("error" ::: linearizationError) resolution
           then NonEmpty.push t1 accumulated
           else
             accumulated
@@ -799,7 +799,7 @@ arcLengthParameterization ::
 arcLengthParameterization curve =
   case nondegenerate curve of
     Ok nondegenerateCurve -> Nondegenerate.get (.arcLengthParameterization) nondegenerateCurve
-    Error IsDegenerate -> (Quantity.zero, id)
+    Err IsDegenerate -> (Quantity.zero, id)
 
 length ::
   (Exists dimension units space, Tolerance units) =>

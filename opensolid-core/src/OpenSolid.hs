@@ -35,7 +35,7 @@ module OpenSolid
   , Number
   , Sign (Sign, Positive, Negative)
   , Tolerance
-  , Result (Ok, Error)
+  , Result (Ok, Err)
   )
 where
 

@@ -119,14 +119,14 @@ Fails if the given bounds are empty (the length, width, or height is zero).
 block :: Tolerance Meters => Bounds3D space -> Result EmptyBody (Body3D space)
 block bounds =
   case Region2D.rectangle (Bounds3D.projectInto World3D.topPlane bounds) of
-    Error Region2D.EmptyRegion -> Error EmptyBody
+    Err Region2D.EmptyRegion -> Err EmptyBody
     Ok profile -> do
       let Interval h1 h2 = Bounds3D.upwardCoordinate bounds
       if h1 ~= h2
-        then Error EmptyBody
+        then Err EmptyBody
         else case extruded World3D.topPlane profile h1 h2 of
           Ok body -> Ok body
-          Error _ ->
+          Err _ ->
             InternalError.throw "Constructing block body from non-empty bounds should not fail"
 
 {-| Create a sphere with the given center point and diameter.
@@ -139,14 +139,14 @@ sphere ::
   "diameter" ::: Length ->
   Result EmptyBody (Body3D space)
 sphere ("centerPoint" ::: centerPoint) ("diameter" ::: diameter)
-  | diameter ~= Length.zero = Error EmptyBody
+  | diameter ~= Length.zero = Err EmptyBody
   | otherwise = do
       let r = 0.5 * diameter
       let arc = Curve2D.arcFrom (Point2D.y r) (Point2D.y -r) -Angle.pi
       let plane = World3D.forwardPlane centerPoint
       case boundedBy [Surface3D.revolved plane arc Axis2D.y Angle.twoPi] of
         Ok body -> Ok body
-        Error _ -> InternalError.throw "Constructing sphere from non-zero diameter should not fail"
+        Err _ -> InternalError.throw "Constructing sphere from non-zero diameter should not fail"
 
 {-| Create a cylindrical body from a start point, end point and diameter.
 
@@ -160,7 +160,7 @@ cylinder ::
   Result EmptyBody (Body3D space)
 cylinder startPoint endPoint ("diameter" ::: diameter) =
   case Vector3D.magnitudeAndDirection (endPoint - startPoint) of
-    Error Vector.IsZero -> Error EmptyBody
+    Err Vector.IsZero -> Err EmptyBody
     Ok (length, direction) ->
       cylinderAlong (Axis3D startPoint direction) Length.zero length (#diameter diameter)
 
@@ -183,13 +183,13 @@ cylinderAlong ::
   Result EmptyBody (Body3D space)
 cylinderAlong axis d1 d2 ("diameter" ::: diameter) =
   case Region2D.circle (Circle2D.withDiameter diameter Point2D.origin) of
-    Error Region2D.EmptyRegion -> Error EmptyBody
+    Err Region2D.EmptyRegion -> Err EmptyBody
     Ok profile ->
       if d1 ~= d2
-        then Error EmptyBody
+        then Err EmptyBody
         else case extruded (Axis3D.normalPlane axis) profile d1 d2 of
           Ok body -> Ok body
-          Error _ -> InternalError.throw "Constructing non-empty cylinder body should not fail"
+          Err _ -> InternalError.throw "Constructing non-empty cylinder body should not fail"
 
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::
@@ -249,11 +249,11 @@ revolved sketchPlane profile givenAxis givenSweptAngle = do
   -- or to the right ('negative')
   profileSign <-
     case Result.collect Curve1D.sign signedDistanceCurves of
-      Error Curve1D.CrossesZero -> Error BoundedBy.BoundaryIntersectsItself
+      Err Curve1D.CrossesZero -> Err BoundedBy.BoundaryIntersectsItself
       Ok curveSigns
         | List.all (== Positive) curveSigns -> Ok Positive
         | List.all (== Negative) curveSigns -> Ok Negative
-        | otherwise -> Error BoundedBy.BoundaryIntersectsItself
+        | otherwise -> Err BoundedBy.BoundaryIntersectsItself
   let planeRotationAxis = Axis2D.placeOn sketchPlane givenAxis
   let rotatedPlane = Plane3D.rotateAround planeRotationAxis givenSweptAngle sketchPlane
   let (startPlane, endPlane) =
@@ -279,7 +279,7 @@ but currently the *first* surface must have the correct orientation
 since all others will be flipped if necessary to match it.
 -}
 boundedBy :: Tolerance Meters => List (Surface3D space) -> Result BoundedBy.Error (Body3D space)
-boundedBy [] = Error BoundedBy.EmptyBody
+boundedBy [] = Err BoundedBy.EmptyBody
 boundedBy (NonEmpty givenSurfaces) = do
   let surfaceSet = Set3D.build Surface3D.bounds givenSurfaces
   let halfEdgeSet = buildHalfEdgeSet surfaceSet
@@ -320,8 +320,8 @@ registerSeam halfEdgeSet halfEdge accumulated =
             accumulated
               & HashMap.insert halfEdge.id (Just matingHalfEdge.id)
               & HashMap.insert matingHalfEdge.id (Just halfEdge.id)
-          [] -> Error BoundedBy.BoundaryHasGaps
-          List.TwoOrMore -> Error BoundedBy.BoundaryIntersectsItself
+          [] -> Err BoundedBy.BoundaryHasGaps
+          List.TwoOrMore -> Err BoundedBy.BoundaryIntersectsItself
 
 ----- MESHING -----
 
@@ -370,7 +370,7 @@ surfaceSegmentsEntry resolution surfaceIndex surface = do
             let p12 = SurfaceFunction3D.Nondegenerate.point function (UvPoint u1 v2)
             let p22 = SurfaceFunction3D.Nondegenerate.point function (UvPoint u2 v2)
             buildSurfaceSegmentSet resolution function uvBounds p11 p21 p12 p22
-          Error IsDegenerate -> Set2D.leaf uvBounds uvBounds
+          Err IsDegenerate -> Set2D.leaf uvBounds uvBounds
   (SurfaceId surfaceIndex, surfaceSegmentSet)
 
 buildSurfaceSegmentSet ::
@@ -392,8 +392,8 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
   let uvCenter = UvPoint uMid vMid
   let pCenter = SurfaceFunction3D.Nondegenerate.point function uvCenter
   let nCenter = SurfaceFunction3D.Nondegenerate.normalDirection function uvCenter
-  let error point = Quantity.abs ((point - pCenter) `dot` nCenter)
-  let maxCornerError = error p11 `max` error p12 `max` error p21 `max` error p22
+  let pointError point = Quantity.abs ((point - pCenter) `dot` nCenter)
+  let maxCornerError = pointError p11 `max` pointError p12 `max` pointError p21 `max` pointError p22
   let uWidth = Interval.width uRange
   let vWidth = Interval.width vRange
   let uOffset = 0.5 * uWidth * Number.sqrt (3 / 7)
@@ -402,7 +402,7 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
   let uInterior2 = uMid + uOffset
   let vInterior1 = vMid - vOffset
   let vInterior2 = vMid + vOffset
-  let interiorError uvPoint = error (SurfaceFunction3D.Nondegenerate.point function uvPoint)
+  let interiorError uvPoint = pointError (SurfaceFunction3D.Nondegenerate.point function uvPoint)
   let interiorError11 = interiorError (UvPoint uInterior1 vInterior1)
   let interiorError21 = interiorError (UvPoint uInterior2 vInterior1)
   let interiorError12 = interiorError (UvPoint uInterior1 vInterior2)
@@ -572,7 +572,7 @@ surfaceMesh ::
   Mesh vertex
 surfaceMesh surfaceSegmentsMap leadingEdgeVerticesMap toVertex surfaceIndex surface =
   case SurfaceFunction3D.nondegenerate (Surface3D.function surface) of
-    Error IsDegenerate -> Mesh.empty
+    Err IsDegenerate -> Mesh.empty
     Ok nondegenerateSurfaceFunction -> do
       let surfaceId = SurfaceId surfaceIndex
       let boundaryPolygons =

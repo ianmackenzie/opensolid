@@ -50,7 +50,7 @@ withIntersectionCurves :: (NonEmpty (Curve2D Unitless) -> Test) -> Test
 withIntersectionCurves callback =
   Tolerance.using Length.defaultTolerance do
     case SurfaceFunction1D.zeros planeTorusSurface of
-      Error error -> Test.abort (Text.show error)
+      Err err -> Test.abort (Text.show err)
       Ok zeros -> case zeros.crossingCurves of
         [] -> Test.abort "No intersection curves found"
         NonEmpty crossingCurves -> callback crossingCurves

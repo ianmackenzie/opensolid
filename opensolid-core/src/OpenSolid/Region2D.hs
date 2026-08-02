@@ -163,7 +163,7 @@ Fails if the given bounds are empty
 rectangle :: Tolerance units => Bounds2D units -> Result EmptyRegion (Region2D units)
 rectangle (Bounds2D xBounds yBounds) =
   if Interval.width xBounds ~= Quantity.zero || Interval.width yBounds ~= Quantity.zero
-    then Error EmptyRegion
+    then Err EmptyRegion
     else Ok do
       let Interval x1 x2 = xBounds
       let Interval y1 y2 = yBounds
@@ -183,7 +183,7 @@ rectangle (Bounds2D xBounds yBounds) =
 circle :: Tolerance units => Circle2D units -> Result EmptyRegion (Region2D units)
 circle givenCircle =
   if Circle2D.diameter givenCircle ~= Quantity.zero
-    then Error EmptyRegion
+    then Err EmptyRegion
     else do
       let edges = NonEmpty.one (Curve2D.circle givenCircle)
       Ok (unsafe (Boundary.unsafe edges) Bag2D.empty)
@@ -219,8 +219,8 @@ addFillet ::
   List (Curve2D units) ->
   Result Text (List (Curve2D units))
 addFillet radius point curves = do
-  let couldNotFindPointToFillet = Error "Could not find point to fillet"
-  let couldNotSolveForFilletLocation = Error "Could not solve for fillet location"
+  let couldNotFindPointToFillet = Err "Could not find point to fillet"
+  let couldNotSolveForFilletLocation = Err "Could not solve for fillet location"
   let curveIncidences = List.map (curveIncidence point) curves
   let incidentCurves =
         curveIncidences
@@ -313,17 +313,16 @@ checkCurvesForInnerIntersection curve1 curve2 =
     -- We can ignore cases where either curve is actually a point,
     -- since we'll still find any inner intersections
     -- when we check with the *neighbours* of those degenerate curves
-    Error IsDegenerate -> Ok ()
+    Err IsDegenerate -> Ok ()
     -- Any overlap between boundary curves is bad
-    Ok (Just Curve.OverlappingSegments{}) ->
-      Error BoundedBy.BoundaryIntersectsItself
+    Ok (Just Curve.OverlappingSegments{}) -> Err BoundedBy.BoundaryIntersectsItself
     -- If there are no intersections at all then we're good!
     Ok Nothing -> Ok ()
     -- Otherwise, make sure curves only intersect (meet) at endpoints
     Ok (Just (Curve.IntersectionPoints intersectionPoints)) ->
       if NonEmpty.all isEndpointIntersection intersectionPoints
         then Ok ()
-        else Error BoundedBy.BoundaryIntersectsItself
+        else Err BoundedBy.BoundaryIntersectsItself
 
 isEndpointIntersection :: Curve2D.IntersectionPoint units -> Bool
 isEndpointIntersection intersectionPoint = do
@@ -358,12 +357,12 @@ extendPartialLoop ::
   Result BoundedBy.Error (PartialLoop units, List (Curve2D units))
 extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
   case List.partition (hasEndpoint currentStart) curves of
-    ([], _) -> Error BoundedBy.BoundaryHasGaps
+    ([], _) -> Err BoundedBy.BoundaryHasGaps
     (List.One curve, remaining) -> do
       let newCurve = if Curve2D.endPoint curve ~= currentStart then curve else Curve2D.reverse curve
       let updatedCurves = NonEmpty.push newCurve currentCurves
       Ok (PartialLoop (Curve2D.startPoint newCurve) updatedCurves loopEnd, remaining)
-    (List.TwoOrMore, _) -> Error BoundedBy.BoundaryIntersectsItself
+    (List.TwoOrMore, _) -> Err BoundedBy.BoundaryIntersectsItself
 
 hasEndpoint :: Tolerance units => Point2D units -> Curve2D units -> Bool
 hasEndpoint point curve = point ~= Curve2D.startPoint curve || point ~= Curve2D.endPoint curve
@@ -483,7 +482,7 @@ classifyInner point candidateInnerBoundaries = case candidateInnerBoundaries of
   [] -> Inside -- Point is not inside or on the boundary of any hole, so is inside the region
 
 classifyLoops :: Tolerance units => List (Loop units) -> Result BoundedBy.Error (Region2D units)
-classifyLoops [] = Error BoundedBy.EmptyRegion
+classifyLoops [] = Err BoundedBy.EmptyRegion
 classifyLoops (NonEmpty loops) = do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
   let outerBoundaryCandidate = Boundary.unsafe (fixSign Positive largestLoop)
@@ -492,7 +491,7 @@ classifyLoops (NonEmpty loops) = do
     then do
       let innerBoundaryBag = Bag2D.pack Boundary.bounds innerBoundaryCandidates
       Ok (unsafe outerBoundaryCandidate innerBoundaryBag)
-    else Error BoundedBy.MultipleDisjointRegions
+    else Err BoundedBy.MultipleDisjointRegions
 
 fixSign :: Tolerance units => Sign -> Loop units -> Loop units
 fixSign desiredSign loop =

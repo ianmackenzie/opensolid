@@ -118,7 +118,7 @@ lookAt
                       Frame3D givenEyePoint World3D.upwardOrientation
                   | otherwise ->
                       Frame3D givenEyePoint World3D.downwardOrientation
-            Error Vector.IsZero ->
+            Err Vector.IsZero ->
               -- Given eye and focal points are coincident,
               -- so just look straight forward
               Frame3D givenEyePoint World3D.forwardOrientation

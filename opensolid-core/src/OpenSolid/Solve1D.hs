@@ -157,7 +157,7 @@ recurseIntoChildrenOf ::
 recurseIntoChildrenOf node callback queue solutions exclusions = do
   let continueWith updatedQueue = process callback updatedQueue solutions exclusions
   case node of
-    Atomic -> Error InfiniteRecursion
+    Atomic -> Err InfiniteRecursion
     Shrinkable child -> continueWith (queue & Queue.push child)
     Splittable middleChild leftChild rightChild ->
       continueWith (queue & Queue.push middleChild & Queue.push leftChild & Queue.push rightChild)
@@ -213,7 +213,7 @@ solveMonotonic function derivative interval sign1 x1 x2 = do
     then Exact xMid
     else case newtonRaphson function derivative interval xMid yMid 0 of
       Ok root -> Exact root -- Newton-Raphson converged to a zero, return it
-      Error Divergence -- Newton-Raphson did not converge within [x1, x2]
+      Err Divergence -- Newton-Raphson did not converge within [x1, x2]
         | x1 < xMid && xMid < x2 ->
             -- It's possible to bisect further,
             -- so recurse into whichever subdomain brackets the zero
@@ -235,11 +235,11 @@ newtonRaphson ::
   Result Divergence Number
 newtonRaphson function derivative interval x y iterations =
   if iterations > 10 -- Check if we've entered an infinite loop
-    then Error Divergence
+    then Err Divergence
     else do
       let dy = derivative x
       if dy == Quantity.zero -- Can't take Newton step if derivative is zero
-        then Error Divergence
+        then Err Divergence
         else do
           let xStepped = x - y / dy
           x2 <-
@@ -253,15 +253,15 @@ newtonRaphson function derivative interval x y iterations =
                 let yClamped = function xClamped
                 let dyClamped = derivative xClamped
                 if dyClamped == Quantity.zero
-                  then Error Divergence
+                  then Err Divergence
                   else do
                     let xStepped2 = xClamped - yClamped / dyClamped
                     if Interval.member xStepped2 interval
                       then Ok xStepped2
-                      else Error Divergence
+                      else Err Divergence
           let y2 = function x2
           if Quantity.abs y2 >= Quantity.abs y
             then -- We've stopped converging, check if we're actually at a root
-              if y ~= Quantity.zero then Ok x else Error Divergence
+              if y ~= Quantity.zero then Ok x else Err Divergence
             else -- We're still converging, so take another iteration
               newtonRaphson function derivative interval x2 y2 (iterations + 1)

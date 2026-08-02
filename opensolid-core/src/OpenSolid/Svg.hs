@@ -394,7 +394,7 @@ arrowWith
   ("headLength" ::: headLength)
   ("headWidth" ::: headWidth) =
     case Tolerance.using Quantity.zero (Direction2D.from start end) of
-      Error Direction2D.PointsAreCoincident -> nothing
+      Err Direction2D.PointsAreCoincident -> nothing
       Ok direction -> do
         let length = Point2D.distanceFrom start end
         let axis = Axis2D start direction

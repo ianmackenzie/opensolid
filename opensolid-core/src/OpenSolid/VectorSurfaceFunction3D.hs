@@ -491,7 +491,7 @@ nondegenerate ::
   Tolerance units =>
   VectorSurfaceFunction3D units space ->
   Result IsDegenerate (Nondegenerate (VectorSurfaceFunction3D units space))
-nondegenerate function = if isZero function then Error IsDegenerate else Ok (Nondegenerate function)
+nondegenerate function = if isZero function then Err IsDegenerate else Ok (Nondegenerate function)
 
 zero :: VectorSurfaceFunction3D units space
 zero = constant Vector3D.zero

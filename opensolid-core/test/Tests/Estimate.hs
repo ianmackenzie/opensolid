@@ -70,7 +70,7 @@ resolvesTo value estimate
       let refinedEstimate = Estimate.refine estimate
       if Interval.width (Estimate.bounds refinedEstimate) < Interval.width (Estimate.bounds estimate)
         then resolvesTo value refinedEstimate
-        else Error "Refined bounds are not narrower than original bounds"
+        else Err "Refined bounds are not narrower than original bounds"
 
 area :: Test
 area = Test.verify "area" do

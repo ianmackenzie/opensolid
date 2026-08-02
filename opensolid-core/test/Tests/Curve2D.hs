@@ -121,9 +121,9 @@ overlappingSegments curve1 curve2 =
     Ok (Just (Curve.OverlappingSegments sign segments intersectionPoints)) ->
       Ok (sign, segments, intersectionPoints)
     Ok (Just (Curve.IntersectionPoints _)) ->
-      Error "Should have found some overlapping segments, got intersection points instead"
-    Ok Nothing -> Error "Should have found some overlapping segments"
-    Error error -> Error (Text.show error)
+      Err "Should have found some overlapping segments, got intersection points instead"
+    Ok Nothing -> Err "Should have found some overlapping segments"
+    Err err -> Err (Text.show err)
 
 equalParameterRanges :: Interval Unitless -> Interval Unitless -> Bool
 equalParameterRanges (Interval actualLow actualHigh) (Interval expectedLow expectedHigh) =

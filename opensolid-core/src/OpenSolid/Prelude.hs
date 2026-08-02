@@ -6,7 +6,7 @@ module OpenSolid.Prelude
   , Text
   , Fuzzy (Resolved, Unresolved)
   , Err
-  , Result (Ok, Error)
+  , Result (Ok, Err)
   , OnError
   , fail
   , catch
@@ -440,7 +440,7 @@ instance Monad Fuzzy where
 
 data Result x a where
   Ok :: a -> Result x a
-  Error :: Err x => x -> Result x a
+  Err :: Err x => x -> Result x a
 
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
@@ -449,7 +449,7 @@ deriving instance Show a => Show (Result x a)
 instance Functor (Result x) where
   {-# INLINE fmap #-}
   fmap function (Ok value) = Ok (function value)
-  fmap _ (Error error) = Error error
+  fmap _ (Err err) = Err err
 
 instance Applicative (Result x) where
   {-# INLINE pure #-}
@@ -457,23 +457,23 @@ instance Applicative (Result x) where
 
   {-# INLINE (<*>) #-}
   Ok function <*> Ok value = Ok (function value)
-  Error error <*> _ = Error error
-  _ <*> Error error = Error error
+  Err err <*> _ = Err err
+  _ <*> Err err = Err err
 
 instance Monad (Result x) where
   {-# INLINE (>>=) #-}
   Ok value >>= function = function value
-  Error error >>= _ = Error error
+  Err err >>= _ = Err err
 
 instance MonadFail (Result Text) where
   {-# INLINE fail #-}
-  fail message = Error (Data.Text.pack message)
+  fail message = Err (Data.Text.pack message)
 
 type OnError x a = (Err x, ?err :: x) => a
 
 (??) :: Monad m => Result x a -> OnError x (m a) -> m a
 Ok value ?? _ = Prelude.return value
-Error err ?? fallback = let ?err = err in fallback
+Err err ?? fallback = let ?err = err in fallback
 
 infixl 0 ??
 

@@ -178,7 +178,7 @@ is quarter circle that turns to the left.
 arcFrom :: Tolerance units => Point2D units -> Point2D units -> Angle -> Curve2D units
 arcFrom givenStartPoint givenEndPoint sweptAngle =
   case Vector2D.magnitudeAndDirection (givenEndPoint - givenStartPoint) of
-    Error Vector.IsZero -> lineFrom givenStartPoint givenEndPoint
+    Err Vector.IsZero -> lineFrom givenStartPoint givenEndPoint
     Ok (distanceBetweenPoints, directionBetweenPoints) -> do
       let halfDistance = 0.5 * distanceBetweenPoints
       let tanHalfAngle = Angle.tan (0.5 * sweptAngle)
@@ -283,7 +283,7 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
               LargeClockwise -> shortAngle - Angle.twoPi
               LargeCounterclockwise -> Angle.twoPi - shortAngle
       sweptArc centerPoint givenStartPoint sweptAngle
-    Error Direction2D.PointsAreCoincident ->
+    Err Direction2D.PointsAreCoincident ->
       lineFrom givenStartPoint givenEndPoint
 
 ellipticalArc ::
@@ -599,7 +599,7 @@ medialAxis curve1 curve2 = do
         v2 `cross_` (2.0 * (v1 `dot_` d) ?*? d - VectorSurfaceFunction2D.squaredMagnitude_ d ?*? v1)
   let targetTolerance = ?tolerance ?*? ((?tolerance ?*? ?tolerance) ?*? ?tolerance)
   case Tolerance.using targetTolerance (SurfaceFunction1D.zeros target) of
-    Error SurfaceFunction1D.IsZero -> TODO -- curves are identical arcs?
+    Err SurfaceFunction1D.IsZero -> TODO -- curves are identical arcs?
     Ok zeros ->
       assert (List.isEmpty zeros.crossingLoops && List.isEmpty zeros.tangentPoints) do
         let Nonzero tangentVector1 = VectorCurve.Nonzero.normalize (Curve.Nonzero.derivative nonzero1)

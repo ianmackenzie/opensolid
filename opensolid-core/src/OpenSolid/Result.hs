@@ -1,5 +1,5 @@
 module OpenSolid.Result
-  ( Result (Ok, Error)
+  ( Result (Ok, Err)
   , map
   , andThen
   , map2
@@ -30,7 +30,7 @@ map2 function result1 result = do
 
 orFail :: MonadFail m => Result x a -> m a
 orFail (Ok value) = Prelude.return value
-orFail (Error error) = Prelude.fail (Prelude.show error)
+orFail (Err err) = Prelude.fail (Prelude.show err)
 
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
 collect = Prelude.mapM

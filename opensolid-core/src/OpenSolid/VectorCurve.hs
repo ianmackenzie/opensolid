@@ -1052,7 +1052,7 @@ nondegenerate ::
   (Exists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsDegenerate (Nondegenerate (VectorCurve dimension units space))
-nondegenerate curve = if isZero curve then Error IsDegenerate else Ok (Nondegenerate curve)
+nondegenerate curve = if isZero curve then Err IsDegenerate else Ok (Nondegenerate curve)
 
 {-# INLINE derivative #-}
 derivative ::
@@ -1155,7 +1155,7 @@ quotient_ ::
   Curve1D units2 ->
   Result DivisionByZero (VectorCurve dimension (units1 ?/? units2) space)
 quotient_ lhs rhs
-  | rhs ~= Curve1D.zero = Error DivisionByZero
+  | rhs ~= Curve1D.zero = Err DivisionByZero
   | otherwise = Ok (lhs ?/? Nondegenerate rhs)
 
 reverse ::
@@ -1186,7 +1186,7 @@ zeros ::
 zeros vectorCurve =
   case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.zeros (squaredMagnitude_ vectorCurve)) of
     Ok zeros1D -> Ok (List.map (.location) zeros1D)
-    Error Curve1D.IsZero -> Error IsDegenerate
+    Err Curve1D.IsZero -> Err IsDegenerate
 
 squaredMagnitude_ ::
   Exists dimension units space =>

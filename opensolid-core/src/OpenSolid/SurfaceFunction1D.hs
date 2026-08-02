@@ -106,7 +106,7 @@ instance
     case zeros (function - quantity) of
       Ok (Zeros [] [] [] []) -> False
       Ok (Zeros{}) -> True
-      Error IsZero -> True
+      Err IsZero -> True
 
 instance
   units1 ~ units2 =>
@@ -451,7 +451,7 @@ data IsZero = IsZero deriving (Eq, Show, Err)
 
 zeros :: Tolerance units => SurfaceFunction1D units -> Result IsZero Zeros
 zeros function
-  | function ~= zero = Error IsZero
+  | function ~= zero = Err IsZero
   | otherwise = do
       let fu = derivative U function
       let fv = derivative V function
@@ -464,7 +464,7 @@ zeros function
         Ok solutions -> do
           let partialZeros = PartialZeros.empty & forEach solutions addSolution
           Ok (PartialZeros.finalize function dvdu dudv partialZeros)
-        Error Solve2D.InfiniteRecursion -> throw HigherOrderZero
+        Err Solve2D.InfiniteRecursion -> throw HigherOrderZero
 
 addSolution :: Solution units -> PartialZeros units -> PartialZeros units
 addSolution solution partialZeros = case solution of

@@ -60,7 +60,7 @@ direction ::
 direction (Line p1 p2) =
   case Vector.direction (p2 - p1) of
     Ok lineDirection -> Ok lineDirection
-    Error Vector.IsZero -> Error IsDegenerate
+    Err Vector.IsZero -> Err IsDegenerate
 
 bounds ::
   Point.Exists dimension units space =>

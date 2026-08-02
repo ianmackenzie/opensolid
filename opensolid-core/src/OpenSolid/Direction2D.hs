@@ -100,7 +100,7 @@ from :: Tolerance units => Point2D units -> Point2D units -> Result PointsAreCoi
 from p1 p2 = do
   case Vector2D.direction (p2 - p1) of
     Ok direction -> Ok direction
-    Error Vector.IsZero -> Error PointsAreCoincident
+    Err Vector.IsZero -> Err PointsAreCoincident
 
 {-| Construct a direction from an angle.
 

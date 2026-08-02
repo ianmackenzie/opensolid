@@ -225,7 +225,7 @@ nondegenerate ::
   Result IsDegenerate (Nondegenerate (SurfaceFunction3D space))
 nondegenerate function =
   if function.maxSampledNondegeneracy ~= Length.zero
-    then Error IsDegenerate
+    then Err IsDegenerate
     else Ok (Nondegenerate function)
 
 normalDirectionRange ::

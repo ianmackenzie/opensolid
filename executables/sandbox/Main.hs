@@ -112,7 +112,7 @@ testTransformation = do
 offsetPoint :: Tolerance Meters => Point2D Meters -> Point2D Meters -> Length -> Point2D Meters
 offsetPoint startPoint endPoint distance =
   case Direction2D.from startPoint endPoint of
-    Error Direction2D.PointsAreCoincident -> startPoint
+    Err Direction2D.PointsAreCoincident -> startPoint
     Ok direction -> do
       let displacement = distance * Direction2D.perpendicularTo direction
       Point2D.midpoint startPoint endPoint + displacement

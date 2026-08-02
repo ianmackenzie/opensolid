@@ -135,7 +135,7 @@ direction ::
 direction vector = do
   let vectorMagnitude = magnitude vector
   if vectorMagnitude ~= Quantity.zero
-    then Error IsZero
+    then Err IsZero
     else Ok (Direction.unsafe (vector / vectorMagnitude))
 
 magnitudeAndDirection ::
@@ -145,7 +145,7 @@ magnitudeAndDirection ::
 magnitudeAndDirection vector = do
   let vectorMagnitude = magnitude vector
   if vectorMagnitude ~= Quantity.zero
-    then Error IsZero
+    then Err IsZero
     else Ok (vectorMagnitude, Direction.unsafe (vector / vectorMagnitude))
 
 {-# INLINEABLE componentIn #-}

@@ -70,14 +70,15 @@ sleep :: Duration -> IO ()
 sleep duration = Control.Concurrent.threadDelay (Number.round (Duration.inMicroseconds duration))
 
 onError :: (Text -> IO a) -> IO a -> IO a
-onError callback io = System.IO.Error.catchIOError io do
-  \error -> callback (Text.pack (System.IO.Error.ioeGetErrorString error))
+onError callback io =
+  System.IO.Error.catchIOError io do
+    System.IO.Error.ioeGetErrorString >> Text.pack >> callback
 
 attempt :: IO a -> IO (Result Text a)
-attempt io = onError (succeed . Error) (map Ok io)
+attempt io = onError (succeed . Err) (map Ok io)
 
 mapError :: (Text -> Text) -> IO a -> IO a
-mapError function = onError (fail . function)
+mapError function = onError (function >> fail)
 
 printLine :: Text -> IO ()
 printLine = Data.Text.IO.Utf8.putStrLn

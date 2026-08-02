@@ -18,8 +18,8 @@ num reader text =
                   <> "' as a number - has extra trailing text '"
                   <> suffix
                   <> "'"
-          Error message
-    Left message -> Error (Data.Text.pack message)
+          Err message
+    Left message -> Err (Data.Text.pack message)
 
 int :: Text -> Result Text Int
 int = num Data.Text.Read.decimal

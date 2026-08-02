@@ -36,9 +36,9 @@ overlappingSegments curve1 curve2 =
   case Curve3D.intersections curve1 curve2 of
     Ok (Just (Curve.OverlappingSegments sign segments _)) -> Ok (sign, segments)
     Ok (Just (Curve.IntersectionPoints _)) ->
-      Error "Should have found some overlapping segments, got intersection points instead"
-    Ok Nothing -> Error "Should have found some overlapping segments"
-    Error error -> Error (Text.show error)
+      Err "Should have found some overlapping segments, got intersection points instead"
+    Ok Nothing -> Err "Should have found some overlapping segments"
+    Err err -> Err (Text.show err)
 
 equalParameterBounds :: Interval Unitless -> Interval Unitless -> Bool
 equalParameterBounds (Interval actualLow actualHigh) (Interval expectedLow expectedHigh) =

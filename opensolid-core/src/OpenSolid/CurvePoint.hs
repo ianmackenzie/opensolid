@@ -66,7 +66,7 @@ nondegenerate ::
   CurvePoint dimension units space ->
   Result IsDegenerate (Nondegenerate (CurvePoint dimension units space))
 nondegenerate curvePoint =
-  if isDegenerate curvePoint then Error IsDegenerate else Ok (Nondegenerate curvePoint)
+  if isDegenerate curvePoint then Err IsDegenerate else Ok (Nondegenerate curvePoint)
 
 continuity ::
   forall dimension units space.

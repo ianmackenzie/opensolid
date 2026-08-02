@@ -128,7 +128,7 @@ instance
     case zeros (curve - quantity) of
       Ok [] -> False
       Ok List.OneOrMore -> True
-      Error IsZero -> True
+      Err IsZero -> True
 
 instance
   units1 ~ units2 =>
@@ -344,7 +344,7 @@ rationalBezier pointsAndWeights = do
       let numerator = bezier scaledPoints
       let denominator = Nonzero (bezier normalizedWeights)
       numerator / denominator
-    else Error DivisionByZero
+    else Err DivisionByZero
 
 rationalQuadraticSpline ::
   (Quantity units, Number) ->
@@ -528,14 +528,14 @@ so we would end up reporting a single order-1 zero at x=0
 -}
 zeros :: Tolerance units => Curve1D units -> Result IsZero (List Zero)
 zeros curve
-  | curve ~= zero = Error IsZero
+  | curve ~= zero = Err IsZero
   | otherwise = do
       let derivatives = Stream.iterate derivative curve
       let derivativeRangeStream tRange = Stream.map (\f -> range f tRange) derivatives
       let cache = Solve1D.init derivativeRangeStream
       case Solve1D.search (findZeros derivatives) cache of
         Ok foundZeros -> Ok (List.sortBy (.location) foundZeros)
-        Error Solve1D.InfiniteRecursion -> throw HigherOrderZero
+        Err Solve1D.InfiniteRecursion -> throw HigherOrderZero
 
 findZeros ::
   Tolerance units =>
@@ -637,13 +637,13 @@ If the curve is zero everywhere, then returns positive.
 -}
 sign :: Tolerance units => Curve1D units -> Result CrossesZero Sign
 sign curve = case zeros curve of
-  Error IsZero -> Ok Positive
+  Err IsZero -> Ok Positive
   Ok curveZeros ->
     case List.filter isInnerZero curveZeros of
       [] -> Ok (Quantity.sign (value curve 0.5)) -- No inner zeros, so check sign at t=0.5
       NonEmpty innerZeros ->
         case NonEmpty.filter isCrossingZero innerZeros of
-          List.OneOrMore -> Error CrossesZero -- There exists at least one inner crossing zero
+          List.OneOrMore -> Err CrossesZero -- There exists at least one inner crossing zero
           [] -> do
             -- All inner zeros are non-crossing (e.g. quadratic) ones,
             -- so we can safely test the curve

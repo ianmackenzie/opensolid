@@ -19,5 +19,5 @@ unitSquare :: UvRegion
 unitSquare = Tolerance.using Quantity.zero do
   case Region2D.rectangle UvBounds.unitSquare of
     Ok region -> region
-    Error Region2D.EmptyRegion ->
+    Err Region2D.EmptyRegion ->
       InternalError.throw "Constructing UV unit square region should not fail"

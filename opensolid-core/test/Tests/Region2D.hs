@@ -94,7 +94,7 @@ incompleteSquare = Test.verify "incompleteSquare" do
   let line3 = Curve2D.lineFrom p4 p3
   case Region2D.boundedBy [line1, line2, line3] of
     Ok _ -> Test.fail "Expected region construction to fail on incomplete boundary"
-    Error error -> Test.expect (error == Region2D.BoundedBy.BoundaryHasGaps)
+    Err err -> Test.expect (err == Region2D.BoundedBy.BoundaryHasGaps)
 
 squareWithTangentHole :: Test
 squareWithTangentHole = Test.verify "squareWithTangentHole" do
@@ -111,7 +111,7 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" do
   let hole = Curve2D.circle (Circle2D.withDiameter width centerPoint)
   case Region2D.boundedBy [line1, line2, line3, line4, hole] of
     Ok _ -> Test.fail "Expected non-manifold region construction to fail"
-    Error error -> Test.expect (error == Region2D.BoundedBy.BoundaryIntersectsItself)
+    Err err -> Test.expect (err == Region2D.BoundedBy.BoundaryIntersectsItself)
 
 twoCircles :: Test
 twoCircles = Test.verify "twoCircles" do
@@ -119,7 +119,7 @@ twoCircles = Test.verify "twoCircles" do
   let circle2 = Curve2D.circle (Circle2D.withDiameter (Length.meters 1.0) (Point2D.meters 1.0 0.0))
   case Region2D.boundedBy [circle1, circle2] of
     Ok _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
-    Error error -> Test.expect (error == Region2D.BoundedBy.MultipleDisjointRegions)
+    Err err -> Test.expect (err == Region2D.BoundedBy.MultipleDisjointRegions)
 
 pointContainment :: Test
 pointContainment = Test.verify "pointContainment" do

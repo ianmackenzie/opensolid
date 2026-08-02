@@ -60,13 +60,13 @@ vector2D :: Tolerance Meters => Vector2D Meters -> Step.Entity
 vector2D givenVector =
   case Vector2D.magnitudeAndDirection givenVector of
     Ok (vectorLength, vectorDirection) -> vector (direction2D vectorDirection) vectorLength
-    Error Vector.IsZero -> vector (direction2D Direction2D.x) Length.zero
+    Err Vector.IsZero -> vector (direction2D Direction2D.x) Length.zero
 
 vector3D :: Tolerance Meters => Vector3D Meters space -> Step.Entity
 vector3D givenVector =
   case Vector3D.magnitudeAndDirection givenVector of
     Ok (vectorLength, vectorDirection) -> vector (direction3D vectorDirection) vectorLength
-    Error Vector.IsZero -> vector (direction3D World3D.upwardDirection) Length.zero
+    Err Vector.IsZero -> vector (direction3D World3D.upwardDirection) Length.zero
 
 cartesianPoint :: List Length -> Step.Entity
 cartesianPoint coordinates =

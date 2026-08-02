@@ -62,7 +62,7 @@ inscribed n circle
   | n >= 3 = case Quantity.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n of
       NonEmpty vertexAngles -> Ok (Polygon2D (NonEmpty.map (Circle2D.point circle) vertexAngles))
       [] -> InternalError.throw "Should have at least three vertex angles"
-  | otherwise = Error IsEmpty
+  | otherwise = Err IsEmpty
 
 {-| Create a regular polygon with the given number of vertices/sides.
 

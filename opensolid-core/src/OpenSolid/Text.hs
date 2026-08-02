@@ -124,7 +124,7 @@ decodeUtf8 :: ByteString -> Result InvalidUtf8 Text
 decodeUtf8 byteString =
   case Data.Text.Encoding.decodeUtf8' byteString of
     Right text -> Ok text
-    Left _ -> Error InvalidUtf8
+    Left _ -> Err InvalidUtf8
 
 assumeUtf8 :: ByteString -> Text
 assumeUtf8 = Data.Text.Encoding.decodeUtf8Lenient
