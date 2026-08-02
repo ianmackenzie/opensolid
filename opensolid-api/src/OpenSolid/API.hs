@@ -694,7 +694,8 @@ uvPoint =
     , Class.minus @Vector2D
     , Class.minus @UvPoint
     , Class.minus @UvCurve
-    ] -- TODO add affine transformations
+    ]
+      <> affineTransformations2D Point2D.transformBy
 
 type Bounds2D = Bounds2D.Bounds2D Meters
 
@@ -727,7 +728,8 @@ uvBounds =
     , Class.property "V Coordinate" Bounds2D.yCoordinate "Get the V coordinate bounds of a bounding box."
     , Class.plus @Vector2D
     , Class.minus @Vector2D
-    ] -- TODO add affine transformations
+    ]
+      <> affineTransformations2D Bounds2D.transformBy
 
 type Line2D = Line2D.Line2D Meters
 
@@ -740,6 +742,7 @@ line2D =
     , Class.member0 "Length" Line2D.length $(docs 'Line2D.length)
     , Class.member1 "Distance To" "Point" Line2D.distanceTo $(docs 'Line2D.distanceTo)
     ]
+      <> affineTransformations2D Line2D.transformBy
 
 type UvLine = Line2D.Line2D Unitless
 
@@ -752,6 +755,7 @@ uvLine =
     , Class.member0 "Length" Line2D.length $(docs 'Line2D.length)
     , Class.member1 "Distance To" "Point" Line2D.distanceTo $(docs 'Line2D.distanceTo)
     ]
+      <> affineTransformations2D Line2D.transformBy
 
 type Triangle2D = Triangle2D.Triangle2D Meters
 
@@ -1026,6 +1030,7 @@ uvAxis =
     , Class.constant "U" (Axis2D.x @Unitless) "The U axis."
     , Class.constant "V" (Axis2D.y @Unitless) "The V axis."
     ]
+      <> orthonormalTransformations2D Axis2D.transformBy
 
 world3D :: Class
 world3D =
@@ -1415,9 +1420,17 @@ displacementCurve2D =
     , Class.member1 "Value" "Parameter Value" VectorCurve2D.valueAt $(docs 'VectorCurve2D.valueAt)
     ]
 
+type Transformations2D value units =
+  ( FFI value
+  , FFI (Vector2D.Vector2D units)
+  , FFI (Quantity units)
+  , FFI (Axis2D.Axis2D units)
+  , FFI (Point2D.Point2D units)
+  )
+
 rigidTransformations2D ::
-  FFI value =>
-  (Transform2D.Rigid Meters -> value -> value) ->
+  Transformations2D value units =>
+  (Transform2D.Rigid units -> value -> value) ->
   List (Class.Member value)
 rigidTransformations2D transformBy =
   [ Class.member1 "Translate By" "Displacement" (Transform2D.translateByImpl transformBy) "Translate by the given displacement."
@@ -1427,24 +1440,24 @@ rigidTransformations2D transformBy =
   ]
 
 orthonormalTransformations2D ::
-  FFI value =>
-  (forall tag. Transform.Tag.IsOrthonormal tag => Transform2D tag Meters -> value -> value) ->
+  Transformations2D value units =>
+  (forall tag. Transform.Tag.IsOrthonormal tag => Transform2D tag units -> value -> value) ->
   List (Class.Member value)
 orthonormalTransformations2D transformBy =
   Class.member1 "Mirror Across" "Axis" (Transform2D.mirrorAcrossImpl transformBy) "Mirror across the given axis."
     : rigidTransformations2D transformBy
 
 uniformTransformations2D ::
-  FFI value =>
-  (forall tag. Transform.Tag.IsUniform tag => Transform2D tag Meters -> value -> value) ->
+  Transformations2D value units =>
+  (forall tag. Transform.Tag.IsUniform tag => Transform2D tag units -> value -> value) ->
   List (Class.Member value)
 uniformTransformations2D transformBy =
   Class.member2 "Scale About" "Point" "Scale" (Transform2D.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."
     : orthonormalTransformations2D transformBy
 
 affineTransformations2D ::
-  FFI value =>
-  (forall tag. Transform2D tag Meters -> value -> value) ->
+  Transformations2D value units =>
+  (forall tag. Transform2D tag units -> value -> value) ->
   List (Class.Member value)
 affineTransformations2D transformBy =
   Class.member2 "Scale Along" "Axis" "Scale" (Transform2D.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
@@ -1548,6 +1561,7 @@ uvCurve =
     , Class.minus @UvCurve
     , Class.minus @UvPoint
     ]
+      <> affineTransformations2D Curve2D.transformBy
 
 type Region2D = Region2D.Region2D Meters
 
@@ -1576,6 +1590,7 @@ uvRegion =
     , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
     , Class.property "Boundary Curves" (Set2D.toNonEmpty . Region2D.boundaryCurves) $(docs 'Region2D.boundaryCurves)
     ]
+      <> affineTransformations2D Region2D.transformBy
 
 type Body3D = Body3D.Body3D Void
 
