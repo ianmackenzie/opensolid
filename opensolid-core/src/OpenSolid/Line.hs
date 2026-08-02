@@ -14,9 +14,10 @@ where
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction (Direction)
-import OpenSolid.Error (IsDegenerate (IsDegenerate), IsZero (IsZero))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Point (Point, PointExists)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude

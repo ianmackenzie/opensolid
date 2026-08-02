@@ -18,7 +18,7 @@ module OpenSolid.Vector
 where
 
 import Data.Coerce qualified
-import OpenSolid.Error (IsZero)
+import OpenSolid.IsZero (IsZero)
 import OpenSolid.Prelude
 import OpenSolid.Primitives.Abstract
   ( Direction

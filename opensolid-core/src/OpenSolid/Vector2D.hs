@@ -55,7 +55,7 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
-import OpenSolid.Error (IsZero (IsZero))
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Primitives

@@ -36,7 +36,7 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Error (IsZero (IsZero))
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2D

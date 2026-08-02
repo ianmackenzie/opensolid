@@ -63,12 +63,12 @@ import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DirectionBounds (DirectionBoundsExists)
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
-import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Interval (Interval)
+import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NonEmpty qualified as NonEmpty

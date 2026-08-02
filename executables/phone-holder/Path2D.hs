@@ -20,7 +20,7 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Arc2D qualified as Arc2D
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
-import OpenSolid.Error (IsDegenerate)
+import OpenSolid.IsDegenerate (IsDegenerate)
 import OpenSolid.Length (Length)
 import OpenSolid.Line2D (data Line2D)
 import OpenSolid.NonEmpty qualified as NonEmpty

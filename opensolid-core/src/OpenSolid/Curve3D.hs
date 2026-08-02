@@ -50,11 +50,11 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve3D, Intersections)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2D (Curve2D)
-import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
+import OpenSolid.IsDegenerate (IsDegenerate)
 import OpenSolid.Length (Length)
 import OpenSolid.Line3D (Line3D)
 import OpenSolid.Plane3D (Plane3D)

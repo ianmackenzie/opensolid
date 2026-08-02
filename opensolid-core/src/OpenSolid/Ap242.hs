@@ -17,9 +17,9 @@ import OpenSolid.Direction2D (Direction2D (Direction2D))
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
-import OpenSolid.Error (IsZero (IsZero))
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Plane3D (Plane3D)

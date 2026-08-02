@@ -41,13 +41,14 @@ import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Domain1D qualified as Domain1D
-import OpenSolid.Error (IsDegenerate (IsDegenerate), IsZero (IsZero))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
+import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Line2D (Line2D)

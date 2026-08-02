@@ -1,6 +1,6 @@
 module OpenSolid.Surface3D.Intersections (Intersections (..), intersections) where
 
-import OpenSolid.Error (IsDegenerate)
+import OpenSolid.IsDegenerate (IsDegenerate)
 import OpenSolid.Prelude
 import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D

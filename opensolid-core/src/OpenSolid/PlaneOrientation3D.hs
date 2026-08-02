@@ -22,7 +22,7 @@ import Data.Coerce qualified
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
-import OpenSolid.Error (IsZero (IsZero))
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Direction3D (Unit3D)

@@ -53,7 +53,7 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Convention3D (Convention3D (Convention3D))
 import OpenSolid.Convention3D qualified as Convention3D
-import OpenSolid.Error (IsZero (IsZero))
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3D

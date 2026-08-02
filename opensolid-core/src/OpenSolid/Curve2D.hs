@@ -99,11 +99,12 @@ import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
-import OpenSolid.Error (IsDegenerate, IsZero (IsZero))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
+import OpenSolid.IsDegenerate (IsDegenerate)
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.List qualified as List
 import OpenSolid.Nonzero (Nonzero (Nonzero))

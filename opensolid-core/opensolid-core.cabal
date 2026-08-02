@@ -146,7 +146,6 @@ library
     OpenSolid.Domain2D
     OpenSolid.Duration
     OpenSolid.Err
-    OpenSolid.Error
     OpenSolid.Estimate
     OpenSolid.Expression
     OpenSolid.FFI
@@ -163,6 +162,8 @@ library
     OpenSolid.InternalError
     OpenSolid.Intersection
     OpenSolid.Interval
+    OpenSolid.IsDegenerate
+    OpenSolid.IsZero
     OpenSolid.Json
     OpenSolid.Length
     OpenSolid.Line

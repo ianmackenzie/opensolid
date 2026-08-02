@@ -37,11 +37,11 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis3D (Axis3D)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
-import OpenSolid.Error (IsZero (IsZero))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3D (Frame3D (Frame3D))
 import OpenSolid.Frame3D qualified as Frame3D
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Length (Length)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Plane3D (Plane3D (Plane3D))

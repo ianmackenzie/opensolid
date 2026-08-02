@@ -33,9 +33,9 @@ import OpenSolid.DirectionBounds2D (DirectionBounds2D)
 import OpenSolid.DirectionBounds2D qualified as DirectionBounds2D
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionBounds3D qualified as DirectionBounds3D
-import OpenSolid.Error (IsZero (IsZero))
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)

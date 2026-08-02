@@ -23,9 +23,9 @@ where
 
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Curve1D.Root (Root)
-import OpenSolid.Error (IsZero)
 import OpenSolid.FFI (FFI)
 import OpenSolid.Interval (Interval)
+import OpenSolid.IsZero (IsZero)
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Prelude

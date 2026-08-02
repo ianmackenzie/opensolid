@@ -51,7 +51,6 @@ import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve2D.Nonzero qualified as Curve2D.Nonzero
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
-import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.FFI (FFI)
@@ -60,6 +59,7 @@ import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
+import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Line2D (data Line2D)
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
