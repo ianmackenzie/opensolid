@@ -34,6 +34,10 @@ data IntersectionPoint dimension units space = IntersectionPoint
   , curvePoints :: (CurvePoint dimension units space, CurvePoint dimension units space)
   }
 
+deriving instance
+  Curve.Exists dimension units space =>
+  Show (IntersectionPoint dimension units space)
+
 crossing ::
   (CurvePoint dimension units space, CurvePoint dimension units space) ->
   IntersectionPoint dimension units space

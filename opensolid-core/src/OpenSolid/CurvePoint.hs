@@ -33,76 +33,76 @@ import OpenSolid.Result qualified as Result
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 
-data CurvePoint dimension units space where
-  CurvePoint ::
-    Curve.Exists dimension units space =>
-    { nondegenerateCurve :: Nondegenerate (Curve dimension units space)
-    , parameterValue :: Number
-    } ->
-    CurvePoint dimension units space
+data CurvePoint dimension units space = CurvePoint
+  { parameterValue :: Number
+  , point :: ~(Point dimension units space)
+  , derivative :: ~(Vector dimension units space)
+  , tangentDirection :: ~(Direction dimension space)
+  , curvatureVector_ :: Nondegenerate.Field (Vector dimension (Unitless ?/? units) space)
+  }
+
+deriving instance Curve.Exists dimension units space => Show (CurvePoint dimension units space)
 
 on ::
   Curve.Exists dimension units space =>
   Nondegenerate (Curve dimension units space) ->
   Number ->
   CurvePoint dimension units space
-on = CurvePoint
+on nondegenerateCurve givenParameterValue = do
+  let Nondegenerate curve = nondegenerateCurve
+  recursive \curvePoint ->
+    CurvePoint
+      { parameterValue = givenParameterValue
+      , point = Curve.point curve givenParameterValue
+      , derivative = Curve.derivativeValue curve givenParameterValue
+      , tangentDirection =
+          Curve.Nondegenerate.tangentDirectionValue nondegenerateCurve givenParameterValue
+      , curvatureVector_ =
+          curvePoint
+            & Nondegenerate.field do
+              \_nondegeneratePoint ->
+                Curve.Nonzero.curvatureVectorValue_
+                  (Nondegenerate.interior nondegenerateCurve)
+                  givenParameterValue
+      }
 
-{-# INLINE curve #-}
-curve :: CurvePoint dimension units space -> Curve dimension units space
-curve = Nondegenerate.unwrap . nondegenerateCurve
-
-{-# INLINE nondegenerateCurve #-}
-nondegenerateCurve ::
-  CurvePoint dimension units space ->
-  Nondegenerate (Curve dimension units space)
-nondegenerateCurve = (.nondegenerateCurve)
-
-{-# INLINE parameterValue #-}
 parameterValue :: CurvePoint dimension units space -> Number
 parameterValue = (.parameterValue)
 
 point :: CurvePoint dimension units space -> Point dimension units space
-point curvePoint = Curve.point (curve curvePoint) (parameterValue curvePoint)
+point = (.point)
 
-derivative ::
-  CurvePoint dimension units space ->
-  Vector dimension units space
-derivative curvePoint@CurvePoint{} =
-  Curve.derivativeValue (curve curvePoint) (parameterValue curvePoint)
+derivative :: CurvePoint dimension units space -> Vector dimension units space
+derivative = (.derivative)
 
-tangentDirection ::
-  CurvePoint dimension units space ->
-  Direction dimension space
-tangentDirection curvePoint@CurvePoint{} =
-  Curve.Nondegenerate.tangentDirectionValue (nondegenerateCurve curvePoint) (parameterValue curvePoint)
+tangentDirection :: CurvePoint dimension units space -> Direction dimension space
+tangentDirection = (.tangentDirection)
 
-curvatureVector_ ::
-  Nondegenerate (CurvePoint dimension units space) ->
-  Vector dimension (Unitless ?/? units) space
-curvatureVector_ (Nondegenerate curvePoint@CurvePoint{}) = do
-  let nonZeroCurve = Nondegenerate.interior (nondegenerateCurve curvePoint)
-  Curve.Nonzero.curvatureVectorValue_ nonZeroCurve (parameterValue curvePoint)
+curvatureVector_ :: Nondegenerate (CurvePoint dimension units space) -> Vector dimension (Unitless ?/? units) space
+curvatureVector_ = Nondegenerate.get (.curvatureVector_)
 
 isEndpoint :: CurvePoint dimension units space -> Bool
 isEndpoint = Parameter.isEndpoint . parameterValue
 
-isDegenerate :: Tolerance units => CurvePoint dimension units space -> Bool
-isDegenerate curvePoint@CurvePoint{} = derivative curvePoint ~= Vector.zero
+isDegenerate ::
+  (Curve.Exists dimension units space, Tolerance units) =>
+  CurvePoint dimension units space ->
+  Bool
+isDegenerate curvePoint = derivative curvePoint ~= Vector.zero
 
 nondegenerate ::
-  Tolerance units =>
+  (Curve.Exists dimension units space, Tolerance units) =>
   CurvePoint dimension units space ->
   Result IsDegenerate (Nondegenerate (CurvePoint dimension units space))
 nondegenerate curvePoint =
   if isDegenerate curvePoint then Error IsDegenerate else Ok (Nondegenerate curvePoint)
 
 continuity ::
-  Tolerance units =>
+  (Curve.Exists dimension units space, Tolerance units) =>
   CurvePoint dimension units space ->
   CurvePoint dimension units space ->
   Maybe Continuity
-continuity p1@CurvePoint{} p2@CurvePoint{} = do
+continuity p1 p2 = do
   if point p1 ~= point p2
     then do
       let tangent1 = tangentDirection p1
