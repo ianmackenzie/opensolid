@@ -3,12 +3,12 @@ from opensolid import (
     Bounds2D,
     Color,
     Curve,
-    Interval,
+    Displacement2D,
     Length,
+    LengthInterval,
     Point2D,
     Svg,
     Triangle2D,
-    Vector2D,
 )
 
 p1 = Point2D.meters(1, 2)
@@ -17,17 +17,17 @@ print(p1.distance_to(p2))
 print(Curve.t.value(0.5))
 print(Curve.t.squared().value(0.5))
 
-r1 = Interval(Length.meters(1), Length.meters(5))
-r2 = Interval(Length.meters(3), Length.meters(7))
-r3 = Interval(Length.meters(1), Length.meters(5))
-r4 = Interval(Length.meters(4), Length.meters(10))
+r1 = LengthInterval(Length.meters(1), Length.meters(5))
+r2 = LengthInterval(Length.meters(3), Length.meters(7))
+r3 = LengthInterval(Length.meters(1), Length.meters(5))
+r4 = LengthInterval(Length.meters(4), Length.meters(10))
 r = r3.intersection(r4)
 if r is None:
     print("No intersection!")
 else:
     print("Intersection:", r)
 
-v = Vector2D.meters(1, 2)
+v = Displacement2D.meters(1, 2)
 print(v.direction().components)
 
 theta = Angle.two_pi * Curve.t
