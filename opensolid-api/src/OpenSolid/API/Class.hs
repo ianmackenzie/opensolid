@@ -6,7 +6,6 @@ module OpenSolid.API.Class
   , Member
   , new
   , static
-  , upcast
   , constant
   , constructor1
   , constructor2
@@ -101,8 +100,6 @@ import OpenSolid.API.Property (Property (Property))
 import OpenSolid.API.Property qualified as Property
 import OpenSolid.API.StaticFunction (StaticFunction (..))
 import OpenSolid.API.StaticFunction qualified as StaticFunction
-import OpenSolid.API.Upcast (Upcast (Upcast))
-import OpenSolid.API.Upcast qualified as Upcast
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -119,7 +116,6 @@ data Class where
   Class ::
     { name :: FFI.ClassName
     , documentation :: Text
-    , toParent :: Maybe Upcast
     , constants :: List (FFI.Name, Constant)
     , constructor :: Maybe Constructor
     , staticFunctions :: List (FFI.Name, StaticFunction)
@@ -136,7 +132,6 @@ data Class where
     Class
 
 data Member value where
-  ToParent :: Upcast -> Member value
   Const :: FFI.Name -> Constant -> Member value
   Constructor :: Constructor -> Member value
   Static :: FFI.Name -> StaticFunction -> Member value
@@ -161,9 +156,6 @@ static className givenDocumentation members =
 
 constant :: FFI result => Text -> result -> Text -> Member value
 constant name value docs = Const (FFI.name name) (Constant value docs)
-
-upcast :: (FFI parent, FFI value) => (value -> parent) -> Member value
-upcast = ToParent . Upcast
 
 constructor1 :: (FFI a, FFI value) => Text -> (a -> value) -> Text -> Member value
 constructor1 arg1 f docs = Constructor (Constructor1 (FFI.name arg1) f docs)
@@ -936,7 +928,6 @@ init givenName givenDocumentation =
   Class
     { name = givenName
     , documentation = givenDocumentation
-    , toParent = Nothing
     , constants = []
     , constructor = Nothing
     , staticFunctions = []
@@ -955,8 +946,6 @@ buildClass :: List (Member value) -> Class -> Class
 buildClass members built = case members of
   [] -> built
   first : rest -> buildClass rest $ case first of
-    ToParent toParent ->
-      built{toParent = Just toParent}
     Const name value ->
       built{constants = built.constants <> [(name, value)]}
     Constructor constructor ->
@@ -998,7 +987,6 @@ functions
   ( Class
       className
       _
-      toParent
       constants
       constructor
       staticFunctions
@@ -1013,8 +1001,7 @@ functions
       nestedClasses
     ) = do
     List.concat
-      [ upcastInfo className toParent
-      , List.map (constantFunctionInfo className) constants
+      [ List.map (constantFunctionInfo className) constants
       , constructorInfo className constructor
       , List.map (staticFunctionInfo className) staticFunctions
       , List.map (propertyInfo className) properties
@@ -1027,19 +1014,6 @@ functions
       , List.combine (NonEmpty.toList . postOperatorOverloads className) postOperators
       , List.combine functions nestedClasses
       ]
-
-upcastInfo :: FFI.ClassName -> Maybe Upcast -> List Function
-upcastInfo className maybeToParent = case maybeToParent of
-  Nothing -> []
-  Just toParent -> do
-    List.singleton $
-      Function
-        { ffiName = Upcast.ffiName className
-        , implicitTolerance = Nothing
-        , argumentTypes = [FFI.Class className]
-        , returnType = FFI.Class (Upcast.parentClassName toParent)
-        , invoke = Upcast.invoke toParent
-        }
 
 constantFunctionInfo :: FFI.ClassName -> (FFI.Name, Constant) -> Function
 constantFunctionInfo className (constantName, constantFunction@(Constant @t _ _)) =

@@ -2,7 +2,6 @@ module Python.Constructor (definition) where
 
 import OpenSolid.API.Constructor (Constructor (..))
 import OpenSolid.API.Constructor qualified as Constructor
-import OpenSolid.API.Upcast (Upcast)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
@@ -12,10 +11,9 @@ import Python qualified
 import Python.Class qualified
 import Python.FFI qualified
 import Python.Function qualified
-import Python.Upcast qualified
 
-definition :: FFI.ClassName -> Maybe Constructor -> Maybe Upcast -> Text
-definition className maybeConstructor maybeUpcast = case maybeConstructor of
+definition :: FFI.ClassName -> Maybe Constructor -> Text
+definition className maybeConstructor = case maybeConstructor of
   Nothing -> ""
   Just constructor -> do
     let ffiFunctionName = Constructor.ffiName className constructor
@@ -34,6 +32,5 @@ definition className maybeConstructor maybeUpcast = case maybeConstructor of
               ffiFunctionName
               "ctypes.byref(inputs)"
               ("ctypes.byref(self." <> pointerFieldName <> ")")
-          , Python.Upcast.lines className "self" maybeUpcast
           ]
       ]

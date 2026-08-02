@@ -6,8 +6,6 @@ import OpenSolid.API.Class qualified as Class
 import OpenSolid.API.Function (Function)
 import OpenSolid.API.Function qualified as Function
 import OpenSolid.API.ImplicitTolerance (ImplicitTolerance)
-import OpenSolid.API.Upcast (Upcast)
-import OpenSolid.API.Upcast qualified as Upcast
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
@@ -33,7 +31,6 @@ import Python.Property qualified
 import Python.StaticFunction qualified
 import Python.Type.Registry (Registry)
 import Python.Type.Registry qualified
-import Python.Upcast qualified
 
 preamble :: Text
 preamble =
@@ -115,7 +112,6 @@ classDefinition
   ( Class
       className
       documentation
-      maybeUpcast
       constants
       maybeConstructor
       staticFunctions
@@ -134,10 +130,10 @@ classDefinition
     let pointerFieldName = Python.Class.pointerFieldName className
     let definition =
           Python.lines
-            [ "class " <> Python.Class.unqualifiedName className <> parentClass maybeUpcast <> ":"
+            [ "class " <> Python.Class.unqualifiedName className <> ":"
             , Python.indent [Python.docstring documentation]
             , Python.indent [pointerFieldName <> ": c_void_p"]
-            , Python.indent [Python.Constructor.definition className maybeConstructor maybeUpcast]
+            , Python.indent [Python.Constructor.definition className maybeConstructor]
             , Python.indent
                 [ "@staticmethod"
                 , "def _new(ptr: c_void_p) -> " <> Python.Class.qualifiedName className <> ":"
@@ -145,7 +141,6 @@ classDefinition
                     [ "\"\"\"Construct directly from an underlying C pointer.\"\"\""
                     , "obj = object.__new__(" <> Python.Class.qualifiedName className <> ")"
                     , "obj." <> pointerFieldName <> " = ptr"
-                    , Python.Upcast.lines className "obj" maybeUpcast
                     , "return obj"
                     ]
                 ]
@@ -155,9 +150,6 @@ classDefinition
                     [ "\"\"\"Free the underlying Haskell value.\"\"\""
                     , "_lib.opensolid_release(self." <> pointerFieldName <> ")"
                     ]
-                , Python.indent $ case maybeUpcast of
-                    Just _ -> ["super().__del__()"]
-                    Nothing -> []
                 ]
             , Python.indent (List.map Python.Constant.declaration constants)
             , Python.indent (List.map (Python.StaticFunction.definition className) staticFunctions)
@@ -188,10 +180,6 @@ classDefinition
           Python.lines $
             List.map (Python.Constant.definition className) constants <> nestedClassConstants
     (definition, constantDefinitions)
-
-parentClass :: Maybe Upcast -> Text
-parentClass Nothing = ""
-parentClass (Just upcast) = "(" <> Python.Class.qualifiedName (Upcast.parentClassName upcast) <> ")"
 
 extraMemberFunctions :: Text -> Text
 extraMemberFunctions className = do

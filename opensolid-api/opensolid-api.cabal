@@ -46,7 +46,6 @@ library
     OpenSolid.API.PreOperatorOverload
     OpenSolid.API.Property
     OpenSolid.API.StaticFunction
-    OpenSolid.API.Upcast
 
   other-modules:
     OpenSolid.API.Docs

@@ -46,7 +46,6 @@ executable opensolid-python
     Python.StaticFunction
     Python.Type
     Python.Type.Registry
-    Python.Upcast
 
   ghc-options:
     -Wall
