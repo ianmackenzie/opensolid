@@ -36,7 +36,7 @@ p5 = Point2D.y(top_flange_top_y)
 
 # Create the sketch profile
 fillet = Curve2D.corner_arc(
-    p2,
+    corner_point=p2,
     incoming=Direction2D.y,
     outgoing=Direction2D.x,
     radius=fillet_radius,

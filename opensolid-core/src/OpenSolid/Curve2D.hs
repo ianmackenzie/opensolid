@@ -222,13 +222,13 @@ sweptArc centerPoint givenStartPoint sweptAngle = do
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
   Tolerance units =>
-  Point2D units ->
+  "cornerPoint" ::: Point2D units ->
   "incoming" ::: Direction2D ->
   "outgoing" ::: Direction2D ->
   "radius" ::: Quantity units ->
   Curve2D units
 cornerArc
-  cornerPoint
+  ("cornerPoint" ::: cornerPoint)
   ("incoming" ::: incomingDirection)
   ("outgoing" ::: outgoingDirection)
   ("radius" ::: givenRadius) = do
