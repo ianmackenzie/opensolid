@@ -433,11 +433,20 @@ instance Division_ (Curve1D units1) (Nonzero (Curve1D units2)) (Curve1D (units1 
             (derivative lhs ?*? rhs - lhs ?*? derivative rhs) ?/? Nonzero (squared_ rhs)
     new quotientCompiled quotientDerivative
 
+instance Division_ (Quantity units1) (Nonzero (Curve1D units2)) (Curve1D (units1 ?/? units2)) where
+  lhs ?/? rhs = constant lhs ?/? rhs
+
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve1D units1) (Nonzero (Curve1D units2)) (Curve1D units3)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
+
+instance
+  Units.Quotient units1 units2 units3 =>
+  Division (Quantity units1) (Nonzero (Curve1D units2)) (Curve1D units3)
+  where
+  lhs / rhs = constant lhs / rhs
 
 instance Units (Nondegenerate (Curve1D units)) units
 
