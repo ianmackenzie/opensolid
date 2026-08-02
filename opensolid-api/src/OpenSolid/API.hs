@@ -1100,8 +1100,8 @@ unitlessVector3D =
     , Class.dot @AreaVector3D Class.noFallback
     , Class.cross @UnitlessVector3D Class.fallbackStaticCrossProduct
     , Class.cross @Direction3D Class.fallbackMemberCross
-    , Class.cross @Displacement3D Class.noFallback
-    , Class.cross @AreaVector3D Class.noFallback
+    , Class.cross @Displacement3D (Class.fallbackMember "Cross Displacement")
+    , Class.cross @AreaVector3D (Class.fallbackMember "Cross Area Vector")
     ]
 
 type Displacement3D = Vector3D.Vector3D Meters Void
