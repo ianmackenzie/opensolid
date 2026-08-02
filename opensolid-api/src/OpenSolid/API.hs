@@ -101,11 +101,10 @@ classes =
   , uvPolyline
   , polygon2D
   , uvPolygon
-  , curve1D
-  , lengthCurve1D
-  , areaCurve1D
-  , angleCurve1D
   , curve
+  , lengthCurve
+  , areaCurve
+  , angleCurve
   , svg
   , axis2D
   , uvAxis
@@ -177,16 +176,16 @@ length =
     , Class.numberTimes
     , Class.plus @Length Class.fallbackMemberPlus
     , Class.plus @LengthInterval Class.noFallback
-    , Class.plus @LengthCurve1D Class.noFallback
+    , Class.plus @LengthCurve Class.noFallback
     , Class.minus @Length Class.fallbackMemberMinus
     , Class.minus @LengthInterval Class.noFallback
-    , Class.minus @LengthCurve1D Class.noFallback
+    , Class.minus @LengthCurve Class.noFallback
     , Class.times @Number Class.fallbackMemberTimes
     , Class.times @Length Class.fallbackStaticProduct
     , Class.times @Interval Class.noFallback
     , Class.times @LengthInterval Class.noFallback
-    , Class.times @Curve1D Class.noFallback
-    , Class.times @LengthCurve1D Class.noFallback
+    , Class.times @Curve Class.noFallback
+    , Class.times @LengthCurve Class.noFallback
     , Class.times @Direction2D Class.noFallback
     , Class.times @Vector2D Class.noFallback
     , Class.times @Displacement2D Class.noFallback
@@ -194,8 +193,8 @@ length =
     , Class.divideBy @Length Class.fallbackStaticRatio
     , Class.divideBy @Interval Class.noFallback
     , Class.divideBy @LengthInterval Class.noFallback
-    , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.noFallback
-    , Class.divideByNonzeroM @LengthCurve1D Curve1D.nonzero Class.noFallback
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.noFallback
+    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero Class.noFallback
     , Class.divMod
     ]
 
@@ -220,13 +219,13 @@ area =
     , Class.numberTimes
     , Class.plus @Area Class.fallbackMemberPlus
     , Class.plus @AreaInterval Class.noFallback
-    , Class.plus @AreaCurve1D Class.noFallback
+    , Class.plus @AreaCurve Class.noFallback
     , Class.minus @Area Class.fallbackMemberMinus
     , Class.minus @AreaInterval Class.noFallback
-    , Class.minus @AreaCurve1D Class.noFallback
+    , Class.minus @AreaCurve Class.noFallback
     , Class.times @Number Class.fallbackMemberTimes
     , Class.times @Interval Class.noFallback
-    , Class.times @Curve1D Class.noFallback
+    , Class.times @Curve Class.noFallback
     , Class.times @Direction2D Class.noFallback
     , Class.times @Vector2D Class.noFallback
     , Class.divideBy @Number Class.fallbackMemberDivideBy
@@ -235,8 +234,8 @@ area =
     , Class.divideBy @Interval Class.noFallback
     , Class.divideBy @LengthInterval Class.noFallback
     , Class.divideBy @AreaInterval Class.noFallback
-    , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.noFallback
-    , Class.divideByNonzeroM @LengthCurve1D Curve1D.nonzero Class.noFallback
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.noFallback
+    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero Class.noFallback
     , Class.divMod
     ]
 
@@ -278,19 +277,19 @@ angle =
     , Class.numberTimes
     , Class.plus @Angle Class.fallbackMemberPlus
     , Class.plus @AngleInterval Class.noFallback
-    , Class.plus @AngleCurve1D Class.noFallback
+    , Class.plus @AngleCurve Class.noFallback
     , Class.minus @Angle Class.fallbackMemberMinus
     , Class.minus @AngleInterval Class.noFallback
-    , Class.minus @AngleCurve1D Class.noFallback
+    , Class.minus @AngleCurve Class.noFallback
     , Class.times @Number Class.fallbackMemberTimes
     , Class.times @Interval Class.noFallback
-    , Class.times @Curve1D Class.noFallback
+    , Class.times @Curve Class.noFallback
     , Class.divideBy @Number Class.fallbackMemberDivideBy
     , Class.divideBy @Angle Class.fallbackStaticRatio
     , Class.divideBy @Interval Class.noFallback
     , Class.divideBy @AngleInterval Class.noFallback
-    , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.noFallback
-    , Class.divideByNonzeroR @AngleCurve1D Curve1D.nonzero Class.noFallback
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.noFallback
+    , Class.divideByNonzeroR @AngleCurve Curve1D.nonzero Class.noFallback
     , Class.divMod
     ]
 
@@ -846,18 +845,13 @@ uvPolygon =
     , Class.member0 "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
     ]
 
+type Curve = Curve1D.Curve1D Unitless
+
 curve :: Class
 curve =
-  Class.static "Curve" "Functionality common to all curve types." $
-    [ Class.constant "T" Curve1D.t $(docs 'Curve1D.t)
-    ]
-
-type Curve1D = Curve1D.Curve1D Unitless
-
-curve1D :: Class
-curve1D =
-  Class.new @Curve1D "A parametric curve definining a unitless value in terms of a parameter value." $
+  Class.new @Curve "A parametric curve definining a unitless value in terms of a parameter value." $
     [ Class.constant "Zero" (Curve1D.zero @Unitless) $(docs 'Curve1D.zero)
+    , Class.constant "T" Curve1D.t $(docs 'Curve1D.t)
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
@@ -874,26 +868,31 @@ curve1D =
     , Class.numberTimes
     , Class.numberDivideByNonzeroU Curve1D.nonzero
     , Class.plus @Number (Class.fallbackMember "Plus Number")
-    , Class.plus @Curve1D Class.fallbackMemberPlus
+    , Class.plus @Curve Class.fallbackMemberPlus
     , Class.minus @Number (Class.fallbackMember "Minus Number")
-    , Class.minus @Curve1D Class.fallbackMemberMinus
+    , Class.minus @Curve Class.fallbackMemberMinus
     , Class.times @Number (Class.fallbackMember "Times Number")
-    , Class.times @Curve1D Class.fallbackMemberTimes
+    , Class.times @Curve Class.fallbackMemberTimes
     , Class.times @Length (Class.fallbackMember "Times Length")
     , Class.times @Area (Class.fallbackMember "Times Area")
     , Class.times @Angle (Class.fallbackMember "Times Angle")
-    , Class.times @LengthCurve1D Class.noFallback
-    , Class.times @AreaCurve1D Class.noFallback
-    , Class.times @AngleCurve1D Class.noFallback
-    , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.fallbackMemberDivideBy
+    , Class.times @LengthCurve Class.noFallback
+    , Class.times @AreaCurve Class.noFallback
+    , Class.times @AngleCurve Class.noFallback
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.fallbackMemberDivideBy
     , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
+    , Class.nested @Curve1D.Root "A point where a given curve is equal to zero." $
+        [ Class.property "Location" (Curve1D.Root.location) "The parameter value at which the curve is zero."
+        , Class.property "Order" (Curve1D.Root.order) "The order of the solution: 0 for crossing, 1 for tangent, etc."
+        , Class.property "Sign" (Curve1D.Root.sign) "The sign of the solution: the sign of the curve to the right of the solution."
+        ]
     ]
 
-type AngleCurve1D = Curve1D.Curve1D Radians
+type AngleCurve = Curve1D.Curve1D Radians
 
-angleCurve1D :: Class
-angleCurve1D =
-  Class.new @AngleCurve1D "A parametric curve definining an angle in terms of a parameter value." $
+angleCurve :: Class
+angleCurve =
+  Class.new @AngleCurve "A parametric curve definining an angle in terms of a parameter value." $
     [ Class.constant "Zero" (Curve1D.zero @Radians) $(docs 'Curve1D.zero)
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
@@ -905,23 +904,23 @@ angleCurve1D =
     , Class.memberR0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negation
     , Class.numberTimes
-    , Class.plus @AngleCurve1D Class.fallbackMemberPlus
+    , Class.plus @AngleCurve Class.fallbackMemberPlus
     , Class.plus @Angle (Class.fallbackMember "Plus Angle")
-    , Class.minus @AngleCurve1D Class.fallbackMemberMinus
+    , Class.minus @AngleCurve Class.fallbackMemberMinus
     , Class.minus @Angle (Class.fallbackMember "Minus Angle")
     , Class.times @Number (Class.fallbackMember "Times Number")
-    , Class.times @Curve1D Class.fallbackMemberTimes
+    , Class.times @Curve Class.fallbackMemberTimes
     , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
-    , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.fallbackMemberDivideBy
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.fallbackMemberDivideBy
     , Class.divideBy @Angle (Class.fallbackMember "Divide By Angle")
-    , Class.divideByNonzeroR @AngleCurve1D Curve1D.nonzero Class.fallbackStaticRatio
+    , Class.divideByNonzeroR @AngleCurve Curve1D.nonzero Class.fallbackStaticRatio
     ]
 
-type LengthCurve1D = Curve1D.Curve1D Meters
+type LengthCurve = Curve1D.Curve1D Meters
 
-lengthCurve1D :: Class
-lengthCurve1D =
-  Class.new @LengthCurve1D "A parametric curve definining a length in terms of a parameter value." $
+lengthCurve :: Class
+lengthCurve =
+  Class.new @LengthCurve "A parametric curve definining a length in terms of a parameter value." $
     [ Class.constant "Zero" (Curve1D.zero @Meters) $(docs 'Curve1D.zero)
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
@@ -932,30 +931,25 @@ lengthCurve1D =
     , Class.memberM0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negation
     , Class.numberTimes
-    , Class.plus @LengthCurve1D Class.fallbackMemberPlus
+    , Class.plus @LengthCurve Class.fallbackMemberPlus
     , Class.plus @Length (Class.fallbackMember "Plus Length")
-    , Class.minus @LengthCurve1D Class.fallbackMemberMinus
+    , Class.minus @LengthCurve Class.fallbackMemberMinus
     , Class.minus @Length (Class.fallbackMember "Minus Length")
     , Class.times @Number (Class.fallbackMember "Times Number")
-    , Class.times @LengthCurve1D Class.fallbackStaticProduct
+    , Class.times @LengthCurve Class.fallbackStaticProduct
     , Class.times @Length (Class.fallbackMember "Times Length")
-    , Class.times @Curve1D Class.fallbackMemberTimes
+    , Class.times @Curve Class.fallbackMemberTimes
     , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
     , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
-    , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.fallbackMemberDivideBy
-    , Class.divideByNonzeroM @LengthCurve1D Curve1D.nonzero Class.fallbackStaticRatio
-    , Class.nested @Curve1D.Root "A point where a given curve is equal to zero." $
-        [ Class.property "Location" (Curve1D.Root.location) "The parameter value at which the curve is zero."
-        , Class.property "Order" (Curve1D.Root.order) "The order of the solution: 0 for crossing, 1 for tangent, etc."
-        , Class.property "Sign" (Curve1D.Root.sign) "The sign of the solution: the sign of the curve to the right of the solution."
-        ]
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.fallbackMemberDivideBy
+    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero Class.fallbackStaticRatio
     ]
 
-type AreaCurve1D = Curve1D.Curve1D SquareMeters
+type AreaCurve = Curve1D.Curve1D SquareMeters
 
-areaCurve1D :: Class
-areaCurve1D =
-  Class.new @AreaCurve1D "A parametric curve definining an area in terms of a parameter value." $
+areaCurve :: Class
+areaCurve =
+  Class.new @AreaCurve "A parametric curve definining an area in terms of a parameter value." $
     [ Class.constant "Zero" (Curve1D.zero @SquareMeters) $(docs 'Curve1D.zero)
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
@@ -963,15 +957,15 @@ areaCurve1D =
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
     , Class.negation
     , Class.numberTimes
-    , Class.plus @AreaCurve1D Class.fallbackMemberPlus
+    , Class.plus @AreaCurve Class.fallbackMemberPlus
     , Class.plus @Area (Class.fallbackMember "Plus Area")
-    , Class.minus @AreaCurve1D Class.fallbackMemberMinus
+    , Class.minus @AreaCurve Class.fallbackMemberMinus
     , Class.minus @Area (Class.fallbackMember "Minus Area")
-    , Class.times @Curve1D Class.fallbackMemberTimes
+    , Class.times @Curve Class.fallbackMemberTimes
     , Class.times @Number (Class.fallbackMember "Times Number")
-    , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.fallbackMemberDivideBy
+    , Class.divideByNonzeroU @Curve Curve1D.nonzero Class.fallbackMemberDivideBy
     , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
-    , Class.divideByNonzeroM @LengthCurve1D Curve1D.nonzero (Class.fallbackMember "Divide By Length Curve")
+    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero (Class.fallbackMember "Divide By Length Curve")
     , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
     , Class.divideBy @Area (Class.fallbackMember "Divide By Area")
     ]

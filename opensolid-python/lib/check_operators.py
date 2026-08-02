@@ -4,19 +4,19 @@ from typing import Literal
 import opensolid
 from opensolid import (
     Angle,
-    AngleCurve1D,
+    AngleCurve,
     AngleInterval,
     Area,
-    AreaCurve1D,
+    AreaCurve,
     AreaInterval,
     AreaVector2D,
     Bounds2D,
-    Curve1D,
+    Curve,
     Direction2D,
     Displacement2D,
     Interval,
     Length,
-    LengthCurve1D,
+    LengthCurve,
     LengthInterval,
     Point2D,
     UvBounds,
@@ -41,10 +41,10 @@ types = [
     UvPoint,
     Bounds2D,
     UvBounds,
-    Curve1D,
-    LengthCurve1D,
-    AreaCurve1D,
-    AngleCurve1D,
+    Curve,
+    LengthCurve,
+    AreaCurve,
+    AngleCurve,
 ]
 
 dimension = {
@@ -64,10 +64,10 @@ dimension = {
     UvPoint: 2,
     Bounds2D: 2,
     UvBounds: 2,
-    Curve1D: 1,
-    LengthCurve1D: 1,
-    AreaCurve1D: 1,
-    AngleCurve1D: 1,
+    Curve: 1,
+    LengthCurve: 1,
+    AreaCurve: 1,
+    AngleCurve: 1,
 }
 
 Space = Literal["Space"]
@@ -89,10 +89,10 @@ space = {
     UvPoint: "Space",
     Bounds2D: "Space",
     UvBounds: "Space",
-    LengthCurve1D: None,
-    Curve1D: None,
-    AreaCurve1D: None,
-    AngleCurve1D: None,
+    LengthCurve: None,
+    Curve: None,
+    AreaCurve: None,
+    AngleCurve: None,
 }
 
 Behaviour = Literal["scalar", "vector", "point"]
@@ -114,10 +114,10 @@ behaviour = {
     UvPoint: "point",
     Bounds2D: "point",
     UvBounds: "point",
-    LengthCurve1D: "scalar",
-    Curve1D: "scalar",
-    AreaCurve1D: "scalar",
-    AngleCurve1D: "scalar",
+    LengthCurve: "scalar",
+    Curve: "scalar",
+    AreaCurve: "scalar",
+    AngleCurve: "scalar",
 }
 
 
@@ -155,10 +155,10 @@ units = {
     UvPoint: unitless,
     Bounds2D: length_units,
     UvBounds: unitless,
-    Curve1D: unitless,
-    LengthCurve1D: length_units,
-    AreaCurve1D: area_units,
-    AngleCurve1D: angle_units,
+    Curve: unitless,
+    LengthCurve: length_units,
+    AreaCurve: area_units,
+    AngleCurve: angle_units,
 }
 
 Topology = Literal["value", "bounds", "curve"]
@@ -180,10 +180,10 @@ topology = {
     UvPoint: "value",
     Bounds2D: "bounds",
     UvBounds: "bounds",
-    Curve1D: "curve",
-    LengthCurve1D: "curve",
-    AreaCurve1D: "curve",
-    AngleCurve1D: "curve",
+    Curve: "curve",
+    LengthCurve: "curve",
+    AreaCurve: "curve",
+    AngleCurve: "curve",
 }
 
 dummy_value = {
@@ -203,10 +203,10 @@ dummy_value = {
     UvPoint: UvPoint.origin,
     Bounds2D: Bounds2D.constant(Point2D.origin),
     UvBounds: UvBounds.constant(UvPoint.origin),
-    Curve1D: Curve1D.constant(1),
-    LengthCurve1D: LengthCurve1D.constant(Length.meters(1)),
-    AreaCurve1D: AreaCurve1D.constant(Area.square_meters(1)),
-    AngleCurve1D: AngleCurve1D.constant(Angle.radian),
+    Curve: Curve.constant(1),
+    LengthCurve: LengthCurve.constant(Length.meters(1)),
+    AreaCurve: AreaCurve.constant(Area.square_meters(1)),
+    AngleCurve: AngleCurve.constant(Angle.radian),
 }
 
 

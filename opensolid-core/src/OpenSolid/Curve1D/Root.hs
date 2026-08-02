@@ -13,7 +13,7 @@ data Root = Root
   deriving (Eq, Show)
 
 instance FFI Root where
-  representation = FFI.nestedClassRepresentation "LengthCurve1D" "Root"
+  representation = FFI.nestedClassRepresentation "Curve" "Root"
 
 -- | Get the parameter value at which the curve is zero.
 location :: Root -> Number

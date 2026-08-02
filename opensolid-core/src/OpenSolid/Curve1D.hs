@@ -103,16 +103,16 @@ data Curve1D units = Curve1D
 type Compiled units = CompiledFunction Number (Quantity units) (Interval Unitless) (Interval units)
 
 instance FFI (Curve1D Unitless) where
-  representation = FFI.classRepresentation "Curve1D"
+  representation = FFI.classRepresentation "Curve"
 
 instance FFI (Curve1D Meters) where
-  representation = FFI.classRepresentation "LengthCurve1D"
+  representation = FFI.classRepresentation "LengthCurve"
 
 instance FFI (Curve1D SquareMeters) where
-  representation = FFI.classRepresentation "AreaCurve1D"
+  representation = FFI.classRepresentation "AreaCurve"
 
 instance FFI (Curve1D Radians) where
-  representation = FFI.classRepresentation "AngleCurve1D"
+  representation = FFI.classRepresentation "AngleCurve"
 
 instance Units (Curve1D units) units
 
