@@ -13,4 +13,3 @@ data Intersections dimension units space
       Sign
       (NonEmpty (Interval Unitless, Interval Unitless))
       (List (IntersectionPoint dimension units space))
-  deriving (Show)

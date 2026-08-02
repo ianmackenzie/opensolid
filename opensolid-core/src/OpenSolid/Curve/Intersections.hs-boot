@@ -3,7 +3,6 @@ module OpenSolid.Curve.Intersections
   )
 where
 
-import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
@@ -11,5 +10,3 @@ import OpenSolid.Prelude
 data Intersections dimension units space
   = IntersectionPoints (NonEmpty (IntersectionPoint dimension units space))
   | OverlappingSegments Sign (NonEmpty (Interval Unitless, Interval Unitless)) (List (IntersectionPoint dimension units space))
-
-instance Curve.Exists dimension units space => Show (Intersections dimension units space)
