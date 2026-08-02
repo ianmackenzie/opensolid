@@ -17,12 +17,6 @@ import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
 
-squaredMagnitude_ ::
-  VectorCurve.Exists dimension units space =>
-  Nondegenerate (VectorCurve dimension units space) ->
-  Nondegenerate (Curve1D (units ?*? units))
-squaredMagnitude_ (Nondegenerate curve) = Nondegenerate (VectorCurve.squaredMagnitude_ curve)
-
 directionAt ::
   (VectorCurve.Exists dimension units space, Direction.Exists dimension space) =>
   Number ->
@@ -38,6 +32,12 @@ directionAt tValue (Nondegenerate curve) =
           | tValue == 1.0 && VectorCurve.hasDegenerateEnd curve ->
               negate (VectorCurve.derivativeAt 1.0 curve)
           | otherwise -> VectorCurve.valueAt tValue curve
+
+squaredMagnitude_ ::
+  VectorCurve.Exists dimension units space =>
+  Nondegenerate (VectorCurve dimension units space) ->
+  Nondegenerate (Curve1D (units ?*? units))
+squaredMagnitude_ (Nondegenerate curve) = Nondegenerate (VectorCurve.squaredMagnitude_ curve)
 
 squaredMagnitude ::
   ( VectorCurve.Exists dimension units1 space
