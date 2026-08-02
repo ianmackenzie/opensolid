@@ -58,6 +58,7 @@ module OpenSolid.API.Class
   , numberMinus
   , numberTimes
   , numberDivideBy
+  , numberDivideByNonzeroU
   , plus
   , minus
   , times
@@ -825,6 +826,18 @@ numberDivideBy ::
 numberDivideBy =
   PreOverload BinaryOperator.Div $
     PreOperatorOverload ((/) :: Number -> value -> result)
+
+numberDivideByNonzeroU ::
+  forall value result.
+  (Division Number (Nonzero value) result, FFI value, FFI result) =>
+  (Tolerance Unitless => value -> Result HasZero (Nonzero value)) ->
+  Member value
+numberDivideByNonzeroU nonzero = do
+  let implementation :: Number -> value -> Result HasZero result
+      implementation number value = do
+        nonzeroValue <- Tolerance.using Tolerance.unitless (nonzero value)
+        Ok (number / nonzeroValue)
+  PreOverload BinaryOperator.Div (PreOperatorOverload implementation)
 
 toFallbackFunction ::
   (FFI value, FFI rhs, FFI result) =>
