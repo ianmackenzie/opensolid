@@ -78,10 +78,10 @@ type Compiled space =
   CompiledFunction UvPoint (Point3D space) UvBounds (Bounds3D space)
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
+  space1 ~ space2 =>
   Addition
     (SurfaceFunction3D space1)
-    (VectorSurfaceFunction3D meters space2)
+    (VectorSurfaceFunction3D Meters space2)
     (SurfaceFunction3D space1)
   where
   f + g =
@@ -90,19 +90,19 @@ instance
       (Pair.map2 (+) (partialDerivatives f) (VectorSurfaceFunction3D.partialDerivatives g))
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
+  space1 ~ space2 =>
   Addition
     (SurfaceFunction3D space1)
-    (Vector3D meters space2)
+    (Vector3D Meters space2)
     (SurfaceFunction3D space1)
   where
   f + v = f + VectorSurfaceFunction3D.constant v
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
+  space1 ~ space2 =>
   Subtraction
     (SurfaceFunction3D space1)
-    (VectorSurfaceFunction3D meters space2)
+    (VectorSurfaceFunction3D Meters space2)
     (SurfaceFunction3D space1)
   where
   f - g =
@@ -111,10 +111,10 @@ instance
       (Pair.map2 (-) (partialDerivatives f) (VectorSurfaceFunction3D.partialDerivatives g))
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
+  space1 ~ space2 =>
   Subtraction
     (SurfaceFunction3D space1)
-    (Vector3D meters space2)
+    (Vector3D Meters space2)
     (SurfaceFunction3D space1)
   where
   f - v = f - VectorSurfaceFunction3D.constant v

@@ -1297,23 +1297,19 @@ instance FFI (Point3D Void) where
   representation = FFI.classRepresentation "Point3D"
 
 instance
-  ( space1 ~ space2
-  , meters ~ Meters
-  ) =>
+  space1 ~ space2 =>
   Addition
     (Point3D space1)
-    (Vector3D meters space2)
+    (Vector3D Meters space2)
     (Point3D space1)
   where
   Position3D p + v = Position3D (p + v)
 
 instance
-  ( space1 ~ space2
-  , meters ~ Meters
-  ) =>
+  space1 ~ space2 =>
   Subtraction
     (Point3D space1)
-    (Vector3D meters space2)
+    (Vector3D Meters space2)
     (Point3D space1)
   where
   Position3D p - v = Position3D (p - v)
@@ -1328,23 +1324,19 @@ instance
   Position3D p1 - Position3D p2 = p1 - p2
 
 instance
-  ( space1 ~ space2
-  , meters ~ Meters
-  ) =>
+  space1 ~ space2 =>
   Addition
     (Point3D space1)
-    (VectorBounds3D meters space2)
+    (VectorBounds3D Meters space2)
     (Bounds3D space1)
   where
   Position3D p + vb = PositionBounds3D (p + vb)
 
 instance
-  ( space1 ~ space2
-  , meters ~ Meters
-  ) =>
+  space1 ~ space2 =>
   Subtraction
     (Point3D space1)
-    (VectorBounds3D meters space2)
+    (VectorBounds3D Meters space2)
     (Bounds3D space1)
   where
   Position3D p - vb = PositionBounds3D (p - vb)
@@ -1826,45 +1818,37 @@ instance FFI (Bounds3D Void) where
   representation = FFI.classRepresentation "Bounds3D"
 
 instance
-  ( space1 ~ space2
-  , meters ~ Meters
-  ) =>
+  space1 ~ space2 =>
   Addition
     (Bounds3D space1)
-    (Vector3D meters space2)
+    (Vector3D Meters space2)
     (Bounds3D space1)
   where
   PositionBounds3D pb + v = PositionBounds3D (pb + v)
 
 instance
-  ( space1 ~ space2
-  , meters ~ Meters
-  ) =>
+  space1 ~ space2 =>
   Addition
     (Bounds3D space1)
-    (VectorBounds3D meters space2)
+    (VectorBounds3D Meters space2)
     (Bounds3D space1)
   where
   PositionBounds3D pb + vb = PositionBounds3D (pb + vb)
 
 instance
-  ( space1 ~ space2
-  , meters ~ Meters
-  ) =>
+  space1 ~ space2 =>
   Subtraction
     (Bounds3D space1)
-    (Vector3D meters space2)
+    (Vector3D Meters space2)
     (Bounds3D space1)
   where
   PositionBounds3D pb - v = PositionBounds3D (pb - v)
 
 instance
-  ( space1 ~ space2
-  , meters ~ Meters
-  ) =>
+  space1 ~ space2 =>
   Subtraction
     (Bounds3D space1)
-    (VectorBounds3D meters space2)
+    (VectorBounds3D Meters space2)
     (Bounds3D space1)
   where
   PositionBounds3D pb - vb = PositionBounds3D (pb - vb)

@@ -29,17 +29,17 @@ type Compiled space =
   CompiledFunction UvPoint (Point3D space) UvBounds (Bounds3D space)
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
+  space1 ~ space2 =>
   Addition
     (SurfaceFunction3D space1)
-    (VectorSurfaceFunction3D meters space2)
+    (VectorSurfaceFunction3D Meters space2)
     (SurfaceFunction3D space1)
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
+  space1 ~ space2 =>
   Subtraction
     (SurfaceFunction3D space1)
-    (VectorSurfaceFunction3D meters space2)
+    (VectorSurfaceFunction3D Meters space2)
     (SurfaceFunction3D space1)
 
 new ::

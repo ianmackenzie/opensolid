@@ -99,12 +99,12 @@ instance
 instance Composition (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units)
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
-  Addition (Curve3D space1) (Vector3D meters space2) (Curve3D space1)
+  space1 ~ space2 =>
+  Addition (Curve3D space1) (Vector3D Meters space2) (Curve3D space1)
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
-  Subtraction (Curve3D space1) (Vector3D meters space2) (Curve3D space1)
+  space1 ~ space2 =>
+  Subtraction (Curve3D space1) (Vector3D Meters space2) (Curve3D space1)
 
 instance
   space1 ~ space2 =>

@@ -419,19 +419,19 @@ instance
   Surface2D lhs _ + VectorSurface2D rhs _ = surface2D (lhs + rhs)
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
+  space1 ~ space2 =>
   Addition
     (Expression Number (Point3D space1))
-    (Expression Number (Vector3D meters space2))
+    (Expression Number (Vector3D Meters space2))
     (Expression Number (Point3D space1))
   where
   Curve3D lhs _ + VectorCurve3D rhs _ = curve3D (lhs + rhs)
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
+  space1 ~ space2 =>
   Addition
     (Expression UvPoint (Point3D space1))
-    (Expression UvPoint (Vector3D meters space2))
+    (Expression UvPoint (Vector3D Meters space2))
     (Expression UvPoint (Point3D space1))
   where
   Surface3D lhs _ + VectorSurface3D rhs _ = surface3D (lhs + rhs)
@@ -531,19 +531,19 @@ instance
   Surface2D lhs _ - Surface2D rhs _ = vectorSurface2D (lhs - rhs)
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
+  space1 ~ space2 =>
   Subtraction
     (Expression Number (Point3D space1))
-    (Expression Number (Vector3D meters space2))
+    (Expression Number (Vector3D Meters space2))
     (Expression Number (Point3D space1))
   where
   Curve3D lhs _ - VectorCurve3D rhs _ = curve3D (lhs - rhs)
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
+  space1 ~ space2 =>
   Subtraction
     (Expression UvPoint (Point3D space1))
-    (Expression UvPoint (Vector3D meters space2))
+    (Expression UvPoint (Vector3D Meters space2))
     (Expression UvPoint (Point3D space1))
   where
   Surface3D lhs _ - VectorSurface3D rhs _ = surface3D (lhs - rhs)
@@ -1485,10 +1485,9 @@ instance
   placeOn plane (VectorSurface2D ast _) = vectorSurface3D (Ast.placeVector2DOn plane ast)
 
 instance
-  meters ~ Meters =>
   PlaceOn
     (Plane3D space)
-    (Expression input (Point2D meters))
+    (Expression input (Point2D Meters))
     (Expression input (Point3D space))
   where
   placeOn plane (Curve2D ast _) = curve3D (Ast.placePoint2DOn plane ast)
@@ -1507,11 +1506,10 @@ instance
   projectInto plane (VectorSurface3D ast _) = vectorSurface2D (Ast.projectVector3dInto plane ast)
 
 instance
-  meters ~ Meters =>
   ProjectInto
     (Plane3D space)
     (Expression input (Point3D space))
-    (Expression input (Point2D meters))
+    (Expression input (Point2D Meters))
   where
   projectInto plane (Curve3D ast _) = curve2D (Ast.projectPoint3dInto plane ast)
   projectInto plane (Surface3D ast _) = surface2D (Ast.projectPoint3dInto plane ast)

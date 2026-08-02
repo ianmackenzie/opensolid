@@ -356,14 +356,14 @@ instance
   f . g = new (compiled f . Curve1D.compiled g) ((derivative f . g) * Curve1D.derivative g)
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
-  Addition (Curve3D space1) (Vector3D meters space2) (Curve3D space1)
+  space1 ~ space2 =>
+  Addition (Curve3D space1) (Vector3D Meters space2) (Curve3D space1)
   where
   lhs + rhs = lhs + VectorCurve3D.constant rhs
 
 instance
-  (space1 ~ space2, meters ~ Meters) =>
-  Subtraction (Curve3D space1) (Vector3D meters space2) (Curve3D space1)
+  space1 ~ space2 =>
+  Subtraction (Curve3D space1) (Vector3D Meters space2) (Curve3D space1)
   where
   lhs - rhs = lhs - VectorCurve3D.constant rhs
 
