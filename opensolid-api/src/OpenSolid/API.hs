@@ -194,6 +194,8 @@ length =
     , Class.divideBy @Length Class.fallbackStaticRatio
     , Class.divideBy @Interval Class.noFallback
     , Class.divideBy @LengthInterval Class.noFallback
+    , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.noFallback
+    , Class.divideByNonzeroM @LengthCurve1D Curve1D.nonzero Class.noFallback
     , Class.divMod
     ]
 
@@ -233,6 +235,8 @@ area =
     , Class.divideBy @Interval Class.noFallback
     , Class.divideBy @LengthInterval Class.noFallback
     , Class.divideBy @AreaInterval Class.noFallback
+    , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.noFallback
+    , Class.divideByNonzeroM @LengthCurve1D Curve1D.nonzero Class.noFallback
     , Class.divMod
     ]
 
@@ -285,6 +289,8 @@ angle =
     , Class.divideBy @Angle Class.fallbackStaticRatio
     , Class.divideBy @Interval Class.noFallback
     , Class.divideBy @AngleInterval Class.noFallback
+    , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.noFallback
+    , Class.divideByNonzeroR @AngleCurve1D Curve1D.nonzero Class.noFallback
     , Class.divMod
     ]
 
