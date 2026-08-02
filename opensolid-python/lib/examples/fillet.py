@@ -66,7 +66,7 @@ ground_model = (
     Model3D.body(ground_body).with_pbr_material(ground_material).with_name("Ground")
 )
 resolution = Resolution.max_error(Length.millimeters(0.01))
-gltf = Gltf(Model3D.group([model, ground_model]))
+gltf = Gltf(model)
 gltf.write_binary("fillet.glb", resolution)
 
 camera = Camera3D.orbit(
