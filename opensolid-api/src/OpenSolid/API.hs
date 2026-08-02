@@ -1515,6 +1515,8 @@ curve2D =
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "X Coordinate" (Curve2D.xCoordinate) $(docs 'Curve2D.xCoordinate)
     , Class.property "Y Coordinate" (Curve2D.yCoordinate) $(docs 'Curve2D.yCoordinate)
+    , Class.plus @Displacement2D Class.noFallback
+    , Class.minus @Displacement2D Class.noFallback
     , Class.plus @DisplacementCurve2D (Class.fallbackMember "Plus Displacement Curve")
     , Class.minus @DisplacementCurve2D (Class.fallbackMember "Minus Displacement Curve")
     , Class.minus @Curve2D Class.fallbackMemberMinus
@@ -1545,6 +1547,8 @@ uvCurve =
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "U Coordinate" (Curve2D.xCoordinate) "Get the U coordinate of a UV curve as a scalar curve."
     , Class.property "V Coordinate" (Curve2D.yCoordinate) "Get the V coordinate of a UV curve as a scalar curve."
+    , Class.plus @Vector2D Class.noFallback
+    , Class.minus @Vector2D Class.noFallback
     , Class.plus @VectorCurve2D (Class.fallbackMember "Plus Vector Curve")
     , Class.minus @VectorCurve2D (Class.fallbackMember "Minus Vector Curve")
     , Class.minus @UvCurve Class.fallbackMemberMinus
