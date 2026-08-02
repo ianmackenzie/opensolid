@@ -54,7 +54,7 @@ body = Body3D.extruded(
 
 material = PbrMaterial.nonmetal(Color.blue, roughness=0.3)
 model = Model3D.body(body).with_pbr_material(material).with_name("Body")
-ground_limits = Interval.symmetric(width=Length.meters(2))
+ground_limits = Interval.plus_minus(Length.meters(1))
 ground_body = Body3D.extruded(
     World3D.bottom_plane,
     Region2D.rectangle(Bounds2D(ground_limits, ground_limits)),
