@@ -71,8 +71,9 @@ fromYDirection :: Direction3D space -> PlaneOrientation3D space
 fromYDirection dy = unsafe (Direction3D.perpendicularDirection dy) dy
 
 fromDirections :: Direction3D space -> Direction3D space -> Maybe (PlaneOrientation3D space)
-fromDirections dx dxy = Tolerance.using Tolerance.unitless do
-  gramSchmidt dx (Vector3D.unit dxy)
+fromDirections dx dxy =
+  Tolerance.using Tolerance.unitless do
+    gramSchmidt dx (Vector3D.unit dxy)
 
 fromVectors ::
   Tolerance units =>
