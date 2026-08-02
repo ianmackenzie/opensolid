@@ -20,6 +20,8 @@ module OpenSolid.VectorSurfaceFunction3D
   , secondPartialDerivatives
   , partialDerivativesAt
   , partialDerivativeRanges
+  , secondPartialDerivativesAt
+  , secondPartialDerivativeRanges
   , placeIn
   , relativeTo
   , transformBy
@@ -563,6 +565,22 @@ partialDerivativeRanges ::
 partialDerivativeRanges uvRange function = do
   let (fu, fv) = partialDerivatives function
   (range uvRange fu, range uvRange fv)
+
+secondPartialDerivativesAt ::
+  UvPoint ->
+  VectorSurfaceFunction3D units space ->
+  (Vector3D units space, Vector3D units space, Vector3D units space)
+secondPartialDerivativesAt uvPoint function = do
+  let (fuu, fuv, fvv) = secondPartialDerivatives function
+  (valueAt uvPoint fuu, valueAt uvPoint fuv, valueAt uvPoint fvv)
+
+secondPartialDerivativeRanges ::
+  UvBounds ->
+  VectorSurfaceFunction3D units space ->
+  (VectorBounds3D units space, VectorBounds3D units space, VectorBounds3D units space)
+secondPartialDerivativeRanges uvRange function = do
+  let (fuu, fuv, fvv) = secondPartialDerivatives function
+  (range uvRange fuu, range uvRange fuv, range uvRange fvv)
 
 placeIn ::
   Frame3D global local ->
