@@ -16,14 +16,17 @@ import OpenSolid.Length (Length)
 import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Text qualified as Text
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
+import OpenSolid.Vector3D.Nonzero qualified as Vector3D.Nonzero
 
-toText :: Convention3D -> (Length -> Number) -> Mesh (Point3D space) -> Text
+toText :: Tolerance Meters => Convention3D -> (Length -> Number) -> Mesh (Point3D space) -> Text
 toText convention units mesh =
   Text.multiline
     [ "solid"
@@ -31,7 +34,12 @@ toText convention units mesh =
     , "endsolid"
     ]
 
-builder :: Convention3D -> (Length -> Number) -> Mesh (Point3D space) -> Builder
+builder ::
+  Tolerance Meters =>
+  Convention3D ->
+  (Length -> Number) ->
+  Mesh (Point3D space) ->
+  Builder
 builder convention units mesh = do
   let emptyHeaderBytes = List.replicate 80 (Binary.uint8 0)
   let header = Binary.concat emptyHeaderBytes
@@ -39,10 +47,22 @@ builder convention units mesh = do
   let triangles = Binary.combine (triangleBuilder convention units) (Mesh.faceVertices mesh)
   Binary.concat [header, triangleCount, triangles]
 
-writeText :: Text -> Convention3D -> (Length -> Number) -> Mesh (Point3D space) -> IO ()
+writeText ::
+  Tolerance Meters =>
+  Text ->
+  Convention3D ->
+  (Length -> Number) ->
+  Mesh (Point3D space) ->
+  IO ()
 writeText path convention units mesh = IO.writeUtf8 path (toText convention units mesh)
 
-writeBinary :: Text -> Convention3D -> (Length -> Number) -> Mesh (Point3D space) -> IO ()
+writeBinary ::
+  Tolerance Meters =>
+  Text ->
+  Convention3D ->
+  (Length -> Number) ->
+  Mesh (Point3D space) ->
+  IO ()
 writeBinary path convention units mesh = IO.writeBinary path (builder convention units mesh)
 
 numberBuilder :: Number -> Builder
@@ -59,37 +79,51 @@ pointBuilder convention units point = do
   numberBuilder (units x) <> numberBuilder (units y) <> numberBuilder (units z)
 
 triangleBuilder ::
+  Tolerance Meters =>
   Convention3D ->
   (Length -> Number) ->
   (Point3D space, Point3D space, Point3D space) ->
   Builder
 triangleBuilder convention units (p0, p1, p2) = do
-  let normal = Vector3D.normalize ((p1 - p0) `cross_` (p2 - p0))
-  Binary.concat
-    [ vectorBuilder convention normal
-    , pointBuilder convention units p0
-    , pointBuilder convention units p1
-    , pointBuilder convention units p2
-    , Builder.word16LE (fromIntegral 0)
-    ]
+  let v1 = p1 - p0
+  let v2 = p2 - p0
+  if Vector3D.divergence v1 v2 ~= Quantity.zero
+    then Binary.empty
+    else do
+      let crossProduct = Nonzero (v1 `cross_` v2)
+      let Nonzero normal = Vector3D.Nonzero.normalize crossProduct
+      Binary.concat
+        [ vectorBuilder convention normal
+        , pointBuilder convention units p0
+        , pointBuilder convention units p1
+        , pointBuilder convention units p2
+        , Builder.word16LE (fromIntegral 0)
+        ]
 
 triangleText ::
+  Tolerance Meters =>
   Convention3D ->
   (Length -> Number) ->
   (Point3D space, Point3D space, Point3D space) ->
   Text
 triangleText convention units (p0, p1, p2) = do
-  let crossProduct = (p1 - p0) `cross_` (p2 - p0)
-  let (nx, ny, nz) = Vector3D.components convention (Vector3D.normalize crossProduct)
-  Text.multiline
-    [ "facet normal " <> Text.number nx <> " " <> Text.number ny <> " " <> Text.number nz
-    , "    outer loop"
-    , "        " <> pointText convention units p0
-    , "        " <> pointText convention units p1
-    , "        " <> pointText convention units p2
-    , "    endloop"
-    , "endfacet"
-    ]
+  let v1 = p1 - p0
+  let v2 = p2 - p0
+  if Vector3D.divergence v1 v2 ~= Quantity.zero
+    then ""
+    else do
+      let crossProduct = Nonzero (v1 `cross_` v2)
+      let Nonzero normal = Vector3D.Nonzero.normalize crossProduct
+      let (nx, ny, nz) = Vector3D.components convention normal
+      Text.multiline
+        [ "facet normal " <> Text.number nx <> " " <> Text.number ny <> " " <> Text.number nz
+        , "    outer loop"
+        , "        " <> pointText convention units p0
+        , "        " <> pointText convention units p1
+        , "        " <> pointText convention units p2
+        , "    endloop"
+        , "endfacet"
+        ]
 
 pointText :: Convention3D -> (Length -> Number) -> Point3D space -> Text
 pointText convention units point = do

@@ -221,10 +221,12 @@ magnitudeAndDirection ::
   Result Vector.IsZero (Quantity units, Direction3D space)
 magnitudeAndDirection = Vector.magnitudeAndDirection
 
-normalize :: Vector3D units space -> Vector3D Unitless space
+normalize :: Tolerance units => Vector3D units space -> Vector3D Unitless space
 normalize vector = do
-  let vm = magnitude vector
-  if vm == Quantity.zero then zero else vector / vm
+  let vectorMagnitude = magnitude vector
+  if vectorMagnitude ~= Quantity.zero
+    then zero
+    else vector / vectorMagnitude
 
 -- | Convert a vectr defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3D global local -> Vector3D units local -> Vector3D units global
