@@ -324,19 +324,19 @@ interval =
     , Class.numberMinus
     , Class.numberTimes
     , Class.numberDivideBy
-    , Class.plus @Number Class.noFallback
+    , Class.plus @Number (Class.fallbackMember "Plus Number")
     , Class.plus @Interval Class.fallbackMemberPlus
-    , Class.minus @Number Class.noFallback
+    , Class.minus @Number (Class.fallbackMember "Minus Number")
     , Class.minus @Interval Class.fallbackMemberMinus
-    , Class.times @Number Class.noFallback
+    , Class.times @Number (Class.fallbackMember "Times Number")
     , Class.times @Interval Class.fallbackMemberTimes
-    , Class.times @Length Class.noFallback
-    , Class.times @Area Class.noFallback
-    , Class.times @Angle Class.noFallback
+    , Class.times @Length (Class.fallbackMember "Times Length")
+    , Class.times @Area (Class.fallbackMember "Times Area")
+    , Class.times @Angle (Class.fallbackMember "Times Angle")
     , Class.times @LengthInterval Class.noFallback
     , Class.times @AreaInterval Class.noFallback
     , Class.times @AngleInterval Class.noFallback
-    , Class.divideBy @Number Class.noFallback
+    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
     , Class.divideBy @Interval Class.fallbackMemberDivideBy
     ]
 
@@ -361,16 +361,16 @@ lengthInterval =
     , Class.abs Interval.abs
     , Class.numberTimes
     , Class.plus @LengthInterval Class.fallbackMemberPlus
-    , Class.plus @Length Class.noFallback
+    , Class.plus @Length (Class.fallbackMember "Plus Length")
     , Class.minus @LengthInterval Class.fallbackMemberMinus
-    , Class.minus @Length Class.noFallback
-    , Class.times @Number Class.noFallback
+    , Class.minus @Length (Class.fallbackMember "Minus Length")
+    , Class.times @Number (Class.fallbackMember "Times Number")
     , Class.times @LengthInterval Class.fallbackStaticProduct
-    , Class.times @Length Class.noFallback
+    , Class.times @Length (Class.fallbackMember "Times Length")
     , Class.times @Interval Class.fallbackMemberTimes
-    , Class.divideBy @Number Class.noFallback
+    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
     , Class.divideBy @LengthInterval Class.fallbackStaticRatio
-    , Class.divideBy @Length Class.noFallback
+    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
     , Class.divideBy @Interval Class.fallbackMemberDivideBy
     ]
 
@@ -395,15 +395,15 @@ areaInterval =
     , Class.abs Interval.abs
     , Class.numberTimes
     , Class.plus @AreaInterval Class.fallbackMemberPlus
-    , Class.plus @Area Class.noFallback
+    , Class.plus @Area (Class.fallbackMember "Plus Area")
     , Class.minus @AreaInterval Class.fallbackMemberMinus
-    , Class.minus @Area Class.noFallback
-    , Class.times @Number Class.noFallback
+    , Class.minus @Area (Class.fallbackMember "Minus Area")
+    , Class.times @Number (Class.fallbackMember "Times Number")
     , Class.times @Interval Class.fallbackMemberTimes
-    , Class.divideBy @Number Class.noFallback
+    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
     , Class.divideBy @AreaInterval Class.fallbackStaticRatio
     , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
-    , Class.divideBy @Area Class.noFallback
+    , Class.divideBy @Area (Class.fallbackMember "Divide By Area")
     , Class.divideBy @Interval Class.fallbackMemberDivideBy
     , Class.divideBy @LengthInterval (Class.fallbackMember "Divide By Length Interval")
     ]
@@ -429,14 +429,14 @@ angleInterval =
     , Class.abs Interval.abs
     , Class.numberTimes
     , Class.plus @AngleInterval Class.fallbackMemberPlus
-    , Class.plus @Angle Class.noFallback
+    , Class.plus @Angle (Class.fallbackMember "Plus Angle")
     , Class.minus @AngleInterval Class.fallbackMemberMinus
-    , Class.minus @Angle Class.noFallback
-    , Class.times @Number Class.noFallback
+    , Class.minus @Angle (Class.fallbackMember "Minus Angle")
+    , Class.times @Number (Class.fallbackMember "Times Number")
     , Class.times @Interval Class.fallbackMemberTimes
-    , Class.divideBy @Number Class.noFallback
+    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
     , Class.divideBy @AngleInterval Class.fallbackStaticRatio
-    , Class.divideBy @Angle Class.noFallback
+    , Class.divideBy @Angle (Class.fallbackMember "Divide By Angle")
     , Class.divideBy @Interval Class.fallbackMemberDivideBy
     ]
 
@@ -873,20 +873,20 @@ curve1D =
     , Class.numberMinus
     , Class.numberTimes
     , Class.numberDivideByNonzeroU Curve1D.nonzero
-    , Class.plus @Number Class.noFallback
+    , Class.plus @Number (Class.fallbackMember "Plus Number")
     , Class.plus @Curve1D Class.fallbackMemberPlus
-    , Class.minus @Number Class.noFallback
+    , Class.minus @Number (Class.fallbackMember "Minus Number")
     , Class.minus @Curve1D Class.fallbackMemberMinus
-    , Class.times @Number Class.noFallback
+    , Class.times @Number (Class.fallbackMember "Times Number")
     , Class.times @Curve1D Class.fallbackMemberTimes
-    , Class.times @Length Class.noFallback
-    , Class.times @Area Class.noFallback
-    , Class.times @Angle Class.noFallback
+    , Class.times @Length (Class.fallbackMember "Times Length")
+    , Class.times @Area (Class.fallbackMember "Times Area")
+    , Class.times @Angle (Class.fallbackMember "Times Angle")
     , Class.times @LengthCurve1D Class.noFallback
     , Class.times @AreaCurve1D Class.noFallback
     , Class.times @AngleCurve1D Class.noFallback
     , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.fallbackMemberDivideBy
-    , Class.divideBy @Number Class.noFallback
+    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
     ]
 
 type AngleCurve1D = Curve1D.Curve1D Radians
@@ -906,14 +906,14 @@ angleCurve1D =
     , Class.negation
     , Class.numberTimes
     , Class.plus @AngleCurve1D Class.fallbackMemberPlus
-    , Class.plus @Angle Class.noFallback
+    , Class.plus @Angle (Class.fallbackMember "Plus Angle")
     , Class.minus @AngleCurve1D Class.fallbackMemberMinus
-    , Class.minus @Angle Class.noFallback
-    , Class.times @Number Class.noFallback
+    , Class.minus @Angle (Class.fallbackMember "Minus Angle")
+    , Class.times @Number (Class.fallbackMember "Times Number")
     , Class.times @Curve1D Class.fallbackMemberTimes
-    , Class.divideBy @Number Class.noFallback
+    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
     , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.fallbackMemberDivideBy
-    , Class.divideBy @Angle Class.noFallback
+    , Class.divideBy @Angle (Class.fallbackMember "Divide By Angle")
     , Class.divideByNonzeroR @AngleCurve1D Curve1D.nonzero Class.fallbackStaticRatio
     ]
 
@@ -933,15 +933,15 @@ lengthCurve1D =
     , Class.negation
     , Class.numberTimes
     , Class.plus @LengthCurve1D Class.fallbackMemberPlus
-    , Class.plus @Length Class.noFallback
+    , Class.plus @Length (Class.fallbackMember "Plus Length")
     , Class.minus @LengthCurve1D Class.fallbackMemberMinus
-    , Class.minus @Length Class.noFallback
-    , Class.times @Number Class.noFallback
+    , Class.minus @Length (Class.fallbackMember "Minus Length")
+    , Class.times @Number (Class.fallbackMember "Times Number")
     , Class.times @LengthCurve1D Class.fallbackStaticProduct
-    , Class.times @Length Class.noFallback
+    , Class.times @Length (Class.fallbackMember "Times Length")
     , Class.times @Curve1D Class.fallbackMemberTimes
-    , Class.divideBy @Number Class.noFallback
-    , Class.divideBy @Length Class.noFallback
+    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
+    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
     , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.fallbackMemberDivideBy
     , Class.divideByNonzeroM @LengthCurve1D Curve1D.nonzero Class.fallbackStaticRatio
     , Class.nested @Curve1D.Root "A point where a given curve is equal to zero." $
@@ -964,11 +964,11 @@ areaCurve1D =
     , Class.negation
     , Class.numberTimes
     , Class.plus @AreaCurve1D Class.fallbackMemberPlus
-    , Class.plus @Area Class.noFallback
+    , Class.plus @Area (Class.fallbackMember "Plus Area")
     , Class.minus @AreaCurve1D Class.fallbackMemberMinus
-    , Class.minus @Area Class.noFallback
+    , Class.minus @Area (Class.fallbackMember "Minus Area")
     , Class.times @Curve1D Class.fallbackMemberTimes
-    , Class.times @Number Class.noFallback
+    , Class.times @Number (Class.fallbackMember "Times Number")
     , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.fallbackMemberDivideBy
     , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
     , Class.divideByNonzeroM @LengthCurve1D Curve1D.nonzero (Class.fallbackMember "Divide By Length Curve")
@@ -1520,7 +1520,7 @@ curve2D =
     , Class.plus @DisplacementCurve2D (Class.fallbackMember "Plus Displacement Curve")
     , Class.minus @DisplacementCurve2D (Class.fallbackMember "Minus Displacement Curve")
     , Class.minus @Curve2D Class.fallbackMemberMinus
-    , Class.minus @Point2D Class.noFallback
+    , Class.minus @Point2D (Class.fallbackMember "Minus Point")
     ]
       <> affineTransformations2D Curve2D.transformBy
 
@@ -1552,7 +1552,7 @@ uvCurve =
     , Class.plus @VectorCurve2D (Class.fallbackMember "Plus Vector Curve")
     , Class.minus @VectorCurve2D (Class.fallbackMember "Minus Vector Curve")
     , Class.minus @UvCurve Class.fallbackMemberMinus
-    , Class.minus @UvPoint Class.noFallback
+    , Class.minus @UvPoint (Class.fallbackMember "Minus Point")
     ]
 
 type Region2D = Region2D.Region2D Meters
