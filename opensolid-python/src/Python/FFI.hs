@@ -158,7 +158,7 @@ singleArgument varName ffiType = case ffiType of
   FFI.Text -> "_str_to_text(" <> varName <> ")"
   FFI.List itemType -> listArgumentValue ffiType itemType varName
   FFI.NonEmpty itemType -> nonEmptyArgumentValue itemType varName
-  FFI.Array itemType -> nonEmptyArgumentValue itemType varName
+  FFI.Array itemType -> arrayArgumentValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> InternalError.throw "Should never have Result as input argument"
@@ -174,7 +174,7 @@ fieldArgumentValue varName ffiType = case ffiType of
   FFI.Text -> "_str_to_text(" <> varName <> ")"
   FFI.List itemType -> listArgumentValue ffiType itemType varName
   FFI.NonEmpty itemType -> nonEmptyArgumentValue itemType varName
-  FFI.Array itemType -> nonEmptyArgumentValue itemType varName
+  FFI.Array itemType -> arrayArgumentValue itemType varName
   FFI.Tuple type1 type2 rest -> tupleArgumentValue ffiType type1 type2 rest varName
   FFI.Maybe valueType -> maybeArgumentValue ffiType valueType varName
   FFI.Result{} -> InternalError.throw "Should never have Result as input argument"
@@ -187,6 +187,10 @@ listArgumentValue listType itemType varName = do
   let arrayItems = "[" <> singleArgument "item" itemType <> " for item in " <> varName <> "]"
   let array = arrayType <> "(*" <> arrayItems <> ")"
   typeName listType <> "(" <> numItems <> ", " <> array <> ")"
+
+arrayArgumentValue :: FFI.Type -> Text -> Text
+arrayArgumentValue itemType varName =
+  listArgumentValue (FFI.List itemType) itemType varName
 
 nonEmptyArgumentValue :: FFI.Type -> Text -> Text
 nonEmptyArgumentValue itemType varName = do

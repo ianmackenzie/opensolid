@@ -98,7 +98,7 @@ data Representation a where
   ListRep :: FFI a => Representation (List a)
   -- Same representation as a list, but with a runtime check for emptiness
   NonEmptyRep :: FFI a => Representation (NonEmpty a)
-  -- Same representation as a list, but with a runtime check for emptiness
+  -- Same representation as a list
   ArrayRep :: FFI a => Representation (Array a)
   -- A struct with the first item and then the second
   Tuple2Rep ::
