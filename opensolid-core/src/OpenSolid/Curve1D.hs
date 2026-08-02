@@ -88,7 +88,13 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
 
-data Curve1D units = Curve1D {compiled :: Compiled units, derivative :: ~(Curve1D units)}
+data Curve1D units = Curve1D
+  { compiled :: Compiled units
+  , derivative :: ~(Curve1D units)
+  , startValue :: ~(Quantity units)
+  , endValue :: ~(Quantity units)
+  , maxSampledAbsoluteValue :: ~(Quantity units)
+  }
 
 type Compiled units = CompiledFunction Number (Quantity units) (Interval Unitless) (Interval units)
 
@@ -111,6 +117,9 @@ instance Units.Coercion (Curve1D units1) (Curve1D units2) where
     Curve1D
       { compiled = Units.coerce curve.compiled
       , derivative = Units.coerce curve.derivative
+      , startValue = Units.coerce curve.startValue
+      , endValue = Units.coerce curve.endValue
+      , maxSampledAbsoluteValue = Units.coerce curve.maxSampledAbsoluteValue
       }
 
 instance ApproximateEquality (Curve1D units) (Tolerance units) where
@@ -138,7 +147,15 @@ instance
   quantity `intersects` curve = curve `intersects` quantity
 
 new :: Compiled units -> Curve1D units -> Curve1D units
-new = Curve1D
+new givenCompiled givenDerivative = do
+  let sampledAbsoluteValue tValue = Quantity.abs (CompiledFunction.value tValue givenCompiled)
+  Curve1D
+    { compiled = givenCompiled
+    , derivative = givenDerivative
+    , startValue = CompiledFunction.value 0.0 givenCompiled
+    , endValue = CompiledFunction.value 1.0 givenCompiled
+    , maxSampledAbsoluteValue = NonEmpty.maximumOf sampledAbsoluteValue Parameter.samples
+    }
 
 concrete :: Expression Number (Quantity units) -> Curve1D units -> Curve1D units
 concrete givenExpression givenDerivative =
@@ -368,6 +385,8 @@ The parameter value should be between 0 and 1.
 -}
 {-# INLINE valueAt #-}
 valueAt :: Number -> Curve1D units -> Quantity units
+valueAt 0.0 curve = startValue curve
+valueAt 1.0 curve = endValue curve
 valueAt tValue curve = CompiledFunction.value tValue (compiled curve)
 
 {-# INLINE valueOf #-}
@@ -378,11 +397,13 @@ valueOf curve tValue = valueAt tValue curve
 range :: Interval Unitless -> Curve1D units -> Interval units
 range tRange curve = CompiledFunction.range tRange (compiled curve)
 
+{-# INLINE startValue #-}
 startValue :: Curve1D units -> Quantity units
-startValue = valueAt 0.0
+startValue = (.startValue)
 
+{-# INLINE endValue #-}
 endValue :: Curve1D units -> Quantity units
-endValue = valueAt 1.0
+endValue = (.endValue)
 
 {-# INLINE derivativeAt #-}
 derivativeAt :: Number -> Curve1D units -> Quantity units
@@ -488,8 +509,7 @@ instance Estimate.Interface (Integral units) units where
     Estimate.new (Integral curve tLeft) + Estimate.new (Integral curve tRight)
 
 degeneracyTolerance :: Curve1D units -> Quantity units
-degeneracyTolerance curve =
-  Tolerance.unitless * NonEmpty.maximumOf (Quantity.abs . valueOf curve) Parameter.samples
+degeneracyTolerance curve = Tolerance.unitless * curve.maxSampledAbsoluteValue
 
 ----- ZERO FINDING -----
 
