@@ -1,5 +1,3 @@
-Remove no-longer-used 'upcast' support
-
 Add support for 'Nondegenerate Surface3D'
 - then refactor Body3D to store a set of 'Nondegenerate Surface3D'
 
@@ -9,28 +7,10 @@ Implement Curve3D-Surface3D intersection
 
 Implement Surface3D-Surface3D intersection...
 
-Add Curve.Nonzero.compiled
-- then division instances can avoid wrapping/unwrapping Nonzero values (search for '\(Nonzero [a-z]' as a regex)
-
-Add Show.partialRecord function
-- use for records where some fields are left out and replaced with an ellipsis
-- use for CurvePoint, IntersectionPoint, maybe Segment types (anything with lazily-computed fields that may not even be valid)
-
-Clean up error modules
-- InternalError vs Error, Nondegenerate vs IsDegenerate...
-
-Move IndexOutOfBounds into Error module?
-- search for other error types ('deriving (Show, Exception)' or just search for Exception)
-  - HigherOrderZero, InfiniteRecursion, InternalError?
-- rename Error module to Exception?
-
 Do a pass to make sure anything using Tolerance.unitless is normalized
 - normalize NURBS points and weights (divide all points and weights by the largest weight)?
 
 Add Planar bytecode instruction
-
-Cache normal direction in PlaneOrientation3D?
-- will often be a constant anyways...and can compute lazily
 
 Switch transforms to be flat structs of unboxed Double# components
 
@@ -63,10 +43,6 @@ Implement Intersects for:
 Rework Region2D sign-fixing to use overall signed rotation angle instead of signed area?
 - seems a bit simpler and more efficient
 
-Add Parameter class to target language API with Parameter.t, Parameter.u, Parameter.v?
-- or Curve.t, Surface.u, Surface.v
-- avoid UnitlessCurve1D.t, UnitlessSurfaceFunction1D.u, UnitlessSurfaceFunction1D.v
-
 Reconsider adding functions that just mirror constructors?
 - sometimes most convenient/consistent to just use qualified functions for everything...
 - Point2D.xy, Vector2D.xy, Bounds2D.xy, VectorBounds2D.xy, Line#D.from
@@ -76,11 +52,6 @@ Reconsider adding functions that just mirror constructors?
 Add enough STEP support to "handcraft" planar/extruded surfaces etc.
 - convert curves to simple B-spline curves (piecewise cubic or quintic)
 - or even just support lines, arcs (and maybe Bezier curves) for now?
-
-Optimize curve segment bounds computation using tangent bounds
-- find max angle of tangent from joining line
-- use that to construct a 'sphere' bounding box at the line midpoint
-- take hull with endpoints
 
 Add support for generic interface types to target language API?
 - add Class.container
@@ -106,9 +77,6 @@ Move directionBounds, tangentDirectionBounds, normalDirectionBounds into Nondege
 - *can* be evaluated for degenerate geometries but it's not very meaningful to do so
 - allowing evaluation for degenerate geometries makes it easier to cache in Segment types though...
 
-Refactor Curve.Segment construction to use L'Hopital for tangents where appropriate
-- normalize second derivative (or negated second derivative) if subdomain includes a singular endpoint
-
 Refactor bisection search to throw during *search*, not during domain *construction*?
 - more useful stack traces, not just traced back to Domain.unitInterval
 - add 'children' accessor function instead of exposing constructor,
@@ -123,12 +91,6 @@ Move remaining generic functionality from Curve#D modules into Curve module
 Tighten vector bounds normalization
 - add C++ code callable via primop that computes normalized vector bounds
   - properly handle cases where component intervals cross zero
-
-Optimize bounds construction in Curve.Segment to take monotonicity into account
-- for each monotonic coordinate in first derivative bounds, can just use hull of start/end for position bounds
-  - generic Bounds function that takes two Point values, a Bounds value and a VectorBounds value
-    and returns a (possibly tightened) Bounds value? maybe call it "tighten"...
-- use tangent instead of first derivative to exploit L'Hopital where appropriate...
 
 Refactor Pair.decorate to have the decoration *first*?
 - better for both sorting and constructing key/value lists for map construction
@@ -149,11 +111,6 @@ Deduplicate code from Tests.Curve2D and Tests.Curve3D into Tests.Curve?
 Rename OpenSolid.Search to OpenSolid.Bisection?
 - rename 'exclusive' to just 'search'
 - add 'find' that just attempts to find a *single* solution
-
-Switch to Vector, VectorBounds purely *forwarding* to Vector2D, VectorBounds2D etc.?
-- don't call back into e.g. Vector from Vector2D
-- more efficient (all operations on primitives are monomorphized, easily inlineable etc.)
-- don't have to have 'fat' .hs-boot files for primitives
 
 Get rid of fields other than internally in modules
 
@@ -221,12 +178,6 @@ Add batch evaluation functions?
 - most important for target languages to avoid many FFI calls
   - curve.steps(n), curve.leading(n), curve.trailing(n) etc.?
 
-Reduce use of HasField instances
--> 'actual Haskell fields' only? (including nested?)
--> Switch types over to being records
-  -> curves and surface functions ('compiled' and derivatives)
--> maybe even disable OverloadedRecordDot? still use records for nice construction/destructuring...
-
 Add more UV-specific modules/types/functions:
 - UvAxis.[u,v]
 - UvDirection.[u,v]
@@ -237,6 +188,7 @@ Add more UV-specific modules/types/functions:
 
 Search for 'Unitless UvSpace' and 'Meters space' to see where type aliases can be used
 -> or new ones introduced...
+-> Displacement3D, DisplacementBounds3D, DisplacementCurve3D, DisplacementSurfaceFunction3D
 
 Add more Curve2D intersection tests
 -> use cycloid as example of curve with singularity?
@@ -250,11 +202,6 @@ Switch back to 'normal' (non-recursive) form of quotient derivatives
 -> search for 'recursive' calls in general?
 
 Rework Curve2D.medialAxis to use tangent directions instead of derivative vectors
-
-Clean up division by 'Curve units' or 'SurfaceFunction units' that is (approximately) identically zero by replacing with division by actual constant zero
--> or just *multiplication* by infinity...
--> Faster to evaluate, gives actual infinities instead of just extremely large values (more correct!)
--> Maybe also for division by e.g. 'Qty units', so division by *approximately* zero gives actual infinity?
 
 Add vectorTransformations3D helper list in API module
 
