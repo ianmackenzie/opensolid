@@ -243,8 +243,11 @@ library
     OpenSolid.UvPoint
     OpenSolid.UvRegion
     OpenSolid.Vector
+    OpenSolid.Vector.Nonzero
     OpenSolid.Vector2D
+    OpenSolid.Vector2D.Nonzero
     OpenSolid.Vector3D
+    OpenSolid.Vector3D.Nonzero
     OpenSolid.VectorBounds
     OpenSolid.VectorBounds2D
     OpenSolid.VectorBounds3D
