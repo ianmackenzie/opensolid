@@ -132,7 +132,7 @@ data Representation a where
   Tuple9Rep ::
     (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i) =>
     Representation (a, b, c, d, e, f, g, h, i)
-  -- A struct with the eight items in order
+  -- A struct with the ten items in order
   Tuple10Rep ::
     (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i, FFI j) =>
     Representation (a, b, c, d, e, f, g, h, i, j)
