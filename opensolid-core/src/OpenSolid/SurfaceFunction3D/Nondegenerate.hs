@@ -7,15 +7,15 @@ module OpenSolid.SurfaceFunction3D.Nondegenerate
 where
 
 import OpenSolid.Direction3D (Direction3D)
-import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector3D qualified as Vector3D
+import OpenSolid.Vector3D.Nonzero qualified as Vector3D.Nonzero
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D.Nondegenerate qualified as VectorSurfaceFunction3D.Nondegenerate
 
@@ -43,4 +43,4 @@ normalDirectionAt uvPoint function = do
   let fuDirection = VectorSurfaceFunction3D.Nondegenerate.direction fu uvPoint
   let fvDirection = VectorSurfaceFunction3D.Nondegenerate.direction fv uvPoint
   let crossProduct = fuDirection `cross` fvDirection
-  Direction3D.unsafe (crossProduct / Vector3D.magnitude crossProduct)
+  Vector3D.Nonzero.direction (Nonzero crossProduct)
