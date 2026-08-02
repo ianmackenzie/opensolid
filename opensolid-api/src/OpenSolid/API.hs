@@ -668,6 +668,8 @@ point2D =
     , Class.member1 "Distance To" "Other" Point2D.distanceFrom $(docs 'Point2D.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point2D.midpoint $(docs 'Point2D.midpoint)
     , Class.member1 "Place On" "Plane" (Point2D.placeOn @Void) $(docs 'Point2D.placeOn)
+    , Class.plus @Displacement2D Class.noFallback
+    , Class.minus @Displacement2D Class.noFallback
     , Class.minus @Point2D Class.fallbackMemberMinus
     , Class.minus @Curve2D Class.noFallback
     ]
