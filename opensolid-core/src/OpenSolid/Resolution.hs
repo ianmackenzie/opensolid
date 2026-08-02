@@ -19,9 +19,6 @@ data Resolution units = Resolution
   }
   deriving (Show)
 
-instance FFI (Resolution Unitless) where
-  representation = FFI.classRepresentation "UnitlessResolution"
-
 instance FFI (Resolution Meters) where
   representation = FFI.classRepresentation "Resolution"
 
