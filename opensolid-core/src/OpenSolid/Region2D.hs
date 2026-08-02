@@ -324,7 +324,7 @@ checkCurvesForInnerIntersection curve1 curve2 =
         then Ok ()
         else Err BoundedBy.BoundaryIntersectsItself
 
-isEndpointIntersection :: Curve2D.IntersectionPoint units -> Bool
+isEndpointIntersection :: Curve.IntersectionPoint -> Bool
 isEndpointIntersection intersectionPoint = do
   let (t1, t2) = Curve.IntersectionPoint.parameterValues intersectionPoint
   Parameter.isEndpoint t1 && Parameter.isEndpoint t2

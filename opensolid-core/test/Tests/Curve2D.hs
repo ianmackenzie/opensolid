@@ -16,7 +16,6 @@ import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve2D.Nonzero qualified as Curve2D.Nonzero
-import OpenSolid.CurvePoint qualified as CurvePoint
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
@@ -71,9 +70,8 @@ findParameterValues ::
   Point2D units ->
   Curve2D units ->
   Result Text (List Number)
-findParameterValues point curve = do
-  curvePoints <- Curve2D.findPoint point curve ?? fail
-  Ok (List.map CurvePoint.parameterValue curvePoints)
+findParameterValues point curve =
+  Curve2D.findPoint point curve ?? fail
 
 findPoint :: Test
 findPoint = Test.verify "findPoint" do
@@ -115,7 +113,7 @@ overlappingSegments ::
   Tolerance Meters =>
   Curve2D Meters ->
   Curve2D Meters ->
-  Result Text (Sign, NonEmpty (Interval Unitless, Interval Unitless), List (Curve2D.IntersectionPoint Meters))
+  Result Text (Sign, NonEmpty (Interval Unitless, Interval Unitless), List Curve.IntersectionPoint)
 overlappingSegments curve1 curve2 =
   case Curve2D.intersections curve1 curve2 of
     Ok (Just (Curve.OverlappingSegments sign segments intersectionPoints)) ->
@@ -194,14 +192,9 @@ overlapAndJoin = Test.verify "overlapAndJoin" do
           (#radius Length.meter)
           (#startAngle (Angle.degrees -45.0))
           (#endAngle Angle.pi)
-  nondegenerate1 <- Curve.nondegenerate arc1 ?? fail
-  nondegenerate2 <- Curve.nondegenerate arc2 ?? fail
-  let curvePoint1 t1 = Curve.Nondegenerate.curvePointAt t1 nondegenerate1
-  let curvePoint2 t2 = Curve.Nondegenerate.curvePointAt t2 nondegenerate2
   (sign, segments, points) <- overlappingSegments arc1 arc2 ?? fail
   let expectedSegments = NonEmpty.one (Interval 0.0 (1 / 4), Interval 0.0 (1 / 5))
-  let expectedPoints =
-        [IntersectionPoint.indistinguishable Negative (curvePoint1 1.0, curvePoint2 1.0)]
+  let expectedPoints = [IntersectionPoint.indistinguishable Negative (1.0, 1.0)]
   Test.all
     [ Test.expect (equalOverlapSegmentLists segments expectedSegments)
         & Test.output "segments" segments
@@ -216,15 +209,11 @@ crossingIntersection :: Test
 crossingIntersection = Test.verify "crossingIntersection" do
   let arc1 = Curve2D.arcFrom Point2D.origin (Point2D.meters 0.0 1.0) Angle.halfTurn
   let arc2 = Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
-  nondegenerate1 <- Curve.nondegenerate arc1 ?? fail
-  nondegenerate2 <- Curve.nondegenerate arc2 ?? fail
-  let curvePoint1 t1 = Curve.Nondegenerate.curvePointAt t1 nondegenerate1
-  let curvePoint2 t2 = Curve.Nondegenerate.curvePointAt t2 nondegenerate2
   intersections <- Curve2D.intersections arc1 arc2 ?? fail
   let expectedIntersectionPoints =
         NonEmpty.two
-          (IntersectionPoint.crossing (curvePoint1 0.0, curvePoint2 0.0))
-          (IntersectionPoint.crossing (curvePoint1 0.5, curvePoint2 0.5))
+          (IntersectionPoint.crossing (0.0, 0.0))
+          (IntersectionPoint.crossing (0.5, 0.5))
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
@@ -248,13 +237,8 @@ tangentIntersection = Test.verify "tangentIntersection" do
           (#radius (Length.meters 0.5))
           (#startAngle -Angle.pi)
           (#endAngle Angle.zero)
-  nondegenerate1 <- Curve.nondegenerate arc1 ?? fail
-  nondegenerate2 <- Curve.nondegenerate arc2 ?? fail
-  let curvePoint1 t1 = Curve.Nondegenerate.curvePointAt t1 nondegenerate1
-  let curvePoint2 t2 = Curve.Nondegenerate.curvePointAt t2 nondegenerate2
   intersections <- Curve2D.intersections arc1 arc2 ?? fail
-  let expectedIntersectionPoints =
-        NonEmpty.one (IntersectionPoint.tangent Negative (curvePoint1 0.5, curvePoint2 0.5))
+  let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent Negative (0.5, 0.5))
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
@@ -420,8 +404,8 @@ g2 = Test.check 100 "G2 continuity" do
   let arcCenter = point + signedRadius * normalDirection
   let arc = Curve2D.sweptArc arcCenter point (Quantity.sign signedRadius * Angle.degrees 30.0)
   nondegenerateArc <- Curve.nondegenerate arc ?? fail
-  let splinePoint = Curve.Nondegenerate.curvePointAt t (Nondegenerate.fromNonzero spline)
-  let arcPoint = Curve.Nondegenerate.curvePointAt 0.0 nondegenerateArc
-  let continuity = CurvePoint.continuity splinePoint arcPoint
+  let continuity =
+        Curve.Nondegenerate.continuityAt (t, 0.0) $
+          (Nondegenerate.fromNonzero spline, nondegenerateArc)
   Test.expect (continuity == Just (Continuity.Indistinguishable Positive))
     & Test.output "continuity" continuity

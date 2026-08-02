@@ -1,10 +1,12 @@
 {-# LANGUAGE UnboxedTuples #-}
 
 module OpenSolid.Curve.Nondegenerate
-  ( pointAt
+  ( hasDegenerateStart
+  , hasDegenerateEnd
+  , pointAt
   , pointOn
-  , curvePointAt
-  , curvePointOn
+  , startPoint
+  , endPoint
   , bounds
   , derivative
   , derivativeAt
@@ -12,6 +14,7 @@ module OpenSolid.Curve.Nondegenerate
   , tangentDirectionAt
   , bisectionTree
   , findPoint
+  , continuityAt
   , intersections
   )
 where
@@ -19,28 +22,40 @@ where
 import OpenSolid.Bag qualified as Bag
 import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.Bounds (Bounds)
+import OpenSolid.Continuity (Continuity)
+import OpenSolid.Continuity qualified as Continuity
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
-import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
+import OpenSolid.Curve.CurvatureVector qualified as Curve.CurvatureVector
+import OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate.Intersections qualified as Curve.Nondegenerate.Intersections
-import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve.Segment qualified as Curve.Segment
-import OpenSolid.CurveLocation qualified as CurveLocation
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.Fuzzy qualified as Fuzzy
-import OpenSolid.Internal.CurvePoint (CurvePoint (..))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
-import OpenSolid.Nondegenerate qualified as Nondegenerate
+import OpenSolid.Number qualified as Number
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Vector (Vector)
+import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
+
+hasDegenerateStart ::
+  Curve.Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) -> Bool
+hasDegenerateStart (Nondegenerate curve) = Curve.hasDegenerateStart curve
+
+hasDegenerateEnd ::
+  Curve.Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) -> Bool
+hasDegenerateEnd (Nondegenerate curve) = Curve.hasDegenerateEnd curve
 
 {-# INLINE pointAt #-}
 pointAt ::
@@ -57,30 +72,11 @@ pointOn ::
   Point dimension units space
 pointOn curve tValue = pointAt tValue curve
 
-curvePointAt ::
-  Curve.Exists dimension units space =>
-  Number ->
-  Nondegenerate (Curve dimension units space) ->
-  CurvePoint dimension units space
-curvePointAt tValue curve =
-  recursive \result ->
-    CurvePoint
-      { location = CurveLocation.fromParameterValue tValue
-      , point = pointAt tValue curve
-      , derivative = derivativeAt tValue curve
-      , tangentDirection = tangentDirectionAt tValue curve
-      , curvatureVector_ =
-          result
-            & Nondegenerate.field \_ ->
-              Curve.Nonzero.curvatureVectorAt_ tValue (Nondegenerate.interior curve)
-      }
+startPoint :: Nondegenerate (Curve dimension units space) -> Point dimension units space
+startPoint (Nondegenerate curve) = Curve.startPoint curve
 
-curvePointOn ::
-  Curve.Exists dimension units space =>
-  Nondegenerate (Curve dimension units space) ->
-  Number ->
-  CurvePoint dimension units space
-curvePointOn curve tValue = curvePointAt tValue curve
+endPoint :: Nondegenerate (Curve dimension units space) -> Point dimension units space
+endPoint (Nondegenerate curve) = Curve.endPoint curve
 
 bounds ::
   Curve.Exists dimension units space =>
@@ -131,7 +127,7 @@ findPoint ::
   (Curve.Exists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Nondegenerate (Curve dimension units space) ->
-  List (CurvePoint dimension units space)
+  List Number
 findPoint givenPoint givenCurve = do
   let endpointSolutions = [t | t <- [0.0, 1.0], pointAt t givenCurve ~= givenPoint]
   let endpointSolutionSet = Bag.pack Interval.constant endpointSolutions
@@ -151,7 +147,48 @@ findPoint givenPoint givenCurve = do
           & Bisection.clusters endpointSolutionSet resolvedMonotonicity
   let interiorSolutions = List.filterMap (Bisection.find resolvedSolution) clusters
   List.sort (endpointSolutions <> interiorSolutions)
-    & List.map (curvePointOn givenCurve)
+
+isDegenerateAt ::
+  (Curve.Exists dimension units space, Tolerance units) =>
+  Number ->
+  Nondegenerate (Curve dimension units space) ->
+  Bool
+isDegenerateAt 0.0 curve = hasDegenerateStart curve
+isDegenerateAt 1.0 curve = hasDegenerateEnd curve
+isDegenerateAt _ _ = False -- Assume no interior degeneracies
+
+continuityAt ::
+  forall dimension units space.
+  (Curve.Exists dimension units space, Tolerance units) =>
+  (Number, Number) ->
+  (Nondegenerate (Curve dimension units space), Nondegenerate (Curve dimension units space)) ->
+  Maybe Continuity
+continuityAt (t1, t2) (curve1, curve2)
+  | pointAt t1 curve1 ~= pointAt t2 curve2 = do
+      let tangent1 = tangentDirectionAt t1 curve1
+      let tangent2 = tangentDirectionAt t2 curve2
+      if Direction.independent tangent1 tangent2
+        then Just Continuity.Crossing
+        else do
+          let alignment = Number.sign (tangent1 `dot` tangent2)
+          if isDegenerateAt t1 curve1 || isDegenerateAt t2 curve2
+            then Just (Continuity.Indistinguishable alignment)
+            else do
+              let firstDerivative1 = derivativeAt t1 curve1
+              let firstDerivative2 = derivativeAt t2 curve2
+              let secondDerivative1 = secondDerivativeAt t1 curve1
+              let secondDerivative2 = secondDerivativeAt t2 curve2
+              let l1 = Vector.magnitude firstDerivative1
+              let l2 = Vector.magnitude firstDerivative2
+              let l = Quantity.erase (min l1 l2)
+              let k1_ = Curve.CurvatureVector.value_ firstDerivative1 secondDerivative1
+              let k2_ = Curve.CurvatureVector.value_ firstDerivative2 secondDerivative2
+              let k = Vector.erase (k1_ - k2_)
+              let curvatureError = Vector.unerase @units (k * l * l / 2.0)
+              if curvatureError ~= Vector.zero
+                then Just (Continuity.Indistinguishable alignment)
+                else Just (Continuity.Tangent alignment)
+  | otherwise = Nothing
 
 intersections ::
   ( Curve.Exists dimension units space
@@ -160,5 +197,5 @@ intersections ::
   ) =>
   Nondegenerate (Curve dimension units space) ->
   Nondegenerate (Curve dimension units space) ->
-  Maybe (Intersections dimension units space)
+  Maybe Intersections
 intersections = Curve.Nondegenerate.Intersections.intersections

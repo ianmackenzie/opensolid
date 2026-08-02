@@ -74,9 +74,9 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import {-# SOURCE #-} OpenSolid.Curve.CrossingSolver qualified as Curve.CrossingSolver
-import {-# SOURCE #-} OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
-import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
-import {-# SOURCE #-} OpenSolid.Curve.Intersections qualified as Intersections
+import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
+import OpenSolid.Curve.Intersections (Intersections)
+import OpenSolid.Curve.Intersections qualified as Intersections
 import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate.Intersections qualified as Curve.Nondegenerate.Intersections
 import OpenSolid.Curve.Segment (Segment)
@@ -85,7 +85,6 @@ import {-# SOURCE #-} OpenSolid.Curve.TangentSolver2D qualified as Curve.Tangent
 import {-# SOURCE #-} OpenSolid.Curve.TangentSolver3D qualified as Curve.TangentSolver3D
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.CurvePoint (CurvePoint)
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
@@ -391,7 +390,7 @@ data Solver dimension units space where
         tag ->
         (Interval Unitless, Interval Unitless) ->
         (Segment dimension units space, Segment dimension units space) ->
-        Fuzzy (Maybe (IntersectionPoint dimension units space))
+        Fuzzy (Maybe IntersectionPoint)
     } ->
     Solver dimension units space
 
@@ -722,7 +721,7 @@ findPoint ::
   (Exists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Curve dimension units space ->
-  Result IsDegenerate (List (CurvePoint dimension units space))
+  Result IsDegenerate (List Number)
 findPoint givenPoint curve =
   Result.map (Curve.Nondegenerate.findPoint givenPoint) (nondegenerate curve)
 
@@ -733,7 +732,7 @@ intersections ::
   ) =>
   Curve dimension units space ->
   Curve dimension units space ->
-  Result IsDegenerate (Maybe (Intersections dimension units space))
+  Result IsDegenerate (Maybe Intersections)
 intersections curve1 curve2 = do
   nondegenerate1 <- nondegenerate curve1
   nondegenerate2 <- nondegenerate curve2

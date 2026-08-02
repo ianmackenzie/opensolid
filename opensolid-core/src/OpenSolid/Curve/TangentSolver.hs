@@ -16,7 +16,6 @@ import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Segment qualified as Curve.Segment
-import OpenSolid.CurvePoint qualified as CurvePoint
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
@@ -62,15 +61,14 @@ solve ::
   Interval Unitless ->
   Interval Unitless ->
   NewtonRaphson.Surface.Function 2 units Void ->
-  Fuzzy (Maybe (IntersectionPoint dimension units space))
+  Fuzzy (Maybe IntersectionPoint)
 solve nondegenerateA nondegenerateB tRangeA tRangeB function = do
   UvPoint tA tB <- NewtonRaphson.Surface.solveIn (UvBounds tRangeA tRangeB) function
-  let p1 = Curve.Nondegenerate.curvePointAt tA nondegenerateA
-  let p2 = Curve.Nondegenerate.curvePointAt tB nondegenerateB
-  case CurvePoint.continuity p1 p2 of
+  let solution = (tA, tB)
+  case Curve.Nondegenerate.continuityAt solution (nondegenerateA, nondegenerateB) of
     Nothing -> Unresolved
     Just continuity -> case continuity of
       Continuity.Crossing -> Unresolved
-      Continuity.Tangent sign -> Resolved (Just (IntersectionPoint.tangent sign (p1, p2)))
+      Continuity.Tangent sign -> Resolved (Just (IntersectionPoint.tangent sign solution))
       Continuity.Indistinguishable _ ->
         InternalError.throw "Should have guaranteed by this point that curvatures are not equal"

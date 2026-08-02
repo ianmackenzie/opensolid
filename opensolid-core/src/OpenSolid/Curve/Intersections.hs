@@ -7,10 +7,10 @@ import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 
-data Intersections dimension units space
-  = IntersectionPoints (NonEmpty (IntersectionPoint dimension units space))
+data Intersections
+  = IntersectionPoints (NonEmpty IntersectionPoint)
   | OverlappingSegments
       Sign
       (NonEmpty (Interval Unitless, Interval Unitless))
-      (List (IntersectionPoint dimension units space))
+      (List IntersectionPoint)
   deriving (Show)

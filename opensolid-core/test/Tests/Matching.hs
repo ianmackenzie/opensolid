@@ -1,11 +1,13 @@
-module Tests.Matching (Matching (matching)) where
+module Tests.Matching
+  ( Matching (matching)
+  , matchingBy
+  )
+where
 
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as Curve.IntersectionPoint
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
-import OpenSolid.CurvePoint (CurvePoint)
-import OpenSolid.CurvePoint qualified as CurvePoint
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
@@ -47,10 +49,9 @@ instance Matching Curve1D.Zero where
       && zero1.order == zero2.order
       && zero1.sign == zero2.sign
 
-instance Matching (CurvePoint dimension units space) where
-  matching = matchingBy CurvePoint.parameterValue
-
-instance Matching (Curve.IntersectionPoint dimension units space) where
+instance Matching Curve.IntersectionPoint where
   matching first second =
     (Curve.IntersectionPoint.continuity first == Curve.IntersectionPoint.continuity second)
-      && matching (Curve.IntersectionPoint.curvePoints first) (Curve.IntersectionPoint.curvePoints second)
+      && matching
+        (Curve.IntersectionPoint.parameterValues first)
+        (Curve.IntersectionPoint.parameterValues second)

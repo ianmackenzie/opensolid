@@ -41,8 +41,6 @@ module OpenSolid.Curve2D
   , tangentDirectionRange
   , reverse
   , bounds
-  , IntersectionPoint
-  , Intersections
   , intersections
   , findPoint
   , distanceAlong
@@ -89,14 +87,13 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve2D)
+import OpenSolid.Curve (Curve2D, Intersections)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
-import OpenSolid.CurvePoint2D (CurvePoint2D)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
@@ -512,22 +509,14 @@ yCoordinate curve = do
 coordinates :: Curve2D units -> (Curve1D units, Curve1D units)
 coordinates curve = (xCoordinate curve, yCoordinate curve)
 
-findPoint ::
-  Tolerance units =>
-  Point2D units ->
-  Curve2D units ->
-  Result IsDegenerate (List (CurvePoint2D units))
+findPoint :: Tolerance units => Point2D units -> Curve2D units -> Result IsDegenerate (List Number)
 findPoint = Curve.findPoint
-
-type IntersectionPoint units = Curve.IntersectionPoint 2 units Void
-
-type Intersections units = Curve.Intersections 2 units Void
 
 intersections ::
   Tolerance units =>
   Curve2D units ->
   Curve2D units ->
-  Result IsDegenerate (Maybe (Intersections units))
+  Result IsDegenerate (Maybe Intersections)
 intersections = Curve.intersections
 
 placeIn :: Frame2D units -> Curve2D units -> Curve2D units

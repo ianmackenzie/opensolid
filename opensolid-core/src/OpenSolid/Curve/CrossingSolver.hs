@@ -9,7 +9,6 @@ import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Segment qualified as Curve.Segment
-import OpenSolid.CurvePoint qualified as CurvePoint
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
@@ -40,7 +39,7 @@ solve ::
   Crossing ->
   (Interval Unitless, Interval Unitless) ->
   (Curve.Segment dimension units space, Curve.Segment dimension units space) ->
-  Fuzzy (Maybe (IntersectionPoint dimension units space))
+  Fuzzy (Maybe IntersectionPoint)
 solve nondegenerateA nondegenerateB Crossing (tRangeA, tRangeB) (segmentA, segmentB) =
   if Curve.Segment.areDistinct segmentA segmentB
     then Resolved Nothing
@@ -53,9 +52,10 @@ solve nondegenerateA nondegenerateB Crossing (tRangeA, tRangeB) (segmentA, segme
             let derivativeB = Curve.derivativeAt tB curveB
             (# displacement, derivativeA, derivativeB #)
       UvPoint tA tB <- NewtonRaphson.Surface.solveIn (UvBounds tRangeA tRangeB) evaluate
-      let p1 = Curve.Nondegenerate.curvePointAt tA nondegenerateA
-      let p2 = Curve.Nondegenerate.curvePointAt tB nondegenerateB
-      case CurvePoint.continuity p1 p2 of
+      let solution = (tA, tB)
+      case Curve.Nondegenerate.continuityAt solution (nondegenerateA, nondegenerateB) of
         Nothing -> Unresolved
-        Just Continuity.Crossing -> Resolved (Just (IntersectionPoint.crossing (p1, p2)))
-        Just _ -> InternalError.throw "Should have guaranteed by this point that all intersection points are crossing ones"
+        Just Continuity.Crossing -> Resolved (Just (IntersectionPoint.crossing solution))
+        Just _ ->
+          InternalError.throw $
+            "Should have guaranteed by this point that all intersection points are crossing ones"

@@ -93,7 +93,7 @@ solve ::
   Orientation ->
   (Interval Unitless, Interval Unitless) ->
   (Curve.Segment 3 Meters space, Curve.Segment 3 Meters space) ->
-  Fuzzy (Maybe (IntersectionPoint 3 Meters space))
+  Fuzzy (Maybe IntersectionPoint)
 solve nondegenerateA nondegenerateB orientation (tRangeA, tRangeB) (segmentA, segmentB) = do
   if TangentSolver.areDistinctOrCrossing segmentA segmentB
     then Resolved Nothing

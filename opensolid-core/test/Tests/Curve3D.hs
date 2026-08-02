@@ -3,7 +3,6 @@ module Tests.Curve3D (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
-import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
@@ -107,15 +106,11 @@ crossingIntersection = Test.verify "crossingIntersection" do
   let arc2 =
         Curve3D.on World3D.topPlane $
           Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
-  nondegenerate1 <- Curve.nondegenerate arc1 ?? fail
-  nondegenerate2 <- Curve.nondegenerate arc2 ?? fail
-  let curvePoint1 t1 = Curve.Nondegenerate.curvePointAt t1 nondegenerate1
-  let curvePoint2 t2 = Curve.Nondegenerate.curvePointAt t2 nondegenerate2
   intersections <- Curve3D.intersections arc1 arc2 ?? fail
   let expectedIntersectionPoints =
         NonEmpty.two
-          (IntersectionPoint.crossing (curvePoint1 0.0, curvePoint2 0.0))
-          (IntersectionPoint.crossing (curvePoint1 0.5, curvePoint2 0.5))
+          (IntersectionPoint.crossing (0.0, 0.0))
+          (IntersectionPoint.crossing (0.5, 0.5))
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
@@ -141,13 +136,8 @@ tangentIntersection = Test.verify "tangentIntersection" do
             (#radius (Length.meters 0.5))
             (#startAngle -Angle.pi)
             (#endAngle Angle.zero)
-  nondegenerate1 <- Curve.nondegenerate arc1 ?? fail
-  nondegenerate2 <- Curve.nondegenerate arc2 ?? fail
-  let curvePoint1 t1 = Curve.Nondegenerate.curvePointAt t1 nondegenerate1
-  let curvePoint2 t2 = Curve.Nondegenerate.curvePointAt t2 nondegenerate2
   intersections <- Curve3D.intersections arc1 arc2 ?? fail
-  let expectedIntersectionPoints =
-        NonEmpty.one (IntersectionPoint.tangent Negative (curvePoint1 0.5, curvePoint2 0.5))
+  let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent Negative (0.5, 0.5))
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
