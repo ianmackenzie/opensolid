@@ -178,7 +178,7 @@ continuityAt (t1, t2) (curve1, curve2)
   | pointAt t1 curve1 ~= pointAt t2 curve2 = do
       let tangent1 = tangentDirectionAt t1 curve1
       let tangent2 = tangentDirectionAt t2 curve2
-      if Direction.independent tangent1 tangent2
+      if Direction.areIndependent tangent1 tangent2
         then Just Continuity.Crossing
         else do
           let alignment = Number.sign (tangent1 `dot` tangent2)

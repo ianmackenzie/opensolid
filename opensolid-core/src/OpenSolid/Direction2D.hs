@@ -14,9 +14,9 @@ module OpenSolid.Direction2D
   , degrees
   , radians
   , angleFrom
-  , parallel
-  , independent
-  , perpendicular
+  , areParallel
+  , areIndependent
+  , arePerpendicular
   , perpendicularTo
   , rotateLeft
   , rotateRight
@@ -152,14 +152,14 @@ second, and will always be between -180 and +180 degrees.
 angleFrom :: Direction2D -> Direction2D -> Angle
 angleFrom (Unit2D v1) (Unit2D v2) = Vector2D.angleFrom v1 v2
 
-perpendicular :: Direction2D -> Direction2D -> Bool
-perpendicular d1 d2 = Tolerance.using Tolerance.unitless (d1 `dot` d2 ~= 0.0)
+arePerpendicular :: Direction2D -> Direction2D -> Bool
+arePerpendicular d1 d2 = Tolerance.using Tolerance.unitless (d1 `dot` d2 ~= 0.0)
 
-parallel :: Direction2D -> Direction2D -> Bool
-parallel d1 d2 = d1 ~= d2 || d1 ~= -d2
+areParallel :: Direction2D -> Direction2D -> Bool
+areParallel d1 d2 = d1 ~= d2 || d1 ~= -d2
 
-independent :: Direction2D -> Direction2D -> Bool
-independent d1 d2 = not (parallel d1 d2)
+areIndependent :: Direction2D -> Direction2D -> Bool
+areIndependent d1 d2 = not (areParallel d1 d2)
 
 perpendicularTo :: Direction2D -> Direction2D
 perpendicularTo = rotateLeft

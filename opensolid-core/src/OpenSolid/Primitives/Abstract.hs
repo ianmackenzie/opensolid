@@ -268,45 +268,45 @@ class
   where
   directionUnsafe :: Vector dimension Unitless space -> Direction dimension space
   directionUnwrap :: Direction dimension space -> Vector dimension Unitless space
-  directionParallel :: Direction dimension space -> Direction dimension space -> Bool
-  directionIndependent :: Direction dimension space -> Direction dimension space -> Bool
-  directionPerpendicular :: Direction dimension space -> Direction dimension space -> Bool
+  directionAreParallel :: Direction dimension space -> Direction dimension space -> Bool
+  directionAreIndependent :: Direction dimension space -> Direction dimension space -> Bool
+  directionArePerpendicular :: Direction dimension space -> Direction dimension space -> Bool
 
 instance DirectionExists 1 Void where
   {-# INLINE directionUnsafe #-}
   directionUnsafe = Quantity.sign
   {-# INLINE directionUnwrap #-}
   directionUnwrap = Sign.value
-  {-# INLINE directionParallel #-}
-  directionParallel _ _ = True
-  {-# INLINE directionIndependent #-}
-  directionIndependent _ _ = False
-  {-# INLINE directionPerpendicular #-}
-  directionPerpendicular _ _ = False
+  {-# INLINE directionAreParallel #-}
+  directionAreParallel _ _ = True
+  {-# INLINE directionAreIndependent #-}
+  directionAreIndependent _ _ = False
+  {-# INLINE directionArePerpendicular #-}
+  directionArePerpendicular _ _ = False
 
 instance DirectionExists 2 Void where
   {-# INLINE directionUnsafe #-}
   directionUnsafe = Direction2D.unsafe
   {-# INLINE directionUnwrap #-}
   directionUnwrap = Direction2D.unwrap
-  {-# INLINE directionParallel #-}
-  directionParallel = Direction2D.parallel
-  {-# INLINE directionIndependent #-}
-  directionIndependent = Direction2D.independent
-  {-# INLINE directionPerpendicular #-}
-  directionPerpendicular = Direction2D.perpendicular
+  {-# INLINE directionAreParallel #-}
+  directionAreParallel = Direction2D.areParallel
+  {-# INLINE directionAreIndependent #-}
+  directionAreIndependent = Direction2D.areIndependent
+  {-# INLINE directionArePerpendicular #-}
+  directionArePerpendicular = Direction2D.arePerpendicular
 
 instance DirectionExists 3 space where
   {-# INLINE directionUnsafe #-}
   directionUnsafe = Direction3D.unsafe
   {-# INLINE directionUnwrap #-}
   directionUnwrap = Direction3D.unwrap
-  {-# INLINE directionParallel #-}
-  directionParallel = Direction3D.parallel
-  {-# INLINE directionIndependent #-}
-  directionIndependent = Direction3D.independent
-  {-# INLINE directionPerpendicular #-}
-  directionPerpendicular = Direction3D.perpendicular
+  {-# INLINE directionAreParallel #-}
+  directionAreParallel = Direction3D.areParallel
+  {-# INLINE directionAreIndependent #-}
+  directionAreIndependent = Direction3D.areIndependent
+  {-# INLINE directionArePerpendicular #-}
+  directionArePerpendicular = Direction3D.arePerpendicular
 
 class
   ( VectorExists dimension units space

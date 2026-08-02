@@ -8,9 +8,9 @@ module OpenSolid.Direction3D
   , backward
   , rightward
   , leftward
-  , parallel
-  , independent
-  , perpendicular
+  , areParallel
+  , areIndependent
+  , arePerpendicular
   )
 where
 
@@ -25,6 +25,6 @@ forward :: Orientation3D space -> Direction3D space
 backward :: Orientation3D space -> Direction3D space
 rightward :: Orientation3D space -> Direction3D space
 leftward :: Orientation3D space -> Direction3D space
-parallel :: Direction3D space -> Direction3D space -> Bool
-independent :: Direction3D space -> Direction3D space -> Bool
-perpendicular :: Direction3D space -> Direction3D space -> Bool
+areParallel :: Direction3D space -> Direction3D space -> Bool
+areIndependent :: Direction3D space -> Direction3D space -> Bool
+arePerpendicular :: Direction3D space -> Direction3D space -> Bool

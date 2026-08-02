@@ -3,9 +3,9 @@ module OpenSolid.Direction
   , DirectionExists
   , unsafe
   , unwrap
-  , parallel
-  , independent
-  , perpendicular
+  , areParallel
+  , areIndependent
+  , arePerpendicular
   )
 where
 
@@ -27,26 +27,26 @@ unwrap ::
   Vector dimension Unitless space
 unwrap = Primitives.Abstract.directionUnwrap
 
-{-# INLINE parallel #-}
-parallel ::
+{-# INLINE areParallel #-}
+areParallel ::
   DirectionExists dimension space =>
   Direction dimension space ->
   Direction dimension space ->
   Bool
-parallel = Primitives.Abstract.directionParallel
+areParallel = Primitives.Abstract.directionAreParallel
 
-{-# INLINE independent #-}
-independent ::
+{-# INLINE areIndependent #-}
+areIndependent ::
   DirectionExists dimension space =>
   Direction dimension space ->
   Direction dimension space ->
   Bool
-independent = Primitives.Abstract.directionIndependent
+areIndependent = Primitives.Abstract.directionAreIndependent
 
-{-# INLINE perpendicular #-}
-perpendicular ::
+{-# INLINE arePerpendicular #-}
+arePerpendicular ::
   DirectionExists dimension space =>
   Direction dimension space ->
   Direction dimension space ->
   Bool
-perpendicular = Primitives.Abstract.directionPerpendicular
+arePerpendicular = Primitives.Abstract.directionArePerpendicular

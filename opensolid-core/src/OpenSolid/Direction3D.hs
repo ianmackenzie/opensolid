@@ -22,9 +22,9 @@ module OpenSolid.Direction3D
   , zUpComponents
   , yUpComponents
   , angleFrom
-  , parallel
-  , independent
-  , perpendicular
+  , areParallel
+  , areIndependent
+  , arePerpendicular
   , placeIn
   , relativeTo
   , transformBy
@@ -163,14 +163,14 @@ The result will always be between 0 and 180 degrees.
 angleFrom :: Direction3D space -> Direction3D space -> Angle
 angleFrom d1 d2 = Angle.atan2 (Vector3D.magnitude (d1 `cross` d2)) (d1 `dot` d2)
 
-parallel :: Direction3D space -> Direction3D space -> Bool
-parallel d1 d2 = d1 ~= d2 || d1 ~= -d2
+areParallel :: Direction3D space -> Direction3D space -> Bool
+areParallel d1 d2 = d1 ~= d2 || d1 ~= -d2
 
-independent :: Direction3D space -> Direction3D space -> Bool
-independent d1 d2 = not (parallel d1 d2)
+areIndependent :: Direction3D space -> Direction3D space -> Bool
+areIndependent d1 d2 = not (areParallel d1 d2)
 
-perpendicular :: Direction3D space -> Direction3D space -> Bool
-perpendicular d1 d2 = Tolerance.using Tolerance.unitless (d1 `dot` d2 ~= 0.0)
+arePerpendicular :: Direction3D space -> Direction3D space -> Bool
+arePerpendicular d1 d2 = Tolerance.using Tolerance.unitless (d1 `dot` d2 ~= 0.0)
 
 -- | Convert a direction defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3D global local -> Direction3D local -> Direction3D global
