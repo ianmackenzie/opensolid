@@ -871,6 +871,7 @@ curve1D =
     , Class.numberPlus
     , Class.numberMinus
     , Class.numberTimes
+    , Class.numberDivideByNonzeroU Curve1D.nonzero
     , Class.plus @Number Class.noFallback
     , Class.plus @Curve1D Class.fallbackMemberPlus
     , Class.minus @Number Class.noFallback
