@@ -8,7 +8,6 @@ module OpenSolid.FFI
   , snakeCase
   , classRepresentation
   , nestedClassRepresentation
-  , nonzeroRepresentation
   , staticClassName
   , Type (..)
   , typeOf
@@ -41,15 +40,12 @@ import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Color (Color)
 import OpenSolid.Err qualified as Err
-import OpenSolid.HasZero (HasZero (HasZero))
 import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Length (Length)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nonzero (Nonzero)
-import OpenSolid.Nonzero qualified as Nonzero
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude hiding (Type, data NonEmpty, data Number, data Sign)
 import OpenSolid.Text qualified as Text
@@ -149,10 +145,6 @@ data Representation a where
   IORep :: FFI a => Representation (IO a)
   -- A function argument that should be named-only if supported
   NamedArgumentRep :: (KnownSymbol name, FFI a) => Representation (name ::: a)
-  -- A 'Nonzero a' value, passed as a plain 'a' value across the FFI boundary
-  --   - unwrapped from a 'Nonzero a' value if returned from Haskell
-  --   - checked and converted to a 'Nonzero a' using the given function, if passed from target language
-  NonzeroRep :: FFI a => (a -> Result HasZero (Nonzero a)) -> Representation (Nonzero a)
 
 classRepresentation :: FFI a => Text -> Proxy a -> Representation a
 classRepresentation givenName _ =
@@ -161,9 +153,6 @@ classRepresentation givenName _ =
 nestedClassRepresentation :: FFI a => Text -> Text -> Proxy a -> Representation a
 nestedClassRepresentation outerName innerName _ =
   ClassRep (ClassName (NonEmpty.two outerName innerName))
-
-nonzeroRepresentation :: FFI a => (a -> Result HasZero (Nonzero a)) -> Representation (Nonzero a)
-nonzeroRepresentation = NonzeroRep
 
 staticClassName :: Text -> ClassName
 staticClassName givenName = ClassName (NonEmpty.one givenName)
@@ -223,7 +212,6 @@ typeOf t = case representation (Proxy @t) of
   ClassRep class_ -> Class class_
   IORep @a -> Result (typeOf a)
   NamedArgumentRep @_name @a -> typeOf a
-  NonzeroRep @a _ -> typeOf a
 
 typeName :: Type -> Text
 typeName ffiType = case ffiType of
@@ -550,7 +538,6 @@ store ptr offset value = do
       store ptr offset result
     NamedArgumentRep{} ->
       InternalError.throw "Should never have a named argument as a Haskell return type"
-    NonzeroRep _ -> store ptr offset (Nonzero.unwrap value)
 
 load :: forall value parent. FFI value => Ptr parent -> Int -> IO value
 load ptr offset = do
@@ -721,11 +708,6 @@ load ptr offset = do
       Foreign.deRefStablePtr stablePtr
     IORep -> InternalError.throw "Passing IO values as FFI arguments is not supported"
     NamedArgumentRep @name_ -> IO.map (name_ :::) (load ptr offset)
-    NonzeroRep function -> do
-      value <- load ptr offset
-      case function value of
-        Ok nonzero -> IO.succeed nonzero
-        Err HasZero -> IO.fail "Value with zero passed to function expecting a nonzero value"
 
 isNamedArgument :: forall t -> FFI t => Bool
 isNamedArgument t =
