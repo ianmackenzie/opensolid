@@ -24,10 +24,13 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
-import OpenSolid.Error (IsDegenerate)
+import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
+import OpenSolid.Length (Length)
+import OpenSolid.Length qualified as Length
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
@@ -43,7 +46,9 @@ import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector3D (Vector3D)
+import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
@@ -54,6 +59,7 @@ data SurfaceFunction3D space = SurfaceFunction3D
   { compiled :: Compiled space
   , du :: ~(VectorSurfaceFunction3D Meters space)
   , dv :: ~(VectorSurfaceFunction3D Meters space)
+  , maxSampledNondegeneracy :: ~Length
   }
 
 type Compiled space =
@@ -166,7 +172,26 @@ new givenCompiled derivativeFunction = do
         U -> VectorSurfaceFunction3D.derivative V du
         V -> VectorSurfaceFunction3D.derivative V dv
   let dv' = VectorSurfaceFunction3D.new dvCompiled dvDerivative
-  SurfaceFunction3D givenCompiled du dv'
+  let nondegeneracy uvPoint = do
+        let duValue = VectorSurfaceFunction3D.value du uvPoint
+        let dvValue = VectorSurfaceFunction3D.value dv' uvPoint
+        let duMagnitude = Vector3D.magnitude duValue
+        let dvMagnitude = Vector3D.magnitude dvValue
+        let minMagnitude = min duMagnitude dvMagnitude
+        if minMagnitude == Length.zero
+          then Length.zero
+          else do
+            let crossMagnitude = Vector3D.magnitude (duValue `cross` dvValue)
+            let duPerpendicularity = crossMagnitude / dvMagnitude
+            let dvPerpendicularity = crossMagnitude / duMagnitude
+            let minPerpendicularity = min duPerpendicularity dvPerpendicularity
+            min minMagnitude minPerpendicularity
+  SurfaceFunction3D
+    { compiled = givenCompiled
+    , du
+    , dv = dv'
+    , maxSampledNondegeneracy = NonEmpty.maximumOf nondegeneracy UvPoint.samples
+    }
 
 constant :: Point3D space -> SurfaceFunction3D space
 constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction3D.zero)
@@ -198,11 +223,10 @@ nondegenerate ::
   Tolerance Meters =>
   SurfaceFunction3D space ->
   Result IsDegenerate (Nondegenerate (SurfaceFunction3D space))
-nondegenerate function = do
-  _ <- VectorSurfaceFunction3D.nondegenerate (derivative U function)
-  _ <- VectorSurfaceFunction3D.nondegenerate (derivative V function)
-  -- TODO also check if partial derivative directions are parallel at any UV corner?
-  Ok (Nondegenerate function)
+nondegenerate function =
+  if function.maxSampledNondegeneracy ~= Length.zero
+    then Error IsDegenerate
+    else Ok (Nondegenerate function)
 
 normalDirection ::
   Tolerance Meters =>
