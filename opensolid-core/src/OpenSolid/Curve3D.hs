@@ -14,8 +14,12 @@ module OpenSolid.Curve3D
   , compiled
   , derivative
   , secondDerivative
+  , startDerivative
+  , endDerivative
   , derivativeAt
   , derivativeRange
+  , startSecondDerivative
+  , endSecondDerivative
   , secondDerivativeAt
   , secondDerivativeRange
   , isPoint
@@ -135,6 +139,12 @@ compiled = Curve.compiled
 secondDerivative :: Curve3D space -> VectorCurve3D Meters space
 secondDerivative = Curve.secondDerivative
 
+startDerivative :: Curve3D space -> Vector3D Meters space
+startDerivative = Curve.startDerivative
+
+endDerivative :: Curve3D space -> Vector3D Meters space
+endDerivative = Curve.endDerivative
+
 {-# INLINE derivativeAt #-}
 derivativeAt :: Number -> Curve3D space -> Vector3D Meters space
 derivativeAt = Curve.derivativeAt
@@ -142,6 +152,12 @@ derivativeAt = Curve.derivativeAt
 {-# INLINE derivativeRange #-}
 derivativeRange :: Interval Unitless -> Curve3D space -> VectorBounds3D Meters space
 derivativeRange = Curve.derivativeRange
+
+startSecondDerivative :: Curve3D space -> Vector3D Meters space
+startSecondDerivative = Curve.startSecondDerivative
+
+endSecondDerivative :: Curve3D space -> Vector3D Meters space
+endSecondDerivative = Curve.endSecondDerivative
 
 {-# INLINE secondDerivativeAt #-}
 secondDerivativeAt :: Number -> Curve3D space -> Vector3D Meters space

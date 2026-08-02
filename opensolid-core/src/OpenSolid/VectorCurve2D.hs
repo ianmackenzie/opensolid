@@ -13,8 +13,12 @@ module OpenSolid.VectorCurve2D
   , valueAt
   , valueOf
   , range
+  , startDerivative
+  , endDerivative
   , derivativeAt
   , derivativeRange
+  , startSecondDerivative
+  , endSecondDerivative
   , secondDerivativeAt
   , secondDerivativeRange
   , xComponent
@@ -172,6 +176,12 @@ valueOf = VectorCurve.valueOf
 range :: Interval Unitless -> VectorCurve2D units -> VectorBounds2D units
 range = VectorCurve.range
 
+startDerivative :: VectorCurve2D units -> Vector2D units
+startDerivative = VectorCurve.startDerivative
+
+endDerivative :: VectorCurve2D units -> Vector2D units
+endDerivative = VectorCurve.endDerivative
+
 {-# INLINE derivativeAt #-}
 derivativeAt :: Number -> VectorCurve2D units -> Vector2D units
 derivativeAt = VectorCurve.derivativeAt
@@ -179,6 +189,12 @@ derivativeAt = VectorCurve.derivativeAt
 {-# INLINE derivativeRange #-}
 derivativeRange :: Interval Unitless -> VectorCurve2D units -> VectorBounds2D units
 derivativeRange = VectorCurve.derivativeRange
+
+startSecondDerivative :: VectorCurve2D units -> Vector2D units
+startSecondDerivative = VectorCurve.startSecondDerivative
+
+endSecondDerivative :: VectorCurve2D units -> Vector2D units
+endSecondDerivative = VectorCurve.endSecondDerivative
 
 {-# INLINE secondDerivativeAt #-}
 secondDerivativeAt :: Number -> VectorCurve2D units -> Vector2D units

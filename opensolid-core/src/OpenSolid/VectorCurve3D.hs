@@ -15,8 +15,12 @@ module OpenSolid.VectorCurve3D
   , valueAt
   , valueOf
   , range
+  , startDerivative
+  , endDerivative
   , derivativeAt
   , derivativeRange
+  , startSecondDerivative
+  , endSecondDerivative
   , secondDerivativeAt
   , secondDerivativeRange
   , zero
@@ -164,6 +168,12 @@ valueOf = VectorCurve.valueOf
 range :: Interval Unitless -> VectorCurve3D units space -> VectorBounds3D units space
 range = VectorCurve.range
 
+startDerivative :: VectorCurve3D space units -> Vector3D space units
+startDerivative = VectorCurve.startDerivative
+
+endDerivative :: VectorCurve3D space units -> Vector3D space units
+endDerivative = VectorCurve.endDerivative
+
 {-# INLINE derivativeAt #-}
 derivativeAt :: Number -> VectorCurve3D units space -> Vector3D units space
 derivativeAt = VectorCurve.derivativeAt
@@ -171,6 +181,12 @@ derivativeAt = VectorCurve.derivativeAt
 {-# INLINE derivativeRange #-}
 derivativeRange :: Interval Unitless -> VectorCurve3D units space -> VectorBounds3D units space
 derivativeRange = VectorCurve.derivativeRange
+
+startSecondDerivative :: VectorCurve3D space units -> Vector3D space units
+startSecondDerivative = VectorCurve.startSecondDerivative
+
+endSecondDerivative :: VectorCurve3D space units -> Vector3D space units
+endSecondDerivative = VectorCurve.endSecondDerivative
 
 {-# INLINE secondDerivativeAt #-}
 secondDerivativeAt :: Number -> VectorCurve3D units space -> Vector3D units space

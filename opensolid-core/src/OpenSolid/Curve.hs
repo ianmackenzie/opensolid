@@ -28,8 +28,12 @@ module OpenSolid.Curve
   , endPoint
   , endpoints
   , secondDerivative
+  , startDerivative
+  , endDerivative
   , derivativeAt
   , derivativeRange
+  , startSecondDerivative
+  , endSecondDerivative
   , secondDerivativeAt
   , secondDerivativeRange
   , reverse
@@ -628,6 +632,18 @@ nonzero curve =
     then Err HasDegeneracy
     else Ok (Nonzero curve)
 
+startDerivative ::
+  CurveExists dimension units space =>
+  Curve dimension units space ->
+  Vector dimension units space
+startDerivative curve = VectorCurve.startValue (derivative curve)
+
+endDerivative ::
+  CurveExists dimension units space =>
+  Curve dimension units space ->
+  Vector dimension units space
+endDerivative curve = VectorCurve.endValue (derivative curve)
+
 derivativeAt ::
   CurveExists dimension units space =>
   Number ->
@@ -641,6 +657,18 @@ derivativeRange ::
   Curve dimension units space ->
   VectorBounds dimension units space
 derivativeRange tRange curve = VectorCurve.range tRange (derivative curve)
+
+startSecondDerivative ::
+  CurveExists dimension units space =>
+  Curve dimension units space ->
+  Vector dimension units space
+startSecondDerivative curve = VectorCurve.startValue (secondDerivative curve)
+
+endSecondDerivative ::
+  CurveExists dimension units space =>
+  Curve dimension units space ->
+  Vector dimension units space
+endSecondDerivative curve = VectorCurve.endValue (secondDerivative curve)
 
 secondDerivativeAt ::
   CurveExists dimension units space =>

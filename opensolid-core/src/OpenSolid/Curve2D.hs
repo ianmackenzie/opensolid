@@ -23,8 +23,12 @@ module OpenSolid.Curve2D
   , cubicBezier
   , hermite
   , involute
+  , startDerivative
+  , endDerivative
   , derivativeAt
   , derivativeRange
+  , startSecondDerivative
+  , endSecondDerivative
   , secondDerivativeAt
   , secondDerivativeRange
   , desingularizeStart
@@ -384,6 +388,12 @@ involuteVector n vx vy theta1 theta2 =
     (CompiledFunction.concrete (Expression.involute n vx vy theta1 theta2))
     (involuteVector (n + 1) vx vy theta1 theta2)
 
+startDerivative :: Curve2D units -> Vector2D units
+startDerivative = Curve.startDerivative
+
+endDerivative :: Curve2D units -> Vector2D units
+endDerivative = Curve.endDerivative
+
 {-# INLINE derivativeAt #-}
 derivativeAt :: Number -> Curve2D units -> Vector2D units
 derivativeAt = Curve.derivativeAt
@@ -391,6 +401,12 @@ derivativeAt = Curve.derivativeAt
 {-# INLINE derivativeRange #-}
 derivativeRange :: Interval Unitless -> Curve2D units -> VectorBounds2D units
 derivativeRange = Curve.derivativeRange
+
+startSecondDerivative :: Curve2D units -> Vector2D units
+startSecondDerivative = Curve.startSecondDerivative
+
+endSecondDerivative :: Curve2D units -> Vector2D units
+endSecondDerivative = Curve.endSecondDerivative
 
 {-# INLINE secondDerivativeAt #-}
 secondDerivativeAt :: Number -> Curve2D units -> Vector2D units

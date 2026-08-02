@@ -24,8 +24,12 @@ module OpenSolid.VectorCurve
   , compiled
   , derivative
   , secondDerivative
+  , startDerivative
+  , endDerivative
   , derivativeAt
   , derivativeRange
+  , startSecondDerivative
+  , endSecondDerivative
   , secondDerivativeAt
   , secondDerivativeRange
   , squaredMagnitude_
@@ -1085,6 +1089,18 @@ range ::
   VectorBounds dimension units space
 range tRange curve = CompiledFunction.range tRange (compiled curve)
 
+startDerivative ::
+  VectorCurveExists dimension units space =>
+  VectorCurve dimension units space ->
+  Vector dimension units space
+startDerivative curve = startValue (derivative curve)
+
+endDerivative ::
+  VectorCurveExists dimension units space =>
+  VectorCurve dimension units space ->
+  Vector dimension units space
+endDerivative curve = endValue (derivative curve)
+
 {-# INLINE derivativeAt #-}
 derivativeAt ::
   VectorCurveExists dimension units space =>
@@ -1100,6 +1116,18 @@ derivativeRange ::
   VectorCurve dimension units space ->
   VectorBounds dimension units space
 derivativeRange tRange curve = range tRange (derivative curve)
+
+startSecondDerivative ::
+  VectorCurveExists dimension units space =>
+  VectorCurve dimension units space ->
+  Vector dimension units space
+startSecondDerivative curve = startValue (secondDerivative curve)
+
+endSecondDerivative ::
+  VectorCurveExists dimension units space =>
+  VectorCurve dimension units space ->
+  Vector dimension units space
+endSecondDerivative curve = endValue (secondDerivative curve)
 
 {-# INLINE secondDerivativeAt #-}
 secondDerivativeAt ::
