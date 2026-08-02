@@ -87,19 +87,21 @@ continuity p1 p2 = do
       let tangent2 = tangentDirection p2
       if Direction.parallel tangent1 tangent2
         then do
-          let sign = Number.sign (tangent1 `dot` tangent2)
-          case (nondegenerate p1, nondegenerate p2) of
-            (Ok nondegenerate1, Ok nondegenerate2) -> do
-              let l1 = Vector.magnitude (derivativeValue p1)
-              let l2 = Vector.magnitude (derivativeValue p2)
-              let l = Quantity.erase (min l1 l2)
-              let k1_ = curvatureVector_ nondegenerate1
-              let k2_ = curvatureVector_ nondegenerate2
-              let k = Vector.erase (k1_ - k2_)
-              let curvatureError :: Vector dimension units space = Vector.unerase (k * l * l / 2.0)
-              if curvatureError ~= Vector.zero
-                then Just (Continuity.Indistinguishable sign)
-                else Just (Continuity.Tangent sign)
-            _ -> Just (Continuity.Indistinguishable sign)
+          let alignment = Number.sign (tangent1 `dot` tangent2)
+          if
+            | Ok nondegenerate1 <- nondegenerate p1
+            , Ok nondegenerate2 <- nondegenerate p2 -> do
+                let l1 = Vector.magnitude (derivativeValue p1)
+                let l2 = Vector.magnitude (derivativeValue p2)
+                let l = Quantity.erase (min l1 l2)
+                let k1_ = curvatureVector_ nondegenerate1
+                let k2_ = curvatureVector_ nondegenerate2
+                let k = Vector.erase (k1_ - k2_)
+                let curvatureError :: Vector dimension units space =
+                      Vector.unerase (k * l * l / 2.0)
+                if curvatureError ~= Vector.zero
+                  then Just (Continuity.Indistinguishable alignment)
+                  else Just (Continuity.Tangent alignment)
+            | otherwise -> Just (Continuity.Indistinguishable alignment)
         else Just Continuity.Crossing
     else Nothing
