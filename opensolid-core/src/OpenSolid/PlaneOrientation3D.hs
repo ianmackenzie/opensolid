@@ -19,6 +19,7 @@ module OpenSolid.PlaneOrientation3D
 where
 
 import Data.Coerce qualified
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Error (IsZero (IsZero))
@@ -137,9 +138,13 @@ relativeTo globalOrientation (PlaneOrientation3D i j k) =
 
 -- | Generate a random plane orientation.
 random :: Random.Generator (PlaneOrientation3D global)
-random =
+random = do
+  dx <- Direction3D.random
   Random.retry do
-    Random.map2
-      (Tolerance.using 0.1 fromDirections)
-      Direction3D.random
-      Direction3D.random
+    dy <- Direction3D.random
+    -- Don't attempt to construct a plane orientation from nearly-parallel directions,
+    -- since that's numerically not well behaved;
+    -- only succeed generation for directions at least 30 degrees apart
+    if Direction3D.angleFrom dx dy >= Angle.degrees 30.0
+      then Random.return (fromDirections dx dy)
+      else Random.return Nothing
