@@ -5,11 +5,16 @@ module OpenSolid.SurfaceFunction1D
   , zero
   , u
   , v
-  , parameter
-  , value
+  , valueAt
+  , valueOf
   , range
   , compiled
-  , derivative
+  , partialDerivatives
+  , partialDerivativesAt
+  , partialDerivativeRanges
+  , secondPartialDerivatives
+  , secondPartialDerivativesAt
+  , secondPartialDerivativeRanges
   , squared
   , squared_
   , cubed
@@ -20,7 +25,6 @@ import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
-import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.UvBounds (UvBounds)
 import {-# SOURCE #-} OpenSolid.UvPoint (UvPoint)
@@ -99,11 +103,24 @@ constant :: Quantity units -> SurfaceFunction1D units
 zero :: SurfaceFunction1D units
 u :: SurfaceFunction1D Unitless
 v :: SurfaceFunction1D Unitless
-parameter :: SurfaceParameter -> SurfaceFunction1D Unitless
-value :: SurfaceFunction1D units -> UvPoint -> Quantity units
-range :: SurfaceFunction1D units -> UvBounds -> Interval units
+valueAt :: UvPoint -> SurfaceFunction1D units -> Quantity units
+valueOf :: SurfaceFunction1D units -> UvPoint -> Quantity units
+range :: UvBounds -> SurfaceFunction1D units -> Interval units
 compiled :: SurfaceFunction1D units -> Compiled units
-derivative :: SurfaceParameter -> SurfaceFunction1D units -> SurfaceFunction1D units
+partialDerivatives :: SurfaceFunction1D units -> (SurfaceFunction1D units, SurfaceFunction1D units)
+partialDerivativesAt :: UvPoint -> SurfaceFunction1D units -> (Quantity units, Quantity units)
+partialDerivativeRanges :: UvBounds -> SurfaceFunction1D units -> (Interval units, Interval units)
+secondPartialDerivatives ::
+  SurfaceFunction1D units ->
+  (SurfaceFunction1D units, SurfaceFunction1D units, SurfaceFunction1D units)
+secondPartialDerivativesAt ::
+  UvPoint ->
+  SurfaceFunction1D units ->
+  (Quantity units, Quantity units, Quantity units)
+secondPartialDerivativeRanges ::
+  UvBounds ->
+  SurfaceFunction1D units ->
+  (Interval units, Interval units, Interval units)
 squared :: Units.Squared units1 units2 => SurfaceFunction1D units1 -> SurfaceFunction1D units2
 squared_ :: SurfaceFunction1D units1 -> SurfaceFunction1D (units1 ?*? units1)
 cubed :: SurfaceFunction1D Unitless -> SurfaceFunction1D Unitless

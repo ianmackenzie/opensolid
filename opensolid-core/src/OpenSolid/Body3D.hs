@@ -326,7 +326,9 @@ registerSeam halfEdgeSet halfEdge accumulated =
 ----- MESHING -----
 
 toPointMesh :: Tolerance Meters => Resolution Meters -> Body3D space -> Mesh (Point3D space)
-toPointMesh resolution body = body & toMesh resolution SurfaceFunction3D.Nondegenerate.point
+toPointMesh resolution body =
+  body & toMesh resolution \function uvPoint ->
+    SurfaceFunction3D.Nondegenerate.pointAt uvPoint function
 
 toSurfaceMesh ::
   Tolerance Meters =>
@@ -336,8 +338,8 @@ toSurfaceMesh ::
 toSurfaceMesh resolution body =
   body & toMesh resolution \function uvPoint ->
     SurfaceVertex3D
-      (SurfaceFunction3D.Nondegenerate.point function uvPoint)
-      (SurfaceFunction3D.Nondegenerate.normalDirection function uvPoint)
+      (SurfaceFunction3D.Nondegenerate.pointAt uvPoint function)
+      (SurfaceFunction3D.Nondegenerate.normalDirectionAt uvPoint function)
 
 toMesh ::
   Tolerance Meters =>
@@ -365,15 +367,16 @@ surfaceSegmentsEntry resolution surfaceIndex surface = do
   let surfaceSegmentSet =
         case SurfaceFunction3D.nondegenerate (Surface3D.function surface) of
           Ok function -> do
-            let p11 = SurfaceFunction3D.Nondegenerate.point function (UvPoint u1 v1)
-            let p21 = SurfaceFunction3D.Nondegenerate.point function (UvPoint u2 v1)
-            let p12 = SurfaceFunction3D.Nondegenerate.point function (UvPoint u1 v2)
-            let p22 = SurfaceFunction3D.Nondegenerate.point function (UvPoint u2 v2)
+            let p11 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u1 v1) function
+            let p21 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u2 v1) function
+            let p12 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u1 v2) function
+            let p22 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u2 v2) function
             buildSurfaceSegmentSet resolution function uvBounds p11 p21 p12 p22
           Err IsDegenerate -> Set2D.leaf uvBounds uvBounds
   (SurfaceId surfaceIndex, surfaceSegmentSet)
 
 buildSurfaceSegmentSet ::
+  Tolerance Meters =>
   Resolution Meters ->
   Nondegenerate (SurfaceFunction3D space) ->
   UvBounds ->
@@ -390,8 +393,8 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
   let uMid = Interval.midpoint uRange
   let vMid = Interval.midpoint vRange
   let uvCenter = UvPoint uMid vMid
-  let pCenter = SurfaceFunction3D.Nondegenerate.point function uvCenter
-  let nCenter = SurfaceFunction3D.Nondegenerate.normalDirection function uvCenter
+  let pCenter = SurfaceFunction3D.Nondegenerate.pointAt uvCenter function
+  let nCenter = SurfaceFunction3D.Nondegenerate.normalDirectionAt uvCenter function
   let pointError point = Quantity.abs ((point - pCenter) `dot` nCenter)
   let maxCornerError = pointError p11 `max` pointError p12 `max` pointError p21 `max` pointError p22
   let uWidth = Interval.width uRange
@@ -402,7 +405,7 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
   let uInterior2 = uMid + uOffset
   let vInterior1 = vMid - vOffset
   let vInterior2 = vMid + vOffset
-  let interiorError uvPoint = pointError (SurfaceFunction3D.Nondegenerate.point function uvPoint)
+  let interiorError uvPoint = pointError (SurfaceFunction3D.Nondegenerate.pointAt uvPoint function)
   let interiorError11 = interiorError (UvPoint uInterior1 vInterior1)
   let interiorError21 = interiorError (UvPoint uInterior2 vInterior1)
   let interiorError12 = interiorError (UvPoint uInterior1 vInterior2)
@@ -418,10 +421,10 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
     else do
       let Interval u1 u2 = uRange
       let Interval v1 v2 = vRange
-      let pMid1 = SurfaceFunction3D.Nondegenerate.point function (UvPoint uMid v1)
-      let pMid2 = SurfaceFunction3D.Nondegenerate.point function (UvPoint uMid v2)
-      let p1Mid = SurfaceFunction3D.Nondegenerate.point function (UvPoint u1 vMid)
-      let p2Mid = SurfaceFunction3D.Nondegenerate.point function (UvPoint u2 vMid)
+      let pMid1 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint uMid v1) function
+      let pMid2 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint uMid v2) function
+      let p1Mid = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u1 vMid) function
+      let p2Mid = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u2 vMid) function
       let uRange1 = Interval u1 uMid
       let uRange2 = Interval uMid u2
       let vRange1 = Interval v1 vMid

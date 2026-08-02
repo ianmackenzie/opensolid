@@ -1,16 +1,21 @@
 module OpenSolid.SurfaceFunction1D
   ( SurfaceFunction1D
   , Compiled
-  , value
+  , valueAt
+  , valueOf
   , range
-  , derivative
+  , partialDerivatives
+  , partialDerivativesAt
+  , partialDerivativeRanges
+  , secondPartialDerivatives
+  , secondPartialDerivativesAt
+  , secondPartialDerivativeRanges
   , derivativeIn
   , compiled
   , zero
   , constant
   , u
   , v
-  , parameter
   , Zeros
   , IsZero (IsZero)
   , zeros
@@ -46,6 +51,7 @@ import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
+import OpenSolid.PartialDerivatives qualified as PartialDerivatives
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -60,7 +66,6 @@ import OpenSolid.SurfaceFunction1D.Subproblem (CornerValues (..), Subproblem (..
 import OpenSolid.SurfaceFunction1D.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceFunction1D.Zeros (Zeros (..))
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
@@ -78,8 +83,7 @@ import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfa
 
 data SurfaceFunction1D units = SurfaceFunction1D
   { compiled :: Compiled units
-  , du :: ~(SurfaceFunction1D units)
-  , dv :: ~(SurfaceFunction1D units)
+  , partialDerivatives :: (SurfaceFunction1D units, SurfaceFunction1D units)
   }
 
 type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interval units)
@@ -87,12 +91,15 @@ type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interv
 instance HasUnits (SurfaceFunction1D units) units
 
 instance Units.Coercion (SurfaceFunction1D units1) (SurfaceFunction1D units2) where
-  coerce (SurfaceFunction1D c du dv) =
-    SurfaceFunction1D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
+  coerce function =
+    SurfaceFunction1D
+      { compiled = Units.coerce function.compiled
+      , partialDerivatives = Pair.map Units.coerce function.partialDerivatives
+      }
 
 instance ApproximateEquality (SurfaceFunction1D units) (Tolerance units) where
   function1 ~= function2 = do
-    let equalValuesAt uvPoint = value function1 uvPoint ~= value function2 uvPoint
+    let equalValuesAt uvPoint = valueAt uvPoint function1 ~= valueAt uvPoint function2
     NonEmpty.all equalValuesAt UvPoint.interiorSamples
 
 instance
@@ -115,7 +122,7 @@ instance
   quantity `intersects` function = function `intersects` quantity
 
 instance Negation (SurfaceFunction1D units) where
-  negate function = new (negate function.compiled) (\p -> negate (derivative p function))
+  negate function = new (negate function.compiled) (Pair.map negate function.partialDerivatives)
 
 instance Multiplication Sign (SurfaceFunction1D units) (SurfaceFunction1D units) where
   Positive * function = function
@@ -132,7 +139,10 @@ instance
     (SurfaceFunction1D units2)
     (SurfaceFunction1D units1)
   where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
+  f + g =
+    new
+      (compiled f + compiled g)
+      (Pair.map2 (+) (partialDerivatives f) (partialDerivatives g))
 
 instance
   units1 ~ units2 =>
@@ -156,7 +166,10 @@ instance
   units1 ~ units2 =>
   Subtraction (SurfaceFunction1D units1) (SurfaceFunction1D units2) (SurfaceFunction1D units1)
   where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (\p -> derivative p lhs - derivative p rhs)
+  f - g =
+    new
+      (compiled f - compiled g)
+      (Pair.map2 (-) (partialDerivatives f) (partialDerivatives g))
 
 instance
   units1 ~ units2 =>
@@ -182,10 +195,15 @@ instance
     (SurfaceFunction1D units2)
     (SurfaceFunction1D (units1 ?*? units2))
   where
-  lhs ?*? rhs =
-    new
-      (lhs.compiled ?*? rhs.compiled)
-      (\p -> derivative p lhs ?*? rhs + lhs ?*? derivative p rhs)
+  f ?*? g = do
+    let (dfdu, dfdv) = partialDerivatives f
+    let (dgdu, dgdv) = partialDerivatives g
+    let compiledProduct = compiled f ?*? compiled g
+    let productPartialDerivatives =
+          ( dfdu ?*? g + f ?*? dgdu
+          , dfdv ?*? g + f ?*? dgdv
+          )
+    new compiledProduct productPartialDerivatives
 
 instance
   Units.Product units1 units2 units3 =>
@@ -330,25 +348,65 @@ instance
   function ?/? quantity = Units.simplify (function ?*? (1.0 ?/? quantity))
 
 instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFunction1D units) where
-  curve . function =
-    new
-      (Curve1D.compiled curve . function.compiled)
-      (\p -> Curve1D.derivative curve . function * derivative p function)
+  f . g = do
+    let dfdt = Curve1D.derivative f . g
+    let (dtdu, dtdv) = partialDerivatives g
+    new (Curve1D.compiled f . compiled g) (dfdt * dtdu, dfdt * dtdv)
 
-value :: SurfaceFunction1D units -> UvPoint -> Quantity units
-value function uvPoint = CompiledFunction.value function.compiled uvPoint
+valueAt :: UvPoint -> SurfaceFunction1D units -> Quantity units
+valueAt uvPoint function = CompiledFunction.value function.compiled uvPoint
 
-range :: SurfaceFunction1D units -> UvBounds -> Interval units
-range function uvRange = CompiledFunction.range function.compiled uvRange
+valueOf :: SurfaceFunction1D units -> UvPoint -> Quantity units
+valueOf function uvPoint = valueAt uvPoint function
 
-{-# INLINE derivative #-}
-derivative :: SurfaceParameter -> SurfaceFunction1D units -> SurfaceFunction1D units
-derivative U = (.du)
-derivative V = (.dv)
+range :: UvBounds -> SurfaceFunction1D units -> Interval units
+range uvRange function = CompiledFunction.range function.compiled uvRange
+
+{-# INLINE partialDerivatives #-}
+partialDerivatives :: SurfaceFunction1D units -> (SurfaceFunction1D units, SurfaceFunction1D units)
+partialDerivatives = (.partialDerivatives)
+
+partialDerivativesAt ::
+  UvPoint ->
+  SurfaceFunction1D units ->
+  (Quantity units, Quantity units)
+partialDerivativesAt uvPoint function = Pair.map (valueAt uvPoint) (partialDerivatives function)
+
+partialDerivativeRanges ::
+  UvBounds ->
+  SurfaceFunction1D units ->
+  (Interval units, Interval units)
+partialDerivativeRanges uvRange function = Pair.map (range uvRange) (partialDerivatives function)
+
+secondPartialDerivatives ::
+  SurfaceFunction1D units ->
+  (SurfaceFunction1D units, SurfaceFunction1D units, SurfaceFunction1D units)
+secondPartialDerivatives f = do
+  let (fu, fv) = partialDerivatives f
+  let (fuu, fuv) = partialDerivatives fu
+  let fvv = Pair.second (partialDerivatives fv)
+  (fuu, fuv, fvv)
+
+secondPartialDerivativesAt ::
+  UvPoint ->
+  SurfaceFunction1D units ->
+  (Quantity units, Quantity units, Quantity units)
+secondPartialDerivativesAt uvPoint function = do
+  let (fuu, fuv, fvv) = secondPartialDerivatives function
+  (valueAt uvPoint fuu, valueAt uvPoint fuv, valueAt uvPoint fvv)
+
+secondPartialDerivativeRanges ::
+  UvBounds ->
+  SurfaceFunction1D units ->
+  (Interval units, Interval units, Interval units)
+secondPartialDerivativeRanges uvRange function = do
+  let (fuu, fuv, fvv) = secondPartialDerivatives function
+  (range uvRange fuu, range uvRange fuv, range uvRange fvv)
 
 derivativeIn :: Direction2D -> SurfaceFunction1D units -> SurfaceFunction1D units
-derivativeIn (Direction2D dx dy) function =
-  dx * derivative U function + dy * derivative V function
+derivativeIn (Direction2D du dv) function = do
+  let (dfdu, dfdv) = partialDerivatives function
+  du * dfdu + dv * dfdv
 
 {-# INLINE compiled #-}
 compiled :: SurfaceFunction1D units -> Compiled units
@@ -361,24 +419,22 @@ one :: SurfaceFunction1D Unitless
 one = constant 1.0
 
 constant :: Quantity units -> SurfaceFunction1D units
-constant quantity = new (CompiledFunction.constant quantity) (const zero)
+constant quantity = new (CompiledFunction.constant quantity) (zero, zero)
 
 u :: SurfaceFunction1D Unitless
-u = new (CompiledFunction.concrete Expression.u) (\case U -> one; V -> zero)
+u = new (CompiledFunction.concrete Expression.u) (one, zero)
 
 v :: SurfaceFunction1D Unitless
-v = new (CompiledFunction.concrete Expression.v) (\case U -> zero; V -> one)
+v = new (CompiledFunction.concrete Expression.v) (zero, one)
 
-parameter :: SurfaceParameter -> SurfaceFunction1D Unitless
-parameter U = u
-parameter V = v
-
-new :: Compiled units -> (SurfaceParameter -> SurfaceFunction1D units) -> SurfaceFunction1D units
-new c derivativeFunction = do
-  let du = derivativeFunction U
-  let dv = derivativeFunction V
-  let dv' = SurfaceFunction1D (compiled dv) (derivative V du) (derivative V dv)
-  SurfaceFunction1D c du dv'
+new ::
+  Compiled units ->
+  (SurfaceFunction1D units, SurfaceFunction1D units) ->
+  SurfaceFunction1D units
+new givenCompiled givenPartialDerivatives = do
+  let mergedPartialDerivatives =
+        PartialDerivatives.merge new compiled partialDerivatives givenPartialDerivatives
+  SurfaceFunction1D givenCompiled mergedPartialDerivatives
 
 instance HasUnits (Nonzero (SurfaceFunction1D units)) units
 
@@ -395,12 +451,17 @@ instance
     (Nonzero (SurfaceFunction1D units2))
     (SurfaceFunction1D (units1 ?/? units2))
   where
-  lhs ?/? Nonzero rhs = do
-    let quotientCompiled = lhs.compiled ?/? rhs.compiled
-    let quotientDerivative p = Units.simplify do
-          (derivative p lhs ?*? rhs - lhs ?*? derivative p rhs)
-            ?/? SurfaceFunction1D.Nonzero.squared_ (Nonzero rhs)
-    new quotientCompiled quotientDerivative
+  f ?/? Nonzero g = do
+    let compiledQuotient = compiled f ?/? compiled g
+    let (dfdu, dfdv) = partialDerivatives f
+    let (dgdu, dgdv) = partialDerivatives g
+    let gSquared_ = SurfaceFunction1D.Nonzero.squared_ (Nonzero g)
+    let quotientPartialDerivatives =
+          Pair.map Units.simplify $
+            ( (dfdu ?*? g - f ?*? dgdu) ?/? gSquared_
+            , (dfdv ?*? g - f ?*? dgdv) ?/? gSquared_
+            )
+    new compiledQuotient quotientPartialDerivatives
 
 instance
   Units.Quotient units1 units2 units3 =>
@@ -424,28 +485,36 @@ squared :: Units.Squared units1 units2 => SurfaceFunction1D units1 -> SurfaceFun
 squared function = Units.specialize (squared_ function)
 
 squared_ :: SurfaceFunction1D units -> SurfaceFunction1D (units ?*? units)
-squared_ function =
+squared_ f =
   new
-    (CompiledFunction.map Expression.squared_ Quantity.squared_ Interval.squared_ function.compiled)
-    (\p -> 2.0 * function ?*? derivative p function)
+    (CompiledFunction.map Expression.squared_ Quantity.squared_ Interval.squared_ f.compiled)
+    (Pair.map (2.0 * f ?*?) (partialDerivatives f))
 
 cubed :: SurfaceFunction1D Unitless -> SurfaceFunction1D Unitless
-cubed function =
+cubed f =
   new
-    (CompiledFunction.map Expression.cubed Number.cubed Interval.cubed function.compiled)
-    (\p -> 3.0 * squared function * derivative p function)
+    (CompiledFunction.map Expression.cubed Number.cubed Interval.cubed f.compiled)
+    (Pair.map (3.0 * squared f *) (partialDerivatives f))
 
 sin :: SurfaceFunction1D Radians -> SurfaceFunction1D Unitless
-sin function =
-  new
-    (CompiledFunction.map Expression.sin Angle.sin Interval.sin function.compiled)
-    (\p -> cos function * (derivative p function / Angle.radian))
+sin f = do
+  let (dfdu, dfdv) = partialDerivatives f
+  let compiledSin = CompiledFunction.map Expression.sin Angle.sin Interval.sin f.compiled
+  let sinPartialDerivatives =
+        ( cos f * (dfdu / Angle.radian)
+        , cos f * (dfdv / Angle.radian)
+        )
+  new compiledSin sinPartialDerivatives
 
 cos :: SurfaceFunction1D Radians -> SurfaceFunction1D Unitless
-cos function =
-  new
-    (CompiledFunction.map Expression.cos Angle.cos Interval.cos function.compiled)
-    (\p -> negate (sin function) * (derivative p function / Angle.radian))
+cos f = do
+  let (dfdu, dfdv) = partialDerivatives f
+  let compiledCos = CompiledFunction.map Expression.cos Angle.cos Interval.cos f.compiled
+  let cosPartialDerivatives =
+        ( negate (sin f) * (dfdu / Angle.radian)
+        , negate (sin f) * (dfdv / Angle.radian)
+        )
+  new compiledCos cosPartialDerivatives
 
 data IsZero = IsZero deriving (Eq, Show, Err)
 
@@ -453,13 +522,12 @@ zeros :: Tolerance units => SurfaceFunction1D units -> Result IsZero Zeros
 zeros function
   | function ~= zero = Err IsZero
   | otherwise = do
-      let fu = derivative U function
-      let fv = derivative V function
+      let (dfdu, dfdv) = partialDerivatives function
       -- Using Nonzero should be OK here
       -- since we only actually use dudv and dvdu
       -- in subdomains where we know the denominator is non-zero
-      let dudv = -fv / Nonzero fu
-      let dvdu = -fu / Nonzero fv
+      let dudv = -dfdv / Nonzero dfdu
+      let dvdu = -dfdu / Nonzero dfdv
       case Solve2D.search (findZeros function dudv dvdu) AllZeroTypes of
         Ok solutions -> do
           let partialZeros = PartialZeros.empty & forEach solutions addSolution
@@ -518,23 +586,20 @@ findTangentSolutions subproblem = do
   let determinant = fuuRange ?*? fvvRange - fuvRange ?*? fuvRange
   case Interval.resolvedSign determinant of
     Resolved determinantSign -> do
-      let fu = derivative U f
-      let fv = derivative V f
-      let fuu = derivative U fu
-      let fuv = derivative V fu
-      let fvv = derivative V fv
+      let (fu, fv) = partialDerivatives f
+      let (fuu, fuv, fvv) = secondPartialDerivatives f
       let maybePoint =
             Solve2D.unique
-              (\testRange -> VectorBounds2D (range fu testRange) (range fv testRange))
-              (\testPoint -> Vector2D (value fu testPoint) (value fv testPoint))
-              (\testPoint -> Vector2D (value fuu testPoint) (value fuv testPoint))
-              (\testPoint -> Vector2D (value fuv testPoint) (value fvv testPoint))
+              (\testRange -> VectorBounds2D (range testRange fu) (range testRange fv))
+              (\testPoint -> Vector2D (valueAt testPoint fu) (valueAt testPoint fv))
+              (\testPoint -> Vector2D (valueAt testPoint fuu) (valueAt testPoint fuv))
+              (\testPoint -> Vector2D (valueAt testPoint fuv) (valueAt testPoint fvv))
               uvRange
       case maybePoint of
         Nothing -> Solve2D.recurse CrossingCurvesOnly
         Just point ->
           if Bounds2D.member point (Domain2D.interior subdomain)
-            && value f point ~= Quantity.zero
+            && valueAt point f ~= Quantity.zero
             then case determinantSign of
               Positive -> do
                 -- Non-saddle tangent point
@@ -547,9 +612,9 @@ findTangentSolutions subproblem = do
                 -- Saddle region
                 let saddleRegion = SaddleRegion.quadratic subproblem point
                 Solve2D.return (SaddleRegionSolution saddleRegion)
-            else do
+            else
               Solve2D.recurse CrossingCurvesOnly
-    Unresolved -> do
+    Unresolved ->
       -- TODO check for tangent curves
       Solve2D.recurse AllZeroTypes
 
@@ -567,7 +632,7 @@ crossingCurve ::
   Tolerance units =>
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
-crossingCurve subproblem = do
+crossingCurve subproblem =
   Fuzzy.oneOf
     [ diagonalCrossingCurve subproblem
     , horizontalCrossingCurve subproblem

@@ -4,7 +4,7 @@ module OpenSolid.VectorSurfaceFunction3D
   , new
   , constant
   , compiled
-  , derivative
+  , partialDerivatives
   )
 where
 
@@ -12,7 +12,6 @@ import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3D, VectorBounds3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
-import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.UvBounds (UvBounds)
@@ -87,11 +86,10 @@ instance
 
 new ::
   Compiled units space ->
-  (SurfaceParameter -> VectorSurfaceFunction3D units space) ->
+  (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
   VectorSurfaceFunction3D units space
 compiled :: VectorSurfaceFunction3D units space -> Compiled units space
-derivative ::
-  SurfaceParameter ->
+partialDerivatives ::
   VectorSurfaceFunction3D units space ->
-  VectorSurfaceFunction3D units space
+  (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space)
 constant :: Vector3D units space -> VectorSurfaceFunction3D units space

@@ -64,7 +64,6 @@ import OpenSolid.Primitives
   , VectorBounds3D
   )
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Units (HasUnits)
@@ -1232,16 +1231,16 @@ yCoordinate (Curve2D ast _) = curve1D (Ast.yComponent ast)
 yCoordinate (Surface2D ast _) = surface1D (Ast.yComponent ast)
 
 t :: Expression Number Number
-t = curve1D Ast.curveParameter
+t = curve1D Ast.t
 
 u :: Expression UvPoint Number
-u = surface1D (Ast.surfaceParameter SurfaceParameter.U)
+u = surface1D Ast.u
 
 v :: Expression UvPoint Number
-v = surface1D (Ast.surfaceParameter SurfaceParameter.V)
+v = surface1D Ast.v
 
 uv :: Expression UvPoint UvPoint
-uv = surface2D Ast.surfaceParameters
+uv = surface2D Ast.uv
 
 squared_ :: Expression input (Quantity units) -> Expression input (Quantity (units ?*? units))
 squared_ (Curve1D ast _) = curve1D (Ast.squared ast)

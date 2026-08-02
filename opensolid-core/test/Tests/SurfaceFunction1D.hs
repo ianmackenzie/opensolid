@@ -11,7 +11,6 @@ import OpenSolid.Random qualified as Random
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction1D.Zeros qualified as SurfaceFunction1D.Zeros
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
@@ -21,7 +20,6 @@ import OpenSolid.World3D qualified as World3D
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Curve2D qualified
-import Tests.Random qualified as Random
 import Tests.VectorCurve2D qualified
 
 tests :: List Test
@@ -43,8 +41,7 @@ planeTorusIntersection =
 firstDerivativeConsistency :: Test
 firstDerivativeConsistency = Test.check 100 "firstDerivativeConsistency" do
   uvPoint <- Test.generate UvPoint.random
-  parameter <- Test.generate Random.surfaceParameter
-  firstDerivativeIsConsistent planeTorusSurface uvPoint parameter
+  firstDerivativesAreConsistent planeTorusSurface uvPoint
 
 withIntersectionCurves :: (NonEmpty (Curve2D Unitless) -> Test) -> Test
 withIntersectionCurves callback =
@@ -112,21 +109,26 @@ planeTorusSurface = do
 samplingRadius :: Number
 samplingRadius = 1e-6
 
-firstDerivativeIsConsistent :: SurfaceFunction1D Meters -> UvPoint -> SurfaceParameter -> Expectation
-firstDerivativeIsConsistent surfaceFunction p0 parameter = do
-  let partialDerivative = SurfaceFunction1D.derivative parameter surfaceFunction
-  let (p1, p2) = samplingPoints p0 parameter
-  let value1 = SurfaceFunction1D.value surfaceFunction p1
-  let value2 = SurfaceFunction1D.value surfaceFunction p2
-  let numericalDerivative = (value2 - value1) / (2.0 * samplingRadius)
-  let analyticalDerivative = SurfaceFunction1D.value partialDerivative p0
-  Tolerance.using Length.micrometer do
-    Test.expect (numericalDerivative ~= analyticalDerivative)
-      & Test.output "numericalDerivative" numericalDerivative
-      & Test.output "analyticalDerivative" analyticalDerivative
-
-samplingPoints :: UvPoint -> SurfaceParameter -> (UvPoint, UvPoint)
-samplingPoints (UvPoint u0 v0) parameter =
-  case parameter of
-    U -> (UvPoint (u0 - samplingRadius) v0, UvPoint (u0 + samplingRadius) v0)
-    V -> (UvPoint u0 (v0 - samplingRadius), UvPoint u0 (v0 + samplingRadius))
+firstDerivativesAreConsistent :: SurfaceFunction1D Meters -> UvPoint -> Expectation
+firstDerivativesAreConsistent surfaceFunction p0 = do
+  let UvPoint u0 v0 = p0
+  let left = UvPoint (u0 - samplingRadius) v0
+  let right = UvPoint (u0 + samplingRadius) v0
+  let bottom = UvPoint u0 (v0 - samplingRadius)
+  let top = UvPoint u0 (v0 + samplingRadius)
+  let leftValue = SurfaceFunction1D.valueAt left surfaceFunction
+  let rightValue = SurfaceFunction1D.valueAt right surfaceFunction
+  let bottomValue = SurfaceFunction1D.valueAt bottom surfaceFunction
+  let topValue = SurfaceFunction1D.valueAt top surfaceFunction
+  let fuNumerical = (rightValue - leftValue) / (2.0 * samplingRadius)
+  let fvNumerical = (topValue - bottomValue) / (2.0 * samplingRadius)
+  let (fuAnalytical, fvAnalytical) = SurfaceFunction1D.partialDerivativesAt p0 surfaceFunction
+  Tolerance.using Length.micrometer $
+    Test.all
+      [ Test.expect (fuNumerical ~= fuAnalytical)
+          & Test.output "fuNumerical" fuNumerical
+          & Test.output "fuAnalytical" fuAnalytical
+      , Test.expect (fvNumerical ~= fvAnalytical)
+          & Test.output "fvNumerical" fvNumerical
+          & Test.output "fvAnalytical" fvAnalytical
+      ]

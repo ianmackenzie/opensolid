@@ -79,7 +79,6 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Units (HasUnits)
@@ -893,10 +892,12 @@ instance
     (SurfaceFunction1D Unitless)
     (VectorSurfaceFunction2D units)
   where
-  curve . function =
-    VectorSurfaceFunction2D.new
-      (compiled curve . SurfaceFunction1D.compiled function)
-      (\p -> (derivative curve . function) * SurfaceFunction1D.derivative p function)
+  f . g = do
+    let dfdt = derivative f . g
+    let (dtdu, dtdv) = SurfaceFunction1D.partialDerivatives g
+    let compiledComposed = compiled f . SurfaceFunction1D.compiled g
+    let composedPartialDerivatives = (dfdt * dtdu, dfdt * dtdv)
+    VectorSurfaceFunction2D.new compiledComposed composedPartialDerivatives
 
 instance
   Composition
@@ -904,26 +905,12 @@ instance
     (SurfaceFunction1D Unitless)
     (VectorSurfaceFunction3D units space)
   where
-  curve . function =
-    VectorSurfaceFunction3D.new
-      (compiled curve . SurfaceFunction1D.compiled function)
-      (\p -> (derivative curve . function) * SurfaceFunction1D.derivative p function)
-
-instance
-  Composition
-    (VectorCurve2D units)
-    SurfaceParameter
-    (VectorSurfaceFunction2D units)
-  where
-  curve . parameter = curve . SurfaceFunction1D.parameter parameter
-
-instance
-  Composition
-    (VectorCurve3D units space)
-    SurfaceParameter
-    (VectorSurfaceFunction3D units space)
-  where
-  curve . parameter = curve . SurfaceFunction1D.parameter parameter
+  f . g = do
+    let dfdt = derivative f . g
+    let (dtdu, dtdv) = SurfaceFunction1D.partialDerivatives g
+    let compiledComposed = compiled f . SurfaceFunction1D.compiled g
+    let composedPartialDerivatives = (dfdt * dtdu, dfdt * dtdv)
+    VectorSurfaceFunction3D.new compiledComposed composedPartialDerivatives
 
 instance
   Division_

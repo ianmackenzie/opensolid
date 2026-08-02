@@ -38,7 +38,6 @@ module Tests.Random
   , affineVectorTransform2D
   , affineTransform3D
   , affineVectorTransform3D
-  , surfaceParameter
   )
 where
 
@@ -77,7 +76,6 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Transform3D qualified as Transform3D
@@ -240,9 +238,6 @@ affineTransform2D =
 
 affineVectorTransform2D :: Generator VectorTransform2D.Affine
 affineVectorTransform2D = Random.map Transform2D.vectorTransform affineTransform2D
-
-surfaceParameter :: Generator SurfaceParameter
-surfaceParameter = Random.oneOf (NonEmpty.two U V)
 
 translation3D :: Generator (Transform3D.Rigid space)
 translation3D = Random.map Transform3D.translateBy vector3D

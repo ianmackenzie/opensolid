@@ -1,7 +1,7 @@
 module OpenSolid.VectorSurfaceFunction
   ( VectorSurfaceFunction
   , Exists
-  , derivative
+  , partialDerivatives
   )
 where
 
@@ -9,7 +9,6 @@ import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
-import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
@@ -51,16 +50,15 @@ class
   ) =>
   Exists dimension units space
   where
-  derivative ::
-    SurfaceParameter ->
+  partialDerivatives ::
     VectorSurfaceFunction dimension units space ->
-    VectorSurfaceFunction dimension units space
+    (VectorSurfaceFunction dimension units space, VectorSurfaceFunction dimension units space)
 
 instance Exists 1 units Void where
-  derivative = SurfaceFunction1D.derivative
+  partialDerivatives = SurfaceFunction1D.partialDerivatives
 
 instance Exists 2 units Void where
-  derivative = VectorSurfaceFunction2D.derivative
+  partialDerivatives = VectorSurfaceFunction2D.partialDerivatives
 
 instance Exists 3 units space where
-  derivative = VectorSurfaceFunction3D.derivative
+  partialDerivatives = VectorSurfaceFunction3D.partialDerivatives

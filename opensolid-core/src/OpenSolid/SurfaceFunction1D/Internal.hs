@@ -25,8 +25,8 @@ solveForU ::
   Number
 solveForU f fu uBounds vValue = do
   let uvPoint uValue = UvPoint uValue vValue
-  let fValue uValue = SurfaceFunction1D.value f (uvPoint uValue)
-  let fuValue uValue = SurfaceFunction1D.value fu (uvPoint uValue)
+  let fValue uValue = SurfaceFunction1D.valueAt (uvPoint uValue) f
+  let fuValue uValue = SurfaceFunction1D.valueAt (uvPoint uValue) fu
   case Solve1D.monotonic fValue fuValue uBounds of
     Solve1D.Exact uValue -> uValue
     Solve1D.Closest uValue -> uValue
@@ -40,8 +40,8 @@ solveForV ::
   Number
 solveForV f fv uValue vBounds = do
   let uvPoint vValue = UvPoint uValue vValue
-  let fValue vValue = SurfaceFunction1D.value f (uvPoint vValue)
-  let fvValue vValue = SurfaceFunction1D.value fv (uvPoint vValue)
+  let fValue vValue = SurfaceFunction1D.valueAt (uvPoint vValue) f
+  let fvValue vValue = SurfaceFunction1D.valueAt (uvPoint vValue) fv
   case Solve1D.monotonic fValue fvValue vBounds of
     Solve1D.Exact vValue -> vValue
     Solve1D.Closest vValue -> vValue

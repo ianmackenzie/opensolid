@@ -124,7 +124,6 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Transform (Transform)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Units (HasUnits)
@@ -265,21 +264,19 @@ instance
   givenPoint - curve = constant givenPoint - curve
 
 instance Composition (Curve2D units) (SurfaceFunction1D Unitless) (SurfaceFunction2D units) where
-  curve . function =
-    SurfaceFunction2D.new
-      (compiled curve . SurfaceFunction1D.compiled function)
-      (\p -> derivative curve . function * SurfaceFunction1D.derivative p function)
-
-instance Composition (Curve2D units) SurfaceParameter (SurfaceFunction2D units) where
-  curve . parameter = curve . SurfaceFunction1D.parameter parameter
+  f . g = do
+    let dfdt = derivative f . g
+    let (dtdu, dtdv) = SurfaceFunction1D.partialDerivatives g
+    let compiledComposed = compiled f . SurfaceFunction1D.compiled g
+    let composedPartialDerivatives = (dfdt * dtdu, dfdt * dtdv)
+    SurfaceFunction2D.new compiledComposed composedPartialDerivatives
 
 instance Composition (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units) where
   f . g = do
+    let (dfdu, dfdv) = Pair.map (. g) (SurfaceFunction1D.partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (derivative g)
     let compiledComposed = SurfaceFunction1D.compiled f . compiled g
-    let composedDerivative =
-          SurfaceFunction1D.derivative U f . g * dudt
-            + SurfaceFunction1D.derivative V f . g * dvdt
+    let composedDerivative = dfdu * dudt + dfdv * dvdt
     Curve1D.new compiledComposed composedDerivative
 
 instance
@@ -288,21 +285,19 @@ instance
     (Curve2D Unitless)
     (VectorCurve3D units space)
   where
-  function . uvCurve = do
-    let (dudt, dvdt) = VectorCurve2D.components (derivative uvCurve)
-    let compiledComposed = VectorSurfaceFunction3D.compiled function . compiled uvCurve
-    let composedDerivative =
-          VectorSurfaceFunction3D.derivative U function . uvCurve * dudt
-            + VectorSurfaceFunction3D.derivative V function . uvCurve * dvdt
+  f . g = do
+    let (dfdu, dfdv) = Pair.map (. g) (VectorSurfaceFunction3D.partialDerivatives f)
+    let (dudt, dvdt) = VectorCurve2D.components (derivative g)
+    let compiledComposed = VectorSurfaceFunction3D.compiled f . compiled g
+    let composedDerivative = dfdu * dudt + dfdv * dvdt
     VectorCurve3D.new compiledComposed composedDerivative
 
 instance Composition (SurfaceFunction3D space) (Curve2D Unitless) (Curve3D space) where
-  function . uvCurve = do
-    let (dudt, dvdt) = VectorCurve2D.components (derivative uvCurve)
-    let compiledComposed = SurfaceFunction3D.compiled function . compiled uvCurve
-    let composedDerivative =
-          SurfaceFunction3D.derivative U function . uvCurve * dudt
-            + SurfaceFunction3D.derivative V function . uvCurve * dvdt
+  f . g = do
+    let (dfdu, dfdv) = Pair.map (. g) (SurfaceFunction3D.partialDerivatives f)
+    let (dudt, dvdt) = VectorCurve2D.components (derivative g)
+    let compiledComposed = SurfaceFunction3D.compiled f . compiled g
+    let composedDerivative = dfdu * dudt + dfdv * dvdt
     new compiledComposed composedDerivative
 
 instance
@@ -371,10 +366,12 @@ instance
   lhs - rhs = constant lhs - rhs
 
 instance Composition (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
-  curve . function =
-    SurfaceFunction3D.new
-      (compiled curve . SurfaceFunction1D.compiled function)
-      (\p -> (derivative curve . function) * SurfaceFunction1D.derivative p function)
+  f . g = do
+    let dfdt = derivative f . g
+    let (dtdu, dtdv) = SurfaceFunction1D.partialDerivatives g
+    let compiledComposed = compiled f . SurfaceFunction1D.compiled g
+    let composedPartialDerivatives = (dfdt * dtdu, dfdt * dtdv)
+    SurfaceFunction3D.new compiledComposed composedPartialDerivatives
 
 data Solver dimension units space where
   Solver ::

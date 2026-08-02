@@ -20,6 +20,7 @@ import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
@@ -27,7 +28,6 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction1D.ImplicitCurveRange (ImplicitCurveRange)
 import OpenSolid.SurfaceFunction1D.ImplicitCurveRange qualified as ImplicitCurveRange
 import OpenSolid.SurfaceFunction1D.Internal qualified as Internal
-import OpenSolid.SurfaceParameter (SurfaceParameter (V))
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (data UvPoint)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -100,7 +100,7 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
               | du > 0.0 -> Interval (max vLow v) vHigh
               | du < 0.0 -> Interval vLow (min vHigh v)
               | otherwise -> Interval vLow vHigh
-  let fv = SurfaceFunction1D.derivative V f
+  let fv = Pair.second (SurfaceFunction1D.partialDerivatives f)
   let solveForV =
         case (SurfaceFunction1D.compiled f, SurfaceFunction1D.compiled fv) of
           (CompiledFunction.Concrete fExpr, CompiledFunction.Concrete fvExpr) ->
@@ -124,7 +124,7 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
               & Bounds2D.placeIn frame
           NotMonotonic -> do
             let vRange = ImplicitCurveRange.over (Interval u1 u2) curveRange
-            let slopeRange = SurfaceFunction1D.range dvdu (Bounds2D (Interval u1 u2) vRange)
+            let slopeRange = SurfaceFunction1D.range (Bounds2D (Interval u1 u2) vRange) dvdu
             let segmentVRange = Internal.curveRangeAt u1 u2 v1 v2 slopeRange
             Bounds2D (Interval u1 u2) segmentVRange
   recursive \self -> do

@@ -40,7 +40,6 @@ import OpenSolid.Solve2D qualified as Solve2D
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction1D.Zeros qualified as SurfaceFunction1D.Zeros
-import OpenSolid.SurfaceParameter qualified as SurfaceParameter
 import OpenSolid.Svg (Svg)
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
@@ -368,14 +367,13 @@ testNewtonRaphson2D = Tolerance.using Tolerance.unitless do
   let g = u - v
   let bounds = Bounds2D (Interval 0.0 2.0) (Interval 0.0 2.0)
   let function = VectorSurfaceFunction2D.xy f g
-  let uDerivative = VectorSurfaceFunction2D.derivative SurfaceParameter.U function
-  let vDerivative = VectorSurfaceFunction2D.derivative SurfaceParameter.V function
+  let (uDerivative, vDerivative) = VectorSurfaceFunction2D.partialDerivatives function
   let solution =
         Solve2D.unique
           (VectorSurfaceFunction2D.range function)
-          (VectorSurfaceFunction2D.value function)
-          (VectorSurfaceFunction2D.value uDerivative)
-          (VectorSurfaceFunction2D.value vDerivative)
+          (VectorSurfaceFunction2D.valueOf function)
+          (VectorSurfaceFunction2D.valueOf uDerivative)
+          (VectorSurfaceFunction2D.valueOf vDerivative)
           bounds
   log "Solve2D.unique solution" solution
 

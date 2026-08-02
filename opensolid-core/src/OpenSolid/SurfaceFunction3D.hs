@@ -3,12 +3,13 @@ module OpenSolid.SurfaceFunction3D
   , Compiled
   , new
   , constant
-  , point
+  , pointAt
+  , pointOn
   , range
   , compiled
-  , derivative
-  , derivativeValue
-  , derivativeRange
+  , partialDerivatives
+  , partialDerivativesAt
+  , partialDerivativeRanges
   , nondegenerate
   , normalDirectionRange
   , placeIn
@@ -30,6 +31,8 @@ import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Pair qualified as Pair
+import OpenSolid.PartialDerivatives qualified as PartialDerivatives
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
@@ -38,7 +41,6 @@ import {-# SOURCE #-} OpenSolid.Surface3D (Surface3D)
 import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.UvBounds (UvBounds)
@@ -54,8 +56,10 @@ import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
 data SurfaceFunction3D space = SurfaceFunction3D
   { compiled :: Compiled space
-  , du :: ~(VectorSurfaceFunction3D Meters space)
-  , dv :: ~(VectorSurfaceFunction3D Meters space)
+  , partialDerivatives ::
+      ( VectorSurfaceFunction3D Meters space
+      , VectorSurfaceFunction3D Meters space
+      )
   , maxSampledNondegeneracy :: ~Length
   }
 
@@ -69,10 +73,10 @@ instance
     (VectorSurfaceFunction3D meters space2)
     (SurfaceFunction3D space1)
   where
-  lhs + rhs =
+  f + g =
     new
-      (lhs.compiled + VectorSurfaceFunction3D.compiled rhs)
-      (\parameter -> derivative parameter lhs + VectorSurfaceFunction3D.derivative parameter rhs)
+      (compiled f + VectorSurfaceFunction3D.compiled g)
+      (Pair.map2 (+) (partialDerivatives f) (VectorSurfaceFunction3D.partialDerivatives g))
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -90,10 +94,10 @@ instance
     (VectorSurfaceFunction3D meters space2)
     (SurfaceFunction3D space1)
   where
-  lhs - rhs =
+  f - g =
     new
-      (lhs.compiled - VectorSurfaceFunction3D.compiled rhs)
-      (\parameter -> derivative parameter lhs - VectorSurfaceFunction3D.derivative parameter rhs)
+      (compiled f - VectorSurfaceFunction3D.compiled g)
+      (Pair.map2 (-) (partialDerivatives f) (VectorSurfaceFunction3D.partialDerivatives g))
 
 instance
   (space1 ~ space2, meters ~ Meters) =>
@@ -111,10 +115,10 @@ instance
     (SurfaceFunction3D space2)
     (VectorSurfaceFunction3D Meters space1)
   where
-  lhs - rhs =
+  f - g =
     VectorSurfaceFunction3D.new
-      (lhs.compiled - rhs.compiled)
-      (\parameter -> derivative parameter lhs - derivative parameter rhs)
+      (compiled f - compiled g)
+      (Pair.map2 (-) (partialDerivatives f) (partialDerivatives g))
 
 instance
   space1 ~ space2 =>
@@ -148,42 +152,43 @@ instance
     (SurfaceFunction2D Unitless)
     (SurfaceFunction3D space)
   where
-  outer . inner = do
-    let duOuter = derivative U outer . inner
-    let dvOuter = derivative V outer . inner
-    let composedDerivative parameter = do
-          let innerDerivative = SurfaceFunction2D.derivative parameter inner
-          let (dU, dV) = VectorSurfaceFunction2D.components innerDerivative
-          duOuter * dU + dvOuter * dV
-    new (outer.compiled . SurfaceFunction2D.compiled inner) composedDerivative
+  f . g = do
+    let (dfdx, dfdy) = Pair.map (. g) (partialDerivatives f)
+    let (dgdu, dgdv) = SurfaceFunction2D.partialDerivatives g
+    let (dxdu, dydu) = VectorSurfaceFunction2D.components dgdu
+    let (dxdv, dydv) = VectorSurfaceFunction2D.components dgdv
+    let compiledComposed = compiled f . SurfaceFunction2D.compiled g
+    let composedPartialDerivatives =
+          ( dfdx * dxdu + dfdy * dydu
+          , dfdx * dxdv + dfdy * dydv
+          )
+    new compiledComposed composedPartialDerivatives
 
 new ::
   Compiled space ->
-  (SurfaceParameter -> VectorSurfaceFunction3D Meters space) ->
+  (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space) ->
   SurfaceFunction3D space
-new givenCompiled derivativeFunction = do
-  let du = derivativeFunction U
-  let dv = derivativeFunction V
-  let dvCompiled = VectorSurfaceFunction3D.compiled dv
-  let dvDerivative p = case p of
-        U -> VectorSurfaceFunction3D.derivative V du
-        V -> VectorSurfaceFunction3D.derivative V dv
-  let dv' = VectorSurfaceFunction3D.new dvCompiled dvDerivative
+new givenCompiled givenPartialDerivatives = do
+  let mergedPartialDerivatives =
+        PartialDerivatives.merge
+          VectorSurfaceFunction3D.new
+          VectorSurfaceFunction3D.compiled
+          VectorSurfaceFunction3D.partialDerivatives
+          givenPartialDerivatives
   recursive \result ->
     SurfaceFunction3D
       { compiled = givenCompiled
-      , du
-      , dv = dv'
+      , partialDerivatives = mergedPartialDerivatives
       , maxSampledNondegeneracy = NonEmpty.maximumOf (nondegeneracy result) UvPoint.interiorSamples
       }
 
 constant :: Point3D space -> SurfaceFunction3D space
-constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction3D.zero)
+constant value =
+  new (CompiledFunction.constant value) (VectorSurfaceFunction3D.zero, VectorSurfaceFunction3D.zero)
 
 nondegeneracy :: SurfaceFunction3D space -> UvPoint -> Length
 nondegeneracy function uvPoint = do
-  let duValue = derivativeValue U function uvPoint
-  let dvValue = derivativeValue V function uvPoint
+  let (duValue, dvValue) = partialDerivativesAt uvPoint function
   let duMagnitude = Vector3D.magnitude duValue
   let dvMagnitude = Vector3D.magnitude dvValue
   let minMagnitude = min duMagnitude dvMagnitude
@@ -196,28 +201,38 @@ nondegeneracy function uvPoint = do
       let minPerpendicularity = min duPerpendicularity dvPerpendicularity
       min minMagnitude minPerpendicularity
 
-point :: SurfaceFunction3D space -> UvPoint -> Point3D space
-point function uvPoint = CompiledFunction.value function.compiled uvPoint
+pointAt :: UvPoint -> SurfaceFunction3D space -> Point3D space
+pointAt uvPoint function = CompiledFunction.value function.compiled uvPoint
 
-range :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
-range function uvRange = CompiledFunction.range function.compiled uvRange
+pointOn :: SurfaceFunction3D space -> UvPoint -> Point3D space
+pointOn function uvPoint = pointAt uvPoint function
 
-derivativeValue :: SurfaceParameter -> SurfaceFunction3D space -> UvPoint -> Vector3D Meters space
-derivativeValue U function uvPoint = VectorSurfaceFunction3D.value (derivative U function) uvPoint
-derivativeValue V function uvPoint = VectorSurfaceFunction3D.value (derivative V function) uvPoint
+range :: UvBounds -> SurfaceFunction3D space -> Bounds3D space
+range uvRange function = CompiledFunction.range function.compiled uvRange
 
-derivativeRange :: SurfaceParameter -> SurfaceFunction3D space -> UvBounds -> VectorBounds3D Meters space
-derivativeRange U function uvRange = VectorSurfaceFunction3D.range (derivative U function) uvRange
-derivativeRange V function uvRange = VectorSurfaceFunction3D.range (derivative V function) uvRange
+partialDerivativesAt ::
+  UvPoint ->
+  SurfaceFunction3D space ->
+  (Vector3D Meters space, Vector3D Meters space)
+partialDerivativesAt uvPoint function =
+  Pair.map (VectorSurfaceFunction3D.valueAt uvPoint) (partialDerivatives function)
+
+partialDerivativeRanges ::
+  UvBounds ->
+  SurfaceFunction3D space ->
+  (VectorBounds3D Meters space, VectorBounds3D Meters space)
+partialDerivativeRanges uvRange function =
+  Pair.map (VectorSurfaceFunction3D.range uvRange) (partialDerivatives function)
 
 {-# INLINE compiled #-}
 compiled :: SurfaceFunction3D space -> Compiled space
 compiled = (.compiled)
 
-{-# INLINE derivative #-}
-derivative :: SurfaceParameter -> SurfaceFunction3D space -> VectorSurfaceFunction3D Meters space
-derivative U = (.du)
-derivative V = (.dv)
+{-# INLINE partialDerivatives #-}
+partialDerivatives ::
+  SurfaceFunction3D space ->
+  (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space)
+partialDerivatives = (.partialDerivatives)
 
 nondegenerate ::
   Tolerance Meters =>
@@ -230,11 +245,14 @@ nondegenerate function =
 
 normalDirectionRange ::
   Tolerance Meters =>
-  SurfaceFunction3D space -> UvBounds -> DirectionBounds3D space
-normalDirectionRange function uvRange = do
-  let duDirectionBounds = VectorSurfaceFunction3D.directionRange (derivative U function) uvRange
-  let dvDirectionBounds = VectorSurfaceFunction3D.directionRange (derivative V function) uvRange
-  VectorBounds3D.direction (duDirectionBounds `cross` dvDirectionBounds)
+  UvBounds ->
+  SurfaceFunction3D space ->
+  DirectionBounds3D space
+normalDirectionRange uvRange function = do
+  let (fu, fv) = partialDerivatives function
+  let fuDirectionBounds = VectorSurfaceFunction3D.directionRange uvRange fu
+  let fvDirectionBounds = VectorSurfaceFunction3D.directionRange uvRange fv
+  VectorBounds3D.direction (fuDirectionBounds `cross` fvDirectionBounds)
 
 transformBy :: Transform3D tag space -> SurfaceFunction3D space -> SurfaceFunction3D space
 transformBy transform function = do
@@ -244,11 +262,11 @@ transformBy transform function = do
           (Point3D.transformBy transform)
           (Bounds3D.transformBy transform)
           function.compiled
-  let transformedDerivative parameter =
-        VectorSurfaceFunction3D.transformBy
-          (Transform3D.vectorTransform transform)
-          (derivative parameter function)
-  new compiledTransformed transformedDerivative
+  let transformDerivative =
+        VectorSurfaceFunction3D.transformBy (Transform3D.vectorTransform transform)
+  let transformedDerivatives =
+        Pair.map transformDerivative (partialDerivatives function)
+  new compiledTransformed transformedDerivatives
 
 placeIn :: Frame3D global local -> SurfaceFunction3D local -> SurfaceFunction3D global
 placeIn frame function = do
@@ -258,9 +276,9 @@ placeIn frame function = do
           (Point3D.placeIn frame)
           (Bounds3D.placeIn frame)
           function.compiled
-  let placedDerivative parameter =
-        VectorSurfaceFunction3D.placeIn frame (derivative parameter function)
-  new compiledPlaced placedDerivative
+  let placedPartialDerivatives =
+        Pair.map (VectorSurfaceFunction3D.placeIn frame) (partialDerivatives function)
+  new compiledPlaced placedPartialDerivatives
 
 relativeTo :: Frame3D global local -> SurfaceFunction3D global -> SurfaceFunction3D local
 relativeTo frame = placeIn (Frame3D.inverse frame)

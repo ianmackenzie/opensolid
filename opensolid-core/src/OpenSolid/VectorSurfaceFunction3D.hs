@@ -12,12 +12,14 @@ module OpenSolid.VectorSurfaceFunction3D
   , nondegenerate
   , zero
   , constant
-  , value
+  , valueAt
+  , valueOf
   , range
   , compiled
-  , derivative
-  , derivativeValue
-  , derivativeRange
+  , partialDerivatives
+  , secondPartialDerivatives
+  , partialDerivativesAt
+  , partialDerivativeRanges
   , placeIn
   , relativeTo
   , transformBy
@@ -40,6 +42,8 @@ import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Pair qualified as Pair
+import OpenSolid.PartialDerivatives qualified as PartialDerivatives
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -47,7 +51,6 @@ import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
@@ -62,8 +65,7 @@ import OpenSolid.VectorTransform3D (VectorTransform3D)
 data VectorSurfaceFunction3D units space
   = VectorSurfaceFunction3D
   { compiled :: Compiled units space
-  , du :: ~(VectorSurfaceFunction3D units space)
-  , dv :: ~(VectorSurfaceFunction3D units space)
+  , partialDerivatives :: (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space)
   , maxSampledInteriorMagnitude :: ~(Quantity units)
   , maxSampledLeftMagnitude :: ~(Quantity units)
   , maxSampledRightMagnitude :: ~(Quantity units)
@@ -87,8 +89,7 @@ instance
   coerce function =
     VectorSurfaceFunction3D
       { compiled = Units.coerce function.compiled
-      , du = Units.coerce function.du
-      , dv = Units.coerce function.dv
+      , partialDerivatives = Pair.map Units.coerce function.partialDerivatives
       , maxSampledInteriorMagnitude = Units.coerce function.maxSampledInteriorMagnitude
       , maxSampledLeftMagnitude = Units.coerce function.maxSampledLeftMagnitude
       , maxSampledRightMagnitude = Units.coerce function.maxSampledRightMagnitude
@@ -97,7 +98,7 @@ instance
       }
 
 instance Negation (VectorSurfaceFunction3D units space) where
-  negate function = new (negate function.compiled) (\p -> negate (derivative p function))
+  negate function = new (negate function.compiled) (Pair.map negate function.partialDerivatives)
 
 instance
   Multiplication
@@ -126,7 +127,10 @@ instance
     (VectorSurfaceFunction3D units2 space2)
     (VectorSurfaceFunction3D units1 space1)
   where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
+  f + g =
+    new
+      (compiled f + compiled g)
+      (Pair.map2 (+) (partialDerivatives f) (partialDerivatives g))
 
 instance
   ( space1 ~ space2
@@ -159,7 +163,10 @@ instance
     (VectorSurfaceFunction3D units2 space2)
     (VectorSurfaceFunction3D units1 space1)
   where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (\p -> derivative p lhs - derivative p rhs)
+  f - g =
+    new
+      (compiled f - compiled g)
+      (Pair.map2 (-) (partialDerivatives f) (partialDerivatives g))
 
 instance
   ( space1 ~ space2
@@ -216,10 +223,15 @@ instance
     (VectorSurfaceFunction3D units2 space)
     (VectorSurfaceFunction3D (units1 ?*? units2) space)
   where
-  lhs ?*? rhs =
-    new
-      (SurfaceFunction1D.compiled lhs ?*? rhs.compiled)
-      (\p -> SurfaceFunction1D.derivative p lhs ?*? rhs + lhs ?*? derivative p rhs)
+  f ?*? g = do
+    let (dfdu, dfdv) = SurfaceFunction1D.partialDerivatives f
+    let (dgdu, dgdv) = partialDerivatives g
+    let compiledProduct = SurfaceFunction1D.compiled f ?*? compiled g
+    let productPartialDerivatives =
+          ( dfdu ?*? g + f ?*? dgdu
+          , dfdv ?*? g + f ?*? dgdv
+          )
+    new compiledProduct productPartialDerivatives
 
 instance
   Units.Product units1 units2 units3 =>
@@ -253,10 +265,15 @@ instance
     (SurfaceFunction1D units2)
     (VectorSurfaceFunction3D (units1 ?*? units2) space)
   where
-  lhs ?*? rhs =
-    new
-      (lhs.compiled ?*? SurfaceFunction1D.compiled rhs)
-      (\p -> derivative p lhs ?*? rhs + lhs ?*? SurfaceFunction1D.derivative p rhs)
+  f ?*? g = do
+    let (dfdu, dfdv) = partialDerivatives f
+    let (dgdu, dgdv) = SurfaceFunction1D.partialDerivatives g
+    let compiledProduct = compiled f ?*? SurfaceFunction1D.compiled g
+    let productPartialDerivatives =
+          ( dfdu ?*? g + f ?*? dgdu
+          , dfdv ?*? g + f ?*? dgdv
+          )
+    new compiledProduct productPartialDerivatives
 
 instance
   Units.Product units1 units2 units3 =>
@@ -308,10 +325,15 @@ instance
     (VectorSurfaceFunction3D units2 space2)
     (VectorSurfaceFunction3D (units1 ?*? units2) space1)
   where
-  lhs `cross_` rhs =
-    new
-      (lhs.compiled `cross_` rhs.compiled)
-      (\p -> derivative p lhs `cross_` rhs + lhs `cross_` derivative p rhs)
+  f `cross_` g = do
+    let (dfdu, dfdv) = partialDerivatives f
+    let (dgdu, dgdv) = partialDerivatives g
+    let compiledCrossProduct = compiled f `cross_` compiled g
+    let crossProductPartialDerivatives =
+          ( dfdu `cross_` g + f `cross_` dgdu
+          , dfdv `cross_` g + f `cross_` dgdv
+          )
+    new compiledCrossProduct crossProductPartialDerivatives
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -383,10 +405,15 @@ instance
     (VectorSurfaceFunction3D units2 space2)
     (SurfaceFunction1D (units1 ?*? units2))
   where
-  lhs `dot_` rhs =
-    SurfaceFunction1D.new
-      (lhs.compiled `dot_` rhs.compiled)
-      (\p -> derivative p lhs `dot_` rhs + lhs `dot_` derivative p rhs)
+  f `dot_` g = do
+    let (dfdu, dfdv) = partialDerivatives f
+    let (dgdu, dgdv) = partialDerivatives g
+    let compiledDotProduct = compiled f `dot_` compiled g
+    let dotProductPartialDerivatives =
+          ( dfdu `dot_` g + f `dot_` dgdu
+          , dfdv `dot_` g + f `dot_` dgdv
+          )
+    SurfaceFunction1D.new compiledDotProduct dotProductPartialDerivatives
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -444,27 +471,15 @@ instance
 
 new ::
   Compiled units space ->
-  (SurfaceParameter -> VectorSurfaceFunction3D units space) ->
+  (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
   VectorSurfaceFunction3D units space
-new givenCompiled derivativeFunction = do
-  let du = derivativeFunction U
-  let dv = derivativeFunction V
-  let dv' =
-        VectorSurfaceFunction3D
-          { compiled = dv.compiled
-          , du = derivative V du
-          , dv = derivative V dv
-          , maxSampledInteriorMagnitude = dv.maxSampledInteriorMagnitude
-          , maxSampledLeftMagnitude = dv.maxSampledLeftMagnitude
-          , maxSampledRightMagnitude = dv.maxSampledRightMagnitude
-          , maxSampledBottomMagnitude = dv.maxSampledBottomMagnitude
-          , maxSampledTopMagnitude = dv.maxSampledTopMagnitude
-          }
+new givenCompiled givenPartialDerivatives = do
+  let mergedPartialDerivatives =
+        PartialDerivatives.merge new compiled partialDerivatives givenPartialDerivatives
   let sampledMagnitude uvPoint = Vector3D.magnitude (CompiledFunction.value givenCompiled uvPoint)
   VectorSurfaceFunction3D
     { compiled = givenCompiled
-    , du = du
-    , dv = dv'
+    , partialDerivatives = mergedPartialDerivatives
     , maxSampledInteriorMagnitude = NonEmpty.maximumOf sampledMagnitude UvPoint.interiorSamples
     , maxSampledLeftMagnitude = NonEmpty.maximumOf sampledMagnitude UvPoint.leftSamples
     , maxSampledRightMagnitude = NonEmpty.maximumOf sampledMagnitude UvPoint.rightSamples
@@ -497,41 +512,51 @@ zero :: VectorSurfaceFunction3D units space
 zero = constant Vector3D.zero
 
 constant :: Vector3D units space -> VectorSurfaceFunction3D units space
-constant vector = new (CompiledFunction.constant vector) (const zero)
+constant vector = new (CompiledFunction.constant vector) (zero, zero)
 
-value :: VectorSurfaceFunction3D units space -> UvPoint -> Vector3D units space
-value function uvPoint = CompiledFunction.value function.compiled uvPoint
+valueAt :: UvPoint -> VectorSurfaceFunction3D units space -> Vector3D units space
+valueAt uvPoint function = CompiledFunction.value function.compiled uvPoint
 
-range :: VectorSurfaceFunction3D units space -> UvBounds -> VectorBounds3D units space
-range function uvRange = CompiledFunction.range function.compiled uvRange
+valueOf :: VectorSurfaceFunction3D units space -> UvPoint -> Vector3D units space
+valueOf function uvPoint = valueAt uvPoint function
+
+range :: UvBounds -> VectorSurfaceFunction3D units space -> VectorBounds3D units space
+range uvRange function = CompiledFunction.range function.compiled uvRange
 
 {-# INLINE compiled #-}
 compiled :: VectorSurfaceFunction3D units space -> Compiled units space
 compiled = (.compiled)
 
-{-# INLINE derivative #-}
-derivative ::
-  SurfaceParameter ->
+{-# INLINE partialDerivatives #-}
+partialDerivatives ::
   VectorSurfaceFunction3D units space ->
-  VectorSurfaceFunction3D units space
-derivative U = (.du)
-derivative V = (.dv)
+  (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space)
+partialDerivatives = (.partialDerivatives)
 
-derivativeValue ::
-  SurfaceParameter ->
+secondPartialDerivatives ::
   VectorSurfaceFunction3D units space ->
+  (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space)
+secondPartialDerivatives function = do
+  let (fu, fv) = partialDerivatives function
+  let (fuu, fuv) = partialDerivatives fu
+  let (_, fvv) = partialDerivatives fv
+  (fuu, fuv, fvv)
+
+partialDerivativesAt ::
   UvPoint ->
-  Vector3D units space
-derivativeValue U function uvPoint = value (derivative U function) uvPoint
-derivativeValue V function uvPoint = value (derivative V function) uvPoint
-
-derivativeRange ::
-  SurfaceParameter ->
   VectorSurfaceFunction3D units space ->
+  (Vector3D units space, Vector3D units space)
+partialDerivativesAt uvPoint function = do
+  let (fu, fv) = partialDerivatives function
+  (valueAt uvPoint fu, valueAt uvPoint fv)
+
+partialDerivativeRanges ::
   UvBounds ->
-  VectorBounds3D units space
-derivativeRange U function uvRange = range (derivative U function) uvRange
-derivativeRange V function uvRange = range (derivative V function) uvRange
+  VectorSurfaceFunction3D units space ->
+  (VectorBounds3D units space, VectorBounds3D units space)
+partialDerivativeRanges uvRange function = do
+  let (fu, fv) = partialDerivatives function
+  (range uvRange fu, range uvRange fv)
 
 placeIn ::
   Frame3D global local ->
@@ -544,7 +569,8 @@ placeIn frame function = do
           (Vector3D.placeIn frame)
           (VectorBounds3D.placeIn frame)
           function.compiled
-  new compiledPlaced (\p -> placeIn frame (derivative p function))
+  let placedPartialDerivatives = Pair.map (placeIn frame) function.partialDerivatives
+  new compiledPlaced placedPartialDerivatives
 
 relativeTo ::
   Frame3D global local ->
@@ -563,7 +589,8 @@ transformBy transform function = do
           (Vector3D.transformBy transform)
           (VectorBounds3D.transformBy transform)
           function.compiled
-  new compiledTransformed (\p -> transformBy transform (derivative p function))
+  let transformedPartialDerivatives = Pair.map (transformBy transform) function.partialDerivatives
+  new compiledTransformed transformedPartialDerivatives
 
 squaredMagnitude_ :: VectorSurfaceFunction3D units space -> SurfaceFunction1D (units ?*? units)
 squaredMagnitude_ function = do
@@ -573,9 +600,9 @@ squaredMagnitude_ function = do
           Vector3D.squaredMagnitude_
           VectorBounds3D.squaredMagnitude_
           function.compiled
-  SurfaceFunction1D.new
-    compiledSquaredMagnitude
-    (\p -> 2.0 * function `dot_` derivative p function)
+  let squaredMagnitudePartialDerivatives =
+        Pair.map (2.0 * function `dot_`) function.partialDerivatives
+  SurfaceFunction1D.new compiledSquaredMagnitude squaredMagnitudePartialDerivatives
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>
@@ -585,21 +612,22 @@ squaredMagnitude = Units.specialize . squaredMagnitude_
 
 directionRange ::
   Tolerance units =>
-  VectorSurfaceFunction3D units space -> UvBounds -> DirectionBounds3D space
-directionRange function uvRange = do
+  UvBounds ->
+  VectorSurfaceFunction3D units space ->
+  DirectionBounds3D space
+directionRange uvRange function = do
   let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvRange
+  let (fuRange, fvRange) = partialDerivativeRanges uvRange function
   VectorBounds3D.direction $
     if
-      | uLow == 0.0 && degenerateLeft function -> range (derivative U function) uvRange
-      | uHigh == 1.0 && degenerateRight function -> negate (range (derivative U function) uvRange)
-      | vLow == 0.0 && degenerateBottom function -> range (derivative V function) uvRange
-      | vHigh == 1.0 && degenerateTop function -> negate (range (derivative V function) uvRange)
-      | otherwise -> range function uvRange
+      | uLow == 0.0 && degenerateLeft function -> fuRange
+      | uHigh == 1.0 && degenerateRight function -> negate fuRange
+      | vLow == 0.0 && degenerateBottom function -> fvRange
+      | vHigh == 1.0 && degenerateTop function -> negate fvRange
+      | otherwise -> range uvRange function
 
 newtonRaphson :: VectorSurfaceFunction3D units space -> UvPoint -> Fuzzy UvPoint
-newtonRaphson function uvPoint0 = do
-  let uDerivative = derivative U function
-  let vDerivative = derivative V function
-  let evaluate uvPoint =
-        (# value function uvPoint, value uDerivative uvPoint, value vDerivative uvPoint #)
+newtonRaphson f uvPoint0 = do
+  let (fu, fv) = partialDerivatives f
+  let evaluate uvPoint = (# valueAt uvPoint f, valueAt uvPoint fu, valueAt uvPoint fv #)
   NewtonRaphson.Surface.solveFrom uvPoint0 evaluate

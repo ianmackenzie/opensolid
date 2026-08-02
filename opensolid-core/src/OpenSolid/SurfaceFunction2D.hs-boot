@@ -1,7 +1,7 @@
 module OpenSolid.SurfaceFunction2D
   ( SurfaceFunction2D
   , Compiled
-  , derivative
+  , partialDerivatives
   , compiled
   , new
   , xy
@@ -13,7 +13,6 @@ import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D, Point2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
-import OpenSolid.SurfaceParameter (SurfaceParameter)
 import {-# SOURCE #-} OpenSolid.UvBounds (UvBounds)
 import {-# SOURCE #-} OpenSolid.UvPoint (UvPoint)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
@@ -63,8 +62,10 @@ instance
 
 new ::
   Compiled units ->
-  (SurfaceParameter -> VectorSurfaceFunction2D units) ->
+  (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units) ->
   SurfaceFunction2D units
 xy :: SurfaceFunction1D units -> SurfaceFunction1D units -> SurfaceFunction2D units
 compiled :: SurfaceFunction2D units -> Compiled units
-derivative :: SurfaceParameter -> SurfaceFunction2D units -> VectorSurfaceFunction2D units
+partialDerivatives ::
+  SurfaceFunction2D units ->
+  (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)

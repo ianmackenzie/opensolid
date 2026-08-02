@@ -164,7 +164,7 @@ revolved plane curve axis angle = do
   parametric surfaceFunction UvRegion.unitSquare
 
 bounds :: Surface3D space -> Bounds3D space
-bounds surface = SurfaceFunction3D.range surface.function (Region2D.bounds surface.domain)
+bounds surface = SurfaceFunction3D.range (Region2D.bounds surface.domain) surface.function
 
 boundaryCurves :: Surface3D space -> Set3D space (SurfaceCurve3D space)
 boundaryCurves = Set3D.flatten . boundaries

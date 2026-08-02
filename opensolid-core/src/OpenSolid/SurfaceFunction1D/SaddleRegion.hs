@@ -31,7 +31,6 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.HorizontalCurve qualified as H
 import OpenSolid.SurfaceFunction1D.Subproblem (Subproblem (Subproblem))
 import OpenSolid.SurfaceFunction1D.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
@@ -67,25 +66,18 @@ bounds = (.subproblem.uvRange)
 quadratic :: Subproblem units -> UvPoint -> SaddleRegion units
 quadratic subproblem saddlePoint = do
   let f = subproblem.f
-  let fu = SurfaceFunction1D.derivative U f
-  let fv = SurfaceFunction1D.derivative V f
-  let fuu = SurfaceFunction1D.derivative U fu
-  let fuv = SurfaceFunction1D.derivative V fu
-  let fvv = SurfaceFunction1D.derivative V fv
-  let fuuValue = SurfaceFunction1D.value fuu saddlePoint
-  let fuvValue = SurfaceFunction1D.value fuv saddlePoint
-  let fvvValue = SurfaceFunction1D.value fvv saddlePoint
+  let (fuu, fuv, fvv) = SurfaceFunction1D.secondPartialDerivativesAt saddlePoint f
   let bDirectionCandidates = NonEmpty.three Direction2D.x Direction2D.y (Direction2D.degrees 45.0)
-  let directionalSecondDerivative = secondDerivative fuuValue fuvValue fvvValue
+  let directionalSecondDerivative = secondDerivative fuu fuv fvv
   let dB = NonEmpty.maximumBy (Quantity.abs . directionalSecondDerivative) bDirectionCandidates
   let dA = Direction2D.rotateRight dB
   let vA = Vector2D.unit dA
   let vB = Vector2D.unit dB
   let Vector2D ua va = vA
   let Vector2D ub vb = vB
-  let faa = ua * ua * fuuValue + 2.0 * ua * va * fuvValue + va * va * fvvValue
-  let fab = ua * ub * fuuValue + (ua * vb + ub * va) * fuvValue + va * vb * fvvValue
-  let fbb = ub * ub * fuuValue + 2.0 * ub * vb * fuvValue + vb * vb * fvvValue
+  let faa = ua * ua * fuu + 2.0 * ua * va * fuv + va * va * fvv
+  let fab = ua * ub * fuu + (ua * vb + ub * va) * fuv + va * vb * fvv
+  let fbb = ub * ub * fuu + 2.0 * ub * vb * fuv + vb * vb * fvv
   let determinant = fab ?*? fab - faa ?*? fbb
   let sqrtD = Quantity.sqrt_ determinant
   let (m1, m2) = Quantity.minmax ((-fab + sqrtD) / fbb, (-fab - sqrtD) / fbb)

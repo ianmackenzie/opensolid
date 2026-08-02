@@ -4,7 +4,7 @@ module OpenSolid.VectorSurfaceFunction2D
   , new
   , constant
   , compiled
-  , derivative
+  , partialDerivatives
   , xComponent
   , yComponent
   , components
@@ -16,7 +16,6 @@ import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector2D, VectorBounds2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
-import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import {-# SOURCE #-} OpenSolid.UvBounds (UvBounds)
@@ -95,10 +94,12 @@ instance
 
 new ::
   Compiled units ->
-  (SurfaceParameter -> VectorSurfaceFunction2D units) ->
+  (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units) ->
   VectorSurfaceFunction2D units
 compiled :: VectorSurfaceFunction2D units -> Compiled units
-derivative :: SurfaceParameter -> VectorSurfaceFunction2D units -> VectorSurfaceFunction2D units
+partialDerivatives ::
+  VectorSurfaceFunction2D units ->
+  (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)
 constant :: Vector2D units -> VectorSurfaceFunction2D units
 xComponent :: VectorSurfaceFunction2D units -> SurfaceFunction1D units
 yComponent :: VectorSurfaceFunction2D units -> SurfaceFunction1D units

@@ -7,13 +7,14 @@ module OpenSolid.VectorSurfaceFunction2D
   , zero
   , constant
   , xy
-  , value
+  , valueAt
+  , valueOf
   , range
   , xComponent
   , yComponent
   , components
   , compiled
-  , derivative
+  , partialDerivatives
   , placeIn
   , relativeTo
   , transformBy
@@ -32,10 +33,11 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
+import OpenSolid.Pair qualified as Pair
+import OpenSolid.PartialDerivatives qualified as PartialDerivatives
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
@@ -50,8 +52,7 @@ import OpenSolid.VectorTransform2D (VectorTransform2D)
 
 data VectorSurfaceFunction2D units = VectorSurfaceFunction2D
   { compiled :: Compiled units
-  , du :: ~(VectorSurfaceFunction2D units)
-  , dv :: ~(VectorSurfaceFunction2D units)
+  , partialDerivatives :: (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)
   }
 
 type Compiled units =
@@ -64,11 +65,14 @@ type Compiled units =
 instance HasUnits (VectorSurfaceFunction2D units) units
 
 instance Units.Coercion (VectorSurfaceFunction2D units1) (VectorSurfaceFunction2D units2) where
-  coerce (VectorSurfaceFunction2D c du dv) =
-    VectorSurfaceFunction2D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
+  coerce function =
+    VectorSurfaceFunction2D
+      { compiled = Units.coerce function.compiled
+      , partialDerivatives = Pair.map Units.coerce function.partialDerivatives
+      }
 
 instance Negation (VectorSurfaceFunction2D units) where
-  negate function = new (negate function.compiled) (\p -> negate (derivative p function))
+  negate function = new (negate function.compiled) (Pair.map negate function.partialDerivatives)
 
 instance
   Multiplication
@@ -95,7 +99,10 @@ instance
     (VectorSurfaceFunction2D units2)
     (VectorSurfaceFunction2D units1)
   where
-  lhs + rhs = new (lhs.compiled + rhs.compiled) (\p -> derivative p lhs + derivative p rhs)
+  f + g =
+    new
+      (compiled f + compiled g)
+      (Pair.map2 (+) (partialDerivatives f) (partialDerivatives g))
 
 instance
   units1 ~ units2 =>
@@ -122,7 +129,10 @@ instance
     (VectorSurfaceFunction2D units2)
     (VectorSurfaceFunction2D units1)
   where
-  lhs - rhs = new (lhs.compiled - rhs.compiled) (\p -> derivative p lhs - derivative p rhs)
+  f - g =
+    new
+      (compiled f - compiled g)
+      (Pair.map2 (-) (partialDerivatives f) (partialDerivatives g))
 
 instance
   units1 ~ units2 =>
@@ -157,10 +167,15 @@ instance
     (VectorSurfaceFunction2D units2)
     (VectorSurfaceFunction2D (units1 ?*? units2))
   where
-  lhs ?*? rhs =
-    new
-      (SurfaceFunction1D.compiled lhs ?*? rhs.compiled)
-      (\p -> SurfaceFunction1D.derivative p lhs ?*? rhs + lhs ?*? derivative p rhs)
+  f ?*? g = do
+    let (dfdu, dfdv) = SurfaceFunction1D.partialDerivatives f
+    let (dgdu, dgdv) = partialDerivatives g
+    let compiledProduct = SurfaceFunction1D.compiled f ?*? compiled g
+    let productPartialDerivatives =
+          ( dfdu ?*? g + f ?*? dgdu
+          , dfdv ?*? g + f ?*? dgdv
+          )
+    new compiledProduct productPartialDerivatives
 
 instance
   Units.Product units1 units2 units3 =>
@@ -194,10 +209,15 @@ instance
     (SurfaceFunction1D units2)
     (VectorSurfaceFunction2D (units1 ?*? units2))
   where
-  lhs ?*? rhs =
-    new
-      (lhs.compiled ?*? SurfaceFunction1D.compiled rhs)
-      (\p -> derivative p lhs ?*? rhs + lhs ?*? SurfaceFunction1D.derivative p rhs)
+  f ?*? g = do
+    let (dfdu, dfdv) = partialDerivatives f
+    let (dgdu, dgdv) = SurfaceFunction1D.partialDerivatives g
+    let compiledProduct = compiled f ?*? SurfaceFunction1D.compiled g
+    let productPartialDerivatives =
+          ( dfdu ?*? g + f ?*? dgdu
+          , dfdv ?*? g + f ?*? dgdv
+          )
+    new compiledProduct productPartialDerivatives
 
 instance
   Units.Product units1 units2 units3 =>
@@ -248,10 +268,15 @@ instance
     (VectorSurfaceFunction2D units2)
     (SurfaceFunction1D (units1 ?*? units2))
   where
-  lhs `cross_` rhs =
-    SurfaceFunction1D.new
-      (lhs.compiled `cross_` rhs.compiled)
-      (\p -> derivative p lhs `cross_` rhs + lhs `cross_` derivative p rhs)
+  f `cross_` g = do
+    let (dfdu, dfdv) = partialDerivatives f
+    let (dgdu, dgdv) = partialDerivatives g
+    let compiledCrossProduct = compiled f `cross_` compiled g
+    let crossProductPartialDerivatives =
+          ( dfdu `cross_` g + f `cross_` dgdu
+          , dfdv `cross_` g + f `cross_` dgdv
+          )
+    SurfaceFunction1D.new compiledCrossProduct crossProductPartialDerivatives
 
 instance
   Units.Product units1 units2 units3 =>
@@ -318,10 +343,15 @@ instance
     (VectorSurfaceFunction2D units2)
     (SurfaceFunction1D (units1 ?*? units2))
   where
-  lhs `dot_` rhs =
-    SurfaceFunction1D.new
-      (lhs.compiled `dot_` rhs.compiled)
-      (\p -> derivative p lhs `dot_` rhs + lhs `dot_` derivative p rhs)
+  f `dot_` g = do
+    let (dfdu, dfdv) = partialDerivatives f
+    let (dgdu, dgdv) = partialDerivatives g
+    let compiledDotProduct = compiled f `dot_` compiled g
+    let dotProductPartialDerivatives =
+          ( dfdu `dot_` g + f `dot_` dgdu
+          , dfdv `dot_` g + f `dot_` dgdv
+          )
+    SurfaceFunction1D.new compiledDotProduct dotProductPartialDerivatives
 
 instance
   Units.Product units1 units2 units3 =>
@@ -379,27 +409,27 @@ instance
     (Curve2D Unitless)
     (VectorCurve2D units)
   where
-  function . curve = do
-    let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative curve)
-    VectorCurve2D.new
-      (function.compiled . Curve2D.compiled curve)
-      ((derivative U function . curve) * dudt + (derivative V function . curve) * dvdt)
+  f . g = do
+    let (dfdu, dfdv) = Pair.map (. g) (partialDerivatives f)
+    let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative g)
+    let compiledComposed = compiled f . Curve2D.compiled g
+    let composedDerivative = dfdu * dudt + dfdv * dvdt
+    VectorCurve2D.new compiledComposed composedDerivative
 
 new ::
   Compiled units ->
-  (SurfaceParameter -> VectorSurfaceFunction2D units) ->
+  (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units) ->
   VectorSurfaceFunction2D units
-new c derivativeFunction = do
-  let du = derivativeFunction U
-  let dv = derivativeFunction V
-  let dv' = VectorSurfaceFunction2D (compiled dv) (derivative V du) (derivative V dv)
-  VectorSurfaceFunction2D c du dv'
+new givenCompiled givenPartialDerivatives = do
+  let mergedPartialDerivatives =
+        PartialDerivatives.merge new compiled partialDerivatives givenPartialDerivatives
+  VectorSurfaceFunction2D givenCompiled mergedPartialDerivatives
 
 zero :: VectorSurfaceFunction2D units
 zero = constant Vector2D.zero
 
 constant :: Vector2D units -> VectorSurfaceFunction2D units
-constant vector = new (CompiledFunction.constant vector) (const zero)
+constant vector = new (CompiledFunction.constant vector) (zero, zero)
 
 xy ::
   SurfaceFunction1D units ->
@@ -413,7 +443,12 @@ xy x y = do
           VectorBounds2D
           (SurfaceFunction1D.compiled x)
           (SurfaceFunction1D.compiled y)
-  new compiledXY (\p -> xy (SurfaceFunction1D.derivative p x) (SurfaceFunction1D.derivative p y))
+  let xyPartialDerivatives =
+        Pair.map2
+          xy
+          (SurfaceFunction1D.partialDerivatives x)
+          (SurfaceFunction1D.partialDerivatives y)
+  new compiledXY xyPartialDerivatives
 
 placeIn :: Frame2D frameUnits -> VectorSurfaceFunction2D units -> VectorSurfaceFunction2D units
 placeIn frame function = do
@@ -423,7 +458,8 @@ placeIn frame function = do
           (Vector2D.placeIn frame)
           (VectorBounds2D.placeIn frame)
           function.compiled
-  new compiledPlaced (\p -> placeIn frame (derivative p function))
+  let placedPartialDerivatives = Pair.map (placeIn frame) (partialDerivatives function)
+  new compiledPlaced placedPartialDerivatives
 
 relativeTo :: Frame2D frameUnits -> VectorSurfaceFunction2D units -> VectorSurfaceFunction2D units
 relativeTo frame = placeIn (Frame2D.inverse frame)
@@ -439,10 +475,14 @@ transformBy transform function = do
           (Vector2D.transformBy transform)
           (VectorBounds2D.transformBy transform)
           function.compiled
-  new compiledTransformed (\p -> transformBy transform (derivative p function))
+  let transformedPartialDerivatives = Pair.map (transformBy transform) (partialDerivatives function)
+  new compiledTransformed transformedPartialDerivatives
 
-value :: VectorSurfaceFunction2D units -> UvPoint -> Vector2D units
-value function uvPoint = CompiledFunction.value function.compiled uvPoint
+valueAt :: UvPoint -> VectorSurfaceFunction2D units -> Vector2D units
+valueAt uvPoint function = CompiledFunction.value function.compiled uvPoint
+
+valueOf :: VectorSurfaceFunction2D units -> UvPoint -> Vector2D units
+valueOf function uvPoint = valueAt uvPoint function
 
 range :: VectorSurfaceFunction2D units -> UvBounds -> VectorBounds2D units
 range function uvRange = CompiledFunction.range function.compiled uvRange
@@ -451,10 +491,9 @@ range function uvRange = CompiledFunction.range function.compiled uvRange
 compiled :: VectorSurfaceFunction2D units -> Compiled units
 compiled = (.compiled)
 
-{-# INLINE derivative #-}
-derivative :: SurfaceParameter -> VectorSurfaceFunction2D units -> VectorSurfaceFunction2D units
-derivative U = (.du)
-derivative V = (.dv)
+{-# INLINE partialDerivatives #-}
+partialDerivatives :: VectorSurfaceFunction2D units -> (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)
+partialDerivatives = (.partialDerivatives)
 
 xComponent :: VectorSurfaceFunction2D units -> SurfaceFunction1D units
 xComponent function = do
@@ -464,9 +503,7 @@ xComponent function = do
           Vector2D.xComponent
           VectorBounds2D.xComponent
           function.compiled
-  SurfaceFunction1D.new
-    compiledXComponent
-    (\parameter -> xComponent (derivative parameter function))
+  SurfaceFunction1D.new compiledXComponent (Pair.map xComponent (partialDerivatives function))
 
 yComponent :: VectorSurfaceFunction2D units -> SurfaceFunction1D units
 yComponent function = do
@@ -476,9 +513,7 @@ yComponent function = do
           Vector2D.yComponent
           VectorBounds2D.yComponent
           function.compiled
-  SurfaceFunction1D.new
-    compiledYComponent
-    (\parameter -> yComponent (derivative parameter function))
+  SurfaceFunction1D.new compiledYComponent (Pair.map yComponent (partialDerivatives function))
 
 components ::
   VectorSurfaceFunction2D units ->
@@ -493,9 +528,9 @@ squaredMagnitude_ function = do
           Vector2D.squaredMagnitude_
           VectorBounds2D.squaredMagnitude_
           function.compiled
-  SurfaceFunction1D.new
-    compiledSquaredMagnitude
-    (\p -> 2.0 * function `dot_` derivative p function)
+  let squaredMagnitudePartialDerivatives =
+        Pair.map (2.0 * function `dot_`) function.partialDerivatives
+  SurfaceFunction1D.new compiledSquaredMagnitude squaredMagnitudePartialDerivatives
 
 squaredMagnitude ::
   Units.Squared units1 units2 =>
@@ -504,9 +539,7 @@ squaredMagnitude ::
 squaredMagnitude = Units.specialize . squaredMagnitude_
 
 newtonRaphson :: VectorSurfaceFunction2D units -> UvPoint -> Fuzzy UvPoint
-newtonRaphson function uvPoint0 = do
-  let uDerivative = derivative U function
-  let vDerivative = derivative V function
-  let evaluate uvPoint =
-        (# value function uvPoint, value uDerivative uvPoint, value vDerivative uvPoint #)
+newtonRaphson f uvPoint0 = do
+  let (fu, fv) = partialDerivatives f
+  let evaluate uvPoint = (# valueAt uvPoint f, valueAt uvPoint fu, valueAt uvPoint fv #)
   NewtonRaphson.Surface.solveFrom uvPoint0 evaluate

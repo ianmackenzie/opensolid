@@ -3,10 +3,11 @@ module OpenSolid.SurfaceFunction3D
   , Compiled
   , new
   , constant
-  , point
+  , pointAt
+  , pointOn
   , range
   , compiled
-  , derivative
+  , partialDerivatives
   , transformBy
   )
 where
@@ -14,7 +15,6 @@ where
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds3D, Point3D)
-import OpenSolid.SurfaceParameter (SurfaceParameter)
 import OpenSolid.Transform3D (Transform3D)
 import {-# SOURCE #-} OpenSolid.UvBounds (UvBounds)
 import {-# SOURCE #-} OpenSolid.UvPoint (UvPoint)
@@ -44,14 +44,14 @@ instance
 
 new ::
   Compiled space ->
-  (SurfaceParameter -> VectorSurfaceFunction3D Meters space) ->
+  (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space) ->
   SurfaceFunction3D space
 constant :: Point3D space -> SurfaceFunction3D space
-point :: SurfaceFunction3D space -> UvPoint -> Point3D space
-range :: SurfaceFunction3D space -> UvBounds -> Bounds3D space
+pointAt :: UvPoint -> SurfaceFunction3D space -> Point3D space
+pointOn :: SurfaceFunction3D space -> UvPoint -> Point3D space
+range :: UvBounds -> SurfaceFunction3D space -> Bounds3D space
 compiled :: SurfaceFunction3D space -> Compiled space
-derivative ::
-  SurfaceParameter ->
+partialDerivatives ::
   SurfaceFunction3D space ->
-  VectorSurfaceFunction3D Meters space
+  (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space)
 transformBy :: Transform3D tag space -> SurfaceFunction3D space -> SurfaceFunction3D space

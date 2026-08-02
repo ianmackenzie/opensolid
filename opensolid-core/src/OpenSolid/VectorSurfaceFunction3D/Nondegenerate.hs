@@ -4,28 +4,24 @@ import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Prelude
-import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
-direction :: Nondegenerate (VectorSurfaceFunction3D units space) -> UvPoint -> Direction3D space
+direction ::
+  Tolerance units =>
+  Nondegenerate (VectorSurfaceFunction3D units space) ->
+  UvPoint ->
+  Direction3D space
 direction (Nondegenerate function) uvPoint = do
   let UvPoint uValue vValue = uvPoint
-  Direction3D.unsafe $
-    Tolerance.using Quantity.zero $
-      Vector3D.normalize $
-        if
-          | uValue == 0.0 && VectorSurfaceFunction3D.degenerateLeft function ->
-              VectorSurfaceFunction3D.derivativeValue U function uvPoint
-          | uValue == 1.0 && VectorSurfaceFunction3D.degenerateRight function ->
-              negate (VectorSurfaceFunction3D.derivativeValue U function uvPoint)
-          | vValue == 0.0 && VectorSurfaceFunction3D.degenerateBottom function ->
-              VectorSurfaceFunction3D.derivativeValue V function uvPoint
-          | vValue == 1.0 && VectorSurfaceFunction3D.degenerateTop function ->
-              negate (VectorSurfaceFunction3D.derivativeValue V function uvPoint)
-          | otherwise ->
-              VectorSurfaceFunction3D.value function uvPoint
+  let fValue = VectorSurfaceFunction3D.valueAt uvPoint function
+  let (fuValue, fvValue) = VectorSurfaceFunction3D.partialDerivativesAt uvPoint function
+  let nonZeroVector
+        | uValue == 0.0 && VectorSurfaceFunction3D.degenerateLeft function = fuValue
+        | uValue == 1.0 && VectorSurfaceFunction3D.degenerateRight function = -fuValue
+        | vValue == 0.0 && VectorSurfaceFunction3D.degenerateBottom function = fvValue
+        | vValue == 1.0 && VectorSurfaceFunction3D.degenerateTop function = -fvValue
+        | otherwise = fValue
+  Direction3D.unsafe (nonZeroVector / Vector3D.magnitude nonZeroVector)

@@ -8,7 +8,7 @@ module OpenSolid.SurfaceFunction2D
   , point
   , range
   , compiled
-  , derivative
+  , partialDerivatives
   , distanceAlong
   , xCoordinate
   , yCoordinate
@@ -26,12 +26,13 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Pair qualified as Pair
+import OpenSolid.PartialDerivatives qualified as PartialDerivatives
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units (HasUnits)
@@ -47,8 +48,7 @@ import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
 data SurfaceFunction2D units = SurfaceFunction2D
   { compiled :: Compiled units
-  , du :: ~(VectorSurfaceFunction2D units)
-  , dv :: ~(VectorSurfaceFunction2D units)
+  , partialDerivatives :: (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)
   }
 
 type Compiled units =
@@ -57,8 +57,11 @@ type Compiled units =
 instance HasUnits (SurfaceFunction2D units) units
 
 instance Units.Coercion (SurfaceFunction2D units1) (SurfaceFunction2D units2) where
-  coerce (SurfaceFunction2D c du dv) =
-    SurfaceFunction2D (Units.coerce c) (Units.coerce du) (Units.coerce dv)
+  coerce function =
+    SurfaceFunction2D
+      { compiled = Units.coerce function.compiled
+      , partialDerivatives = Pair.map Units.coerce function.partialDerivatives
+      }
 
 instance
   units1 ~ units2 =>
@@ -67,10 +70,10 @@ instance
     (VectorSurfaceFunction2D units2)
     (SurfaceFunction2D units1)
   where
-  lhs + rhs =
+  f + g =
     new
-      (compiled lhs + VectorSurfaceFunction2D.compiled rhs)
-      (\p -> derivative p lhs + VectorSurfaceFunction2D.derivative p rhs)
+      (compiled f + VectorSurfaceFunction2D.compiled g)
+      (Pair.map2 (+) (partialDerivatives f) (VectorSurfaceFunction2D.partialDerivatives g))
 
 instance
   units1 ~ units2 =>
@@ -88,10 +91,10 @@ instance
     (VectorSurfaceFunction2D units2)
     (SurfaceFunction2D units1)
   where
-  lhs - rhs =
+  f - g =
     new
-      (compiled lhs - VectorSurfaceFunction2D.compiled rhs)
-      (\p -> derivative p lhs - VectorSurfaceFunction2D.derivative p rhs)
+      (compiled f - VectorSurfaceFunction2D.compiled g)
+      (Pair.map2 (-) (partialDerivatives f) (VectorSurfaceFunction2D.partialDerivatives g))
 
 instance
   units1 ~ units2 =>
@@ -109,27 +112,27 @@ instance
     (SurfaceFunction2D units2)
     (VectorSurfaceFunction2D units1)
   where
-  lhs - rhs =
+  f - g =
     VectorSurfaceFunction2D.new
-      (compiled lhs - compiled rhs)
-      (\p -> derivative p lhs - derivative p rhs)
+      (compiled f - compiled g)
+      (Pair.map2 (-) (partialDerivatives f) (partialDerivatives g))
 
 new ::
   Compiled units ->
-  (SurfaceParameter -> VectorSurfaceFunction2D units) ->
+  (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units) ->
   SurfaceFunction2D units
-new c derivativeFunction = do
-  let du = derivativeFunction U
-  let dv = derivativeFunction V
-  let dvCompiled = VectorSurfaceFunction2D.compiled dv
-  let dvDerivative parameter = case parameter of
-        U -> VectorSurfaceFunction2D.derivative V du
-        V -> VectorSurfaceFunction2D.derivative V dv
-  let dv' = VectorSurfaceFunction2D.new dvCompiled dvDerivative
-  SurfaceFunction2D c du dv'
+new givenCompiled givenPartialDerivatives = do
+  let mergedPartialDerivatives =
+        PartialDerivatives.merge
+          VectorSurfaceFunction2D.new
+          VectorSurfaceFunction2D.compiled
+          VectorSurfaceFunction2D.partialDerivatives
+          givenPartialDerivatives
+  SurfaceFunction2D givenCompiled mergedPartialDerivatives
 
 constant :: Point2D units -> SurfaceFunction2D units
-constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction2D.zero)
+constant value =
+  new (CompiledFunction.constant value) (VectorSurfaceFunction2D.zero, VectorSurfaceFunction2D.zero)
 
 uv :: SurfaceFunction2D Unitless
 uv = xy SurfaceFunction1D.u SurfaceFunction1D.v
@@ -143,11 +146,12 @@ xy x y = do
           Bounds2D
           (SurfaceFunction1D.compiled x)
           (SurfaceFunction1D.compiled y)
-  let xyDerivative p =
-        VectorSurfaceFunction2D.xy
-          (SurfaceFunction1D.derivative p x)
-          (SurfaceFunction1D.derivative p y)
-  new compiledXY xyDerivative
+  let xyPartialDerivatives =
+        Pair.map2
+          VectorSurfaceFunction2D.xy
+          (SurfaceFunction1D.partialDerivatives x)
+          (SurfaceFunction1D.partialDerivatives y)
+  new compiledXY xyPartialDerivatives
 
 point :: SurfaceFunction2D units -> UvPoint -> Point2D units
 point function uvPoint = CompiledFunction.value (compiled function) uvPoint
@@ -159,10 +163,11 @@ range function uvRange = CompiledFunction.range (compiled function) uvRange
 compiled :: SurfaceFunction2D units -> Compiled units
 compiled = (.compiled)
 
-{-# INLINE derivative #-}
-derivative :: SurfaceParameter -> SurfaceFunction2D units -> VectorSurfaceFunction2D units
-derivative U = (.du)
-derivative V = (.dv)
+{-# INLINE partialDerivatives #-}
+partialDerivatives ::
+  SurfaceFunction2D units ->
+  (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)
+partialDerivatives = (.partialDerivatives)
 
 transformBy :: Transform2D tag units -> SurfaceFunction2D units -> SurfaceFunction2D units
 transformBy transform function = do
@@ -172,11 +177,9 @@ transformBy transform function = do
           (Point2D.transformBy transform)
           (Bounds2D.transformBy transform)
           function.compiled
-  let transformedDerivative p =
-        VectorSurfaceFunction2D.transformBy
-          (Transform2D.vectorTransform transform)
-          (derivative p function)
-  new compiledTransformed transformedDerivative
+  let transformDerivative =
+        VectorSurfaceFunction2D.transformBy (Transform2D.vectorTransform transform)
+  new compiledTransformed (Pair.map transformDerivative function.partialDerivatives)
 
 instance
   Composition
@@ -184,11 +187,10 @@ instance
     (Curve2D Unitless)
     (Curve2D units)
   where
-  function . curve = do
-    let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative curve)
-    Curve2D.new
-      (compiled function . Curve2D.compiled curve)
-      ((derivative U function . curve) * dudt + (derivative V function . curve) * dvdt)
+  f . g = do
+    let (dfdu, dfdv) = Pair.map (. g) (partialDerivatives f)
+    let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative g)
+    Curve2D.new (compiled f . Curve2D.compiled g) (dfdu * dudt + dfdv * dvdt)
 
 instance
   Composition
@@ -197,12 +199,16 @@ instance
     (SurfaceFunction1D units)
   where
   f . g = do
-    let dfdu = SurfaceFunction1D.derivative U f . g
-    let dfdv = SurfaceFunction1D.derivative V f . g
-    let composedDerivative p = do
-          let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
-          dfdu * dudp + dfdv * dvdp
-    SurfaceFunction1D.new (SurfaceFunction1D.compiled f . g.compiled) composedDerivative
+    let (dfdx, dfdy) = Pair.map (. g) (SurfaceFunction1D.partialDerivatives f)
+    let (dgdu, dgdv) = partialDerivatives g
+    let (dxdu, dydu) = VectorSurfaceFunction2D.components dgdu
+    let (dxdv, dydv) = VectorSurfaceFunction2D.components dgdv
+    let compiledComposed = SurfaceFunction1D.compiled f . compiled g
+    let composedPartialDerivatives =
+          ( dfdx * dxdu + dfdy * dydu
+          , dfdx * dxdv + dfdy * dydv
+          )
+    SurfaceFunction1D.new compiledComposed composedPartialDerivatives
 
 instance
   Composition
@@ -211,13 +217,16 @@ instance
     (VectorSurfaceFunction2D units)
   where
   f . g = do
-    let dfdu = VectorSurfaceFunction2D.derivative U f . g
-    let dfdv = VectorSurfaceFunction2D.derivative V f . g
-    let compiledComposed = VectorSurfaceFunction2D.compiled f . g.compiled
-    let composedDerivative p = do
-          let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
-          dfdu * dudp + dfdv * dvdp
-    VectorSurfaceFunction2D.new compiledComposed composedDerivative
+    let (dfdx, dfdy) = Pair.map (. g) (VectorSurfaceFunction2D.partialDerivatives f)
+    let (dgdu, dgdv) = partialDerivatives g
+    let (dxdu, dydu) = VectorSurfaceFunction2D.components dgdu
+    let (dxdv, dydv) = VectorSurfaceFunction2D.components dgdv
+    let compiledComposed = VectorSurfaceFunction2D.compiled f . compiled g
+    let composedPartialDerivatives =
+          ( dfdx * dxdu + dfdy * dydu
+          , dfdx * dxdv + dfdy * dydv
+          )
+    VectorSurfaceFunction2D.new compiledComposed composedPartialDerivatives
 
 instance
   Composition
@@ -226,13 +235,16 @@ instance
     (VectorSurfaceFunction3D units space)
   where
   f . g = do
-    let dfdu = VectorSurfaceFunction3D.derivative U f . g
-    let dfdv = VectorSurfaceFunction3D.derivative V f . g
-    let compiledComposed = VectorSurfaceFunction3D.compiled f . g.compiled
-    let composedDerivative p = do
-          let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
-          dfdu * dudp + dfdv * dvdp
-    VectorSurfaceFunction3D.new compiledComposed composedDerivative
+    let (dfdx, dfdy) = Pair.map (. g) (VectorSurfaceFunction3D.partialDerivatives f)
+    let (dgdu, dgdv) = partialDerivatives g
+    let (dxdu, dydu) = VectorSurfaceFunction2D.components dgdu
+    let (dxdv, dydv) = VectorSurfaceFunction2D.components dgdv
+    let compiledComposed = VectorSurfaceFunction3D.compiled f . compiled g
+    let composedPartialDerivatives =
+          ( dfdx * dxdu + dfdy * dydu
+          , dfdx * dxdv + dfdy * dydv
+          )
+    VectorSurfaceFunction3D.new compiledComposed composedPartialDerivatives
 
 distanceAlong :: Axis2D units -> SurfaceFunction2D units -> SurfaceFunction1D units
 distanceAlong axis function =
@@ -246,9 +258,9 @@ xCoordinate function = do
           Point2D.xCoordinate
           Bounds2D.xCoordinate
           function.compiled
-  SurfaceFunction1D.new
-    compiledXCoordinate
-    (\parameter -> VectorSurfaceFunction2D.xComponent (derivative parameter function))
+  let xCoordinatePartialDerivatives =
+        Pair.map VectorSurfaceFunction2D.xComponent function.partialDerivatives
+  SurfaceFunction1D.new compiledXCoordinate xCoordinatePartialDerivatives
 
 yCoordinate :: SurfaceFunction2D units -> SurfaceFunction1D units
 yCoordinate function = do
@@ -258,9 +270,9 @@ yCoordinate function = do
           Point2D.yCoordinate
           Bounds2D.yCoordinate
           function.compiled
-  SurfaceFunction1D.new
-    compiledYCoordinate
-    (\parameter -> VectorSurfaceFunction2D.yComponent (derivative parameter function))
+  let yCoordinatePartialDerivatives =
+        Pair.map VectorSurfaceFunction2D.yComponent function.partialDerivatives
+  SurfaceFunction1D.new compiledYCoordinate yCoordinatePartialDerivatives
 
 coordinates :: SurfaceFunction2D units -> (SurfaceFunction1D units, SurfaceFunction1D units)
 coordinates function = (xCoordinate function, yCoordinate function)

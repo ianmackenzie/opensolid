@@ -3,6 +3,7 @@ module OpenSolid.Pair
   , second
   , flip
   , map
+  , map2
   , mapFirst
   , mapSecond
   , decorate
@@ -23,6 +24,9 @@ flip (a, b) = (b, a)
 {-# INLINE map #-}
 map :: (a -> b) -> (a, a) -> (b, b)
 map f (a1, a2) = (f a1, f a2)
+
+map2 :: (a -> b -> c) -> (a, a) -> (b, b) -> (c, c)
+map2 f (a1, a2) (b1, b2) = (f a1 b1, f a2 b2)
 
 {-# INLINE mapFirst #-}
 mapFirst :: (a1 -> a2) -> (a1, b) -> (a2, b)

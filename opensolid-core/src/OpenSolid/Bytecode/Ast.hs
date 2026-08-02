@@ -6,8 +6,9 @@ module OpenSolid.Bytecode.Ast
   , constant1D
   , constant2D
   , constant3D
-  , curveParameter
-  , surfaceParameter
+  , t
+  , u
+  , v
   , xComponent
   , yComponent
   , squared
@@ -31,7 +32,7 @@ module OpenSolid.Bytecode.Ast
   , placePoint2DOn
   , projectVector3dInto
   , projectPoint3dInto
-  , surfaceParameters
+  , uv
   , xy
   , bezierCurve1D
   , bezierCurve2D
@@ -89,7 +90,6 @@ import OpenSolid.Primitives
   , VectorTransform3D (VectorTransform3D)
   )
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Text qualified as Text
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Transform3D qualified as Transform3D
@@ -113,8 +113,9 @@ deriving instance Ord (Ast1D input)
 deriving instance Show (Ast1D input)
 
 data Variable1D input where
-  CurveParameter :: Variable1D Number
-  SurfaceParameter :: SurfaceParameter -> Variable1D UvPoint
+  T :: Variable1D Number
+  U :: Variable1D UvPoint
+  V :: Variable1D UvPoint
   XComponent :: Variable2D input -> Variable1D input
   YComponent :: Variable2D input -> Variable1D input
   Negated1D :: Variable1D input -> Variable1D input
@@ -160,7 +161,7 @@ deriving instance Ord (Ast2D input)
 deriving instance Show (Ast2D input)
 
 data Variable2D input where
-  SurfaceParameters :: Variable2D UvPoint
+  UV :: Variable2D UvPoint
   XY :: Variable1D input -> Variable1D input -> Variable2D input
   XC :: Variable1D input -> Number -> Variable2D input
   CY :: Number -> Variable1D input -> Variable2D input
@@ -260,8 +261,8 @@ instance Composition (Ast1D Number) (Ast1D input) (Ast1D input) where
   outer . Constant1D inner = Constant1D (evaluateCurve1D outer inner)
 
 instance Composition (Variable1D Number) (Variable1D input) (Ast1D input) where
-  input . CurveParameter = Variable1D input
-  CurveParameter . input = Variable1D input
+  input . T = Variable1D input
+  T . input = Variable1D input
   XComponent arg . input = xComponent (arg . input)
   YComponent arg . input = yComponent (arg . input)
   Negated1D arg . input = negate (arg . input)
@@ -299,7 +300,7 @@ instance Composition (Ast2D Number) (Ast1D input) (Ast2D input) where
   outer . Constant1D inner = Constant2D (evaluateVectorCurve2D outer inner)
 
 instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
-  input . CurveParameter = Variable2D input
+  input . T = Variable2D input
   XY x y . input = xy (x . input) (y . input)
   XC x y . input = xy (x . input) (Constant1D y)
   CY x y . input = xy (Constant1D x) (y . input)
@@ -338,7 +339,7 @@ instance Composition (Ast3D Number) (Ast1D input) (Ast3D input) where
   outer . Constant1D inner = Constant3D (evaluateVectorCurve3D outer inner)
 
 instance Composition (Variable3D Number) (Variable1D input) (Ast3D input) where
-  input . CurveParameter = Variable3D input
+  input . T = Variable3D input
   Negated3D arg . input = negate (arg . input)
   Sum3D lhs rhs . input = lhs . input + rhs . input
   SumVariableConstant3D lhs rhs . input = lhs . input + rhs
@@ -376,9 +377,9 @@ instance Composition (Ast1D UvPoint) (Ast2D input) (Ast1D input) where
   outer . Constant2D parameter = Constant1D (evaluateSurface1D outer (uvPoint parameter))
 
 instance Composition (Variable1D UvPoint) (Variable2D input) (Ast1D input) where
-  input . SurfaceParameters = Variable1D input
-  SurfaceParameter U . input = xComponent (Variable2D input)
-  SurfaceParameter V . input = yComponent (Variable2D input)
+  input . UV = Variable1D input
+  U . input = xComponent (Variable2D input)
+  V . input = yComponent (Variable2D input)
   XComponent arg . input = xComponent (arg . input)
   YComponent arg . input = yComponent (arg . input)
   Negated1D arg . input = negate (arg . input)
@@ -415,8 +416,8 @@ instance Composition (Ast2D UvPoint) (Ast2D input) (Ast2D input) where
   outer . Constant2D parameter = Constant2D (evaluateVectorSurface2D outer (uvPoint parameter))
 
 instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
-  input . SurfaceParameters = Variable2D input
-  SurfaceParameters . input = Variable2D input
+  input . UV = Variable2D input
+  UV . input = Variable2D input
   XY x y . input = xy (x . input) (y . input)
   XC x y . input = xy (x . input) (Constant1D y)
   CY x y . input = xy (Constant1D x) (y . input)
@@ -455,7 +456,7 @@ instance Composition (Ast3D UvPoint) (Ast2D input) (Ast3D input) where
   outer . Constant2D parameter = Constant3D (evaluateVectorSurface3D outer (uvPoint parameter))
 
 instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
-  input . SurfaceParameters = Variable3D input
+  input . UV = Variable3D input
   Negated3D arg . input = negate (arg . input)
   Sum3D lhs rhs . input = lhs . input + rhs . input
   SumVariableConstant3D lhs rhs . input = lhs . input + rhs
@@ -492,18 +493,21 @@ constant2D = Constant2D . Vector2D.erase
 constant3D :: Vector3D units space -> Ast3D input
 constant3D = Constant3D . Vector3D.erase
 
-curveParameter :: Ast1D Number
-curveParameter = Variable1D CurveParameter
+t :: Ast1D Number
+t = Variable1D T
 
-surfaceParameter :: SurfaceParameter -> Ast1D UvPoint
-surfaceParameter = Variable1D . SurfaceParameter
+u :: Ast1D UvPoint
+u = Variable1D U
 
-surfaceParameters :: Ast2D UvPoint
-surfaceParameters = Variable2D SurfaceParameters
+v :: Ast1D UvPoint
+v = Variable1D V
+
+uv :: Ast2D UvPoint
+uv = Variable2D UV
 
 xComponent :: Ast2D input -> Ast1D input
 xComponent (Constant2D val) = Constant1D (Vector2D.xComponent val)
-xComponent (Variable2D SurfaceParameters) = Variable1D (SurfaceParameter U)
+xComponent (Variable2D UV) = Variable1D U
 xComponent (Variable2D (XY xVar _)) = Variable1D xVar
 xComponent (Variable2D (XC xVar _)) = Variable1D xVar
 xComponent (Variable2D (CY xVal _)) = Constant1D xVal
@@ -513,7 +517,7 @@ xComponent (Variable2D var) = Variable1D (XComponent var)
 
 yComponent :: Ast2D input -> Ast1D input
 yComponent (Constant2D val) = Constant1D (Vector2D.yComponent val)
-yComponent (Variable2D SurfaceParameters) = Variable1D (SurfaceParameter V)
+yComponent (Variable2D UV) = Variable1D V
 yComponent (Variable2D (XY _ yVar)) = Variable1D yVar
 yComponent (Variable2D (XC _ yVal)) = Constant1D yVal
 yComponent (Variable2D (CY _ yVar)) = Variable1D yVar
@@ -1112,33 +1116,33 @@ xy (Variable1D x) (Variable1D y) = Variable2D (XY x y)
 bezierCurve1D :: NonEmpty (Quantity units) -> Ast1D Number
 bezierCurve1D (NonEmpty.One value) = constant1D value
 bezierCurve1D controlPoints =
-  Variable1D (BezierCurve1D (NonEmpty.map Quantity.erase controlPoints) CurveParameter)
+  Variable1D (BezierCurve1D (NonEmpty.map Quantity.erase controlPoints) T)
 
 bezierCurve2D :: NonEmpty (Vector2D units) -> Ast2D Number
 bezierCurve2D (NonEmpty.One value) = constant2D value
 bezierCurve2D controlPoints =
-  Variable2D (BezierCurve2D (NonEmpty.map Vector2D.erase controlPoints) CurveParameter)
+  Variable2D (BezierCurve2D (NonEmpty.map Vector2D.erase controlPoints) T)
 
 bezierCurve3D :: NonEmpty (Vector3D units space) -> Ast3D Number
 bezierCurve3D (NonEmpty.One value) = constant3D value
 bezierCurve3D controlPoints =
-  Variable3D (BezierCurve3D (NonEmpty.map Vector3D.erase controlPoints) CurveParameter)
+  Variable3D (BezierCurve3D (NonEmpty.map Vector3D.erase controlPoints) T)
 
 arc2D :: Vector2D units -> Vector2D units -> Angle -> Angle -> Ast2D Number
 arc2D vx vy theta1 theta2 =
-  Variable2D (Arc2D (Vector2D.erase vx) (Vector2D.erase vy) theta1 theta2 CurveParameter)
+  Variable2D (Arc2D (Vector2D.erase vx) (Vector2D.erase vy) theta1 theta2 T)
 
 arc3D :: Vector3D units space -> Vector3D units space -> Angle -> Angle -> Ast3D Number
 arc3D vx vy theta1 theta2 =
-  Variable3D (Arc3D (Vector3D.erase vx) (Vector3D.erase vy) theta1 theta2 CurveParameter)
+  Variable3D (Arc3D (Vector3D.erase vx) (Vector3D.erase vy) theta1 theta2 T)
 
 involute2D :: Int -> Vector2D units -> Vector2D units -> Angle -> Angle -> Ast2D Number
 involute2D n vx vy theta1 theta2 =
-  Variable2D (Involute2D n (Vector2D.erase vx) (Vector2D.erase vy) theta1 theta2 CurveParameter)
+  Variable2D (Involute2D n (Vector2D.erase vx) (Vector2D.erase vy) theta1 theta2 T)
 
 involute3D :: Int -> Vector3D units space -> Vector3D units space -> Angle -> Angle -> Ast3D Number
 involute3D n vx vy theta1 theta2 =
-  Variable3D (Involute3D n (Vector3D.erase vx) (Vector3D.erase vy) theta1 theta2 CurveParameter)
+  Variable3D (Involute3D n (Vector3D.erase vx) (Vector3D.erase vy) theta1 theta2 T)
 
 addVectorTransform2D :: VectorTransform2D.Affine -> Compile.Step ConstantIndex
 addVectorTransform2D (VectorTransform2D i j) = do
@@ -1177,9 +1181,9 @@ addPlane plane = do
 
 compileVariable1D :: Variable1D input -> Compile.Step VariableIndex
 compileVariable1D variable = case variable of
-  CurveParameter -> Compile.return (VariableIndex 0)
-  SurfaceParameter U -> Compile.return (VariableIndex 0)
-  SurfaceParameter V -> Compile.return (VariableIndex 1)
+  T -> Compile.return (VariableIndex 0)
+  U -> Compile.return (VariableIndex 0)
+  V -> Compile.return (VariableIndex 1)
   XComponent arg -> do
     argIndex <- compileVariable2D arg
     Compile.addVariable1D (Instruction.Component0 argIndex)
@@ -1283,11 +1287,11 @@ coordinates2D :: Vector2D Unitless -> NonEmpty Number
 coordinates2D (Vector2D x y) = NonEmpty.two x y
 
 coordinates3D :: Vector3D Unitless Void -> NonEmpty Number
-coordinates3D (Vector3D r f u) = NonEmpty.three r f u
+coordinates3D (Vector3D x y z) = NonEmpty.three x y z
 
 compileVariable2D :: Variable2D input -> Compile.Step VariableIndex
 compileVariable2D variable = case variable of
-  SurfaceParameters -> Compile.return (VariableIndex 0)
+  UV -> Compile.return (VariableIndex 0)
   XY x y -> do
     xIndex <- compileVariable1D x
     yIndex <- compileVariable1D y
