@@ -163,6 +163,7 @@ xComponent (Vector2D vx _) = vx
 yComponent :: Vector2D units -> Quantity units
 yComponent (Vector2D _ vy) = vy
 
+-- | Get the component of a vector in the given direction.
 componentIn :: Direction2D -> Vector2D units -> Quantity units
 componentIn = dot
 

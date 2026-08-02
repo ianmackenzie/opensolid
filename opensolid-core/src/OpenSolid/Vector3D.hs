@@ -124,6 +124,7 @@ This is a convention where positive X is leftward, positive Y is upward, and pos
 yUp :: Quantity units -> Quantity units -> Quantity units -> Vector3D units space
 yUp vX vY vZ = Vector3D -vX vZ vY
 
+-- | Get the component of a vector in the given direction.
 componentIn :: Direction3D space -> Vector3D units space -> Quantity units
 componentIn = dot
 
