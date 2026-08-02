@@ -21,7 +21,6 @@ module OpenSolid.FFI
   , load
   , Representation
   , argumentName
-  , splitCamelCase
   )
 where
 
