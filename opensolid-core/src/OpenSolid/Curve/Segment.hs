@@ -14,13 +14,13 @@ module OpenSolid.Curve.Segment
   )
 where
 
-import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds (Bounds, BoundsExists)
 import OpenSolid.Bounds qualified as Bounds
-import {-# SOURCE #-} OpenSolid.Curve (Curve)
+import {-# SOURCE #-} OpenSolid.Curve (Curve, CurveExists)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.CurvatureVector qualified as Curve.CurvatureVector
 import OpenSolid.Degeneracy qualified as Degeneracy
-import OpenSolid.DirectionBounds (DirectionBounds)
+import OpenSolid.DirectionBounds (DirectionBounds, DirectionBoundsExists)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
@@ -30,9 +30,9 @@ import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.VectorBounds (VectorBounds)
+import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
 import OpenSolid.VectorBounds qualified as VectorBounds
-import OpenSolid.VectorCurve qualified as VectorCurve
+import OpenSolid.VectorCurve (VectorCurveExists)
 import OpenSolid.VectorCurve.Direction qualified as VectorCurve.Direction
 
 data Segment dimension units space = Segment
@@ -49,10 +49,10 @@ instance HasUnits (Segment dimension units space) units
 instance
   ( dimension1 ~ dimension2
   , space1 ~ space2
-  , VectorBounds.Exists dimension1 units1 space1
-  , VectorBounds.Exists dimension2 units2 space2
-  , VectorBounds.Exists dimension1 (Unitless ?/? units1) space1
-  , VectorBounds.Exists dimension2 (Unitless ?/? units2) space2
+  , VectorBoundsExists dimension1 units1 space1
+  , VectorBoundsExists dimension2 units2 space2
+  , VectorBoundsExists dimension1 (Unitless ?/? units1) space1
+  , VectorBoundsExists dimension2 (Unitless ?/? units2) space2
   , Units.Coercion (Point dimension1 units1 space1) (Point dimension2 units2 space2)
   , Units.Coercion (Bounds dimension1 units1 space1) (Bounds dimension2 units2 space2)
   ) =>
@@ -90,11 +90,11 @@ tangentDirectionRange = (.tangentDirectionRange)
 isDegenerate :: Segment dimension units space -> Bool
 isDegenerate = (.isDegenerate)
 
-isMonotonic :: VectorBounds.Exists dimension units space => Segment dimension units space -> Bool
+isMonotonic :: VectorBoundsExists dimension units space => Segment dimension units space -> Bool
 isMonotonic segment = Interval.isResolved (VectorBounds.magnitude segment.derivativeRange)
 
 areDistinct ::
-  (Bounds.Exists dimension units space, Tolerance units) =>
+  (BoundsExists dimension units space, Tolerance units) =>
   Segment dimension units space ->
   Segment dimension units space ->
   Bool
@@ -102,7 +102,7 @@ areDistinct segment1 segment2 =
   not (range segment1 `intersects` range segment2)
 
 haveCrossingTangents ::
-  VectorBounds.Exists dimension units space =>
+  VectorBoundsExists dimension units space =>
   Segment dimension units space ->
   Segment dimension units space ->
   Bool
@@ -112,8 +112,8 @@ haveCrossingTangents segment1 segment2 =
     (tangentDirectionRange segment2)
 
 haveDistinctCurvatures ::
-  ( Curve.Exists dimension units space
-  , VectorBounds.Exists dimension (Unitless ?/? units) space
+  ( CurveExists dimension units space
+  , VectorBoundsExists dimension (Unitless ?/? units) space
   ) =>
   Segment dimension units space ->
   Segment dimension units space ->
@@ -124,12 +124,12 @@ haveDistinctCurvatures segment1 segment2 =
     (curvatureVectorRange_ segment2)
 
 new ::
-  ( Curve.Exists dimension units space
-  , VectorCurve.Exists dimension units space
-  , Bounds.Exists dimension units space
-  , DirectionBounds.Exists dimension space
-  , VectorBounds.Exists dimension units space
-  , VectorBounds.Exists dimension (Unitless ?/? units) space
+  ( CurveExists dimension units space
+  , VectorCurveExists dimension units space
+  , BoundsExists dimension units space
+  , DirectionBoundsExists dimension space
+  , VectorBoundsExists dimension units space
+  , VectorBoundsExists dimension (Unitless ?/? units) space
   , Addition
       (Point dimension units space)
       (VectorBounds dimension units space)

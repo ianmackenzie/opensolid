@@ -55,17 +55,17 @@ import OpenSolid.Primitives
   , Vector3D
   , VectorTransform3D (VectorTransform3D)
   )
-import {-# SOURCE #-} OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.VectorTransform3D qualified as VectorTransform3D
 import OpenSolid.World3D qualified as World3D
 
-type Rigid space = Transform3D Transform.Rigid space
+type Rigid space = Transform3D Transform.Tag.Rigid space
 
-type Orthonormal space = Transform3D Transform.Orthonormal space
+type Orthonormal space = Transform3D Transform.Tag.Orthonormal space
 
-type Uniform space = Transform3D Transform.Uniform space
+type Uniform space = Transform3D Transform.Tag.Uniform space
 
-type Affine space = Transform3D Transform.Affine space
+type Affine space = Transform3D Transform.Tag.Affine space
 
 {-# INLINE vectorTransform #-}
 vectorTransform :: Transform3D tag space -> VectorTransform3D tag space
@@ -131,10 +131,10 @@ relativeTo frame transform =
     (World3D.originPoint * frame * transform / frame)
     (VectorTransform3D.relativeTo frame (vectorTransform transform))
 
-asOrthonormal :: Transform.IsOrthonormal tag => Transform3D tag space -> Orthonormal space
+asOrthonormal :: Transform.Tag.IsOrthonormal tag => Transform3D tag space -> Orthonormal space
 asOrthonormal = Data.Coerce.coerce
 
-asUniform :: Transform.IsUniform tag => Transform3D tag space -> Uniform space
+asUniform :: Transform.Tag.IsUniform tag => Transform3D tag space -> Uniform space
 asUniform = Data.Coerce.coerce
 
 asAffine :: Transform3D tag space -> Affine space

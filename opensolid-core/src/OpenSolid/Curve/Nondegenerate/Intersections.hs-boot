@@ -1,14 +1,13 @@
 module OpenSolid.Curve.Nondegenerate.Intersections (intersections) where
 
-import {-# SOURCE #-} OpenSolid.Curve (Curve)
-import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
+import {-# SOURCE #-} OpenSolid.Curve (Curve, CurveExists)
 import OpenSolid.Curve.Intersections (Intersections)
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Prelude
 
 intersections ::
-  ( Curve.Exists dimension units space
+  ( CurveExists dimension units space
   , NewtonRaphson.Surface.Solver dimension units space
   , Tolerance units
   ) =>

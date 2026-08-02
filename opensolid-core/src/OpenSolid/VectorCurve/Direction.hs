@@ -1,24 +1,21 @@
 module OpenSolid.VectorCurve.Direction (value, range) where
 
-import OpenSolid.Direction (Direction)
-import OpenSolid.Direction qualified as Direction
-import OpenSolid.DirectionBounds (DirectionBounds)
-import OpenSolid.DirectionBounds qualified as DirectionBounds
+import OpenSolid.Direction (Direction, DirectionExists)
+import OpenSolid.DirectionBounds (DirectionBounds, DirectionBoundsExists)
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
-import OpenSolid.Vector (Vector)
-import OpenSolid.Vector qualified as Vector
+import OpenSolid.Vector (Vector, VectorExists)
 import OpenSolid.Vector.Nonzero qualified as Vector.Nonzero
-import OpenSolid.VectorBounds (VectorBounds)
+import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
 import OpenSolid.VectorBounds qualified as VectorBounds
-import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve)
+import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve, VectorCurveExists)
 import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
 value ::
-  ( VectorCurve.Exists dimension units space
-  , Vector.Exists dimension units space
-  , Direction.Exists dimension space
+  ( VectorCurveExists dimension units space
+  , VectorExists dimension units space
+  , DirectionExists dimension space
   ) =>
   VectorCurve dimension units space ->
   Number ->
@@ -33,9 +30,9 @@ value curve tValue curveValue derivativeValue =
       | otherwise -> curveValue
 
 range ::
-  ( VectorCurve.Exists dimension units space
-  , VectorBounds.Exists dimension units space
-  , DirectionBounds.Exists dimension space
+  ( VectorCurveExists dimension units space
+  , VectorBoundsExists dimension units space
+  , DirectionBoundsExists dimension space
   ) =>
   VectorCurve dimension units space ->
   Interval Unitless ->

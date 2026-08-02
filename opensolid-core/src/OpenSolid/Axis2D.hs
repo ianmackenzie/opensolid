@@ -33,7 +33,7 @@ import OpenSolid.Primitives
   , Plane3D
   , Transform2D
   )
-import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Vector2D (Vector2D)
 
@@ -76,7 +76,11 @@ this returns the corresponding 3D axis.
 placeOn :: Plane3D space -> Axis2D Meters -> Axis3D space
 placeOn plane (Axis2D p0 d) = Axis3D (Point2D.placeOn plane p0) (Direction2D.placeOn plane d)
 
-transformBy :: Transform.IsOrthonormal tag => Transform2D tag units -> Axis2D units -> Axis2D units
+transformBy ::
+  Transform.Tag.IsOrthonormal tag =>
+  Transform2D tag units ->
+  Axis2D units ->
+  Axis2D units
 transformBy transform axis = do
   let transformedOriginPoint = Point2D.transformBy transform (originPoint axis)
   let transformedDirection =

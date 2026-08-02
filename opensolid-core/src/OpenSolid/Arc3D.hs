@@ -36,7 +36,7 @@ import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Vector3D (Vector3D)
@@ -90,7 +90,11 @@ toCircle arc = Circle3D.on (plane arc) (Circle2D.withRadius (radius arc) Point2D
 reverse :: Arc3D space -> Arc3D space
 reverse (Arc3D p r a b) = Arc3D p r b a
 
-transformBy :: Transform.IsOrthonormal tag => Transform3D tag space -> Arc3D space -> Arc3D space
+transformBy ::
+  Transform.Tag.IsOrthonormal tag =>
+  Transform3D tag space ->
+  Arc3D space ->
+  Arc3D space
 transformBy transform (Arc3D p r a b) = Arc3D (Plane3D.transformBy transform p) r a b
 
 translateBy :: Vector3D Meters space -> Arc3D space -> Arc3D space

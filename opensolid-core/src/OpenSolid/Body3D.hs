@@ -41,7 +41,7 @@ import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Domain1D qualified as Domain1D
-import OpenSolid.Error (IsDegenerate (IsDegenerate))
+import OpenSolid.Error (IsDegenerate (IsDegenerate), IsZero (IsZero))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3D (Frame3D)
@@ -87,7 +87,6 @@ import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
-import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorCurve3D (VectorCurve3D)
 import OpenSolid.VectorCurve3D qualified as VectorCurve3D
@@ -160,7 +159,7 @@ cylinder ::
   Result EmptyBody (Body3D space)
 cylinder startPoint endPoint ("diameter" ::: diameter) =
   case Vector3D.magnitudeAndDirection (endPoint - startPoint) of
-    Err Vector.IsZero -> Err EmptyBody
+    Err IsZero -> Err EmptyBody
     Ok (length, direction) ->
       cylinderAlong (Axis3D startPoint direction) Length.zero length (#diameter diameter)
 

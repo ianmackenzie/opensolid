@@ -14,10 +14,10 @@ where
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Direction (Direction)
-import OpenSolid.Error (IsDegenerate (IsDegenerate))
+import OpenSolid.Error (IsDegenerate (IsDegenerate), IsZero (IsZero))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Point (Point)
+import OpenSolid.Point (Point, PointExists)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -48,11 +48,11 @@ endpoints :: Line dimension units space -> (Point dimension units space, Point d
 endpoints (Line p1 p2) = (p1, p2)
 
 -- | Get the length of a line.
-length :: Point.Exists dimension units space => Line dimension units space -> Quantity units
+length :: PointExists dimension units space => Line dimension units space -> Quantity units
 length (Line p1 p2) = Point.distanceFrom p1 p2
 
 direction ::
-  ( Point.Exists dimension units space
+  ( PointExists dimension units space
   , Tolerance units
   ) =>
   Line dimension units space ->
@@ -60,10 +60,10 @@ direction ::
 direction (Line p1 p2) =
   case Vector.direction (p2 - p1) of
     Ok lineDirection -> Ok lineDirection
-    Err Vector.IsZero -> Err IsDegenerate
+    Err IsZero -> Err IsDegenerate
 
 bounds ::
-  Point.Exists dimension units space =>
+  PointExists dimension units space =>
   Line dimension units space ->
   Bounds dimension units space
 bounds (Line p1 p2) = Bounds.hull2 p1 p2
@@ -76,7 +76,7 @@ or might be one of the line's endpoints,
 so this is not necessarily a *perpendicular* distance).
 -}
 distanceTo ::
-  Point.Exists dimension units space =>
+  PointExists dimension units space =>
   Point dimension units space ->
   Line dimension units space ->
   Quantity units

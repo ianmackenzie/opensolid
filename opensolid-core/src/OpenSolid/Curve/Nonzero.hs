@@ -12,22 +12,20 @@ module OpenSolid.Curve.Nonzero
   )
 where
 
-import OpenSolid.Curve (Curve)
+import OpenSolid.Curve (Curve, CurveExists)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.CurvatureVector qualified as Curve.CurvatureVector
-import OpenSolid.Direction (Direction)
-import OpenSolid.Direction qualified as Direction
-import OpenSolid.DirectionBounds (DirectionBounds)
-import OpenSolid.DirectionBounds qualified as DirectionBounds
+import OpenSolid.Direction (Direction, DirectionExists)
+import OpenSolid.DirectionBounds (DirectionBounds, DirectionBoundsExists)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector (Vector)
+import OpenSolid.Vector (Vector, VectorExists)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector.Nonzero qualified as Vector.Nonzero
-import OpenSolid.VectorBounds (VectorBounds)
+import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve.Nonzero qualified as VectorCurve.Nonzero
@@ -42,21 +40,21 @@ derivative :: Nonzero (Curve dimension units space) -> Nonzero (VectorCurve dime
 derivative (Nonzero curve) = Nonzero (Curve.derivative curve)
 
 derivativeAt ::
-  (Curve.Exists dimension units space, Vector.Exists dimension units space) =>
+  (CurveExists dimension units space, VectorExists dimension units space) =>
   Number ->
   Nonzero (Curve dimension units space) ->
   Nonzero (Vector dimension units space)
 derivativeAt tValue curve = VectorCurve.Nonzero.valueAt tValue (derivative curve)
 
 tangentDirectionAt ::
-  (Curve.Exists dimension units space, Direction.Exists dimension space) =>
+  (CurveExists dimension units space, DirectionExists dimension space) =>
   Number ->
   Nonzero (Curve dimension units space) ->
   Direction dimension space
 tangentDirectionAt tValue curve = Vector.Nonzero.direction (derivativeAt tValue curve)
 
 tangentDirectionRange ::
-  (Curve.Exists dimension units space, DirectionBounds.Exists dimension space) =>
+  (CurveExists dimension units space, DirectionBoundsExists dimension space) =>
   Interval Unitless ->
   Nonzero (Curve dimension units space) ->
   DirectionBounds dimension space
@@ -64,9 +62,9 @@ tangentDirectionRange tRange (Nonzero curve) =
   VectorBounds.direction (Curve.derivativeRange tRange curve)
 
 curvatureVectorAt ::
-  ( Curve.Exists dimension units space
+  ( CurveExists dimension units space
   , Units.Inverse units inverseUnits
-  , Vector.Exists dimension inverseUnits space
+  , VectorExists dimension inverseUnits space
   ) =>
   Number ->
   Nonzero (Curve dimension units space) ->
@@ -74,9 +72,9 @@ curvatureVectorAt ::
 curvatureVectorAt tValue curve = Vector.coerce (curvatureVectorAt_ tValue curve)
 
 curvatureVectorRange ::
-  ( Curve.Exists dimension units space
+  ( CurveExists dimension units space
   , Units.Inverse units inverseUnits
-  , VectorBounds.Exists dimension inverseUnits space
+  , VectorBoundsExists dimension inverseUnits space
   ) =>
   Interval Unitless ->
   Nonzero (Curve dimension units space) ->
@@ -84,7 +82,7 @@ curvatureVectorRange ::
 curvatureVectorRange tRange curve = VectorBounds.coerce (curvatureVectorRange_ tRange curve)
 
 curvatureVectorAt_ ::
-  (Curve.Exists dimension units space, Vector.Exists dimension (Unitless ?/? units) space) =>
+  (CurveExists dimension units space, VectorExists dimension (Unitless ?/? units) space) =>
   Number ->
   Nonzero (Curve dimension units space) ->
   Vector dimension (Unitless ?/? units) space
@@ -94,7 +92,7 @@ curvatureVectorAt_ tValue (Nonzero curve) =
     (Curve.secondDerivativeAt tValue curve)
 
 curvatureVectorRange_ ::
-  (Curve.Exists dimension units space, VectorBounds.Exists dimension (Unitless ?/? units) space) =>
+  (CurveExists dimension units space, VectorBoundsExists dimension (Unitless ?/? units) space) =>
   Interval Unitless ->
   Nonzero (Curve dimension units space) ->
   VectorBounds dimension (Unitless ?/? units) space

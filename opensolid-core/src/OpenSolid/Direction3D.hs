@@ -55,7 +55,7 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
-import {-# SOURCE #-} OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorTransform3D (VectorTransform3D)
 
@@ -181,7 +181,7 @@ relativeTo :: Frame3D global local -> Direction3D global -> Direction3D local
 relativeTo frame = lift (Vector3D.relativeTo frame)
 
 transformBy ::
-  Transform.IsOrthonormal tag =>
+  Transform.Tag.IsOrthonormal tag =>
   VectorTransform3D tag space ->
   Direction3D space ->
   Direction3D space

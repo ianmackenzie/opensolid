@@ -95,7 +95,7 @@ import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
-import OpenSolid.Error (IsDegenerate)
+import OpenSolid.Error (IsDegenerate, IsZero (IsZero))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
@@ -119,7 +119,6 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D)
@@ -175,7 +174,7 @@ is quarter circle that turns to the left.
 arcFrom :: Tolerance units => Point2D units -> Point2D units -> Angle -> Curve2D units
 arcFrom givenStartPoint givenEndPoint sweptAngle =
   case Vector2D.magnitudeAndDirection (givenEndPoint - givenStartPoint) of
-    Err Vector.IsZero -> lineFrom givenStartPoint givenEndPoint
+    Err IsZero -> lineFrom givenStartPoint givenEndPoint
     Ok (distanceBetweenPoints, directionBetweenPoints) -> do
       let halfDistance = 0.5 * distanceBetweenPoints
       let tanHalfAngle = Angle.tan (0.5 * sweptAngle)

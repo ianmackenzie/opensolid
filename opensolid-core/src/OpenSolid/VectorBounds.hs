@@ -1,6 +1,6 @@
 module OpenSolid.VectorBounds
   ( VectorBounds
-  , Exists
+  , VectorBoundsExists
   , member
   , center
   , squaredMagnitude_
@@ -18,153 +18,97 @@ module OpenSolid.VectorBounds
   )
 where
 
-import Data.Coerce (Coercible)
 import Data.Coerce qualified
-import {-# SOURCE #-} OpenSolid.DirectionBounds (DirectionBounds)
-import {-# SOURCE #-} OpenSolid.DirectionBounds qualified as DirectionBounds
-import OpenSolid.Interval (Interval (Interval))
-import OpenSolid.Interval qualified as Interval
+import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
-import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Primitives.Abstract (DirectionBounds, VectorBounds, VectorBoundsExists, VectorTransform)
+import OpenSolid.Primitives.Abstract qualified as Primitives.Abstract
 import OpenSolid.Vector (Vector)
-import OpenSolid.Vector qualified as Vector
-import OpenSolid.VectorBounds2D (VectorBounds2D)
-import OpenSolid.VectorBounds2D qualified as VectorBounds2D
-import OpenSolid.VectorBounds3D (VectorBounds3D)
-import OpenSolid.VectorBounds3D qualified as VectorBounds3D
-import OpenSolid.VectorTransform (VectorTransform, VectorTransform1D (VectorTransform1D))
 
-type family
-  VectorBounds dimension units space =
-    vectorBounds | vectorBounds -> dimension units space
-  where
-  VectorBounds 1 units Void = Interval units
-  VectorBounds 2 units Void = VectorBounds2D units
-  VectorBounds 3 units space = VectorBounds3D units space
+{-# INLINE member #-}
+member ::
+  VectorBoundsExists dimension units space =>
+  Vector dimension units space ->
+  VectorBounds dimension units space ->
+  Bool
+member = Primitives.Abstract.vectorBoundsMember
 
-class
-  ( Vector.Exists dimension units space
-  , Exists dimension Unitless space
-  , DirectionBounds.Exists dimension space
-  , HasUnits (VectorBounds dimension units space) units
-  , Coercible (VectorBounds dimension units space) (VectorBounds dimension Unitless space)
-  , Coercible (VectorBounds dimension Unitless space) (VectorBounds dimension units space)
-  , Show (VectorBounds dimension units space)
-  , Negation (VectorBounds dimension units space)
-  , Addition
-      (VectorBounds dimension units space)
-      (VectorBounds dimension units space)
-      (VectorBounds dimension units space)
-  , Subtraction
-      (VectorBounds dimension units space)
-      (VectorBounds dimension units space)
-      (VectorBounds dimension units space)
-  , Multiplication Number (VectorBounds dimension units space) (VectorBounds dimension units space)
-  , Multiplication (VectorBounds dimension units space) Number (VectorBounds dimension units space)
-  , Multiplication (Quantity units) (VectorBounds dimension Unitless space) (VectorBounds dimension units space)
-  , Multiplication (VectorBounds dimension Unitless space) (Quantity units) (VectorBounds dimension units space)
-  , Division (VectorBounds dimension units space) Number (VectorBounds dimension units space)
-  , Division (VectorBounds dimension units space) (Quantity units) (VectorBounds dimension Unitless space)
-  , Multiplication (Interval Unitless) (VectorBounds dimension units space) (VectorBounds dimension units space)
-  , Multiplication (VectorBounds dimension units space) (Interval Unitless) (VectorBounds dimension units space)
-  , Multiplication (Interval units) (VectorBounds dimension Unitless space) (VectorBounds dimension units space)
-  , Multiplication (VectorBounds dimension Unitless space) (Interval units) (VectorBounds dimension units space)
-  , Division (VectorBounds dimension units space) (Interval Unitless) (VectorBounds dimension units space)
-  , Division (VectorBounds dimension units space) (Interval units) (VectorBounds dimension Unitless space)
-  , DotMultiplication
-      (VectorBounds dimension units space)
-      (Vector dimension Unitless space)
-      (Interval units)
-  , DotMultiplication
-      (Vector dimension Unitless space)
-      (VectorBounds dimension units space)
-      (Interval units)
-  , DotMultiplication
-      (VectorBounds dimension Unitless space)
-      (Vector dimension units space)
-      (Interval units)
-  , DotMultiplication
-      (Vector dimension units space)
-      (VectorBounds dimension Unitless space)
-      (Interval units)
-  , DotMultiplication
-      (VectorBounds dimension units space)
-      (VectorBounds dimension Unitless space)
-      (Interval units)
-  , DotMultiplication
-      (VectorBounds dimension Unitless space)
-      (VectorBounds dimension units space)
-      (Interval units)
-  , DotMultiplication_
-      (VectorBounds dimension units space)
-      (VectorBounds dimension units space)
-      (Interval (units ?*? units))
-  ) =>
-  Exists dimension units space
-  where
-  member :: Vector dimension units space -> VectorBounds dimension units space -> Bool
-  center :: VectorBounds dimension units space -> Vector dimension units space
-  squaredMagnitude_ :: VectorBounds dimension units space -> Interval (units ?*? units)
-  magnitude :: VectorBounds dimension units space -> Interval units
-  normalize :: VectorBounds dimension units space -> VectorBounds dimension Unitless space
-  diameter :: VectorBounds dimension units space -> Quantity units
-  isResolved :: VectorBounds dimension units space -> Bool
-  areDistinct :: VectorBounds dimension units space -> VectorBounds dimension units space -> Bool
-  areIndependent :: VectorBounds dimension units space -> VectorBounds dimension units space -> Bool
-  transformBy ::
-    VectorTransform dimension tag space ->
-    VectorBounds dimension units space ->
-    VectorBounds dimension units space
+{-# INLINE center #-}
+center ::
+  VectorBoundsExists dimension units space =>
+  VectorBounds dimension units space ->
+  Vector dimension units space
+center = Primitives.Abstract.vectorBoundsCenter
 
-instance Exists 1 units Void where
-  member = Interval.member
-  center = Interval.midpoint
-  squaredMagnitude_ = Interval.squared_
-  magnitude = Interval.abs
-  normalize (Interval low high)
-    | low > Quantity.zero = Interval.constant 1.0
-    | high < Quantity.zero = Interval.constant -1.0
-    | otherwise = Interval -1.0 1.0
-  diameter = Interval.width
-  isResolved = Interval.isResolved
-  areDistinct = Interval.areDistinct
-  areIndependent _ _ = False
-  transformBy (VectorTransform1D scale) value = scale * value
+{-# INLINE squaredMagnitude_ #-}
+squaredMagnitude_ ::
+  VectorBoundsExists dimension units space =>
+  VectorBounds dimension units space ->
+  Interval (units ?*? units)
+squaredMagnitude_ = Primitives.Abstract.vectorBoundsSquaredMagnitude_
 
-instance Exists 2 units Void where
-  member = VectorBounds2D.member
-  center = VectorBounds2D.center
-  squaredMagnitude_ = VectorBounds2D.squaredMagnitude_
-  magnitude = VectorBounds2D.magnitude
-  normalize = VectorBounds2D.normalize
-  diameter = VectorBounds2D.diameter
-  isResolved = VectorBounds2D.isResolved
-  areDistinct = VectorBounds2D.areDistinct
-  areIndependent = VectorBounds2D.areIndependent
-  transformBy = VectorBounds2D.transformBy
+{-# INLINE magnitude #-}
+magnitude ::
+  VectorBoundsExists dimension units space =>
+  VectorBounds dimension units space ->
+  Interval units
+magnitude = Primitives.Abstract.vectorBoundsMagnitude
 
-instance Exists 3 units space where
-  member = VectorBounds3D.member
-  center = VectorBounds3D.center
-  squaredMagnitude_ = VectorBounds3D.squaredMagnitude_
-  magnitude = VectorBounds3D.magnitude
-  normalize = VectorBounds3D.normalize
-  diameter = VectorBounds3D.diameter
-  isResolved = VectorBounds3D.isResolved
-  areDistinct = VectorBounds3D.areDistinct
-  areIndependent = VectorBounds3D.areIndependent
-  transformBy = VectorBounds3D.transformBy
-
+{-# INLINE direction #-}
 direction ::
-  Exists dimension units space =>
+  VectorBoundsExists dimension units space =>
   VectorBounds dimension units space ->
   DirectionBounds dimension space
-direction = DirectionBounds.unsafe . normalize
+direction = Primitives.Abstract.vectorBoundsDirection
+
+{-# INLINE normalize #-}
+normalize ::
+  VectorBoundsExists dimension units space =>
+  VectorBounds dimension units space ->
+  VectorBounds dimension Unitless space
+normalize = Primitives.Abstract.vectorBoundsNormalize
+
+{-# INLINE diameter #-}
+diameter ::
+  VectorBoundsExists dimension units space =>
+  VectorBounds dimension units space ->
+  Quantity units
+diameter = Primitives.Abstract.vectorBoundsDiameter
+
+{-# INLINE isResolved #-}
+isResolved ::
+  VectorBoundsExists dimension units space =>
+  VectorBounds dimension units space ->
+  Bool
+isResolved = Primitives.Abstract.vectorBoundsIsResolved
+
+{-# INLINE areDistinct #-}
+areDistinct ::
+  VectorBoundsExists dimension units space =>
+  VectorBounds dimension units space ->
+  VectorBounds dimension units space ->
+  Bool
+areDistinct = Primitives.Abstract.vectorBoundsAreDistinct
+
+{-# INLINE areIndependent #-}
+areIndependent ::
+  VectorBoundsExists dimension units space =>
+  VectorBounds dimension units space ->
+  VectorBounds dimension units space ->
+  Bool
+areIndependent = Primitives.Abstract.vectorBoundsAreIndependent
+
+{-# INLINE transformBy #-}
+transformBy ::
+  VectorBoundsExists dimension units space =>
+  VectorTransform dimension tag space ->
+  VectorBounds dimension units space ->
+  VectorBounds dimension units space
+transformBy = Primitives.Abstract.vectorBoundsTransformBy
 
 {-# INLINE erase #-}
 erase ::
-  Exists dimension units space =>
+  VectorBoundsExists dimension units space =>
   VectorBounds dimension units space ->
   VectorBounds dimension Unitless space
 erase = coerce
@@ -172,14 +116,14 @@ erase = coerce
 {-# INLINE unerase #-}
 unerase ::
   forall units space dimension.
-  Exists dimension units space =>
+  VectorBoundsExists dimension units space =>
   VectorBounds dimension Unitless space ->
   VectorBounds dimension units space
 unerase = coerce
 
 {-# INLINE coerce #-}
 coerce ::
-  (Exists dimension units1 space, Exists dimension units2 space) =>
+  (VectorBoundsExists dimension units1 space, VectorBoundsExists dimension units2 space) =>
   VectorBounds dimension units1 space ->
   VectorBounds dimension units2 space
 coerce = Data.Coerce.coerce

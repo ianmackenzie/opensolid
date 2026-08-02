@@ -17,6 +17,7 @@ import OpenSolid.Direction2D (Direction2D (Direction2D))
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
+import OpenSolid.Error (IsZero (IsZero))
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Length (Length)
@@ -28,7 +29,6 @@ import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Step qualified as Step
-import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D (Vector3D)
@@ -60,13 +60,13 @@ vector2D :: Tolerance Meters => Vector2D Meters -> Step.Entity
 vector2D givenVector =
   case Vector2D.magnitudeAndDirection givenVector of
     Ok (vectorLength, vectorDirection) -> vector (direction2D vectorDirection) vectorLength
-    Err Vector.IsZero -> vector (direction2D Direction2D.x) Length.zero
+    Err IsZero -> vector (direction2D Direction2D.x) Length.zero
 
 vector3D :: Tolerance Meters => Vector3D Meters space -> Step.Entity
 vector3D givenVector =
   case Vector3D.magnitudeAndDirection givenVector of
     Ok (vectorLength, vectorDirection) -> vector (direction3D vectorDirection) vectorLength
-    Err Vector.IsZero -> vector (direction3D World3D.upwardDirection) Length.zero
+    Err IsZero -> vector (direction3D World3D.upwardDirection) Length.zero
 
 cartesianPoint :: List Length -> Step.Entity
 cartesianPoint coordinates =

@@ -3,7 +3,7 @@
 module OpenSolid.Curve.CrossingSolver (solver) where
 
 import OpenSolid.Continuity qualified as Continuity
-import OpenSolid.Curve (Curve)
+import OpenSolid.Curve (Curve, CurveExists)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
@@ -23,7 +23,7 @@ solver = Curve.Solver resolve solve
 data Crossing = Crossing
 
 resolve ::
-  (Curve.Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   (Interval Unitless, Interval Unitless) ->
   (Curve.Segment dimension units space, Curve.Segment dimension units space) ->
   Fuzzy (Maybe Crossing)
@@ -33,7 +33,7 @@ resolve _ (segmentA, segmentB)
   | otherwise = Unresolved
 
 solve ::
-  (Curve.Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Nondegenerate (Curve dimension units space) ->
   Nondegenerate (Curve dimension units space) ->
   Crossing ->

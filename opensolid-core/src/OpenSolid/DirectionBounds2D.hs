@@ -11,6 +11,8 @@ module OpenSolid.DirectionBounds2D
   , placeInOrientation
   , placeOn
   , placeOnOrientation
+  , areDistinct
+  , areIndependent
   )
 where
 
@@ -156,3 +158,12 @@ placeOn plane = placeOnOrientation plane.orientation
 placeOnOrientation :: PlaneOrientation3D space -> DirectionBounds2D -> DirectionBounds3D space
 placeOnOrientation orientation (UnitBounds2D vector) =
   DirectionBounds3D.unsafe (VectorBounds2D.placeOnOrientation orientation vector)
+
+areDistinct :: DirectionBounds2D -> DirectionBounds2D -> Bool
+areDistinct (UnitBounds2D vectorBounds1) (UnitBounds2D vectorBounds2) =
+  VectorBounds2D.areDistinct vectorBounds1 vectorBounds2
+
+areIndependent :: DirectionBounds2D -> DirectionBounds2D -> Bool
+areIndependent directionBounds1 directionBounds2 =
+  areDistinct directionBounds1 directionBounds2
+    && areDistinct directionBounds1 -directionBounds2

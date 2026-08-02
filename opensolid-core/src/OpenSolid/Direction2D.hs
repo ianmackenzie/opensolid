@@ -36,6 +36,7 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Error (IsZero (IsZero))
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2D
@@ -52,8 +53,7 @@ import OpenSolid.Primitives
 import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
-import {-# SOURCE #-} OpenSolid.Transform qualified as Transform
-import OpenSolid.Vector qualified as Vector
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Vector2D qualified as Vector2D
 
 {-# COMPLETE Direction2D #-}
@@ -101,7 +101,7 @@ from :: Tolerance units => Point2D units -> Point2D units -> Result PointsAreCoi
 from p1 p2 = do
   case Vector2D.direction (p2 - p1) of
     Ok direction -> Ok direction
-    Err Vector.IsZero -> Err PointsAreCoincident
+    Err IsZero -> Err PointsAreCoincident
 
 {-| Construct a direction from an angle.
 
@@ -200,7 +200,7 @@ random :: Random.Generator Direction2D
 random = Random.map fromAngle (Random.quantity -Angle.pi Angle.pi)
 
 transformBy ::
-  Transform.IsOrthonormal tag =>
+  Transform.Tag.IsOrthonormal tag =>
   VectorTransform2D tag ->
   Direction2D ->
   Direction2D

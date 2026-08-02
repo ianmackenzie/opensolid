@@ -7,7 +7,7 @@ where
 import OpenSolid.Bag (Bag)
 import OpenSolid.Bag qualified as Bag
 import OpenSolid.Bisection qualified as Bisection
-import OpenSolid.Curve (Curve)
+import OpenSolid.Curve (Curve, CurveExists)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint (IntersectionPoint))
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
@@ -24,7 +24,7 @@ import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Prelude
 
 type Problem dimension units space =
-  ( Curve.Exists dimension units space
+  ( CurveExists dimension units space
   , Tolerance units
   , ?curve1 :: Nondegenerate (Curve dimension units space)
   , ?curve2 :: Nondegenerate (Curve dimension units space)
@@ -46,7 +46,7 @@ bisectionTree :: Problem dimension units space => BisectionTree dimension units 
 bisectionTree = ?bisectionTree
 
 intersections ::
-  ( Curve.Exists dimension units space
+  ( CurveExists dimension units space
   , NewtonRaphson.Surface.Solver dimension units space
   , Tolerance units
   ) =>

@@ -37,6 +37,7 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis3D (Axis3D)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
+import OpenSolid.Error (IsZero (IsZero))
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3D (Frame3D (Frame3D))
@@ -51,7 +52,6 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3D qualified as Transform3D
-import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.World3D qualified as World3D
@@ -118,7 +118,7 @@ lookAt
                       Frame3D givenEyePoint World3D.upwardOrientation
                   | otherwise ->
                       Frame3D givenEyePoint World3D.downwardOrientation
-            Err Vector.IsZero ->
+            Err IsZero ->
               -- Given eye and focal points are coincident,
               -- so just look straight forward
               Frame3D givenEyePoint World3D.forwardOrientation

@@ -50,16 +50,16 @@ import OpenSolid.Primitives
   , VectorTransform2D (VectorTransform2D)
   )
 import OpenSolid.Tolerance qualified as Tolerance
-import {-# SOURCE #-} OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import {-# SOURCE #-} OpenSolid.Vector2D qualified as Vector2D
 
-type Rigid = VectorTransform2D Transform.Rigid
+type Rigid = VectorTransform2D Transform.Tag.Rigid
 
-type Orthonormal = VectorTransform2D Transform.Orthonormal
+type Orthonormal = VectorTransform2D Transform.Tag.Orthonormal
 
-type Uniform = VectorTransform2D Transform.Uniform
+type Uniform = VectorTransform2D Transform.Tag.Uniform
 
-type Affine = VectorTransform2D Transform.Affine
+type Affine = VectorTransform2D Transform.Tag.Affine
 
 unitX :: Vector2D Unitless
 unitX = Vector2D 1.0 0.0
@@ -128,10 +128,10 @@ relativeTo frame transform = do
   let vy = unitY * frame * transform / frame
   VectorTransform2D vx vy
 
-asOrthonormal :: Transform.IsOrthonormal tag => VectorTransform2D tag -> Orthonormal
+asOrthonormal :: Transform.Tag.IsOrthonormal tag => VectorTransform2D tag -> Orthonormal
 asOrthonormal = Data.Coerce.coerce
 
-asUniform :: Transform.IsUniform tag => VectorTransform2D tag -> Uniform
+asUniform :: Transform.Tag.IsUniform tag => VectorTransform2D tag -> Uniform
 asUniform = Data.Coerce.coerce
 
 asAffine :: VectorTransform2D tag -> Affine

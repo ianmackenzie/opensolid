@@ -1,117 +1,31 @@
 module OpenSolid.Transform
   ( Transform
-  , Exists
+  , TransformExists
   , vectorTransform
   , asAffine
   , uniformScale
-  , Rigid
-  , Orthonormal
-  , Uniform
-  , Affine
-  , IsRigid
-  , IsOrthonormal
-  , IsUniform
   )
 where
 
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Transform2D, Transform3D)
-import OpenSolid.Transform2D qualified as Transform2D
-import OpenSolid.Transform3D qualified as Transform3D
-import OpenSolid.VectorTransform (VectorTransform)
+import OpenSolid.Primitives.Abstract (Transform, TransformExists, VectorTransform)
+import OpenSolid.Primitives.Abstract qualified as Primitives.Abstract
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 
-type family
-  Transform dimension tag units space =
-    transform | transform -> dimension tag units space
-  where
-  Transform 2 tag units Void = Transform2D tag units
-  Transform 3 tag Meters space = Transform3D tag space
+vectorTransform ::
+  TransformExists dimension units space =>
+  Transform dimension tag units space ->
+  VectorTransform dimension tag space
+vectorTransform = Primitives.Abstract.transformVectorTransform
 
-class Exists dimension units space where
-  vectorTransform :: Transform dimension t units space -> VectorTransform dimension t space
-  asAffine :: Transform dimension tag units space -> Transform dimension Affine units space
-  uniformScale :: Transform dimension tag units space -> Maybe Number
+asAffine ::
+  TransformExists dimension units space =>
+  Transform dimension tag units space ->
+  Transform dimension Transform.Tag.Affine units space
+asAffine = Primitives.Abstract.transformAsAffine
 
-instance Exists 2 units Void where
-  vectorTransform = Transform2D.vectorTransform
-  asAffine = Transform2D.asAffine
-  uniformScale = Transform2D.uniformScale
-
-instance Exists 3 Meters space where
-  vectorTransform = Transform3D.vectorTransform
-  asAffine = Transform3D.asAffine
-  uniformScale = Transform3D.uniformScale
-
-data Rigid = Rigid deriving (Eq, Show)
-
-data Orthonormal = Orthonormal deriving (Eq, Show)
-
-data Uniform = Uniform deriving (Eq, Show)
-
-data Affine = Affine deriving (Eq, Show)
-
-class IsOrthonormal tag => IsRigid tag
-
-class IsUniform tag => IsOrthonormal tag
-
-class IsUniform tag
-
-instance IsRigid Rigid
-
-instance IsOrthonormal Rigid
-
-instance IsUniform Rigid
-
-instance IsOrthonormal Orthonormal
-
-instance IsUniform Orthonormal
-
-instance IsUniform Uniform
-
-instance Composition Rigid Rigid Rigid where
-  Rigid . Rigid = Rigid
-
-instance Composition Orthonormal Rigid Orthonormal where
-  Orthonormal . Rigid = Orthonormal
-
-instance Composition Uniform Rigid Uniform where
-  Uniform . Rigid = Uniform
-
-instance Composition Affine Rigid Affine where
-  Affine . Rigid = Affine
-
-instance Composition Rigid Orthonormal Orthonormal where
-  Rigid . Orthonormal = Orthonormal
-
-instance Composition Orthonormal Orthonormal Orthonormal where
-  Orthonormal . Orthonormal = Orthonormal
-
-instance Composition Uniform Orthonormal Uniform where
-  Uniform . Orthonormal = Uniform
-
-instance Composition Affine Orthonormal Affine where
-  Affine . Orthonormal = Affine
-
-instance Composition Rigid Uniform Uniform where
-  Rigid . Uniform = Uniform
-
-instance Composition Orthonormal Uniform Uniform where
-  Orthonormal . Uniform = Uniform
-
-instance Composition Uniform Uniform Uniform where
-  Uniform . Uniform = Uniform
-
-instance Composition Affine Uniform Affine where
-  Affine . Uniform = Affine
-
-instance Composition Rigid Affine Affine where
-  Rigid . Affine = Affine
-
-instance Composition Orthonormal Affine Affine where
-  Orthonormal . Affine = Affine
-
-instance Composition Uniform Affine Affine where
-  Uniform . Affine = Affine
-
-instance Composition Affine Affine Affine where
-  Affine . Affine = Affine
+uniformScale ::
+  TransformExists dimension units space =>
+  Transform dimension tag units space ->
+  Maybe Number
+uniformScale = Primitives.Abstract.transformUniformScale

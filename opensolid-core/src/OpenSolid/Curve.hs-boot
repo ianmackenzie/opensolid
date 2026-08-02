@@ -2,7 +2,7 @@ module OpenSolid.Curve
   ( Curve
   , Curve2D
   , Curve3D
-  , Exists
+  , CurveExists
   , Solver
   , Compiled
   , constant
@@ -23,7 +23,7 @@ module OpenSolid.Curve
 where
 
 import GHC.TypeLits (Natural)
-import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Interval (Interval)
@@ -46,15 +46,15 @@ type Curve2D units = Curve 2 units Void
 
 type Curve3D space = Curve 3 Meters space
 
-class Exists (dimension :: Natural) (units :: Type) (space :: Type)
+class CurveExists (dimension :: Natural) (units :: Type) (space :: Type)
 
 type role Solver nominal nominal nominal
 
 data Solver (dimension :: Natural) (units :: Type) (space :: Type)
 
-instance Exists 2 units Void
+instance CurveExists 2 units Void
 
-instance Exists 3 Meters space
+instance CurveExists 3 Meters space
 
 type Compiled dimension units space =
   CompiledFunction
@@ -64,21 +64,21 @@ type Compiled dimension units space =
     (Bounds dimension units space)
 
 instance
-  (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
+  (CurveExists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
   Addition
     (Curve dimension1 units1 space1)
     (VectorCurve dimension2 units2 space2)
     (Curve dimension1 units1 space1)
 
 instance
-  (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
+  (CurveExists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Curve dimension1 units1 space1)
     (VectorCurve dimension2 units2 space2)
     (Curve dimension1 units1 space1)
 
 instance
-  (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
+  (CurveExists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Curve dimension1 units1 space1)
     (Curve dimension2 units2 space2)
@@ -115,7 +115,7 @@ instance
   Subtraction (Point3D space1) (Curve3D space2) (VectorCurve3D Meters space1)
 
 constant ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Point dimension units space ->
   Curve dimension units space
 pointAt ::
@@ -140,28 +140,28 @@ derivative ::
   Curve dimension units space ->
   VectorCurve dimension units space
 derivativeAt ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Number ->
   Curve dimension units space ->
   Vector dimension units space
 derivativeRange ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Interval Unitless ->
   Curve dimension units space ->
   VectorBounds dimension units space
 secondDerivative ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Curve dimension units space ->
   VectorCurve dimension units space
 secondDerivativeAt ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Number ->
   Curve dimension units space ->
   Vector dimension units space
 secondDerivativeRange ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Interval Unitless ->
   Curve dimension units space ->
   VectorBounds dimension units space
-hasDegenerateStart :: Exists dimension units space => Curve dimension units space -> Bool
-hasDegenerateEnd :: Exists dimension units space => Curve dimension units space -> Bool
+hasDegenerateStart :: CurveExists dimension units space => Curve dimension units space -> Bool
+hasDegenerateEnd :: CurveExists dimension units space => Curve dimension units space -> Bool

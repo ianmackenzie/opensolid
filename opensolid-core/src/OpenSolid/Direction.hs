@@ -1,6 +1,6 @@
 module OpenSolid.Direction
   ( Direction
-  , Exists
+  , DirectionExists
   , unsafe
   , unwrap
   , parallel
@@ -9,76 +9,44 @@ module OpenSolid.Direction
   )
 where
 
-import GHC.TypeLits (Natural)
-import {-# SOURCE #-} OpenSolid.Direction2D qualified as Direction2D
-import {-# SOURCE #-} OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Direction2D, Direction3D)
-import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Sign qualified as Sign
-import {-# SOURCE #-} OpenSolid.Vector (Vector)
-import {-# SOURCE #-} OpenSolid.Vector qualified as Vector
-
-type family
-  Direction (dimension :: Natural) space =
-    direction | direction -> dimension space
-  where
-  Direction 1 Void = Sign
-  Direction 2 Void = Direction2D
-  Direction 3 space = Direction3D space
-
-class
-  ( Vector.Exists dimension Unitless space
-  , Eq (Direction dimension space)
-  , Ord (Direction dimension space)
-  , Show (Direction dimension space)
-  , Negation (Direction dimension space)
-  , ApproximateEquality (Direction dimension space) ()
-  , DotMultiplication (Direction dimension space) (Direction dimension space) Number
-  ) =>
-  Exists (dimension :: Natural) (space :: Type)
-  where
-  unsafeImpl :: Vector dimension Unitless space -> Direction dimension space
-  unwrapImpl :: Direction dimension space -> Vector dimension Unitless space
-  parallel :: Direction dimension space -> Direction dimension space -> Bool
-  independent :: Direction dimension space -> Direction dimension space -> Bool
-  perpendicular :: Direction dimension space -> Direction dimension space -> Bool
-
-instance Exists 1 Void where
-  unsafeImpl = Quantity.sign
-  unwrapImpl = Sign.value
-  parallel _ _ = True
-  independent _ _ = False
-  perpendicular _ _ = False
-
-instance Exists 2 Void where
-  {-# INLINEABLE unsafeImpl #-}
-  unsafeImpl = Direction2D.unsafe
-  {-# INLINEABLE unwrapImpl #-}
-  unwrapImpl = Direction2D.unwrap
-  {-# INLINEABLE parallel #-}
-  parallel = Direction2D.parallel
-  {-# INLINEABLE independent #-}
-  independent = Direction2D.independent
-  {-# INLINEABLE perpendicular #-}
-  perpendicular = Direction2D.perpendicular
-
-instance Exists 3 space where
-  {-# INLINEABLE unsafeImpl #-}
-  unsafeImpl = Direction3D.unsafe
-  {-# INLINEABLE unwrapImpl #-}
-  unwrapImpl = Direction3D.unwrap
-  {-# INLINEABLE parallel #-}
-  parallel = Direction3D.parallel
-  {-# INLINEABLE independent #-}
-  independent = Direction3D.independent
-  {-# INLINEABLE perpendicular #-}
-  perpendicular = Direction3D.perpendicular
+import OpenSolid.Primitives.Abstract (Direction, DirectionExists, Vector)
+import OpenSolid.Primitives.Abstract qualified as Primitives.Abstract
 
 {-# INLINE unsafe #-}
-unsafe :: Exists dimension space => Vector dimension Unitless space -> Direction dimension space
-unsafe = unsafeImpl
+unsafe ::
+  DirectionExists dimension space =>
+  Vector dimension Unitless space ->
+  Direction dimension space
+unsafe = Primitives.Abstract.directionUnsafe
 
 {-# INLINE unwrap #-}
-unwrap :: Exists dimension space => Direction dimension space -> Vector dimension Unitless space
-unwrap = unwrapImpl
+unwrap ::
+  DirectionExists dimension space =>
+  Direction dimension space ->
+  Vector dimension Unitless space
+unwrap = Primitives.Abstract.directionUnwrap
+
+{-# INLINE parallel #-}
+parallel ::
+  DirectionExists dimension space =>
+  Direction dimension space ->
+  Direction dimension space ->
+  Bool
+parallel = Primitives.Abstract.directionParallel
+
+{-# INLINE independent #-}
+independent ::
+  DirectionExists dimension space =>
+  Direction dimension space ->
+  Direction dimension space ->
+  Bool
+independent = Primitives.Abstract.directionIndependent
+
+{-# INLINE perpendicular #-}
+perpendicular ::
+  DirectionExists dimension space =>
+  Direction dimension space ->
+  Direction dimension space ->
+  Bool
+perpendicular = Primitives.Abstract.directionPerpendicular

@@ -21,6 +21,7 @@ where
 import Data.Coerce qualified
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
+import OpenSolid.Error (IsZero (IsZero))
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Direction3D (Unit3D)
@@ -31,8 +32,7 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Transform qualified as Transform
-import OpenSolid.Vector qualified as Vector
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Vector3D qualified as Vector3D
 
 {-# INLINE coerce #-}
@@ -81,7 +81,7 @@ fromVectors ::
   Maybe (PlaneOrientation3D space)
 fromVectors vx vxy =
   case Vector3D.direction vx of
-    Err Vector.IsZero -> Nothing
+    Err IsZero -> Nothing
     Ok dx -> gramSchmidt dx vxy
 
 gramSchmidt ::
@@ -92,7 +92,7 @@ gramSchmidt ::
 gramSchmidt dx vxy = do
   let vy = vxy - Vector3D.projectionIn dx vxy
   case Vector3D.direction vy of
-    Err Vector.IsZero -> Nothing
+    Err IsZero -> Nothing
     Ok dy -> Just (PlaneOrientation3D dx dy)
 
 flip :: PlaneOrientation3D space -> PlaneOrientation3D space
@@ -111,7 +111,7 @@ normalDirection :: PlaneOrientation3D space -> Direction3D space
 normalDirection (PlaneOrientation3D i j) = Unit3D (i `cross` j)
 
 transformBy ::
-  Transform.IsOrthonormal tag =>
+  Transform.Tag.IsOrthonormal tag =>
   VectorTransform3D tag space ->
   PlaneOrientation3D space ->
   PlaneOrientation3D space

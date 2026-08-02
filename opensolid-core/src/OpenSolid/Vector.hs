@@ -1,15 +1,12 @@
 module OpenSolid.Vector
   ( Vector
-  , Exists
-  , IsZero (IsZero)
+  , VectorExists
   , zero
   , squaredMagnitude_
-  , squaredMagnitude
   , magnitude
   , crossProductMagnitude_
   , componentIn
   , projectionIn
-  , normalize
   , direction
   , magnitudeAndDirection
   , sum
@@ -20,160 +17,79 @@ module OpenSolid.Vector
   )
 where
 
-import Data.Coerce (Coercible)
 import Data.Coerce qualified
-import {-# SOURCE #-} OpenSolid.Direction (Direction)
-import {-# SOURCE #-} OpenSolid.Direction qualified as Direction
-import OpenSolid.HasZero (HasZero)
-import OpenSolid.HasZero qualified as HasZero
+import OpenSolid.Error (IsZero)
 import OpenSolid.Prelude
-import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Units (HasUnits)
-import OpenSolid.Units qualified as Units
-import {-# SOURCE #-} OpenSolid.Vector2D (Vector2D)
-import {-# SOURCE #-} OpenSolid.Vector3D (Vector3D)
-import {-# SOURCE #-} OpenSolid.Vector3D qualified as Vector3D
-import OpenSolid.VectorTransform (VectorTransform, VectorTransform1D (VectorTransform1D))
+import OpenSolid.Primitives.Abstract
+  ( Direction
+  , DirectionExists
+  , Vector
+  , VectorExists
+  , VectorTransform
+  )
+import OpenSolid.Primitives.Abstract qualified as Primitives.Abstract
 
-type family Vector dimension units space = vector | vector -> dimension units space where
-  Vector 1 units Void = Quantity units
-  Vector 2 units Void = Vector2D units
-  Vector 3 units space = Vector3D units space
+zero :: VectorExists dimension units space => Vector dimension units space
+zero = Primitives.Abstract.vectorZero
 
-class
-  ( HasZero (Vector dimension units space)
-  , HasUnits (Vector dimension units space) units
-  , Coercible (Vector dimension units space) (Vector dimension Unitless space)
-  , Coercible (Vector dimension Unitless space) (Vector dimension units space)
-  , Eq (Vector dimension units space)
-  , Ord (Vector dimension units space)
-  , Show (Vector dimension units space)
-  , ApproximateEquality (Vector dimension units space) (Tolerance units)
-  , Negation (Vector dimension units space)
-  , Addition
-      (Vector dimension units space)
-      (Vector dimension units space)
-      (Vector dimension units space)
-  , Subtraction
-      (Vector dimension units space)
-      (Vector dimension units space)
-      (Vector dimension units space)
-  , Multiplication Number (Vector dimension units space) (Vector dimension units space)
-  , Multiplication (Vector dimension units space) Number (Vector dimension units space)
-  , Multiplication (Quantity units) (Vector dimension Unitless space) (Vector dimension units space)
-  , Multiplication (Vector dimension Unitless space) (Quantity units) (Vector dimension units space)
-  , Division (Vector dimension units space) Number (Vector dimension units space)
-  , Division (Vector dimension units space) (Quantity units) (Vector dimension Unitless space)
-  , DotMultiplication (Vector dimension units space) (Vector dimension Unitless space) (Quantity units)
-  , DotMultiplication (Vector dimension Unitless space) (Vector dimension units space) (Quantity units)
-  , DotMultiplication (Vector dimension units space) (Direction dimension space) (Quantity units)
-  , DotMultiplication (Direction dimension space) (Vector dimension units space) (Quantity units)
-  , DotMultiplication_ (Vector dimension units space) (Vector dimension units space) (Quantity (units ?*? units))
-  , Exists dimension Unitless space
-  , Direction.Exists dimension space
-  ) =>
-  Exists dimension units space
-  where
-  zero :: Vector dimension units space
-  zero = HasZero.zero
-
-  squaredMagnitude_ :: Vector dimension units space -> Quantity (units ?*? units)
-  crossProductMagnitude_ ::
-    Vector dimension units space ->
-    Vector dimension units space ->
-    Quantity (units ?*? units)
-  transformBy ::
-    VectorTransform dimension tag space ->
-    Vector dimension units space ->
-    Vector dimension units space
-
-data IsZero = IsZero deriving (Eq, Show, Err)
-
-instance Exists 1 units Void where
-  {-# INLINEABLE squaredMagnitude_ #-}
-  squaredMagnitude_ = Quantity.squared_
-  crossProductMagnitude_ _ _ = Quantity.zero
-  transformBy (VectorTransform1D scale) value = scale * value
-
-instance Exists 2 units Void where
-  {-# INLINEABLE squaredMagnitude_ #-}
-  squaredMagnitude_ vector = vector `dot_` vector
-  crossProductMagnitude_ v1 v2 = Quantity.abs (v1 `cross_` v2)
-  transformBy transform vector = transform * vector
-
-instance Exists 3 units space where
-  {-# INLINEABLE squaredMagnitude_ #-}
-  squaredMagnitude_ vector = vector `dot_` vector
-  crossProductMagnitude_ v1 v2 = Vector3D.magnitude (v1 `cross_` v2)
-  transformBy transform vector = transform * vector
-
-{-# INLINEABLE squaredMagnitude #-}
-squaredMagnitude ::
-  (Exists dimension units space, Units.Squared units squaredUnits) =>
+squaredMagnitude_ ::
+  VectorExists dimension units space =>
   Vector dimension units space ->
-  Quantity squaredUnits
-squaredMagnitude = Units.specialize . squaredMagnitude_
+  Quantity (units ?*? units)
+squaredMagnitude_ = Primitives.Abstract.vectorSquaredMagnitude_
 
-{-# INLINEABLE magnitude #-}
-magnitude :: Exists dimension units space => Vector dimension units space -> Quantity units
-magnitude = Quantity.sqrt_ . squaredMagnitude_
-
-normalize ::
-  (Exists dimension units space, Tolerance units) =>
-  Vector dimension units space ->
-  Vector dimension Unitless space
-normalize vector = do
-  let vectorMagnitude = magnitude vector
-  if vectorMagnitude ~= Quantity.zero
-    then zero
-    else vector / vectorMagnitude
+magnitude :: VectorExists dimension units space => Vector dimension units space -> Quantity units
+magnitude = Primitives.Abstract.vectorMagnitude
 
 direction ::
-  (Exists dimension units space, Direction.Exists dimension space, Tolerance units) =>
+  (VectorExists dimension units space, Tolerance units) =>
   Vector dimension units space ->
   Result IsZero (Direction dimension space)
-direction vector = do
-  let vectorMagnitude = magnitude vector
-  if vectorMagnitude ~= Quantity.zero
-    then Err IsZero
-    else Ok (Direction.unsafe (vector / vectorMagnitude))
+direction = Primitives.Abstract.vectorDirection
 
 magnitudeAndDirection ::
-  (Exists dimension units space, Direction.Exists dimension space, Tolerance units) =>
+  (VectorExists dimension units space, DirectionExists dimension space, Tolerance units) =>
   Vector dimension units space ->
   Result IsZero (Quantity units, Direction dimension space)
-magnitudeAndDirection vector = do
-  let vectorMagnitude = magnitude vector
-  if vectorMagnitude ~= Quantity.zero
-    then Err IsZero
-    else Ok (vectorMagnitude, Direction.unsafe (vector / vectorMagnitude))
+magnitudeAndDirection = Primitives.Abstract.vectorMagnitudeAndDirection
 
-{-# INLINEABLE componentIn #-}
+crossProductMagnitude_ ::
+  VectorExists dimension units space =>
+  Vector dimension units space ->
+  Vector dimension units space ->
+  Quantity (units ?*? units)
+crossProductMagnitude_ = Primitives.Abstract.vectorCrossProductMagnitude_
+
 componentIn ::
-  (Exists dimension units space, Direction.Exists dimension space) =>
+  (VectorExists dimension units space, DirectionExists dimension space) =>
   Direction dimension space ->
   Vector dimension units space ->
   Quantity units
-componentIn givenDirection vector = Direction.unwrap givenDirection `dot` vector
+componentIn = Primitives.Abstract.vectorComponentIn
 
-{-# INLINEABLE projectionIn #-}
 projectionIn ::
-  (Exists dimension units space, Direction.Exists dimension space) =>
+  (VectorExists dimension units space, DirectionExists dimension space) =>
   Direction dimension space ->
   Vector dimension units space ->
   Vector dimension units space
-projectionIn givenDirection vector =
-  Direction.unwrap givenDirection * componentIn givenDirection vector
+projectionIn = Primitives.Abstract.vectorProjectionIn
+
+transformBy ::
+  VectorExists dimension units space =>
+  VectorTransform dimension tag space ->
+  Vector dimension units space ->
+  Vector dimension units space
+transformBy = Primitives.Abstract.vectorTransformBy
 
 sum ::
-  Exists dimension units space =>
+  VectorExists dimension units space =>
   List (Vector dimension units space) ->
   Vector dimension units space
-sum vectors = zero & forEach vectors (+)
+sum = Primitives.Abstract.vectorSum
 
 {-# INLINE erase #-}
 erase ::
-  Exists dimension units space =>
+  VectorExists dimension units space =>
   Vector dimension units space ->
   Vector dimension Unitless space
 erase = coerce
@@ -181,14 +97,14 @@ erase = coerce
 {-# INLINE unerase #-}
 unerase ::
   forall units space dimension.
-  Exists dimension units space =>
+  VectorExists dimension units space =>
   Vector dimension Unitless space ->
   Vector dimension units space
 unerase = coerce
 
 {-# INLINE coerce #-}
 coerce ::
-  (Exists dimension units1 space, Exists dimension units2 space) =>
+  (VectorExists dimension units1 space, VectorExists dimension units2 space) =>
   Vector dimension units1 space ->
   Vector dimension units2 space
 coerce = Data.Coerce.coerce

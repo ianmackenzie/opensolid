@@ -53,6 +53,7 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Convention3D (Convention3D (Convention3D))
 import OpenSolid.Convention3D qualified as Convention3D
+import OpenSolid.Error (IsZero (IsZero))
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3D
@@ -67,7 +68,6 @@ import OpenSolid.Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorTransform3D (VectorTransform3D)
 import OpenSolid.VectorTransform3D qualified as VectorTransform3D
 
@@ -212,14 +212,22 @@ squaredMagnitude_ (Vector3D vx vy vz) = vx ?*? vx + vy ?*? vy + vz ?*? vz
 The current tolerance will be used to check if the vector is zero
 (and therefore does not have a direction).
 -}
-direction :: Tolerance units => Vector3D units space -> Result Vector.IsZero (Direction3D space)
-direction = Vector.direction
+direction :: Tolerance units => Vector3D units space -> Result IsZero (Direction3D space)
+direction vector = do
+  let vectorMagnitude = magnitude vector
+  if vectorMagnitude ~= Quantity.zero
+    then Err IsZero
+    else Ok (Unit3D (vector / vectorMagnitude))
 
 magnitudeAndDirection ::
   Tolerance units =>
   Vector3D units space ->
-  Result Vector.IsZero (Quantity units, Direction3D space)
-magnitudeAndDirection = Vector.magnitudeAndDirection
+  Result IsZero (Quantity units, Direction3D space)
+magnitudeAndDirection vector = do
+  let vectorMagnitude = magnitude vector
+  if vectorMagnitude ~= Quantity.zero
+    then Err IsZero
+    else Ok (vectorMagnitude, Unit3D (vector / vectorMagnitude))
 
 normalize :: Tolerance units => Vector3D units space -> Vector3D Unitless space
 normalize vector = do
@@ -241,7 +249,7 @@ projectInto :: Plane3D space -> Vector3D units space -> Vector2D units
 projectInto (Plane3D _ (PlaneOrientation3D i j)) v = Vector2D (v `dot` i) (v `dot` j)
 
 sum :: List (Vector3D units space) -> Vector3D units space
-sum = Vector.sum
+sum vectors = zero & forEach vectors (+)
 
 convert :: Quantity (units2 ?/? units1) -> Vector3D units1 space -> Vector3D units2 space
 convert factor vector = Units.simplify (vector ?*? factor)

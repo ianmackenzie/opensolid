@@ -55,7 +55,7 @@ import OpenSolid.Step qualified as Step
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Transform3D (Transform3D)
@@ -1423,7 +1423,7 @@ rigidTransformations2D transformBy =
 
 orthonormalTransformations2D ::
   FFI value =>
-  (forall tag. Transform.IsOrthonormal tag => Transform2D tag Meters -> value -> value) ->
+  (forall tag. Transform.Tag.IsOrthonormal tag => Transform2D tag Meters -> value -> value) ->
   List (Class.Member value)
 orthonormalTransformations2D transformBy =
   Class.member1 "Mirror Across" "Axis" (Transform2D.mirrorAcrossImpl transformBy) "Mirror across the given axis."
@@ -1431,7 +1431,7 @@ orthonormalTransformations2D transformBy =
 
 uniformTransformations2D ::
   FFI value =>
-  (forall tag. Transform.IsUniform tag => Transform2D tag Meters -> value -> value) ->
+  (forall tag. Transform.Tag.IsUniform tag => Transform2D tag Meters -> value -> value) ->
   List (Class.Member value)
 uniformTransformations2D transformBy =
   Class.member2 "Scale About" "Point" "Scale" (Transform2D.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."
@@ -1459,7 +1459,7 @@ rigidTransformations3D transformBy =
 orthonormalTransformations3D ::
   forall value.
   FFI value =>
-  (forall tag. Transform.IsOrthonormal tag => Transform3D tag Void -> value -> value) ->
+  (forall tag. Transform.Tag.IsOrthonormal tag => Transform3D tag Void -> value -> value) ->
   List (Class.Member value)
 orthonormalTransformations3D transformBy =
   Class.member1 "Mirror Across" "Plane" (Transform3D.mirrorAcrossImpl transformBy :: Plane3D -> value -> value) "Mirror across the given plane."
@@ -1467,7 +1467,7 @@ orthonormalTransformations3D transformBy =
 
 uniformTransformations3D ::
   FFI value =>
-  (forall tag. Transform.IsUniform tag => Transform3D tag Void -> value -> value) ->
+  (forall tag. Transform.Tag.IsUniform tag => Transform3D tag Void -> value -> value) ->
   List (Class.Member value)
 uniformTransformations3D transformBy =
   Class.member2 "Scale About" "Point" "Scale" (Transform3D.scaleAboutImpl transformBy) "Scale uniformly about the given point by the given scaling factor."

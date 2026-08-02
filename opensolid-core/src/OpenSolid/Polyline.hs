@@ -12,15 +12,14 @@ module OpenSolid.Polyline
   )
 where
 
-import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds (Bounds, BoundsExists)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Line (Line (Line))
 import OpenSolid.Line qualified as Line
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Point (Point)
-import OpenSolid.Point qualified as Point
+import OpenSolid.Point (Point, PointExists)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 
@@ -62,11 +61,11 @@ segments :: Polyline dimension units space -> List (Line dimension units space)
 segments polyline = NonEmpty.successive Line (vertices polyline)
 
 -- | Get the total length of a polyline (the sum of the lengths of its segments).
-length :: Point.Exists dimension units space => Polyline dimension units space -> Quantity units
+length :: PointExists dimension units space => Polyline dimension units space -> Quantity units
 length polyline = Quantity.sumOf Line.length (segments polyline)
 
 bounds ::
-  Bounds.Exists dimension units space =>
+  BoundsExists dimension units space =>
   Polyline dimension units space ->
   Bounds dimension units space
 bounds polyline = Bounds.hull (vertices polyline)

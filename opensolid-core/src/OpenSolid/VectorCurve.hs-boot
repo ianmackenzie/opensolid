@@ -2,7 +2,7 @@ module OpenSolid.VectorCurve
   ( VectorCurve
   , VectorCurve2D
   , VectorCurve3D
-  , Exists
+  , VectorCurveExists
   , Compiled
   , constant
   , hasDegenerateStart
@@ -36,7 +36,7 @@ type VectorCurve2D units = VectorCurve 2 units Void
 
 type VectorCurve3D units space = VectorCurve 3 units space
 
-class Exists (dimension :: Natural) (units :: Type) (space :: Type)
+class VectorCurveExists (dimension :: Natural) (units :: Type) (space :: Type)
 
 type Compiled dimension units space =
   CompiledFunction
@@ -67,24 +67,24 @@ instance
     (Nondegenerate (VectorCurve3D units2 space2))
 
 instance
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Composition
     (VectorCurve dimension units space)
     (Curve1D Unitless)
     (VectorCurve dimension units space)
 
-instance Exists dimension units space => Negation (VectorCurve dimension units space)
+instance VectorCurveExists dimension units space => Negation (VectorCurve dimension units space)
 
 instance
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Multiplication Sign (VectorCurve dimension units space) (VectorCurve dimension units space)
 
 instance
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Multiplication (VectorCurve dimension units space) Sign (VectorCurve dimension units space)
 
 instance
-  ( Exists dimension1 units1 space1
+  ( VectorCurveExists dimension1 units1 space1
   , dimension1 ~ dimension2
   , space1 ~ space2
   , units1 ~ units2
@@ -95,7 +95,7 @@ instance
     (VectorCurve dimension1 units1 space1)
 
 instance
-  ( Exists dimension1 units1 space1
+  ( VectorCurveExists dimension1 units1 space1
   , dimension1 ~ dimension2
   , space1 ~ space2
   , units1 ~ units2
@@ -196,41 +196,47 @@ instance
     (VectorCurve3D units2 space2)
     (Curve1D units3)
 
-instance Exists 2 units Void
+instance VectorCurveExists 2 units Void
 
-instance Exists 3 units space
+instance VectorCurveExists 3 units space
 
 constant ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Vector dimension units space ->
   VectorCurve dimension units space
-hasDegenerateStart :: Exists dimension units space => VectorCurve dimension units space -> Bool
-hasDegenerateEnd :: Exists dimension units space => VectorCurve dimension units space -> Bool
+hasDegenerateStart ::
+  VectorCurveExists dimension units space =>
+  VectorCurve dimension units space ->
+  Bool
+hasDegenerateEnd ::
+  VectorCurveExists dimension units space =>
+  VectorCurve dimension units space ->
+  Bool
 valueAt ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Number ->
   VectorCurve dimension units space ->
   Vector dimension units space
 valueOf ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
   Number ->
   Vector dimension units space
 range ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Interval Unitless ->
   VectorCurve dimension units space ->
   VectorBounds dimension units space
 derivative ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension units space
 derivativeAt ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Number ->
   VectorCurve dimension units space ->
   Vector dimension units space
 squaredMagnitude_ ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
   Curve1D (units ?*? units)

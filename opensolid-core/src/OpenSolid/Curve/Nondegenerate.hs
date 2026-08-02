@@ -25,16 +25,15 @@ import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Continuity (Continuity)
 import OpenSolid.Continuity qualified as Continuity
-import OpenSolid.Curve (Curve)
+import OpenSolid.Curve (Curve, CurveExists)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.CurvatureVector qualified as Curve.CurvatureVector
 import OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate.Intersections qualified as Curve.Nondegenerate.Intersections
 import OpenSolid.Curve.Segment qualified as Curve.Segment
-import OpenSolid.Direction (Direction)
+import OpenSolid.Direction (Direction, DirectionExists)
 import OpenSolid.Direction qualified as Direction
-import OpenSolid.DirectionBounds (DirectionBounds)
-import OpenSolid.DirectionBounds qualified as DirectionBounds
+import OpenSolid.DirectionBounds (DirectionBounds, DirectionBoundsExists)
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
@@ -52,25 +51,25 @@ import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 
 hasDegenerateStart ::
-  Curve.Exists dimension units space =>
+  CurveExists dimension units space =>
   Nondegenerate (Curve dimension units space) -> Bool
 hasDegenerateStart (Nondegenerate curve) = Curve.hasDegenerateStart curve
 
 hasDegenerateEnd ::
-  Curve.Exists dimension units space =>
+  CurveExists dimension units space =>
   Nondegenerate (Curve dimension units space) -> Bool
 hasDegenerateEnd (Nondegenerate curve) = Curve.hasDegenerateEnd curve
 
 {-# INLINE pointAt #-}
 pointAt ::
-  Curve.Exists dimension units space =>
+  CurveExists dimension units space =>
   Number ->
   Nondegenerate (Curve dimension units space) ->
   Point dimension units space
 pointAt tValue (Nondegenerate curve) = Curve.pointAt tValue curve
 
 pointOn ::
-  Curve.Exists dimension units space =>
+  CurveExists dimension units space =>
   Nondegenerate (Curve dimension units space) ->
   Number ->
   Point dimension units space
@@ -83,20 +82,20 @@ endPoint :: Nondegenerate (Curve dimension units space) -> Point dimension units
 endPoint (Nondegenerate curve) = Curve.endPoint curve
 
 bounds ::
-  Curve.Exists dimension units space =>
+  CurveExists dimension units space =>
   Nondegenerate (Curve dimension units space) ->
   Bounds dimension units space
 bounds (Nondegenerate curve) = Curve.bounds curve
 
 derivative ::
-  Curve.Exists dimension units space =>
+  CurveExists dimension units space =>
   Nondegenerate (Curve dimension units space) ->
   Nondegenerate (VectorCurve dimension units space)
 derivative (Nondegenerate curve) = Nondegenerate (Curve.derivative curve)
 
 {-# INLINE derivativeAt #-}
 derivativeAt ::
-  Curve.Exists dimension units space =>
+  CurveExists dimension units space =>
   Number ->
   Nondegenerate (Curve dimension units space) ->
   Vector dimension units space
@@ -105,7 +104,7 @@ derivativeAt tValue (Nondegenerate curve) =
 
 {-# INLINE secondDerivativeAt #-}
 secondDerivativeAt ::
-  Curve.Exists dimension units space =>
+  CurveExists dimension units space =>
   Number ->
   Nondegenerate (Curve dimension units space) ->
   Vector dimension units space
@@ -113,7 +112,7 @@ secondDerivativeAt tValue (Nondegenerate curve) =
   Curve.secondDerivativeAt tValue curve
 
 tangentDirectionAt ::
-  (Curve.Exists dimension units space, Direction.Exists dimension space) =>
+  (CurveExists dimension units space, DirectionExists dimension space) =>
   Number ->
   Nondegenerate (Curve dimension units space) ->
   Direction dimension space
@@ -121,7 +120,7 @@ tangentDirectionAt tValue curve =
   VectorCurve.Nondegenerate.directionAt tValue (derivative curve)
 
 tangentDirectionRange ::
-  (Curve.Exists dimension units space, DirectionBounds.Exists dimension space) =>
+  (CurveExists dimension units space, DirectionBoundsExists dimension space) =>
   Interval Unitless ->
   Nondegenerate (Curve dimension units space) ->
   DirectionBounds dimension space
@@ -136,7 +135,7 @@ bisectionTree = Curve.bisectionTree
 data Monotonic = Monotonic deriving (Eq)
 
 findPoint ::
-  (Curve.Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Nondegenerate (Curve dimension units space) ->
   List Number
@@ -161,7 +160,7 @@ findPoint givenPoint givenCurve = do
   List.sort (endpointSolutions <> interiorSolutions)
 
 isDegenerateAt ::
-  (Curve.Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Number ->
   Nondegenerate (Curve dimension units space) ->
   Bool
@@ -171,7 +170,7 @@ isDegenerateAt _ _ = False -- Assume no interior degeneracies
 
 continuityAt ::
   forall dimension units space.
-  (Curve.Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   (Number, Number) ->
   (Nondegenerate (Curve dimension units space), Nondegenerate (Curve dimension units space)) ->
   Maybe Continuity
@@ -203,7 +202,7 @@ continuityAt (t1, t2) (curve1, curve2)
   | otherwise = Nothing
 
 intersections ::
-  ( Curve.Exists dimension units space
+  ( CurveExists dimension units space
   , NewtonRaphson.Surface.Solver dimension units space
   , Tolerance units
   ) =>

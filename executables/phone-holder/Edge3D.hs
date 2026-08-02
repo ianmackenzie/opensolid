@@ -23,7 +23,7 @@ import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Step qualified as Step
-import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 
@@ -56,7 +56,7 @@ reverse (Line sign l) = Line -sign l
 reverse (Arc sign a) = Arc -sign a
 
 transformBy ::
-  Transform.IsOrthonormal tag =>
+  Transform.Tag.IsOrthonormal tag =>
   Transform3D tag space ->
   Edge3D space ->
   Edge3D space

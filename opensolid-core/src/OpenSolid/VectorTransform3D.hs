@@ -54,16 +54,16 @@ import OpenSolid.Primitives
   , VectorTransform3D (VectorTransform3D)
   )
 import OpenSolid.Tolerance qualified as Tolerance
-import {-# SOURCE #-} OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import {-# SOURCE #-} OpenSolid.Vector3D qualified as Vector3D
 
-type Rigid space = VectorTransform3D Transform.Rigid space
+type Rigid space = VectorTransform3D Transform.Tag.Rigid space
 
-type Orthonormal space = VectorTransform3D Transform.Orthonormal space
+type Orthonormal space = VectorTransform3D Transform.Tag.Orthonormal space
 
-type Uniform space = VectorTransform3D Transform.Uniform space
+type Uniform space = VectorTransform3D Transform.Tag.Uniform space
 
-type Affine space = VectorTransform3D Transform.Affine space
+type Affine space = VectorTransform3D Transform.Tag.Affine space
 
 unitX :: Vector3D Unitless space
 unitX = Vector3D 1.0 0.0 0.0
@@ -162,10 +162,10 @@ relativeTo frame transform = do
   let vz = unitZ * frame * transform / frame
   VectorTransform3D vx vy vz
 
-asOrthonormal :: Transform.IsOrthonormal tag => VectorTransform3D tag space -> Orthonormal space
+asOrthonormal :: Transform.Tag.IsOrthonormal tag => VectorTransform3D tag space -> Orthonormal space
 asOrthonormal = Data.Coerce.coerce
 
-asUniform :: Transform.IsUniform tag => VectorTransform3D tag space -> Uniform space
+asUniform :: Transform.Tag.IsUniform tag => VectorTransform3D tag space -> Uniform space
 asUniform = Data.Coerce.coerce
 
 asAffine :: VectorTransform3D tag space -> Affine space

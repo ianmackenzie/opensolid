@@ -7,6 +7,8 @@ module OpenSolid.DirectionBounds3D
   , yComponent
   , zComponent
   , isResolved
+  , areDistinct
+  , areIndependent
   )
 where
 
@@ -207,3 +209,12 @@ zComponent (UnitBounds3D vectorBounds) = VectorBounds3D.zComponent vectorBounds
 
 isResolved :: DirectionBounds3D space -> Bool
 isResolved (UnitBounds3D vectorBounds) = VectorBounds3D.isResolved vectorBounds
+
+areDistinct :: DirectionBounds3D space -> DirectionBounds3D space -> Bool
+areDistinct (UnitBounds3D vectorBounds1) (UnitBounds3D vectorBounds2) =
+  VectorBounds3D.areDistinct vectorBounds1 vectorBounds2
+
+areIndependent :: DirectionBounds3D space -> DirectionBounds3D space -> Bool
+areIndependent directionBounds1 directionBounds2 =
+  areDistinct directionBounds1 directionBounds2
+    && areDistinct directionBounds1 -directionBounds2

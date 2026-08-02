@@ -7,19 +7,18 @@ module OpenSolid.VectorCurve.Nondegenerate
 where
 
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
-import OpenSolid.Direction (Direction)
-import OpenSolid.Direction qualified as Direction
+import OpenSolid.Direction (Direction, DirectionExists)
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
-import OpenSolid.VectorCurve (VectorCurve)
+import OpenSolid.VectorCurve (VectorCurve, VectorCurveExists)
 import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve.Direction qualified as VectorCurve.Direction
 
 directionAt ::
-  (VectorCurve.Exists dimension units space, Direction.Exists dimension space) =>
+  (VectorCurveExists dimension units space, DirectionExists dimension space) =>
   Number ->
   Nondegenerate (VectorCurve dimension units space) ->
   Direction dimension space
@@ -29,7 +28,7 @@ directionAt tValue (Nondegenerate curve) = do
   VectorCurve.Direction.value curve tValue curveValue derivativeValue
 
 directionRange ::
-  VectorCurve.Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Interval Unitless ->
   Nondegenerate (VectorCurve dimension units space) ->
   DirectionBounds dimension space
@@ -39,13 +38,13 @@ directionRange tRange (Nondegenerate curve) = do
   VectorCurve.Direction.range curve tRange curveRange derivativeRange
 
 squaredMagnitude_ ::
-  VectorCurve.Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Nondegenerate (VectorCurve dimension units space) ->
   Nondegenerate (Curve1D (units ?*? units))
 squaredMagnitude_ (Nondegenerate curve) = Nondegenerate (VectorCurve.squaredMagnitude_ curve)
 
 squaredMagnitude ::
-  ( VectorCurve.Exists dimension units1 space
+  ( VectorCurveExists dimension units1 space
   , Units.Squared units1 units2
   ) =>
   Nondegenerate (VectorCurve dimension units1 space) ->

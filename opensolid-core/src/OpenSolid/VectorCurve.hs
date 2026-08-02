@@ -2,7 +2,7 @@ module OpenSolid.VectorCurve
   ( VectorCurve
   , VectorCurve2D
   , VectorCurve3D
-  , Exists
+  , VectorCurveExists
   , Compiled
   , isZero
   , hasDegenerateStart
@@ -57,7 +57,7 @@ import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction3D (Direction3D)
-import OpenSolid.DirectionBounds qualified as DirectionBounds
+import OpenSolid.DirectionBounds (DirectionBoundsExists)
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression (Expression)
@@ -78,22 +78,22 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector (Vector)
+import OpenSolid.Vector (Vector, VectorExists)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
-import OpenSolid.VectorBounds (VectorBounds)
+import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
-import OpenSolid.VectorTransform (VectorTransform)
+import OpenSolid.VectorTransform (VectorTransform, VectorTransformExists)
 import OpenSolid.VectorTransform qualified as VectorTransform
 
 data VectorCurve dimension units space = VectorCurve
@@ -116,11 +116,11 @@ type Compiled dimension units space =
     (VectorBounds dimension units space)
 
 class
-  ( Vector.Exists dimension units space
-  , VectorBounds.Exists dimension units space
-  , DirectionBounds.Exists dimension space
-  , VectorTransform.Exists dimension space
-  , Exists dimension Unitless space
+  ( VectorExists dimension units space
+  , VectorBoundsExists dimension units space
+  , DirectionBoundsExists dimension space
+  , VectorTransformExists dimension space
+  , VectorCurveExists dimension Unitless space
   , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
   , Units.Coercion (VectorCurve dimension Unitless space) (VectorCurve dimension units space)
   , Expression.Constant Number (Vector dimension units space)
@@ -144,7 +144,7 @@ class
       (Expression Number (Vector dimension units space))
       (Expression Number (Quantity (units ?*? units)))
   , Expression.TransformBy
-      (VectorTransform dimension Transform.Affine space)
+      (VectorTransform dimension Transform.Tag.Affine space)
       (Expression Number (Vector dimension units space))
       (Expression Number (Vector dimension units space))
   , Multiplication Number (VectorCurve dimension units space) (VectorCurve dimension units space)
@@ -203,7 +203,7 @@ class
       (Curve1D units)
   , NewtonRaphson.Curve.Solver dimension units space
   ) =>
-  Exists dimension units space
+  VectorCurveExists dimension units space
 
 instance FFI (VectorCurve2D Unitless) where
   representation = FFI.classRepresentation "UnitlessVectorCurve2D"
@@ -277,7 +277,7 @@ instance
   coerce (Nonzero curve) = Nonzero (Units.coerce curve)
 
 instance
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   ApproximateEquality (VectorCurve dimension units space) (Tolerance units)
   where
   curve1 ~= curve2 = do
@@ -311,27 +311,27 @@ instance
   vector `intersects` curve = curve `intersects` vector
 
 instance
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Negation (VectorCurve dimension units space)
   where
   negate curve = new (negate (compiled curve)) (negate (derivative curve))
 
 instance
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Multiplication Sign (VectorCurve dimension units space) (VectorCurve dimension units space)
   where
   Positive * curve = curve
   Negative * curve = -curve
 
 instance
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Multiplication (VectorCurve dimension units space) Sign (VectorCurve dimension units space)
   where
   curve * Positive = curve
   curve * Negative = -curve
 
 instance
-  ( Exists dimension1 units1 space1
+  ( VectorCurveExists dimension1 units1 space1
   , dimension1 ~ dimension2
   , space1 ~ space2
   , units1 ~ units2
@@ -371,7 +371,7 @@ instance
   vector + curve = constant vector + curve
 
 instance
-  ( Exists dimension1 units1 space1
+  ( VectorCurveExists dimension1 units1 space1
   , dimension1 ~ dimension2
   , space1 ~ space2
   , units1 ~ units2
@@ -872,7 +872,7 @@ instance
   point - curve = Curve3D.constant point - curve
 
 instance
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Composition
     (VectorCurve dimension units space)
     (Curve1D Unitless)
@@ -953,12 +953,12 @@ instance
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
-instance Exists 2 units Void
+instance VectorCurveExists 2 units Void
 
-instance Exists 3 units space
+instance VectorCurveExists 3 units space
 
 new ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Compiled dimension units space ->
   VectorCurve dimension units space ->
   VectorCurve dimension units space
@@ -973,23 +973,23 @@ new givenCompiled givenDerivative = do
     }
 
 constant ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Vector dimension units space ->
   VectorCurve dimension units space
 constant givenValue = new (CompiledFunction.constant givenValue) zero
 
-zero :: Exists dimension units space => VectorCurve dimension units space
+zero :: VectorCurveExists dimension units space => VectorCurve dimension units space
 zero = constant Vector.zero
 
 interpolateFrom ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Vector dimension units space ->
   Vector dimension units space ->
   VectorCurve dimension units space
 interpolateFrom v1 v2 = bezier (NonEmpty.two v1 v2)
 
 bezier ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   NonEmpty (Vector dimension units space) ->
   VectorCurve dimension units space
 bezier controlPoints = do
@@ -998,7 +998,7 @@ bezier controlPoints = do
   new compiledBezier bezierDerivative
 
 quadraticBezier ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Vector dimension units space ->
   Vector dimension units space ->
   Vector dimension units space ->
@@ -1006,7 +1006,7 @@ quadraticBezier ::
 quadraticBezier v1 v2 v3 = bezier (NonEmpty.three v1 v2 v3)
 
 cubicBezier ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Vector dimension units space ->
   Vector dimension units space ->
   Vector dimension units space ->
@@ -1015,7 +1015,7 @@ cubicBezier ::
 cubicBezier v1 v2 v3 v4 = bezier (NonEmpty.four v1 v2 v3 v4)
 
 arc ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Vector dimension units space ->
   Vector dimension units space ->
   Angle ->
@@ -1032,21 +1032,21 @@ compiled :: VectorCurve dimension units space -> Compiled dimension units space
 compiled = (.compiled)
 
 nondegenerate ::
-  (Exists dimension units space, Tolerance units) =>
+  (VectorCurveExists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsDegenerate (Nondegenerate (VectorCurve dimension units space))
 nondegenerate curve = if isZero curve then Err IsDegenerate else Ok (Nondegenerate curve)
 
 {-# INLINE derivative #-}
 derivative ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension units space
 derivative = (.derivative)
 
 {-# INLINE secondDerivative #-}
 secondDerivative ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension units space
 secondDerivative = (.derivative.derivative)
@@ -1061,7 +1061,7 @@ endValue = (.endValue)
 
 {-# INLINE valueAt #-}
 valueAt ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Number ->
   VectorCurve dimension units space ->
   Vector dimension units space
@@ -1071,7 +1071,7 @@ valueAt tValue curve = CompiledFunction.value tValue (compiled curve)
 
 {-# INLINE valueOf #-}
 valueOf ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
   Number ->
   Vector dimension units space
@@ -1079,7 +1079,7 @@ valueOf curve tValue = valueAt tValue curve
 
 {-# INLINE range #-}
 range ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Interval Unitless ->
   VectorCurve dimension units space ->
   VectorBounds dimension units space
@@ -1087,7 +1087,7 @@ range tRange curve = CompiledFunction.range tRange (compiled curve)
 
 {-# INLINE derivativeAt #-}
 derivativeAt ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Number ->
   VectorCurve dimension units space ->
   Vector dimension units space
@@ -1095,7 +1095,7 @@ derivativeAt tValue curve = valueAt tValue (derivative curve)
 
 {-# INLINE derivativeRange #-}
 derivativeRange ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Interval Unitless ->
   VectorCurve dimension units space ->
   VectorBounds dimension units space
@@ -1103,7 +1103,7 @@ derivativeRange tRange curve = range tRange (derivative curve)
 
 {-# INLINE secondDerivativeAt #-}
 secondDerivativeAt ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Number ->
   VectorCurve dimension units space ->
   Vector dimension units space
@@ -1111,7 +1111,7 @@ secondDerivativeAt tValue curve = valueAt tValue (secondDerivative curve)
 
 {-# INLINE secondDerivativeRange #-}
 secondDerivativeRange ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   Interval Unitless ->
   VectorCurve dimension units space ->
   VectorBounds dimension units space
@@ -1121,19 +1121,29 @@ secondDerivativeRange tRange curve = range tRange (secondDerivative curve)
 isZero :: Tolerance units => VectorCurve dimension units space -> Bool
 isZero curve = curve.maxSampledMagnitude <= ?tolerance
 
-hasDegenerateStart :: Exists dimension units space => VectorCurve dimension units space -> Bool
+hasDegenerateStart ::
+  VectorCurveExists dimension units space =>
+  VectorCurve dimension units space ->
+  Bool
 hasDegenerateStart = isDegenerateAt 0.0
 
-hasDegenerateEnd :: Exists dimension units space => VectorCurve dimension units space -> Bool
+hasDegenerateEnd ::
+  VectorCurveExists dimension units space =>
+  VectorCurve dimension units space ->
+  Bool
 hasDegenerateEnd = isDegenerateAt 1.0
 
-isDegenerateAt :: Exists dimension units space => Number -> VectorCurve dimension units space -> Bool
+isDegenerateAt ::
+  VectorCurveExists dimension units space =>
+  Number ->
+  VectorCurve dimension units space ->
+  Bool
 isDegenerateAt tValue curve = do
   let degeneracyTolerance = Tolerance.unitless * curve.maxSampledMagnitude
   Tolerance.using degeneracyTolerance (valueAt tValue curve ~= Vector.zero)
 
 quotient_ ::
-  ( Exists dimension units1 space
+  ( VectorCurveExists dimension units1 space
   , Division_
       (VectorCurve dimension units1 space)
       (Nondegenerate (Curve1D units2))
@@ -1148,13 +1158,13 @@ quotient_ lhs rhs
   | otherwise = Ok (lhs ?/? Nondegenerate rhs)
 
 reverse ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension units space
 reverse curve = curve . (1.0 - Curve1D.t)
 
 transformBy ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   VectorTransform dimension tag space ->
   VectorCurve dimension units space ->
   VectorCurve dimension units space
@@ -1169,7 +1179,7 @@ transformBy transform curve = do
   new compiledTransformed (transformBy affineTransform (derivative curve))
 
 zeros ::
-  (Exists dimension units space, Tolerance units) =>
+  (VectorCurveExists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsDegenerate (List Number)
 zeros vectorCurve =
@@ -1178,7 +1188,7 @@ zeros vectorCurve =
     Err Curve1D.IsZero -> Err IsDegenerate
 
 squaredMagnitude_ ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
   Curve1D (units ?*? units)
 squaredMagnitude_ curve = do
@@ -1192,26 +1202,26 @@ squaredMagnitude_ curve = do
   Curve1D.new compiledSquaredMagnitude squaredMagnitudeDerivative
 
 squaredMagnitude ::
-  (Exists dimension units1 space, Units.Squared units1 units2) =>
+  (VectorCurveExists dimension units1 space, Units.Squared units1 units2) =>
   VectorCurve dimension units1 space ->
   Curve1D units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)
 
 erase ::
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension Unitless space
 erase = Units.erase
 
 unerase ::
   forall units space dimension.
-  Exists dimension units space =>
+  VectorCurveExists dimension units space =>
   VectorCurve dimension Unitless space ->
   VectorCurve dimension units space
 unerase = Units.unerase
 
 coerce ::
-  (Exists dimension units1 space, Exists dimension units2 space) =>
+  (VectorCurveExists dimension units1 space, VectorCurveExists dimension units2 space) =>
   VectorCurve dimension units1 space ->
   VectorCurve dimension units2 space
 coerce curve = unerase (erase curve)

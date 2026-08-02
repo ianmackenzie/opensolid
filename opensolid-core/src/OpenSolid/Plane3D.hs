@@ -40,7 +40,7 @@ import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Frame3D, Plane3D (Plane3D, orientation, originPoint))
-import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Vector3D (Vector3D)
@@ -154,7 +154,7 @@ flip :: Plane3D space -> Plane3D space
 flip (Plane3D p o) = Plane3D p (PlaneOrientation3D.flip o)
 
 transformBy ::
-  Transform.IsOrthonormal tag =>
+  Transform.Tag.IsOrthonormal tag =>
   Transform3D tag space ->
   Plane3D space ->
   Plane3D space

@@ -54,16 +54,16 @@ import OpenSolid.Primitives
   , Vector2D
   , VectorTransform2D (VectorTransform2D)
   )
-import {-# SOURCE #-} OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.VectorTransform2D qualified as VectorTransform2D
 
-type Rigid units = Transform2D Transform.Rigid units
+type Rigid units = Transform2D Transform.Tag.Rigid units
 
-type Orthonormal units = Transform2D Transform.Orthonormal units
+type Orthonormal units = Transform2D Transform.Tag.Orthonormal units
 
-type Uniform units = Transform2D Transform.Uniform units
+type Uniform units = Transform2D Transform.Tag.Uniform units
 
-type Affine units = Transform2D Transform.Affine units
+type Affine units = Transform2D Transform.Tag.Affine units
 
 {-# INLINE vectorTransform #-}
 vectorTransform :: Transform2D tag units -> VectorTransform2D tag
@@ -122,10 +122,10 @@ relativeTo frame transform = do
   let p0 = Point2D.origin * frame * transform / frame
   Transform2D p0 (VectorTransform2D.relativeTo frame (vectorTransform transform))
 
-asOrthonormal :: Transform.IsOrthonormal tag => Transform2D tag units -> Orthonormal units
+asOrthonormal :: Transform.Tag.IsOrthonormal tag => Transform2D tag units -> Orthonormal units
 asOrthonormal = Data.Coerce.coerce
 
-asUniform :: Transform.IsUniform tag => Transform2D tag units -> Uniform units
+asUniform :: Transform.Tag.IsUniform tag => Transform2D tag units -> Uniform units
 asUniform = Data.Coerce.coerce
 
 asAffine :: Transform2D tag units -> Affine units

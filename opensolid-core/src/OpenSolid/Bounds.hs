@@ -1,6 +1,6 @@
 module OpenSolid.Bounds
   ( Bounds
-  , Exists
+  , BoundsExists
   , constant
   , contains
   , hull
@@ -13,75 +13,65 @@ module OpenSolid.Bounds
   )
 where
 
-import OpenSolid.Bounds2D (Bounds2D)
-import OpenSolid.Bounds2D qualified as Bounds2D
-import OpenSolid.Bounds3D (Bounds3D)
-import OpenSolid.Bounds3D qualified as Bounds3D
-import OpenSolid.Point (Point)
-import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
-import OpenSolid.Set qualified as Set
-import OpenSolid.Transform (Transform)
-import OpenSolid.VectorBounds (VectorBounds)
-import OpenSolid.VectorBounds qualified as VectorBounds
+import OpenSolid.Primitives.Abstract (Bounds, BoundsExists, Point, Transform)
+import OpenSolid.Primitives.Abstract qualified as Primitives.Abstract
 
-type family Bounds dimension units space = bounds | bounds -> dimension units space where
-  Bounds 2 units Void = Bounds2D units
-  Bounds 3 Meters space = Bounds3D space
+constant ::
+  BoundsExists dimension units space =>
+  Point dimension units space ->
+  Bounds dimension units space
+constant = Primitives.Abstract.boundsConstant
 
-class
-  ( Point.Exists dimension units space
-  , VectorBounds.Exists dimension units space
-  , Show (Bounds dimension units space)
-  , Set.Bounds (Bounds dimension units space)
-  , Intersects (Point dimension units space) (Bounds dimension units space) (Tolerance units)
-  , Intersects (Bounds dimension units space) (Point dimension units space) (Tolerance units)
-  , Intersects (Bounds dimension units space) (Bounds dimension units space) (Tolerance units)
-  , Addition (Bounds dimension units space) (VectorBounds dimension units space) (Bounds dimension units space)
-  , Addition (Point dimension units space) (VectorBounds dimension units space) (Bounds dimension units space)
-  , Subtraction (Bounds dimension units space) (VectorBounds dimension units space) (Bounds dimension units space)
-  , Subtraction (Point dimension units space) (VectorBounds dimension units space) (Bounds dimension units space)
-  , Subtraction (Bounds dimension units space) (Bounds dimension units space) (VectorBounds dimension units space)
-  ) =>
-  Exists dimension units space
-  where
-  constant :: Point dimension units space -> Bounds dimension units space
-  contains :: Bounds dimension units space -> Bounds dimension units space -> Bool
-  hull :: NonEmpty (Point dimension units space) -> Bounds dimension units space
-  hull2 :: Point dimension units space -> Point dimension units space -> Bounds dimension units space
-  aggregate :: NonEmpty (Bounds dimension units space) -> Bounds dimension units space
-  aggregate2 ::
-    Bounds dimension units space ->
-    Bounds dimension units space ->
-    Bounds dimension units space
-  intersection ::
-    Bounds dimension units space ->
-    Bounds dimension units space ->
-    Maybe (Bounds dimension units space)
-  diameter :: Bounds dimension units space -> Quantity units
-  transformBy ::
-    Transform dimension tag units space ->
-    Bounds dimension units space ->
-    Bounds dimension units space
+contains ::
+  BoundsExists dimension units space =>
+  Bounds dimension units space ->
+  Bounds dimension units space ->
+  Bool
+contains = Primitives.Abstract.boundsContains
 
-instance Exists 2 units Void where
-  constant = Bounds2D.constant
-  contains = Bounds2D.contains
-  hull = Bounds2D.hull
-  hull2 = Bounds2D.hull2
-  aggregate = Bounds2D.aggregate
-  aggregate2 = Bounds2D.aggregate2
-  intersection = Bounds2D.intersection
-  diameter = Bounds2D.diameter
-  transformBy = Bounds2D.transformBy
+hull ::
+  BoundsExists dimension units space =>
+  NonEmpty (Point dimension units space) ->
+  Bounds dimension units space
+hull = Primitives.Abstract.boundsHull
 
-instance Exists 3 Meters space where
-  constant = Bounds3D.constant
-  contains = Bounds3D.contains
-  hull = Bounds3D.hull
-  hull2 = Bounds3D.hull2
-  aggregate = Bounds3D.aggregate
-  aggregate2 = Bounds3D.aggregate2
-  intersection = Bounds3D.intersection
-  diameter = Bounds3D.diameter
-  transformBy = Bounds3D.transformBy
+hull2 ::
+  BoundsExists dimension units space =>
+  Point dimension units space ->
+  Point dimension units space ->
+  Bounds dimension units space
+hull2 = Primitives.Abstract.boundsHull2
+
+aggregate ::
+  BoundsExists dimension units space =>
+  NonEmpty (Bounds dimension units space) ->
+  Bounds dimension units space
+aggregate = Primitives.Abstract.boundsAggregate
+
+aggregate2 ::
+  BoundsExists dimension units space =>
+  Bounds dimension units space ->
+  Bounds dimension units space ->
+  Bounds dimension units space
+aggregate2 = Primitives.Abstract.boundsAggregate2
+
+intersection ::
+  BoundsExists dimension units space =>
+  Bounds dimension units space ->
+  Bounds dimension units space ->
+  Maybe (Bounds dimension units space)
+intersection = Primitives.Abstract.boundsIntersection
+
+diameter ::
+  BoundsExists dimension units space =>
+  Bounds dimension units space ->
+  Quantity units
+diameter = Primitives.Abstract.boundsDiameter
+
+transformBy ::
+  BoundsExists dimension units space =>
+  Transform dimension tag units space ->
+  Bounds dimension units space ->
+  Bounds dimension units space
+transformBy = Primitives.Abstract.boundsTransformBy

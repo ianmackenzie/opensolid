@@ -10,7 +10,7 @@ where
 
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Continuity qualified as Continuity
-import OpenSolid.Curve (Curve)
+import OpenSolid.Curve (Curve, CurveExists)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
@@ -27,7 +27,7 @@ import OpenSolid.UvBounds (data UvBounds)
 import OpenSolid.UvPoint (data UvPoint)
 
 lengthScale ::
-  Curve.Exists dimension units space =>
+  CurveExists dimension units space =>
   Curve dimension units space ->
   Curve dimension units space ->
   Quantity units
@@ -37,7 +37,7 @@ lengthScale curveA curveB = do
   Quantity.sqrt_ (scaleA ?*? scaleB)
 
 areDistinctOrCrossing ::
-  (Curve.Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Curve.Segment dimension units space ->
   Curve.Segment dimension units space ->
   Bool
@@ -55,7 +55,7 @@ secondDerivativeRange dxdt dydt d2xdt2 d2ydt2 = Units.simplify do
   (d2ydt2 ?*? dxdt - d2xdt2 ?*? dydt) ?/? (dxdt ?*? dxdt ?*? dxdt)
 
 solve ::
-  (Curve.Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Nondegenerate (Curve dimension units space) ->
   Nondegenerate (Curve dimension units space) ->
   Interval Unitless ->

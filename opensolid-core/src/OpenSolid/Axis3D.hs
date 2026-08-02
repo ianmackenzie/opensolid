@@ -21,7 +21,7 @@ import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Axis3D (Axis3D, direction, originPoint), Frame3D, Plane3D (Plane3D))
-import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 
@@ -63,7 +63,11 @@ The origin point of the axis will remain unchanged.
 reverse :: Axis3D space -> Axis3D space
 reverse (Axis3D p0 d) = Axis3D p0 -d
 
-transformBy :: Transform.IsOrthonormal tag => Transform3D tag space -> Axis3D space -> Axis3D space
+transformBy ::
+  Transform.Tag.IsOrthonormal tag =>
+  Transform3D tag space ->
+  Axis3D space ->
+  Axis3D space
 transformBy transform axis = do
   let transformedOriginPoint = Point3D.transformBy transform (originPoint axis)
   let transformedDirection =

@@ -4,7 +4,7 @@ module OpenSolid.Curve
   ( Curve
   , Curve2D
   , Curve3D
-  , Exists
+  , CurveExists
   , Solver (..)
   , Compiled
   , Segment
@@ -63,11 +63,11 @@ module OpenSolid.Curve
 where
 
 import OpenSolid.ArcLength qualified as ArcLength
-import OpenSolid.Axis (Axis)
+import OpenSolid.Axis (Axis, AxisExists)
 import OpenSolid.Axis qualified as Axis
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bisection qualified as Bisection
-import OpenSolid.Bounds (Bounds)
+import OpenSolid.Bounds (Bounds, BoundsExists)
 import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction (CompiledFunction)
@@ -84,7 +84,7 @@ import {-# SOURCE #-} OpenSolid.Curve.TangentSolver2D qualified as Curve.Tangent
 import {-# SOURCE #-} OpenSolid.Curve.TangentSolver3D qualified as Curve.TangentSolver3D
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.DirectionBounds qualified as DirectionBounds
+import OpenSolid.DirectionBounds (DirectionBoundsExists)
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
@@ -105,7 +105,7 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
-import OpenSolid.Point (Point)
+import OpenSolid.Point (Point, PointExists)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
@@ -122,17 +122,17 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
-import OpenSolid.Transform (Transform)
+import OpenSolid.Transform (Transform, TransformExists)
 import OpenSolid.Transform qualified as Transform
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector (Vector)
+import OpenSolid.Vector (Vector, VectorExists)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector3D (Vector3D)
-import OpenSolid.VectorBounds (VectorBounds)
-import OpenSolid.VectorBounds qualified as VectorBounds
-import OpenSolid.VectorCurve (VectorCurve)
+import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
+import OpenSolid.VectorCurve (VectorCurve, VectorCurveExists)
 import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 import OpenSolid.VectorCurve2D (VectorCurve2D)
@@ -171,7 +171,7 @@ type BisectionTree dimension units space =
   Bisection.Tree (Interval Unitless) (Segment dimension units space)
 
 buildBisectionTree ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Interval Unitless ->
   Nondegenerate (Curve dimension units space) ->
   BisectionTree dimension units space
@@ -203,13 +203,17 @@ instance FFI (Curve2D Unitless) where
 instance HasUnits (Curve dimension units space) units
 
 instance
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   ApproximateEquality (Curve dimension units space) (Tolerance units)
   where
   curve1 ~= curve2 = testPoints curve1 ~= testPoints curve2
 
 instance
-  (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
+  ( CurveExists dimension1 units1 space1
+  , dimension1 ~ dimension2
+  , space1 ~ space2
+  , units1 ~ units2
+  ) =>
   Addition
     (Curve dimension1 units1 space1)
     (VectorCurve dimension2 units2 space2)
@@ -219,7 +223,11 @@ instance
     new (compiled lhs + VectorCurve.compiled rhs) (derivative lhs + VectorCurve.derivative rhs)
 
 instance
-  (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
+  ( CurveExists dimension1 units1 space1
+  , dimension1 ~ dimension2
+  , space1 ~ space2
+  , units1 ~ units2
+  ) =>
   Subtraction
     (Curve dimension1 units1 space1)
     (VectorCurve dimension2 units2 space2)
@@ -229,7 +237,11 @@ instance
     new (compiled lhs - VectorCurve.compiled rhs) (derivative lhs - VectorCurve.derivative rhs)
 
 instance
-  (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
+  ( CurveExists dimension1 units1 space1
+  , dimension1 ~ dimension2
+  , space1 ~ space2
+  , units1 ~ units2
+  ) =>
   Subtraction
     (Curve dimension1 units1 space1)
     (Curve dimension2 units2 space2)
@@ -323,7 +335,7 @@ instance
   intersects = intersectsPoint
 
 intersectsPoint ::
-  (Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Curve dimension units space ->
   Bool
@@ -334,7 +346,7 @@ intersectsPoint givenPoint curve = case nondegenerate curve of
       & not . List.isEmpty
 
 instance
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Composition (Curve dimension units space) (Curve1D Unitless) (Curve dimension units space)
   where
   f . g = new (compiled f . Curve1D.compiled g) ((derivative f . g) * Curve1D.derivative g)
@@ -374,12 +386,12 @@ instance Composition (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFuncti
 data Solver dimension units space where
   Solver ::
     { resolve ::
-        (Exists dimension units space, Tolerance units) =>
+        (CurveExists dimension units space, Tolerance units) =>
         (Interval Unitless, Interval Unitless) ->
         (Segment dimension units space, Segment dimension units space) ->
         Fuzzy (Maybe tag)
     , solve ::
-        (Exists dimension units space, Tolerance units) =>
+        (CurveExists dimension units space, Tolerance units) =>
         Nondegenerate (Curve dimension units space) ->
         Nondegenerate (Curve dimension units space) ->
         tag ->
@@ -390,19 +402,19 @@ data Solver dimension units space where
     Solver dimension units space
 
 class
-  ( Point.Exists dimension units space
-  , Bounds.Exists dimension units space
-  , Transform.Exists dimension units space
-  , Vector.Exists dimension units space
-  , Vector.Exists dimension (Unitless ?/? units) space
-  , VectorBounds.Exists dimension units space
-  , VectorBounds.Exists dimension (Unitless ?/? units) space
-  , DirectionBounds.Exists dimension space
-  , Axis.Exists dimension units space
+  ( PointExists dimension units space
+  , BoundsExists dimension units space
+  , TransformExists dimension units space
+  , VectorExists dimension units space
+  , VectorExists dimension (Unitless ?/? units) space
+  , VectorBoundsExists dimension units space
+  , VectorBoundsExists dimension (Unitless ?/? units) space
+  , DirectionBoundsExists dimension space
+  , AxisExists dimension units space
   , Expression.Constant Number (Point dimension units space)
   , Expression.BezierCurve (Point dimension units space)
   , Expression.TransformBy
-      (Transform dimension Transform.Affine units space)
+      (Transform dimension Transform.Tag.Affine units space)
       (Expression Number (Point dimension units space))
       (Expression Number (Point dimension units space))
   , Expression.Evaluation
@@ -422,8 +434,8 @@ class
       (Expression Number (Point dimension units space))
       (Expression Number (Point dimension units space))
       (Expression Number (Vector dimension units space))
-  , VectorCurve.Exists dimension units space
-  , VectorCurve.Exists dimension (Unitless ?/? units) space
+  , VectorCurveExists dimension units space
+  , VectorCurveExists dimension (Unitless ?/? units) space
   , Subtraction
       (Curve dimension units space)
       (Point dimension units space)
@@ -437,21 +449,21 @@ class
   , NewtonRaphson.Curve.Solver dimension units space
   , NewtonRaphson.Surface.Solver dimension units space
   ) =>
-  Exists dimension units space
+  CurveExists dimension units space
   where
   tangentSolver :: Solver dimension units space
 
 crossingSolver :: Solver dimension units space
 crossingSolver = Curve.CrossingSolver.solver
 
-instance Exists 2 units Void where
+instance CurveExists 2 units Void where
   tangentSolver = Curve.TangentSolver2D.solver
 
-instance Exists 3 Meters space where
+instance CurveExists 3 Meters space where
   tangentSolver = Curve.TangentSolver3D.solver
 
 new ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Compiled dimension units space ->
   VectorCurve dimension units space ->
   Curve dimension units space
@@ -468,7 +480,7 @@ new givenCompiled givenDerivative =
       }
 
 buildArcLengthParameterization ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Nondegenerate (Curve dimension units space) ->
   (Quantity units, Number -> Number)
 buildArcLengthParameterization (Nondegenerate curve) = do
@@ -479,25 +491,25 @@ buildArcLengthParameterization (Nondegenerate curve) = do
   ArcLength.parameterization dsdt d2sdt2
 
 constant ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Point dimension units space -> Curve dimension units space
 constant givenPoint = new (CompiledFunction.constant givenPoint) VectorCurve.zero
 
 line ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Line dimension units space ->
   Curve dimension units space
 line (Line p1 p2) = lineFrom p1 p2
 
 lineFrom ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Point dimension units space ->
   Point dimension units space ->
   Curve dimension units space
 lineFrom p1 p2 = bezier (NonEmpty.two p1 p2)
 
 bezier ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   NonEmpty (Point dimension units space) ->
   Curve dimension units space
 bezier controlPoints = do
@@ -506,7 +518,7 @@ bezier controlPoints = do
   new compiledBezier bezierDerivative
 
 quadraticBezier ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Point dimension units space ->
   Point dimension units space ->
   Point dimension units space ->
@@ -514,7 +526,7 @@ quadraticBezier ::
 quadraticBezier p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
 
 cubicBezier ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Point dimension units space ->
   Point dimension units space ->
   Point dimension units space ->
@@ -523,7 +535,7 @@ cubicBezier ::
 cubicBezier p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
 hermite ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Point dimension units space ->
   List (Vector dimension units space) ->
   Point dimension units space ->
@@ -541,19 +553,22 @@ compiled :: Curve dimension units space -> Compiled dimension units space
 compiled = (.compiled)
 
 testPoints ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Curve dimension units space ->
   NonEmpty (Point dimension units space)
 testPoints curve = NonEmpty.map (pointOn curve) Parameter.samples
 
 secondDerivative ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Curve dimension units space ->
   VectorCurve dimension units space
 secondDerivative = VectorCurve.derivative . derivative
 
 {-# INLINE isPoint #-}
-isPoint :: (Exists dimension units space, Tolerance units) => Curve dimension units space -> Bool
+isPoint ::
+  (CurveExists dimension units space, Tolerance units) =>
+  Curve dimension units space ->
+  Bool
 isPoint curve = VectorCurve.isZero (derivative curve)
 
 pointAt :: Number -> Curve dimension units space -> Point dimension units space
@@ -584,28 +599,28 @@ bounds = (.bounds)
 bisectionTree :: Nondegenerate (Curve dimension units space) -> BisectionTree dimension units space
 bisectionTree = Nondegenerate.get (.bisectionTree)
 
-hasDegenerateStart :: Exists dimension units space => Curve dimension units space -> Bool
+hasDegenerateStart :: CurveExists dimension units space => Curve dimension units space -> Bool
 hasDegenerateStart curve = VectorCurve.hasDegenerateStart (derivative curve)
 
-hasDegenerateEnd :: Exists dimension units space => Curve dimension units space -> Bool
+hasDegenerateEnd :: CurveExists dimension units space => Curve dimension units space -> Bool
 hasDegenerateEnd curve = VectorCurve.hasDegenerateEnd (derivative curve)
 
 isOnAxis ::
-  (Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Axis dimension units space ->
   Curve dimension units space ->
   Bool
 isOnAxis axis curve = NonEmpty.all (intersects axis) (testPoints curve)
 
 nondegenerate ::
-  (Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   Result IsDegenerate (Nondegenerate (Curve dimension units space))
 nondegenerate curve =
   if VectorCurve.isZero (derivative curve) then Err IsDegenerate else Ok (Nondegenerate curve)
 
 nonzero ::
-  (Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   Result HasDegeneracy (Nonzero (Curve dimension units space))
 nonzero curve =
@@ -614,35 +629,35 @@ nonzero curve =
     else Ok (Nonzero curve)
 
 derivativeAt ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Number ->
   Curve dimension units space ->
   Vector dimension units space
 derivativeAt tValue curve = VectorCurve.valueAt tValue (derivative curve)
 
 derivativeRange ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Interval Unitless ->
   Curve dimension units space ->
   VectorBounds dimension units space
 derivativeRange tRange curve = VectorCurve.range tRange (derivative curve)
 
 secondDerivativeAt ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Number ->
   Curve dimension units space ->
   Vector dimension units space
 secondDerivativeAt tValue curve = VectorCurve.valueAt tValue (secondDerivative curve)
 
 secondDerivativeRange ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Interval Unitless ->
   Curve dimension units space ->
   VectorBounds dimension units space
 secondDerivativeRange tRange curve = VectorCurve.range tRange (secondDerivative curve)
 
 reverse ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Curve dimension units space ->
   Curve dimension units space
 reverse curve =
@@ -660,7 +675,7 @@ reverse curve =
       }
 
 distanceAlong ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Axis dimension units space ->
   Curve dimension units space ->
   Curve1D units
@@ -670,7 +685,7 @@ affixWidth :: Number
 affixWidth = 1 / 256
 
 desingularizeStart ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Point dimension units space ->
   Vector dimension units space ->
   Curve dimension units space ->
@@ -688,7 +703,7 @@ desingularizeStart givenStartPoint givenStartDerivative curve = do
   (prefix, curve . Curve1D.interpolateFrom tInner 1.0)
 
 desingularizeEnd ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Curve dimension units space ->
   Point dimension units space ->
   Vector dimension units space ->
@@ -706,7 +721,7 @@ desingularizeEnd curve givenEndPoint givenEndDerivative = do
   (curve . Curve1D.interpolateFrom 0.0 tInner, suffix)
 
 findPoint ::
-  (Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Curve dimension units space ->
   Result IsDegenerate (List Number)
@@ -714,7 +729,7 @@ findPoint givenPoint curve =
   Result.map (Curve.Nondegenerate.findPoint givenPoint) (nondegenerate curve)
 
 intersections ::
-  ( Exists dimension units space
+  ( CurveExists dimension units space
   , NewtonRaphson.Surface.Solver dimension units space
   , Tolerance units
   ) =>
@@ -727,7 +742,7 @@ intersections curve1 curve2 = do
   Ok (Curve.Nondegenerate.Intersections.intersections nondegenerate1 nondegenerate2)
 
 linearDeviation ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Curve dimension units space ->
   Interval Unitless ->
   Quantity units
@@ -739,7 +754,7 @@ linearDeviation curve (Interval t1 t2) = do
   max midError (leftRightError curve t1 t2 p1 p2)
 
 toPolyline ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Resolution units ->
   Curve dimension units space ->
   Polyline dimension units space
@@ -747,7 +762,7 @@ toPolyline resolution curve =
   Polyline (NonEmpty.map (pointOn curve) (linearize resolution curve))
 
 linearize ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Resolution units ->
   Curve dimension units space ->
   NonEmpty Number
@@ -767,7 +782,7 @@ linearize resolution curve = do
   collect Interval.unit (startPoint curve) (endPoint curve) (NonEmpty.one 1.0)
 
 leftRightError ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Curve dimension units space ->
   Number ->
   Number ->
@@ -785,7 +800,7 @@ leftRightError curve t1 t2 p1 p2 = do
   max leftError rightError
 
 arcLengthParameterization ::
-  (Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   (Quantity units, Number -> Number)
 arcLengthParameterization curve =
@@ -794,34 +809,34 @@ arcLengthParameterization curve =
     Err IsDegenerate -> (Quantity.zero, id)
 
 length ::
-  (Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   Quantity units
 length = Pair.first . arcLengthParameterization
 
 uniformParameterization ::
-  (Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   Number ->
   Number
 uniformParameterization = Pair.second . arcLengthParameterization
 
 fromUniform ::
-  (Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Number ->
   Curve dimension units space ->
   Number
 fromUniform rValue curve = uniformParameterization curve rValue
 
 atUniform ::
-  (Exists dimension units space, Tolerance units) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Number ->
   Curve dimension units space ->
   Point dimension units space
 atUniform r curve = pointAt (uniformParameterization curve r) curve
 
 transformBy ::
-  Exists dimension units space =>
+  CurveExists dimension units space =>
   Transform dimension tag units space ->
   Curve dimension units space ->
   Curve dimension units space
