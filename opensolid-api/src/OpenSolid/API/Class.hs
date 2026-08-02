@@ -748,7 +748,7 @@ member4 name arg1 arg2 arg3 arg4 f docs =
   Member (FFI.name name) $
     MemberFunction4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f docs
 
-data Self a = Self
+data Self = Self
 
 equalityAndHash :: forall value. (FFI value, Eq value, Hashable value) => Member value
 equalityAndHash =
@@ -825,7 +825,7 @@ numberDivByS f = PreOverload BinaryOperator.Div (PreOperatorOverloadS f)
 plus ::
   forall rhs value result.
   (Addition value rhs result, FFI value, FFI rhs, FFI result) =>
-  Self (value -> rhs -> result) ->
+  Self ->
   Member value
 plus _ =
   PostOverload BinaryOperator.Add $
@@ -846,7 +846,7 @@ plusSelf = plus @value Self
 minus ::
   forall rhs value result.
   (Subtraction value rhs result, FFI value, FFI rhs, FFI result) =>
-  Self (value -> rhs -> result) ->
+  Self ->
   Member value
 minus _ =
   PostOverload BinaryOperator.Sub $
@@ -867,7 +867,7 @@ minusSelf = minus @value Self
 times ::
   forall rhs value result.
   (Multiplication value rhs result, FFI value, FFI rhs, FFI result) =>
-  Self (value -> rhs -> result) ->
+  Self ->
   Member value
 times _ =
   PostOverload BinaryOperator.Mul $
@@ -888,7 +888,7 @@ timesSelf = times @value Self
 divBy ::
   forall rhs value result.
   (Division value rhs result, FFI value, FFI rhs, FFI result) =>
-  Self (value -> rhs -> result) ->
+  Self ->
   Member value
 divBy _ =
   PostOverload BinaryOperator.Div $
@@ -943,7 +943,7 @@ modBySelf =
 dotProduct ::
   forall rhs value result.
   (DotMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
-  Self (value -> rhs -> result) ->
+  Self ->
   Member value
 dotProduct _ =
   PostOverload BinaryOperator.Dot $
@@ -958,7 +958,7 @@ dotSelf = dotProduct @value Self
 crossProduct ::
   forall rhs value result.
   (CrossMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
-  Self (value -> rhs -> result) ->
+  Self ->
   Member value
 crossProduct _ =
   PostOverload BinaryOperator.Cross $
