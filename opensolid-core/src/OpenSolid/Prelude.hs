@@ -8,9 +8,7 @@ module OpenSolid.Prelude
   , Err
   , Result (Ok, Error)
   , OnError
-  , succeed
   , fail
-  , report
   , catch
   , (??)
   , Exception
@@ -471,38 +469,19 @@ instance MonadFail (Result Text) where
   {-# INLINE fail #-}
   fail message = Error (Data.Text.pack message)
 
-data OnError m x a where
-  Succeed :: Monad m => a -> OnError m x a
-  Fail :: MonadFail m => OnError m x a
-  Report :: MonadFail m => Text -> OnError m x a
-  Catch :: (x -> OnError m x a) -> OnError m x a
+type OnError x a = (Err x, ?err :: x) => a
 
-succeed :: Monad m => a -> OnError m x a
-succeed = Succeed
-
-fail :: MonadFail m => OnError m x a
-fail = Fail
-
-report :: MonadFail m => Text -> OnError m x a
-report = Report
-
-catch :: (x -> OnError m x a) -> OnError m x a
-catch = Catch
-
-succeedWith :: Monad m => a -> m a
-succeedWith = Prelude.return
-
-failWith :: MonadFail m => Text -> m a
-failWith message = Prelude.fail (Data.Text.unpack message)
-
-(??) :: Monad m => Result x a -> OnError m x a -> m a
-Ok value ?? _ = succeedWith value
-Error _ ?? Succeed value = succeedWith value
-Error err ?? Fail = failWith (Error.message err)
-Error _ ?? Report message = failWith message
-Error err ?? Catch callback = Error err ?? callback err
+(??) :: Monad m => Result x a -> OnError x (m a) -> m a
+Ok value ?? _ = Prelude.return value
+Error err ?? fallback = let ?err = err in fallback
 
 infixl 0 ??
+
+fail :: MonadFail m => OnError x (m a)
+fail = Prelude.fail (Data.Text.unpack (Error.message ?err))
+
+catch :: (x -> OnError x a) -> OnError x a
+catch callback = callback ?err
 
 ----- Quantity -----
 

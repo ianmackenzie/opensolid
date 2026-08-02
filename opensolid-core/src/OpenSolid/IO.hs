@@ -31,7 +31,7 @@ import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Prelude hiding (fail, forEach, forEachWithIndex, succeed)
+import OpenSolid.Prelude hiding (fail, forEach, forEachWithIndex)
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import System.Directory
