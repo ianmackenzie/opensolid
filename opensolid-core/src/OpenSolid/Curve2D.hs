@@ -38,7 +38,6 @@ module OpenSolid.Curve2D
   , compiled
   , derivative
   , secondDerivative
-  , tangentDirectionRange
   , reverse
   , bounds
   , intersections
@@ -96,7 +95,6 @@ import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
-import OpenSolid.DirectionBounds2D (DirectionBounds2D)
 import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
@@ -459,9 +457,6 @@ derivative = Curve.derivative
 
 secondDerivative :: Curve2D units -> VectorCurve2D units
 secondDerivative = Curve.secondDerivative
-
-tangentDirectionRange :: Interval Unitless -> Curve2D units -> DirectionBounds2D
-tangentDirectionRange = Curve.tangentDirectionRange
 
 distanceAlong :: Axis2D units -> Curve2D units -> Curve1D units
 distanceAlong (Axis2D p0 d) curve = (curve - p0) `dot` d

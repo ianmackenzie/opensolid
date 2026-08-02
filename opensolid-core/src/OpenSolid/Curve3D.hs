@@ -18,7 +18,6 @@ module OpenSolid.Curve3D
   , derivativeRange
   , secondDerivativeAt
   , secondDerivativeRange
-  , tangentDirectionRange
   , isPoint
   , startPoint
   , endPoint
@@ -47,7 +46,6 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve3D, Intersections)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2D (Curve2D)
-import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
@@ -152,9 +150,6 @@ secondDerivativeAt = Curve.secondDerivativeAt
 {-# INLINE secondDerivativeRange #-}
 secondDerivativeRange :: Interval Unitless -> Curve3D space -> VectorBounds3D Meters space
 secondDerivativeRange = Curve.secondDerivativeRange
-
-tangentDirectionRange :: Interval Unitless -> Curve3D space -> DirectionBounds3D space
-tangentDirectionRange = Curve.tangentDirectionRange
 
 isPoint :: Tolerance Meters => Curve3D space -> Bool
 isPoint = Curve.isPoint

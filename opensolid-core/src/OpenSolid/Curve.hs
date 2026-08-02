@@ -32,7 +32,6 @@ module OpenSolid.Curve
   , derivativeRange
   , secondDerivativeAt
   , secondDerivativeRange
-  , tangentDirectionRange
   , reverse
   , isPoint
   , hasDegenerateStart
@@ -85,7 +84,6 @@ import {-# SOURCE #-} OpenSolid.Curve.TangentSolver2D qualified as Curve.Tangent
 import {-# SOURCE #-} OpenSolid.Curve.TangentSolver3D qualified as Curve.TangentSolver3D
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression (Expression)
@@ -642,13 +640,6 @@ secondDerivativeRange ::
   Curve dimension units space ->
   VectorBounds dimension units space
 secondDerivativeRange tRange curve = VectorCurve.range tRange (secondDerivative curve)
-
-tangentDirectionRange ::
-  Exists dimension units space =>
-  Interval Unitless ->
-  Curve dimension units space ->
-  DirectionBounds dimension space
-tangentDirectionRange tRange curve = VectorCurve.directionRange tRange (derivative curve)
 
 reverse ::
   Exists dimension units space =>

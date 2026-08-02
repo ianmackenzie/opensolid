@@ -12,6 +12,7 @@ module OpenSolid.Curve.Nondegenerate
   , derivativeAt
   , secondDerivativeAt
   , tangentDirectionAt
+  , tangentDirectionRange
   , bisectionTree
   , findPoint
   , continuityAt
@@ -32,7 +33,10 @@ import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate.Intersections qualified as C
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
+import OpenSolid.DirectionBounds (DirectionBounds)
+import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Fuzzy qualified as Fuzzy
+import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
@@ -115,6 +119,14 @@ tangentDirectionAt ::
   Direction dimension space
 tangentDirectionAt tValue curve =
   VectorCurve.Nondegenerate.directionAt tValue (derivative curve)
+
+tangentDirectionRange ::
+  (Curve.Exists dimension units space, DirectionBounds.Exists dimension space) =>
+  Interval Unitless ->
+  Nondegenerate (Curve dimension units space) ->
+  DirectionBounds dimension space
+tangentDirectionRange tRange curve =
+  VectorCurve.Nondegenerate.directionRange tRange (derivative curve)
 
 bisectionTree ::
   Nondegenerate (Curve dimension units space) ->

@@ -31,7 +31,6 @@ module OpenSolid.VectorCurve
   , squaredMagnitude_
   , squaredMagnitude
   , nondegenerate
-  , directionRange
   , quotient_
   , reverse
   , transformBy
@@ -58,7 +57,6 @@ import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction3D (Direction3D)
-import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
@@ -91,7 +89,6 @@ import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
-import OpenSolid.VectorCurve.Direction qualified as VectorCurve.Direction
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
@@ -1119,14 +1116,6 @@ secondDerivativeRange ::
   VectorCurve dimension units space ->
   VectorBounds dimension units space
 secondDerivativeRange tRange curve = range tRange (secondDerivative curve)
-
-directionRange ::
-  Exists dimension units space =>
-  Interval Unitless ->
-  VectorCurve dimension units space ->
-  DirectionBounds dimension space
-directionRange tRange curve =
-  VectorCurve.Direction.range curve tRange (range tRange curve) (derivativeRange tRange curve)
 
 {-# INLINE isZero #-}
 isZero :: Tolerance units => VectorCurve dimension units space -> Bool
