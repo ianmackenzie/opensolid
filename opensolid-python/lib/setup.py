@@ -10,7 +10,7 @@ class custom_bdist_wheel(bdist_wheel):
         and so is independent of the Python ABI or even Python version,
         but is still specific to the platform it was built for.
         """
-        impl_tag, abi_tag, plat_tag = bdist_wheel.get_tag(self)
+        _impl_tag, _abi_tag, plat_tag = bdist_wheel.get_tag(self)
         return "py3", "none", plat_tag
 
 
