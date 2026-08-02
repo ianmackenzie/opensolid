@@ -60,7 +60,7 @@ data SurfaceFunction3D space = SurfaceFunction3D
       ( VectorSurfaceFunction3D Meters space
       , VectorSurfaceFunction3D Meters space
       )
-  , maxSampledNondegeneracy :: ~Length
+  , maxSampledDivergence :: ~Length
   }
 
 type Compiled space =
@@ -179,15 +179,15 @@ new givenCompiled givenPartialDerivatives = do
     SurfaceFunction3D
       { compiled = givenCompiled
       , partialDerivatives = mergedPartialDerivatives
-      , maxSampledNondegeneracy = NonEmpty.maximumOf (nondegeneracy result) UvPoint.interiorSamples
+      , maxSampledDivergence = NonEmpty.maximumOf (divergence result) UvPoint.interiorSamples
       }
 
 constant :: Point3D space -> SurfaceFunction3D space
 constant value =
   new (CompiledFunction.constant value) (VectorSurfaceFunction3D.zero, VectorSurfaceFunction3D.zero)
 
-nondegeneracy :: SurfaceFunction3D space -> UvPoint -> Length
-nondegeneracy function uvPoint = do
+divergence :: SurfaceFunction3D space -> UvPoint -> Length
+divergence function uvPoint = do
   let (duValue, dvValue) = partialDerivativesAt uvPoint function
   let duMagnitude = Vector3D.magnitude duValue
   let dvMagnitude = Vector3D.magnitude dvValue
@@ -242,7 +242,7 @@ nondegenerate ::
   SurfaceFunction3D space ->
   Result IsDegenerate (Nondegenerate (SurfaceFunction3D space))
 nondegenerate function =
-  if function.maxSampledNondegeneracy ~= Length.zero
+  if function.maxSampledDivergence ~= Length.zero
     then Err IsDegenerate
     else Ok (Nondegenerate function)
 
