@@ -1,6 +1,5 @@
 module OpenSolid.CurvePoint
   ( CurvePoint
-  , Location
   , point
   , derivative
   , tangentDirection
@@ -20,8 +19,8 @@ import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
-import OpenSolid.CurvePoint.Location (Location)
-import OpenSolid.CurvePoint.Location qualified as Location
+import OpenSolid.CurveLocation (CurveLocation)
+import OpenSolid.CurveLocation qualified as CurveLocation
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
@@ -37,7 +36,7 @@ import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 
 data CurvePoint dimension units space = CurvePoint
-  { location :: Location
+  { location :: CurveLocation
   , point :: ~(Point dimension units space)
   , derivative :: ~(Vector dimension units space)
   , tangentDirection :: ~(Direction dimension space)
@@ -54,7 +53,7 @@ on ::
 on curve tValue =
   recursive \curvePoint ->
     CurvePoint
-      { location = Location.fromParameterValue tValue
+      { location = CurveLocation.fromParameterValue tValue
       , point = Curve.Nondegenerate.point curve tValue
       , derivative = Curve.Nondegenerate.derivativeValue curve tValue
       , tangentDirection = Curve.Nondegenerate.tangentDirection curve tValue
@@ -64,11 +63,11 @@ on curve tValue =
               Curve.Nonzero.curvatureVector_ (Nondegenerate.interior curve) tValue
       }
 
-location :: CurvePoint dimension units space -> Location
+location :: CurvePoint dimension units space -> CurveLocation
 location = (.location)
 
 parameterValue :: CurvePoint dimension units space -> Number
-parameterValue = Location.toParameterValue . location
+parameterValue = CurveLocation.toParameterValue . location
 
 point :: CurvePoint dimension units space -> Point dimension units space
 point = (.point)
