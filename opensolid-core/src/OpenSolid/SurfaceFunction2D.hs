@@ -118,6 +118,24 @@ instance
       (compiled f - compiled g)
       (Pair.map2 (-) (partialDerivatives f) (partialDerivatives g))
 
+instance
+  units1 ~ units2 =>
+  Subtraction
+    (SurfaceFunction2D units1)
+    (Point2D units2)
+    (VectorSurfaceFunction2D units1)
+  where
+  function - point = function - constant point
+
+instance
+  units1 ~ units2 =>
+  Subtraction
+    (Point2D units2)
+    (SurfaceFunction2D units1)
+    (VectorSurfaceFunction2D units1)
+  where
+  point - function = constant point - function
+
 new ::
   Compiled units ->
   (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units) ->
@@ -254,8 +272,7 @@ instance
     VectorSurfaceFunction3D.new compiledComposed composedPartialDerivatives
 
 distanceAlong :: Axis2D units -> SurfaceFunction2D units -> SurfaceFunction1D units
-distanceAlong axis function =
-  (function - constant (Axis2D.originPoint axis)) `dot` Axis2D.direction axis
+distanceAlong axis function = (function - Axis2D.originPoint axis) `dot` Axis2D.direction axis
 
 xCoordinate :: SurfaceFunction2D units -> SurfaceFunction1D units
 xCoordinate function = do
