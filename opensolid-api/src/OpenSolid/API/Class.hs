@@ -850,7 +850,7 @@ toFallbackFunctionM ::
 toFallbackFunctionM operator docs fallback = case fallback of
   NoFallback -> Nothing
   FallbackMember fallbackName -> do
-    let memberFunction = MemberFunctionM1 (FFI.name "Other") operator docs
+    let memberFunction = MemberFunctionM1 (FFI.name "Other") (flip operator) docs
     Just (FallbackMemberFunction fallbackName memberFunction)
   FallbackStatic fallbackName -> do
     let staticFunction = StaticFunctionM2 (FFI.name "Lhs") (FFI.name "Rhs") operator docs
