@@ -7,6 +7,7 @@ import OpenSolid.API.PostOperatorOverload qualified as PostOperatorOverload
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import Python qualified
 import Python.Function qualified
@@ -15,10 +16,10 @@ import Python.Type qualified
 rhsArgName :: Text
 rhsArgName = FFI.snakeCase PostOperatorOverload.rhsName
 
-definition :: FFI.ClassName -> (BinaryOperator.Id, List PostOperatorOverload) -> Text
+definition :: FFI.ClassName -> (BinaryOperator.Id, NonEmpty PostOperatorOverload) -> Text
 definition className (operatorId, operators) = do
-  case List.map (overloadComponents className operatorId) operators of
-    [(signature, _, body)] ->
+  case NonEmpty.map (overloadComponents className operatorId) operators of
+    NonEmpty.One (signature, _, body) ->
       Python.lines
         [ signature
         , Python.indent
@@ -30,13 +31,13 @@ definition className (operatorId, operators) = do
       let overloadDeclaration (signature, _, _) = Python.Function.overloadDeclaration signature
       let overloadCase (_, matchPattern, body) = Python.Function.overloadCase matchPattern [body]
       Python.lines
-        [ Python.lines (List.map overloadDeclaration overloads)
+        [ Python.lines (NonEmpty.toList (NonEmpty.map overloadDeclaration overloads))
         , "def " <> functionName operatorId <> "(self, " <> rhsArgName <> ": Any) -> Any:"
         , Python.indent
             [ documentation operatorId
             , "match " <> rhsArgName <> ":"
             , Python.indent
-                [ Python.lines (List.map overloadCase overloads)
+                [ Python.lines (NonEmpty.toList (NonEmpty.map overloadCase overloads))
                 , "case _:"
                 , Python.indent ["return NotImplemented"]
                 ]

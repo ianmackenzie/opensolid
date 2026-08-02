@@ -108,6 +108,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.HasZero (HasZero)
 import OpenSolid.List qualified as List
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude hiding (cross, dot)
@@ -128,8 +129,8 @@ data Class where
     , comparisonFunction :: Maybe ComparisonFunction
     , negationFunction :: Maybe NegationFunction
     , absFunction :: Maybe AbsFunction
-    , preOperators :: List (BinaryOperator.Id, List PreOperatorOverload)
-    , postOperators :: List (BinaryOperator.Id, List PostOperatorOverload)
+    , preOperators :: List (BinaryOperator.Id, NonEmpty PreOperatorOverload)
+    , postOperators :: List (BinaryOperator.Id, NonEmpty PostOperatorOverload)
     , nestedClasses :: List Class
     } ->
     Class
@@ -909,25 +910,25 @@ nested = Nested
 addPreOverload ::
   BinaryOperator.Id ->
   PreOperatorOverload ->
-  List (BinaryOperator.Id, List PreOperatorOverload) ->
-  List (BinaryOperator.Id, List PreOperatorOverload)
-addPreOverload operatorId overload [] = [(operatorId, [overload])]
+  List (BinaryOperator.Id, NonEmpty PreOperatorOverload) ->
+  List (BinaryOperator.Id, NonEmpty PreOperatorOverload)
+addPreOverload operatorId overload [] = [(operatorId, NonEmpty.one overload)]
 addPreOverload operatorId overload (first : rest) = do
   let (existingId, existingOverloads) = first
   if operatorId == existingId
-    then (existingId, existingOverloads <> [overload]) : rest
+    then (existingId, NonEmpty.extend existingOverloads [overload]) : rest
     else first : addPreOverload operatorId overload rest
 
 addPostOverload ::
   BinaryOperator.Id ->
   PostOperatorOverload ->
-  List (BinaryOperator.Id, List PostOperatorOverload) ->
-  List (BinaryOperator.Id, List PostOperatorOverload)
-addPostOverload operatorId overload [] = [(operatorId, [overload])]
+  List (BinaryOperator.Id, NonEmpty PostOperatorOverload) ->
+  List (BinaryOperator.Id, NonEmpty PostOperatorOverload)
+addPostOverload operatorId overload [] = [(operatorId, NonEmpty.one overload)]
 addPostOverload operatorId overload (first : rest) = do
   let (existingId, existingOverloads) = first
   if operatorId == existingId
-    then (existingId, existingOverloads <> [overload]) : rest
+    then (existingId, NonEmpty.extend existingOverloads [overload]) : rest
     else first : addPostOverload operatorId overload rest
 
 init :: FFI.ClassName -> Text -> Class
@@ -1022,8 +1023,8 @@ functions
       , comparisonFunctionInfo className comparisonFunction
       , negationFunctionInfo className negationFunction
       , absFunctionInfo className absFunction
-      , List.combine (preOperatorOverloads className) preOperators
-      , List.combine (postOperatorOverloads className) postOperators
+      , List.combine (NonEmpty.toList . preOperatorOverloads className) preOperators
+      , List.combine (NonEmpty.toList . postOperatorOverloads className) postOperators
       , List.combine functions nestedClasses
       ]
 
@@ -1184,10 +1185,10 @@ preOperatorOverload className operatorId overload = do
 
 preOperatorOverloads ::
   FFI.ClassName ->
-  (BinaryOperator.Id, List PreOperatorOverload) ->
-  List Function
+  (BinaryOperator.Id, NonEmpty PreOperatorOverload) ->
+  NonEmpty Function
 preOperatorOverloads className (operatorId, overloads) =
-  List.map (preOperatorOverload className operatorId) overloads
+  NonEmpty.map (preOperatorOverload className operatorId) overloads
 
 postOperatorOverload ::
   FFI.ClassName ->
@@ -1207,7 +1208,7 @@ postOperatorOverload className operatorId overload = do
 
 postOperatorOverloads ::
   FFI.ClassName ->
-  (BinaryOperator.Id, List PostOperatorOverload) ->
-  List Function
+  (BinaryOperator.Id, NonEmpty PostOperatorOverload) ->
+  NonEmpty Function
 postOperatorOverloads className (operatorId, overloads) =
-  List.map (postOperatorOverload className operatorId) overloads
+  NonEmpty.map (postOperatorOverload className operatorId) overloads
