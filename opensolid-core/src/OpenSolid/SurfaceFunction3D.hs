@@ -228,7 +228,9 @@ nondegenerate function =
     then Error IsDegenerate
     else Ok (Nondegenerate function)
 
-normalDirectionRange :: SurfaceFunction3D space -> UvBounds -> DirectionBounds3D space
+normalDirectionRange ::
+  Tolerance Meters =>
+  SurfaceFunction3D space -> UvBounds -> DirectionBounds3D space
 normalDirectionRange function uvRange = do
   let duDirectionBounds = VectorSurfaceFunction3D.directionRange (derivative U function) uvRange
   let dvDirectionBounds = VectorSurfaceFunction3D.directionRange (derivative V function) uvRange

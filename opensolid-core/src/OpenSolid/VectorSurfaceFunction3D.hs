@@ -5,10 +5,10 @@ module OpenSolid.VectorSurfaceFunction3D
   , Compiled
   , new
   , isZero
-  , degenerateU0
-  , degenerateU1
-  , degenerateV0
-  , degenerateV1
+  , degenerateLeft
+  , degenerateRight
+  , degenerateBottom
+  , degenerateTop
   , nondegenerate
   , zero
   , constant
@@ -40,19 +40,18 @@ import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
-import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
-import OpenSolid.UvPoint (UvPoint, data UvPoint)
+import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
@@ -65,11 +64,11 @@ data VectorSurfaceFunction3D units space
   { compiled :: Compiled units space
   , du :: ~(VectorSurfaceFunction3D units space)
   , dv :: ~(VectorSurfaceFunction3D units space)
-  , maxSampledMagnitude :: Quantity units
-  , degenerateU0 :: ~Bool
-  , degenerateU1 :: ~Bool
-  , degenerateV0 :: ~Bool
-  , degenerateV1 :: ~Bool
+  , maxSampledInteriorMagnitude :: ~(Quantity units)
+  , maxSampledLeftMagnitude :: ~(Quantity units)
+  , maxSampledRightMagnitude :: ~(Quantity units)
+  , maxSampledBottomMagnitude :: ~(Quantity units)
+  , maxSampledTopMagnitude :: ~(Quantity units)
   }
 
 type Compiled units space =
@@ -90,11 +89,11 @@ instance
       { compiled = Units.coerce function.compiled
       , du = Units.coerce function.du
       , dv = Units.coerce function.dv
-      , maxSampledMagnitude = Units.coerce function.maxSampledMagnitude
-      , degenerateU0 = function.degenerateU0
-      , degenerateU1 = function.degenerateU1
-      , degenerateV0 = function.degenerateV0
-      , degenerateV1 = function.degenerateV1
+      , maxSampledInteriorMagnitude = Units.coerce function.maxSampledInteriorMagnitude
+      , maxSampledLeftMagnitude = Units.coerce function.maxSampledLeftMagnitude
+      , maxSampledRightMagnitude = Units.coerce function.maxSampledRightMagnitude
+      , maxSampledBottomMagnitude = Units.coerce function.maxSampledBottomMagnitude
+      , maxSampledTopMagnitude = Units.coerce function.maxSampledTopMagnitude
       }
 
 instance Negation (VectorSurfaceFunction3D units space) where
@@ -455,49 +454,38 @@ new givenCompiled derivativeFunction = do
           { compiled = dv.compiled
           , du = derivative V du
           , dv = derivative V dv
-          , maxSampledMagnitude = dv.maxSampledMagnitude
-          , degenerateU0 = dv.degenerateU0
-          , degenerateU1 = dv.degenerateU1
-          , degenerateV0 = dv.degenerateV0
-          , degenerateV1 = dv.degenerateV1
+          , maxSampledInteriorMagnitude = dv.maxSampledInteriorMagnitude
+          , maxSampledLeftMagnitude = dv.maxSampledLeftMagnitude
+          , maxSampledRightMagnitude = dv.maxSampledRightMagnitude
+          , maxSampledBottomMagnitude = dv.maxSampledBottomMagnitude
+          , maxSampledTopMagnitude = dv.maxSampledTopMagnitude
           }
   let sampledMagnitude uvPoint = Vector3D.magnitude (CompiledFunction.value givenCompiled uvPoint)
-  let maxSampledMagnitude = NonEmpty.maximumOf sampledMagnitude UvPoint.interiorSamples
   VectorSurfaceFunction3D
     { compiled = givenCompiled
     , du = du
     , dv = dv'
-    , maxSampledMagnitude = maxSampledMagnitude
-    , degenerateU0 = boundaryIsDegenerate U 0.0 givenCompiled maxSampledMagnitude
-    , degenerateU1 = boundaryIsDegenerate U 1.0 givenCompiled maxSampledMagnitude
-    , degenerateV0 = boundaryIsDegenerate V 0.0 givenCompiled maxSampledMagnitude
-    , degenerateV1 = boundaryIsDegenerate V 1.0 givenCompiled maxSampledMagnitude
+    , maxSampledInteriorMagnitude = NonEmpty.maximumOf sampledMagnitude UvPoint.interiorSamples
+    , maxSampledLeftMagnitude = NonEmpty.maximumOf sampledMagnitude UvPoint.leftSamples
+    , maxSampledRightMagnitude = NonEmpty.maximumOf sampledMagnitude UvPoint.rightSamples
+    , maxSampledBottomMagnitude = NonEmpty.maximumOf sampledMagnitude UvPoint.bottomSamples
+    , maxSampledTopMagnitude = NonEmpty.maximumOf sampledMagnitude UvPoint.topSamples
     }
 
-boundaryIsDegenerate :: SurfaceParameter -> Number -> Compiled units space -> Quantity units -> Bool
-boundaryIsDegenerate parameter parameterValue compiledFunction maxSampledMagnitude =
-  Tolerance.using (Tolerance.unitless * maxSampledMagnitude) do
-    let isZeroAt testPoint = CompiledFunction.value compiledFunction testPoint ~= Vector3D.zero
-    NonEmpty.all isZeroAt (testPoints parameter parameterValue)
-
-testPoints :: SurfaceParameter -> Number -> NonEmpty UvPoint
-testPoints U uValue = NonEmpty.map (\v -> UvPoint uValue v) Parameter.samples
-testPoints V vValue = NonEmpty.map (\u -> UvPoint u vValue) Parameter.samples
-
 isZero :: Tolerance units => VectorSurfaceFunction3D units space -> Bool
-isZero function = function.maxSampledMagnitude <= ?tolerance
+isZero function = function.maxSampledInteriorMagnitude ~= Quantity.zero
 
-degenerateU0 :: VectorSurfaceFunction3D units space -> Bool
-degenerateU0 = (.degenerateU0)
+degenerateLeft :: Tolerance units => VectorSurfaceFunction3D units space -> Bool
+degenerateLeft function = function.maxSampledLeftMagnitude ~= Quantity.zero
 
-degenerateU1 :: VectorSurfaceFunction3D units space -> Bool
-degenerateU1 = (.degenerateU1)
+degenerateRight :: Tolerance units => VectorSurfaceFunction3D units space -> Bool
+degenerateRight function = function.maxSampledRightMagnitude ~= Quantity.zero
 
-degenerateV0 :: VectorSurfaceFunction3D units space -> Bool
-degenerateV0 = (.degenerateV0)
+degenerateBottom :: Tolerance units => VectorSurfaceFunction3D units space -> Bool
+degenerateBottom function = function.maxSampledBottomMagnitude ~= Quantity.zero
 
-degenerateV1 :: VectorSurfaceFunction3D units space -> Bool
-degenerateV1 = (.degenerateV1)
+degenerateTop :: Tolerance units => VectorSurfaceFunction3D units space -> Bool
+degenerateTop function = function.maxSampledTopMagnitude ~= Quantity.zero
 
 nondegenerate ::
   Tolerance units =>
@@ -595,15 +583,17 @@ squaredMagnitude ::
   SurfaceFunction1D units2
 squaredMagnitude = Units.specialize . squaredMagnitude_
 
-directionRange :: VectorSurfaceFunction3D units space -> UvBounds -> DirectionBounds3D space
+directionRange ::
+  Tolerance units =>
+  VectorSurfaceFunction3D units space -> UvBounds -> DirectionBounds3D space
 directionRange function uvRange = do
   let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvRange
   VectorBounds3D.direction $
     if
-      | uLow == 0.0 && function.degenerateU0 -> range (derivative U function) uvRange
-      | uHigh == 1.0 && function.degenerateU1 -> negate (range (derivative U function) uvRange)
-      | vLow == 0.0 && function.degenerateV0 -> range (derivative V function) uvRange
-      | vHigh == 1.0 && function.degenerateV1 -> negate (range (derivative V function) uvRange)
+      | uLow == 0.0 && degenerateLeft function -> range (derivative U function) uvRange
+      | uHigh == 1.0 && degenerateRight function -> negate (range (derivative U function) uvRange)
+      | vLow == 0.0 && degenerateBottom function -> range (derivative V function) uvRange
+      | vHigh == 1.0 && degenerateTop function -> negate (range (derivative V function) uvRange)
       | otherwise -> range function uvRange
 
 newtonRaphson :: VectorSurfaceFunction3D units space -> UvPoint -> Fuzzy UvPoint
