@@ -276,7 +276,7 @@ upward (Frame3D p o) = Frame3D p (Orientation3D.upwardOrientation o)
 {-| Construct a downward-facing frame relative to a parent/reference frame.
 
 The forward direction of the frame will point downward,
-the upward direction of the frame will point upward,
+the upward direction of the frame will point forward,
 and the rightward direction of the frame will point rightward
 (all relative to the parent frame).
 -}
