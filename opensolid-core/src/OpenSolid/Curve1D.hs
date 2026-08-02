@@ -34,6 +34,9 @@ module OpenSolid.Curve1D
   , sin
   , cos
   , degeneracyTolerance
+  , isZero
+  , nondegenerate
+  , nonzero
   , IsZero (IsZero)
   , zeros
   , CrossesZero (CrossesZero)
@@ -55,13 +58,14 @@ import OpenSolid.Curve1D.Zero qualified as Zero
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
-import OpenSolid.Error (IsZero (IsZero))
+import OpenSolid.Error (IsDegenerate (IsDegenerate), IsZero (IsZero))
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.HasZero (HasZero (HasZero))
 import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.Int qualified as Int
 import OpenSolid.Interval (Interval (Interval))
@@ -510,6 +514,26 @@ instance Estimate.Interface (Integral units) units where
 
 degeneracyTolerance :: Curve1D units -> Quantity units
 degeneracyTolerance curve = Tolerance.unitless * curve.maxSampledAbsoluteValue
+
+isZero :: Tolerance units => Curve1D units -> Bool
+isZero curve = curve.maxSampledAbsoluteValue ~= Quantity.zero
+
+nondegenerate ::
+  Tolerance units =>
+  Curve1D units ->
+  Result IsDegenerate (Nondegenerate (Curve1D units))
+nondegenerate curve =
+  if isZero curve then Err IsDegenerate else Ok (Nondegenerate curve)
+
+nonzero ::
+  Tolerance units =>
+  Curve1D units ->
+  Result HasZero (Nonzero (Curve1D units))
+nonzero curve =
+  case zeros curve of
+    Err IsZero -> Err HasZero
+    Ok [] -> Ok (Nonzero curve)
+    Ok NonEmpty{} -> Err HasZero
 
 ----- ZERO FINDING -----
 
