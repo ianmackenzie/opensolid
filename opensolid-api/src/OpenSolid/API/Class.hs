@@ -4,7 +4,8 @@
 module OpenSolid.API.Class
   ( Class (..)
   , Member
-  , FallbackFunction (..)
+  , PostOperatorFallback
+  , FallbackFunction (FallbackMemberFunction, FallbackStaticFunction)
   , new
   , static
   , upcast
