@@ -2,6 +2,7 @@ module OpenSolid.Curve.Nonzero
   ( pointAt
   , pointOn
   , derivative
+  , derivativeAt
   , tangentDirectionAt
   , tangentDirectionRange
   , curvatureVectorAt
@@ -28,6 +29,7 @@ import OpenSolid.Vector qualified as Vector
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
+import OpenSolid.VectorCurve.Nonzero qualified as VectorCurve.Nonzero
 
 pointAt :: Number -> Nonzero (Curve dimension units space) -> Point dimension units space
 pointAt tValue (Nonzero curve) = Curve.pointAt tValue curve
@@ -37,6 +39,13 @@ pointOn curve tValue = pointAt tValue curve
 
 derivative :: Nonzero (Curve dimension units space) -> Nonzero (VectorCurve dimension units space)
 derivative (Nonzero curve) = Nonzero (Curve.derivative curve)
+
+derivativeAt ::
+  (Curve.Exists dimension units space, Vector.Exists dimension units space) =>
+  Number ->
+  Nonzero (Curve dimension units space) ->
+  Nonzero (Vector dimension units space)
+derivativeAt tValue curve = VectorCurve.Nonzero.valueAt tValue (derivative curve)
 
 tangentDirectionAt ::
   (Curve.Exists dimension units space, Direction.Exists dimension space) =>
