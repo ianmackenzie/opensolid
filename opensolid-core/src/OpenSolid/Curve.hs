@@ -56,7 +56,8 @@ module OpenSolid.Curve
   , arcLengthParameterization
   , length
   , uniformParameterization
-  , uniformPoint
+  , fromUniform
+  , atUniform
   , transformBy
   , placeOn
   )
@@ -818,12 +819,19 @@ uniformParameterization ::
   Number
 uniformParameterization = Pair.second . arcLengthParameterization
 
-uniformPoint ::
+fromUniform ::
+  (Exists dimension units space, Tolerance units) =>
+  Number ->
+  Curve dimension units space ->
+  Number
+fromUniform rValue curve = uniformParameterization curve rValue
+
+atUniform ::
   (Exists dimension units space, Tolerance units) =>
   Number ->
   Curve dimension units space ->
   Point dimension units space
-uniformPoint r curve = pointAt (uniformParameterization curve r) curve
+atUniform r curve = pointAt (uniformParameterization curve r) curve
 
 transformBy ::
   Exists dimension units space =>

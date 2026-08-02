@@ -71,7 +71,8 @@ module OpenSolid.Curve2D
   , arcLengthParameterization
   , length
   , uniformParameterization
-  , uniformPoint
+  , fromUniform
+  , atUniform
   , piecewise
   )
 where
@@ -631,8 +632,11 @@ length = Curve.length
 uniformParameterization :: Tolerance units => Curve2D units -> Number -> Number
 uniformParameterization = Curve.uniformParameterization
 
-uniformPoint :: Tolerance units => Number -> Curve2D units -> Point2D units
-uniformPoint = Curve.uniformPoint
+fromUniform :: Tolerance units => Number -> Curve2D units -> Number
+fromUniform = Curve.fromUniform
+
+atUniform :: Tolerance units => Number -> Curve2D units -> Point2D units
+atUniform = Curve.atUniform
 
 piecewise :: Tolerance units => NonEmpty (Curve2D units) -> Curve2D units
 piecewise segments = do

@@ -67,6 +67,6 @@ matingCurves curve1 curve2 =
   Curve3D.length curve1 ~= Curve3D.length curve2 && do
     Parameter.samples & NonEmpty.all \r1 -> do
       let r2 = 1.0 - r1
-      let point1 = Curve3D.uniformPoint r1 curve1
-      let point2 = Curve3D.uniformPoint r2 curve2
+      let point1 = Curve3D.atUniform r1 curve1
+      let point2 = Curve3D.atUniform r2 curve2
       point1 ~= point2

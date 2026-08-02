@@ -31,7 +31,8 @@ module OpenSolid.Curve3D
   , arcLengthParameterization
   , length
   , uniformParameterization
-  , uniformPoint
+  , fromUniform
+  , atUniform
   , transformBy
   , placeIn
   , relativeTo
@@ -194,8 +195,11 @@ length = Curve.length
 uniformParameterization :: Tolerance Meters => Curve3D space -> Number -> Number
 uniformParameterization = Curve.uniformParameterization
 
-uniformPoint :: Tolerance Meters => Number -> Curve3D space -> Point3D space
-uniformPoint = Curve.uniformPoint
+fromUniform :: Tolerance Meters => Number -> Curve3D space -> Number
+fromUniform = Curve.fromUniform
+
+atUniform :: Tolerance Meters => Number -> Curve3D space -> Point3D space
+atUniform = Curve.atUniform
 
 transformBy :: Transform3D tag space -> Curve3D space -> Curve3D space
 transformBy = Curve.transformBy
