@@ -66,7 +66,7 @@ instance Show (Vector2D units) where
     Show.constructor2 precedence "Vector2D" vx vy
 
 instance FFI (Vector2D Unitless) where
-  representation = FFI.classRepresentation "UnitlessVector2D"
+  representation = FFI.classRepresentation "Vector2D"
 
 instance FFI (Vector2D Meters) where
   representation = FFI.classRepresentation "Displacement2D"
@@ -972,7 +972,7 @@ instance Show (Vector3D units space) where
     Show.constructor3 precedence "Vector3D" vx vy vz
 
 instance FFI (Vector3D Unitless Void) where
-  representation = FFI.classRepresentation "UnitlessVector3D"
+  representation = FFI.classRepresentation "Vector3D"
 
 instance FFI (Vector3D Meters Void) where
   representation = FFI.classRepresentation "Displacement3D"

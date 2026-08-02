@@ -206,13 +206,13 @@ class
   VectorCurveExists dimension units space
 
 instance FFI (VectorCurve2D Unitless) where
-  representation = FFI.classRepresentation "UnitlessVectorCurve2D"
+  representation = FFI.classRepresentation "VectorCurve2D"
 
 instance FFI (VectorCurve2D Meters) where
   representation = FFI.classRepresentation "DisplacementCurve2D"
 
 instance FFI (VectorCurve3D Unitless Void) where
-  representation = FFI.classRepresentation "UnitlessVectorCurve3D"
+  representation = FFI.classRepresentation "VectorCurve3D"
 
 instance FFI (VectorCurve3D Meters Void) where
   representation = FFI.classRepresentation "DisplacementCurve3D"

@@ -103,7 +103,7 @@ data Curve1D units = Curve1D
 type Compiled units = CompiledFunction Number (Quantity units) (Interval Unitless) (Interval units)
 
 instance FFI (Curve1D Unitless) where
-  representation = FFI.classRepresentation "UnitlessCurve1D"
+  representation = FFI.classRepresentation "Curve1D"
 
 instance FFI (Curve1D Meters) where
   representation = FFI.classRepresentation "LengthCurve1D"
