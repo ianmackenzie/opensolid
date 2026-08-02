@@ -212,7 +212,7 @@ translational ::
   Result BoundedBy.Error (Body3D space)
 translational sketchPlane profile givenDisplacement = do
   -- Fix displacement curve so that extrusion is upwards from plane
-  let startDerivative = VectorCurve3D.derivativeAt 0.0 givenDisplacement
+  let startDerivative = VectorCurve3D.startDerivative givenDisplacement
   let displacement =
         case Quantity.sign (startDerivative `dot` Plane3D.normalDirection sketchPlane) of
           Positive -> givenDisplacement

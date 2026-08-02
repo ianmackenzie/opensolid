@@ -628,7 +628,7 @@ nonzero ::
   Curve dimension units space ->
   Result HasDegeneracy (Nonzero (Curve dimension units space))
 nonzero curve =
-  if derivativeAt 0.0 curve ~= Vector.zero || derivativeAt 1.0 curve ~= Vector.zero
+  if startDerivative curve ~= Vector.zero || endDerivative curve ~= Vector.zero
     then Err HasDegeneracy
     else Ok (Nonzero curve)
 
