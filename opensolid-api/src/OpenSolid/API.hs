@@ -402,7 +402,7 @@ areaInterval =
     , Class.times @Interval Class.fallbackMemberTimes
     , Class.divideBy @Number Class.noFallback
     , Class.divideBy @AreaInterval Class.fallbackStaticRatio
-    , Class.divideBy @Length Class.noFallback
+    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
     , Class.divideBy @Area Class.noFallback
     , Class.divideBy @Interval Class.fallbackMemberDivideBy
     , Class.divideBy @LengthInterval (Class.fallbackMember "Divide By Length Interval")
