@@ -150,8 +150,9 @@ new nondegenerateCurve tRange = do
   let segmentRange0 = Curve.range tRange givenCurve
   let segmentDerivativeRange = Curve.derivativeRange tRange givenCurve
   let segmentSecondDerivativeRange = Curve.secondDerivativeRange tRange givenCurve
-  let leftRange = Bounds.aggregate2 (Bounds.constant p1) (p1 + 0.5 * segmentDerivativeRange)
-  let rightRange = Bounds.aggregate2 (Bounds.constant p2) (p2 - 0.5 * segmentDerivativeRange)
+  let halfDisplacementRange = 0.5 * Interval.width tRange * segmentDerivativeRange
+  let leftRange = Bounds.aggregate2 (Bounds.constant p1) (p1 + halfDisplacementRange)
+  let rightRange = Bounds.aggregate2 (Bounds.constant p2) (p2 - halfDisplacementRange)
   let segmentRange1 = Bounds.aggregate2 leftRange rightRange
   let segmentRange =
         case Bounds.intersection segmentRange0 segmentRange1 of
