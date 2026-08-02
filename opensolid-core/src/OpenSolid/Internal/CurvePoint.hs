@@ -14,8 +14,8 @@ data CurvePoint dimension units space = CurvePoint
   { location :: CurveLocation
   , point :: ~(Point dimension units space)
   , derivativeValue :: ~(Vector dimension units space)
-  , tangentDirection :: ~(Direction dimension space)
-  , curvatureVector_ :: Nondegenerate.Field (Vector dimension (Unitless ?/? units) space)
+  , tangentDirectionValue :: ~(Direction dimension space)
+  , curvatureVectorValue_ :: Nondegenerate.Field (Vector dimension (Unitless ?/? units) space)
   }
 
 deriving instance

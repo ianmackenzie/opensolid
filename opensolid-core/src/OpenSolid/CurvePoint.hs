@@ -2,8 +2,8 @@ module OpenSolid.CurvePoint
   ( CurvePoint
   , point
   , derivativeValue
-  , tangentDirection
-  , curvatureVector_
+  , tangentDirectionValue
+  , curvatureVectorValue_
   , location
   , parameterValue
   , isEndpoint
@@ -44,13 +44,13 @@ point = (.point)
 derivativeValue :: CurvePoint dimension units space -> Vector dimension units space
 derivativeValue = (.derivativeValue)
 
-tangentDirection :: CurvePoint dimension units space -> Direction dimension space
-tangentDirection = (.tangentDirection)
+tangentDirectionValue :: CurvePoint dimension units space -> Direction dimension space
+tangentDirectionValue = (.tangentDirectionValue)
 
-curvatureVector_ ::
+curvatureVectorValue_ ::
   Nondegenerate (CurvePoint dimension units space) ->
   Vector dimension (Unitless ?/? units) space
-curvatureVector_ = Nondegenerate.get (.curvatureVector_)
+curvatureVectorValue_ = Nondegenerate.get (.curvatureVectorValue_)
 
 isEndpoint :: CurvePoint dimension units space -> Bool
 isEndpoint = Parameter.isEndpoint . parameterValue
@@ -83,8 +83,8 @@ continuity ::
 continuity p1 p2 = do
   if point p1 ~= point p2
     then do
-      let tangent1 = tangentDirection p1
-      let tangent2 = tangentDirection p2
+      let tangent1 = tangentDirectionValue p1
+      let tangent2 = tangentDirectionValue p2
       if Direction.parallel tangent1 tangent2
         then do
           let alignment = Number.sign (tangent1 `dot` tangent2)
@@ -94,8 +94,8 @@ continuity p1 p2 = do
                 let l1 = Vector.magnitude (derivativeValue p1)
                 let l2 = Vector.magnitude (derivativeValue p2)
                 let l = Quantity.erase (min l1 l2)
-                let k1_ = curvatureVector_ nondegenerate1
-                let k2_ = curvatureVector_ nondegenerate2
+                let k1_ = curvatureVectorValue_ nondegenerate1
+                let k2_ = curvatureVectorValue_ nondegenerate2
                 let k = Vector.erase (k1_ - k2_)
                 let curvatureError :: Vector dimension units space =
                       Vector.unerase (k * l * l / 2.0)

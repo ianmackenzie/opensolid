@@ -7,7 +7,7 @@ module OpenSolid.Curve.Nondegenerate
   , derivative
   , derivativeValue
   , secondDerivativeValue
-  , tangentDirection
+  , tangentDirectionValue
   , bisectionTree
   , findPoint
   , intersections
@@ -59,11 +59,11 @@ curvePoint curve tValue =
       { location = CurveLocation.fromParameterValue tValue
       , point = point curve tValue
       , derivativeValue = derivativeValue curve tValue
-      , tangentDirection = tangentDirection curve tValue
-      , curvatureVector_ =
+      , tangentDirectionValue = tangentDirectionValue curve tValue
+      , curvatureVectorValue_ =
           result
             & Nondegenerate.field \_ ->
-              Curve.Nonzero.curvatureVector_ (Nondegenerate.interior curve) tValue
+              Curve.Nonzero.curvatureVectorValue_ (Nondegenerate.interior curve) tValue
       }
 
 bounds ::
@@ -96,12 +96,12 @@ secondDerivativeValue ::
 secondDerivativeValue (Nondegenerate curve) parameterValue =
   Curve.secondDerivativeValue curve parameterValue
 
-tangentDirection ::
+tangentDirectionValue ::
   (Curve.Exists dimension units space, Direction.Exists dimension space) =>
   Nondegenerate (Curve dimension units space) ->
   Number ->
   Direction dimension space
-tangentDirection curve tValue =
+tangentDirectionValue curve tValue =
   VectorCurve.Nondegenerate.direction (derivative curve) tValue
 
 bisectionTree ::

@@ -271,8 +271,8 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" do
   p2 <- Test.generate Random.point2D
   curve <- Curve.nondegenerate (Curve2D.cubicBezier p0 p0 p1 p2) ?? fail
   let decreasingTValues = [2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-  let startTangent = Curve.Nondegenerate.tangentDirection curve 0.0
-  let otherTangents = List.map (Curve.Nondegenerate.tangentDirection curve) decreasingTValues
+  let startTangent = Curve.Nondegenerate.tangentDirectionValue curve 0.0
+  let otherTangents = List.map (Curve.Nondegenerate.tangentDirectionValue curve) decreasingTValues
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom startTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -284,8 +284,8 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" do
   p2 <- Test.generate Random.point2D
   curve <- Curve.nondegenerate (Curve2D.cubicBezier p0 p1 p2 p2) ?? fail
   let increasingTValues = [1.0 - 2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-  let endTangent = Curve.Nondegenerate.tangentDirection curve 1.0
-  let otherTangents = List.map (Curve.Nondegenerate.tangentDirection curve) increasingTValues
+  let endTangent = Curve.Nondegenerate.tangentDirectionValue curve 1.0
+  let otherTangents = List.map (Curve.Nondegenerate.tangentDirectionValue curve) increasingTValues
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom endTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -411,8 +411,8 @@ g2 = Test.check 100 "G2 continuity" do
   spline <- Curve.nonzero (Curve2D.cubicBezier p1 p2 p3 p4) ?? fail
   t <- Test.generate Parameter.random
   let point = Curve2D.Nonzero.point spline t
-  let tangentDirection = Curve.Nonzero.tangentDirection spline t
-  let curvatureVector = Curve.Nonzero.curvatureVector spline t
+  let tangentDirection = Curve.Nonzero.tangentDirectionValue spline t
+  let curvatureVector = Curve.Nonzero.curvatureVectorValue spline t
   let signedRadius = 1.0 / (tangentDirection `cross` curvatureVector)
   let normalDirection = Direction2D.rotateLeft tangentDirection
   let arcCenter = point + signedRadius * normalDirection

@@ -2,7 +2,7 @@ module OpenSolid.Curve.Nondegenerate
   ( derivative
   , derivativeValue
   , secondDerivativeValue
-  , tangentDirection
+  , tangentDirectionValue
   , findPoint
   )
 where
@@ -32,7 +32,7 @@ secondDerivativeValue ::
   Nondegenerate (Curve dimension units space) ->
   Number ->
   Vector dimension units space
-tangentDirection ::
+tangentDirectionValue ::
   (Curve.Exists dimension units space, Direction.Exists dimension space) =>
   Nondegenerate (Curve dimension units space) ->
   Number ->

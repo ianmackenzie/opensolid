@@ -1,10 +1,11 @@
 module OpenSolid.Curve.Nonzero
   ( point
   , derivative
-  , tangentDirection
+  , tangentDirectionValue
   , tangentDirectionRange
-  , curvatureVector
-  , curvatureVector_
+  , curvatureVectorValue
+  , curvatureVectorRange
+  , curvatureVectorValue_
   , curvatureVectorRange_
   )
 where
@@ -33,12 +34,12 @@ point (Nonzero curve) parameterValue = Curve.point curve parameterValue
 derivative :: Nonzero (Curve dimension units space) -> Nonzero (VectorCurve dimension units space)
 derivative (Nonzero curve) = Nonzero (Curve.derivative curve)
 
-tangentDirection ::
+tangentDirectionValue ::
   (Curve.Exists dimension units space, Direction.Exists dimension space) =>
   Nonzero (Curve dimension units space) ->
   Number ->
   Direction dimension space
-tangentDirection (Nonzero curve) tValue = do
+tangentDirectionValue (Nonzero curve) tValue = do
   let derivativeValue = Curve.derivativeValue curve tValue
   Direction.unsafe (derivativeValue / Vector.magnitude derivativeValue)
 
@@ -50,7 +51,7 @@ tangentDirectionRange ::
 tangentDirectionRange (Nonzero curve) tRange =
   VectorBounds.direction (Curve.derivativeRange curve tRange)
 
-curvatureVector ::
+curvatureVectorValue ::
   ( Curve.Exists dimension units space
   , Units.Inverse units inverseUnits
   , Vector.Exists dimension inverseUnits space
@@ -58,14 +59,24 @@ curvatureVector ::
   Nonzero (Curve dimension units space) ->
   Number ->
   Vector dimension inverseUnits space
-curvatureVector curve tValue = Vector.coerce (curvatureVector_ curve tValue)
+curvatureVectorValue curve tValue = Vector.coerce (curvatureVectorValue_ curve tValue)
 
-curvatureVector_ ::
+curvatureVectorRange ::
+  ( Curve.Exists dimension units space
+  , Units.Inverse units inverseUnits
+  , VectorBounds.Exists dimension inverseUnits space
+  ) =>
+  Nonzero (Curve dimension units space) ->
+  Interval Unitless ->
+  VectorBounds dimension inverseUnits space
+curvatureVectorRange curve tRange = VectorBounds.coerce (curvatureVectorRange_ curve tRange)
+
+curvatureVectorValue_ ::
   (Curve.Exists dimension units space, Vector.Exists dimension (Unitless ?/? units) space) =>
   Nonzero (Curve dimension units space) ->
   Number ->
   Vector dimension (Unitless ?/? units) space
-curvatureVector_ (Nonzero curve) tValue =
+curvatureVectorValue_ (Nonzero curve) tValue =
   Curve.CurvatureVector.value_
     (Curve.derivativeValue curve tValue)
     (Curve.secondDerivativeValue curve tValue)
