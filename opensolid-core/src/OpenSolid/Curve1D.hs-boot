@@ -22,7 +22,7 @@ module OpenSolid.Curve1D
   )
 where
 
-import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D.Zero (Zero)
 import OpenSolid.FFI (FFI)
 import OpenSolid.Interval (Interval)

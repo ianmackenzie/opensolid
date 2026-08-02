@@ -21,13 +21,13 @@ module OpenSolid.SurfaceFunction1D
   )
 where
 
-import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
-import {-# SOURCE #-} OpenSolid.UvBounds (UvBounds)
-import {-# SOURCE #-} OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 
 type role SurfaceFunction1D nominal
 

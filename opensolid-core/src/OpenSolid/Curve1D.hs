@@ -50,7 +50,6 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import {-# SOURCE #-} OpenSolid.Curve1D.Nonzero qualified as Curve1D.Nonzero
 import OpenSolid.Curve1D.Zero (Zero)
 import OpenSolid.Curve1D.Zero qualified as Zero
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
@@ -403,9 +402,9 @@ secondDerivativeRange tRange curve = range tRange (secondDerivative curve)
 instance Division_ (Curve1D units1) (Nonzero (Curve1D units2)) (Curve1D (units1 ?/? units2)) where
   lhs ?/? Nonzero rhs = do
     let quotientCompiled = compiled lhs ?/? compiled rhs
-    let quotientDerivative = Units.simplify do
-          (derivative lhs ?*? rhs - lhs ?*? derivative rhs)
-            ?/? Curve1D.Nonzero.squared_ (Nonzero rhs)
+    let quotientDerivative =
+          Units.simplify $
+            (derivative lhs ?*? rhs - lhs ?*? derivative rhs) ?/? Nonzero (squared_ rhs)
     new quotientCompiled quotientDerivative
 
 instance

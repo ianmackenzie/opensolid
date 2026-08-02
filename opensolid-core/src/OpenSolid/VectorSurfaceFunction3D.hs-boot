@@ -8,14 +8,14 @@ module OpenSolid.VectorSurfaceFunction3D
   )
 where
 
-import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector3D, VectorBounds3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
-import {-# SOURCE #-} OpenSolid.UvBounds (UvBounds)
-import {-# SOURCE #-} OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 
 type role VectorSurfaceFunction3D nominal nominal
 

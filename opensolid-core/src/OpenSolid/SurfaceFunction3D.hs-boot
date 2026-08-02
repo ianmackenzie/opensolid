@@ -12,12 +12,12 @@ module OpenSolid.SurfaceFunction3D
   )
 where
 
-import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
+import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds3D, Point3D)
 import OpenSolid.Transform3D (Transform3D)
-import {-# SOURCE #-} OpenSolid.UvBounds (UvBounds)
-import {-# SOURCE #-} OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 
 type role SurfaceFunction3D nominal
