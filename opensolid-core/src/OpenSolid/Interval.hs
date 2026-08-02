@@ -79,7 +79,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Show qualified as Show
 import OpenSolid.Unboxed.Math
-import OpenSolid.Units (Units, SquareMeters)
+import OpenSolid.Units (SquareMeters, Units)
 import OpenSolid.Units qualified as Units
 import Prelude qualified
 
