@@ -2,7 +2,6 @@ module OpenSolid.Curve1D
   ( Curve1D
   , Compiled
   , Zero
-  , IsZero (IsZero)
   , new
   , constant
   , zero
@@ -24,6 +23,7 @@ where
 
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D.Zero (Zero)
+import OpenSolid.Error (IsZero)
 import OpenSolid.FFI (FFI)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Nondegenerate (Nondegenerate)
@@ -36,8 +36,6 @@ type role Curve1D nominal
 
 type Curve1D :: Type -> Type
 data Curve1D units
-
-data IsZero = IsZero
 
 instance Composition (Curve1D units) (Curve1D Unitless) (Curve1D units)
 

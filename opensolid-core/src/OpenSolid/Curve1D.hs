@@ -55,6 +55,7 @@ import OpenSolid.Curve1D.Zero qualified as Zero
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
+import OpenSolid.Error (IsZero (IsZero))
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Expression (Expression)
@@ -491,8 +492,6 @@ degeneracyTolerance curve =
   Tolerance.unitless * NonEmpty.maximumOf (Quantity.abs . valueOf curve) Parameter.samples
 
 ----- ZERO FINDING -----
-
-data IsZero = IsZero deriving (Eq, Show, Err)
 
 {-| Find all points at which the given curve is zero.
 
