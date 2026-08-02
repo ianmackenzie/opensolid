@@ -15,7 +15,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [dependency-groups]
-dev = ["setuptools>=75.6.0"]
+dev = ["setuptools>=83.0.0"]
 
 [tool.ty.rules]
 blanket-ignore-comment = "error"
