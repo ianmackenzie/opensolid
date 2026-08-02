@@ -205,17 +205,7 @@ constant value =
 divergence :: SurfaceFunction3D space -> UvPoint -> Length
 divergence function uvPoint = do
   let (duValue, dvValue) = partialDerivativesAt uvPoint function
-  let duMagnitude = Vector3D.magnitude duValue
-  let dvMagnitude = Vector3D.magnitude dvValue
-  let minMagnitude = min duMagnitude dvMagnitude
-  if minMagnitude == Length.zero
-    then Length.zero
-    else do
-      let crossMagnitude = Vector3D.magnitude (duValue `cross` dvValue)
-      let duPerpendicularity = crossMagnitude / dvMagnitude
-      let dvPerpendicularity = crossMagnitude / duMagnitude
-      let minPerpendicularity = min duPerpendicularity dvPerpendicularity
-      min minMagnitude minPerpendicularity
+  Vector3D.divergence duValue dvValue
 
 {-# INLINE pointAt #-}
 pointAt :: UvPoint -> SurfaceFunction3D space -> Point3D space
