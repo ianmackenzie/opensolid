@@ -354,7 +354,7 @@ signature memberFunction = normalizeSignature $ case memberFunction of
   MemberFunctionS4 arg1 arg2 arg3 arg4 f _ -> signatureS4 arg1 arg2 arg3 arg4 f
 
 arg :: forall t -> FFI t => Name -> (Name, FFI.Type, Argument.Kind)
-arg t name = (name, FFI.typeOf t, Argument.kind t name)
+arg t name = (name, FFI.typeOf t, Argument.kind t)
 
 signature0 ::
   forall value result.

@@ -397,7 +397,7 @@ signature staticFunction = normalizeSignature $ case staticFunction of
   StaticFunction10 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 f _ -> signature10 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 f
 
 arg :: forall t -> FFI t => Name -> (Name, FFI.Type, Argument.Kind)
-arg t name = (name, FFI.typeOf t, Argument.kind t name)
+arg t name = (name, FFI.typeOf t, Argument.kind t)
 
 signature1 ::
   forall a b.
