@@ -279,7 +279,7 @@ relativeTo frame (Bounds2D x y) = do
 
 placeOn :: Plane3D space -> Bounds2D Meters -> Bounds3D space
 placeOn plane (Bounds2D x y) = do
-  let Plane3D _ (PlaneOrientation3D i j) = plane
+  let Plane3D _ (PlaneOrientation3D i j _) = plane
   let Direction3D ix iy iz = i
   let Direction3D jx jy jz = j
   let xMid = Interval.midpoint x

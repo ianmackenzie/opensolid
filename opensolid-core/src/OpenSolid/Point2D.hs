@@ -188,7 +188,7 @@ Given a 2D point defined within a plane's coordinate system,
 this returns the corresponding 3D point.
 -}
 placeOn :: Plane3D space -> Point2D Meters -> Point3D space
-placeOn (Plane3D originPoint (PlaneOrientation3D i j)) (Point2D px py) =
+placeOn (Plane3D originPoint (PlaneOrientation3D i j _)) (Point2D px py) =
   originPoint + px * i + py * j
 
 convert :: Quantity (units2 ?/? units1) -> Point2D units1 -> Point2D units2

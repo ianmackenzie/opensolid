@@ -40,7 +40,6 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Convention3D (Convention3D)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Length (Length)
-import {-# SOURCE #-} OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D (Point2D, data Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Primitives
@@ -48,8 +47,8 @@ import OpenSolid.Primitives
   , Direction3D (Direction3D)
   , Frame3D (Frame3D)
   , Orientation3D (Orientation3D)
-  , Plane3D (Plane3D)
-  , PlaneOrientation3D (PlaneOrientation3D)
+  , Plane3D (..)
+  , PlaneOrientation3D (..)
   , Point3D (Point3D, Position3D)
   , Transform3D
   , Vector3D
@@ -99,7 +98,7 @@ along (Axis3D originPoint direction) distance = do
 
 -- | Construct a point on the given plane, at the given position within the plane.
 on :: Plane3D space -> Point2D Meters -> Point3D space
-on (Plane3D originPoint (PlaneOrientation3D i j)) (Point2D pX pY) = do
+on (Plane3D originPoint (PlaneOrientation3D i j _)) (Point2D pX pY) = do
   let Point3D oR oF oU = originPoint
   let Direction3D iR iF iU = i
   let Direction3D jR jF jU = j
@@ -176,7 +175,7 @@ relativeTo (Frame3D p0 (Orientation3D i j k)) p =
 -- | Project a point onto a plane.
 projectOnto :: Plane3D space -> Point3D space -> Point3D space
 projectOnto plane point =
-  point - Vector3D.projectionIn (Plane3D.normalDirection plane) (point - Plane3D.originPoint plane)
+  point - Vector3D.projectionIn plane.orientation.normalDirection (point - plane.originPoint)
 
 {-| Project a point *into* a plane.
 
@@ -184,7 +183,7 @@ Conceptualy, this projects the point onto the plane in 3D,
 then expresses the projected point in 2D planar XY coordinates.
 -}
 projectInto :: Plane3D space -> Point3D space -> Point2D Meters
-projectInto (Plane3D p0 (PlaneOrientation3D i j)) p =
+projectInto (Plane3D p0 (PlaneOrientation3D i j _)) p =
   let d = p - p0 in Point2D (d `dot` i) (d `dot` j)
 
 transformBy :: Transform3D tag space -> Point3D space -> Point3D space

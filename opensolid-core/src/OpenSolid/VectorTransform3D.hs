@@ -46,10 +46,10 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3D (..)
-  , Direction3D (Direction3D, Unit3D)
+  , Direction3D (Direction3D)
   , Frame3D
-  , Plane3D (Plane3D)
-  , PlaneOrientation3D (PlaneOrientation3D)
+  , Plane3D (..)
+  , PlaneOrientation3D (..)
   , Vector3D (Vector3D)
   , VectorTransform3D (VectorTransform3D)
   )
@@ -146,7 +146,7 @@ mirrorIn (Direction3D dx dy dz) = do
   VectorTransform3D vx vy vz
 
 mirrorAcross :: Plane3D space -> Orthonormal space
-mirrorAcross (Plane3D _ (PlaneOrientation3D i j)) = mirrorIn (Unit3D (i `cross` j))
+mirrorAcross plane = mirrorIn plane.orientation.normalDirection
 
 placeIn :: Frame3D global local -> VectorTransform3D tag local -> VectorTransform3D tag global
 placeIn frame transform = do

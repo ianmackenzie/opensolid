@@ -37,8 +37,7 @@ import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.PlaneOrientation3D qualified as PlaneOrientation3D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Direction3D (Unit3D)
-  , Frame3D
+  ( Frame3D
   , Orientation3D (..)
   , PlaneOrientation3D (PlaneOrientation3D)
   )
@@ -82,7 +81,10 @@ and the Y direction of the plane orientation will point upward.
 -}
 frontPlaneOrientation :: Orientation3D space -> PlaneOrientation3D space
 frontPlaneOrientation orientation =
-  PlaneOrientation3D (leftwardDirection orientation) (upwardDirection orientation)
+  PlaneOrientation3D
+    (leftwardDirection orientation)
+    (upwardDirection orientation)
+    (forwardDirection orientation)
 
 {-| Construct a backward-facing plane orientation from a parent orientation.
 
@@ -93,7 +95,10 @@ and the Y direction of the plane orientation will point upward.
 -}
 backPlaneOrientation :: Orientation3D space -> PlaneOrientation3D space
 backPlaneOrientation orientation =
-  PlaneOrientation3D (rightwardDirection orientation) (upwardDirection orientation)
+  PlaneOrientation3D
+    (rightwardDirection orientation)
+    (upwardDirection orientation)
+    (backwardDirection orientation)
 
 {-| Construct a leftward-facing plane orientation from a parent orientation.
 
@@ -104,7 +109,10 @@ and the Y direction of the plane orientation will point upward.
 -}
 leftPlaneOrientation :: Orientation3D space -> PlaneOrientation3D space
 leftPlaneOrientation orientation =
-  PlaneOrientation3D (backwardDirection orientation) (upwardDirection orientation)
+  PlaneOrientation3D
+    (backwardDirection orientation)
+    (upwardDirection orientation)
+    (leftwardDirection orientation)
 
 {-| Construct a rightward-facing plane orientation from a parent orientation.
 
@@ -115,7 +123,10 @@ and the Y direction of the plane orientation will point upward.
 -}
 rightPlaneOrientation :: Orientation3D space -> PlaneOrientation3D space
 rightPlaneOrientation orientation =
-  PlaneOrientation3D (forwardDirection orientation) (upwardDirection orientation)
+  PlaneOrientation3D
+    (forwardDirection orientation)
+    (upwardDirection orientation)
+    (rightwardDirection orientation)
 
 {-| Construct a upward-facing plane orientation from a parent orientation.
 
@@ -126,7 +137,10 @@ and the Y direction of the plane orientation will point forward.
 -}
 topPlaneOrientation :: Orientation3D space -> PlaneOrientation3D space
 topPlaneOrientation orientation =
-  PlaneOrientation3D (rightwardDirection orientation) (forwardDirection orientation)
+  PlaneOrientation3D
+    (rightwardDirection orientation)
+    (forwardDirection orientation)
+    (upwardDirection orientation)
 
 {-| Construct a downward-facing plane orientation from a parent orientation.
 
@@ -137,37 +151,34 @@ and the Y direction of the plane orientation will point forward.
 -}
 bottomPlaneOrientation :: Orientation3D space -> PlaneOrientation3D space
 bottomPlaneOrientation orientation =
-  PlaneOrientation3D (leftwardDirection orientation) (forwardDirection orientation)
+  PlaneOrientation3D
+    (leftwardDirection orientation)
+    (forwardDirection orientation)
+    (downwardDirection orientation)
 
 -- | Construct an orientation from its front plane orientation.
 fromFrontPlaneOrientation :: PlaneOrientation3D space -> Orientation3D space
-fromFrontPlaneOrientation (PlaneOrientation3D l u) =
-  Orientation3D -l (Unit3D (l `cross` u)) u
+fromFrontPlaneOrientation (PlaneOrientation3D l u f) = Orientation3D -l f u
 
 -- | Construct an orientation from its back plane orientation.
 fromBackPlaneOrientation :: PlaneOrientation3D space -> Orientation3D space
-fromBackPlaneOrientation (PlaneOrientation3D r u) =
-  Orientation3D r (Unit3D (u `cross` r)) u
+fromBackPlaneOrientation (PlaneOrientation3D r u b) = Orientation3D r -b u
 
 -- | Construct an orientation from its left plane orientation.
 fromLeftPlaneOrientation :: PlaneOrientation3D space -> Orientation3D space
-fromLeftPlaneOrientation (PlaneOrientation3D b u) =
-  Orientation3D (Unit3D (u `cross` b)) -b u
+fromLeftPlaneOrientation (PlaneOrientation3D b u l) = Orientation3D -l -b u
 
 -- | Construct an orientation from its right plane orientation.
 fromRightPlaneOrientation :: PlaneOrientation3D space -> Orientation3D space
-fromRightPlaneOrientation (PlaneOrientation3D f u) =
-  Orientation3D (Unit3D (f `cross` u)) f u
+fromRightPlaneOrientation (PlaneOrientation3D f u r) = Orientation3D r f u
 
 -- | Construct an orientation from its top plane orientation.
 fromTopPlaneOrientation :: PlaneOrientation3D space -> Orientation3D space
-fromTopPlaneOrientation (PlaneOrientation3D r f) =
-  Orientation3D r f (Unit3D (r `cross` f))
+fromTopPlaneOrientation (PlaneOrientation3D r f u) = Orientation3D r f u
 
 -- | Construct an orientation from its bottom plane orientation.
 fromBottomPlaneOrientation :: PlaneOrientation3D space -> Orientation3D space
-fromBottomPlaneOrientation (PlaneOrientation3D l f) =
-  Orientation3D -l f (Unit3D (f `cross` l))
+fromBottomPlaneOrientation (PlaneOrientation3D l f d) = Orientation3D -l f -d
 
 {-| Construct a backward facing orientation relative to a parent/reference orientation.
 

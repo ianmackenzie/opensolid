@@ -183,7 +183,7 @@ on plane bounds2D = do
   let Bounds2D bX bY = bounds2D
   let rX = 0.5 * Interval.width bX
   let rY = 0.5 * Interval.width bY
-  let Plane3D _ (PlaneOrientation3D i j) = plane
+  let Plane3D _ (PlaneOrientation3D i j _) = plane
   let Direction3D iR iF iU = i
   let Direction3D jR jF jU = j
   let Point3D cR cF cU = Point3D.on plane (Bounds2D.centerPoint bounds2D)
@@ -239,7 +239,7 @@ relativeTo frame (Bounds3D pR pF pU) = do
 
 projectInto :: Plane3D space -> Bounds3D space -> Bounds2D Meters
 projectInto plane (Bounds3D pR pF pU) = do
-  let Plane3D _ (PlaneOrientation3D i j) = plane
+  let Plane3D _ (PlaneOrientation3D i j _) = plane
   let Direction3D iR iF iU = i
   let Direction3D jR jF jU = j
   let cR = Interval.midpoint pR

@@ -31,8 +31,8 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Frame2D (Frame2D, orientation, originPoint)
   , Orientation2D (Orientation2D)
-  , Plane3D (Plane3D)
-  , PlaneOrientation3D (PlaneOrientation3D)
+  , Plane3D (..)
+  , PlaneOrientation3D (..)
   )
 
 originPoint :: Frame2D units -> Point2D units
@@ -86,7 +86,10 @@ relativeTo globalFrame frame =
 placeOn :: Plane3D space -> Frame2D Meters -> Plane3D space
 placeOn plane (Frame2D p0 (Orientation2D i j)) =
   Plane3D (Point2D.placeOn plane p0) $
-    PlaneOrientation3D (Direction2D.placeOn plane i) (Direction2D.placeOn plane j)
+    PlaneOrientation3D
+      (Direction2D.placeOn plane i)
+      (Direction2D.placeOn plane j)
+      plane.orientation.normalDirection
 
 inverse :: Frame2D units -> Frame2D units
 inverse frame = relativeTo frame xy

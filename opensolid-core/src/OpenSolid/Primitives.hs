@@ -13,7 +13,7 @@ module OpenSolid.Primitives
   , Transform2D (Transform2D)
   , Vector3D (Vector3D, V3D#)
   , Direction3D (Unit3D, Direction3D)
-  , PlaneOrientation3D (PlaneOrientation3D)
+  , PlaneOrientation3D (..)
   , Orientation3D (..)
   , Point3D (Point3D, Position3D)
   , VectorBounds3D (VectorBounds3D, VB3D#)
@@ -1239,7 +1239,11 @@ instance
 type role PlaneOrientation3D phantom
 
 -- | A pair of perpendicular X and Y directions defining the orientation of a plane in 3D.
-data PlaneOrientation3D space = PlaneOrientation3D (Direction3D space) (Direction3D space)
+data PlaneOrientation3D space = PlaneOrientation3D
+  { xDirection :: Direction3D space
+  , yDirection :: Direction3D space
+  , normalDirection :: Direction3D space
+  }
 
 deriving instance Eq (PlaneOrientation3D space)
 

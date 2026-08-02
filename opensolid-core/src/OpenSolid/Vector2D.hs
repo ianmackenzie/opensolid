@@ -281,7 +281,7 @@ placeOn :: Plane3D space -> Vector2D units -> Vector3D units space
 placeOn plane = placeOnOrientation plane.orientation
 
 placeOnOrientation :: PlaneOrientation3D space -> Vector2D units -> Vector3D units space
-placeOnOrientation (PlaneOrientation3D i j) (Vector2D vx vy) = vx * i + vy * j
+placeOnOrientation (PlaneOrientation3D i j _) (Vector2D vx vy) = vx * i + vy * j
 
 convert :: Quantity (units2 ?/? units1) -> Vector2D units1 -> Vector2D units2
 convert factor vector = Units.simplify (vector ?*? factor)

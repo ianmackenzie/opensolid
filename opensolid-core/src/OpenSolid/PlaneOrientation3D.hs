@@ -40,7 +40,7 @@ coerce :: PlaneOrientation3D space1 -> PlaneOrientation3D space2
 coerce = Data.Coerce.coerce
 
 unsafe :: Direction3D space -> Direction3D space -> PlaneOrientation3D space
-unsafe = PlaneOrientation3D
+unsafe dx dy = PlaneOrientation3D dx dy (Unit3D (dx `cross` dy))
 
 {-| Construct a plane orientation normal to the given direction.
 
@@ -52,7 +52,7 @@ fromNormalDirection :: Direction3D space -> PlaneOrientation3D space
 fromNormalDirection n = do
   let x = Direction3D.perpendicularDirection n
   let y = Unit3D (n `cross` x)
-  PlaneOrientation3D x y
+  PlaneOrientation3D x y n
 
 {-| Construct a plane orientation from its X direction.
 
@@ -60,7 +60,7 @@ The Y direction of the returned basis will be perpendicular to the given X direc
 but otherwise will be chosen arbitrarily.
 -}
 fromXDirection :: Direction3D space -> PlaneOrientation3D space
-fromXDirection dx = PlaneOrientation3D dx (Direction3D.perpendicularDirection dx)
+fromXDirection dx = unsafe dx (Direction3D.perpendicularDirection dx)
 
 {-| Construct a plane orientation from its Y direction.
 
@@ -68,7 +68,7 @@ The X direction of the returned basis will be perpendicular to the given Y direc
 but otherwise will be chosen arbitrarily.
 -}
 fromYDirection :: Direction3D space -> PlaneOrientation3D space
-fromYDirection dy = PlaneOrientation3D (Direction3D.perpendicularDirection dy) dy
+fromYDirection dy = unsafe (Direction3D.perpendicularDirection dy) dy
 
 fromDirections :: Direction3D space -> Direction3D space -> Maybe (PlaneOrientation3D space)
 fromDirections dx dxy = Tolerance.using Tolerance.unitless do
@@ -93,46 +93,46 @@ gramSchmidt dx vxy = do
   let vy = vxy - Vector3D.projectionIn dx vxy
   case Vector3D.direction vy of
     Err IsZero -> Nothing
-    Ok dy -> Just (PlaneOrientation3D dx dy)
+    Ok dy -> Just (unsafe dx dy)
 
 flip :: PlaneOrientation3D space -> PlaneOrientation3D space
-flip (PlaneOrientation3D i j) = PlaneOrientation3D -i j
+flip (PlaneOrientation3D i j k) = PlaneOrientation3D -i j -k
 
 -- | Get the X direction of a plane orientation.
 xDirection :: PlaneOrientation3D space -> Direction3D space
-xDirection (PlaneOrientation3D i _) = i
+xDirection (PlaneOrientation3D i _ _) = i
 
 -- | Get the Y direction of a plane orientation.
 yDirection :: PlaneOrientation3D space -> Direction3D space
-yDirection (PlaneOrientation3D _ j) = j
+yDirection (PlaneOrientation3D _ j _) = j
 
 -- | Get the normal (outward) direction of a plane orientation.
 normalDirection :: PlaneOrientation3D space -> Direction3D space
-normalDirection (PlaneOrientation3D i j) = Unit3D (i `cross` j)
+normalDirection (PlaneOrientation3D _ _ k) = k
 
 transformBy ::
   Transform.Tag.IsOrthonormal tag =>
   VectorTransform3D tag space ->
   PlaneOrientation3D space ->
   PlaneOrientation3D space
-transformBy transform (PlaneOrientation3D i j) =
-  PlaneOrientation3D
-    (Direction3D.transformBy transform i)
-    (Direction3D.transformBy transform j)
+transformBy transform (PlaneOrientation3D i j _) =
+  unsafe (Direction3D.transformBy transform i) (Direction3D.transformBy transform j)
 
 -- | Convert a orientation defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3D global local -> PlaneOrientation3D local -> PlaneOrientation3D global
-placeIn globalOrientation (PlaneOrientation3D i j) =
+placeIn globalOrientation (PlaneOrientation3D i j k) =
   PlaneOrientation3D
     (Direction3D.placeIn globalOrientation i)
     (Direction3D.placeIn globalOrientation j)
+    (Direction3D.placeIn globalOrientation k)
 
 -- | Convert a orientation defined in global coordinates to one defined in local coordinates.
 relativeTo :: Frame3D global local -> PlaneOrientation3D global -> PlaneOrientation3D local
-relativeTo globalOrientation (PlaneOrientation3D i j) =
+relativeTo globalOrientation (PlaneOrientation3D i j k) =
   PlaneOrientation3D
     (Direction3D.relativeTo globalOrientation i)
     (Direction3D.relativeTo globalOrientation j)
+    (Direction3D.relativeTo globalOrientation k)
 
 -- | Generate a random plane orientation.
 random :: Random.Generator (PlaneOrientation3D global)

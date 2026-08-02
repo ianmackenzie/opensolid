@@ -161,7 +161,7 @@ The X direction of the orientation will be the global leftward direction,
 and the Y direction of the orientation will be the global upward direction.
 -}
 forwardPlaneOrientation :: PlaneOrientation3D space
-forwardPlaneOrientation = PlaneOrientation3D leftwardDirection upwardDirection
+forwardPlaneOrientation = PlaneOrientation3D leftwardDirection upwardDirection forwardDirection
 
 {-| A backward-facing plane through the global origin point.
 
@@ -185,7 +185,7 @@ The X direction of the orientation will be the global rightward direction,
 and the Y direction of the orientation will be the global upward direction.
 -}
 backwardPlaneOrientation :: PlaneOrientation3D space
-backwardPlaneOrientation = PlaneOrientation3D rightwardDirection upwardDirection
+backwardPlaneOrientation = PlaneOrientation3D rightwardDirection upwardDirection backwardDirection
 
 {-| An upward-facing plane through the global origin point.
 
@@ -209,7 +209,7 @@ The X direction of the orientation will be the global rightward direction,
 and the Y direction of the orientation will be the global forward direction.
 -}
 upwardPlaneOrientation :: PlaneOrientation3D space
-upwardPlaneOrientation = PlaneOrientation3D rightwardDirection forwardDirection
+upwardPlaneOrientation = PlaneOrientation3D rightwardDirection forwardDirection upwardDirection
 
 {-| A downward-facing plane through the global origin point.
 
@@ -233,7 +233,7 @@ The X direction of the orientation will be the global leftward direction,
 and the Y direction of the orientation will be the global forward direction.
 -}
 downwardPlaneOrientation :: PlaneOrientation3D space
-downwardPlaneOrientation = PlaneOrientation3D leftwardDirection forwardDirection
+downwardPlaneOrientation = PlaneOrientation3D leftwardDirection forwardDirection downwardDirection
 
 {-| A rightward-facing plane through the global origin point.
 
@@ -257,7 +257,7 @@ The X direction of the orientation will be the global forward direction,
 and the Y direction of the orientation will be the global upward direction.
 -}
 rightwardPlaneOrientation :: PlaneOrientation3D space
-rightwardPlaneOrientation = PlaneOrientation3D forwardDirection upwardDirection
+rightwardPlaneOrientation = PlaneOrientation3D forwardDirection upwardDirection rightwardDirection
 
 {-| A leftward-facing plane through the global origin point.
 
@@ -281,7 +281,7 @@ The X direction of the orientation will be the global backward direction,
 and the Y direction of the orientation will be the global upward direction.
 -}
 leftwardPlaneOrientation :: PlaneOrientation3D space
-leftwardPlaneOrientation = PlaneOrientation3D backwardDirection upwardDirection
+leftwardPlaneOrientation = PlaneOrientation3D backwardDirection upwardDirection leftwardDirection
 
 -- | A forward-facing axis through the global origin point.
 forwardAxis :: Axis3D space
