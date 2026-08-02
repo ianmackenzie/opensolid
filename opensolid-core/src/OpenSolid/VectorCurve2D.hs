@@ -10,11 +10,12 @@ module OpenSolid.VectorCurve2D
   , nondegenerate
   , startValue
   , endValue
-  , value
+  , valueAt
+  , valueOf
   , range
-  , derivativeValue
+  , derivativeAt
   , derivativeRange
-  , secondDerivativeValue
+  , secondDerivativeAt
   , secondDerivativeRange
   , xComponent
   , yComponent
@@ -157,29 +158,29 @@ endValue = VectorCurve.endValue
 
 The parameter value should be between 0 and 1.
 -}
-value :: VectorCurve2D units -> Number -> Vector2D units
-value = VectorCurve.value
+valueAt :: Number -> VectorCurve2D units -> Vector2D units
+valueAt = VectorCurve.valueAt
 
-range :: VectorCurve2D units -> Interval Unitless -> VectorBounds2D units
+valueOf :: VectorCurve2D units -> Number -> Vector2D units
+valueOf = VectorCurve.valueOf
+
+range :: Interval Unitless -> VectorCurve2D units -> VectorBounds2D units
 range = VectorCurve.range
 
-{-# INLINE derivativeValue #-}
-derivativeValue :: VectorCurve2D units -> Number -> Vector2D units
-derivativeValue = VectorCurve.derivativeValue
+{-# INLINE derivativeAt #-}
+derivativeAt :: Number -> VectorCurve2D units -> Vector2D units
+derivativeAt = VectorCurve.derivativeAt
 
 {-# INLINE derivativeRange #-}
-derivativeRange :: VectorCurve2D units -> Interval Unitless -> VectorBounds2D units
+derivativeRange :: Interval Unitless -> VectorCurve2D units -> VectorBounds2D units
 derivativeRange = VectorCurve.derivativeRange
 
-{-# INLINE secondDerivativeValue #-}
-secondDerivativeValue :: VectorCurve2D units -> Number -> Vector2D units
-secondDerivativeValue = VectorCurve.secondDerivativeValue
+{-# INLINE secondDerivativeAt #-}
+secondDerivativeAt :: Number -> VectorCurve2D units -> Vector2D units
+secondDerivativeAt = VectorCurve.secondDerivativeAt
 
 {-# INLINE secondDerivativeRange #-}
-secondDerivativeRange ::
-  VectorCurve2D units ->
-  Interval Unitless ->
-  VectorBounds2D units
+secondDerivativeRange :: Interval Unitless -> VectorCurve2D units -> VectorBounds2D units
 secondDerivativeRange = VectorCurve.secondDerivativeRange
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
@@ -252,5 +253,5 @@ unconvert factor curve = Units.simplify (curve ?/? factor)
 
 newtonRaphson :: VectorCurve2D units -> Number -> Fuzzy Number
 newtonRaphson curve t1 = do
-  let evaluate tValue = (# value curve tValue, derivativeValue curve tValue #)
+  let evaluate tValue = (# valueAt tValue curve, derivativeAt tValue curve #)
   NewtonRaphson.Curve.solveFrom t1 evaluate

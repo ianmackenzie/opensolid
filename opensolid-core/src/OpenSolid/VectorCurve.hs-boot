@@ -7,10 +7,11 @@ module OpenSolid.VectorCurve
   , constant
   , hasDegenerateStart
   , hasDegenerateEnd
-  , value
+  , valueAt
+  , valueOf
   , range
   , derivative
-  , derivativeValue
+  , derivativeAt
   , squaredMagnitude_
   )
 where
@@ -205,24 +206,29 @@ constant ::
   VectorCurve dimension units space
 hasDegenerateStart :: Exists dimension units space => VectorCurve dimension units space -> Bool
 hasDegenerateEnd :: Exists dimension units space => VectorCurve dimension units space -> Bool
-value ::
+valueAt ::
+  Exists dimension units space =>
+  Number ->
+  VectorCurve dimension units space ->
+  Vector dimension units space
+valueOf ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   Number ->
   Vector dimension units space
 range ::
   Exists dimension units space =>
-  VectorCurve dimension units space ->
   Interval Unitless ->
+  VectorCurve dimension units space ->
   VectorBounds dimension units space
 derivative ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension units space
-derivativeValue ::
+derivativeAt ::
   Exists dimension units space =>
-  VectorCurve dimension units space ->
   Number ->
+  VectorCurve dimension units space ->
   Vector dimension units space
 squaredMagnitude_ ::
   Exists dimension units space =>

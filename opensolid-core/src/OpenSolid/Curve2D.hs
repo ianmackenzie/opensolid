@@ -751,7 +751,7 @@ piecewiseDerivativeValue tree s = case tree of
     | s < leftLength -> piecewiseDerivativeValue leftTree s
     | otherwise -> piecewiseDerivativeValue rightTree (s - leftLength)
   PiecewiseDerivativeLeaf segmentLength curve ->
-    VectorCurve2D.value curve (s / segmentLength)
+    VectorCurve2D.valueAt (s / segmentLength) curve
 
 piecewiseDerivativeRange ::
   PiecewiseDerivativeTree units space ->
@@ -768,4 +768,4 @@ piecewiseDerivativeRange tree s1 s2 = case tree of
           (piecewiseDerivativeRange rightTree Quantity.zero (s2 - leftLength))
   PiecewiseDerivativeLeaf segmentLength curve -> do
     let rRange = Interval (s1 / segmentLength) (s2 / segmentLength)
-    VectorCurve2D.range curve rRange
+    VectorCurve2D.range rRange curve

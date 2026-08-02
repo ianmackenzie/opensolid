@@ -34,10 +34,10 @@ direction (Nondegenerate curve) tValue =
       Vector.normalize $
         if
           | tValue == 0.0 && VectorCurve.hasDegenerateStart curve ->
-              VectorCurve.derivativeValue curve 0.0
+              VectorCurve.derivativeAt 0.0 curve
           | tValue == 1.0 && VectorCurve.hasDegenerateEnd curve ->
-              negate (VectorCurve.derivativeValue curve 1.0)
-          | otherwise -> VectorCurve.value curve tValue
+              negate (VectorCurve.derivativeAt 1.0 curve)
+          | otherwise -> VectorCurve.valueAt tValue curve
 
 squaredMagnitude ::
   ( VectorCurve.Exists dimension units1 space

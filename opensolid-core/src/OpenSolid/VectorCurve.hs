@@ -18,14 +18,15 @@ module OpenSolid.VectorCurve
   , arc
   , startValue
   , endValue
-  , value
+  , valueAt
+  , valueOf
   , range
   , compiled
   , derivative
   , secondDerivative
-  , derivativeValue
+  , derivativeAt
   , derivativeRange
-  , secondDerivativeValue
+  , secondDerivativeAt
   , secondDerivativeRange
   , squaredMagnitude_
   , squaredMagnitude
@@ -284,7 +285,7 @@ instance
   ApproximateEquality (VectorCurve dimension units space) (Tolerance units)
   where
   curve1 ~= curve2 = do
-    let equalValuesAt t = value curve1 t ~= value curve2 t
+    let equalValuesAt t = valueAt t curve1 ~= valueAt t curve2
     NonEmpty.all equalValuesAt Parameter.samples
 
 instance
@@ -1076,49 +1077,56 @@ startValue = (.startValue)
 endValue :: VectorCurve dimension units space -> Vector dimension units space
 endValue = (.endValue)
 
-value ::
+valueAt ::
+  Exists dimension units space =>
+  Number ->
+  VectorCurve dimension units space ->
+  Vector dimension units space
+valueAt 0.0 curve = startValue curve
+valueAt 1.0 curve = endValue curve
+valueAt tValue curve = CompiledFunction.value (compiled curve) tValue
+
+valueOf ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
   Number ->
   Vector dimension units space
-value curve 0.0 = startValue curve
-value curve 1.0 = endValue curve
-value curve tValue = CompiledFunction.value (compiled curve) tValue
+valueOf curve tValue = valueAt tValue curve
 
 range ::
   Exists dimension units space =>
-  VectorCurve dimension units space ->
   Interval Unitless ->
-  VectorBounds dimension units space
-range curve tRange = CompiledFunction.range (compiled curve) tRange
-
-derivativeValue ::
-  Exists dimension units space =>
   VectorCurve dimension units space ->
+  VectorBounds dimension units space
+range tRange curve = CompiledFunction.range (compiled curve) tRange
+
+derivativeAt ::
+  Exists dimension units space =>
   Number ->
+  VectorCurve dimension units space ->
   Vector dimension units space
-derivativeValue curve tValue = value (derivative curve) tValue
+derivativeAt tValue curve = valueAt tValue (derivative curve)
 
 derivativeRange ::
   Exists dimension units space =>
-  VectorCurve dimension units space ->
   Interval Unitless ->
-  VectorBounds dimension units space
-derivativeRange curve tRange = range (derivative curve) tRange
-
-secondDerivativeValue ::
-  Exists dimension units space =>
   VectorCurve dimension units space ->
+  VectorBounds dimension units space
+derivativeRange tRange curve = range tRange (derivative curve)
+
+secondDerivativeAt ::
+  Exists dimension units space =>
   Number ->
+  VectorCurve dimension units space ->
   Vector dimension units space
-secondDerivativeValue curve tValue = value (secondDerivative curve) tValue
+secondDerivativeAt tValue curve = valueAt tValue (secondDerivative curve)
 
 secondDerivativeRange ::
   Exists dimension units space =>
-  VectorCurve dimension units space ->
   Interval Unitless ->
+  VectorCurve dimension units space ->
   VectorBounds dimension units space
-secondDerivativeRange curve tRange = range (secondDerivative curve) tRange
+secondDerivativeRange tRange curve = range tRange (secondDerivative curve)
 
 directionRange ::
   Exists dimension units space =>
@@ -1126,7 +1134,7 @@ directionRange ::
   Interval Unitless ->
   DirectionBounds dimension space
 directionRange curve tRange =
-  VectorCurve.Direction.range curve tRange (range curve tRange) (derivativeRange curve tRange)
+  VectorCurve.Direction.range curve tRange (range tRange curve) (derivativeRange tRange curve)
 
 {-# INLINE isZero #-}
 isZero :: Tolerance units => VectorCurve dimension units space -> Bool
@@ -1141,7 +1149,7 @@ hasDegenerateEnd = isDegenerateAt 1.0
 isDegenerateAt :: Exists dimension units space => Number -> VectorCurve dimension units space -> Bool
 isDegenerateAt tValue curve = do
   let degeneracyTolerance = Tolerance.unitless * curve.maxSampledMagnitude
-  Tolerance.using degeneracyTolerance (value curve tValue ~= Vector.zero)
+  Tolerance.using degeneracyTolerance (valueAt tValue curve ~= Vector.zero)
 
 quotient_ ::
   ( Exists dimension units1 space

@@ -12,11 +12,12 @@ module OpenSolid.VectorCurve3D
   , nondegenerate
   , startValue
   , endValue
-  , value
+  , valueAt
+  , valueOf
   , range
-  , derivativeValue
+  , derivativeAt
   , derivativeRange
-  , secondDerivativeValue
+  , secondDerivativeAt
   , secondDerivativeRange
   , zero
   , constant
@@ -149,28 +150,31 @@ startValue = VectorCurve.startValue
 endValue :: VectorCurve3D units space -> Vector3D units space
 endValue = VectorCurve.endValue
 
-value :: VectorCurve3D units space -> Number -> Vector3D units space
-value = VectorCurve.value
+valueAt :: Number -> VectorCurve3D units space -> Vector3D units space
+valueAt = VectorCurve.valueAt
 
-range :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
+valueOf :: VectorCurve3D units space -> Number -> Vector3D units space
+valueOf = VectorCurve.valueOf
+
+range :: Interval Unitless -> VectorCurve3D units space -> VectorBounds3D units space
 range = VectorCurve.range
 
-{-# INLINE derivativeValue #-}
-derivativeValue :: VectorCurve3D units space -> Number -> Vector3D units space
-derivativeValue = VectorCurve.derivativeValue
+{-# INLINE derivativeAt #-}
+derivativeAt :: Number -> VectorCurve3D units space -> Vector3D units space
+derivativeAt = VectorCurve.derivativeAt
 
 {-# INLINE derivativeRange #-}
-derivativeRange :: VectorCurve3D units space -> Interval Unitless -> VectorBounds3D units space
+derivativeRange :: Interval Unitless -> VectorCurve3D units space -> VectorBounds3D units space
 derivativeRange = VectorCurve.derivativeRange
 
-{-# INLINE secondDerivativeValue #-}
-secondDerivativeValue :: VectorCurve3D units space -> Number -> Vector3D units space
-secondDerivativeValue = VectorCurve.secondDerivativeValue
+{-# INLINE secondDerivativeAt #-}
+secondDerivativeAt :: Number -> VectorCurve3D units space -> Vector3D units space
+secondDerivativeAt = VectorCurve.secondDerivativeAt
 
 {-# INLINE secondDerivativeRange #-}
 secondDerivativeRange ::
-  VectorCurve3D units space ->
   Interval Unitless ->
+  VectorCurve3D units space ->
   VectorBounds3D units space
 secondDerivativeRange = VectorCurve.secondDerivativeRange
 

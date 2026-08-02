@@ -1396,7 +1396,7 @@ unitlessVectorCurve2D =
     [ Class.constant "Zero" (VectorCurve2D.zero @Unitless) $(docs 'VectorCurve2D.zero)
     , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
     , Class.factory2 "XY" "X Component" "Y Component" VectorCurve2D.xy $(docs 'VectorCurve2D.xy)
-    , Class.member1 "Value" "Parameter Value" (flip VectorCurve2D.value) $(docs 'VectorCurve2D.value)
+    , Class.member1 "Value" "Parameter Value" VectorCurve2D.valueAt $(docs 'VectorCurve2D.valueAt)
     ]
 
 type VectorCurve2D = VectorCurve2D.VectorCurve2D Meters
@@ -1407,7 +1407,7 @@ vectorCurve2D =
     [ Class.constant "Zero" (VectorCurve2D.zero @Meters) $(docs 'VectorCurve2D.zero)
     , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
     , Class.factory2 "XY" "X Component" "Y Component" VectorCurve2D.xy $(docs 'VectorCurve2D.xy)
-    , Class.member1 "Value" "Parameter Value" (flip VectorCurve2D.value) $(docs 'VectorCurve2D.value)
+    , Class.member1 "Value" "Parameter Value" VectorCurve2D.valueAt $(docs 'VectorCurve2D.valueAt)
     ]
 
 rigidTransformations2D ::

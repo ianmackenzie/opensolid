@@ -48,5 +48,5 @@ direction ::
   Number ->
   Direction dimension space
 direction (Nonzero curve) tValue = do
-  let vector = VectorCurve.value curve tValue
+  let vector = VectorCurve.valueAt tValue curve
   Direction.unsafe (vector / Vector.magnitude vector)

@@ -619,28 +619,28 @@ derivativeValue ::
   Curve dimension units space ->
   Number ->
   Vector dimension units space
-derivativeValue curve tValue = VectorCurve.value (derivative curve) tValue
+derivativeValue curve tValue = VectorCurve.valueAt tValue (derivative curve)
 
 derivativeRange ::
   Exists dimension units space =>
   Curve dimension units space ->
   Interval Unitless ->
   VectorBounds dimension units space
-derivativeRange curve tRange = VectorCurve.range (derivative curve) tRange
+derivativeRange curve tRange = VectorCurve.range tRange (derivative curve)
 
 secondDerivativeValue ::
   Exists dimension units space =>
   Curve dimension units space ->
   Number ->
   Vector dimension units space
-secondDerivativeValue curve tValue = VectorCurve.value (secondDerivative curve) tValue
+secondDerivativeValue curve tValue = VectorCurve.valueAt tValue (secondDerivative curve)
 
 secondDerivativeRange ::
   Exists dimension units space =>
   Curve dimension units space ->
   Interval Unitless ->
   VectorBounds dimension units space
-secondDerivativeRange curve tRange = VectorCurve.range (secondDerivative curve) tRange
+secondDerivativeRange curve tRange = VectorCurve.range tRange (secondDerivative curve)
 
 tangentDirectionRange ::
   Exists dimension units space =>
