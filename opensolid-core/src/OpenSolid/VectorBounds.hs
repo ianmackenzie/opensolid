@@ -171,6 +171,7 @@ erase = coerce
 
 {-# INLINE unerase #-}
 unerase ::
+  forall units space dimension.
   Exists dimension units space =>
   VectorBounds dimension Unitless space ->
   VectorBounds dimension units space

@@ -180,6 +180,7 @@ erase = coerce
 
 {-# INLINE unerase #-}
 unerase ::
+  forall units space dimension.
   Exists dimension units space =>
   Vector dimension Unitless space ->
   Vector dimension units space

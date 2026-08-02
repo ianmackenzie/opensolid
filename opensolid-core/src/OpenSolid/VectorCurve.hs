@@ -1223,6 +1223,7 @@ erase ::
 erase = Units.erase
 
 unerase ::
+  forall units space dimension.
   Exists dimension units space =>
   VectorCurve dimension Unitless space ->
   VectorCurve dimension units space
