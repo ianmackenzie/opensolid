@@ -691,9 +691,10 @@ uvPoint =
     , Class.property "V Coordinate" Point2D.yCoordinate $(docs 'Point2D.yCoordinate)
     , Class.member1 "Distance To" "Other" Point2D.distanceFrom $(docs 'Point2D.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point2D.midpoint $(docs 'Point2D.midpoint)
-    , Class.minus @UvPoint Class.fallbackMemberMinus
     , Class.plus @Vector2D Class.noFallback
     , Class.minus @Vector2D Class.noFallback
+    , Class.minus @UvPoint Class.fallbackMemberMinus
+    , Class.minus @UvCurve Class.noFallback
     ] -- TODO add affine transformations
 
 type Bounds2D = Bounds2D.Bounds2D Meters
