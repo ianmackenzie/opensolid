@@ -141,65 +141,83 @@ instance FFI (Interval SquareMeters) where
 instance HasUnits (Interval units) units
 
 instance Units.Coercion (Interval units1) (Interval units2) where
+  {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
 
 instance units1 ~ units2 => Intersects (Quantity units1) (Interval units2) (Tolerance units1) where
+  {-# INLINE intersects #-}
   value `intersects` interval = exclusion value interval <= ?tolerance
 
 instance units1 ~ units2 => Intersects (Interval units1) (Quantity units2) (Tolerance units1) where
+  {-# INLINE intersects #-}
   interval `intersects` value = value `intersects` interval
 
 instance units1 ~ units2 => Intersects (Interval units1) (Interval units2) (Tolerance units1) where
+  {-# INLINE intersects #-}
   first `intersects` second = separation first second <= ?tolerance
 
 instance Negation (Interval units) where
+  {-# INLINE negate #-}
   negate (I# low# high#) = I# (negate# high#) (negate# low#)
 
 instance Multiplication Sign (Interval units) (Interval units) where
+  {-# INLINE (*) #-}
   Positive * interval = interval
   Negative * interval = -interval
 
 instance Multiplication (Interval units) Sign (Interval units) where
+  {-# INLINE (*) #-}
   interval * Positive = interval
   interval * Negative = -interval
 
 instance units1 ~ units2 => Addition (Interval units1) (Interval units2) (Interval units1) where
+  {-# INLINE (+) #-}
   I# low1# high1# + I# low2# high2# = I# (low1# +# low2#) (high1# +# high2#)
 
 instance units1 ~ units2 => Addition (Interval units1) (Quantity units2) (Interval units1) where
+  {-# INLINE (+) #-}
   I# low# high# + Q# value# = I# (low# +# value#) (high# +# value#)
 
 instance units1 ~ units2 => Addition (Quantity units1) (Interval units2) (Interval units1) where
+  {-# INLINE (+) #-}
   Q# value# + I# low# high# = I# (value# +# low#) (value# +# high#)
 
 instance units1 ~ units2 => Subtraction (Interval units1) (Interval units2) (Interval units1) where
+  {-# INLINE (-) #-}
   I# low1# high1# - I# low2# high2# = I# (low1# -# high2#) (high1# -# low2#)
 
 instance units1 ~ units2 => Subtraction (Interval units1) (Quantity units2) (Interval units1) where
+  {-# INLINE (-) #-}
   I# low# high# - Q# value# = I# (low# -# value#) (high# -# value#)
 
 instance units1 ~ units2 => Subtraction (Quantity units1) (Interval units2) (Interval units1) where
+  {-# INLINE (-) #-}
   Q# value# - I# low# high# = I# (value# -# high#) (value# -# low#)
 
 instance Multiplication_ (Quantity units1) (Interval units2) (Interval (units1 ?*? units2)) where
+  {-# INLINE (?*?) #-}
   Q# value# ?*? I# low# high# = I# (value# *# low#) (value# *# high#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Interval units2) (Interval units3)
   where
+  {-# INLINE (*) #-}
   Q# value# * I# low# high# = I# (value# *# low#) (value# *# high#)
 
 instance Multiplication_ (Interval units1) (Quantity units2) (Interval (units1 ?*? units2)) where
+  {-# INLINE (?*?) #-}
   I# low# high# ?*? Q# value# = I# (low# *# value#) (high# *# value#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Interval units1) (Quantity units2) (Interval units3)
   where
+  {-# INLINE (*) #-}
   I# low# high# * Q# value# = I# (low# *# value#) (high# *# value#)
 
 instance Multiplication_ (Interval units1) (Interval units2) (Interval (units1 ?*? units2)) where
+  {-# INLINE (?*?) #-}
   I# low1# high1# ?*? I# low2# high2# = do
     let !(# low#, high# #) = intervalTimesInterval# low1# high1# low2# high2#
     Ordered# low# high#
@@ -208,38 +226,46 @@ instance
   Units.Product units1 units2 units3 =>
   Multiplication (Interval units1) (Interval units2) (Interval units3)
   where
+  {-# INLINE (*) #-}
   I# low1# high1# * I# low2# high2# = do
     let !(# low#, high# #) = intervalTimesInterval# low1# high1# low2# high2#
     Ordered# low# high#
 
 instance DotMultiplication_ (Quantity units1) (Interval units2) (Interval (units1 ?*? units2)) where
+  {-# INLINE dot_ #-}
   dot_ = (?*?)
 
 instance
   Units.Product units1 units2 units3 =>
   DotMultiplication (Quantity units1) (Interval units2) (Interval units3)
   where
+  {-# INLINE dot #-}
   dot = (*)
 
 instance DotMultiplication_ (Interval units1) (Quantity units2) (Interval (units1 ?*? units2)) where
+  {-# INLINE dot_ #-}
   dot_ = (?*?)
 
 instance
   Units.Product units1 units2 units3 =>
   DotMultiplication (Interval units1) (Quantity units2) (Interval units3)
   where
+  {-# INLINE dot #-}
   dot = (*)
 
 instance DotMultiplication_ (Interval units1) (Interval units2) (Interval (units1 ?*? units2)) where
+  {-# INLINE dot_ #-}
   dot_ = (?*?)
 
 instance
   Units.Product units1 units2 units3 =>
   DotMultiplication (Interval units1) (Interval units2) (Interval units3)
   where
+  {-# INLINE dot #-}
   dot = (*)
 
 instance Division_ (Quantity units1) (Interval units2) (Interval (units1 ?/? units2)) where
+  {-# INLINE (?/?) #-}
   Q# n# ?/? I# dl# dh# = do
     let !(# low#, high# #) = doubleOverInterval# n# dl# dh#
     Ordered# low# high#
@@ -248,11 +274,13 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Quantity units1) (Interval units2) (Interval units3)
   where
+  {-# INLINE (/) #-}
   Q# n# / I# dl# dh# = do
     let !(# low#, high# #) = doubleOverInterval# n# dl# dh#
     Ordered# low# high#
 
 instance Division_ (Interval units1) (Quantity units2) (Interval (units1 ?/? units2)) where
+  {-# INLINE (?/?) #-}
   I# nl# nh# ?/? Q# d# = do
     let !(# low#, high# #) = intervalOverDouble# nl# nh# d#
     Ordered# low# high#
@@ -261,11 +289,13 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Interval units1) (Quantity units2) (Interval units3)
   where
+  {-# INLINE (/) #-}
   I# nl# nh# / Q# d# = do
     let !(# low#, high# #) = intervalOverDouble# nl# nh# d#
     Ordered# low# high#
 
 instance Division_ (Interval units1) (Interval units2) (Interval (units1 ?/? units2)) where
+  {-# INLINE (?/?) #-}
   I# nl# nh# ?/? I# dl# dh# = do
     let !(# low#, high# #) = intervalOverInterval# nl# nh# dl# dh#
     Ordered# low# high#
@@ -274,6 +304,7 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Interval units1) (Interval units2) (Interval units3)
   where
+  {-# INLINE (/) #-}
   I# nl# nh# / I# dl# dh# = do
     let !(# low#, high# #) = intervalOverInterval# nl# nh# dl# dh#
     Ordered# low# high#
