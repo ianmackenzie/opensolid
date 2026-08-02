@@ -148,9 +148,11 @@ cubicBezier = VectorCurve.cubicBezier
 bezier :: NonEmpty (Vector2D units) -> VectorCurve2D units
 bezier = VectorCurve.bezier
 
+{-# INLINE startValue #-}
 startValue :: VectorCurve2D units -> Vector2D units
 startValue = VectorCurve.startValue
 
+{-# INLINE endValue #-}
 endValue :: VectorCurve2D units -> Vector2D units
 endValue = VectorCurve.endValue
 
@@ -158,12 +160,15 @@ endValue = VectorCurve.endValue
 
 The parameter value should be between 0 and 1.
 -}
+{-# INLINE valueAt #-}
 valueAt :: Number -> VectorCurve2D units -> Vector2D units
 valueAt = VectorCurve.valueAt
 
+{-# INLINE valueOf #-}
 valueOf :: VectorCurve2D units -> Number -> Vector2D units
 valueOf = VectorCurve.valueOf
 
+{-# INLINE range #-}
 range :: Interval Unitless -> VectorCurve2D units -> VectorBounds2D units
 range = VectorCurve.range
 

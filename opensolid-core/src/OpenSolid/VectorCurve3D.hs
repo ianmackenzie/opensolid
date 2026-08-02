@@ -144,18 +144,23 @@ cubicBezier = VectorCurve.cubicBezier
 bezier :: NonEmpty (Vector3D units space) -> VectorCurve3D units space
 bezier = VectorCurve.bezier
 
+{-# INLINE startValue #-}
 startValue :: VectorCurve3D units space -> Vector3D units space
 startValue = VectorCurve.startValue
 
+{-# INLINE endValue #-}
 endValue :: VectorCurve3D units space -> Vector3D units space
 endValue = VectorCurve.endValue
 
+{-# INLINE valueAt #-}
 valueAt :: Number -> VectorCurve3D units space -> Vector3D units space
 valueAt = VectorCurve.valueAt
 
+{-# INLINE valueOf #-}
 valueOf :: VectorCurve3D units space -> Number -> Vector3D units space
 valueOf = VectorCurve.valueOf
 
+{-# INLINE range #-}
 range :: Interval Unitless -> VectorCurve3D units space -> VectorBounds3D units space
 range = VectorCurve.range
 

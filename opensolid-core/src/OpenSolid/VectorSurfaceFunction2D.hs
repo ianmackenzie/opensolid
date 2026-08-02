@@ -478,12 +478,15 @@ transformBy transform function = do
   let transformedPartialDerivatives = Pair.map (transformBy transform) (partialDerivatives function)
   new compiledTransformed transformedPartialDerivatives
 
+{-# INLINE valueAt #-}
 valueAt :: UvPoint -> VectorSurfaceFunction2D units -> Vector2D units
 valueAt uvPoint function = CompiledFunction.value function.compiled uvPoint
 
+{-# INLINE valueOf #-}
 valueOf :: VectorSurfaceFunction2D units -> UvPoint -> Vector2D units
 valueOf function uvPoint = valueAt uvPoint function
 
+{-# INLINE range #-}
 range :: VectorSurfaceFunction2D units -> UvBounds -> VectorBounds2D units
 range function uvRange = CompiledFunction.range function.compiled uvRange
 

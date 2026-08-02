@@ -201,12 +201,15 @@ nondegeneracy function uvPoint = do
       let minPerpendicularity = min duPerpendicularity dvPerpendicularity
       min minMagnitude minPerpendicularity
 
+{-# INLINE pointAt #-}
 pointAt :: UvPoint -> SurfaceFunction3D space -> Point3D space
 pointAt uvPoint function = CompiledFunction.value function.compiled uvPoint
 
+{-# INLINE pointOn #-}
 pointOn :: SurfaceFunction3D space -> UvPoint -> Point3D space
 pointOn function uvPoint = pointAt uvPoint function
 
+{-# INLINE range #-}
 range :: UvBounds -> SurfaceFunction3D space -> Bounds3D space
 range uvRange function = CompiledFunction.range function.compiled uvRange
 

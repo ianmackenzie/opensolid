@@ -353,9 +353,11 @@ instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFuncti
     let (dtdu, dtdv) = partialDerivatives g
     new (Curve1D.compiled f . compiled g) (dfdt * dtdu, dfdt * dtdv)
 
+{-# INLINE valueAt #-}
 valueAt :: UvPoint -> SurfaceFunction1D units -> Quantity units
 valueAt uvPoint function = CompiledFunction.value function.compiled uvPoint
 
+{-# INLINE valueOf #-}
 valueOf :: SurfaceFunction1D units -> UvPoint -> Quantity units
 valueOf function uvPoint = valueAt uvPoint function
 

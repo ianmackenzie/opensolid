@@ -514,12 +514,15 @@ zero = constant Vector3D.zero
 constant :: Vector3D units space -> VectorSurfaceFunction3D units space
 constant vector = new (CompiledFunction.constant vector) (zero, zero)
 
+{-# INLINE valueAt #-}
 valueAt :: UvPoint -> VectorSurfaceFunction3D units space -> Vector3D units space
 valueAt uvPoint function = CompiledFunction.value function.compiled uvPoint
 
+{-# INLINE valueOf #-}
 valueOf :: VectorSurfaceFunction3D units space -> UvPoint -> Vector3D units space
 valueOf function uvPoint = valueAt uvPoint function
 
+{-# INLINE range #-}
 range :: UvBounds -> VectorSurfaceFunction3D units space -> VectorBounds3D units space
 range uvRange function = CompiledFunction.range function.compiled uvRange
 

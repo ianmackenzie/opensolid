@@ -1064,6 +1064,7 @@ startValue = (.startValue)
 endValue :: VectorCurve dimension units space -> Vector dimension units space
 endValue = (.endValue)
 
+{-# INLINE valueAt #-}
 valueAt ::
   Exists dimension units space =>
   Number ->
@@ -1073,6 +1074,7 @@ valueAt 0.0 curve = startValue curve
 valueAt 1.0 curve = endValue curve
 valueAt tValue curve = CompiledFunction.value (compiled curve) tValue
 
+{-# INLINE valueOf #-}
 valueOf ::
   Exists dimension units space =>
   VectorCurve dimension units space ->
@@ -1080,6 +1082,7 @@ valueOf ::
   Vector dimension units space
 valueOf curve tValue = valueAt tValue curve
 
+{-# INLINE range #-}
 range ::
   Exists dimension units space =>
   Interval Unitless ->
@@ -1087,6 +1090,7 @@ range ::
   VectorBounds dimension units space
 range tRange curve = CompiledFunction.range (compiled curve) tRange
 
+{-# INLINE derivativeAt #-}
 derivativeAt ::
   Exists dimension units space =>
   Number ->
@@ -1094,6 +1098,7 @@ derivativeAt ::
   Vector dimension units space
 derivativeAt tValue curve = valueAt tValue (derivative curve)
 
+{-# INLINE derivativeRange #-}
 derivativeRange ::
   Exists dimension units space =>
   Interval Unitless ->
@@ -1101,6 +1106,7 @@ derivativeRange ::
   VectorBounds dimension units space
 derivativeRange tRange curve = range tRange (derivative curve)
 
+{-# INLINE secondDerivativeAt #-}
 secondDerivativeAt ::
   Exists dimension units space =>
   Number ->
@@ -1108,6 +1114,7 @@ secondDerivativeAt ::
   Vector dimension units space
 secondDerivativeAt tValue curve = valueAt tValue (secondDerivative curve)
 
+{-# INLINE secondDerivativeRange #-}
 secondDerivativeRange ::
   Exists dimension units space =>
   Interval Unitless ->
