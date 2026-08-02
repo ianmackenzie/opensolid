@@ -22,7 +22,6 @@ import OpenSolid.Curve.CurvatureVector qualified as Curve.CurvatureVector
 import OpenSolid.Degeneracy qualified as Degeneracy
 import OpenSolid.DirectionBounds (DirectionBounds, DirectionBoundsExists)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
-import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
@@ -157,7 +156,7 @@ new nondegenerateCurve tRange = do
   let segmentRange =
         case Bounds.intersection segmentRange0 segmentRange1 of
           Just intersection -> intersection
-          Nothing -> InternalError.throw "Curve bounds and derivative bounds are inconsistent"
+          Nothing -> error "Curve bounds and derivative bounds are inconsistent"
   let segmentTangentDirectionRange =
         VectorCurve.Direction.range
           (Curve.derivative givenCurve)

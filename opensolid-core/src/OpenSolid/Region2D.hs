@@ -56,7 +56,6 @@ import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D (Frame2D)
-import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
@@ -528,7 +527,7 @@ boundaryIsInside outer inner = do
     Boundary.Internal -> True
     Boundary.External -> False
     -- Shouldn't happen, loops should be guaranteed not to be touching by this point
-    Boundary.Intersected -> InternalError.throw "Unexpected contact between region boundaries"
+    Boundary.Intersected -> error "Unexpected contact between region boundaries"
 
 bounds :: Region2D units -> Bounds2D units
 bounds region = Boundary.bounds region.outerBoundary
@@ -553,4 +552,4 @@ toVertexLoop resolution loop = do
   let allVertices = List.combine trailingVertices (NonEmpty.toList loop)
   case allVertices of
     NonEmpty vertices -> vertices
-    [] -> InternalError.throw "Should always have at least one vertex"
+    [] -> error "Should always have at least one vertex"

@@ -44,7 +44,6 @@ import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3D (Frame3D)
-import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
@@ -126,8 +125,7 @@ block bounds =
         then Err EmptyBody
         else case extruded World3D.topPlane profile h1 h2 of
           Ok body -> Ok body
-          Err _ ->
-            InternalError.throw "Constructing block body from non-empty bounds should not fail"
+          Err _ -> error "Constructing block body from non-empty bounds should not fail"
 
 {-| Create a sphere with the given center point and diameter.
 
@@ -146,7 +144,7 @@ sphere ("centerPoint" ::: centerPoint) ("diameter" ::: diameter)
       let plane = World3D.forwardPlane centerPoint
       case boundedBy [Surface3D.revolved plane arc Axis2D.y Angle.twoPi] of
         Ok body -> Ok body
-        Err _ -> InternalError.throw "Constructing sphere from non-zero diameter should not fail"
+        Err _ -> error "Constructing sphere from non-zero diameter should not fail"
 
 {-| Create a cylindrical body from a start point, end point and diameter.
 
@@ -189,7 +187,7 @@ cylinderAlong axis d1 d2 ("diameter" ::: diameter) =
         then Err EmptyBody
         else case extruded (Axis3D.normalPlane axis) profile d1 d2 of
           Ok body -> Ok body
-          Err _ -> InternalError.throw "Constructing non-empty cylinder body should not fail"
+          Err _ -> error "Constructing non-empty cylinder body should not fail"
 
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::

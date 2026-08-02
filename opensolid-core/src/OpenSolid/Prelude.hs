@@ -53,6 +53,7 @@ module OpenSolid.Prelude
   , getField
   , ifThenElse
   , assert
+  , error
   , throw
   , data TODO
   , recursive
@@ -725,6 +726,9 @@ pattern TODO <- (GHC.Stack.withFrozenCallStack todoImpl -> ())
 
 todoImpl :: HasCallStack => a
 todoImpl = Prelude.error "Not implemented"
+
+error :: Text -> a
+error = Prelude.error . Data.Text.unpack
 
 {-# INLINE recursive #-}
 recursive :: (a -> a) -> a

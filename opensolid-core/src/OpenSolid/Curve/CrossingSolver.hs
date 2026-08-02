@@ -9,7 +9,6 @@ import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Segment qualified as Curve.Segment
-import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.Nondegenerate (Nondegenerate)
@@ -56,6 +55,4 @@ solve curveA curveB Crossing (tRangeA, tRangeB) (segmentA, segmentB) =
       case Curve.Nondegenerate.continuityAt solution (curveA, curveB) of
         Nothing -> Unresolved
         Just Continuity.Crossing -> Resolved (Just (IntersectionPoint.crossing solution))
-        Just _ ->
-          InternalError.throw $
-            "Should have guaranteed by this point that all intersection points are crossing ones"
+        Just _ -> error "Should have guaranteed by this point that all intersection points are crossing ones"

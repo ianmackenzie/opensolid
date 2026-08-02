@@ -159,7 +159,6 @@ library
     OpenSolid.IO.Parallel
     OpenSolid.IndexOutOfBounds
     OpenSolid.Int
-    OpenSolid.InternalError
     OpenSolid.Intersection
     OpenSolid.Interval
     OpenSolid.IsDegenerate

@@ -49,17 +49,17 @@ withDefaultContentType defaultContentType headers =
 notFound :: Response
 notFound = custom Status.notFound404 [] Binary.empty
 
-error :: Status -> Text -> Response
-error status message = custom status [contentType "text/plain"] (Text.toUtf8 message)
+errorResponse :: Status -> Text -> Response
+errorResponse status message = custom status [contentType "text/plain"] (Text.toUtf8 message)
 
 badRequest :: Text -> Response
-badRequest = error Status.badRequest400
+badRequest = errorResponse Status.badRequest400
 
 methodNotAllowed :: Response
 methodNotAllowed = custom Status.methodNotAllowed405 [] Binary.empty
 
 internalServerError :: Text -> Response
-internalServerError = error Status.internalServerError500
+internalServerError = errorResponse Status.internalServerError500
 
 isContentType :: (Text, Text) -> Bool
 isContentType (name, _) = Text.toLower name == "content-type"

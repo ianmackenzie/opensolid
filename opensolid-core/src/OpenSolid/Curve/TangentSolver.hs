@@ -16,7 +16,6 @@ import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Segment qualified as Curve.Segment
-import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.Nondegenerate (Nondegenerate)
@@ -71,4 +70,4 @@ solve curveA curveB tRangeA tRangeB function = do
       Continuity.Crossing -> Unresolved
       Continuity.Tangent sign -> Resolved (Just (IntersectionPoint.tangent sign solution))
       Continuity.Indistinguishable _ ->
-        InternalError.throw "Should have guaranteed by this point that curvatures are not equal"
+        error "Should have guaranteed by this point that curvatures are not equal"

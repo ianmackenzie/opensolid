@@ -47,7 +47,6 @@ import Data.Proxy (Proxy (Proxy))
 import {-# SOURCE #-} OpenSolid.Bag (Bag)
 import {-# SOURCE #-} OpenSolid.Bag qualified as Bag
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
-import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
@@ -192,7 +191,7 @@ splitAtIndex :: Int -> NonEmpty a -> (NonEmpty a, NonEmpty a)
 splitAtIndex index nonEmpty =
   case Data.List.NonEmpty.splitAt index nonEmpty of
     (NonEmpty first, NonEmpty second) -> (first, second)
-    _ -> InternalError.throw "Bad split index in Set.split"
+    _ -> error "Bad split index in Set.split"
 
 flatten :: Set b (Set b a) -> Set b a
 flatten Leaf{leafItem} = leafItem
@@ -536,7 +535,7 @@ clusters boundsPredicate itemPredicate set = do
   let graph = Graph.buildG (0, size set - 1) edges
   case Graph.components graph of
     NonEmpty components -> NonEmpty.map (buildCluster set) components
-    [] -> InternalError.throw "Should have at least one cluster (since sets cannot be empty)"
+    [] -> error "Should have at least one cluster (since sets cannot be empty)"
 
 buildCluster :: Bounds b => Set b a -> Graph.Tree Int -> NonEmpty a
 buildCluster set tree = NonEmpty.map (set !!) (Data.Foldable1.toNonEmpty tree)

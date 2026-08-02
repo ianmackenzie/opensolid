@@ -5,7 +5,6 @@ import OpenSolid.API.ImplicitTolerance (ImplicitTolerance)
 import OpenSolid.API.PreOperatorOverload (PreOperatorOverload (..))
 import OpenSolid.API.PreOperatorOverload qualified as PreOperatorOverload
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -55,8 +54,8 @@ documentation operatorId =
       BinaryOperator.Div -> "Return ``" <> lhsArgName <> " / self``."
       BinaryOperator.FloorDiv -> "Return ``" <> lhsArgName <> " // self``."
       BinaryOperator.Mod -> "Return ``" <> lhsArgName <> " % self``."
-      BinaryOperator.Dot -> InternalError.throw "Dot product should never be a pre-operator"
-      BinaryOperator.Cross -> InternalError.throw "Cross product should never be a pre-operator"
+      BinaryOperator.Dot -> error "Dot product should never be a pre-operator"
+      BinaryOperator.Cross -> error "Cross product should never be a pre-operator"
 
 functionName :: BinaryOperator.Id -> Text
 functionName operatorId = case operatorId of
@@ -66,8 +65,8 @@ functionName operatorId = case operatorId of
   BinaryOperator.Div -> "__rtruediv__"
   BinaryOperator.FloorDiv -> "__rfloordiv__"
   BinaryOperator.Mod -> "__rmod__"
-  BinaryOperator.Dot -> InternalError.throw "Dot product should never be a pre-operator"
-  BinaryOperator.Cross -> InternalError.throw "Cross product should never be a pre-operator"
+  BinaryOperator.Dot -> error "Dot product should never be a pre-operator"
+  BinaryOperator.Cross -> error "Cross product should never be a pre-operator"
 
 overloadComponents ::
   FFI.ClassName ->

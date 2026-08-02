@@ -12,7 +12,6 @@ import OpenSolid.API.Argument qualified as Argument
 import OpenSolid.API.ImplicitTolerance (ImplicitTolerance (ImplicitTolerance))
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.List qualified as List
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
@@ -152,7 +151,7 @@ normalizeSignature ::
   (Maybe ImplicitTolerance, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
 normalizeSignature (maybeImplicitTolerance, arguments, returnType) =
   if not (List.isOrdered (\(_, _, kind1) (_, _, kind2) -> kind1 <= kind2) arguments)
-    then InternalError.throw "Named arguments should always come after positional arguments"
+    then error "Named arguments should always come after positional arguments"
     else do
       let args desiredKind = [(name, typ) | (name, typ, kind) <- arguments, kind == desiredKind]
       (maybeImplicitTolerance, args Argument.Positional, args Argument.Named, returnType)

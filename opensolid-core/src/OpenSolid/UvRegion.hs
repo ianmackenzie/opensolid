@@ -4,7 +4,6 @@ module OpenSolid.UvRegion
   )
 where
 
-import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2D (Region2D)
@@ -19,5 +18,4 @@ unitSquare :: UvRegion
 unitSquare = Tolerance.using Quantity.zero do
   case Region2D.rectangle UvBounds.unitSquare of
     Ok region -> region
-    Err Region2D.EmptyRegion ->
-      InternalError.throw "Constructing UV unit square region should not fail"
+    Err Region2D.EmptyRegion -> error "Constructing UV unit square region should not fail"
