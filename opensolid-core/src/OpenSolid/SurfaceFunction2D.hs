@@ -5,7 +5,8 @@ module OpenSolid.SurfaceFunction2D
   , constant
   , uv
   , xy
-  , point
+  , pointAt
+  , pointOn
   , range
   , compiled
   , partialDerivatives
@@ -153,8 +154,11 @@ xy x y = do
           (SurfaceFunction1D.partialDerivatives y)
   new compiledXY xyPartialDerivatives
 
-point :: SurfaceFunction2D units -> UvPoint -> Point2D units
-point function uvPoint = CompiledFunction.value (compiled function) uvPoint
+pointAt :: UvPoint -> SurfaceFunction2D units -> Point2D units
+pointAt uvPoint function = CompiledFunction.value (compiled function) uvPoint
+
+pointOn :: SurfaceFunction2D units -> UvPoint -> Point2D units
+pointOn function uvPoint = pointAt uvPoint function
 
 range :: SurfaceFunction2D units -> UvBounds -> Bounds2D units
 range function uvRange = CompiledFunction.range (compiled function) uvRange
