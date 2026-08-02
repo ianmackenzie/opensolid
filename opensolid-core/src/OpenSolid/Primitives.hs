@@ -1247,8 +1247,6 @@ data PlaneOrientation3D space = PlaneOrientation3D
 
 deriving instance Eq (PlaneOrientation3D space)
 
-deriving instance Ord (PlaneOrientation3D space)
-
 deriving instance Show (PlaneOrientation3D space)
 
 instance FFI (PlaneOrientation3D Void) where
@@ -1964,8 +1962,6 @@ data Plane3D space = Plane3D
   }
 
 deriving instance Eq (Plane3D space)
-
-deriving instance Ord (Plane3D space)
 
 deriving instance Show (Plane3D space)
 

@@ -108,8 +108,6 @@ data Ast1D input where
 
 deriving instance Eq (Ast1D input)
 
-deriving instance Ord (Ast1D input)
-
 deriving instance Show (Ast1D input)
 
 data Variable1D input where
@@ -146,8 +144,6 @@ data Variable1D input where
 
 deriving instance Eq (Variable1D input)
 
-deriving instance Ord (Variable1D input)
-
 deriving instance Show (Variable1D input)
 
 data Ast2D input where
@@ -155,8 +151,6 @@ data Ast2D input where
   Variable2D :: Variable2D input -> Ast2D input
 
 deriving instance Eq (Ast2D input)
-
-deriving instance Ord (Ast2D input)
 
 deriving instance Show (Ast2D input)
 
@@ -198,8 +192,6 @@ data Variable2D input where
 
 deriving instance Eq (Variable2D input)
 
-deriving instance Ord (Variable2D input)
-
 deriving instance Show (Variable2D input)
 
 data Ast3D input where
@@ -207,8 +199,6 @@ data Ast3D input where
   Variable3D :: Variable3D input -> Ast3D input
 
 deriving instance Eq (Ast3D input)
-
-deriving instance Ord (Ast3D input)
 
 deriving instance Show (Ast3D input)
 
@@ -247,8 +237,6 @@ data Variable3D input where
     Variable3D input
 
 deriving instance Eq (Variable3D input)
-
-deriving instance Ord (Variable3D input)
 
 deriving instance Show (Variable3D input)
 
@@ -573,7 +561,7 @@ instance
   input1 ~ input2 =>
   Addition (Variable1D input1) (Variable1D input2) (Variable1D input1)
   where
-  lhs + rhs = if lhs <= rhs then Sum1D lhs rhs else Sum1D rhs lhs
+  lhs + rhs = Sum1D lhs rhs
 
 instance Addition (Quantity units) (Ast1D input) (Ast1D input) where
   lhs + rhs = constant1D lhs + rhs
@@ -614,8 +602,7 @@ instance input1 ~ input2 => Multiplication (Ast1D input1) (Ast1D input2) (Ast1D 
   Constant1D a * Variable1D (ProductVariableConstant1D b c) = (a * c) * Variable1D b
   Variable1D lhs * Constant1D rhs = Variable1D (ProductVariableConstant1D lhs rhs)
   Constant1D lhs * Variable1D rhs = Variable1D (ProductVariableConstant1D rhs lhs)
-  Variable1D lhs * Variable1D rhs =
-    Variable1D (if lhs <= rhs then Product1D lhs rhs else Product1D rhs lhs)
+  Variable1D lhs * Variable1D rhs = Variable1D (Product1D lhs rhs)
 
 instance Multiplication (Quantity units) (Ast1D input) (Ast1D input) where
   lhs * rhs = constant1D lhs * rhs
@@ -681,7 +668,7 @@ instance
   input1 ~ input2 =>
   Addition (Variable2D input1) (Variable2D input2) (Variable2D input1)
   where
-  lhs + rhs = if lhs <= rhs then Sum2D lhs rhs else Sum2D rhs lhs
+  lhs + rhs = Sum2D lhs rhs
 
 instance Addition (Vector2D units) (Ast2D input) (Ast2D input) where
   lhs + rhs = constant2D lhs + rhs
@@ -788,7 +775,7 @@ instance
   input1 ~ input2 =>
   Addition (Variable3D input1) (Variable3D input2) (Variable3D input1)
   where
-  lhs + rhs = if lhs <= rhs then Sum3D lhs rhs else Sum3D rhs lhs
+  lhs + rhs = Sum3D lhs rhs
 
 instance Addition (Vector3D units space) (Ast3D input) (Ast3D input) where
   lhs + rhs = constant3D lhs + rhs
@@ -870,7 +857,7 @@ instance
   input1 ~ input2 =>
   DotMultiplication (Variable2D input1) (Variable2D input2) (Variable1D input1)
   where
-  lhs `dot` rhs = if lhs <= rhs then Dot2D lhs rhs else Dot2D rhs lhs
+  lhs `dot` rhs = Dot2D lhs rhs
 
 instance DotMultiplication (Vector2D units) (Ast2D input) (Ast1D input) where
   lhs `dot` rhs = constant2D lhs `dot` rhs
@@ -904,7 +891,7 @@ instance
   input1 ~ input2 =>
   DotMultiplication (Variable3D input1) (Variable3D input2) (Variable1D input1)
   where
-  lhs `dot` rhs = if lhs <= rhs then Dot3D lhs rhs else Dot3D rhs lhs
+  lhs `dot` rhs = Dot3D lhs rhs
 
 instance DotMultiplication (Vector3D units space) (Ast3D input) (Ast1D input) where
   lhs `dot` rhs = constant3D lhs `dot` rhs
