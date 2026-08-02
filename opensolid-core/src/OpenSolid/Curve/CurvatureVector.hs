@@ -17,7 +17,8 @@ value_ derivativeValue secondDerivativeValue = do
   let derivativeSquaredMagnitude_ = Vector.squaredMagnitude_ derivativeValue
   let numerator =
         secondDerivativeValue
-          - derivativeValue * ((secondDerivativeValue `dot_` derivativeValue) / derivativeSquaredMagnitude_)
+          - derivativeValue
+            * ((secondDerivativeValue `dot_` derivativeValue) / derivativeSquaredMagnitude_)
   Vector.unerase (Vector.erase numerator / Quantity.erase derivativeSquaredMagnitude_)
 
 range_ ::
