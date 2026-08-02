@@ -966,12 +966,13 @@ areaCurve1D =
     , Class.plus @Area Class.noFallback
     , Class.minus @AreaCurve1D Class.fallbackMemberMinus
     , Class.minus @Area Class.noFallback
-    , Class.times @Number Class.noFallback
     , Class.times @Curve1D Class.fallbackMemberTimes
-    , Class.divideBy @Number Class.noFallback
+    , Class.times @Number Class.noFallback
     , Class.divideByNonzeroU @Curve1D Curve1D.nonzero Class.fallbackMemberDivideBy
-    , Class.divideBy @Length Class.noFallback
+    , Class.divideBy @Number (Class.fallbackMember "Divide By Number")
     , Class.divideByNonzeroM @LengthCurve1D Curve1D.nonzero (Class.fallbackMember "Divide By Length Curve")
+    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
+    , Class.divideBy @Area (Class.fallbackMember "Divide By Area")
     ]
 
 type Svg = Svg.Svg
