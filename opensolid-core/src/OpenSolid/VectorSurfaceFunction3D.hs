@@ -538,7 +538,10 @@ partialDerivatives = (.partialDerivatives)
 
 secondPartialDerivatives ::
   VectorSurfaceFunction3D units space ->
-  (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space)
+  ( VectorSurfaceFunction3D units space
+  , VectorSurfaceFunction3D units space
+  , VectorSurfaceFunction3D units space
+  )
 secondPartialDerivatives function = do
   let (fu, fv) = partialDerivatives function
   let (fuu, fuv) = partialDerivatives fu
