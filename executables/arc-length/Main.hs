@@ -74,12 +74,12 @@ testCubicSplineParameterization = Tolerance.using Length.defaultTolerance do
   IO.printLine ("Cubic spline: " <> formatLength length)
   let drawCurve fileName curve parameterization = do
         let parameterValues = List.map parameterization (Parameter.steps 30)
-        let drawPoint parameterValue = do
-              let point = Curve2D.point curve parameterValue
+        let drawPoint tValue = do
+              let point = Curve2D.pointAt tValue curve
               let diameter = Length.millimeters 3.0
               let startHue = Angle.turns 0.25
               let endHue = Angle.turns 0.75
-              let hue = Quantity.interpolateFrom startHue endHue parameterValue
+              let hue = Quantity.interpolateFrom startHue endHue tValue
               let fillColor = Color.hsl1 hue 0.5 0.5
               Svg.circleWith [Svg.fillColor fillColor] (Circle2D.withDiameter diameter point)
         let resolution = Resolution.maxError Length.micrometer

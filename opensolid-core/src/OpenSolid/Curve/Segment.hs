@@ -145,11 +145,11 @@ new ::
 new nondegenerateCurve tRange = do
   let Nondegenerate givenCurve = nondegenerateCurve
   let Interval t1 t2 = tRange
-  let p1 = Curve.point givenCurve t1
-  let p2 = Curve.point givenCurve t2
-  let segmentRange0 = Curve.range givenCurve tRange
-  let segmentDerivativeRange = Curve.derivativeRange givenCurve tRange
-  let segmentSecondDerivativeRange = Curve.secondDerivativeRange givenCurve tRange
+  let p1 = Curve.pointAt t1 givenCurve
+  let p2 = Curve.pointAt t2 givenCurve
+  let segmentRange0 = Curve.range tRange givenCurve
+  let segmentDerivativeRange = Curve.derivativeRange tRange givenCurve
+  let segmentSecondDerivativeRange = Curve.secondDerivativeRange tRange givenCurve
   let leftRange = Bounds.aggregate2 (Bounds.constant p1) (p1 + 0.5 * segmentDerivativeRange)
   let rightRange = Bounds.aggregate2 (Bounds.constant p2) (p2 - 0.5 * segmentDerivativeRange)
   let segmentRange1 = Bounds.aggregate2 leftRange rightRange

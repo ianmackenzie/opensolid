@@ -104,7 +104,7 @@ findOwnPoint = Test.check 500 "findOwnPoint" do
   let p3 = Point2D.meters 2.0 0.0
   let testSpline = Curve2D.quadraticBezier p1 p2 p3
   t <- Test.generate Parameter.random
-  let p = Curve2D.point testSpline t
+  let p = Curve2D.pointAt t testSpline
   solutions <- findParameterValues p testSpline ?? fail
   Tolerance.using 1e-12 do
     Test.expect (solutions ~= [t])
@@ -196,8 +196,8 @@ overlapAndJoin = Test.verify "overlapAndJoin" do
           (#endAngle Angle.pi)
   nondegenerate1 <- Curve.nondegenerate arc1 ?? fail
   nondegenerate2 <- Curve.nondegenerate arc2 ?? fail
-  let curvePoint1 t1 = Curve.Nondegenerate.curvePoint nondegenerate1 t1
-  let curvePoint2 t2 = Curve.Nondegenerate.curvePoint nondegenerate2 t2
+  let curvePoint1 t1 = Curve.Nondegenerate.curvePointAt t1 nondegenerate1
+  let curvePoint2 t2 = Curve.Nondegenerate.curvePointAt t2 nondegenerate2
   (sign, segments, points) <- overlappingSegments arc1 arc2 ?? fail
   let expectedSegments = NonEmpty.one (Interval 0.0 (1 / 4), Interval 0.0 (1 / 5))
   let expectedPoints =
@@ -218,8 +218,8 @@ crossingIntersection = Test.verify "crossingIntersection" do
   let arc2 = Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
   nondegenerate1 <- Curve.nondegenerate arc1 ?? fail
   nondegenerate2 <- Curve.nondegenerate arc2 ?? fail
-  let curvePoint1 t1 = Curve.Nondegenerate.curvePoint nondegenerate1 t1
-  let curvePoint2 t2 = Curve.Nondegenerate.curvePoint nondegenerate2 t2
+  let curvePoint1 t1 = Curve.Nondegenerate.curvePointAt t1 nondegenerate1
+  let curvePoint2 t2 = Curve.Nondegenerate.curvePointAt t2 nondegenerate2
   intersections <- Curve2D.intersections arc1 arc2 ?? fail
   let expectedIntersectionPoints =
         NonEmpty.two
@@ -250,8 +250,8 @@ tangentIntersection = Test.verify "tangentIntersection" do
           (#endAngle Angle.zero)
   nondegenerate1 <- Curve.nondegenerate arc1 ?? fail
   nondegenerate2 <- Curve.nondegenerate arc2 ?? fail
-  let curvePoint1 t1 = Curve.Nondegenerate.curvePoint nondegenerate1 t1
-  let curvePoint2 t2 = Curve.Nondegenerate.curvePoint nondegenerate2 t2
+  let curvePoint1 t1 = Curve.Nondegenerate.curvePointAt t1 nondegenerate1
+  let curvePoint2 t2 = Curve.Nondegenerate.curvePointAt t2 nondegenerate2
   intersections <- Curve2D.intersections arc1 arc2 ?? fail
   let expectedIntersectionPoints =
         NonEmpty.one (IntersectionPoint.tangent Negative (curvePoint1 0.5, curvePoint2 0.5))
@@ -271,8 +271,9 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" do
   p2 <- Test.generate Random.point2D
   curve <- Curve.nondegenerate (Curve2D.cubicBezier p0 p0 p1 p2) ?? fail
   let decreasingTValues = [2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-  let startTangent = Curve.Nondegenerate.tangentDirectionValue curve 0.0
-  let otherTangents = List.map (Curve.Nondegenerate.tangentDirectionValue curve) decreasingTValues
+  let tangentDirectionAt tValue = Curve.Nondegenerate.tangentDirectionAt tValue curve
+  let startTangent = tangentDirectionAt 0.0
+  let otherTangents = List.map tangentDirectionAt decreasingTValues
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom startTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -284,8 +285,9 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" do
   p2 <- Test.generate Random.point2D
   curve <- Curve.nondegenerate (Curve2D.cubicBezier p0 p1 p2 p2) ?? fail
   let increasingTValues = [1.0 - 2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-  let endTangent = Curve.Nondegenerate.tangentDirectionValue curve 1.0
-  let otherTangents = List.map (Curve.Nondegenerate.tangentDirectionValue curve) increasingTValues
+  let tangentDirectionAt tValue = Curve.Nondegenerate.tangentDirectionAt tValue curve
+  let endTangent = tangentDirectionAt 1.0
+  let otherTangents = List.map tangentDirectionAt increasingTValues
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom endTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -301,10 +303,10 @@ firstDerivativeIsConsistentWithin ::
   Expectation
 firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let dt :: Number = 1e-6
-  let p1 = Curve2D.point curve (tValue - dt)
-  let p2 = Curve2D.point curve (tValue + dt)
+  let p1 = Curve2D.pointAt (tValue - dt) curve
+  let p2 = Curve2D.pointAt (tValue + dt) curve
   let numericalFirstDerivative = (p2 - p1) / (2.0 * dt)
-  let analyticFirstDerivative = Curve2D.derivativeValue curve tValue
+  let analyticFirstDerivative = Curve2D.derivativeAt tValue curve
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
       & Test.output "numericalFirstDerivative" numericalFirstDerivative
@@ -319,10 +321,10 @@ firstDerivativeConsistency randomCurve = Test.check 100 "firstDerivativeConsiste
 secondDerivativeIsConsistent :: Curve2D Meters -> Number -> Expectation
 secondDerivativeIsConsistent curve tValue = do
   let dt :: Number = 1e-6
-  let v1 = Curve2D.derivativeValue curve (tValue - dt)
-  let v2 = Curve2D.derivativeValue curve (tValue + dt)
+  let v1 = Curve2D.derivativeAt (tValue - dt) curve
+  let v2 = Curve2D.derivativeAt (tValue + dt) curve
   let numericalSecondDerivative = (v2 - v1) / (2.0 * dt)
-  let analyticSecondDerivative = Curve2D.secondDerivativeValue curve tValue
+  let analyticSecondDerivative = Curve2D.secondDerivativeAt tValue curve
   Tolerance.using Length.micrometer do
     Test.expect (numericalSecondDerivative ~= analyticSecondDerivative)
       & Test.output "numericalSecondDerivative" numericalSecondDerivative
@@ -353,14 +355,14 @@ reversalConsistency =
           curve <- Test.generate randomCurve
           let reversedCurve = Curve2D.reverse curve
           t <- Test.generate Parameter.random
-          Test.expect (Curve2D.point curve t ~= Curve2D.point reversedCurve (1.0 - t))
+          Test.expect (Curve2D.pointAt t curve ~= Curve2D.pointAt (1.0 - t) reversedCurve)
 
 rangeConsistency :: (Tolerance units, Show (Quantity units)) => Curve2D units -> Expectation
 rangeConsistency curve = do
   tRange <- Test.generate (Interval.random Parameter.random)
   tValue <- Test.generate (Random.map (Interval.interpolate tRange) Parameter.random)
-  let curveValue = Curve2D.point curve tValue
-  let curveRange = Curve2D.range curve tRange
+  let curveValue = Curve2D.pointAt tValue curve
+  let curveRange = Curve2D.range tRange curve
   Test.expect (curveValue `intersects` curveRange)
     & Test.output "tValue" tValue
     & Test.output "tRange" tRange
@@ -375,7 +377,7 @@ arcConstruction = do
         let expectedPoint = Point2D.meters expectedX expectedY
         Test.verify label do
           let arc = Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 1.0) sweptAngle
-          Test.expect (Curve2D.point arc 0.5 ~= expectedPoint)
+          Test.expect (Curve2D.pointAt 0.5 arc ~= expectedPoint)
   let invSqrt2 = 1.0 / Number.sqrt 2.0
   Test.group "from" $
     [ testArcMidpoint 90 (invSqrt2, 1.0 - invSqrt2)
@@ -390,10 +392,10 @@ arcDeformation = Test.check 100 "deformation" do
   transform <- Test.generate Random.affineTransform2D
   t <- Test.generate Parameter.random
   let transformedArc = Curve2D.transformBy transform initialArc
-  let pointOnTransformed = Curve2D.point transformedArc t
+  let pointOnTransformed = Curve2D.pointAt t transformedArc
   let transformOfStart = Point2D.transformBy transform (Curve2D.startPoint initialArc)
   let transformOfEnd = Point2D.transformBy transform (Curve2D.endPoint initialArc)
-  let transformOfPoint = Point2D.transformBy transform (Curve2D.point initialArc t)
+  let transformOfPoint = Point2D.transformBy transform (Curve2D.pointAt t initialArc)
   Test.all
     [ Test.expect (Curve2D.startPoint transformedArc ~= transformOfStart)
         & Test.output "transformedArc.startPoint" (Curve2D.startPoint transformedArc)
@@ -410,16 +412,16 @@ g2 = Test.check 100 "G2 continuity" do
   p4 <- Test.generate Random.point2D
   spline <- Curve.nonzero (Curve2D.cubicBezier p1 p2 p3 p4) ?? fail
   t <- Test.generate Parameter.random
-  let point = Curve2D.Nonzero.point spline t
-  let tangentDirection = Curve.Nonzero.tangentDirectionValue spline t
-  let curvatureVector = Curve.Nonzero.curvatureVectorValue spline t
+  let point = Curve2D.Nonzero.pointAt t spline
+  let tangentDirection = Curve.Nonzero.tangentDirectionAt t spline
+  let curvatureVector = Curve.Nonzero.curvatureVectorAt t spline
   let signedRadius = 1.0 / (tangentDirection `cross` curvatureVector)
   let normalDirection = Direction2D.rotateLeft tangentDirection
   let arcCenter = point + signedRadius * normalDirection
   let arc = Curve2D.sweptArc arcCenter point (Quantity.sign signedRadius * Angle.degrees 30.0)
   nondegenerateArc <- Curve.nondegenerate arc ?? fail
-  let splinePoint = Curve.Nondegenerate.curvePoint (Nondegenerate.fromNonzero spline) t
-  let arcPoint = Curve.Nondegenerate.curvePoint nondegenerateArc 0.0
+  let splinePoint = Curve.Nondegenerate.curvePointAt t (Nondegenerate.fromNonzero spline)
+  let arcPoint = Curve.Nondegenerate.curvePointAt 0.0 nondegenerateArc
   let continuity = CurvePoint.continuity splinePoint arcPoint
   Test.expect (continuity == Just (Continuity.Indistinguishable Positive))
     & Test.output "continuity" continuity

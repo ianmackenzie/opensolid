@@ -75,10 +75,10 @@ findEndpointIntersections ::
   Problem dimension units space =>
   List (IntersectionPoint dimension units space)
 findEndpointIntersections = do
-  let start1 = Curve.Nondegenerate.curvePoint curve1 0.0
-  let end1 = Curve.Nondegenerate.curvePoint curve1 1.0
-  let start2 = Curve.Nondegenerate.curvePoint curve2 0.0
-  let end2 = Curve.Nondegenerate.curvePoint curve2 1.0
+  let start1 = Curve.Nondegenerate.curvePointAt 0.0 curve1
+  let end1 = Curve.Nondegenerate.curvePointAt 1.0 curve1
+  let start2 = Curve.Nondegenerate.curvePointAt 0.0 curve2
+  let end2 = Curve.Nondegenerate.curvePointAt 1.0 curve2
   let findPoint curvePoint searchCurve =
         Curve.Nondegenerate.findPoint (CurvePoint.point curvePoint) searchCurve
   let endpoints1On2 = [(p1, p2) | p1 <- [start1, end1], p2 <- findPoint p1 curve2]

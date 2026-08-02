@@ -1,11 +1,12 @@
 module OpenSolid.Curve.Nonzero
-  ( point
+  ( pointAt
+  , pointOn
   , derivative
-  , tangentDirectionValue
+  , tangentDirectionAt
   , tangentDirectionRange
-  , curvatureVectorValue
+  , curvatureVectorAt
   , curvatureVectorRange
-  , curvatureVectorValue_
+  , curvatureVectorAt_
   , curvatureVectorRange_
   )
 where
@@ -28,65 +29,68 @@ import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
 
-point :: Nonzero (Curve dimension units space) -> Number -> Point dimension units space
-point (Nonzero curve) parameterValue = Curve.point curve parameterValue
+pointAt :: Number -> Nonzero (Curve dimension units space) -> Point dimension units space
+pointAt tValue (Nonzero curve) = Curve.pointAt tValue curve
+
+pointOn :: Nonzero (Curve dimension units space) -> Number -> Point dimension units space
+pointOn curve tValue = pointAt tValue curve
 
 derivative :: Nonzero (Curve dimension units space) -> Nonzero (VectorCurve dimension units space)
 derivative (Nonzero curve) = Nonzero (Curve.derivative curve)
 
-tangentDirectionValue ::
+tangentDirectionAt ::
   (Curve.Exists dimension units space, Direction.Exists dimension space) =>
-  Nonzero (Curve dimension units space) ->
   Number ->
+  Nonzero (Curve dimension units space) ->
   Direction dimension space
-tangentDirectionValue (Nonzero curve) tValue = do
-  let derivativeValue = Curve.derivativeValue curve tValue
+tangentDirectionAt tValue (Nonzero curve) = do
+  let derivativeValue = Curve.derivativeAt tValue curve
   Direction.unsafe (derivativeValue / Vector.magnitude derivativeValue)
 
 tangentDirectionRange ::
   (Curve.Exists dimension units space, DirectionBounds.Exists dimension space) =>
-  Nonzero (Curve dimension units space) ->
   Interval Unitless ->
+  Nonzero (Curve dimension units space) ->
   DirectionBounds dimension space
-tangentDirectionRange (Nonzero curve) tRange =
-  VectorBounds.direction (Curve.derivativeRange curve tRange)
+tangentDirectionRange tRange (Nonzero curve) =
+  VectorBounds.direction (Curve.derivativeRange tRange curve)
 
-curvatureVectorValue ::
+curvatureVectorAt ::
   ( Curve.Exists dimension units space
   , Units.Inverse units inverseUnits
   , Vector.Exists dimension inverseUnits space
   ) =>
-  Nonzero (Curve dimension units space) ->
   Number ->
+  Nonzero (Curve dimension units space) ->
   Vector dimension inverseUnits space
-curvatureVectorValue curve tValue = Vector.coerce (curvatureVectorValue_ curve tValue)
+curvatureVectorAt tValue curve = Vector.coerce (curvatureVectorAt_ tValue curve)
 
 curvatureVectorRange ::
   ( Curve.Exists dimension units space
   , Units.Inverse units inverseUnits
   , VectorBounds.Exists dimension inverseUnits space
   ) =>
-  Nonzero (Curve dimension units space) ->
   Interval Unitless ->
-  VectorBounds dimension inverseUnits space
-curvatureVectorRange curve tRange = VectorBounds.coerce (curvatureVectorRange_ curve tRange)
-
-curvatureVectorValue_ ::
-  (Curve.Exists dimension units space, Vector.Exists dimension (Unitless ?/? units) space) =>
   Nonzero (Curve dimension units space) ->
+  VectorBounds dimension inverseUnits space
+curvatureVectorRange tRange curve = VectorBounds.coerce (curvatureVectorRange_ tRange curve)
+
+curvatureVectorAt_ ::
+  (Curve.Exists dimension units space, Vector.Exists dimension (Unitless ?/? units) space) =>
   Number ->
+  Nonzero (Curve dimension units space) ->
   Vector dimension (Unitless ?/? units) space
-curvatureVectorValue_ (Nonzero curve) tValue =
+curvatureVectorAt_ tValue (Nonzero curve) =
   Curve.CurvatureVector.value_
-    (Curve.derivativeValue curve tValue)
-    (Curve.secondDerivativeValue curve tValue)
+    (Curve.derivativeAt tValue curve)
+    (Curve.secondDerivativeAt tValue curve)
 
 curvatureVectorRange_ ::
   (Curve.Exists dimension units space, VectorBounds.Exists dimension (Unitless ?/? units) space) =>
-  Nonzero (Curve dimension units space) ->
   Interval Unitless ->
+  Nonzero (Curve dimension units space) ->
   VectorBounds dimension (Unitless ?/? units) space
-curvatureVectorRange_ (Nonzero curve) tRange =
+curvatureVectorRange_ tRange (Nonzero curve) =
   Curve.CurvatureVector.range_
-    (Curve.derivativeRange curve tRange)
-    (Curve.secondDerivativeRange curve tRange)
+    (Curve.derivativeRange tRange curve)
+    (Curve.secondDerivativeRange tRange curve)

@@ -21,15 +21,16 @@ module OpenSolid.Curve
   , derivative
   , compiled
   , bounds
-  , point
+  , pointAt
+  , pointOn
   , range
   , startPoint
   , endPoint
   , endpoints
   , secondDerivative
-  , derivativeValue
+  , derivativeAt
   , derivativeRange
-  , secondDerivativeValue
+  , secondDerivativeAt
   , secondDerivativeRange
   , tangentDirectionRange
   , reverse
@@ -476,10 +477,10 @@ buildArcLengthParameterization ::
   Nondegenerate (Curve dimension units space) ->
   (Quantity units, Number -> Number)
 buildArcLengthParameterization (Nondegenerate curve) = do
-  let dsdt tValue = Vector.magnitude (derivativeValue curve tValue)
+  let dsdt tValue = Vector.magnitude (derivativeAt tValue curve)
   let nondegenerateDerivative = Nondegenerate (derivative curve)
-  let tangentDirection tValue = VectorCurve.Nondegenerate.direction nondegenerateDerivative tValue
-  let d2sdt2 tValue = secondDerivativeValue curve tValue `dot` tangentDirection tValue
+  let tangentDirection tValue = VectorCurve.Nondegenerate.directionAt tValue nondegenerateDerivative
+  let d2sdt2 tValue = secondDerivativeAt tValue curve `dot` tangentDirection tValue
   ArcLength.parameterization dsdt d2sdt2
 
 constant ::
@@ -548,7 +549,7 @@ testPoints ::
   Exists dimension units space =>
   Curve dimension units space ->
   NonEmpty (Point dimension units space)
-testPoints curve = NonEmpty.map (point curve) Parameter.samples
+testPoints curve = NonEmpty.map (pointOn curve) Parameter.samples
 
 secondDerivative ::
   Exists dimension units space =>
@@ -560,10 +561,13 @@ secondDerivative = VectorCurve.derivative . derivative
 isPoint :: (Exists dimension units space, Tolerance units) => Curve dimension units space -> Bool
 isPoint curve = VectorCurve.isZero (derivative curve)
 
-point :: Curve dimension units space -> Number -> Point dimension units space
-point curve 0.0 = startPoint curve
-point curve 1.0 = endPoint curve
-point curve tValue = CompiledFunction.value (compiled curve) tValue
+pointAt :: Number -> Curve dimension units space -> Point dimension units space
+pointAt 0.0 curve = startPoint curve
+pointAt 1.0 curve = endPoint curve
+pointAt tValue curve = CompiledFunction.value (compiled curve) tValue
+
+pointOn :: Curve dimension units space -> Number -> Point dimension units space
+pointOn curve tValue = pointAt tValue curve
 
 startPoint :: Curve dimension units space -> Point dimension units space
 startPoint = (.startPoint)
@@ -576,8 +580,8 @@ endpoints ::
   (Point dimension units space, Point dimension units space)
 endpoints curve = (startPoint curve, endPoint curve)
 
-range :: Curve dimension units space -> Interval Unitless -> Bounds dimension units space
-range curve tRange = CompiledFunction.range (compiled curve) tRange
+range :: Interval Unitless -> Curve dimension units space -> Bounds dimension units space
+range tRange curve = CompiledFunction.range (compiled curve) tRange
 
 bounds :: Curve dimension units space -> Bounds dimension units space
 bounds = (.bounds)
@@ -610,44 +614,44 @@ nonzero ::
   Curve dimension units space ->
   Result HasDegeneracy (Nonzero (Curve dimension units space))
 nonzero curve =
-  if derivativeValue curve 0.0 ~= Vector.zero || derivativeValue curve 1.0 ~= Vector.zero
+  if derivativeAt 0.0 curve ~= Vector.zero || derivativeAt 1.0 curve ~= Vector.zero
     then Err HasDegeneracy
     else Ok (Nonzero curve)
 
-derivativeValue ::
+derivativeAt ::
   Exists dimension units space =>
-  Curve dimension units space ->
   Number ->
+  Curve dimension units space ->
   Vector dimension units space
-derivativeValue curve tValue = VectorCurve.valueAt tValue (derivative curve)
+derivativeAt tValue curve = VectorCurve.valueAt tValue (derivative curve)
 
 derivativeRange ::
   Exists dimension units space =>
-  Curve dimension units space ->
   Interval Unitless ->
-  VectorBounds dimension units space
-derivativeRange curve tRange = VectorCurve.range tRange (derivative curve)
-
-secondDerivativeValue ::
-  Exists dimension units space =>
   Curve dimension units space ->
+  VectorBounds dimension units space
+derivativeRange tRange curve = VectorCurve.range tRange (derivative curve)
+
+secondDerivativeAt ::
+  Exists dimension units space =>
   Number ->
+  Curve dimension units space ->
   Vector dimension units space
-secondDerivativeValue curve tValue = VectorCurve.valueAt tValue (secondDerivative curve)
+secondDerivativeAt tValue curve = VectorCurve.valueAt tValue (secondDerivative curve)
 
 secondDerivativeRange ::
   Exists dimension units space =>
-  Curve dimension units space ->
   Interval Unitless ->
+  Curve dimension units space ->
   VectorBounds dimension units space
-secondDerivativeRange curve tRange = VectorCurve.range tRange (secondDerivative curve)
+secondDerivativeRange tRange curve = VectorCurve.range tRange (secondDerivative curve)
 
 tangentDirectionRange ::
   Exists dimension units space =>
-  Curve dimension units space ->
   Interval Unitless ->
+  Curve dimension units space ->
   DirectionBounds dimension space
-tangentDirectionRange curve tRange = VectorCurve.directionRange (derivative curve) tRange
+tangentDirectionRange tRange curve = VectorCurve.directionRange tRange (derivative curve)
 
 reverse ::
   Exists dimension units space =>
@@ -689,9 +693,9 @@ desingularizeStart givenStartPoint givenStartDerivative curve = do
         hermite
           givenStartPoint
           [affixWidth * givenStartDerivative]
-          (point curve tInner)
-          [ affixWidth * derivativeValue curve tInner
-          , affixWidth * affixWidth * secondDerivativeValue curve tInner
+          (pointAt tInner curve)
+          [ affixWidth * derivativeAt tInner curve
+          , affixWidth * affixWidth * secondDerivativeAt tInner curve
           ]
   (prefix, curve . Curve1D.interpolateFrom tInner 1.0)
 
@@ -705,9 +709,9 @@ desingularizeEnd curve givenEndPoint givenEndDerivative = do
   let tInner = 1.0 - affixWidth
   let suffix =
         hermite
-          (point curve tInner)
-          [ affixWidth * derivativeValue curve tInner
-          , affixWidth * affixWidth * secondDerivativeValue curve tInner
+          (pointAt tInner curve)
+          [ affixWidth * derivativeAt tInner curve
+          , affixWidth * affixWidth * secondDerivativeAt tInner curve
           ]
           givenEndPoint
           [affixWidth * givenEndDerivative]
@@ -740,9 +744,9 @@ linearDeviation ::
   Interval Unitless ->
   Quantity units
 linearDeviation curve (Interval t1 t2) = do
-  let p1 = point curve t1
-  let p2 = point curve t2
-  let pMid = point curve (Number.midpoint t1 t2)
+  let p1 = pointAt t1 curve
+  let p2 = pointAt t2 curve
+  let pMid = pointAt (Number.midpoint t1 t2) curve
   let midError = Line.distanceTo pMid (Line p1 p2)
   max midError (leftRightError curve t1 t2 p1 p2)
 
@@ -752,7 +756,7 @@ toPolyline ::
   Curve dimension units space ->
   Polyline dimension units space
 toPolyline resolution curve =
-  Polyline (NonEmpty.map (point curve) (linearize resolution curve))
+  Polyline (NonEmpty.map (pointOn curve) (linearize resolution curve))
 
 linearize ::
   Exists dimension units space =>
@@ -762,7 +766,7 @@ linearize ::
 linearize resolution curve = do
   let collect (Interval t1 t2) p1 p2 accumulated = do
         let tMid = Number.midpoint t1 t2
-        let pMid = point curve tMid
+        let pMid = pointAt tMid curve
         let midError = Line.distanceTo pMid (Line p1 p2)
         let linearizationError = max midError (leftRightError curve t1 t2 p1 p2)
         let size = Point.distanceFrom p1 p2
@@ -788,8 +792,8 @@ leftRightError curve t1 t2 p1 p2 = do
   let tOffset = 0.5 * tWidth * Number.sqrt (3 / 7)
   let tLeft = tMid + tOffset
   let tRight = tMid - tOffset
-  let leftError = Line.distanceTo (point curve tLeft) (Line p1 p2)
-  let rightError = Line.distanceTo (point curve tRight) (Line p1 p2)
+  let leftError = Line.distanceTo (pointAt tLeft curve) (Line p1 p2)
+  let rightError = Line.distanceTo (pointAt tRight curve) (Line p1 p2)
   max leftError rightError
 
 arcLengthParameterization ::
@@ -816,10 +820,10 @@ uniformParameterization = Pair.second . arcLengthParameterization
 
 uniformPoint ::
   (Exists dimension units space, Tolerance units) =>
-  Curve dimension units space ->
   Number ->
+  Curve dimension units space ->
   Point dimension units space
-uniformPoint curve r = point curve (uniformParameterization curve r)
+uniformPoint r curve = pointAt (uniformParameterization curve r) curve
 
 transformBy ::
   Exists dimension units space =>

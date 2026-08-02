@@ -1,8 +1,8 @@
 module OpenSolid.Curve.Nondegenerate
   ( derivative
-  , derivativeValue
-  , secondDerivativeValue
-  , tangentDirectionValue
+  , derivativeAt
+  , secondDerivativeAt
+  , tangentDirectionAt
   , findPoint
   )
 where
@@ -22,20 +22,20 @@ derivative ::
   Curve.Exists dimension units space =>
   Nondegenerate (Curve dimension units space) ->
   Nondegenerate (VectorCurve dimension units space)
-derivativeValue ::
+derivativeAt ::
   Curve.Exists dimension units space =>
-  Nondegenerate (Curve dimension units space) ->
   Number ->
+  Nondegenerate (Curve dimension units space) ->
   Vector dimension units space
-secondDerivativeValue ::
+secondDerivativeAt ::
   Curve.Exists dimension units space =>
-  Nondegenerate (Curve dimension units space) ->
   Number ->
+  Nondegenerate (Curve dimension units space) ->
   Vector dimension units space
-tangentDirectionValue ::
+tangentDirectionAt ::
   (Curve.Exists dimension units space, Direction.Exists dimension space) =>
-  Nondegenerate (Curve dimension units space) ->
   Number ->
+  Nondegenerate (Curve dimension units space) ->
   Direction dimension space
 findPoint ::
   (Curve.Exists dimension units space, Tolerance units) =>

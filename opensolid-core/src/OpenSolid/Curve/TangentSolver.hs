@@ -65,8 +65,8 @@ solve ::
   Fuzzy (Maybe (IntersectionPoint dimension units space))
 solve nondegenerateA nondegenerateB tRangeA tRangeB function = do
   UvPoint tA tB <- NewtonRaphson.Surface.solveIn (UvBounds tRangeA tRangeB) function
-  let p1 = Curve.Nondegenerate.curvePoint nondegenerateA tA
-  let p2 = Curve.Nondegenerate.curvePoint nondegenerateB tB
+  let p1 = Curve.Nondegenerate.curvePointAt tA nondegenerateA
+  let p2 = Curve.Nondegenerate.curvePointAt tB nondegenerateB
   case CurvePoint.continuity p1 p2 of
     Nothing -> Unresolved
     Just continuity -> case continuity of

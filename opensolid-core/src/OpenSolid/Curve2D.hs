@@ -23,13 +23,14 @@ module OpenSolid.Curve2D
   , cubicBezier
   , hermite
   , involute
-  , derivativeValue
+  , derivativeAt
   , derivativeRange
-  , secondDerivativeValue
+  , secondDerivativeAt
   , secondDerivativeRange
   , desingularizeStart
   , desingularizeEnd
-  , point
+  , pointAt
+  , pointOn
   , startPoint
   , endPoint
   , endpoints
@@ -388,20 +389,20 @@ involuteVector n vx vy theta1 theta2 =
     (CompiledFunction.concrete (Expression.involute n vx vy theta1 theta2))
     (involuteVector (n + 1) vx vy theta1 theta2)
 
-{-# INLINE derivativeValue #-}
-derivativeValue :: Curve2D units -> Number -> Vector2D units
-derivativeValue = Curve.derivativeValue
+{-# INLINE derivativeAt #-}
+derivativeAt :: Number -> Curve2D units -> Vector2D units
+derivativeAt = Curve.derivativeAt
 
 {-# INLINE derivativeRange #-}
-derivativeRange :: Curve2D units -> Interval Unitless -> VectorBounds2D units
+derivativeRange :: Interval Unitless -> Curve2D units -> VectorBounds2D units
 derivativeRange = Curve.derivativeRange
 
-{-# INLINE secondDerivativeValue #-}
-secondDerivativeValue :: Curve2D units -> Number -> Vector2D units
-secondDerivativeValue = Curve.secondDerivativeValue
+{-# INLINE secondDerivativeAt #-}
+secondDerivativeAt :: Number -> Curve2D units -> Vector2D units
+secondDerivativeAt = Curve.secondDerivativeAt
 
 {-# INLINE secondDerivativeRange #-}
-secondDerivativeRange :: Curve2D units -> Interval Unitless -> VectorBounds2D units
+secondDerivativeRange :: Interval Unitless -> Curve2D units -> VectorBounds2D units
 secondDerivativeRange = Curve.secondDerivativeRange
 
 desingularizeStart ::
@@ -422,8 +423,11 @@ desingularizeEnd = Curve.desingularizeEnd
 
 The parameter value should be between 0 and 1.
 -}
-point :: Curve2D units -> Number -> Point2D units
-point = Curve.point
+pointAt :: Number -> Curve2D units -> Point2D units
+pointAt = Curve.pointAt
+
+pointOn :: Curve2D units -> Number -> Point2D units
+pointOn = Curve.pointOn
 
 -- | Get the start point of a curve.
 startPoint :: Curve2D units -> Point2D units
@@ -437,7 +441,7 @@ endPoint = Curve.endPoint
 endpoints :: Curve2D units -> (Point2D units, Point2D units)
 endpoints = Curve.endpoints
 
-range :: Curve2D units -> Interval Unitless -> Bounds2D units
+range :: Interval Unitless -> Curve2D units -> Bounds2D units
 range = Curve.range
 
 -- | Reverse a curve, so that the start point is the end point and vice versa.
@@ -458,7 +462,7 @@ derivative = Curve.derivative
 secondDerivative :: Curve2D units -> VectorCurve2D units
 secondDerivative = Curve.secondDerivative
 
-tangentDirectionRange :: Curve2D units -> Interval Unitless -> DirectionBounds2D
+tangentDirectionRange :: Interval Unitless -> Curve2D units -> DirectionBounds2D
 tangentDirectionRange = Curve.tangentDirectionRange
 
 distanceAlong :: Axis2D units -> Curve2D units -> Curve1D units
@@ -627,7 +631,7 @@ length = Curve.length
 uniformParameterization :: Tolerance units => Curve2D units -> Number -> Number
 uniformParameterization = Curve.uniformParameterization
 
-uniformPoint :: Tolerance units => Curve2D units -> Number -> Point2D units
+uniformPoint :: Tolerance units => Number -> Curve2D units -> Point2D units
 uniformPoint = Curve.uniformPoint
 
 piecewise :: Tolerance units => NonEmpty (Curve2D units) -> Curve2D units
@@ -673,7 +677,7 @@ piecewisePoint tree s = case tree of
   PiecewiseNode leftLength leftTree rightTree
     | s < leftLength -> piecewisePoint leftTree s
     | otherwise -> piecewisePoint rightTree (s - leftLength)
-  PiecewiseLeaf segmentLength curve -> point curve (s / segmentLength)
+  PiecewiseLeaf segmentLength curve -> pointAt (s / segmentLength) curve
 
 piecewiseRange ::
   PiecewiseTree units space ->
@@ -689,7 +693,7 @@ piecewiseRange tree s1 s2 = case tree of
           (piecewiseRange leftTree s1 leftLength)
           (piecewiseRange rightTree Quantity.zero (s2 - leftLength))
   PiecewiseLeaf segmentLength curve ->
-    range curve (Interval (s1 / segmentLength) (s2 / segmentLength))
+    range (Interval (s1 / segmentLength) (s2 / segmentLength)) curve
 
 piecewiseDerivative ::
   PiecewiseDerivativeTree units space ->

@@ -1,13 +1,15 @@
 {-# LANGUAGE UnboxedTuples #-}
 
 module OpenSolid.Curve.Nondegenerate
-  ( point
-  , curvePoint
+  ( pointAt
+  , pointOn
+  , curvePointAt
+  , curvePointOn
   , bounds
   , derivative
-  , derivativeValue
-  , secondDerivativeValue
-  , tangentDirectionValue
+  , derivativeAt
+  , secondDerivativeAt
+  , tangentDirectionAt
   , bisectionTree
   , findPoint
   , intersections
@@ -40,31 +42,45 @@ import OpenSolid.Vector (Vector)
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 
-{-# INLINE point #-}
-point ::
+{-# INLINE pointAt #-}
+pointAt ::
+  Curve.Exists dimension units space =>
+  Number ->
+  Nondegenerate (Curve dimension units space) ->
+  Point dimension units space
+pointAt tValue (Nondegenerate curve) = Curve.pointAt tValue curve
+
+pointOn ::
   Curve.Exists dimension units space =>
   Nondegenerate (Curve dimension units space) ->
   Number ->
   Point dimension units space
-point (Nondegenerate curve) parameterValue = Curve.point curve parameterValue
+pointOn curve tValue = pointAt tValue curve
 
-curvePoint ::
+curvePointAt ::
+  Curve.Exists dimension units space =>
+  Number ->
+  Nondegenerate (Curve dimension units space) ->
+  CurvePoint dimension units space
+curvePointAt tValue curve =
+  recursive \result ->
+    CurvePoint
+      { location = CurveLocation.fromParameterValue tValue
+      , point = pointAt tValue curve
+      , derivative = derivativeAt tValue curve
+      , tangentDirection = tangentDirectionAt tValue curve
+      , curvatureVector_ =
+          result
+            & Nondegenerate.field \_ ->
+              Curve.Nonzero.curvatureVectorAt_ tValue (Nondegenerate.interior curve)
+      }
+
+curvePointOn ::
   Curve.Exists dimension units space =>
   Nondegenerate (Curve dimension units space) ->
   Number ->
   CurvePoint dimension units space
-curvePoint curve tValue =
-  recursive \result ->
-    CurvePoint
-      { location = CurveLocation.fromParameterValue tValue
-      , point = point curve tValue
-      , derivativeValue = derivativeValue curve tValue
-      , tangentDirectionValue = tangentDirectionValue curve tValue
-      , curvatureVectorValue_ =
-          result
-            & Nondegenerate.field \_ ->
-              Curve.Nonzero.curvatureVectorValue_ (Nondegenerate.interior curve) tValue
-      }
+curvePointOn curve tValue = curvePointAt tValue curve
 
 bounds ::
   Curve.Exists dimension units space =>
@@ -78,31 +94,31 @@ derivative ::
   Nondegenerate (VectorCurve dimension units space)
 derivative (Nondegenerate curve) = Nondegenerate (Curve.derivative curve)
 
-{-# INLINE derivativeValue #-}
-derivativeValue ::
+{-# INLINE derivativeAt #-}
+derivativeAt ::
   Curve.Exists dimension units space =>
-  Nondegenerate (Curve dimension units space) ->
   Number ->
+  Nondegenerate (Curve dimension units space) ->
   Vector dimension units space
-derivativeValue (Nondegenerate curve) parameterValue =
-  Curve.derivativeValue curve parameterValue
+derivativeAt tValue (Nondegenerate curve) =
+  Curve.derivativeAt tValue curve
 
-{-# INLINE secondDerivativeValue #-}
-secondDerivativeValue ::
+{-# INLINE secondDerivativeAt #-}
+secondDerivativeAt ::
   Curve.Exists dimension units space =>
-  Nondegenerate (Curve dimension units space) ->
   Number ->
+  Nondegenerate (Curve dimension units space) ->
   Vector dimension units space
-secondDerivativeValue (Nondegenerate curve) parameterValue =
-  Curve.secondDerivativeValue curve parameterValue
+secondDerivativeAt tValue (Nondegenerate curve) =
+  Curve.secondDerivativeAt tValue curve
 
-tangentDirectionValue ::
+tangentDirectionAt ::
   (Curve.Exists dimension units space, Direction.Exists dimension space) =>
-  Nondegenerate (Curve dimension units space) ->
   Number ->
+  Nondegenerate (Curve dimension units space) ->
   Direction dimension space
-tangentDirectionValue curve tValue =
-  VectorCurve.Nondegenerate.direction (derivative curve) tValue
+tangentDirectionAt tValue curve =
+  VectorCurve.Nondegenerate.directionAt tValue (derivative curve)
 
 bisectionTree ::
   Nondegenerate (Curve dimension units space) ->
@@ -117,7 +133,7 @@ findPoint ::
   Nondegenerate (Curve dimension units space) ->
   List (CurvePoint dimension units space)
 findPoint givenPoint givenCurve = do
-  let endpointSolutions = [t | t <- [0.0, 1.0], point givenCurve t ~= givenPoint]
+  let endpointSolutions = [t | t <- [0.0, 1.0], pointAt t givenCurve ~= givenPoint]
   let endpointSolutionSet = Bag.pack Interval.constant endpointSolutions
   let isDistant segment = not (givenPoint `intersects` Curve.Segment.range segment)
   let resolvedMonotonicity _ segment
@@ -126,7 +142,7 @@ findPoint givenPoint givenCurve = do
         | Curve.Segment.isDegenerate segment = Resolved (Just Monotonic)
         | otherwise = Unresolved
   let evaluate tValue =
-        (# point givenCurve tValue - givenPoint, derivativeValue givenCurve tValue #)
+        (# pointAt tValue givenCurve - givenPoint, derivativeAt tValue givenCurve #)
   let resolvedSolution Monotonic tRange segment
         | isDistant segment = Resolved Nothing
         | otherwise = Fuzzy.map Just (NewtonRaphson.Curve.solveIn tRange evaluate)
@@ -135,7 +151,7 @@ findPoint givenPoint givenCurve = do
           & Bisection.clusters endpointSolutionSet resolvedMonotonicity
   let interiorSolutions = List.filterMap (Bisection.find resolvedSolution) clusters
   List.sort (endpointSolutions <> interiorSolutions)
-    & List.map (curvePoint givenCurve)
+    & List.map (curvePointOn givenCurve)
 
 intersections ::
   ( Curve.Exists dimension units space

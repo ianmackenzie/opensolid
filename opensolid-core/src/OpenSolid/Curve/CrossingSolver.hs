@@ -48,13 +48,13 @@ solve nondegenerateA nondegenerateB Crossing (tRangeA, tRangeB) (segmentA, segme
       let Nondegenerate curveA = nondegenerateA
       let Nondegenerate curveB = nondegenerateB
       let evaluate (UvPoint tA tB) = do
-            let displacement = Curve.point curveB tB - Curve.point curveA tA
-            let derivativeA = negate (Curve.derivativeValue curveA tA)
-            let derivativeB = Curve.derivativeValue curveB tB
+            let displacement = Curve.pointAt tB curveB - Curve.pointAt tA curveA
+            let derivativeA = negate (Curve.derivativeAt tA curveA)
+            let derivativeB = Curve.derivativeAt tB curveB
             (# displacement, derivativeA, derivativeB #)
       UvPoint tA tB <- NewtonRaphson.Surface.solveIn (UvBounds tRangeA tRangeB) evaluate
-      let p1 = Curve.Nondegenerate.curvePoint nondegenerateA tA
-      let p2 = Curve.Nondegenerate.curvePoint nondegenerateB tB
+      let p1 = Curve.Nondegenerate.curvePointAt tA nondegenerateA
+      let p2 = Curve.Nondegenerate.curvePointAt tB nondegenerateB
       case CurvePoint.continuity p1 p2 of
         Nothing -> Unresolved
         Just Continuity.Crossing -> Resolved (Just (IntersectionPoint.crossing (p1, p2)))

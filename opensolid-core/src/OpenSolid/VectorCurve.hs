@@ -1130,10 +1130,10 @@ secondDerivativeRange tRange curve = range tRange (secondDerivative curve)
 
 directionRange ::
   Exists dimension units space =>
-  VectorCurve dimension units space ->
   Interval Unitless ->
+  VectorCurve dimension units space ->
   DirectionBounds dimension space
-directionRange curve tRange =
+directionRange tRange curve =
   VectorCurve.Direction.range curve tRange (range tRange curve) (derivativeRange tRange curve)
 
 {-# INLINE isZero #-}

@@ -1,8 +1,9 @@
 module OpenSolid.Curve2D.Nonzero
-  ( point
+  ( pointAt
+  , pointOn
   , derivative
-  , tangentDirectionValue
-  , curvatureVectorValue
+  , tangentDirectionAt
+  , curvatureVectorAt
   , offsetLeftwardBy
   , offsetRightwardBy
   )
@@ -22,21 +23,24 @@ import OpenSolid.VectorCurve.Nonzero qualified as VectorCurve.Nonzero
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
-point :: Nonzero (Curve2D units) -> Number -> Point2D units
-point = Curve.Nonzero.point
+pointAt :: Number -> Nonzero (Curve2D units) -> Point2D units
+pointAt = Curve.Nonzero.pointAt
+
+pointOn :: Nonzero (Curve2D units) -> Number -> Point2D units
+pointOn = Curve.Nonzero.pointOn
 
 derivative :: Nonzero (Curve2D units) -> Nonzero (VectorCurve2D units)
 derivative = Curve.Nonzero.derivative
 
-tangentDirectionValue :: Nonzero (Curve2D units) -> Number -> Direction2D
-tangentDirectionValue = Curve.Nonzero.tangentDirectionValue
+tangentDirectionAt :: Number -> Nonzero (Curve2D units) -> Direction2D
+tangentDirectionAt = Curve.Nonzero.tangentDirectionAt
 
-curvatureVectorValue ::
+curvatureVectorAt ::
   Units.Inverse units inverseUnits =>
-  Nonzero (Curve2D units) ->
   Number ->
+  Nonzero (Curve2D units) ->
   Vector2D inverseUnits
-curvatureVectorValue = Curve.Nonzero.curvatureVectorValue
+curvatureVectorAt = Curve.Nonzero.curvatureVectorAt
 
 offsetLeftwardBy ::
   Tolerance units =>

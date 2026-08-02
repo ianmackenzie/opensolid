@@ -6,15 +6,16 @@ module OpenSolid.Curve
   , Solver
   , Compiled
   , constant
-  , point
+  , pointAt
+  , pointOn
   , range
   , startPoint
   , endPoint
   , derivative
-  , derivativeValue
+  , derivativeAt
   , derivativeRange
   , secondDerivative
-  , secondDerivativeValue
+  , secondDerivativeAt
   , secondDerivativeRange
   , hasDegenerateStart
   , hasDegenerateEnd
@@ -117,13 +118,17 @@ constant ::
   Exists dimension units space =>
   Point dimension units space ->
   Curve dimension units space
-point ::
+pointAt ::
+  Number ->
+  Curve dimension units space ->
+  Point dimension units space
+pointOn ::
   Curve dimension units space ->
   Number ->
   Point dimension units space
 range ::
-  Curve dimension units space ->
   Interval Unitless ->
+  Curve dimension units space ->
   Bounds dimension units space
 startPoint ::
   Curve dimension units space ->
@@ -134,29 +139,29 @@ endPoint ::
 derivative ::
   Curve dimension units space ->
   VectorCurve dimension units space
-derivativeValue ::
+derivativeAt ::
   Exists dimension units space =>
-  Curve dimension units space ->
   Number ->
+  Curve dimension units space ->
   Vector dimension units space
 derivativeRange ::
   Exists dimension units space =>
-  Curve dimension units space ->
   Interval Unitless ->
+  Curve dimension units space ->
   VectorBounds dimension units space
 secondDerivative ::
   Exists dimension units space =>
   Curve dimension units space ->
   VectorCurve dimension units space
-secondDerivativeValue ::
+secondDerivativeAt ::
   Exists dimension units space =>
-  Curve dimension units space ->
   Number ->
+  Curve dimension units space ->
   Vector dimension units space
 secondDerivativeRange ::
   Exists dimension units space =>
-  Curve dimension units space ->
   Interval Unitless ->
+  Curve dimension units space ->
   VectorBounds dimension units space
 hasDegenerateStart :: Exists dimension units space => Curve dimension units space -> Bool
 hasDegenerateEnd :: Exists dimension units space => Curve dimension units space -> Bool

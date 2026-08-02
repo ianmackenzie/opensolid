@@ -14,16 +14,17 @@ module OpenSolid.Curve3D
   , compiled
   , derivative
   , secondDerivative
-  , derivativeValue
+  , derivativeAt
   , derivativeRange
-  , secondDerivativeValue
+  , secondDerivativeAt
   , secondDerivativeRange
   , tangentDirectionRange
   , isPoint
   , startPoint
   , endPoint
   , endpoints
-  , point
+  , pointAt
+  , pointOn
   , range
   , bounds
   , reverse
@@ -138,35 +139,23 @@ compiled = Curve.compiled
 secondDerivative :: Curve3D space -> VectorCurve3D Meters space
 secondDerivative = Curve.secondDerivative
 
-{-# INLINE derivativeValue #-}
-derivativeValue ::
-  Curve3D space ->
-  Number ->
-  Vector3D Meters space
-derivativeValue = Curve.derivativeValue
+{-# INLINE derivativeAt #-}
+derivativeAt :: Number -> Curve3D space -> Vector3D Meters space
+derivativeAt = Curve.derivativeAt
 
 {-# INLINE derivativeRange #-}
-derivativeRange ::
-  Curve3D space ->
-  Interval Unitless ->
-  VectorBounds3D Meters space
+derivativeRange :: Interval Unitless -> Curve3D space -> VectorBounds3D Meters space
 derivativeRange = Curve.derivativeRange
 
-{-# INLINE secondDerivativeValue #-}
-secondDerivativeValue ::
-  Curve3D space ->
-  Number ->
-  Vector3D Meters space
-secondDerivativeValue = Curve.secondDerivativeValue
+{-# INLINE secondDerivativeAt #-}
+secondDerivativeAt :: Number -> Curve3D space -> Vector3D Meters space
+secondDerivativeAt = Curve.secondDerivativeAt
 
 {-# INLINE secondDerivativeRange #-}
-secondDerivativeRange ::
-  Curve3D space ->
-  Interval Unitless ->
-  VectorBounds3D Meters space
+secondDerivativeRange :: Interval Unitless -> Curve3D space -> VectorBounds3D Meters space
 secondDerivativeRange = Curve.secondDerivativeRange
 
-tangentDirectionRange :: Curve3D space -> Interval Unitless -> DirectionBounds3D space
+tangentDirectionRange :: Interval Unitless -> Curve3D space -> DirectionBounds3D space
 tangentDirectionRange = Curve.tangentDirectionRange
 
 isPoint :: Tolerance Meters => Curve3D space -> Bool
@@ -181,10 +170,13 @@ endPoint = Curve.endPoint
 endpoints :: Curve3D space -> (Point3D space, Point3D space)
 endpoints = Curve.endpoints
 
-point :: Curve3D space -> Number -> Point3D space
-point = Curve.point
+pointAt :: Number -> Curve3D space -> Point3D space
+pointAt = Curve.pointAt
 
-range :: Curve3D space -> Interval Unitless -> Bounds3D space
+pointOn :: Curve3D space -> Number -> Point3D space
+pointOn = Curve.pointOn
+
+range :: Interval Unitless -> Curve3D space -> Bounds3D space
 range = Curve.range
 
 bounds :: Curve3D space -> Bounds3D space
@@ -202,7 +194,7 @@ length = Curve.length
 uniformParameterization :: Tolerance Meters => Curve3D space -> Number -> Number
 uniformParameterization = Curve.uniformParameterization
 
-uniformPoint :: Tolerance Meters => Curve3D space -> Number -> Point3D space
+uniformPoint :: Tolerance Meters => Number -> Curve3D space -> Point3D space
 uniformPoint = Curve.uniformPoint
 
 transformBy :: Transform3D tag space -> Curve3D space -> Curve3D space

@@ -1,5 +1,5 @@
 module OpenSolid.VectorCurve.Nondegenerate
-  ( direction
+  ( directionAt
   , squaredMagnitude_
   , squaredMagnitude
   )
@@ -23,12 +23,12 @@ squaredMagnitude_ ::
   Nondegenerate (Curve1D (units ?*? units))
 squaredMagnitude_ (Nondegenerate curve) = Nondegenerate (VectorCurve.squaredMagnitude_ curve)
 
-direction ::
+directionAt ::
   (VectorCurve.Exists dimension units space, Direction.Exists dimension space) =>
-  Nondegenerate (VectorCurve dimension units space) ->
   Number ->
+  Nondegenerate (VectorCurve dimension units space) ->
   Direction dimension space
-direction (Nondegenerate curve) tValue =
+directionAt tValue (Nondegenerate curve) =
   Direction.unsafe $
     Tolerance.using Quantity.zero $
       Vector.normalize $

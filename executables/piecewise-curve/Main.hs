@@ -43,7 +43,7 @@ main = Tolerance.using Length.defaultTolerance do
   let drawCurve n curve =
         Svg.group
           [ Svg.curve (Resolution.maxError Length.micrometer) curve
-          , Svg.combine (drawDot . Curve2D.point curve) (Parameter.steps n)
+          , Svg.combine (drawDot . Curve2D.pointOn curve) (Parameter.steps n)
           ]
   Svg.write "executables/piecewise-curve/circle.svg" (Svg.padding Length.centimeter) $
     drawCurve 40 circle

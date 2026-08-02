@@ -1,9 +1,9 @@
 module OpenSolid.CurvePoint
   ( CurvePoint
   , point
-  , derivativeValue
-  , tangentDirectionValue
-  , curvatureVectorValue_
+  , derivativeAt
+  , tangentDirectionAt
+  , curvatureVectorAt_
   , location
   , parameterValue
   , isEndpoint
@@ -41,16 +41,16 @@ parameterValue = CurveLocation.toParameterValue . location
 point :: CurvePoint dimension units space -> Point dimension units space
 point = (.point)
 
-derivativeValue :: CurvePoint dimension units space -> Vector dimension units space
-derivativeValue = (.derivativeValue)
+derivativeAt :: CurvePoint dimension units space -> Vector dimension units space
+derivativeAt = (.derivative)
 
-tangentDirectionValue :: CurvePoint dimension units space -> Direction dimension space
-tangentDirectionValue = (.tangentDirectionValue)
+tangentDirectionAt :: CurvePoint dimension units space -> Direction dimension space
+tangentDirectionAt = (.tangentDirection)
 
-curvatureVectorValue_ ::
+curvatureVectorAt_ ::
   Nondegenerate (CurvePoint dimension units space) ->
   Vector dimension (Unitless ?/? units) space
-curvatureVectorValue_ = Nondegenerate.get (.curvatureVectorValue_)
+curvatureVectorAt_ = Nondegenerate.get (.curvatureVector_)
 
 isEndpoint :: CurvePoint dimension units space -> Bool
 isEndpoint = Parameter.isEndpoint . parameterValue
@@ -59,7 +59,7 @@ isDegenerate ::
   (Vector.Exists dimension units space, Tolerance units) =>
   CurvePoint dimension units space ->
   Bool
-isDegenerate curvePoint = derivativeValue curvePoint ~= Vector.zero
+isDegenerate curvePoint = derivativeAt curvePoint ~= Vector.zero
 
 nondegenerate ::
   (Vector.Exists dimension units space, Tolerance units) =>
@@ -83,19 +83,19 @@ continuity ::
 continuity p1 p2 = do
   if point p1 ~= point p2
     then do
-      let tangent1 = tangentDirectionValue p1
-      let tangent2 = tangentDirectionValue p2
+      let tangent1 = tangentDirectionAt p1
+      let tangent2 = tangentDirectionAt p2
       if Direction.parallel tangent1 tangent2
         then do
           let alignment = Number.sign (tangent1 `dot` tangent2)
           if
             | Ok nondegenerate1 <- nondegenerate p1
             , Ok nondegenerate2 <- nondegenerate p2 -> do
-                let l1 = Vector.magnitude (derivativeValue p1)
-                let l2 = Vector.magnitude (derivativeValue p2)
+                let l1 = Vector.magnitude (derivativeAt p1)
+                let l2 = Vector.magnitude (derivativeAt p2)
                 let l = Quantity.erase (min l1 l2)
-                let k1_ = curvatureVectorValue_ nondegenerate1
-                let k2_ = curvatureVectorValue_ nondegenerate2
+                let k1_ = curvatureVectorAt_ nondegenerate1
+                let k2_ = curvatureVectorAt_ nondegenerate2
                 let k = Vector.erase (k1_ - k2_)
                 let curvatureError :: Vector dimension units space =
                       Vector.unerase (k * l * l / 2.0)
