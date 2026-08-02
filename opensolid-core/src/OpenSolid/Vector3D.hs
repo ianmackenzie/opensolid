@@ -45,6 +45,7 @@ module OpenSolid.Vector3D
   , scaleAlong
   , mirrorIn
   , mirrorAcross
+  , divergence
   )
 where
 
@@ -284,3 +285,17 @@ mirrorIn = VectorTransform3D.mirrorInImpl transformBy
 -- | Mirror across the given plane.
 mirrorAcross :: Plane3D space -> Vector3D units space -> Vector3D units space
 mirrorAcross = VectorTransform3D.mirrorAcrossImpl transformBy
+
+divergence :: Vector3D units space -> Vector3D units space -> Quantity units
+divergence vector1 vector2 = do
+  let magnitude1 = magnitude vector1
+  let magnitude2 = magnitude vector2
+  let minMagnitude = min magnitude1 magnitude2
+  if minMagnitude == Quantity.zero
+    then Quantity.zero
+    else do
+      let crossMagnitude_ = magnitude (vector1 `cross_` vector2)
+      let divergence1 = Units.simplify (crossMagnitude_ ?/? magnitude2)
+      let divergence2 = Units.simplify (crossMagnitude_ ?/? magnitude1)
+      let minDivergence = min divergence1 divergence2
+      min minMagnitude minDivergence
