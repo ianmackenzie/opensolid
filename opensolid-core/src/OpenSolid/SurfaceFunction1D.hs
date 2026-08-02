@@ -93,7 +93,7 @@ instance Units.Coercion (SurfaceFunction1D units1) (SurfaceFunction1D units2) wh
 instance ApproximateEquality (SurfaceFunction1D units) (Tolerance units) where
   function1 ~= function2 = do
     let equalValuesAt uvPoint = value function1 uvPoint ~= value function2 uvPoint
-    NonEmpty.all equalValuesAt UvPoint.samples
+    NonEmpty.all equalValuesAt UvPoint.interiorSamples
 
 instance
   units1 ~ units2 =>

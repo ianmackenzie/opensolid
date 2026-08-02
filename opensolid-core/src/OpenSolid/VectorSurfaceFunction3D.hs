@@ -462,7 +462,7 @@ new givenCompiled derivativeFunction = do
           , degenerateV1 = dv.degenerateV1
           }
   let sampledMagnitude uvPoint = Vector3D.magnitude (CompiledFunction.value givenCompiled uvPoint)
-  let maxSampledMagnitude = NonEmpty.maximumOf sampledMagnitude UvPoint.samples
+  let maxSampledMagnitude = NonEmpty.maximumOf sampledMagnitude UvPoint.interiorSamples
   VectorSurfaceFunction3D
     { compiled = givenCompiled
     , du = du

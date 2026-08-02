@@ -174,7 +174,7 @@ new givenCompiled derivativeFunction = do
       { compiled = givenCompiled
       , du
       , dv = dv'
-      , maxSampledNondegeneracy = NonEmpty.maximumOf (nondegeneracy result) UvPoint.samples
+      , maxSampledNondegeneracy = NonEmpty.maximumOf (nondegeneracy result) UvPoint.interiorSamples
       }
 
 constant :: Point3D space -> SurfaceFunction3D space
