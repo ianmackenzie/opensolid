@@ -231,7 +231,9 @@ library
     OpenSolid.SurfaceFunction2D
     OpenSolid.SurfaceFunction3D
     OpenSolid.SurfaceFunction3D.Nondegenerate
+    OpenSolid.SurfaceLocation
     OpenSolid.SurfaceParameter
+    OpenSolid.SurfacePoint3D
     OpenSolid.SurfaceVertex3D
     OpenSolid.Svg
     OpenSolid.Text
@@ -289,6 +291,7 @@ library
     OpenSolid.Curve1D.Bisection
     OpenSolid.HasZero
     OpenSolid.Internal.CurvePoint
+    OpenSolid.Internal.SurfacePoint3D
     OpenSolid.Lobatto
     OpenSolid.Quadrature
     OpenSolid.Region2D.BoundaryTree
