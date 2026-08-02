@@ -391,7 +391,7 @@ store ptr offset value = do
     SignRep -> store @Int ptr offset (case value of Positive -> 1; Negative -> -1)
     TextRep -> do
       let numBytes = Data.Text.Foreign.lengthWord8 value
-      contentsPtr <- Foreign.Marshal.Alloc.mallocBytes (numBytes + 1)
+      contentsPtr <- Foreign.Marshal.Alloc.callocBytes (numBytes + 1)
       Data.Text.Foreign.unsafeCopyToPtr value contentsPtr
       Foreign.pokeByteOff contentsPtr numBytes (fromIntegral 0 :: Word8)
       Foreign.pokeByteOff ptr offset contentsPtr
