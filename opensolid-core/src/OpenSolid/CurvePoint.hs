@@ -69,8 +69,11 @@ nondegenerate curvePoint =
   if isDegenerate curvePoint then Error IsDegenerate else Ok (Nondegenerate curvePoint)
 
 continuity ::
+  forall dimension units space.
   ( Point.Exists dimension units space
+  , Direction.Exists dimension space
   , Vector.Exists dimension units space
+  , Vector.Exists dimension Unitless space
   , Vector.Exists dimension (Unitless ?/? units) space
   , Tolerance units
   ) =>
@@ -93,7 +96,8 @@ continuity p1 p2 = do
               let k1_ = curvatureVector_ nondegenerate1
               let k2_ = curvatureVector_ nondegenerate2
               let k = Vector.erase (k1_ - k2_)
-              if Vector.unerase (k * l * l / 2.0) ~= Vector.zero
+              let curvatureError :: Vector dimension units space = Vector.unerase (k * l * l / 2.0)
+              if curvatureError ~= Vector.zero
                 then Just (Continuity.Indistinguishable sign)
                 else Just (Continuity.Tangent sign)
             _ -> Just (Continuity.Indistinguishable sign)
