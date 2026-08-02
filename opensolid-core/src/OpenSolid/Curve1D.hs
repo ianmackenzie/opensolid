@@ -106,7 +106,7 @@ instance FFI (Curve1D Unitless) where
   representation = FFI.classRepresentation "UnitlessCurve1D"
 
 instance FFI (Curve1D Meters) where
-  representation = FFI.classRepresentation "Curve1D"
+  representation = FFI.classRepresentation "LengthCurve1D"
 
 instance FFI (Curve1D SquareMeters) where
   representation = FFI.classRepresentation "AreaCurve1D"

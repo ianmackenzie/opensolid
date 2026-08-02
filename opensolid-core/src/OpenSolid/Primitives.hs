@@ -69,7 +69,7 @@ instance FFI (Vector2D Unitless) where
   representation = FFI.classRepresentation "UnitlessVector2D"
 
 instance FFI (Vector2D Meters) where
-  representation = FFI.classRepresentation "Vector2D"
+  representation = FFI.classRepresentation "Displacement2D"
 
 instance FFI (Vector2D SquareMeters) where
   representation = FFI.classRepresentation "AreaVector2D"
@@ -975,7 +975,7 @@ instance FFI (Vector3D Unitless Void) where
   representation = FFI.classRepresentation "UnitlessVector3D"
 
 instance FFI (Vector3D Meters Void) where
-  representation = FFI.classRepresentation "Vector3D"
+  representation = FFI.classRepresentation "Displacement3D"
 
 instance FFI (Vector3D SquareMeters Void) where
   representation = FFI.classRepresentation "AreaVector3D"

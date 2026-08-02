@@ -130,7 +130,7 @@ instance FFI (Interval Radians) where
   representation = FFI.classRepresentation "AngleInterval"
 
 instance FFI (Interval Meters) where
-  representation = FFI.classRepresentation "Interval"
+  representation = FFI.classRepresentation "LengthInterval"
 
 instance FFI (Interval SquareMeters) where
   representation = FFI.classRepresentation "AreaInterval"
