@@ -26,6 +26,7 @@ import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
+import OpenSolid.Vector.Nonzero qualified as Vector.Nonzero
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
@@ -52,9 +53,7 @@ tangentDirectionAt ::
   Number ->
   Nonzero (Curve dimension units space) ->
   Direction dimension space
-tangentDirectionAt tValue (Nonzero curve) = do
-  let derivativeValue = Curve.derivativeAt tValue curve
-  Direction.unsafe (derivativeValue / Vector.magnitude derivativeValue)
+tangentDirectionAt tValue curve = Vector.Nonzero.direction (derivativeAt tValue curve)
 
 tangentDirectionRange ::
   (Curve.Exists dimension units space, DirectionBounds.Exists dimension space) =>
