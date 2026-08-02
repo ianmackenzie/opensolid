@@ -20,7 +20,7 @@ import OpenSolid.Color qualified as Color
 import OpenSolid.Convention3D (Convention3D)
 import OpenSolid.Convention3D qualified as Convention3D
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
+import OpenSolid.Curve1D.Root qualified as Curve1D.Root
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Direction3D qualified as Direction3D
@@ -859,7 +859,7 @@ unitlessCurve1D =
     , Class.member0 "Sin" (Curve1D.sin . (Angle.radian *)) $(docs 'Curve1D.sin)
     , Class.member0 "Cos" (Curve1D.cos . (Angle.radian *)) $(docs 'Curve1D.cos)
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
-    , Class.memberU0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
+    , Class.memberU0 "Roots" Curve1D.roots $(docs 'Curve1D.roots)
     , Class.memberU0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negation
     , Class.numberPlus
@@ -893,7 +893,7 @@ angleCurve1D =
     , Class.member0 "Sin" Curve1D.sin $(docs 'Curve1D.sin)
     , Class.member0 "Cos" Curve1D.cos $(docs 'Curve1D.cos)
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
-    , Class.memberR0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
+    , Class.memberR0 "Roots" Curve1D.roots $(docs 'Curve1D.roots)
     , Class.memberR0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negation
     , Class.numberTimes
@@ -920,7 +920,7 @@ lengthCurve1D =
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
     , Class.member0 "Squared" Curve1D.squared $(docs 'Curve1D.squared)
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
-    , Class.memberM0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
+    , Class.memberM0 "Roots" Curve1D.roots $(docs 'Curve1D.roots)
     , Class.memberM0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negation
     , Class.numberTimes
@@ -936,10 +936,10 @@ lengthCurve1D =
     , Class.divideBy @Length Class.noFallback
     , Class.divideByNonzeroU @UnitlessCurve1D Curve1D.nonzero Class.fallbackMemberDivideBy
     , Class.divideByNonzeroM @LengthCurve1D Curve1D.nonzero Class.fallbackStaticRatio
-    , Class.nested @Curve1D.Zero "A point where a given curve is equal to zero." $
-        [ Class.property "Location" (.location) "The parameter value at which the curve is zero."
-        , Class.property "Order" (.order) "The order of the solution: 0 for crossing, 1 for tangent, etc."
-        , Class.property "Sign" (.sign) "The sign of the solution: the sign of the curve to the right of the solution."
+    , Class.nested @Curve1D.Root "A point where a given curve is equal to zero." $
+        [ Class.property "Location" (Curve1D.Root.location) "The parameter value at which the curve is zero."
+        , Class.property "Order" (Curve1D.Root.order) "The order of the solution: 0 for crossing, 1 for tangent, etc."
+        , Class.property "Sign" (Curve1D.Root.sign) "The sign of the solution: the sign of the curve to the right of the solution."
         ]
     ]
 

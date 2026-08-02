@@ -49,7 +49,7 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Nonzero qualified as Curve1D.Nonzero
-import OpenSolid.Curve1D.Zero qualified
+import OpenSolid.Curve1D.Root qualified as Curve1D.Root
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
@@ -1183,8 +1183,8 @@ zeros ::
   VectorCurve dimension units space ->
   Result IsDegenerate (List Number)
 zeros vectorCurve =
-  case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.zeros (squaredMagnitude_ vectorCurve)) of
-    Ok zeros1D -> Ok (List.map (.location) zeros1D)
+  case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.roots (squaredMagnitude_ vectorCurve)) of
+    Ok zeros1D -> Ok (List.map Curve1D.Root.location zeros1D)
     Err Curve1D.IsZero -> Err IsDegenerate
 
 squaredMagnitude_ ::

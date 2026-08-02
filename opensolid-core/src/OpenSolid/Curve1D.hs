@@ -3,7 +3,7 @@
 module OpenSolid.Curve1D
   ( Curve1D
   , Compiled
-  , Zero
+  , Root
   , valueAt
   , valueOf
   , range
@@ -38,7 +38,7 @@ module OpenSolid.Curve1D
   , nondegenerate
   , nonzero
   , IsZero (IsZero)
-  , zeros
+  , roots
   , CrossesZero (CrossesZero)
   , sign
   , reverse
@@ -53,8 +53,8 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve1D.Zero (Zero)
-import OpenSolid.Curve1D.Zero qualified as Zero
+import OpenSolid.Curve1D.Root (Root)
+import OpenSolid.Curve1D.Root qualified as Root
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
@@ -139,7 +139,7 @@ instance
     -- TODO optimize this to use a special Solve1D.find or similar
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and their exact locations)
-    case zeros (curve - quantity) of
+    case roots (curve - quantity) of
       Ok [] -> False
       Ok List.OneOrMore -> True
       Err IsZero -> True
@@ -530,12 +530,12 @@ nonzero ::
   Curve1D units ->
   Result HasZero (Nonzero (Curve1D units))
 nonzero curve =
-  case zeros curve of
+  case roots curve of
     Err IsZero -> Err HasZero
     Ok [] -> Ok (Nonzero curve)
     Ok NonEmpty{} -> Err HasZero
 
------ ZERO FINDING -----
+----- ROOT FINDING -----
 
 {-| Find all points at which the given curve is zero.
 
@@ -544,54 +544,54 @@ but also where it is *tangent* to zero.
 For example, y=x-3 crosses zero at x=3,
 while y=(x-3)^2 is tangent to zero at x=3.
 
-We define y=x-3 as having a zero of order 0 at x=3,
+We define y=x-3 as having a root of order 0 at x=3,
 since only the "derivative of order zero" (the curve itself)
 is zero at that point.
-Similarly, y=(x-3)^2 has a zero of order 1 at x=3,
+Similarly, y=(x-3)^2 has a root of order 1 at x=3,
 since the first derivative (but not the second derivative)
 is zero at that point.
 
-Currently, this function up to third-order zeros
-(e.g. y=x^4 has a third-order zero at x=0,
+Currently, this function up to third-order roots
+(e.g. y=x^4 has a third-order root at x=0,
 since everything up to the third derivative is zero at x=0).
 
 The current tolerance is used to determine
-whether a given point should be considered a zero,
+whether a given point should be considered a root,
 and of what order.
 For example, the curve y=x^2-0.0001 is *exactly* zero at x=0.01 and x=-0.01.
 However, note that the curve is also very close to zero at x=0,
 and at that point the first derivative is *also* zero.
 In many cases, it is reasonable to assume that
 the 0.0001 is an artifact of numerical roundoff,
-and the curve actually has a single zero of order 1 at x=0.
+and the curve actually has a single root of order 1 at x=0.
 The current tolerance is used to choose which case to report.
 In this example, a tolerance of 0.000001
 would mean that we consider 0.0001 a meaningful value (not just roundoff),
-so we would end up reporting two order-0 zeros at x=0.01 and x=-0.01.
+so we would end up reporting two order-0 roots at x=0.01 and x=-0.01.
 On the other hand, a tolerance of 0.01 would mean that
 we consider 0.0001 as just roundoff error,
-so we would end up reporting a single order-1 zero at x=0
+so we would end up reporting a single order-1 root at x=0
 (the point at which the *first derivative* is zero).
 -}
-zeros :: Tolerance units => Curve1D units -> Result IsZero (List Zero)
-zeros curve
+roots :: Tolerance units => Curve1D units -> Result IsZero (List Root)
+roots curve
   | curve ~= zero = Err IsZero
   | otherwise = do
       let derivatives = Stream.iterate derivative curve
       let derivativeRangeStream tRange = Stream.map (range tRange) derivatives
       let cache = Solve1D.init derivativeRangeStream
-      case Solve1D.search (findZeros derivatives) cache of
-        Ok foundZeros -> Ok (List.sortBy (.location) foundZeros)
+      case Solve1D.search (findRoots derivatives) cache of
+        Ok foundRoots -> Ok (List.sortBy Root.location foundRoots)
         Err Solve1D.InfiniteRecursion -> throw HigherOrderZero
 
-findZeros ::
+findRoots ::
   Tolerance units =>
   Stream (Curve1D units) ->
   Domain1D ->
   Stream (Interval units) ->
   Solve1D.Exclusions exclusions ->
-  Solve1D.Action exclusions Zero
-findZeros derivatives subdomain derivativeRangeStream exclusions
+  Solve1D.Action exclusions Root
+findRoots derivatives subdomain derivativeRangeStream exclusions
   -- Skip the subdomain entirely if the curve itself is non-zero everywhere
   | not (Stream.head derivativeRangeStream `intersects` Quantity.zero) = Solve1D.pass
   -- Optimization heuristic: bisect down to small subdomains first,
@@ -601,44 +601,44 @@ findZeros derivatives subdomain derivativeRangeStream exclusions
   | otherwise = case exclusions of
       Solve1D.SomeExclusions -> Solve1D.recurse
       Solve1D.NoExclusions ->
-        case findZerosOrder 0 derivatives subdomain derivativeRangeStream of
+        case findRootsOrder 0 derivatives subdomain derivativeRangeStream of
           Unresolved -> Solve1D.recurse
           Resolved [] -> Solve1D.pass
-          Resolved (NonEmpty subdomainZeros) -> do
+          Resolved (NonEmpty subdomainRoots) -> do
             let subdomainInterior = Domain1D.interior subdomain
             let isInterior (t0, _) = Interval.member t0 subdomainInterior
-            if NonEmpty.all isInterior subdomainZeros
-              then Solve1D.return (NonEmpty.map toZero subdomainZeros)
+            if NonEmpty.all isInterior subdomainRoots
+              then Solve1D.return (NonEmpty.map toRoot subdomainRoots)
               else Solve1D.recurse
 
-toZero :: (Number, Solve1D.Neighborhood units) -> Zero
-toZero (t0, neighborhood) = Solve1D.zero t0 neighborhood
+toRoot :: (Number, Solve1D.Neighborhood units) -> Root
+toRoot (t0, neighborhood) = Solve1D.root t0 neighborhood
 
-maxZeroOrder :: Int
-maxZeroOrder = 3
+maxRootOrder :: Int
+maxRootOrder = 3
 
-findZerosOrder ::
+findRootsOrder ::
   Tolerance units =>
   Int ->
   Stream (Curve1D units) ->
   Domain1D ->
   Stream (Interval units) ->
   Fuzzy (List (Number, Solve1D.Neighborhood units))
-findZerosOrder k derivatives subdomain derivativeRangeStream
-  -- A derivative is resolved, so it has no zeros
-  -- (note that if k == 0, we already checked for the curve being non-zero in findZeros above)
+findRootsOrder k derivatives subdomain derivativeRangeStream
+  -- A derivative is resolved, so it has no roots
+  -- (note that if k == 0, we already checked for the curve being non-zero in findRoots above)
   | k > 0 && Interval.isResolved (Stream.head derivativeRangeStream) = Resolved []
-  -- We've exceeded the maximum zero order without finding a non-zero derivative
-  | k > maxZeroOrder = Unresolved
-  -- Otherwise, find higher-order zeros and then search in between them
+  -- We've exceeded the maximum root order without finding a non-zero derivative
+  | k > maxRootOrder = Unresolved
+  -- Otherwise, find higher-order roots and then search in between them
   | otherwise = do
       let higherDerivatives = Stream.tail derivatives
       let higherDerivativeRanges = Stream.tail derivativeRangeStream
       let currentDerivative = Stream.head derivatives
       let nextDerivative = Stream.head higherDerivatives
       let tRange = Domain1D.bounds subdomain
-      higherOrderZeros <- findZerosOrder (k + 1) higherDerivatives subdomain higherDerivativeRanges
-      case higherOrderZeros of
+      higherOrderRoots <- findRootsOrder (k + 1) higherDerivatives subdomain higherDerivativeRanges
+      case higherOrderRoots of
         [] -> solveMonotonic k currentDerivative nextDerivative tRange
         List.One (t0, neighborhood) -> do
           if Quantity.abs (valueAt t0 currentDerivative)
@@ -647,9 +647,9 @@ findZerosOrder k derivatives subdomain derivativeRangeStream
             else do
               let leftBounds = Interval (Interval.lower tRange) t0
               let rightBounds = Interval t0 (Interval.upper tRange)
-              leftZeros <- solveMonotonic k currentDerivative nextDerivative leftBounds
-              rightZeros <- solveMonotonic k currentDerivative nextDerivative rightBounds
-              Resolved (leftZeros <> rightZeros)
+              leftRoots <- solveMonotonic k currentDerivative nextDerivative leftBounds
+              rightRoots <- solveMonotonic k currentDerivative nextDerivative rightBounds
+              Resolved (leftRoots <> rightRoots)
         List.TwoOrMore -> Unresolved
 
 solveMonotonic ::
@@ -679,36 +679,36 @@ data CrossesZero = CrossesZero deriving (Eq, Show, Err)
 {-| Attempt to find the (consistent) sign of all values on the curve.
 
 Will return an error if the curve crosses zero,
-or has an indeterminate higher-order zero anywhere.
+or has an indeterminate higher-order root anywhere.
 If the curve is zero everywhere, then returns positive.
 -}
 sign :: Tolerance units => Curve1D units -> Result CrossesZero Sign
-sign curve = case zeros curve of
+sign curve = case roots curve of
   Err IsZero -> Ok Positive
-  Ok curveZeros ->
-    case List.filter isInnerZero curveZeros of
-      [] -> Ok (Quantity.sign (valueAt 0.5 curve)) -- No inner zeros, so check sign at t=0.5
-      NonEmpty innerZeros ->
-        case NonEmpty.filter isCrossingZero innerZeros of
-          List.OneOrMore -> Err CrossesZero -- There exists at least one inner crossing zero
+  Ok curveRoots ->
+    case List.filter isInnerRoot curveRoots of
+      [] -> Ok (Quantity.sign (valueAt 0.5 curve)) -- No inner roots, so check sign at t=0.5
+      NonEmpty innerRoots ->
+        case NonEmpty.filter isCrossingRoot innerRoots of
+          List.OneOrMore -> Err CrossesZero -- There exists at least one inner crossing root
           [] -> do
-            -- All inner zeros are non-crossing (e.g. quadratic) ones,
+            -- All inner roots are non-crossing (e.g. quadratic) ones,
             -- so we can safely test the curve
-            -- halfway between t=0 and the first inner zero
-            let firstInnerZero = NonEmpty.first innerZeros
-            let testPoint = 0.5 * firstInnerZero.location
+            -- halfway between t=0 and the first inner root
+            let firstInnerRoot = NonEmpty.first innerRoots
+            let testPoint = 0.5 * Root.location firstInnerRoot
             Ok (Quantity.sign (valueAt testPoint curve))
 
-isInnerZero :: Zero -> Bool
-isInnerZero curveZero = not (Parameter.isEndpoint curveZero.location)
+isInnerRoot :: Root -> Bool
+isInnerRoot root = not (Parameter.isEndpoint (Root.location root))
 
-isCrossingZero :: Zero -> Bool
-isCrossingZero curveZero =
-  -- Curve1D order 0 is linear (crossing) zero
-  -- Curve1D order 1 is quadratic (non-crossing) zero
-  -- Curve1D order 2 is cubic (crossing) zero
-  -- Curve1D order 3 is quartic (non-crossing) zero, etc.
-  Int.isEven curveZero.order
+isCrossingRoot :: Root -> Bool
+isCrossingRoot root =
+  -- Curve1D order 0 is linear (crossing) root
+  -- Curve1D order 1 is quadratic (non-crossing) root
+  -- Curve1D order 2 is cubic (crossing) root
+  -- Curve1D order 3 is quartic (non-crossing) root, etc.
+  Int.isEven (Root.order root)
 
 newtonRaphson :: Curve1D units -> Number -> Fuzzy Number
 newtonRaphson curve t0 = do

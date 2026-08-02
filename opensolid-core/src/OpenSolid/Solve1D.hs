@@ -2,7 +2,7 @@ module OpenSolid.Solve1D
   ( Neighborhood
   , neighborhood
   , derivativeTolerance
-  , zero
+  , root
   , Cache
   , init
   , SomeExclusions
@@ -14,12 +14,12 @@ module OpenSolid.Solve1D
   , return
   , recurse
   , pass
-  , Root (Exact, Closest)
+  , Solution (Exact, Closest)
   , monotonic
   )
 where
 
-import OpenSolid.Curve1D.Zero (Zero (Zero))
+import OpenSolid.Curve1D.Root (Root (Root))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.Int qualified as Int
@@ -58,8 +58,8 @@ derivativeTolerance Neighborhood{n, magnitude, radius} k = do
   (magnitude * radius ** Number.fromInt (n - k))
     / Number.fromInt (Int.factorial (n - k))
 
-zero :: Number -> Neighborhood units -> Zero
-zero location Neighborhood{n, sign} = Zero location (n - 1) sign
+root :: Number -> Neighborhood units -> Root
+root location Neighborhood{n, sign} = Root location (n - 1) sign
 
 data Cache cached
   = Tree Domain1D cached (Node cached)
@@ -176,14 +176,14 @@ recurse = Recurse
 pass :: Action exclusions solution
 pass = Pass
 
-data Root = Exact Number | Closest Number
+data Solution = Exact Number | Closest Number
 
 monotonic ::
   Tolerance units =>
   (Number -> Quantity units) ->
   (Number -> Quantity units) ->
   Interval Unitless ->
-  Root
+  Solution
 monotonic function derivative interval = do
   let Interval x1 x2 = interval
   let y1 = function x1
@@ -203,24 +203,24 @@ solveMonotonic ::
   Sign ->
   Number ->
   Number ->
-  Root
+  Solution
 solveMonotonic function derivative interval sign1 x1 x2 = do
   -- First, try applying Newton-Raphson within [x1,x2]
-  -- to see if that converges to a zero
+  -- to see if that converges to a root
   let xMid = Quantity.midpoint x1 x2
   let yMid = function xMid
   if yMid == Quantity.zero
     then Exact xMid
     else case newtonRaphson function derivative interval xMid yMid 0 of
-      Ok root -> Exact root -- Newton-Raphson converged to a zero, return it
+      Ok solution -> Exact solution -- Newton-Raphson converged to a root, return it
       Err Divergence -- Newton-Raphson did not converge within [x1, x2]
         | x1 < xMid && xMid < x2 ->
             -- It's possible to bisect further,
-            -- so recurse into whichever subdomain brackets the zero
+            -- so recurse into whichever subdomain brackets the root
             if Quantity.sign yMid == sign1
               then solveMonotonic function derivative interval sign1 xMid x2
               else solveMonotonic function derivative interval sign1 x1 xMid
-        | otherwise -> Exact xMid -- We've converged to a zero by bisection
+        | otherwise -> Exact xMid -- We've converged to a root by bisection
 
 data Divergence = Divergence deriving (Eq, Show, Err)
 

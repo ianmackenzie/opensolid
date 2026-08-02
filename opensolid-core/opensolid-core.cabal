@@ -124,7 +124,7 @@ library
     OpenSolid.Curve1D
     OpenSolid.Curve1D.Nondegenerate
     OpenSolid.Curve1D.Nonzero
-    OpenSolid.Curve1D.Zero
+    OpenSolid.Curve1D.Root
     OpenSolid.Curve2D
     OpenSolid.Curve2D.MedialAxis
     OpenSolid.Curve2D.Nonzero

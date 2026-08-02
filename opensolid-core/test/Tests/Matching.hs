@@ -7,7 +7,7 @@ where
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as Curve.IntersectionPoint
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
+import OpenSolid.Curve1D.Root qualified as Curve1D.Root
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
@@ -43,11 +43,11 @@ instance Matching Number where
 instance Matching Length where
   matching first second = Tolerance.using Length.defaultTolerance (first ~= second)
 
-instance Matching Curve1D.Zero where
-  matching zero1 zero2 =
-    matching zero1.location zero2.location
-      && zero1.order == zero2.order
-      && zero1.sign == zero2.sign
+instance Matching Curve1D.Root where
+  matching root1 root2 =
+    matching (Curve1D.Root.location root1) (Curve1D.Root.location root2)
+      && (Curve1D.Root.order root1 == Curve1D.Root.order root2)
+      && (Curve1D.Root.sign root1 == Curve1D.Root.sign root2)
 
 instance Matching Curve.IntersectionPoint where
   matching first second =

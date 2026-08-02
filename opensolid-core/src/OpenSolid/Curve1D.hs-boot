@@ -1,7 +1,7 @@
 module OpenSolid.Curve1D
   ( Curve1D
   , Compiled
-  , Zero
+  , Root
   , new
   , constant
   , zero
@@ -13,7 +13,7 @@ module OpenSolid.Curve1D
   , derivativeAt
   , secondDerivativeAt
   , range
-  , zeros
+  , roots
   , degeneracyTolerance
   , squared_
   , erase
@@ -22,7 +22,7 @@ module OpenSolid.Curve1D
 where
 
 import OpenSolid.CompiledFunction (CompiledFunction)
-import {-# SOURCE #-} OpenSolid.Curve1D.Zero (Zero)
+import OpenSolid.Curve1D.Root (Root)
 import OpenSolid.Error (IsZero)
 import OpenSolid.FFI (FFI)
 import OpenSolid.Interval (Interval)
@@ -100,7 +100,7 @@ valueOf :: Curve1D units -> Number -> Quantity units
 derivativeAt :: Number -> Curve1D units -> Quantity units
 secondDerivativeAt :: Number -> Curve1D units -> Quantity units
 range :: Interval Unitless -> Curve1D units -> Interval units
-zeros :: Tolerance units => Curve1D units -> Result IsZero (List Zero)
+roots :: Tolerance units => Curve1D units -> Result IsZero (List Root)
 degeneracyTolerance :: Curve1D units -> Quantity units
 squared_ :: Curve1D units -> Curve1D (units ?*? units)
 erase :: Curve1D units -> Curve1D Unitless
