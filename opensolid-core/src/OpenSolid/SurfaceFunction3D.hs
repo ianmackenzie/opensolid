@@ -169,29 +169,32 @@ new givenCompiled derivativeFunction = do
         U -> VectorSurfaceFunction3D.derivative V du
         V -> VectorSurfaceFunction3D.derivative V dv
   let dv' = VectorSurfaceFunction3D.new dvCompiled dvDerivative
-  let nondegeneracy uvPoint = do
-        let duValue = VectorSurfaceFunction3D.value du uvPoint
-        let dvValue = VectorSurfaceFunction3D.value dv' uvPoint
-        let duMagnitude = Vector3D.magnitude duValue
-        let dvMagnitude = Vector3D.magnitude dvValue
-        let minMagnitude = min duMagnitude dvMagnitude
-        if minMagnitude == Length.zero
-          then Length.zero
-          else do
-            let crossMagnitude = Vector3D.magnitude (duValue `cross` dvValue)
-            let duPerpendicularity = crossMagnitude / dvMagnitude
-            let dvPerpendicularity = crossMagnitude / duMagnitude
-            let minPerpendicularity = min duPerpendicularity dvPerpendicularity
-            min minMagnitude minPerpendicularity
-  SurfaceFunction3D
-    { compiled = givenCompiled
-    , du
-    , dv = dv'
-    , maxSampledNondegeneracy = NonEmpty.maximumOf nondegeneracy UvPoint.samples
-    }
+  recursive \result ->
+    SurfaceFunction3D
+      { compiled = givenCompiled
+      , du
+      , dv = dv'
+      , maxSampledNondegeneracy = NonEmpty.maximumOf (nondegeneracy result) UvPoint.samples
+      }
 
 constant :: Point3D space -> SurfaceFunction3D space
 constant value = new (CompiledFunction.constant value) (const VectorSurfaceFunction3D.zero)
+
+nondegeneracy :: SurfaceFunction3D space -> UvPoint -> Length
+nondegeneracy function uvPoint = do
+  let duValue = derivativeValue U function uvPoint
+  let dvValue = derivativeValue V function uvPoint
+  let duMagnitude = Vector3D.magnitude duValue
+  let dvMagnitude = Vector3D.magnitude dvValue
+  let minMagnitude = min duMagnitude dvMagnitude
+  if minMagnitude == Length.zero
+    then Length.zero
+    else do
+      let crossMagnitude = Vector3D.magnitude (duValue `cross` dvValue)
+      let duPerpendicularity = crossMagnitude / dvMagnitude
+      let dvPerpendicularity = crossMagnitude / duMagnitude
+      let minPerpendicularity = min duPerpendicularity dvPerpendicularity
+      min minMagnitude minPerpendicularity
 
 point :: SurfaceFunction3D space -> UvPoint -> Point3D space
 point function uvPoint = CompiledFunction.value function.compiled uvPoint
