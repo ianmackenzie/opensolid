@@ -87,7 +87,7 @@ unboxedQuinticHermiteEvaluation = Test.check 100 "unboxedQuinticHermiteEvaluatio
   t <- Test.generate Parameter.random
   let !(Q# t#) = t
   let actual = Q# (quinticBezier# p1# p2# p3# p4# p5# p6# t#)
-  let expected = Curve1D.value curve t
+  let expected = Curve1D.valueAt t curve
   Test.expect (Tolerance.using Tolerance.unitless (actual ~= expected))
     & Test.output "actual" actual
     & Test.output "expected" expected

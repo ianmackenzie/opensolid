@@ -9,9 +9,10 @@ module OpenSolid.Curve1D
   , bezier
   , compiled
   , derivative
-  , value
-  , derivativeValue
-  , secondDerivativeValue
+  , valueAt
+  , valueOf
+  , derivativeAt
+  , secondDerivativeAt
   , range
   , zeros
   , degeneracyTolerance
@@ -96,10 +97,11 @@ zero :: Curve1D units
 bezier :: NonEmpty (Quantity units) -> Curve1D units
 compiled :: Curve1D units -> Compiled units
 derivative :: Curve1D units -> Curve1D units
-value :: Curve1D units -> Number -> Quantity units
-derivativeValue :: Curve1D units -> Number -> Quantity units
-secondDerivativeValue :: Curve1D units -> Number -> Quantity units
-range :: Curve1D units -> Interval Unitless -> Interval units
+valueAt :: Number -> Curve1D units -> Quantity units
+valueOf :: Curve1D units -> Number -> Quantity units
+derivativeAt :: Number -> Curve1D units -> Quantity units
+secondDerivativeAt :: Number -> Curve1D units -> Quantity units
+range :: Interval Unitless -> Curve1D units -> Interval units
 zeros :: Tolerance units => Curve1D units -> Result IsZero (List Zero)
 degeneracyTolerance :: Curve1D units -> Quantity units
 squared_ :: Curve1D units -> Curve1D (units ?*? units)
