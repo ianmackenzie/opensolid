@@ -562,7 +562,12 @@ load ptr offset = do
     IntRep -> IO.map fromIntegral (Foreign.peekByteOff @Int64 ptr offset)
     NumberRep -> IO.map Number.fromDouble (Foreign.peekByteOff ptr offset)
     BoolRep -> IO.map (/= 0) (load @Int ptr offset)
-    SignRep -> IO.map Int.sign (load @Int ptr offset)
+    SignRep -> do
+      intValue <- load @Int ptr offset
+      case intValue of
+        1 -> IO.succeed Positive
+        -1 -> IO.succeed Negative
+        _ -> IO.fail ("Expected sign value to be encoded as +1 or -1, got " <> Text.int intValue)
     TextRep -> do
       dataPtr <- Foreign.peekByteOff ptr offset
       byteString <- Data.ByteString.packCString dataPtr
