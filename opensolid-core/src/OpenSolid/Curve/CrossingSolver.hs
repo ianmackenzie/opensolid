@@ -12,7 +12,7 @@ import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.InternalError qualified as InternalError
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Prelude
 import OpenSolid.UvBounds (data UvBounds)
 import OpenSolid.UvPoint (data UvPoint)
@@ -40,20 +40,20 @@ solve ::
   (Interval Unitless, Interval Unitless) ->
   (Curve.Segment dimension units space, Curve.Segment dimension units space) ->
   Fuzzy (Maybe IntersectionPoint)
-solve nondegenerateA nondegenerateB Crossing (tRangeA, tRangeB) (segmentA, segmentB) =
+solve curveA curveB Crossing (tRangeA, tRangeB) (segmentA, segmentB) =
   if Curve.Segment.areDistinct segmentA segmentB
     then Resolved Nothing
     else do
-      let Nondegenerate curveA = nondegenerateA
-      let Nondegenerate curveB = nondegenerateB
       let evaluate (UvPoint tA tB) = do
-            let displacement = Curve.pointAt tB curveB - Curve.pointAt tA curveA
-            let derivativeA = negate (Curve.derivativeAt tA curveA)
-            let derivativeB = Curve.derivativeAt tB curveB
+            let pointA = Curve.Nondegenerate.pointAt tA curveA
+            let pointB = Curve.Nondegenerate.pointAt tB curveB
+            let displacement = pointB - pointA
+            let derivativeA = negate (Curve.Nondegenerate.derivativeAt tA curveA)
+            let derivativeB = Curve.Nondegenerate.derivativeAt tB curveB
             (# displacement, derivativeA, derivativeB #)
       UvPoint tA tB <- NewtonRaphson.Surface.solveIn (UvBounds tRangeA tRangeB) evaluate
       let solution = (tA, tB)
-      case Curve.Nondegenerate.continuityAt solution (nondegenerateA, nondegenerateB) of
+      case Curve.Nondegenerate.continuityAt solution (curveA, curveB) of
         Nothing -> Unresolved
         Just Continuity.Crossing -> Resolved (Just (IntersectionPoint.crossing solution))
         Just _ ->

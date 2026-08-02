@@ -5,11 +5,12 @@ module OpenSolid.Curve.TangentSolver2D (solver) where
 import OpenSolid.Curve (Curve2D)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
+import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Curve.TangentSolver qualified as TangentSolver
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
@@ -62,20 +63,18 @@ solve ::
   (Interval Unitless, Interval Unitless) ->
   (Curve.Segment 2 units Void, Curve.Segment 2 units Void) ->
   Fuzzy (Maybe IntersectionPoint)
-solve nondegenerateA nondegenerateB orientation (tRangeA, tRangeB) (segmentA, segmentB) =
+solve curveA curveB orientation (tRangeA, tRangeB) (segmentA, segmentB) =
   if TangentSolver.areDistinctOrCrossing segmentA segmentB
     then Resolved Nothing
     else do
-      let Nondegenerate curveA = nondegenerateA
-      let Nondegenerate curveB = nondegenerateB
       let scale = TangentSolver.lengthScale curveA curveB
       let evaluate (UvPoint tA tB) = do
-            let Point2D xA yA = Curve.pointAt tA curveA
-            let Point2D xB yB = Curve.pointAt tB curveB
-            let Vector2D x'A y'A = Curve.derivativeAt tA curveA
-            let Vector2D x'B y'B = Curve.derivativeAt tB curveB
-            let Vector2D x''A y''A = Curve.secondDerivativeAt tA curveA
-            let Vector2D x''B y''B = Curve.secondDerivativeAt tB curveB
+            let Point2D xA yA = Curve.Nondegenerate.pointAt tA curveA
+            let Point2D xB yB = Curve.Nondegenerate.pointAt tB curveB
+            let Vector2D x'A y'A = Curve.Nondegenerate.derivativeAt tA curveA
+            let Vector2D x'B y'B = Curve.Nondegenerate.derivativeAt tB curveB
+            let Vector2D x''A y''A = Curve.Nondegenerate.secondDerivativeAt tA curveA
+            let Vector2D x''B y''B = Curve.Nondegenerate.secondDerivativeAt tB curveB
             let crossProduct = Units.simplify do (x'A ?*? y'B - y'A ?*? x'B) ?/? scale
             let crossProduct'A = Units.simplify do (x''A ?*? y'B - y''A ?*? x'B) ?/? scale
             let crossProduct'B = Units.simplify do (x'A ?*? y''B - y'A ?*? x''B) ?/? scale
@@ -90,4 +89,4 @@ solve nondegenerateA nondegenerateB orientation (tRangeA, tRangeB) (segmentA, se
                 let fA = Vector2D -y'A crossProduct'A
                 let fB = Vector2D y'B crossProduct'B
                 (# f, fA, fB #)
-      TangentSolver.solve nondegenerateA nondegenerateB tRangeA tRangeB evaluate
+      TangentSolver.solve curveA curveB tRangeA tRangeB evaluate

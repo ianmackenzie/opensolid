@@ -28,12 +28,12 @@ import OpenSolid.UvPoint (data UvPoint)
 
 lengthScale ::
   CurveExists dimension units space =>
-  Curve dimension units space ->
-  Curve dimension units space ->
+  Nondegenerate (Curve dimension units space) ->
+  Nondegenerate (Curve dimension units space) ->
   Quantity units
 lengthScale curveA curveB = do
-  let scaleA = Bounds.diameter (Curve.bounds curveA)
-  let scaleB = Bounds.diameter (Curve.bounds curveB)
+  let scaleA = Bounds.diameter (Curve.Nondegenerate.bounds curveA)
+  let scaleB = Bounds.diameter (Curve.Nondegenerate.bounds curveB)
   Quantity.sqrt_ (scaleA ?*? scaleB)
 
 areDistinctOrCrossing ::
@@ -62,10 +62,10 @@ solve ::
   Interval Unitless ->
   NewtonRaphson.Surface.Function 2 units Void ->
   Fuzzy (Maybe IntersectionPoint)
-solve nondegenerateA nondegenerateB tRangeA tRangeB function = do
+solve curveA curveB tRangeA tRangeB function = do
   UvPoint tA tB <- NewtonRaphson.Surface.solveIn (UvBounds tRangeA tRangeB) function
   let solution = (tA, tB)
-  case Curve.Nondegenerate.continuityAt solution (nondegenerateA, nondegenerateB) of
+  case Curve.Nondegenerate.continuityAt solution (curveA, curveB) of
     Nothing -> Unresolved
     Just continuity -> case continuity of
       Continuity.Crossing -> Unresolved
