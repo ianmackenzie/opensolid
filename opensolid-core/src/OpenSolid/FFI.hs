@@ -571,7 +571,9 @@ load ptr offset = do
     TextRep -> do
       dataPtr <- Foreign.peekByteOff ptr offset
       byteString <- Data.ByteString.packCString dataPtr
-      IO.succeed (Data.Text.Encoding.decodeUtf8 byteString)
+      case Data.Text.Encoding.decodeUtf8' byteString of
+        Left unicodeException -> IO.fail ("Could not decode text as UTF-8: " <> Text.show unicodeException)
+        Right decodedText -> IO.succeed decodedText
     ListRep @item -> do
       let itemSize = sizeOf item
       numItems <- load @Int ptr offset
