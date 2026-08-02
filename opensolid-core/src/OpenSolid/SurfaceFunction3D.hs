@@ -10,6 +10,9 @@ module OpenSolid.SurfaceFunction3D
   , partialDerivatives
   , partialDerivativesAt
   , partialDerivativeRanges
+  , secondPartialDerivatives
+  , secondPartialDerivativesAt
+  , secondPartialDerivativeRanges
   , nondegenerate
   , normalDirectionRange
   , placeIn
@@ -227,6 +230,28 @@ partialDerivativeRanges ::
 partialDerivativeRanges uvRange function =
   Pair.map (VectorSurfaceFunction3D.range uvRange) (partialDerivatives function)
 
+secondPartialDerivativesAt ::
+  UvPoint ->
+  SurfaceFunction3D space ->
+  (Vector3D Meters space, Vector3D Meters space, Vector3D Meters space)
+secondPartialDerivativesAt uvPoint function = do
+  let (fuu, fuv, fvv) = secondPartialDerivatives function
+  let fuuValue = VectorSurfaceFunction3D.valueAt uvPoint fuu
+  let fuvValue = VectorSurfaceFunction3D.valueAt uvPoint fuv
+  let fvvValue = VectorSurfaceFunction3D.valueAt uvPoint fvv
+  (fuuValue, fuvValue, fvvValue)
+
+secondPartialDerivativeRanges ::
+  UvBounds ->
+  SurfaceFunction3D space ->
+  (VectorBounds3D Meters space, VectorBounds3D Meters space, VectorBounds3D Meters space)
+secondPartialDerivativeRanges uvRange function = do
+  let (fuu, fuv, fvv) = secondPartialDerivatives function
+  let fuuRange = VectorSurfaceFunction3D.range uvRange fuu
+  let fuvRange = VectorSurfaceFunction3D.range uvRange fuv
+  let fvvRange = VectorSurfaceFunction3D.range uvRange fvv
+  (fuuRange, fuvRange, fvvRange)
+
 {-# INLINE compiled #-}
 compiled :: SurfaceFunction3D space -> Compiled space
 compiled = (.compiled)
@@ -236,6 +261,18 @@ partialDerivatives ::
   SurfaceFunction3D space ->
   (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space)
 partialDerivatives = (.partialDerivatives)
+
+secondPartialDerivatives ::
+  SurfaceFunction3D space ->
+  ( VectorSurfaceFunction3D Meters space
+  , VectorSurfaceFunction3D Meters space
+  , VectorSurfaceFunction3D Meters space
+  )
+secondPartialDerivatives function = do
+  let (fu, fv) = partialDerivatives function
+  let (fuu, fuv) = VectorSurfaceFunction3D.partialDerivatives fu
+  let (_, fvv) = VectorSurfaceFunction3D.partialDerivatives fv
+  (fuu, fuv, fvv)
 
 nondegenerate ::
   Tolerance Meters =>
