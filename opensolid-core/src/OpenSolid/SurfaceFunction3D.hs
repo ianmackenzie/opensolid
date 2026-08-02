@@ -127,7 +127,7 @@ instance
     (Point3D space2)
     (VectorSurfaceFunction3D Meters space1)
   where
-  function - givenPoint = function - constant givenPoint
+  function - point = function - constant point
 
 instance
   space1 ~ space2 =>
@@ -136,7 +136,7 @@ instance
     (SurfaceFunction3D space2)
     (VectorSurfaceFunction3D Meters space1)
   where
-  givenPoint - function = constant givenPoint - function
+  point - function = constant point - function
 
 instance
   Composition
