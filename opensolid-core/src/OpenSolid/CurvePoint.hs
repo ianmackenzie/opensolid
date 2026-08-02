@@ -4,6 +4,7 @@ module OpenSolid.CurvePoint
   , derivative
   , tangentDirection
   , curvatureVector_
+  , location
   , parameterValue
   , on
   , isEndpoint
