@@ -1,6 +1,6 @@
 module OpenSolid.API (classes, functions) where
 
-import OpenSolid.API.Class (Class, Self (Self))
+import OpenSolid.API.Class (Class)
 import OpenSolid.API.Class qualified as Class
 import OpenSolid.API.Docs (docs)
 import OpenSolid.API.Function (Function)
@@ -80,12 +80,12 @@ classes =
   , angle
   , tolerance
   , unitlessInterval
-  , interval
+  , lengthInterval
   , areaInterval
   , angleInterval
   , color
   , unitlessVector2D
-  , vector2D
+  , displacement2D
   , areaVector2D
   , direction2D
   , point2D
@@ -102,7 +102,7 @@ classes =
   , polygon2D
   , uvPolygon
   , unitlessCurve1D
-  , curve1D
+  , lengthCurve1D
   , areaCurve1D
   , angleCurve1D
   , curve
@@ -111,7 +111,7 @@ classes =
   , uvAxis
   , convention3D
   , unitlessVector3D
-  , vector3D
+  , displacement3D
   , areaVector3D
   , direction3D
   , point3D
@@ -123,7 +123,7 @@ classes =
   , frame3D
   , world3D
   , unitlessVectorCurve2D
-  , vectorCurve2D
+  , displacementCurve2D
   , curve2D
   , uvCurve
   , region2D
@@ -172,30 +172,29 @@ length =
     , Class.memberM0 "Is Zero" (~= Length.zero) "Check if a length is zero, within the current tolerance."
     , Class.equalityAndHash
     , Class.comparison
-    , Class.negateSelf
-    , Class.absSelf Quantity.abs
+    , Class.negation
+    , Class.abs Quantity.abs
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.plus @Interval Self
-    , Class.plus @Curve1D Self
-    , Class.minusSelf
-    , Class.minus @Interval Self
-    , Class.minus @Curve1D Self
-    , Class.timesNumber
-    , Class.timesSelf
-    , Class.times @UnitlessInterval Self
-    , Class.times @Interval Self
-    , Class.times @UnitlessCurve1D Self
-    , Class.times @Curve1D Self
-    , Class.times @Direction2D Self
-    , Class.times @UnitlessVector2D Self
-    , Class.times @Vector2D Self
-    , Class.divByNumber
-    , Class.divBySelf
-    , Class.divBy @UnitlessInterval Self
-    , Class.divBy @Interval Self
-    , Class.floorDivBySelf
-    , Class.modBySelf
+    , Class.plus @Length Class.fallbackMemberPlus
+    , Class.plus @LengthInterval Class.noFallback
+    , Class.plus @LengthCurve1D Class.noFallback
+    , Class.minus @Length Class.fallbackMemberMinus
+    , Class.minus @LengthInterval Class.noFallback
+    , Class.minus @LengthCurve1D Class.noFallback
+    , Class.times @Number Class.fallbackMemberTimes
+    , Class.times @Length Class.fallbackStaticProduct
+    , Class.times @UnitlessInterval Class.noFallback
+    , Class.times @LengthInterval Class.noFallback
+    , Class.times @UnitlessCurve1D Class.noFallback
+    , Class.times @LengthCurve1D Class.noFallback
+    , Class.times @Direction2D Class.noFallback
+    , Class.times @UnitlessVector2D Class.noFallback
+    , Class.times @Displacement2D Class.noFallback
+    , Class.divideBy @Number Class.fallbackMemberDivideBy
+    , Class.divideBy @Length Class.fallbackStaticRatio
+    , Class.divideBy @UnitlessInterval Class.noFallback
+    , Class.divideBy @LengthInterval Class.noFallback
+    , Class.divMod
     ]
 
 area :: Class
@@ -212,31 +211,29 @@ area =
     , Class.factory1 "Square Inches" "Value" Area.squareInches $(docs 'Area.squareInches)
     , Class.member0 "In Square Meters" Area.inSquareMeters $(docs 'Area.inSquareMeters)
     , Class.member0 "In Square Inches" Area.inSquareInches $(docs 'Area.inSquareInches)
-    , Class.memberS0 "Is Zero" (~= Area.zero) "Check if an area is zero, within the current tolerance."
     , Class.equalityAndHash
     , Class.comparison
-    , Class.negateSelf
-    , Class.absSelf Quantity.abs
+    , Class.negation
+    , Class.abs Quantity.abs
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.plus @AreaInterval Self
-    , Class.plus @AreaCurve1D Self
-    , Class.minusSelf
-    , Class.minus @AreaInterval Self
-    , Class.minus @AreaCurve1D Self
-    , Class.timesNumber
-    , Class.times @UnitlessInterval Self
-    , Class.times @UnitlessCurve1D Self
-    , Class.times @Direction2D Self
-    , Class.times @UnitlessVector2D Self
-    , Class.divByNumber
-    , Class.divBySelf
-    , Class.divBy @Length Self
-    , Class.divBy @UnitlessInterval Self
-    , Class.divBy @Interval Self
-    , Class.divBy @AreaInterval Self
-    , Class.floorDivBySelf
-    , Class.modBySelf
+    , Class.plus @Area Class.fallbackMemberPlus
+    , Class.plus @AreaInterval Class.noFallback
+    , Class.plus @AreaCurve1D Class.noFallback
+    , Class.minus @Area Class.fallbackMemberMinus
+    , Class.minus @AreaInterval Class.noFallback
+    , Class.minus @AreaCurve1D Class.noFallback
+    , Class.times @Number Class.fallbackMemberTimes
+    , Class.times @UnitlessInterval Class.noFallback
+    , Class.times @UnitlessCurve1D Class.noFallback
+    , Class.times @Direction2D Class.noFallback
+    , Class.times @UnitlessVector2D Class.noFallback
+    , Class.divideBy @Number Class.fallbackMemberDivideBy
+    , Class.divideBy @Area Class.fallbackStaticRatio
+    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
+    , Class.divideBy @UnitlessInterval Class.noFallback
+    , Class.divideBy @LengthInterval Class.noFallback
+    , Class.divideBy @AreaInterval Class.noFallback
+    , Class.divMod
     ]
 
 angle :: Class
@@ -272,24 +269,23 @@ angle =
     , Class.member0 "Tan" Angle.tan $(docs 'Angle.tan)
     , Class.equalityAndHash
     , Class.comparison
-    , Class.negateSelf
-    , Class.absSelf Quantity.abs
+    , Class.negation
+    , Class.abs Quantity.abs
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.plus @AngleInterval Self
-    , Class.plus @AngleCurve1D Self
-    , Class.minusSelf
-    , Class.minus @AngleInterval Self
-    , Class.minus @AngleCurve1D Self
-    , Class.timesNumber
-    , Class.times @UnitlessInterval Self
-    , Class.times @UnitlessCurve1D Self
-    , Class.divByNumber
-    , Class.divBySelf
-    , Class.divBy @UnitlessInterval Self
-    , Class.divBy @AngleInterval Self
-    , Class.floorDivBySelf
-    , Class.modBySelf
+    , Class.plus @Angle Class.fallbackMemberPlus
+    , Class.plus @AngleInterval Class.noFallback
+    , Class.plus @AngleCurve1D Class.noFallback
+    , Class.minus @Angle Class.fallbackMemberMinus
+    , Class.minus @AngleInterval Class.noFallback
+    , Class.minus @AngleCurve1D Class.noFallback
+    , Class.times @Number Class.fallbackMemberTimes
+    , Class.times @UnitlessInterval Class.noFallback
+    , Class.times @UnitlessCurve1D Class.noFallback
+    , Class.divideBy @Number Class.fallbackMemberDivideBy
+    , Class.divideBy @Angle Class.fallbackStaticRatio
+    , Class.divideBy @UnitlessInterval Class.noFallback
+    , Class.divideBy @AngleInterval Class.noFallback
+    , Class.divMod
     ]
 
 tolerance :: Class
@@ -312,36 +308,37 @@ unitlessInterval =
     , Class.property "Endpoints" Interval.endpoints $(docs 'Interval.endpoints)
     , Class.property "Lower" Interval.lower $(docs 'Interval.lower)
     , Class.property "Upper" Interval.upper $(docs 'Interval.upper)
+    , Class.member0 "Reciprocal" (1.0 /) "Compute the reciprocal of the given interval."
     , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
     , Class.member1 "Member" "Value" Interval.member $(docs 'Interval.member)
     , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
-    , Class.negateSelf
-    , Class.absSelf Interval.abs
+    , Class.negation
+    , Class.abs Interval.abs
     , Class.numberPlus
     , Class.numberMinus
     , Class.numberTimes
-    , Class.numberDivBy
-    , Class.plusNumber
-    , Class.plusSelf
-    , Class.minusNumber
-    , Class.minusSelf
-    , Class.timesNumber
-    , Class.timesSelf
-    , Class.times @Length Self
-    , Class.times @Area Self
-    , Class.times @Angle Self
-    , Class.times @Interval Self
-    , Class.times @AreaInterval Self
-    , Class.times @AngleInterval Self
-    , Class.divByNumber
-    , Class.divBySelf
+    , Class.numberDivideBy
+    , Class.plus @Number Class.noFallback
+    , Class.plus @UnitlessInterval Class.fallbackMemberPlus
+    , Class.minus @Number Class.noFallback
+    , Class.minus @UnitlessInterval Class.fallbackMemberMinus
+    , Class.times @Number Class.noFallback
+    , Class.times @UnitlessInterval Class.fallbackMemberTimes
+    , Class.times @Length Class.noFallback
+    , Class.times @Area Class.noFallback
+    , Class.times @Angle Class.noFallback
+    , Class.times @LengthInterval Class.noFallback
+    , Class.times @AreaInterval Class.noFallback
+    , Class.times @AngleInterval Class.noFallback
+    , Class.divideBy @Number Class.noFallback
+    , Class.divideBy @UnitlessInterval Class.fallbackMemberDivideBy
     ]
 
-type Interval = Interval.Interval Meters
+type LengthInterval = Interval.Interval Meters
 
-interval :: Class
-interval =
-  Class.new @Interval "A range of length values, with a lower bound and upper bound." $
+lengthInterval :: Class
+lengthInterval =
+  Class.new @LengthInterval "A range of length values, with a lower bound and upper bound." $
     [ Class.constructor2 "First Value" "Second Value" Interval.Interval $(docs 'Interval.Interval)
     , Class.factory1 "Constant" "Value" Interval.constant $(docs 'Interval.constant)
     , Class.factory1 "Zero To" "Value" Interval.zeroTo $(docs 'Interval.zeroTo)
@@ -354,21 +351,21 @@ interval =
     , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
     , Class.member1 "Member" "Value" Interval.member $(docs 'Interval.member)
     , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
-    , Class.negateSelf
-    , Class.absSelf Interval.abs
+    , Class.negation
+    , Class.abs Interval.abs
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.plus @Length Self
-    , Class.minusSelf
-    , Class.minus @Length Self
-    , Class.timesNumber
-    , Class.timesSelf
-    , Class.times @Length Self
-    , Class.times @UnitlessInterval Self
-    , Class.divByNumber
-    , Class.divBySelf
-    , Class.divBy @Length Self
-    , Class.divBy @UnitlessInterval Self
+    , Class.plus @LengthInterval Class.fallbackMemberPlus
+    , Class.plus @Length Class.noFallback
+    , Class.minus @LengthInterval Class.fallbackMemberMinus
+    , Class.minus @Length Class.noFallback
+    , Class.times @Number Class.noFallback
+    , Class.times @LengthInterval Class.fallbackStaticProduct
+    , Class.times @Length Class.noFallback
+    , Class.times @UnitlessInterval Class.fallbackMemberTimes
+    , Class.divideBy @Number Class.noFallback
+    , Class.divideBy @LengthInterval Class.fallbackStaticRatio
+    , Class.divideBy @Length Class.noFallback
+    , Class.divideBy @UnitlessInterval Class.fallbackMemberDivideBy
     ]
 
 type AreaInterval = Interval.Interval SquareMeters
@@ -388,21 +385,21 @@ areaInterval =
     , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
     , Class.member1 "Member" "Value" Interval.member $(docs 'Interval.member)
     , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
-    , Class.negateSelf
-    , Class.absSelf Interval.abs
+    , Class.negation
+    , Class.abs Interval.abs
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.plus @Area Self
-    , Class.minusSelf
-    , Class.minus @Area Self
-    , Class.timesNumber
-    , Class.times @UnitlessInterval Self
-    , Class.divByNumber
-    , Class.divBySelf
-    , Class.divBy @Length Self
-    , Class.divBy @Area Self
-    , Class.divBy @UnitlessInterval Self
-    , Class.divBy @Interval Self
+    , Class.plus @AreaInterval Class.fallbackMemberPlus
+    , Class.plus @Area Class.noFallback
+    , Class.minus @AreaInterval Class.fallbackMemberMinus
+    , Class.minus @Area Class.noFallback
+    , Class.times @Number Class.noFallback
+    , Class.times @UnitlessInterval Class.fallbackMemberTimes
+    , Class.divideBy @Number Class.noFallback
+    , Class.divideBy @AreaInterval Class.fallbackStaticRatio
+    , Class.divideBy @Length Class.noFallback
+    , Class.divideBy @Area Class.noFallback
+    , Class.divideBy @UnitlessInterval Class.fallbackMemberDivideBy
+    , Class.divideBy @LengthInterval (Class.fallbackMember "Divide By Length Interval")
     ]
 
 type AngleInterval = Interval.Interval Radians
@@ -422,19 +419,19 @@ angleInterval =
     , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
     , Class.member1 "Member" "Value" Interval.member $(docs 'Interval.member)
     , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
-    , Class.negateSelf
-    , Class.absSelf Interval.abs
+    , Class.negation
+    , Class.abs Interval.abs
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.plus @Angle Self
-    , Class.minusSelf
-    , Class.minus @Angle Self
-    , Class.timesNumber
-    , Class.times @UnitlessInterval Self
-    , Class.divByNumber
-    , Class.divBySelf
-    , Class.divBy @Angle Self
-    , Class.divBy @UnitlessInterval Self
+    , Class.plus @AngleInterval Class.fallbackMemberPlus
+    , Class.plus @Angle Class.noFallback
+    , Class.minus @AngleInterval Class.fallbackMemberMinus
+    , Class.minus @Angle Class.noFallback
+    , Class.times @Number Class.noFallback
+    , Class.times @UnitlessInterval Class.fallbackMemberTimes
+    , Class.divideBy @Number Class.noFallback
+    , Class.divideBy @AngleInterval Class.fallbackStaticRatio
+    , Class.divideBy @Angle Class.noFallback
+    , Class.divideBy @UnitlessInterval Class.fallbackMemberDivideBy
     ]
 
 color :: Class
@@ -511,36 +508,37 @@ unitlessVector2D =
     , Class.property "Components" Vector2D.components $(docs 'Vector2D.components)
     , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
     , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
+    , Class.member1 "Component In" "Direction" Vector2D.componentIn $(docs 'Vector2D.componentIn)
     , Class.memberU0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
     , Class.memberU0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
     , Class.memberU0 "Is Zero" (~= Vector2D.zero) "Check if a vector is zero, within the current tolerance."
     , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> UnitlessVector2D -> UnitlessVector3D) $(docs 'Vector2D.placeOn)
-    , Class.negateSelf
+    , Class.negation
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.minusSelf
-    , Class.timesNumber
-    , Class.times @Length Self
-    , Class.times @Area Self
-    , Class.divByNumber
-    , Class.dotSelf
-    , Class.dotProduct @Direction2D Self
-    , Class.dotProduct @Vector2D Self
-    , Class.dotProduct @AreaVector2D Self
-    , Class.crossSelf
-    , Class.crossProduct @Direction2D Self
-    , Class.crossProduct @Vector2D Self
-    , Class.crossProduct @AreaVector2D Self
+    , Class.plus @UnitlessVector2D Class.fallbackMemberPlus
+    , Class.minus @UnitlessVector2D Class.fallbackMemberMinus
+    , Class.times @Number Class.fallbackMemberTimes
+    , Class.times @Length (Class.fallbackMember "Times Length")
+    , Class.times @Area (Class.fallbackMember "Times Area")
+    , Class.divideBy @Number Class.fallbackMemberDivideBy
+    , Class.dot @UnitlessVector2D Class.fallbackStaticDotProduct
+    , Class.dot @Direction2D Class.fallbackMemberDot
+    , Class.dot @Displacement2D Class.noFallback
+    , Class.dot @AreaVector2D Class.noFallback
+    , Class.cross @UnitlessVector2D Class.fallbackStaticCrossProduct
+    , Class.cross @Direction2D Class.fallbackMemberCross
+    , Class.cross @Displacement2D (Class.fallbackMember "Cross Displacement")
+    , Class.cross @AreaVector2D (Class.fallbackMember "Cross Area Vector")
     ]
       <> vectorTransformations2D
 
-type Vector2D = Vector2D.Vector2D Meters
+type Displacement2D = Vector2D.Vector2D Meters
 
-vector2D :: Class
-vector2D =
-  Class.new @Vector2D "A displacement vector in 2D." $
+displacement2D :: Class
+displacement2D =
+  Class.new @Displacement2D "A displacement vector in 2D." $
     [ Class.constant "Zero" (Vector2D.zero @Meters) $(docs 'Vector2D.zero)
     , Class.constructor2 "X Component" "Y Component" Vector2D.Vector2D $(docs 'Vector2D.Vector2D)
     , Class.factory1 "X" "X Component" Vector2D.x $(docs 'Vector2D.x)
@@ -555,26 +553,27 @@ vector2D =
     , Class.property "Components" Vector2D.components $(docs 'Vector2D.components)
     , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
     , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
+    , Class.member1 "Component In" "Direction" Vector2D.componentIn $(docs 'Vector2D.componentIn)
     , Class.memberM0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
     , Class.memberM0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
     , Class.memberM0 "Is Zero" (~= Vector2D.zero) "Check if a displacement is zero, within the current tolerance."
-    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> Vector2D -> Vector3D) $(docs 'Vector2D.placeOn)
-    , Class.negateSelf
+    , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> Displacement2D -> Displacement3D) $(docs 'Vector2D.placeOn)
+    , Class.negation
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.minusSelf
-    , Class.timesNumber
-    , Class.times @Length Self
-    , Class.divByNumber
-    , Class.divBy @Length Self
-    , Class.dotSelf
-    , Class.dotProduct @Direction2D Self
-    , Class.dotProduct @UnitlessVector2D Self
-    , Class.crossSelf
-    , Class.crossProduct @Direction2D Self
-    , Class.crossProduct @UnitlessVector2D Self
+    , Class.plus @Displacement2D Class.fallbackMemberPlus
+    , Class.minus @Displacement2D Class.fallbackMemberMinus
+    , Class.times @Number Class.fallbackMemberTimes
+    , Class.times @Length (Class.fallbackMember "Times Length")
+    , Class.divideBy @Number Class.fallbackMemberDivideBy
+    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
+    , Class.dot @Displacement2D Class.fallbackStaticDotProduct
+    , Class.dot @Direction2D Class.fallbackMemberDot
+    , Class.dot @UnitlessVector2D (Class.fallbackMember "Dot Unitless Vector")
+    , Class.cross @Displacement2D Class.fallbackStaticCrossProduct
+    , Class.cross @Direction2D Class.fallbackMemberCross
+    , Class.cross @UnitlessVector2D (Class.fallbackMember "Cross Unitless Vector")
     ]
       <> vectorTransformations2D
 
@@ -592,24 +591,22 @@ areaVector2D =
     , Class.property "Components" Vector2D.components $(docs 'Vector2D.components)
     , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
     , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
-    , Class.memberS0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
-    , Class.memberS0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
+    , Class.member1 "Component In" "Direction" Vector2D.componentIn $(docs 'Vector2D.componentIn)
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
-    , Class.memberS0 "Is Zero" (~= Vector2D.zero) "Check if an area vector is zero, within the current tolerance."
     , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> AreaVector2D -> AreaVector3D) $(docs 'Vector2D.placeOn)
-    , Class.negateSelf
+    , Class.negation
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.minusSelf
-    , Class.timesNumber
-    , Class.divByNumber
-    , Class.divBy @Length Self
-    , Class.divBy @Area Self
-    , Class.dotProduct @Direction2D Self
-    , Class.dotProduct @UnitlessVector2D Self
-    , Class.crossProduct @Direction2D Self
-    , Class.crossProduct @UnitlessVector2D Self
+    , Class.plus @AreaVector2D Class.fallbackMemberPlus
+    , Class.minus @AreaVector2D Class.fallbackMemberMinus
+    , Class.times @Number Class.fallbackMemberTimes
+    , Class.divideBy @Number Class.fallbackMemberDivideBy
+    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
+    , Class.divideBy @Area (Class.fallbackMember "Divide By Area")
+    , Class.dot @Direction2D Class.fallbackMemberDot
+    , Class.dot @UnitlessVector2D (Class.fallbackMember "Dot Unitless Vector")
+    , Class.cross @Direction2D Class.fallbackMemberCross
+    , Class.cross @UnitlessVector2D (Class.fallbackMember "Cross Unitless Vector")
     ]
       <> vectorTransformations2D
 
@@ -634,19 +631,19 @@ direction2D =
     , Class.member1 "Mirror In" "Direction" Direction2D.mirrorIn $(docs 'Direction2D.mirrorIn)
     , Class.member1 "Mirror Across" "Axis" (Direction2D.mirrorAcross :: Axis2D -> Direction2D -> Direction2D) $(docs 'Direction2D.mirrorAcross)
     , Class.member1 "Place On" "Plane" (Direction2D.placeOn :: Plane3D -> Direction2D -> Direction3D) $(docs 'Direction2D.placeOn)
-    , Class.negateSelf
+    , Class.negation
     , Class.numberTimes
-    , Class.timesNumber
-    , Class.times @Length Self
-    , Class.times @Area Self
-    , Class.dotSelf
-    , Class.dotProduct @UnitlessVector2D Self
-    , Class.dotProduct @Vector2D Self
-    , Class.dotProduct @AreaVector2D Self
-    , Class.crossSelf
-    , Class.crossProduct @UnitlessVector2D Self
-    , Class.crossProduct @Vector2D Self
-    , Class.crossProduct @AreaVector2D Self
+    , Class.times @Number Class.fallbackMemberTimes
+    , Class.times @Length (Class.fallbackMember "Times Length")
+    , Class.times @Area (Class.fallbackMember "Times Area")
+    , Class.dot @Direction2D Class.fallbackMemberDot
+    , Class.dot @UnitlessVector2D Class.noFallback
+    , Class.dot @Displacement2D Class.noFallback
+    , Class.dot @AreaVector2D Class.noFallback
+    , Class.cross @Direction2D Class.fallbackMemberCross
+    , Class.cross @UnitlessVector2D (Class.fallbackMember "Cross Unitless Vector")
+    , Class.cross @Displacement2D (Class.fallbackMember "Cross Displacement")
+    , Class.cross @AreaVector2D (Class.fallbackMember "Cross Area Vector")
     ]
 
 type Point2D = Point2D.Point2D Meters
@@ -671,10 +668,8 @@ point2D =
     , Class.member1 "Distance To" "Other" Point2D.distanceFrom $(docs 'Point2D.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point2D.midpoint $(docs 'Point2D.midpoint)
     , Class.member1 "Place On" "Plane" (Point2D.placeOn @Void) $(docs 'Point2D.placeOn)
-    , Class.minusSelf
-    , Class.minus @Vector2D Self
-    , Class.plus @Vector2D Self
-    , Class.minus @Curve2D Self
+    , Class.minus @Point2D Class.fallbackMemberMinus
+    , Class.minus @Curve2D Class.noFallback
     ]
       <> affineTransformations2D Point2D.transformBy
 
@@ -688,10 +683,10 @@ uvPoint =
     , Class.property "V Coordinate" Point2D.yCoordinate $(docs 'Point2D.yCoordinate)
     , Class.member1 "Distance To" "Other" Point2D.distanceFrom $(docs 'Point2D.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point2D.midpoint $(docs 'Point2D.midpoint)
-    , Class.minusSelf
-    , Class.minus @UnitlessVector2D Self
-    , Class.plus @UnitlessVector2D Self
-    ]
+    , Class.minus @UvPoint Class.fallbackMemberMinus
+    , Class.plus @UnitlessVector2D Class.noFallback
+    , Class.minus @UnitlessVector2D Class.noFallback
+    ] -- TODO add affine transformations
 
 type Bounds2D = Bounds2D.Bounds2D Meters
 
@@ -706,8 +701,8 @@ bounds2D =
     , Class.property "Coordinates" Bounds2D.coordinates $(docs 'Bounds2D.coordinates)
     , Class.property "X Coordinate" Bounds2D.xCoordinate $(docs 'Bounds2D.xCoordinate)
     , Class.property "Y Coordinate" Bounds2D.yCoordinate $(docs 'Bounds2D.yCoordinate)
-    , Class.plus @Vector2D Self
-    , Class.minus @Vector2D Self
+    , Class.plus @Displacement2D Class.noFallback
+    , Class.minus @Displacement2D Class.noFallback
     ]
       <> affineTransformations2D Bounds2D.transformBy
 
@@ -722,9 +717,9 @@ uvBounds =
     , Class.property "Coordinates" Bounds2D.coordinates $(docs 'Bounds2D.coordinates)
     , Class.property "U Coordinate" Bounds2D.xCoordinate "Get the U coordinate bounds of a bounding box."
     , Class.property "V Coordinate" Bounds2D.yCoordinate "Get the V coordinate bounds of a bounding box."
-    , Class.plus @UnitlessVector2D Self
-    , Class.minus @UnitlessVector2D Self
-    ]
+    , Class.plus @UnitlessVector2D Class.noFallback
+    , Class.minus @UnitlessVector2D Class.noFallback
+    ] -- TODO add affine transformations
 
 type Line2D = Line2D.Line2D Meters
 
@@ -864,23 +859,24 @@ unitlessCurve1D =
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
     , Class.memberU0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
     , Class.memberU0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
-    , Class.negateSelf
+    , Class.negation
     , Class.numberPlus
     , Class.numberMinus
     , Class.numberTimes
-    , Class.plusNumber
-    , Class.plusSelf
-    , Class.minusNumber
-    , Class.minusSelf
-    , Class.timesNumber
-    , Class.timesSelf
-    , Class.times @Length Self
-    , Class.times @Area Self
-    , Class.times @Angle Self
-    , Class.times @Curve1D Self
-    , Class.times @AreaCurve1D Self
-    , Class.times @AngleCurve1D Self
-    , Class.divByNumber
+    , Class.plus @Number Class.noFallback
+    , Class.plus @UnitlessCurve1D Class.fallbackMemberPlus
+    , Class.minus @Number Class.noFallback
+    , Class.minus @UnitlessCurve1D Class.fallbackMemberMinus
+    , Class.times @Number Class.noFallback
+    , Class.times @UnitlessCurve1D Class.fallbackMemberTimes
+    , Class.times @Length Class.noFallback
+    , Class.times @Area Class.noFallback
+    , Class.times @Angle Class.noFallback
+    , Class.times @LengthCurve1D Class.noFallback
+    , Class.times @AreaCurve1D Class.noFallback
+    , Class.times @AngleCurve1D Class.noFallback
+    , Class.divideByNonzeroU @UnitlessCurve1D Curve1D.nonzero Class.fallbackMemberDivideBy
+    , Class.divideBy @Number Class.noFallback
     ]
 
 type AngleCurve1D = Curve1D.Curve1D Radians
@@ -897,23 +893,25 @@ angleCurve1D =
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
     , Class.memberR0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
     , Class.memberR0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
-    , Class.negateSelf
+    , Class.negation
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.plus @Angle Self
-    , Class.minusSelf
-    , Class.minus @Angle Self
-    , Class.timesNumber
-    , Class.times @UnitlessCurve1D Self
-    , Class.divByNumber
-    , Class.divBy @Angle Self
+    , Class.plus @AngleCurve1D Class.fallbackMemberPlus
+    , Class.plus @Angle Class.noFallback
+    , Class.minus @AngleCurve1D Class.fallbackMemberMinus
+    , Class.minus @Angle Class.noFallback
+    , Class.times @Number Class.noFallback
+    , Class.times @UnitlessCurve1D Class.fallbackMemberTimes
+    , Class.divideBy @Number Class.noFallback
+    , Class.divideByNonzeroU @UnitlessCurve1D Curve1D.nonzero Class.fallbackMemberDivideBy
+    , Class.divideBy @Angle Class.noFallback
+    , Class.divideByNonzeroR @AngleCurve1D Curve1D.nonzero Class.fallbackStaticRatio
     ]
 
-type Curve1D = Curve1D.Curve1D Meters
+type LengthCurve1D = Curve1D.Curve1D Meters
 
-curve1D :: Class
-curve1D =
-  Class.new @Curve1D "A parametric curve definining a length in terms of a parameter value." $
+lengthCurve1D :: Class
+lengthCurve1D =
+  Class.new @LengthCurve1D "A parametric curve definining a length in terms of a parameter value." $
     [ Class.constant "Zero" (Curve1D.zero @Meters) $(docs 'Curve1D.zero)
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
@@ -922,18 +920,20 @@ curve1D =
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
     , Class.memberM0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
     , Class.memberM0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
-    , Class.negateSelf
+    , Class.negation
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.plus @Length Self
-    , Class.minusSelf
-    , Class.minus @Length Self
-    , Class.timesNumber
-    , Class.timesSelf
-    , Class.times @Length Self
-    , Class.times @UnitlessCurve1D Self
-    , Class.divByNumber
-    , Class.divBy @Length Self
+    , Class.plus @LengthCurve1D Class.fallbackMemberPlus
+    , Class.plus @Length Class.noFallback
+    , Class.minus @LengthCurve1D Class.fallbackMemberMinus
+    , Class.minus @Length Class.noFallback
+    , Class.times @Number Class.noFallback
+    , Class.times @LengthCurve1D Class.fallbackStaticProduct
+    , Class.times @Length Class.noFallback
+    , Class.times @UnitlessCurve1D Class.fallbackMemberTimes
+    , Class.divideBy @Number Class.noFallback
+    , Class.divideBy @Length Class.noFallback
+    , Class.divideByNonzeroU @UnitlessCurve1D Curve1D.nonzero Class.fallbackMemberDivideBy
+    , Class.divideByNonzeroM @LengthCurve1D Curve1D.nonzero Class.fallbackStaticRatio
     , Class.nested @Curve1D.Zero "A point where a given curve is equal to zero." $
         [ Class.property "Location" (.location) "The parameter value at which the curve is zero."
         , Class.property "Order" (.order) "The order of the solution: 0 for crossing, 1 for tangent, etc."
@@ -951,19 +951,18 @@ areaCurve1D =
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
-    , Class.memberS0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
-    , Class.memberS0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
-    , Class.negateSelf
+    , Class.negation
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.plus @Area Self
-    , Class.minusSelf
-    , Class.minus @Area Self
-    , Class.timesNumber
-    , Class.times @UnitlessCurve1D Self
-    , Class.divByNumber
-    , Class.divBy @Length Self
-    , Class.divBy @Area Self
+    , Class.plus @AreaCurve1D Class.fallbackMemberPlus
+    , Class.plus @Area Class.noFallback
+    , Class.minus @AreaCurve1D Class.fallbackMemberMinus
+    , Class.minus @Area Class.noFallback
+    , Class.times @Number Class.noFallback
+    , Class.times @UnitlessCurve1D Class.fallbackMemberTimes
+    , Class.divideBy @Number Class.noFallback
+    , Class.divideByNonzeroU @UnitlessCurve1D Curve1D.nonzero Class.fallbackMemberDivideBy
+    , Class.divideBy @Length Class.noFallback
+    , Class.divideByNonzeroM @LengthCurve1D Curve1D.nonzero (Class.fallbackMember "Divide By Length Curve")
     ]
 
 type Svg = Svg.Svg
@@ -1074,6 +1073,7 @@ unitlessVector3D =
     , Class.member1 "Components" "Convention" Vector3D.components $(docs 'Vector3D.components)
     , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
     , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
+    , Class.member1 "Component In" "Direction" Vector3D.componentIn $(docs 'Vector3D.componentIn)
     , Class.memberU0 "Direction" Vector3D.direction $(docs 'Vector3D.direction)
     , Class.memberU0 "Is Zero" (~= Vector3D.zero) "Check if a vector is zero, within the current tolerance."
     , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
@@ -1084,29 +1084,29 @@ unitlessVector3D =
     , Class.member2 "Scale Along" "Axis" "Scale" (Vector3D.scaleAlong :: Axis3D -> Number -> UnitlessVector3D -> UnitlessVector3D) $(docs 'Vector3D.scaleAlong)
     , Class.member1 "Place In" "Frame" (Vector3D.placeIn :: Frame3D -> UnitlessVector3D -> UnitlessVector3D) $(docs 'Vector3D.placeIn)
     , Class.member1 "Relative To" "Frame" (Vector3D.relativeTo :: Frame3D -> UnitlessVector3D -> UnitlessVector3D) $(docs 'Vector3D.relativeTo)
-    , Class.negateSelf
+    , Class.negation
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.minusSelf
-    , Class.timesNumber
-    , Class.times @Length Self
-    , Class.times @Area Self
-    , Class.divByNumber
-    , Class.dotSelf
-    , Class.dotProduct @Direction3D Self
-    , Class.dotProduct @Vector3D Self
-    , Class.dotProduct @AreaVector3D Self
-    , Class.crossSelf
-    , Class.crossProduct @Direction3D Self
-    , Class.crossProduct @Vector3D Self
-    , Class.crossProduct @AreaVector3D Self
+    , Class.plus @UnitlessVector3D Class.fallbackMemberPlus
+    , Class.minus @UnitlessVector3D Class.fallbackMemberMinus
+    , Class.times @Number Class.fallbackMemberTimes
+    , Class.times @Length (Class.fallbackMember "Times Length")
+    , Class.times @Area (Class.fallbackMember "Times Area")
+    , Class.divideBy @Number Class.fallbackMemberDivideBy
+    , Class.dot @UnitlessVector3D Class.fallbackStaticDotProduct
+    , Class.dot @Direction3D Class.fallbackMemberDot
+    , Class.dot @Displacement3D Class.noFallback
+    , Class.dot @AreaVector3D Class.noFallback
+    , Class.cross @UnitlessVector3D Class.fallbackStaticCrossProduct
+    , Class.cross @Direction3D Class.fallbackMemberCross
+    , Class.cross @Displacement3D Class.noFallback
+    , Class.cross @AreaVector3D Class.noFallback
     ]
 
-type Vector3D = Vector3D.Vector3D Meters Void
+type Displacement3D = Vector3D.Vector3D Meters Void
 
-vector3D :: Class
-vector3D =
-  Class.new @Vector3D "A displacement vector in 3D." $
+displacement3D :: Class
+displacement3D =
+  Class.new @Displacement3D "A displacement vector in 3D." $
     [ Class.constant "Zero" (Vector3D.zero @Meters @Void) $(docs 'Vector3D.zero)
     , Class.factory2 "XYZ" "Convention" "Components" Vector3D.xyz $(docs 'Vector3D.xyz)
     , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3D.zUp $(docs 'Vector3D.zUp)
@@ -1114,30 +1114,31 @@ vector3D =
     , Class.member1 "Components" "Convention" Vector3D.components $(docs 'Vector3D.components)
     , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
     , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
+    , Class.member1 "Component In" "Direction" Vector3D.componentIn $(docs 'Vector3D.componentIn)
     , Class.memberM0 "Direction" Vector3D.direction $(docs 'Vector3D.direction)
     , Class.memberM0 "Is Zero" (~= Vector3D.zero) "Check if a displacement is zero, within the current tolerance."
     , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
-    , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> Vector3D -> Vector3D) $(docs 'Vector3D.rotateAround)
+    , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> Displacement3D -> Displacement3D) $(docs 'Vector3D.rotateAround)
     , Class.member1 "Mirror In" "Direction" Vector3D.mirrorIn $(docs 'Vector3D.mirrorIn)
-    , Class.member1 "Mirror Across" "Plane" (Vector3D.mirrorAcross :: Plane3D -> Vector3D -> Vector3D) $(docs 'Vector3D.mirrorAcross)
+    , Class.member1 "Mirror Across" "Plane" (Vector3D.mirrorAcross :: Plane3D -> Displacement3D -> Displacement3D) $(docs 'Vector3D.mirrorAcross)
     , Class.member2 "Scale In" "Direction" "Scale" Vector3D.scaleIn $(docs 'Vector3D.scaleIn)
-    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3D.scaleAlong :: Axis3D -> Number -> Vector3D -> Vector3D) $(docs 'Vector3D.scaleAlong)
-    , Class.member1 "Place In" "Frame" (Vector3D.placeIn :: Frame3D -> Vector3D -> Vector3D) $(docs 'Vector3D.placeIn)
-    , Class.member1 "Relative To" "Frame" (Vector3D.relativeTo :: Frame3D -> Vector3D -> Vector3D) $(docs 'Vector3D.relativeTo)
-    , Class.negateSelf
+    , Class.member2 "Scale Along" "Axis" "Scale" (Vector3D.scaleAlong :: Axis3D -> Number -> Displacement3D -> Displacement3D) $(docs 'Vector3D.scaleAlong)
+    , Class.member1 "Place In" "Frame" (Vector3D.placeIn :: Frame3D -> Displacement3D -> Displacement3D) $(docs 'Vector3D.placeIn)
+    , Class.member1 "Relative To" "Frame" (Vector3D.relativeTo :: Frame3D -> Displacement3D -> Displacement3D) $(docs 'Vector3D.relativeTo)
+    , Class.negation
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.minusSelf
-    , Class.timesNumber
-    , Class.times @Length Self
-    , Class.divByNumber
-    , Class.divBy @Length Self
-    , Class.dotSelf
-    , Class.dotProduct @Direction3D Self
-    , Class.dotProduct @UnitlessVector3D Self
-    , Class.crossSelf
-    , Class.crossProduct @Direction3D Self
-    , Class.crossProduct @UnitlessVector3D Self
+    , Class.plus @Displacement3D Class.fallbackMemberPlus
+    , Class.minus @Displacement3D Class.fallbackMemberMinus
+    , Class.times @Number Class.fallbackMemberTimes
+    , Class.times @Length (Class.fallbackMember "Times Length")
+    , Class.divideBy @Number Class.fallbackMemberDivideBy
+    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
+    , Class.dot @Displacement3D Class.fallbackStaticDotProduct
+    , Class.dot @Direction3D Class.fallbackMemberDot
+    , Class.dot @UnitlessVector3D (Class.fallbackMember "Dot Unitless Vector")
+    , Class.cross @Displacement3D Class.fallbackStaticCrossProduct
+    , Class.cross @Direction3D Class.fallbackMemberCross
+    , Class.cross @UnitlessVector3D (Class.fallbackMember "Cross Unitless Vector")
     ]
 
 type AreaVector3D = Vector3D.Vector3D SquareMeters Void
@@ -1152,8 +1153,7 @@ areaVector3D =
     , Class.member1 "Components" "Convention" Vector3D.components $(docs 'Vector3D.components)
     , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
     , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
-    , Class.memberS0 "Direction" Vector3D.direction $(docs 'Vector3D.direction)
-    , Class.memberS0 "Is Zero" (~= Vector3D.zero) "Check if an area vector is zero, within the current tolerance."
+    , Class.member1 "Component In" "Direction" Vector3D.componentIn $(docs 'Vector3D.componentIn)
     , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
     , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> AreaVector3D -> AreaVector3D) $(docs 'Vector3D.rotateAround)
     , Class.member1 "Mirror In" "Direction" Vector3D.mirrorIn $(docs 'Vector3D.mirrorIn)
@@ -1162,18 +1162,18 @@ areaVector3D =
     , Class.member2 "Scale Along" "Axis" "Scale" (Vector3D.scaleAlong :: Axis3D -> Number -> AreaVector3D -> AreaVector3D) $(docs 'Vector3D.scaleAlong)
     , Class.member1 "Place In" "Frame" (Vector3D.placeIn :: Frame3D -> AreaVector3D -> AreaVector3D) $(docs 'Vector3D.placeIn)
     , Class.member1 "Relative To" "Frame" (Vector3D.relativeTo :: Frame3D -> AreaVector3D -> AreaVector3D) $(docs 'Vector3D.relativeTo)
-    , Class.negateSelf
+    , Class.negation
     , Class.numberTimes
-    , Class.plusSelf
-    , Class.minusSelf
-    , Class.timesNumber
-    , Class.divByNumber
-    , Class.divBy @Length Self
-    , Class.divBy @Area Self
-    , Class.dotProduct @Direction3D Self
-    , Class.dotProduct @UnitlessVector3D Self
-    , Class.crossProduct @Direction3D Self
-    , Class.crossProduct @UnitlessVector3D Self
+    , Class.plus @AreaVector3D Class.fallbackMemberPlus
+    , Class.minus @AreaVector3D Class.fallbackMemberMinus
+    , Class.times @Number Class.fallbackMemberTimes
+    , Class.divideBy @Number Class.fallbackMemberDivideBy
+    , Class.divideBy @Length (Class.fallbackMember "Divide By Length")
+    , Class.divideBy @Area (Class.fallbackMember "Divide By Area")
+    , Class.dot @Direction3D Class.fallbackMemberDot
+    , Class.dot @UnitlessVector3D (Class.fallbackMember "Dot Unitless Vector")
+    , Class.cross @Direction3D Class.fallbackMemberCross
+    , Class.cross @UnitlessVector3D (Class.fallbackMember "Cross Unitless Vector")
     ]
 
 type Direction3D = Direction3D.Direction3D Void
@@ -1192,19 +1192,19 @@ direction3D =
     , Class.member1 "Mirror Across" "Plane" (Direction3D.mirrorAcross :: Plane3D -> Direction3D -> Direction3D) $(docs 'Direction3D.mirrorAcross)
     , Class.member1 "Place In" "Frame" (Direction3D.placeIn :: Frame3D -> Direction3D -> Direction3D) $(docs 'Direction3D.placeIn)
     , Class.member1 "Relative To" "Frame" (Direction3D.relativeTo :: Frame3D -> Direction3D -> Direction3D) $(docs 'Direction3D.relativeTo)
-    , Class.negateSelf
+    , Class.negation
     , Class.numberTimes
-    , Class.timesNumber
-    , Class.times @Length Self
-    , Class.times @Area Self
-    , Class.dotSelf
-    , Class.dotProduct @UnitlessVector3D Self
-    , Class.dotProduct @Vector3D Self
-    , Class.dotProduct @AreaVector3D Self
-    , Class.crossSelf
-    , Class.crossProduct @UnitlessVector3D Self
-    , Class.crossProduct @Vector3D Self
-    , Class.crossProduct @AreaVector3D Self
+    , Class.times @Number Class.fallbackMemberTimes
+    , Class.times @Length (Class.fallbackMember "Times Length")
+    , Class.times @Area (Class.fallbackMember "Times Area")
+    , Class.dot @Direction3D Class.fallbackMemberDot
+    , Class.dot @UnitlessVector3D Class.noFallback
+    , Class.dot @Displacement3D Class.noFallback
+    , Class.dot @AreaVector3D Class.noFallback
+    , Class.cross @Direction3D Class.fallbackMemberCross
+    , Class.cross @UnitlessVector3D (Class.fallbackMember "Cross Unitless Vector")
+    , Class.cross @Displacement3D (Class.fallbackMember "Cross Displacement")
+    , Class.cross @AreaVector3D (Class.fallbackMember "Cross Area Vector")
     ]
 
 type Point3D = Point3D.Point3D Void
@@ -1223,9 +1223,9 @@ point3D =
     , Class.member1 "Midpoint" "Other" Point3D.midpoint $(docs 'Point3D.midpoint)
     , Class.member1 "Project Onto" "Plane" Point3D.projectOnto $(docs 'Point3D.projectOnto)
     , Class.member1 "Project Into" "Plane" (Point3D.projectInto @Void) $(docs 'Point3D.projectInto)
-    , Class.minusSelf
-    , Class.minus @Vector3D Self
-    , Class.plus @Vector3D Self
+    , Class.minus @Point3D Class.fallbackMemberMinus
+    , Class.minus @Displacement3D Class.noFallback
+    , Class.plus @Displacement3D Class.noFallback
     , Class.member1 "Place In" "Frame" (Point3D.placeIn :: Frame3D -> Point3D -> Point3D) $(docs 'Point3D.placeIn)
     , Class.member1 "Relative To" "Frame" (Point3D.relativeTo :: Frame3D -> Point3D -> Point3D) $(docs 'Point3D.relativeTo)
     ]
@@ -1241,8 +1241,8 @@ bounds3D =
     , Class.factory1 @(NonEmpty Point3D) "Hull" "Points" Bounds3D.hull $(docs 'Bounds3D.hull)
     , Class.factory1 "Aggregate" "Bounds" Bounds3D.aggregate $(docs 'Bounds3D.aggregate)
     , Class.member1 "Coordinates" "Convention" Bounds3D.coordinates $(docs 'Bounds3D.coordinates)
-    , Class.plus @Vector3D Self
-    , Class.minus @Vector3D Self
+    , Class.plus @Displacement3D Class.noFallback
+    , Class.minus @Displacement3D Class.noFallback
     ]
       <> affineTransformations3D Bounds3D.transformBy
 
@@ -1399,11 +1399,11 @@ unitlessVectorCurve2D =
     , Class.member1 "Value" "Parameter Value" VectorCurve2D.valueAt $(docs 'VectorCurve2D.valueAt)
     ]
 
-type VectorCurve2D = VectorCurve2D.VectorCurve2D Meters
+type DisplacementCurve2D = VectorCurve2D.VectorCurve2D Meters
 
-vectorCurve2D :: Class
-vectorCurve2D =
-  Class.new @VectorCurve2D "A parametric curve defining a 2D displacement vector in terms of a parameter value." $
+displacementCurve2D :: Class
+displacementCurve2D =
+  Class.new @DisplacementCurve2D "A parametric curve defining a 2D displacement vector in terms of a parameter value." $
     [ Class.constant "Zero" (VectorCurve2D.zero @Meters) $(docs 'VectorCurve2D.zero)
     , Class.factory1 "Constant" "Value" VectorCurve2D.constant $(docs 'VectorCurve2D.constant)
     , Class.factory2 "XY" "X Component" "Y Component" VectorCurve2D.xy $(docs 'VectorCurve2D.xy)
@@ -1504,10 +1504,10 @@ curve2D =
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "X Coordinate" (Curve2D.xCoordinate) $(docs 'Curve2D.xCoordinate)
     , Class.property "Y Coordinate" (Curve2D.yCoordinate) $(docs 'Curve2D.yCoordinate)
-    , Class.plus @VectorCurve2D Self
-    , Class.minus @VectorCurve2D Self
-    , Class.minusSelf
-    , Class.minus @Point2D Self
+    , Class.plus @DisplacementCurve2D (Class.fallbackMember "Plus Displacement Curve")
+    , Class.minus @DisplacementCurve2D (Class.fallbackMember "Minus Displacement Curve")
+    , Class.minus @Curve2D Class.fallbackMemberMinus
+    , Class.minus @Point2D Class.noFallback
     ]
       <> affineTransformations2D Curve2D.transformBy
 
@@ -1534,10 +1534,10 @@ uvCurve =
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "U Coordinate" (Curve2D.xCoordinate) "Get the U coordinate of a UV curve as a scalar curve."
     , Class.property "V Coordinate" (Curve2D.yCoordinate) "Get the V coordinate of a UV curve as a scalar curve."
-    , Class.plus @UnitlessVectorCurve2D Self
-    , Class.minus @UnitlessVectorCurve2D Self
-    , Class.minusSelf
-    , Class.minus @UvPoint Self
+    , Class.plus @UnitlessVectorCurve2D (Class.fallbackMember "Plus Unitless Vector Curve")
+    , Class.minus @UnitlessVectorCurve2D (Class.fallbackMember "Minus Unitless Vector Curve")
+    , Class.minus @UvCurve Class.fallbackMemberMinus
+    , Class.minus @UvPoint Class.noFallback
     ]
 
 type Region2D = Region2D.Region2D Meters

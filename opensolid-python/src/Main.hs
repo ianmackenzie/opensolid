@@ -104,18 +104,10 @@ preamble =
     , "def _error(message: str) -> Never:"
     , "    raise Error(message)"
     , ""
-    , "_length_tolerance_context_var : ContextVar[Length] = ContextVar('length tolerance')"
-    , "_area_tolerance_context_var : ContextVar[Area] = ContextVar('area tolerance')"
+    , "_tolerance_context_var : ContextVar[Length] = ContextVar('tolerance')"
     , ""
-    , "def _length_tolerance() -> Length:"
-    , "    return _length_tolerance_context_var.get(Length.default_tolerance)"
-    , ""
-    , "def _area_tolerance() -> Area:"
-    , "    try:"
-    , "        return _area_tolerance_context_var.get()"
-    , "    except LookupError as error:"
-    , "        message = 'No area tolerance set, please set one using \"with Tolerance.area(...)\"'"
-    , "        raise LookupError(message) from error"
+    , "def _tolerance() -> Length:"
+    , "    return _tolerance_context_var.get(Length.default_tolerance)"
     ]
 
 classDefinition :: Class -> (Text, Text)
@@ -212,19 +204,15 @@ extraMemberFunctions className = do
               ]
           ]
   case className of
-    "Tolerance" ->
+    "Length" ->
       Python.lines
-        [ "@staticmethod"
-        , "def length(value: Length) -> contextvars.Token[Length]:"
-        , "    \"\"\"Set the length tolerance to use for a block of code.\"\"\""
-        , "    return _length_tolerance_context_var.set(value)"
+        [ repr ["return 'Length.meters(' + str(self.in_meters()) + ')'"]
         , ""
         , "@staticmethod"
-        , "def area(value: Area) -> contextvars.Token[Area]:"
-        , "    \"\"\"Set the area tolerance to use for a block of code.\"\"\""
-        , "    return _area_tolerance_context_var.set(value)"
+        , "def tolerance(value: Length) -> contextvars.Token[Length]:"
+        , "    \"\"\"Set the length tolerance to use for a block of code.\"\"\""
+        , "    return _tolerance_context_var.set(value)"
         ]
-    "Length" -> repr ["return 'Length.meters(' + str(self.in_meters()) + ')'"]
     "Area" -> repr ["return 'Area.square_meters(' + str(self.in_square_meters()) + ')'"]
     "Angle" -> repr ["return 'Angle.radians(' + str(self.in_radians()) + ')'"]
     "Interval" ->

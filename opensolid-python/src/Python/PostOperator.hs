@@ -1,6 +1,7 @@
 module Python.PostOperator (definition) where
 
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator
+import OpenSolid.API.Class (FallbackFunction)
 import OpenSolid.API.ImplicitArgument (ImplicitArgument)
 import OpenSolid.API.PostOperatorOverload (PostOperatorOverload (..))
 import OpenSolid.API.PostOperatorOverload qualified as PostOperatorOverload
@@ -15,7 +16,7 @@ import Python.Type qualified
 rhsArgName :: Text
 rhsArgName = FFI.snakeCase PostOperatorOverload.rhsName
 
-definition :: FFI.ClassName -> (BinaryOperator.Id, List PostOperatorOverload) -> Text
+definition :: FFI.ClassName -> (BinaryOperator.Id, List (PostOperatorOverload, Maybe FallbackFunction)) -> Text
 definition className (operatorId, operators) = do
   case List.map (overloadComponents className operatorId) operators of
     [(signature, _, body)] ->
@@ -70,12 +71,12 @@ functionName operatorId = case operatorId of
 overloadComponents ::
   FFI.ClassName ->
   BinaryOperator.Id ->
-  PostOperatorOverload ->
+  (PostOperatorOverload, Maybe FallbackFunction) ->
   (Text, Text, Text)
-overloadComponents className operatorId memberFunction = do
-  let ffiFunctionName = PostOperatorOverload.ffiName className operatorId memberFunction
+overloadComponents className operatorId (overload, _) = do
+  let ffiFunctionName = PostOperatorOverload.ffiName className operatorId overload
   let selfType = FFI.Class className
-  let (maybeImplicitArgument, rhsType, returnType) = PostOperatorOverload.signature memberFunction
+  let (maybeImplicitArgument, rhsType, returnType) = PostOperatorOverload.signature overload
   let signature = overloadSignature operatorId rhsType returnType
   let matchPattern = Python.Function.typePattern rhsType
   let body = overloadBody ffiFunctionName maybeImplicitArgument selfType rhsType returnType
