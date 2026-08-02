@@ -47,40 +47,48 @@ solveForV f fv uValue vBounds = do
     Solve1D.Closest vValue -> vValue
 
 curveRangeAt :: Number -> Number -> Quantity units -> Quantity units -> Interval units -> Interval units
-curveRangeAt x1 x2 y1 y2 (Interval mLow mHigh)
-  | mLow >= Quantity.zero || mHigh <= Quantity.zero = Interval y1 y2 -- Monotonic case
+curveRangeAt x1 x2 y1 y2 mRange
+  | x2 < x1 = curveRangeAt x2 x1 y2 y1 mRange -- Ensure arguments are in increasing X order
   | otherwise = do
-      let dX = x2 - x1
-      let dY = y2 - y1
-      let dXValley = Number.clampTo (Interval 0.0 dX) ((mHigh * dX - dY) / (mHigh - mLow))
-      let dXPeak = Number.clampTo (Interval 0.0 dX) ((dY - mLow * dX) / (mHigh - mLow))
-      let yValley =
-            if Quantity.isInfinite mLow
-              then -Quantity.infinity
-              else y1 + mLow * dXValley
-      let yPeak =
-            if Quantity.isInfinite mHigh
-              then Quantity.infinity
-              else y1 + mHigh * dXPeak
-      Interval yValley yPeak
+      let Interval mLow mHigh = mRange
+      if mLow >= Quantity.zero || mHigh <= Quantity.zero
+        then Interval y1 y2 -- Monotonic case
+        else do
+          let dX = x2 - x1
+          let dY = y2 - y1
+          let dXValley = Number.clampTo (Interval 0.0 dX) ((mHigh * dX - dY) / (mHigh - mLow))
+          let dXPeak = Number.clampTo (Interval 0.0 dX) ((dY - mLow * dX) / (mHigh - mLow))
+          let yValley =
+                if Quantity.isInfinite mLow
+                  then -Quantity.infinity
+                  else y1 + mLow * dXValley
+          let yPeak =
+                if Quantity.isInfinite mHigh
+                  then Quantity.infinity
+                  else y1 + mHigh * dXPeak
+          Interval yValley yPeak
 
 curveRangeOver :: Number -> Number -> Interval units -> Interval units -> Interval units -> Interval units
-curveRangeOver x1 x2 y1 y2 (Interval mLow mHigh)
-  | mLow >= Quantity.zero || mHigh <= Quantity.zero = Interval.aggregate2 y1 y2 -- Monotonic case
+curveRangeOver x1 x2 y1 y2 mRange
+  | x2 < x1 = curveRangeOver x2 x1 y2 y1 mRange -- Ensure arguments are in increasing X order
   | otherwise = do
-      let dX = x2 - x1
-      let Interval low1 high1 = y1
-      let Interval low2 high2 = y2
-      let dYLow = low2 - low1
-      let dYHigh = high2 - high1
-      let dXValley = Number.clampTo (Interval 0.0 dX) ((mHigh * dX - dYLow) / (mHigh - mLow))
-      let dXPeak = Number.clampTo (Interval 0.0 dX) ((dYHigh - mLow * dX) / (mHigh - mLow))
-      let yValley =
-            if Quantity.isInfinite mLow
-              then -Quantity.infinity
-              else low1 + mLow * dXValley
-      let yPeak =
-            if Quantity.isInfinite mHigh
-              then Quantity.infinity
-              else high1 + mHigh * dXPeak
-      Interval yValley yPeak
+      let Interval mLow mHigh = mRange
+      if mLow >= Quantity.zero || mHigh <= Quantity.zero
+        then Interval.aggregate2 y1 y2 -- Monotonic case
+        else do
+          let dX = x2 - x1
+          let Interval low1 high1 = y1
+          let Interval low2 high2 = y2
+          let dYLow = low2 - low1
+          let dYHigh = high2 - high1
+          let dXValley = Number.clampTo (Interval 0.0 dX) ((mHigh * dX - dYLow) / (mHigh - mLow))
+          let dXPeak = Number.clampTo (Interval 0.0 dX) ((dYHigh - mLow * dX) / (mHigh - mLow))
+          let yValley =
+                if Quantity.isInfinite mLow
+                  then -Quantity.infinity
+                  else low1 + mLow * dXValley
+          let yPeak =
+                if Quantity.isInfinite mHigh
+                  then Quantity.infinity
+                  else high1 + mHigh * dXPeak
+          Interval yValley yPeak
