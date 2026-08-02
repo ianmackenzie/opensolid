@@ -4,6 +4,7 @@ module OpenSolid.Direction
   , unsafe
   , unwrap
   , parallel
+  , independent
   , perpendicular
   )
 where
@@ -40,12 +41,14 @@ class
   unsafeImpl :: Vector dimension Unitless space -> Direction dimension space
   unwrapImpl :: Direction dimension space -> Vector dimension Unitless space
   parallel :: Direction dimension space -> Direction dimension space -> Bool
+  independent :: Direction dimension space -> Direction dimension space -> Bool
   perpendicular :: Direction dimension space -> Direction dimension space -> Bool
 
 instance Exists 1 Void where
   unsafeImpl = Quantity.sign
   unwrapImpl = Sign.value
   parallel _ _ = True
+  independent _ _ = False
   perpendicular _ _ = False
 
 instance Exists 2 Void where
@@ -55,6 +58,8 @@ instance Exists 2 Void where
   unwrapImpl = Direction2D.unwrap
   {-# INLINEABLE parallel #-}
   parallel = Direction2D.parallel
+  {-# INLINEABLE independent #-}
+  independent = Direction2D.independent
   {-# INLINEABLE perpendicular #-}
   perpendicular = Direction2D.perpendicular
 
@@ -65,6 +70,8 @@ instance Exists 3 space where
   unwrapImpl = Direction3D.unwrap
   {-# INLINEABLE parallel #-}
   parallel = Direction3D.parallel
+  {-# INLINEABLE independent #-}
+  independent = Direction3D.independent
   {-# INLINEABLE perpendicular #-}
   perpendicular = Direction3D.perpendicular
 

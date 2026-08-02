@@ -4,6 +4,7 @@ module OpenSolid.Direction2D
   , unwrap
   , rotateLeft
   , parallel
+  , independent
   , perpendicular
   )
 where
@@ -15,4 +16,5 @@ unsafe :: Vector2D Unitless -> Direction2D
 unwrap :: Direction2D -> Vector2D Unitless
 rotateLeft :: Direction2D -> Direction2D
 parallel :: Direction2D -> Direction2D -> Bool
+independent :: Direction2D -> Direction2D -> Bool
 perpendicular :: Direction2D -> Direction2D -> Bool

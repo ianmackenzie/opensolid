@@ -15,6 +15,7 @@ module OpenSolid.Direction2D
   , radians
   , angleFrom
   , parallel
+  , independent
   , perpendicular
   , perpendicularTo
   , rotateLeft
@@ -156,6 +157,9 @@ perpendicular d1 d2 = Tolerance.using Tolerance.unitless (d1 `dot` d2 ~= 0.0)
 
 parallel :: Direction2D -> Direction2D -> Bool
 parallel d1 d2 = d1 ~= d2 || d1 ~= -d2
+
+independent :: Direction2D -> Direction2D -> Bool
+independent d1 d2 = not (parallel d1 d2)
 
 perpendicularTo :: Direction2D -> Direction2D
 perpendicularTo = rotateLeft

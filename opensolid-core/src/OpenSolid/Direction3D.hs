@@ -23,6 +23,7 @@ module OpenSolid.Direction3D
   , yUpComponents
   , angleFrom
   , parallel
+  , independent
   , perpendicular
   , placeIn
   , relativeTo
@@ -164,6 +165,9 @@ angleFrom d1 d2 = Angle.atan2 (Vector3D.magnitude (d1 `cross` d2)) (d1 `dot` d2)
 
 parallel :: Direction3D space -> Direction3D space -> Bool
 parallel d1 d2 = d1 ~= d2 || d1 ~= -d2
+
+independent :: Direction3D space -> Direction3D space -> Bool
+independent d1 d2 = not (parallel d1 d2)
 
 perpendicular :: Direction3D space -> Direction3D space -> Bool
 perpendicular d1 d2 = Tolerance.using Tolerance.unitless (d1 `dot` d2 ~= 0.0)
