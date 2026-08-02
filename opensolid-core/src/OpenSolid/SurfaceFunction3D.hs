@@ -203,7 +203,7 @@ nondegeneracy function uvPoint = do
 
 {-# INLINE pointAt #-}
 pointAt :: UvPoint -> SurfaceFunction3D space -> Point3D space
-pointAt uvPoint function = CompiledFunction.value function.compiled uvPoint
+pointAt uvPoint function = CompiledFunction.value uvPoint function.compiled
 
 {-# INLINE pointOn #-}
 pointOn :: SurfaceFunction3D space -> UvPoint -> Point3D space
@@ -211,7 +211,7 @@ pointOn function uvPoint = pointAt uvPoint function
 
 {-# INLINE range #-}
 range :: UvBounds -> SurfaceFunction3D space -> Bounds3D space
-range uvRange function = CompiledFunction.range function.compiled uvRange
+range uvRange function = CompiledFunction.range uvRange function.compiled
 
 partialDerivativesAt ::
   UvPoint ->

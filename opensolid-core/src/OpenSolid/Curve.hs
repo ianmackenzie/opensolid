@@ -462,9 +462,9 @@ new givenCompiled givenDerivative =
     Curve
       { compiled = givenCompiled
       , derivative = givenDerivative
-      , startPoint = CompiledFunction.value givenCompiled 0.0
-      , endPoint = CompiledFunction.value givenCompiled 1.0
-      , bounds = CompiledFunction.range givenCompiled Interval.unit
+      , startPoint = CompiledFunction.value 0.0 givenCompiled
+      , endPoint = CompiledFunction.value 1.0 givenCompiled
+      , bounds = CompiledFunction.range Interval.unit givenCompiled
       , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) curve
       , arcLengthParameterization = Nondegenerate.field buildArcLengthParameterization curve
       }
@@ -561,7 +561,7 @@ isPoint curve = VectorCurve.isZero (derivative curve)
 pointAt :: Number -> Curve dimension units space -> Point dimension units space
 pointAt 0.0 curve = startPoint curve
 pointAt 1.0 curve = endPoint curve
-pointAt tValue curve = CompiledFunction.value (compiled curve) tValue
+pointAt tValue curve = CompiledFunction.value tValue (compiled curve)
 
 pointOn :: Curve dimension units space -> Number -> Point dimension units space
 pointOn curve tValue = pointAt tValue curve
@@ -578,7 +578,7 @@ endpoints ::
 endpoints curve = (startPoint curve, endPoint curve)
 
 range :: Interval Unitless -> Curve dimension units space -> Bounds dimension units space
-range tRange curve = CompiledFunction.range (compiled curve) tRange
+range tRange curve = CompiledFunction.range tRange (compiled curve)
 
 bounds :: Curve dimension units space -> Bounds dimension units space
 bounds = (.bounds)
@@ -849,7 +849,7 @@ transformBy transform curve =
       , derivative = transformedDerivative
       , startPoint = Point.transformBy transform curve.startPoint
       , endPoint = Point.transformBy transform curve.endPoint
-      , bounds = CompiledFunction.range compiledTransformed Interval.unit
+      , bounds = CompiledFunction.range Interval.unit compiledTransformed
       , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) transformed
       , arcLengthParameterization =
           case Transform.uniformScale transform of
@@ -874,7 +874,7 @@ placeOn plane curve =
       , derivative = placedDerivative
       , startPoint = Point2D.placeOn plane curve.startPoint
       , endPoint = Point2D.placeOn plane curve.endPoint
-      , bounds = CompiledFunction.range compiledPlaced Interval.unit
+      , bounds = CompiledFunction.range Interval.unit compiledPlaced
       , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) placed
       , arcLengthParameterization = curve.arcLengthParameterization
       }

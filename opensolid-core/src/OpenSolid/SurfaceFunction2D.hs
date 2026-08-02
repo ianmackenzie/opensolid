@@ -174,7 +174,7 @@ xy x y = do
 
 {-# INLINE pointAt #-}
 pointAt :: UvPoint -> SurfaceFunction2D units -> Point2D units
-pointAt uvPoint function = CompiledFunction.value (compiled function) uvPoint
+pointAt uvPoint function = CompiledFunction.value uvPoint (compiled function)
 
 {-# INLINE pointOn #-}
 pointOn :: SurfaceFunction2D units -> UvPoint -> Point2D units
@@ -182,7 +182,7 @@ pointOn function uvPoint = pointAt uvPoint function
 
 {-# INLINE range #-}
 range :: SurfaceFunction2D units -> UvBounds -> Bounds2D units
-range function uvRange = CompiledFunction.range (compiled function) uvRange
+range function uvRange = CompiledFunction.range uvRange (compiled function)
 
 {-# INLINE compiled #-}
 compiled :: SurfaceFunction2D units -> Compiled units

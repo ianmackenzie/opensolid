@@ -965,16 +965,14 @@ new ::
   Compiled dimension units space ->
   VectorCurve dimension units space ->
   VectorCurve dimension units space
-new givenCompiled givenDerivative =
+new givenCompiled givenDerivative = do
+  let sampledMagnitude tValue = Vector.magnitude (CompiledFunction.value tValue givenCompiled)
   VectorCurve
     { compiled = givenCompiled
     , derivative = givenDerivative
-    , startValue = CompiledFunction.value givenCompiled 0.0
-    , endValue = CompiledFunction.value givenCompiled 1.0
-    , maxSampledMagnitude =
-        NonEmpty.maximumOf
-          (Vector.magnitude . CompiledFunction.value givenCompiled)
-          Parameter.samples
+    , startValue = CompiledFunction.value 0.0 givenCompiled
+    , endValue = CompiledFunction.value 1.0 givenCompiled
+    , maxSampledMagnitude = NonEmpty.maximumOf sampledMagnitude Parameter.samples
     }
 
 constant ::
@@ -1072,7 +1070,7 @@ valueAt ::
   Vector dimension units space
 valueAt 0.0 curve = startValue curve
 valueAt 1.0 curve = endValue curve
-valueAt tValue curve = CompiledFunction.value (compiled curve) tValue
+valueAt tValue curve = CompiledFunction.value tValue (compiled curve)
 
 {-# INLINE valueOf #-}
 valueOf ::
@@ -1088,7 +1086,7 @@ range ::
   Interval Unitless ->
   VectorCurve dimension units space ->
   VectorBounds dimension units space
-range tRange curve = CompiledFunction.range (compiled curve) tRange
+range tRange curve = CompiledFunction.range tRange (compiled curve)
 
 {-# INLINE derivativeAt #-}
 derivativeAt ::

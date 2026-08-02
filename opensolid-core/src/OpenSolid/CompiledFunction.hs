@@ -324,18 +324,18 @@ map _ mapValue mapBounds (Abstract valueImpl rangeImpl) =
   Abstract (mapValue . valueImpl) (mapBounds . rangeImpl)
 
 value ::
-  CompiledFunction inputValue outputValue inputBounds outputBounds ->
   inputValue ->
+  CompiledFunction inputValue outputValue inputBounds outputBounds ->
   outputValue
-value (Concrete expr) inputValue = Expression.value expr inputValue
-value (Abstract valueImpl _) inputValue = valueImpl inputValue
+value inputValue (Concrete expr) = Expression.value expr inputValue
+value inputValue (Abstract valueImpl _) = valueImpl inputValue
 
 range ::
-  CompiledFunction inputValue outputValue inputBounds outputBounds ->
   inputBounds ->
+  CompiledFunction inputValue outputValue inputBounds outputBounds ->
   outputBounds
-range (Concrete expr) inputRange = Expression.range expr inputRange
-range (Abstract _ rangeImpl) inputRange = rangeImpl inputRange
+range inputRange (Concrete expr) = Expression.range expr inputRange
+range inputRange (Abstract _ rangeImpl) = rangeImpl inputRange
 
 evaluators ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->

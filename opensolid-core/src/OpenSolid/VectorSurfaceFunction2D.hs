@@ -480,7 +480,7 @@ transformBy transform function = do
 
 {-# INLINE valueAt #-}
 valueAt :: UvPoint -> VectorSurfaceFunction2D units -> Vector2D units
-valueAt uvPoint function = CompiledFunction.value function.compiled uvPoint
+valueAt uvPoint function = CompiledFunction.value uvPoint function.compiled
 
 {-# INLINE valueOf #-}
 valueOf :: VectorSurfaceFunction2D units -> UvPoint -> Vector2D units
@@ -488,7 +488,7 @@ valueOf function uvPoint = valueAt uvPoint function
 
 {-# INLINE range #-}
 range :: VectorSurfaceFunction2D units -> UvBounds -> VectorBounds2D units
-range function uvRange = CompiledFunction.range function.compiled uvRange
+range function uvRange = CompiledFunction.range uvRange function.compiled
 
 {-# INLINE compiled #-}
 compiled :: VectorSurfaceFunction2D units -> Compiled units

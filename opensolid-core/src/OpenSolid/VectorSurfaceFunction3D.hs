@@ -476,7 +476,7 @@ new ::
 new givenCompiled givenPartialDerivatives = do
   let mergedPartialDerivatives =
         PartialDerivatives.merge new compiled partialDerivatives givenPartialDerivatives
-  let sampledMagnitude uvPoint = Vector3D.magnitude (CompiledFunction.value givenCompiled uvPoint)
+  let sampledMagnitude uvPoint = Vector3D.magnitude (CompiledFunction.value uvPoint givenCompiled)
   VectorSurfaceFunction3D
     { compiled = givenCompiled
     , partialDerivatives = mergedPartialDerivatives
@@ -516,7 +516,7 @@ constant vector = new (CompiledFunction.constant vector) (zero, zero)
 
 {-# INLINE valueAt #-}
 valueAt :: UvPoint -> VectorSurfaceFunction3D units space -> Vector3D units space
-valueAt uvPoint function = CompiledFunction.value function.compiled uvPoint
+valueAt uvPoint function = CompiledFunction.value uvPoint function.compiled
 
 {-# INLINE valueOf #-}
 valueOf :: VectorSurfaceFunction3D units space -> UvPoint -> Vector3D units space
@@ -524,7 +524,7 @@ valueOf function uvPoint = valueAt uvPoint function
 
 {-# INLINE range #-}
 range :: UvBounds -> VectorSurfaceFunction3D units space -> VectorBounds3D units space
-range uvRange function = CompiledFunction.range function.compiled uvRange
+range uvRange function = CompiledFunction.range uvRange function.compiled
 
 {-# INLINE compiled #-}
 compiled :: VectorSurfaceFunction3D units space -> Compiled units space

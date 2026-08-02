@@ -368,7 +368,7 @@ The parameter value should be between 0 and 1.
 -}
 {-# INLINE valueAt #-}
 valueAt :: Number -> Curve1D units -> Quantity units
-valueAt tValue curve = CompiledFunction.value (compiled curve) tValue
+valueAt tValue curve = CompiledFunction.value tValue (compiled curve)
 
 {-# INLINE valueOf #-}
 valueOf :: Curve1D units -> Number -> Quantity units
@@ -376,7 +376,7 @@ valueOf curve tValue = valueAt tValue curve
 
 {-# INLINE range #-}
 range :: Interval Unitless -> Curve1D units -> Interval units
-range tRange curve = CompiledFunction.range (compiled curve) tRange
+range tRange curve = CompiledFunction.range tRange (compiled curve)
 
 startValue :: Curve1D units -> Quantity units
 startValue = valueAt 0.0

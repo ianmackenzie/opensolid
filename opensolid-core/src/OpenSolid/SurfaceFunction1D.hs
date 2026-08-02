@@ -355,14 +355,14 @@ instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFuncti
 
 {-# INLINE valueAt #-}
 valueAt :: UvPoint -> SurfaceFunction1D units -> Quantity units
-valueAt uvPoint function = CompiledFunction.value function.compiled uvPoint
+valueAt uvPoint function = CompiledFunction.value uvPoint function.compiled
 
 {-# INLINE valueOf #-}
 valueOf :: SurfaceFunction1D units -> UvPoint -> Quantity units
 valueOf function uvPoint = valueAt uvPoint function
 
 range :: UvBounds -> SurfaceFunction1D units -> Interval units
-range uvRange function = CompiledFunction.range function.compiled uvRange
+range uvRange function = CompiledFunction.range uvRange function.compiled
 
 {-# INLINE partialDerivatives #-}
 partialDerivatives :: SurfaceFunction1D units -> (SurfaceFunction1D units, SurfaceFunction1D units)
