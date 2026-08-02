@@ -1,6 +1,7 @@
-import contextlib
 from dataclasses import dataclass
+from typing import Literal
 
+import opensolid
 from opensolid import (
     Angle,
     AngleCurve1D,
@@ -12,13 +13,12 @@ from opensolid import (
     Bounds2D,
     Curve1D,
     Direction2D,
+    Displacement2D,
     Interval,
     Length,
+    LengthCurve1D,
+    LengthInterval,
     Point2D,
-    Tolerance,
-    UnitlessCurve1D,
-    UnitlessInterval,
-    UnitlessVector2D,
     UvBounds,
     UvPoint,
     Vector2D,
@@ -29,20 +29,20 @@ types = [
     Length,
     Area,
     Angle,
-    UnitlessInterval,
     Interval,
+    LengthInterval,
     AreaInterval,
     AngleInterval,
     Vector2D,
+    Displacement2D,
     AreaVector2D,
-    UnitlessVector2D,
     Direction2D,
     Point2D,
     UvPoint,
     Bounds2D,
     UvBounds,
-    UnitlessCurve1D,
     Curve1D,
+    LengthCurve1D,
     AreaCurve1D,
     AngleCurve1D,
 ]
@@ -52,65 +52,69 @@ dimension = {
     Length: 1,
     Area: 1,
     Angle: 1,
-    UnitlessInterval: 1,
     Interval: 1,
+    LengthInterval: 1,
     AreaInterval: 1,
     AngleInterval: 1,
     Vector2D: 2,
-    UnitlessVector2D: 2,
+    Displacement2D: 2,
     AreaVector2D: 2,
     Direction2D: 2,
     Point2D: 2,
     UvPoint: 2,
     Bounds2D: 2,
     UvBounds: 2,
-    UnitlessCurve1D: 1,
     Curve1D: 1,
+    LengthCurve1D: 1,
     AreaCurve1D: 1,
     AngleCurve1D: 1,
 }
+
+Space = Literal["Space"]
 
 space = {
     float: None,
     Length: None,
     Area: None,
     Angle: None,
-    UnitlessInterval: None,
     Interval: None,
+    LengthInterval: None,
     AreaInterval: None,
     AngleInterval: None,
-    UnitlessVector2D: "Space",
     Vector2D: "Space",
+    Displacement2D: "Space",
     AreaVector2D: "Space",
     Direction2D: "Space",
     Point2D: "Space",
     UvPoint: "Space",
     Bounds2D: "Space",
     UvBounds: "Space",
-    UnitlessCurve1D: None,
+    LengthCurve1D: None,
     Curve1D: None,
     AreaCurve1D: None,
     AngleCurve1D: None,
 }
+
+Behaviour = Literal["scalar", "vector", "point"]
 
 behaviour = {
     float: "scalar",
     Length: "scalar",
     Area: "scalar",
     Angle: "scalar",
-    UnitlessInterval: "scalar",
     Interval: "scalar",
+    LengthInterval: "scalar",
     AreaInterval: "scalar",
     AngleInterval: "scalar",
-    UnitlessVector2D: "vector",
     Vector2D: "vector",
+    Displacement2D: "vector",
     AreaVector2D: "vector",
     Direction2D: "direction",
     Point2D: "point",
     UvPoint: "point",
     Bounds2D: "point",
     UvBounds: "point",
-    UnitlessCurve1D: "scalar",
+    LengthCurve1D: "scalar",
     Curve1D: "scalar",
     AreaCurve1D: "scalar",
     AngleCurve1D: "scalar",
@@ -122,10 +126,10 @@ class Units:
     rad: int = 0
     m: int = 0
 
-    def __mul__(self, other):
+    def __mul__(self, other: Units) -> Units:
         return Units(rad=self.rad + other.rad, m=self.m + other.m)
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: Units) -> Units:
         return Units(rad=self.rad - other.rad, m=self.m - other.m)
 
 
@@ -139,43 +143,45 @@ units = {
     Length: length_units,
     Area: area_units,
     Angle: angle_units,
-    UnitlessInterval: unitless,
-    Interval: length_units,
+    Interval: unitless,
+    LengthInterval: length_units,
     AreaInterval: area_units,
     AngleInterval: angle_units,
-    UnitlessVector2D: unitless,
-    Vector2D: length_units,
+    Vector2D: unitless,
+    Displacement2D: length_units,
     AreaVector2D: area_units,
     Direction2D: unitless,
     Point2D: length_units,
     UvPoint: unitless,
     Bounds2D: length_units,
     UvBounds: unitless,
-    UnitlessCurve1D: unitless,
-    Curve1D: length_units,
+    Curve1D: unitless,
+    LengthCurve1D: length_units,
     AreaCurve1D: area_units,
     AngleCurve1D: angle_units,
 }
+
+Topology = Literal["value", "bounds", "curve"]
 
 topology = {
     float: "value",
     Length: "value",
     Area: "value",
     Angle: "value",
-    UnitlessInterval: "bounds",
     Interval: "bounds",
+    LengthInterval: "bounds",
     AreaInterval: "bounds",
     AngleInterval: "bounds",
-    UnitlessVector2D: "value",
     Vector2D: "value",
+    Displacement2D: "value",
     AreaVector2D: "value",
     Direction2D: "value",
     Point2D: "value",
     UvPoint: "value",
     Bounds2D: "bounds",
     UvBounds: "bounds",
-    UnitlessCurve1D: "curve",
     Curve1D: "curve",
+    LengthCurve1D: "curve",
     AreaCurve1D: "curve",
     AngleCurve1D: "curve",
 }
@@ -185,26 +191,26 @@ dummy_value = {
     Length: Length.meters(1),
     Area: Area.square_meters(1),
     Angle: Angle.radian,
-    UnitlessInterval: UnitlessInterval.constant(1),
-    Interval: Interval.constant(Length.meters(1)),
+    Interval: Interval.constant(1),
+    LengthInterval: LengthInterval.constant(Length.meters(1)),
     AreaInterval: AreaInterval.constant(Area.square_meters(1)),
     AngleInterval: AngleInterval.constant(Angle.radian),
-    UnitlessVector2D: UnitlessVector2D.zero,
     Vector2D: Vector2D.zero,
+    Displacement2D: Displacement2D.zero,
     AreaVector2D: AreaVector2D.zero,
     Direction2D: Direction2D.x,
     Point2D: Point2D.origin,
     UvPoint: UvPoint.origin,
     Bounds2D: Bounds2D.constant(Point2D.origin),
     UvBounds: UvBounds.constant(UvPoint.origin),
-    UnitlessCurve1D: UnitlessCurve1D.constant(1),
-    Curve1D: Curve1D.constant(Length.meters(1)),
+    Curve1D: Curve1D.constant(1),
+    LengthCurve1D: LengthCurve1D.constant(Length.meters(1)),
     AreaCurve1D: AreaCurve1D.constant(Area.square_meters(1)),
     AngleCurve1D: AngleCurve1D.constant(Angle.radian),
 }
 
 
-def get_output_topology(t1, t2):
+def get_output_topology(t1: type, t2: type) -> Topology | None:
     match (topology[t1], topology[t2]):
         case ("value", "value"):
             return "value"
@@ -221,8 +227,12 @@ def get_output_topology(t1, t2):
 
 
 def find_output_type(
-    output_behaviour, output_dimension, output_topology, output_units, output_space
-):
+    output_behaviour: Behaviour,
+    output_dimension: int,
+    output_topology: Topology,
+    output_units: Units,
+    output_space: Space,
+) -> type | None:
     valid_output_types = [
         t
         for t in types
@@ -242,19 +252,6 @@ def find_output_type(
             assert False, "Found more than one possible product type: " + ",".join(
                 [t.__name__ for t in valid_output_types]
             )
-
-
-def tolerance_context(units):
-    if units == unitless:
-        return contextlib.nullcontext()
-    elif units == length_units:
-        return contextlib.nullcontext()
-    elif units == area_units:
-        return Tolerance.area(Area.square_meters(1e-9))
-    elif units == angle_units:
-        return contextlib.nullcontext()
-    else:
-        assert False, "Unrecognized units type: " + str(units)
 
 
 if __name__ == "__main__":
@@ -326,7 +323,7 @@ if __name__ == "__main__":
             try:
                 print("Checking addition of " + t1.__name__ + " and " + t2.__name__)
                 sum = dummy1 + dummy2
-            except Exception as e:
+            except opensolid.Error as e:
                 print(
                     "Failed to add "
                     + t1.__name__
@@ -417,7 +414,7 @@ if __name__ == "__main__":
             try:
                 print("Checking subtraction of " + t1.__name__ + " and " + t2.__name__)
                 difference = dummy1 - dummy2
-            except Exception as e:
+            except opensolid.Error as e:
                 print(
                     "Failed to subtract "
                     + t1.__name__
@@ -500,7 +497,7 @@ if __name__ == "__main__":
             try:
                 print("Checking product of " + t1.__name__ + " and " + t2.__name__)
                 product = dummy1 * dummy2
-            except Exception as e:
+            except opensolid.Error as e:
                 print(
                     "Failed to multiply "
                     + t1.__name__
@@ -526,6 +523,11 @@ if __name__ == "__main__":
     # Check division
     for t1 in types:
         for t2 in types:
+            if units[t2] == area_units and topology[t2] == "curve":
+                # Division by area curves is not supported,
+                # since it would require an area tolerance
+                continue
+
             # Determine output 'behaviour'
             match (behaviour[t1], behaviour[t2]):
                 case ("direction", _) | (_, "direction"):
@@ -574,9 +576,8 @@ if __name__ == "__main__":
             dummy2 = dummy_value[t2]
             try:
                 print("Checking quotient of " + t1.__name__ + " and " + t2.__name__)
-                with tolerance_context(units[t2]):
-                    quotient = dummy1 / dummy2
-            except Exception as e:
+                quotient = dummy1 / dummy2
+            except opensolid.Error as e:
                 print(
                     "Failed to divide "
                     + t1.__name__
