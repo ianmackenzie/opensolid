@@ -455,7 +455,7 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
           let halfEdgeId = HalfEdge.Id{surfaceId, boundaryId, curveId}
           let curve = SurfaceCurve3D.curve surfaceCurve
           let uvCurve = SurfaceCurve3D.uvCurve surfaceCurve
-          let uniformParameterization = Curve3D.uniformParameterizationValue curve
+          let uniformParameterization = Curve3D.uniformParameterization curve
           case body.seams !! halfEdgeId of
             Nothing -> do
               -- Degenerate half-edge not mated to any adjacent half-edge
@@ -474,8 +474,7 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
                   let matingSurfaceCurve = body !! matingHalfEdgeId
                   let matingSurfaceSegments = surfaceSegmentsMap !! matingHalfEdgeId.surfaceId
                   let matingCurve = SurfaceCurve3D.curve matingSurfaceCurve
-                  let matingUniformParameterization =
-                        Curve3D.uniformParameterizationValue matingCurve
+                  let matingUniformParameterization = Curve3D.uniformParameterization matingCurve
                   let matingUvCurve = SurfaceCurve3D.uvCurve matingSurfaceCurve
                   let edgePredicate =
                         edgeLinearizationPredicate

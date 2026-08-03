@@ -36,8 +36,8 @@ parameterization dsdt d2sdt2 = do
       let initialEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
       let (length, tree) =
             buildTree 1 dsdt d2sdt2 hasDegenerateStart hasDegenerateEnd 0.0 1.0 dsdt1 dsdt4 initialEstimate
-      let uniformParameterizationValue r = evaluate tree (length * r)
-      (length, uniformParameterizationValue)
+      let uniformParameterization r = evaluate tree (length * r)
+      (length, uniformParameterization)
 
 evaluate :: Tree units -> Quantity units -> Number
 evaluate tree s = case tree of

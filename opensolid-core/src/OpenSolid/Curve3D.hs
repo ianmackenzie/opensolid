@@ -30,7 +30,6 @@ module OpenSolid.Curve3D
   , arcLengthParameterization
   , length
   , uniformParameterization
-  , uniformParameterizationValue
   , uniformPoint
   , transformBy
   , placeIn
@@ -47,7 +46,6 @@ import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve3D)
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.Error (IsDegenerate)
@@ -194,17 +192,14 @@ bounds = Curve.bounds
 reverse :: Curve3D space -> Curve3D space
 reverse = Curve.reverse
 
-arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Length, Curve1D Unitless)
+arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Length, Number -> Number)
 arcLengthParameterization = Curve.arcLengthParameterization
 
 length :: Tolerance Meters => Curve3D space -> Length
 length = Curve.length
 
-uniformParameterization :: Tolerance Meters => Curve3D space -> Curve1D Unitless
+uniformParameterization :: Tolerance Meters => Curve3D space -> Number -> Number
 uniformParameterization = Curve.uniformParameterization
-
-uniformParameterizationValue :: Tolerance Meters => Curve3D space -> Number -> Number
-uniformParameterizationValue = Curve.uniformParameterizationValue
 
 uniformPoint :: Tolerance Meters => Curve3D space -> Number -> Point3D space
 uniformPoint = Curve.uniformPoint

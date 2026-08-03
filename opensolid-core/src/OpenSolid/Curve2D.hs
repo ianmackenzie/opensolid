@@ -72,7 +72,6 @@ module OpenSolid.Curve2D
   , arcLengthParameterization
   , length
   , uniformParameterization
-  , uniformParameterizationValue
   , uniformPoint
   , piecewise
   )
@@ -633,17 +632,14 @@ medialAxis curve1 curve2 = do
                 }
         Ok (List.map toSegment zeros.crossingCurves)
 
-arcLengthParameterization :: Tolerance units => Curve2D units -> (Quantity units, Curve1D Unitless)
+arcLengthParameterization :: Tolerance units => Curve2D units -> (Quantity units, Number -> Number)
 arcLengthParameterization = Curve.arcLengthParameterization
 
 length :: Tolerance units => Curve2D units -> Quantity units
 length = Curve.length
 
-uniformParameterization :: Tolerance units => Curve2D units -> Curve1D Unitless
+uniformParameterization :: Tolerance units => Curve2D units -> Number -> Number
 uniformParameterization = Curve.uniformParameterization
-
-uniformParameterizationValue :: Tolerance units => Curve2D units -> Number -> Number
-uniformParameterizationValue = Curve.uniformParameterizationValue
 
 uniformPoint :: Tolerance units => Curve2D units -> Number -> Point2D units
 uniformPoint = Curve.uniformPoint

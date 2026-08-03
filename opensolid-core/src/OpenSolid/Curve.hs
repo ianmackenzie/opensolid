@@ -55,7 +55,6 @@ module OpenSolid.Curve
   , arcLengthParameterization
   , length
   , uniformParameterization
-  , uniformParameterizationValue
   , uniformPoint
   , transformBy
   , placeOn
@@ -139,7 +138,6 @@ import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
-import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -154,7 +152,7 @@ data Curve dimension units space = Curve
   , endPoint :: ~(Point dimension units space)
   , bounds :: ~(Bounds dimension units space)
   , bisectionTree :: Nondegenerate.Field (BisectionTree dimension units space)
-  , arcLengthParameterization :: Nondegenerate.Field (Quantity units, Curve1D Unitless)
+  , arcLengthParameterization :: Nondegenerate.Field (Quantity units, Number -> Number)
   }
 
 -- | A parametric curve in 2D space.
@@ -495,40 +493,13 @@ new givenCompiled givenDerivative =
 buildArcLengthParameterization ::
   Exists dimension units space =>
   Nondegenerate (Curve dimension units space) ->
-  (Quantity units, Curve1D Unitless)
+  (Quantity units, Number -> Number)
 buildArcLengthParameterization curve = do
   let dsdt t = Vector.magnitude (derivativeValue (Nondegenerate.unwrap curve) t)
   let d2sdt2 t = do
         let tangent = Curve.Nondegenerate.tangentDirectionValue curve t
         secondDerivativeValue (Nondegenerate.unwrap curve) t `dot` tangent
-  let (arcLength, parameterizationValue) = ArcLength.parameterization dsdt d2sdt2
-  (arcLength, uniformParameterizationCurve curve arcLength parameterizationValue)
-
-uniformParameterizationCurve ::
-  Exists dimension units space =>
-  Nondegenerate (Curve dimension units space) ->
-  Quantity units ->
-  (Number -> Number) ->
-  Curve1D Unitless
-uniformParameterizationCurve curve curveLength parameterizationValue =
-  recursive \self -> do
-    let parameterizationRange (Interval rLow rHigh) =
-          Interval (parameterizationValue rLow) (parameterizationValue rHigh)
-    Curve1D.new
-      (CompiledFunction.abstract parameterizationValue parameterizationRange)
-      (uniformParameterizationDerivative curve curveLength self)
-
-uniformParameterizationDerivative ::
-  Exists dimension units space =>
-  Nondegenerate (Curve dimension units space) ->
-  Quantity units ->
-  Curve1D Unitless ->
-  Curve1D Unitless
-uniformParameterizationDerivative curve curveLength curveUniformParameterization = do
-  let nondegenerateDerivative = Curve.Nondegenerate.derivative curve
-  let derivativeMagnitude = VectorCurve.Nondegenerate.magnitude nondegenerateDerivative
-  let dtdr = Curve1D.constant curveLength / derivativeMagnitude
-  dtdr . curveUniformParameterization
+  ArcLength.parameterization dsdt d2sdt2
 
 constant ::
   Exists dimension units space =>
@@ -712,7 +683,7 @@ reverse curve =
       , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) reversed
       , arcLengthParameterization =
           curve.arcLengthParameterization
-            & Nondegenerate.map (Pair.mapSecond Curve1D.reverse)
+            & Nondegenerate.map (Pair.mapSecond (\f r -> 1.0 - f (1.0 - r)))
       }
 
 distanceAlong ::
@@ -829,11 +800,11 @@ leftRightError curve t1 t2 p1 p2 = do
 arcLengthParameterization ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  (Quantity units, Curve1D Unitless)
+  (Quantity units, Number -> Number)
 arcLengthParameterization curve =
   case nondegenerate curve of
     Ok nondegenerateCurve -> Nondegenerate.get (.arcLengthParameterization) nondegenerateCurve
-    Error IsDegenerate -> (Quantity.zero, Curve1D.t)
+    Error IsDegenerate -> (Quantity.zero, id)
 
 length ::
   (Exists dimension units space, Tolerance units) =>
@@ -844,22 +815,16 @@ length = Pair.first . arcLengthParameterization
 uniformParameterization ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  Curve1D Unitless
-uniformParameterization = Pair.second . arcLengthParameterization
-
-uniformParameterizationValue ::
-  (Exists dimension units space, Tolerance units) =>
-  Curve dimension units space ->
   Number ->
   Number
-uniformParameterizationValue curve r = Curve1D.value (uniformParameterization curve) r
+uniformParameterization = Pair.second . arcLengthParameterization
 
 uniformPoint ::
   (Exists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   Number ->
   Point dimension units space
-uniformPoint curve r = point curve (uniformParameterizationValue curve r)
+uniformPoint curve r = point curve (uniformParameterization curve r)
 
 transformBy ::
   Exists dimension units space =>

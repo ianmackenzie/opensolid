@@ -1,18 +1,24 @@
 module Main (main) where
 
+import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
 import OpenSolid.Circle2D qualified as Circle2D
+import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
+import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
+import OpenSolid.Polyline2D (data Polyline2D)
 import OpenSolid.Prelude
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
@@ -59,26 +65,54 @@ analyticalLength (Point2D x0 y0) (Point2D x1 y1) (Point2D x2 y2) = do
 testCubicSplineParameterization :: IO ()
 testCubicSplineParameterization = Tolerance.using Length.defaultTolerance do
   let p1 = Point2D.centimeters 5.0 5.0
-  let p2 = Point2D.centimeters 14.0 15.0
+  let p2 = Point2D.centimeters 7.0 8.0
   let p3 = Point2D.centimeters 16.0 15.0
   let p4 = Point2D.centimeters 25.0 5.0
   let spline = Curve2D.cubicBezier p1 p2 p3 p4
+  let reversedSpline = Curve2D.reverse spline
   let length = Curve2D.length spline
-  let parameterization = Curve2D.uniformParameterization spline
   IO.printLine ("Cubic spline: " <> formatLength length)
-  let drawCurve fileName curve = do
-        let pointLocations = List.map (Curve2D.point curve) (Parameter.steps 30)
-        let drawPoint point = do
+  let drawCurve fileName curve parameterization = do
+        let parameterValues = List.map parameterization (Parameter.steps 30)
+        let drawPoint parameterValue = do
+              let point = Curve2D.point curve parameterValue
               let diameter = Length.millimeters 3.0
-              Svg.circleWith [Svg.whiteFill] (Circle2D.withDiameter diameter point)
+              let startHue = Angle.turns 0.25
+              let endHue = Angle.turns 0.75
+              let hue = Quantity.interpolateFrom startHue endHue parameterValue
+              let fillColor = Color.hsl1 hue 0.5 0.5
+              Svg.circleWith [Svg.fillColor fillColor] (Circle2D.withDiameter diameter point)
         let resolution = Resolution.maxError Length.micrometer
         Svg.write fileName (Svg.padding Length.centimeter) $
           Svg.group
             [ Svg.curve resolution curve
-            , Svg.combine drawPoint pointLocations
+            , Svg.combine drawPoint parameterValues
             ]
-  drawCurve "executables/arc-length/cubic-spline.svg" spline
-  drawCurve "executables/arc-length/parameterized-spline.svg" (spline . parameterization)
+  drawCurve "executables/arc-length/cubic-spline.svg" spline id
+  drawCurve "executables/arc-length/cubic-spline-reversed.svg" reversedSpline id
+  drawCurve
+    "executables/arc-length/parameterized-spline.svg"
+    spline
+    (Curve2D.uniformParameterization spline)
+  drawCurve
+    "executables/arc-length/parameterized-spline-reversed.svg"
+    reversedSpline
+    (Curve2D.uniformParameterization reversedSpline)
+  drawParameterization
+    "executables/arc-length/parameterization.svg"
+    (Curve2D.uniformParameterization spline)
+  drawParameterization
+    "executables/arc-length/parameterization-reversed.svg"
+    (Curve2D.uniformParameterization reversedSpline)
+
+drawParameterization :: Text -> (Number -> Number) -> IO ()
+drawParameterization fileName parameterization = do
+  tValues <- Parameter.steps 100 & NonEmpty.fromList & Maybe.orFail "Should not be empty"
+  let size = Length.centimeters 10.0
+  let point tValue = Point2D (size * tValue) (size * parameterization tValue)
+  let points :: NonEmpty (Point2D Meters) = NonEmpty.map point tValues
+  let polyline = Polyline2D points
+  Svg.write fileName (Svg.padding Length.centimeter) (Svg.polyline polyline)
 
 main :: IO ()
 main = do
