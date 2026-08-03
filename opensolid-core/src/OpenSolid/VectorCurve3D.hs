@@ -29,7 +29,6 @@ module OpenSolid.VectorCurve3D
   , desingularized
   , quotient
   , quotient_
-  , magnitude
   , squaredMagnitude
   , squaredMagnitude_
   , reverse
@@ -217,9 +216,6 @@ squaredMagnitude = VectorCurve.squaredMagnitude
 
 squaredMagnitude_ :: VectorCurve3D units space -> Curve1D (units ?*? units)
 squaredMagnitude_ = VectorCurve.squaredMagnitude_
-
-magnitude :: Tolerance units => VectorCurve3D units space -> Curve1D units
-magnitude = VectorCurve.magnitude
 
 zeros :: Tolerance units => VectorCurve3D units space -> Result IsDegenerate (List Number)
 zeros = VectorCurve.zeros

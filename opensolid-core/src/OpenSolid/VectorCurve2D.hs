@@ -31,7 +31,6 @@ module OpenSolid.VectorCurve2D
   , desingularized
   , quotient
   , quotient_
-  , magnitude
   , squaredMagnitude
   , squaredMagnitude_
   , reverse
@@ -250,9 +249,6 @@ squaredMagnitude = VectorCurve.squaredMagnitude
 
 squaredMagnitude_ :: VectorCurve2D units -> Curve1D (units ?*? units)
 squaredMagnitude_ = VectorCurve.squaredMagnitude_
-
-magnitude :: Tolerance units => VectorCurve2D units -> Curve1D units
-magnitude = VectorCurve.magnitude
 
 isZero :: Tolerance units => VectorCurve2D units -> Bool
 isZero = VectorCurve.isZero

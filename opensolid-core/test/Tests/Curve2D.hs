@@ -13,8 +13,6 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
 import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
-import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.CurvePoint qualified as CurvePoint
@@ -38,7 +36,6 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (InverseMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D)
-import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Matching (matching)
@@ -62,7 +59,6 @@ tests =
   , overlapAndJoin
   , crossingIntersection
   , tangentIntersection
-  , solving
   , degenerateStartPointTangent
   , degenerateEndPointTangent
   , derivativeConsistency
@@ -260,15 +256,6 @@ tangentIntersection = Test.verify "tangentIntersection" do
         & Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just Curve.OverlappingSegments{} ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
-
-solving :: Test
-solving = Test.verify "solving" do
-  let arc = Curve2D.arcFrom (Point2D.meters 0.0 1.0) (Point2D.meters 1.0 0.0) Angle.quarterTurn
-  let distanceFromOrigin = VectorCurve2D.magnitude (arc - Point2D.origin)
-  let desiredDistance = Length.meters 0.5
-  zeros <- Curve1D.zeros (distanceFromOrigin - desiredDistance) & Result.orFail
-  let distanceAt zero = Point2D.distanceFrom Point2D.origin (Curve2D.point arc zero.location)
-  Test.expect (List.map distanceAt zeros ~= [desiredDistance, desiredDistance])
 
 degenerateStartPointTangent :: Test
 degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" do

@@ -30,7 +30,6 @@ module OpenSolid.VectorCurve
   , squaredMagnitude_
   , squaredMagnitude
   , nondegenerate
-  , magnitude
   , directionRange
   , quotient_
   , reverse
@@ -75,7 +74,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
-import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D)
@@ -98,7 +96,6 @@ import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve.Direction qualified as VectorCurve.Direction
-import {-# SOURCE #-} OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
@@ -1304,14 +1301,6 @@ squaredMagnitude ::
   VectorCurve dimension units1 space ->
   Curve1D units2
 squaredMagnitude curve = Units.specialize (squaredMagnitude_ curve)
-
-magnitude ::
-  (Exists dimension units space, Tolerance units) =>
-  VectorCurve dimension units space ->
-  Curve1D units
-magnitude curve
-  | isZero curve = Curve1D.zero
-  | otherwise = Nondegenerate.unwrap (VectorCurve.Nondegenerate.magnitude (Nondegenerate curve))
 
 erase ::
   Exists dimension units space =>
