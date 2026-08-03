@@ -2,7 +2,7 @@ module OpenSolid.Nondegenerate
   ( Nondegenerate (Nondegenerate)
   , unwrap
   , interior
-  , exterior
+  , fromNonzero
   , Field
   , field
   , get
@@ -30,8 +30,8 @@ for cases where you're only working with the interior portion of a nondegenerate
 interior :: Nondegenerate a -> Nonzero a
 interior (Nondegenerate value) = Nonzero value
 
-exterior :: Nonzero a -> Nondegenerate a
-exterior (Nonzero value) = Nondegenerate value
+fromNonzero :: Nonzero a -> Nondegenerate a
+fromNonzero (Nonzero value) = Nondegenerate value
 
 data Field value = Field ~value deriving (Eq, Ord, Show)
 
