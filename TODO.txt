@@ -1,3 +1,9 @@
+Move functions from e.g. Curve.Nondegenerate into Curve?
+- in particular Curve.Nondegenerate.tangentDirectionValue (and rename to just tangentDirection)
+
+Remove division by nondegenerate Curve1D/SurfaceFunction1D?
+- only leave division by non-zero curves/surfaces
+
 Add Show.partialRecord function
 - use for records where some fields are left out and replaced with an ellipsis
 - use for CurvePoint, IntersectionPoint, maybe Segment types (anything with lazily-computed fields that may not even be valid)
@@ -50,8 +56,6 @@ Implement Surface3D.findPoint
 Implement Curve3D-Surface3D intersection
 
 Implement Surface3D-Surface3D intersection...
-
-Switch DirectionCurve to be an actual type instead of a type family
 
 Switch e.g. Curve.arcLengthParameterization to only return the 'Curve1D Unitless'
 - have separate 'Curve.arcLengthAndParameterization' to return the tuple
@@ -148,8 +152,6 @@ Optimize bounds construction in Curve.Segment to take monotonicity into account
   - generic Bounds function that takes two Point values, a Bounds value and a VectorBounds value
     and returns a (possibly tightened) Bounds value? maybe call it "tighten"...
 - use tangent instead of first derivative to exploit L'Hopital where appropriate...
-
-Update Curve2D.curvature_ to be based on curvatureVector_
 
 Refactor Pair.decorate to have the decoration *first*?
 - better for both sorting and constructing key/value lists for map construction
@@ -335,6 +337,3 @@ Turn C++ hull2, hull3 etc. functions into just overloads of a 'hull' function
 Split bytecode.h/bytecode.cpp into a few more files
 -> e.g. helper functions for Bezier/Hermite evaluation
 -> allow calling non-bytecode-specific functions from Haskell without having to use 'bytecode.h'...
-
-Add DirectionCurve2D.[rotateLeft,rotateRight] and use in Curve2D.offsetBy, Region2D.fillet
--> best to implement right down to bytecode level...
