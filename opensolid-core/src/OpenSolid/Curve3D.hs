@@ -18,9 +18,7 @@ module OpenSolid.Curve3D
   , derivativeRange
   , secondDerivativeValue
   , secondDerivativeRange
-  , tangentDirection
   , tangentDirectionRange
-  , curvatureVector
   , isPoint
   , startPoint
   , endPoint
@@ -47,12 +45,11 @@ where
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve3D, HasDegeneracy)
+import OpenSolid.Curve (Curve3D)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
-import OpenSolid.DirectionCurve3D (DirectionCurve3D)
 import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
@@ -64,10 +61,7 @@ import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
-import OpenSolid.Result qualified as Result
 import OpenSolid.Transform3D (Transform3D)
-import OpenSolid.Units (InverseMeters)
-import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -173,20 +167,8 @@ secondDerivativeRange ::
   VectorBounds3D Meters space
 secondDerivativeRange = Curve.secondDerivativeRange
 
-tangentDirection ::
-  Tolerance Meters =>
-  Curve3D space ->
-  Result IsDegenerate (DirectionCurve3D space)
-tangentDirection = Curve.tangentDirection
-
 tangentDirectionRange :: Curve3D space -> Interval Unitless -> DirectionBounds3D space
 tangentDirectionRange = Curve.tangentDirectionRange
-
-curvatureVector ::
-  Tolerance Meters =>
-  Curve3D space ->
-  Result HasDegeneracy (VectorCurve3D InverseMeters space)
-curvatureVector curve = Result.map Units.specialize (Curve.curvatureVector_ curve)
 
 isPoint :: Tolerance Meters => Curve3D space -> Bool
 isPoint = Curve.isPoint

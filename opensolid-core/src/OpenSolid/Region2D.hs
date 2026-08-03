@@ -45,12 +45,12 @@ import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as Curve.IntersectionPoint
+import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
-import OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Estimate (Estimate)
 import OpenSolid.Estimate qualified as Estimate
@@ -237,10 +237,12 @@ addFillet radius point curves = do
     List.One _ -> couldNotFindPointToFillet
     List.ThreeOrMore -> couldNotFindPointToFillet
     List.Two firstCurve secondCurve -> do
-      firstTangent <- Curve2D.tangentDirection firstCurve & Result.orFail
-      secondTangent <- Curve2D.tangentDirection secondCurve & Result.orFail
-      let firstEndDirection = DirectionCurve2D.endValue firstTangent
-      let secondStartDirection = DirectionCurve2D.startValue secondTangent
+      nondegenerateFirstCurve <- Curve.nondegenerate firstCurve & Result.orFail
+      nondegenerateSecondCurve <- Curve.nondegenerate secondCurve & Result.orFail
+      let firstEndDirection =
+            Curve.Nondegenerate.tangentDirectionValue nondegenerateFirstCurve 1.0
+      let secondStartDirection =
+            Curve.Nondegenerate.tangentDirectionValue nondegenerateSecondCurve 0.0
       let cornerAngle = Direction2D.angleFrom firstEndDirection secondStartDirection
       let offset = Quantity.sign cornerAngle * Quantity.abs radius
       firstOffsetCurve <- Curve2D.offsetLeftwardBy offset firstCurve & Result.orFail
@@ -266,8 +268,8 @@ addFillet radius point curves = do
               let startPoint = Curve2D.point firstCurve t1
               let sweptAngle =
                     Direction2D.angleFrom
-                      (DirectionCurve2D.value firstTangent t1)
-                      (DirectionCurve2D.value secondTangent t2)
+                      (Curve.Nondegenerate.tangentDirectionValue nondegenerateFirstCurve t1)
+                      (Curve.Nondegenerate.tangentDirectionValue nondegenerateSecondCurve t2)
               let filletArc = Curve2D.sweptArc centerPoint startPoint sweptAngle
               let trimmedFirstCurve = firstCurve . Curve1D.interpolateFrom 0.0 t1
               let trimmedSecondCurve = secondCurve . Curve1D.interpolateFrom t2 1.0

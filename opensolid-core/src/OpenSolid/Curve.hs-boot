@@ -16,8 +16,6 @@ module OpenSolid.Curve
   , secondDerivative
   , secondDerivativeValue
   , secondDerivativeRange
-  , tangentDirection
-  , curvatureVector_
   , hasDegenerateStart
   , hasDegenerateEnd
   )
@@ -27,8 +25,6 @@ import GHC.TypeLits (Natural)
 import {-# SOURCE #-} OpenSolid.Bounds (Bounds)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
-import {-# SOURCE #-} OpenSolid.DirectionCurve (DirectionCurve)
-import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Point (Point)
 import OpenSolid.Point2D (Point2D)
@@ -40,7 +36,6 @@ import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds (VectorBounds)
 import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve, VectorCurve2D, VectorCurve3D)
-import {-# SOURCE #-} OpenSolid.VectorCurve qualified as VectorCurve
 
 type role Curve nominal nominal nominal
 
@@ -66,8 +61,6 @@ type Compiled dimension units space =
     (Point dimension units space)
     (Interval Unitless)
     (Bounds dimension units space)
-
-data HasDegeneracy
 
 instance
   (Exists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
@@ -165,16 +158,5 @@ secondDerivativeRange ::
   Curve dimension units space ->
   Interval Unitless ->
   VectorBounds dimension units space
-tangentDirection ::
-  (Exists dimension units space, Tolerance units) =>
-  Curve dimension units space ->
-  Result IsDegenerate (DirectionCurve dimension space)
-curvatureVector_ ::
-  ( Exists dimension units space
-  , VectorCurve.Exists dimension (Unitless ?/? units) space
-  , Tolerance units
-  ) =>
-  Curve dimension units space ->
-  Result HasDegeneracy (VectorCurve dimension (Unitless ?/? units) space)
 hasDegenerateStart :: Exists dimension units space => Curve dimension units space -> Bool
 hasDegenerateEnd :: Exists dimension units space => Curve dimension units space -> Bool

@@ -11,6 +11,7 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Continuity qualified as Continuity
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
+import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Zero qualified as Curve1D.Zero
@@ -18,13 +19,12 @@ import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.CurvePoint qualified as CurvePoint
 import OpenSolid.Direction2D qualified as Direction2D
-import OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nonzero (Nonzero (Nonzero))
+import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D qualified as Point2D
@@ -35,8 +35,9 @@ import OpenSolid.Random qualified as Random
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Units (InverseMeters)
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2D qualified as Vector2D
+import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import Test (Expectation, Test)
 import Test qualified
@@ -64,15 +65,11 @@ tests =
   , solving
   , degenerateStartPointTangent
   , degenerateEndPointTangent
-  , tangentDerivativeIsPerpendicularToTangent
-  , degenerateStartPointTangentDerivative
-  , degenerateEndPointTangentDerivative
   , derivativeConsistency
   , reversalConsistency
   , arcConstruction
   , arcDeformation
   , g2
-  , curvatureVectorIsTangentDerivative
   ]
 
 findPoint :: Test
@@ -280,9 +277,11 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" do
   p2 <- Test.generate Random.point2D
   let curve = Curve2D.cubicBezier p0 p0 p1 p2
   let decreasingTValues = [2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-  tangentDirection <- Curve2D.tangentDirection curve & Result.orFail
-  let startTangent = DirectionCurve2D.startValue tangentDirection
-  let otherTangents = List.map (DirectionCurve2D.value tangentDirection) decreasingTValues
+  nondegenerateCurve <- Curve.nondegenerate curve & Result.orFail
+  let startTangent = Curve.Nondegenerate.tangentDirectionValue nondegenerateCurve 0.0
+  let otherTangents =
+        decreasingTValues
+          & List.map (Curve.Nondegenerate.tangentDirectionValue nondegenerateCurve)
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom startTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -294,71 +293,14 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" do
   p2 <- Test.generate Random.point2D
   let curve = Curve2D.cubicBezier p0 p1 p2 p2
   let increasingTValues = [1.0 - 2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-  tangentDirection <- Curve2D.tangentDirection curve & Result.orFail
-  let endTangent = DirectionCurve2D.endValue tangentDirection
-  let otherTangents = List.map (DirectionCurve2D.value tangentDirection) increasingTValues
+  nondegenerateCurve <- Curve.nondegenerate curve & Result.orFail
+  let endTangent = Curve.Nondegenerate.tangentDirectionValue nondegenerateCurve 1.0
+  let otherTangents =
+        increasingTValues
+          & List.map (Curve.Nondegenerate.tangentDirectionValue nondegenerateCurve)
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom endTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
-
-tangentDerivativeIsPerpendicularToTangent :: Test
-tangentDerivativeIsPerpendicularToTangent =
-  Test.check 100 "tangentDerivativeIsPerpendicularToTangent" do
-    p0 <- Test.generate Random.point2D
-    p1 <- Test.generate Random.point2D
-    p2 <- Test.generate Random.point2D
-    p3 <- Test.generate Random.point2D
-    let curve = Curve2D.cubicBezier p0 p1 p2 p3
-    tangentDirection <- Curve2D.tangentDirection curve & Result.orFail
-    let tangentDerivative = DirectionCurve2D.derivative tangentDirection
-    tValue <- Test.generate Parameter.random
-    let tangent = DirectionCurve2D.value tangentDirection tValue
-    let derivative = VectorCurve2D.value tangentDerivative tValue
-    Test.expect (Tolerance.using 1e-12 (derivative `dot` tangent ~= 0.0))
-      & Test.output "tValue" tValue
-      & Test.output "tangent" tangent
-      & Test.output "derivative" derivative
-      & Test.output "dot product" (derivative `dot` tangent)
-
-degenerateStartPointTangentDerivative :: Test
-degenerateStartPointTangentDerivative =
-  Test.check 100 "degenerateStartPointTangentDerivative" do
-    p0 <- Test.generate Random.point2D
-    p1 <- Test.generate Random.point2D
-    p2 <- Test.generate Random.point2D
-    let curve = Curve2D.cubicBezier p0 p0 p1 p2
-    let decreasingTValues = [2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-    tangentDirection <- Curve2D.tangentDirection curve & Result.orFail
-    let tangentDerivative = DirectionCurve2D.derivative tangentDirection
-    let startTangentDerivative = VectorCurve2D.startValue tangentDerivative
-    let otherTangentDerivatives =
-          List.map (VectorCurve2D.value tangentDerivative) decreasingTValues
-    let differences =
-          List.map Vector2D.magnitude $
-            List.map (- startTangentDerivative) otherTangentDerivatives
-    Test.expect (List.isDescending differences)
-      & Test.output "differences" differences
-      & Test.output "startTangentDerivative" startTangentDerivative
-
-degenerateEndPointTangentDerivative :: Test
-degenerateEndPointTangentDerivative =
-  Test.check 100 "degenerateEndPointTangentDerivative" do
-    p0 <- Test.generate Random.point2D
-    p1 <- Test.generate Random.point2D
-    p2 <- Test.generate Random.point2D
-    let curve = Curve2D.cubicBezier p0 p1 p2 p2
-    let increasingTValues = [1.0 - 2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-    tangentDirection <- Curve2D.tangentDirection curve & Result.orFail
-    let tangentDerivative = DirectionCurve2D.derivative tangentDirection
-    let endTangentDerivative = VectorCurve2D.endValue tangentDerivative
-    let otherTangentDerivatives =
-          List.map (VectorCurve2D.value tangentDerivative) increasingTValues
-    let differences =
-          List.map Vector2D.magnitude $
-            List.map (- endTangentDerivative) otherTangentDerivatives
-    Test.expect (List.isDescending differences)
-      & Test.output "differences" differences
-      & Test.output "endTangentDerivative" endTangentDerivative
 
 firstDerivativeIsConsistent :: Curve2D Meters -> Number -> Expectation
 firstDerivativeIsConsistent = firstDerivativeIsConsistentWithin (Length.meters 1e-6)
@@ -481,45 +423,18 @@ g2 = Test.check 100 "G2 continuity" do
   let spline = Curve2D.cubicBezier p1 p2 p3 p4
   t <- Test.generate Parameter.random
   let point = Curve2D.point spline t
-  tangentCurve <- Curve2D.tangentDirection spline & Result.orFail
-  curvatureCurve <- Curve2D.curvature spline & Result.orFail
-  let tangentDirection = DirectionCurve2D.value tangentCurve t
-  let signedRadius = 1.0 / Curve1D.value curvatureCurve t
+  nonzeroSpline <- Curve.nonzero spline & Result.orFail
+  let nondegenerateSpline = Nondegenerate.fromNonzero nonzeroSpline
+  let tangentDirection = Curve.Nondegenerate.tangentDirectionValue nondegenerateSpline t
+  let curvatureVector :: Vector2D InverseMeters =
+        Units.specialize (Curve.Nonzero.curvatureVectorValue_ nonzeroSpline t)
+  let signedRadius = 1.0 / (tangentDirection `cross` curvatureVector)
   let normalDirection = Direction2D.rotateLeft tangentDirection
   let arcCenter = point + signedRadius * normalDirection
   let arc = Curve2D.sweptArc arcCenter point (Quantity.sign signedRadius * Angle.degrees 30.0)
-  nondegenerateSpline <- Curve.nondegenerate spline & Result.orFail
   nondegenerateArc <- Curve.nondegenerate arc & Result.orFail
   let splinePoint = CurvePoint.on nondegenerateSpline t
   let arcPoint = CurvePoint.on nondegenerateArc 0.0
   let continuity = CurvePoint.continuity splinePoint arcPoint
   Test.expect (continuity == Just (Continuity.Indistinguishable Positive))
     & Test.output "continuity" continuity
-
-curvatureVectorIsTangentDerivative :: Test
-curvatureVectorIsTangentDerivative =
-  Test.check 100 "Curvature vector is equal to tangent derivative" do
-    p1 <- Test.generate Random.point2D
-    p2 <- Test.generate Random.point2D
-    p3 <- Test.generate Random.point2D
-    p4 <- Test.generate Random.point2D
-    let spline = Curve2D.cubicBezier p1 p2 p3 p4
-    if p1 ~= p2 || p2 ~= p3 || p3 ~= p4
-      then Test.fail "Randomly generated points are equal"
-      else do
-        tangent <- Curve2D.tangentDirection spline & Result.orFail
-        let tangentDerivative = DirectionCurve2D.derivative tangent
-        let firstDerivative = Curve2D.derivative spline
-        let curvatureVector = Units.specialize (Curve.Nonzero.curvatureVector_ (Nonzero spline))
-        tValue <- Test.generate Parameter.random
-        let curvatureVector1 = VectorCurve2D.value curvatureVector tValue
-        let curvatureVector2 =
-              Units.specialize (Curve.Nonzero.curvatureVectorValue_ (Nonzero spline) tValue)
-        let curvatureVector3 =
-              VectorCurve2D.value tangentDerivative tValue
-                / Vector2D.magnitude (VectorCurve2D.value firstDerivative tValue)
-        Tolerance.using (1e-12 / Length.meter) do
-          Test.all
-            [ Test.expect (curvatureVector1 ~= curvatureVector2)
-            , Test.expect (curvatureVector1 ~= curvatureVector3)
-            ]

@@ -34,7 +34,6 @@ module OpenSolid.VectorCurve3D
   , squaredMagnitude_
   , reverse
   , zeros
-  , direction
   , placeIn
   , relativeTo
   , transformBy
@@ -44,7 +43,6 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve1D (Curve1D)
-import {-# SOURCE #-} OpenSolid.DirectionCurve3D (DirectionCurve3D)
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Expression qualified as Expression
@@ -225,12 +223,6 @@ magnitude = VectorCurve.magnitude
 
 zeros :: Tolerance units => VectorCurve3D units space -> Result IsDegenerate (List Number)
 zeros = VectorCurve.zeros
-
-direction ::
-  Tolerance units =>
-  VectorCurve3D units space ->
-  Result IsDegenerate (DirectionCurve3D space)
-direction = VectorCurve.direction
 
 placeIn ::
   Frame3D global local ->

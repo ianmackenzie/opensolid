@@ -25,10 +25,6 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
-import OpenSolid.DirectionSurfaceFunction2D (DirectionSurfaceFunction2D)
-import OpenSolid.DirectionSurfaceFunction2D qualified as DirectionSurfaceFunction2D
-import OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
-import OpenSolid.DirectionSurfaceFunction3D qualified as DirectionSurfaceFunction3D
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
@@ -237,22 +233,6 @@ instance
           let (dudp, dvdp) = VectorSurfaceFunction2D.components (derivative p g)
           dfdu * dudp + dfdv * dvdp
     VectorSurfaceFunction3D.new compiledComposed composedDerivative
-
-instance
-  Composition
-    DirectionSurfaceFunction2D
-    (SurfaceFunction2D Unitless)
-    DirectionSurfaceFunction2D
-  where
-  f . g = DirectionSurfaceFunction2D.unsafe (DirectionSurfaceFunction2D.unwrap f . g)
-
-instance
-  Composition
-    (DirectionSurfaceFunction3D space)
-    (SurfaceFunction2D Unitless)
-    (DirectionSurfaceFunction3D space)
-  where
-  f . g = DirectionSurfaceFunction3D.unsafe (DirectionSurfaceFunction3D.unwrap f . g)
 
 distanceAlong :: Axis2D units -> SurfaceFunction2D units -> SurfaceFunction1D units
 distanceAlong axis function =

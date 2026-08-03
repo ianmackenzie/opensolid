@@ -39,8 +39,6 @@ module OpenSolid.Curve
   , isOnAxis
   , nondegenerate
   , nonzero
-  , tangentDirection
-  , curvatureVector_
   , distanceAlong
   , desingularize
   , desingularized
@@ -81,7 +79,6 @@ import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections qualified as Intersections
 import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate.Intersections qualified as Curve.Nondegenerate.Intersections
-import {-# SOURCE #-} OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve.Segment (Segment)
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import {-# SOURCE #-} OpenSolid.Curve.TangentSolver2D qualified as Curve.TangentSolver2D
@@ -92,8 +89,6 @@ import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Desingularization.Curve qualified as Desingularization.Curve
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
-import OpenSolid.DirectionCurve (DirectionCurve)
-import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
@@ -436,7 +431,6 @@ class
       (Expression Number (Vector dimension units space))
   , VectorCurve.Exists dimension units space
   , VectorCurve.Exists dimension (Unitless ?/? units) space
-  , DirectionCurve.Exists dimension space
   , Subtraction
       (Curve dimension units space)
       (Point dimension units space)
@@ -667,21 +661,6 @@ nonzero curve =
   if derivativeValue curve 0.0 ~= Vector.zero || derivativeValue curve 1.0 ~= Vector.zero
     then Error HasDegeneracy
     else Ok (Nonzero curve)
-
-tangentDirection ::
-  (Exists dimension units space, Tolerance units) =>
-  Curve dimension units space ->
-  Result IsDegenerate (DirectionCurve dimension space)
-tangentDirection curve = VectorCurve.direction (derivative curve)
-
-curvatureVector_ ::
-  ( Exists dimension units space
-  , VectorCurve.Exists dimension (Unitless ?/? units) space
-  , Tolerance units
-  ) =>
-  Curve dimension units space ->
-  Result HasDegeneracy (VectorCurve dimension (Unitless ?/? units) space)
-curvatureVector_ curve = Result.map Curve.Nonzero.curvatureVector_ (nonzero curve)
 
 derivativeValue ::
   Exists dimension units space =>

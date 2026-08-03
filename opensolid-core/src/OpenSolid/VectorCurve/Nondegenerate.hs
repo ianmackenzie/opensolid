@@ -1,6 +1,5 @@
 module OpenSolid.VectorCurve.Nondegenerate
   ( magnitude
-  , direction
   , directionValue
   , squaredMagnitude_
   , squaredMagnitude
@@ -11,8 +10,6 @@ import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import {-# SOURCE #-} OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
-import OpenSolid.DirectionCurve (DirectionCurve)
-import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -33,12 +30,6 @@ magnitude ::
   Nondegenerate (VectorCurve dimension units space) ->
   Nondegenerate (Curve1D units)
 magnitude = Curve1D.Nondegenerate.sqrt_ . squaredMagnitude_
-
-direction ::
-  VectorCurve.Exists dimension units space =>
-  Nondegenerate (VectorCurve dimension units space) ->
-  DirectionCurve dimension space
-direction (Nondegenerate curve) = DirectionCurve.unsafe (curve / magnitude (Nondegenerate curve))
 
 directionValue ::
   (VectorCurve.Exists dimension units space, Direction.Exists dimension space) =>

@@ -30,7 +30,6 @@ module OpenSolid.VectorSurfaceFunction3D
   , squaredMagnitude
   , squaredMagnitude_
   , magnitude
-  , direction
   , directionRange
   , newtonRaphson
   )
@@ -40,9 +39,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
-import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
-import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction3D qualified as DirectionSurfaceFunction3D
-import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
+import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
@@ -688,14 +685,6 @@ squaredMagnitude = Units.specialize . squaredMagnitude_
 
 magnitude :: Tolerance units => VectorSurfaceFunction3D units space -> SurfaceFunction1D units
 magnitude function = SurfaceFunction1D.sqrt_ (squaredMagnitude_ function)
-
-direction ::
-  Tolerance units =>
-  VectorSurfaceFunction3D units space ->
-  Result IsDegenerate (DirectionSurfaceFunction3D space)
-direction function = case quotient function (magnitude function) of
-  Error DivisionByZero -> Error IsDegenerate
-  Ok normalizedFunction -> Ok (DirectionSurfaceFunction3D.unsafe normalizedFunction)
 
 directionRange :: VectorSurfaceFunction3D units space -> UvBounds -> DirectionBounds3D space
 directionRange function uvRange = do

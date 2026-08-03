@@ -31,7 +31,6 @@ module OpenSolid.VectorCurve
   , squaredMagnitude
   , nondegenerate
   , magnitude
-  , direction
   , directionRange
   , quotient_
   , reverse
@@ -65,8 +64,6 @@ import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
-import {-# SOURCE #-} OpenSolid.DirectionCurve (DirectionCurve)
-import {-# SOURCE #-} OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression (Expression)
@@ -85,7 +82,6 @@ import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceParameter (SurfaceParameter)
@@ -135,7 +131,6 @@ class
   , DirectionBounds.Exists dimension space
   , VectorTransform.Exists dimension space
   , Exists dimension Unitless space
-  , DirectionCurve.Exists dimension space
   , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
   , Units.Coercion (VectorCurve dimension Unitless space) (VectorCurve dimension units space)
   , Expression.Constant Number (Vector dimension units space)
@@ -1196,12 +1191,6 @@ secondDerivativeRange ::
   Interval Unitless ->
   VectorBounds dimension units space
 secondDerivativeRange curve tRange = range (secondDerivative curve) tRange
-
-direction ::
-  (Exists dimension units space, Tolerance units) =>
-  VectorCurve dimension units space ->
-  Result IsDegenerate (DirectionCurve dimension space)
-direction vectorCurve = Result.map VectorCurve.Nondegenerate.direction (nondegenerate vectorCurve)
 
 directionRange ::
   Exists dimension units space =>

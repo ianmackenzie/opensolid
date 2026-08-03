@@ -37,10 +37,7 @@ module OpenSolid.Curve2D
   , compiled
   , derivative
   , secondDerivative
-  , tangentDirection
   , tangentDirectionRange
-  , curvatureVector_
-  , curvatureVector
   , offsetLeftwardBy
   , offsetRightwardBy
   , reverse
@@ -70,8 +67,6 @@ module OpenSolid.Curve2D
   , scaleAlong
   , convert
   , unconvert
-  , curvature
-  , curvature_
   , toPolyline
   , medialAxis
   , arcLengthParameterization
@@ -95,8 +90,9 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve2D, HasDegeneracy)
+import OpenSolid.Curve (Curve2D)
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
@@ -104,15 +100,14 @@ import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
-import OpenSolid.DirectionCurve2D (DirectionCurve2D)
-import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
-import OpenSolid.Error (IsDegenerate (IsDegenerate))
+import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.List qualified as List
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D (Point2D (Point2D))
@@ -121,7 +116,6 @@ import OpenSolid.Polyline2D (Polyline2D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
-import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction1D.Zeros qualified as SurfaceFunction1D.Zeros
@@ -135,6 +129,7 @@ import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.VectorBounds2D (VectorBounds2D)
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
+import OpenSolid.VectorCurve.Nonzero qualified as VectorCurve.Nonzero
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
@@ -461,31 +456,17 @@ derivative = Curve.derivative
 secondDerivative :: Curve2D units -> VectorCurve2D units
 secondDerivative = Curve.secondDerivative
 
-tangentDirection :: Tolerance units => Curve2D units -> Result IsDegenerate DirectionCurve2D
-tangentDirection = Curve.tangentDirection
-
 tangentDirectionRange :: Curve2D units -> Interval Unitless -> DirectionBounds2D
 tangentDirectionRange = Curve.tangentDirectionRange
-
-curvatureVector_ ::
-  Tolerance units =>
-  Curve2D units ->
-  Result HasDegeneracy (VectorCurve2D (Unitless ?/? units))
-curvatureVector_ = Curve.curvatureVector_
-
-curvatureVector ::
-  (Tolerance units1, Units.Inverse units1 units2) =>
-  Curve2D units1 ->
-  Result HasDegeneracy (VectorCurve2D units2)
-curvatureVector curve = Result.map Units.specialize (curvatureVector_ curve)
 
 offsetLeftwardBy ::
   Tolerance units =>
   Quantity units ->
   Curve2D units ->
-  Result IsDegenerate (Curve2D units)
+  Result Curve.HasDegeneracy (Curve2D units)
 offsetLeftwardBy offset curve = do
-  tangentCurve <- tangentDirection curve
+  nonzeroCurve <- Curve.nonzero curve
+  let Nonzero tangentCurve = VectorCurve.Nonzero.normalize (Curve.Nonzero.derivative nonzeroCurve)
   let offsetCurve = VectorCurve2D.rotateBy Angle.quarterTurn (offset * tangentCurve)
   Ok (curve + offsetCurve)
 
@@ -493,7 +474,7 @@ offsetRightwardBy ::
   Tolerance units =>
   Quantity units ->
   Curve2D units ->
-  Result IsDegenerate (Curve2D units)
+  Result Curve.HasDegeneracy (Curve2D units)
 offsetRightwardBy distance = offsetLeftwardBy -distance
 
 distanceAlong :: Axis2D units -> Curve2D units -> Curve1D units
@@ -609,33 +590,6 @@ convert factor curve = Units.coerce (scaleAbout Point2D.origin (Units.erase fact
 unconvert :: Quantity (units2 ?/? units1) -> Curve2D units2 -> Curve2D units1
 unconvert factor curve = convert (Units.simplify (1.0 ?/? factor)) curve
 
-curvature_ ::
-  Tolerance units =>
-  Curve2D units ->
-  Result IsDegenerate (Curve1D (Unitless ?/? units))
-curvature_ curve = do
-  tangent <- tangentDirection curve
-  let numerator = tangent `cross` secondDerivative curve
-  let denominator = VectorCurve2D.squaredMagnitude_ (derivative curve)
-  case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.quotient_ numerator denominator) of
-    Ok quotient_ -> Ok (Units.simplify quotient_)
-    Error DivisionByZero -> Error IsDegenerate
-
-{-| Get the curvature of a 2D curve.
-
-This is the inverse of the radius of curvature, but is in general a better-defined quantity
-since the radius of curvature can go to infinity if the curve has zero curvature anywhere,
-and can in fact go through a singularity where it flips from positive to negative infinity
-if the curve has an inflection point where curvature goes from positive to zero to negative.
-
-Positive curvature is defined as curving to the left (relative to the curve's tangent direction).
--}
-curvature ::
-  (Tolerance units1, Units.Inverse units1 units2) =>
-  Curve2D units1 ->
-  Result IsDegenerate (Curve1D units2)
-curvature curve = Result.map Units.specialize (curvature_ curve)
-
 toPolyline :: Resolution units -> Curve2D units -> Polyline2D units
 toPolyline = Curve.toPolyline
 
@@ -644,8 +598,10 @@ medialAxis ::
   Tolerance units =>
   Curve2D units ->
   Curve2D units ->
-  Result IsDegenerate (List (MedialAxis.Segment units))
+  Result Curve.HasDegeneracy (List (MedialAxis.Segment units))
 medialAxis curve1 curve2 = do
+  nonzero1 <- Curve.nonzero curve1
+  _ <- Curve.nonzero curve2
   let p1 = curve1 . SurfaceFunction1D.u
   let p2 = curve2 . SurfaceFunction1D.v
   let v1 = derivative curve1 . SurfaceFunction1D.u
@@ -658,8 +614,7 @@ medialAxis curve1 curve2 = do
     Error SurfaceFunction1D.IsZero -> TODO -- curves are identical arcs?
     Ok zeros ->
       assert (List.isEmpty zeros.crossingLoops && List.isEmpty zeros.tangentPoints) do
-        tangentDirection1 <- tangentDirection curve1
-        let tangentVector1 = VectorCurve2D.unit tangentDirection1
+        let Nonzero tangentVector1 = VectorCurve.Nonzero.normalize (Curve.Nonzero.derivative nonzero1)
         let normal1 = VectorCurve2D.rotateBy Angle.quarterTurn tangentVector1
         let radius :: SurfaceFunction1D units =
               Units.coerce $

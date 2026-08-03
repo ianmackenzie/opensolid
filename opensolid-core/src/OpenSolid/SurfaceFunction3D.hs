@@ -10,7 +10,6 @@ module OpenSolid.SurfaceFunction3D
   , derivativeValue
   , derivativeRange
   , nondegenerate
-  , normalDirection
   , normalDirectionRange
   , placeIn
   , relativeTo
@@ -23,7 +22,6 @@ import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
-import OpenSolid.DirectionSurfaceFunction3D (DirectionSurfaceFunction3D)
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
@@ -41,7 +39,6 @@ import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.UvBounds (UvBounds)
@@ -227,16 +224,6 @@ nondegenerate function =
   if function.maxSampledNondegeneracy ~= Length.zero
     then Error IsDegenerate
     else Ok (Nondegenerate function)
-
-normalDirection ::
-  Tolerance Meters =>
-  SurfaceFunction3D space ->
-  Result IsDegenerate (DirectionSurfaceFunction3D space)
-normalDirection function = do
-  duDirection <- VectorSurfaceFunction3D.direction (derivative U function)
-  dvDirection <- VectorSurfaceFunction3D.direction (derivative V function)
-  let crossProduct = duDirection `cross` dvDirection
-  Tolerance.using Tolerance.unitless (VectorSurfaceFunction3D.direction crossProduct)
 
 normalDirectionRange :: SurfaceFunction3D space -> UvBounds -> DirectionBounds3D space
 normalDirectionRange function uvRange = do

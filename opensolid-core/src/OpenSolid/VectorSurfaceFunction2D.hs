@@ -26,7 +26,6 @@ module OpenSolid.VectorSurfaceFunction2D
   , squaredMagnitude_
   , squaredMagnitude
   , magnitude
-  , direction
   , newtonRaphson
   )
 where
@@ -36,10 +35,7 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D)
-import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2D (DirectionSurfaceFunction2D)
-import {-# SOURCE #-} OpenSolid.DirectionSurfaceFunction2D qualified as DirectionSurfaceFunction2D
-import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
-import OpenSolid.Error (IsDegenerate (IsDegenerate))
+import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
@@ -593,14 +589,6 @@ squaredMagnitude = Units.specialize . squaredMagnitude_
 
 magnitude :: Tolerance units => VectorSurfaceFunction2D units -> SurfaceFunction1D units
 magnitude function = SurfaceFunction1D.sqrt_ (squaredMagnitude_ function)
-
-direction ::
-  Tolerance units =>
-  VectorSurfaceFunction2D units ->
-  Result IsDegenerate DirectionSurfaceFunction2D
-direction function = case quotient function (magnitude function) of
-  Error DivisionByZero -> Error IsDegenerate
-  Ok normalizedFunction -> Ok (DirectionSurfaceFunction2D.unsafe normalizedFunction)
 
 newtonRaphson :: VectorSurfaceFunction2D units -> UvPoint -> Fuzzy UvPoint
 newtonRaphson function uvPoint0 = do

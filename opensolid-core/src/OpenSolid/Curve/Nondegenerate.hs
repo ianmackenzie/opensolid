@@ -2,7 +2,6 @@
 
 module OpenSolid.Curve.Nondegenerate
   ( derivative
-  , tangentDirection
   , tangentDirectionValue
   , findPoint
   , intersections
@@ -18,7 +17,6 @@ import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate.Intersections qualified as C
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
-import OpenSolid.DirectionCurve (DirectionCurve)
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
@@ -35,13 +33,6 @@ derivative ::
   Nondegenerate (Curve dimension units space) ->
   Nondegenerate (VectorCurve dimension units space)
 derivative (Nondegenerate curve) = Nondegenerate (Curve.derivative curve)
-
-tangentDirection ::
-  Curve.Exists dimension units space =>
-  Nondegenerate (Curve dimension units space) ->
-  DirectionCurve dimension space
-tangentDirection (Nondegenerate curve) =
-  VectorCurve.Nondegenerate.direction (Nondegenerate (Curve.derivative curve))
 
 tangentDirectionValue ::
   (Curve.Exists dimension units space, Direction.Exists dimension space) =>

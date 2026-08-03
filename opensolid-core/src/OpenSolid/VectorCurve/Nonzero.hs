@@ -2,7 +2,7 @@ module OpenSolid.VectorCurve.Nonzero
   ( squaredMagnitude
   , squaredMagnitude_
   , magnitude
-  , direction
+  , normalize
   , directionValue
   )
 where
@@ -11,8 +11,6 @@ import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D.Nonzero qualified as Curve1D.Nonzero
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
-import OpenSolid.DirectionCurve (DirectionCurve)
-import OpenSolid.DirectionCurve qualified as DirectionCurve
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
@@ -38,11 +36,11 @@ magnitude ::
   Nonzero (Curve1D units)
 magnitude = Curve1D.Nonzero.sqrt_ . squaredMagnitude_
 
-direction ::
+normalize ::
   VectorCurve.Exists dimension units space =>
   Nonzero (VectorCurve dimension units space) ->
-  DirectionCurve dimension space
-direction (Nonzero curve) = DirectionCurve.unsafe (curve / magnitude (Nonzero curve))
+  Nonzero (VectorCurve dimension Unitless space)
+normalize (Nonzero curve) = Nonzero (curve / magnitude (Nonzero curve))
 
 directionValue ::
   VectorCurve.Exists dimension units space =>

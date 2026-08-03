@@ -21,7 +21,6 @@ module OpenSolid.VectorCurve2D
   , components
   , zero
   , constant
-  , unit
   , xy
   , interpolateFrom
   , arc
@@ -40,7 +39,6 @@ module OpenSolid.VectorCurve2D
   , hasDegenerateStart
   , hasDegenerateEnd
   , zeros
-  , direction
   , placeIn
   , relativeTo
   , placeOn
@@ -56,8 +54,6 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
-import {-# SOURCE #-} OpenSolid.DirectionCurve2D (DirectionCurve2D)
-import {-# SOURCE #-} OpenSolid.DirectionCurve2D qualified as DirectionCurve2D
 import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Expression qualified as Expression
@@ -120,9 +116,6 @@ zero = VectorCurve.zero
 -- | Create a curve with a constant value.
 constant :: Vector2D units -> VectorCurve2D units
 constant = VectorCurve.constant
-
-unit :: DirectionCurve2D -> VectorCurve2D Unitless
-unit = DirectionCurve2D.unwrap
 
 -- | Create a curve from its X and Y component curves.
 xy :: Curve1D units -> Curve1D units -> VectorCurve2D units
@@ -272,9 +265,6 @@ hasDegenerateEnd = VectorCurve.hasDegenerateEnd
 
 zeros :: Tolerance units => VectorCurve2D units -> Result IsDegenerate (List Number)
 zeros = VectorCurve.zeros
-
-direction :: Tolerance units => VectorCurve2D units -> Result IsDegenerate DirectionCurve2D
-direction = VectorCurve.direction
 
 placeIn :: Frame2D frameUnits -> VectorCurve2D units -> VectorCurve2D units
 placeIn frame curve = do

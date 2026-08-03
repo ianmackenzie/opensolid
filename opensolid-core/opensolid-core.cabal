@@ -145,11 +145,6 @@ library
     OpenSolid.DirectionBounds
     OpenSolid.DirectionBounds2D
     OpenSolid.DirectionBounds3D
-    OpenSolid.DirectionCurve
-    OpenSolid.DirectionCurve2D
-    OpenSolid.DirectionCurve3D
-    OpenSolid.DirectionSurfaceFunction2D
-    OpenSolid.DirectionSurfaceFunction3D
     OpenSolid.DivisionByZero
     OpenSolid.Domain1D
     OpenSolid.Domain2D
