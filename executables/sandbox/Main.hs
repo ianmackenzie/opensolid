@@ -11,7 +11,6 @@ import OpenSolid.Color qualified as Color
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
-import OpenSolid.Debug.Plot qualified as Debug.Plot
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Duration (Duration)
@@ -411,21 +410,6 @@ testQuotientDesingularization = Tolerance.using Tolerance.unitless do
   IO.forEach tValues (Curve1D.value quotient'' >> log "second derivative")
   IO.forEach tValues (Curve1D.value quotient''' >> log "third derivative")
 
-testCurveSqrt :: IO ()
-testCurveSqrt = Tolerance.using 1e-6 do
-  let t = Curve1D.t
-  let curve = Curve1D.sqrt (0.5 * (1.0 - Curve1D.cos (Angle.twoPi * t)))
-  let curve' = Curve1D.derivative curve
-  Svg.write
-    "executables/sandbox/cos-sqrt.svg"
-    (Svg.viewBox (Debug.Plot.viewBox (Point2D -0.1 -4.1) (Point2D 1.1 4.1)))
-    $ Svg.group
-      [ Debug.Plot.xAxis 0.0 1.0
-      , Debug.Plot.yAxis 0.0 1.0
-      , Debug.Plot.curve curve
-      , Debug.Plot.curve curve'
-      ]
-
 main :: IO ()
 main = Tolerance.using Length.defaultTolerance do
   testScalarArithmetic
@@ -452,4 +436,3 @@ main = Tolerance.using Length.defaultTolerance do
   testTextSum
   testNewtonRaphson2D
   testQuotientDesingularization
-  testCurveSqrt

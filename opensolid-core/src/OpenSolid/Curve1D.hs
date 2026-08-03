@@ -33,8 +33,6 @@ module OpenSolid.Curve1D
   , quotient_
   , squared
   , squared_
-  , sqrt
-  , sqrt_
   , cubed
   , sin
   , cos
@@ -60,7 +58,6 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import {-# SOURCE #-} OpenSolid.Curve1D.Nondegenerate qualified as Curve1D.Nondegenerate
 import {-# SOURCE #-} OpenSolid.Curve1D.Nonzero qualified as Curve1D.Nonzero
 import OpenSolid.Curve1D.Zero (Zero)
 import OpenSolid.Curve1D.Zero qualified as Zero
@@ -83,7 +80,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
-import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
@@ -499,16 +495,6 @@ squared_ curve =
   new
     (CompiledFunction.map Expression.squared_ Quantity.squared_ Interval.squared_ (compiled curve))
     (2.0 * curve ?*? derivative curve)
-
--- | Compute the square root of a curve.
-sqrt :: Tolerance units1 => Units.Squared units1 units2 => Curve1D units2 -> Curve1D units1
-sqrt curve = sqrt_ (Units.unspecialize curve)
-
-sqrt_ :: Tolerance units => Curve1D (units ?*? units) -> Curve1D units
-sqrt_ curve =
-  if Tolerance.using (Quantity.squared_ ?tolerance) (curve ~= zero)
-    then zero
-    else Nondegenerate.unwrap (Curve1D.Nondegenerate.sqrt_ (Nondegenerate curve))
 
 -- | Compute the cube of a curve.
 cubed :: Curve1D Unitless -> Curve1D Unitless

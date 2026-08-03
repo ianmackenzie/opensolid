@@ -21,10 +21,6 @@ module OpenSolid.SurfaceFunction1D
   , unsafeQuotient_
   , squared
   , squared_
-  , sqrt
-  , sqrt_
-  , unsafeSqrt
-  , unsafeSqrt_
   , cubed
   , sin
   , cos
@@ -61,7 +57,6 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2D qualified as Solve2D
 import OpenSolid.SurfaceFunction1D.Blending qualified as SurfaceFunction1D.Blending
-import OpenSolid.SurfaceFunction1D.Desingularization qualified as SurfaceFunction1D.Desingularization
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.HorizontalCurve qualified as HorizontalCurve
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.Nonzero qualified as SurfaceFunction1D.Nonzero
 import OpenSolid.SurfaceFunction1D.PartialZeros (PartialZeros)
@@ -74,7 +69,6 @@ import OpenSolid.SurfaceFunction1D.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceFunction1D.Zeros (Zeros (..))
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
@@ -507,53 +501,6 @@ squared_ function =
   new
     (CompiledFunction.map Expression.squared_ Quantity.squared_ Interval.squared_ function.compiled)
     (\p -> 2.0 * function ?*? derivative p function)
-
-sqrt ::
-  (Tolerance units1, Units.Squared units1 units2) =>
-  SurfaceFunction1D units2 ->
-  SurfaceFunction1D units1
-sqrt function = sqrt_ (Units.unspecialize function)
-
-sqrt_ :: Tolerance units => SurfaceFunction1D (units ?*? units) -> SurfaceFunction1D units
-sqrt_ function =
-  if Tolerance.using (Quantity.squared_ ?tolerance) (function ~= zero)
-    then zero
-    else do
-      let maybeSingularity param parameterValue sign = do
-            let firstDerivative = derivative param function
-            let secondDerivative = derivative param firstDerivative
-            let testPoints = SurfaceFunction1D.Desingularization.testPoints param parameterValue
-            let functionIsZeroAt testPoint =
-                  Tolerance.using (Quantity.squared_ ?tolerance) $
-                    value function testPoint ~= Quantity.zero
-            let functionIsZero = NonEmpty.all functionIsZeroAt testPoints
-            let firstDerivativeIsZeroAt testPoint = do
-                  let secondDerivativeValue = value secondDerivative testPoint
-                  let firstDerivativeTolerance =
-                        ?tolerance ?*? Quantity.sqrt_ (2.0 * secondDerivativeValue)
-                  Tolerance.using firstDerivativeTolerance $
-                    value firstDerivative testPoint ~= Quantity.zero
-            let firstDerivativeIsZero = NonEmpty.all firstDerivativeIsZeroAt testPoints
-            if functionIsZero && firstDerivativeIsZero
-              then Just (zero, sign * unsafeSqrt_ (0.5 * secondDerivative))
-              else Nothing
-      desingularize
-        (unsafeSqrt_ function)
-        (#singularityU0 (maybeSingularity U 0.0 Positive))
-        (#singularityU1 (maybeSingularity U 1.0 Negative))
-        (#singularityV0 (maybeSingularity V 0.0 Positive))
-        (#singularityV1 (maybeSingularity V 1.0 Negative))
-
-unsafeSqrt :: Units.Squared units1 units2 => SurfaceFunction1D units2 -> SurfaceFunction1D units1
-unsafeSqrt function = unsafeSqrt_ (Units.unspecialize function)
-
-unsafeSqrt_ :: SurfaceFunction1D (units ?*? units) -> SurfaceFunction1D units
-unsafeSqrt_ function = do
-  let compiledSqrt =
-        CompiledFunction.map Expression.sqrt_ Quantity.sqrt_ Interval.sqrt_ function.compiled
-  recursive \self -> do
-    let sqrtDerivative p = Units.coerce (unsafeQuotient_ (derivative p function) (2.0 * self))
-    new compiledSqrt sqrtDerivative
 
 cubed :: SurfaceFunction1D Unitless -> SurfaceFunction1D Unitless
 cubed function =

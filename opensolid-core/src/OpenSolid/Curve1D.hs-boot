@@ -17,7 +17,6 @@ module OpenSolid.Curve1D
   , degeneracyTolerance
   , desingularized
   , squared_
-  , sqrt_
   , erase
   , unerase
   )
@@ -110,6 +109,5 @@ zeros :: Tolerance units => Curve1D units -> Result IsZero (List Zero)
 degeneracyTolerance :: Curve1D units -> Quantity units
 desingularized :: Curve1D units -> Curve1D units -> Curve1D units -> Curve1D units
 squared_ :: Curve1D units -> Curve1D (units ?*? units)
-sqrt_ :: Tolerance units => Curve1D (units ?*? units) -> Curve1D units
 erase :: Curve1D units -> Curve1D Unitless
 unerase :: Curve1D Unitless -> Curve1D units

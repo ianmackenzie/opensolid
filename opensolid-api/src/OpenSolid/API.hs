@@ -865,7 +865,6 @@ unitlessCurve1D =
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
     , Class.member0 "Squared" Curve1D.squared $(docs 'Curve1D.squared)
-    , Class.memberU0 "Sqrt" Curve1D.sqrt $(docs 'Curve1D.sqrt)
     , Class.member0 "Cubed" Curve1D.cubed $(docs 'Curve1D.cubed)
     , Class.member0 "Sin" (Curve1D.sin . (Angle.radian *)) $(docs 'Curve1D.sin)
     , Class.member0 "Cos" (Curve1D.cos . (Angle.radian *)) $(docs 'Curve1D.cos)
@@ -964,7 +963,6 @@ areaCurve1D =
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
-    , Class.memberM0 "Sqrt" Curve1D.sqrt $(docs 'Curve1D.sqrt)
     , Class.member1 "Value" "Parameter Value" (flip Curve1D.value) $(docs 'Curve1D.value)
     , Class.memberS0 "Zeros" Curve1D.zeros $(docs 'Curve1D.zeros)
     , Class.memberS0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
