@@ -221,39 +221,6 @@ interpolateFrom(const Vector3d<Bounds>& a, const Vector3d<Bounds>& b, Bounds t) 
   return Vector3d(x, y, z);
 }
 
-int
-prod(int a, int b) {
-  int result = a;
-  while (a < b) {
-    ++a;
-    result *= a;
-  }
-  return result;
-}
-
-int
-choose(int n, int k) {
-  static const int lookup[] = {
-    /*00*/ 1,
-    /*01*/ 1, 1,
-    /*02*/ 1, 2, 1,
-    /*03*/ 1, 3, 3,  1,
-    /*04*/ 1, 4, 6,  4,  1,
-    /*05*/ 1, 5, 10, 10, 5,  1,
-    /*06*/ 1, 6, 15, 20, 15, 6,  1,
-    /*07*/ 1, 7, 21, 35, 35, 21, 7,  1,
-    /*08*/ 1, 8, 28, 56, 70, 56, 28, 8, 1,
-  };
-  if (n < 0 || k < 0 || k > n) {
-    return 0;
-  } else if (n <= 8) {
-    return lookup[(n * (n + 1)) / 2 + k];
-  } else {
-    int d = std::min(k, n - k);
-    return d == 0 ? 1 : prod(n - d + 1, n) / prod(1, d);
-  }
-}
-
 template <class Vector>
 inline Vector
 quadraticBlossom(const Vector* p, double t1, double t2) {
