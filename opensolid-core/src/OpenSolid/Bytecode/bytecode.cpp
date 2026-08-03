@@ -17,6 +17,46 @@
 #define T0 0.00390625 // 1/256
 #define T1 0.99609375 // 255/256
 
+template <class T>
+T
+invalid();
+
+template <>
+inline double
+invalid<double>() {
+  return NAN;
+}
+
+template <>
+inline Bounds
+invalid<Bounds>() {
+  return Bounds::invalid();
+}
+
+template <>
+inline Vector2d<double>
+invalid<Vector2d<double>>() {
+  return Vector2d<double>::invalid();
+}
+
+template <>
+inline Vector3d<double>
+invalid<Vector3d<double>>() {
+  return Vector3d<double>::invalid();
+}
+
+template <>
+inline Vector2d<Bounds>
+invalid<Vector2d<Bounds>>() {
+  return Vector2d<Bounds>::invalid();
+}
+
+template <>
+inline Vector3d<Bounds>
+invalid<Vector3d<Bounds>>() {
+  return Vector3d<Bounds>::invalid();
+}
+
 inline double
 squared(double x) {
   return x * x;
