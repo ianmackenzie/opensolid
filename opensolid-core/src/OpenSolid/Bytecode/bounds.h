@@ -27,19 +27,14 @@ struct Bounds {
   }
 
   inline Bounds(double value) {
-    if (std::isnan(value)) {
-      this->lower = -INFINITY;
-      this->upper = INFINITY;
-    } else {
-      this->lower = value;
-      this->upper = value;
-    }
+    this->lower = value;
+    this->upper = value;
   }
 
   inline Bounds(double a, double b) {
     if (std::isnan(a) || std::isnan(b)) [[unlikely]] {
-      this->lower = -INFINITY;
-      this->upper = INFINITY;
+      this->lower = NAN;
+      this->upper = NAN;
     } else if (a <= b) [[likely]] {
       this->lower = a;
       this->upper = b;
