@@ -19,7 +19,7 @@ template <class S> struct Vector3d {
       z(z) {
   }
 
-  static Vector3d<Bounds>
+  static Vector3d<S>
   invalid();
 
   static Vector3d<Bounds>
@@ -72,6 +72,12 @@ template <class S> struct Vector3d {
   S
   magnitude() const;
 };
+
+template <>
+inline Vector3d<double>
+Vector3d<double>::invalid() {
+  return Vector3d(NAN, NAN, NAN);
+}
 
 template <>
 inline Vector3d<Bounds>

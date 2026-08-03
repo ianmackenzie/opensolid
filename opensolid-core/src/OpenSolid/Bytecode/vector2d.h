@@ -16,7 +16,7 @@ template <class S> struct Vector2d {
       y(y) {
   }
 
-  static Vector2d<Bounds>
+  static Vector2d<S>
   invalid();
 
   static Vector2d<Bounds>
@@ -65,6 +65,12 @@ template <class S> struct Vector2d {
   S
   magnitude() const;
 };
+
+template <>
+inline Vector2d<double>
+Vector2d<double>::invalid() {
+  return Vector2d(NAN, NAN);
+}
 
 template <>
 inline Vector2d<Bounds>
