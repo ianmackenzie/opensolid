@@ -236,6 +236,6 @@ operator/(double lhs, Bounds rhs) {
 
 inline std::ostream&
 operator<<(std::ostream& stream, Bounds bounds) {
-    stream << "Bounds(" << bounds.lower << "," << bounds.upper << ")";
-    return stream;
+  stream << "Bounds(" << bounds.lower << "," << bounds.upper << ")";
+  return stream;
 }

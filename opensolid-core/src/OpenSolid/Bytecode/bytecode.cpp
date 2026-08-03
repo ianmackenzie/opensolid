@@ -548,8 +548,7 @@ arc(
 }
 
 template <class Scalar>
-inline
-std::pair<Scalar, Scalar>
+inline std::pair<Scalar, Scalar>
 involuteCoefficients(int n, Scalar theta) {
   Scalar sinTheta = sine(theta);
   Scalar cosTheta = cosine(theta);
