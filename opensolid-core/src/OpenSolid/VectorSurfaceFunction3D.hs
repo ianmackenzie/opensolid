@@ -29,7 +29,6 @@ module OpenSolid.VectorSurfaceFunction3D
   , unsafeQuotient_
   , squaredMagnitude
   , squaredMagnitude_
-  , magnitude
   , directionRange
   , newtonRaphson
   )
@@ -682,9 +681,6 @@ squaredMagnitude ::
   VectorSurfaceFunction3D units1 space ->
   SurfaceFunction1D units2
 squaredMagnitude = Units.specialize . squaredMagnitude_
-
-magnitude :: Tolerance units => VectorSurfaceFunction3D units space -> SurfaceFunction1D units
-magnitude function = SurfaceFunction1D.sqrt_ (squaredMagnitude_ function)
 
 directionRange :: VectorSurfaceFunction3D units space -> UvBounds -> DirectionBounds3D space
 directionRange function uvRange = do

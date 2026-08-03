@@ -25,7 +25,6 @@ module OpenSolid.VectorSurfaceFunction2D
   , unsafeQuotient_
   , squaredMagnitude_
   , squaredMagnitude
-  , magnitude
   , newtonRaphson
   )
 where
@@ -586,9 +585,6 @@ squaredMagnitude ::
   VectorSurfaceFunction2D units1 ->
   SurfaceFunction1D units2
 squaredMagnitude = Units.specialize . squaredMagnitude_
-
-magnitude :: Tolerance units => VectorSurfaceFunction2D units -> SurfaceFunction1D units
-magnitude function = SurfaceFunction1D.sqrt_ (squaredMagnitude_ function)
 
 newtonRaphson :: VectorSurfaceFunction2D units -> UvPoint -> Fuzzy UvPoint
 newtonRaphson function uvPoint0 = do
