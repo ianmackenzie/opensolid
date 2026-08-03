@@ -364,6 +364,9 @@ bezierBlossom(
   double tUpper,
   int nLow
 ) {
+  if (numControlPoints <= 0) {
+    return invalid<Vector>();
+  }
   if (numControlPoints == 1) {
     return *controlPoints;
   }
