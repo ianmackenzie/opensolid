@@ -71,7 +71,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -336,14 +335,15 @@ rationalBezier ::
   NonEmpty (Quantity units, Number) ->
   Result DivisionByZero (Curve1D units)
 rationalBezier pointsAndWeights = do
-  let weights = NonEmpty.map Pair.second pointsAndWeights
-  if NonEmpty.all (>= Tolerance.unitless) weights
-    then do
-      let scaledPoint (point, weight) = point * weight
-      let scaledPoints = NonEmpty.map scaledPoint pointsAndWeights
+  let (points, weights) = NonEmpty.unzip2 pointsAndWeights
+  let weightScale = NonEmpty.maximumOf Number.abs weights
+  let normalizedWeights = NonEmpty.map (/ weightScale) weights
+  if NonEmpty.all (>= Tolerance.unitless) normalizedWeights
+    then Ok do
+      let scaledPoints = NonEmpty.map2 (*) points normalizedWeights
       let numerator = bezier scaledPoints
-      let denominator = Nonzero (bezier weights)
-      Ok (numerator / denominator)
+      let denominator = Nonzero (bezier normalizedWeights)
+      numerator / denominator
     else Error DivisionByZero
 
 rationalQuadraticSpline ::
