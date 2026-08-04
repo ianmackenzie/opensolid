@@ -1,6 +1,5 @@
 module Main (main) where
 
-import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D qualified as Curve2D
@@ -49,9 +48,7 @@ main = Tolerance.using Length.defaultTolerance do
           [ Svg.curve (Resolution.maxError Length.micrometer) curve
           , Svg.combine (drawDot . Curve2D.point curve) (Parameter.steps n)
           ]
-  let drawingBounds =
-        Bounds2D.hull2 (Point2D.centimeters -12.0 -12.0) (Point2D.centimeters 12.0 12.0)
-  Svg.write "executables/piecewise-curve/circle.svg" (Svg.viewBox drawingBounds) $
+  Svg.write "executables/piecewise-curve/circle.svg" (Svg.padding Length.centimeter) $
     drawCurve 40 circle
-  Svg.write "executables/piecewise-curve/arcs.svg" (Svg.viewBox drawingBounds) $
+  Svg.write "executables/piecewise-curve/arcs.svg" (Svg.padding Length.centimeter) $
     Svg.combine (drawCurve 10) [arc1, arc2, arc3, arc4]
