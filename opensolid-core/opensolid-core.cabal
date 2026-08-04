@@ -137,8 +137,6 @@ library
     OpenSolid.Debug
     OpenSolid.Debug.Plot
     OpenSolid.Degeneracy
-    OpenSolid.Desingularization
-    OpenSolid.Desingularization.Curve
     OpenSolid.Direction
     OpenSolid.Direction2D
     OpenSolid.Direction3D
