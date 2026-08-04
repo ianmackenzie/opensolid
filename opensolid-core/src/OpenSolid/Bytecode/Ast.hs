@@ -55,26 +55,6 @@ module OpenSolid.Bytecode.Ast
   , debugSurface1D
   , debugSurface2D
   , debugSurface3D
-  , b00
-  , b00d1
-  , b00d2
-  , b00d3
-  , b01
-  , b01d1
-  , b01d2
-  , b01d3
-  , b02
-  , b02d1
-  , b02d2
-  , b02d3
-  , b10
-  , b10d1
-  , b10d2
-  , b10d3
-  , b11
-  , b11d1
-  , b11d2
-  , b11d3
   , involute2D
   , involute3D
   , arc2D
@@ -172,26 +152,6 @@ data Variable1D input where
     Variable1D input ->
     Variable1D input ->
     Variable1D input
-  B00 :: Variable1D input -> Variable1D input
-  B00d1 :: Variable1D input -> Variable1D input
-  B00d2 :: Variable1D input -> Variable1D input
-  B00d3 :: Variable1D input -> Variable1D input
-  B01 :: Variable1D input -> Variable1D input
-  B01d1 :: Variable1D input -> Variable1D input
-  B01d2 :: Variable1D input -> Variable1D input
-  B01d3 :: Variable1D input -> Variable1D input
-  B02 :: Variable1D input -> Variable1D input
-  B02d1 :: Variable1D input -> Variable1D input
-  B02d2 :: Variable1D input -> Variable1D input
-  B02d3 :: Variable1D input -> Variable1D input
-  B10 :: Variable1D input -> Variable1D input
-  B10d1 :: Variable1D input -> Variable1D input
-  B10d2 :: Variable1D input -> Variable1D input
-  B10d3 :: Variable1D input -> Variable1D input
-  B11 :: Variable1D input -> Variable1D input
-  B11d1 :: Variable1D input -> Variable1D input
-  B11d2 :: Variable1D input -> Variable1D input
-  B11d3 :: Variable1D input -> Variable1D input
 
 deriving instance Eq (Variable1D input)
 
@@ -356,66 +316,6 @@ instance Composition (Variable1D Number) (Variable1D input) (Ast1D input) where
   DotVariableConstant3D lhs rhs . input = lhs . input `dot` rhs
   Desingularized1D parameter left middle right . input =
     desingularized1D (parameter . input) (left . input) (middle . input) (right . input)
-  B00 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b00 paramVal)
-    Variable1D paramVar -> Variable1D (B00 paramVar)
-  B00d1 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b00d1 paramVal)
-    Variable1D paramVar -> Variable1D (B00d1 paramVar)
-  B00d2 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b00d2 paramVal)
-    Variable1D paramVar -> Variable1D (B00d2 paramVar)
-  B00d3 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b00d3 paramVal)
-    Variable1D paramVar -> Variable1D (B00d3 paramVar)
-  B01 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b01 paramVal)
-    Variable1D paramVar -> Variable1D (B01 paramVar)
-  B01d1 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b01d1 paramVal)
-    Variable1D paramVar -> Variable1D (B01d1 paramVar)
-  B01d2 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b01d2 paramVal)
-    Variable1D paramVar -> Variable1D (B01d2 paramVar)
-  B01d3 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b01d3 paramVal)
-    Variable1D paramVar -> Variable1D (B01d3 paramVar)
-  B02 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b02 paramVal)
-    Variable1D paramVar -> Variable1D (B02 paramVar)
-  B02d1 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b02d1 paramVal)
-    Variable1D paramVar -> Variable1D (B02d1 paramVar)
-  B02d2 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b02d2 paramVal)
-    Variable1D paramVar -> Variable1D (B02d2 paramVar)
-  B02d3 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b02d3 paramVal)
-    Variable1D paramVar -> Variable1D (B02d3 paramVar)
-  B10 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b10 paramVal)
-    Variable1D paramVar -> Variable1D (B10 paramVar)
-  B10d1 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b10d1 paramVal)
-    Variable1D paramVar -> Variable1D (B10d1 paramVar)
-  B10d2 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b10d2 paramVal)
-    Variable1D paramVar -> Variable1D (B10d2 paramVar)
-  B10d3 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b10d3 paramVal)
-    Variable1D paramVar -> Variable1D (B10d3 paramVar)
-  B11 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b11 paramVal)
-    Variable1D paramVar -> Variable1D (B11 paramVar)
-  B11d1 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b11d1 paramVal)
-    Variable1D paramVar -> Variable1D (B11d1 paramVar)
-  B11d2 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b11d2 paramVal)
-    Variable1D paramVar -> Variable1D (B11d2 paramVar)
-  B11d3 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b11d3 paramVal)
-    Variable1D paramVar -> Variable1D (B11d3 paramVar)
 
 instance Composition (Ast2D Number) (Ast1D input) (Ast2D input) where
   Constant2D outer . _ = Constant2D outer
@@ -538,66 +438,6 @@ instance Composition (Variable1D UvPoint) (Variable2D input) (Ast1D input) where
   DotVariableConstant3D lhs rhs . input = lhs . input `dot` rhs
   Desingularized1D parameter left middle right . input =
     desingularized1D (parameter . input) (left . input) (middle . input) (right . input)
-  B00 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b00 paramVal)
-    Variable1D paramVar -> Variable1D (B00 paramVar)
-  B00d1 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b00d1 paramVal)
-    Variable1D paramVar -> Variable1D (B00d1 paramVar)
-  B00d2 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b00d2 paramVal)
-    Variable1D paramVar -> Variable1D (B00d2 paramVar)
-  B00d3 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b00d3 paramVal)
-    Variable1D paramVar -> Variable1D (B00d3 paramVar)
-  B01 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b01 paramVal)
-    Variable1D paramVar -> Variable1D (B01 paramVar)
-  B01d1 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b01d1 paramVal)
-    Variable1D paramVar -> Variable1D (B01d1 paramVar)
-  B01d2 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b01d2 paramVal)
-    Variable1D paramVar -> Variable1D (B01d2 paramVar)
-  B01d3 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b01d3 paramVal)
-    Variable1D paramVar -> Variable1D (B01d3 paramVar)
-  B02 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b02 paramVal)
-    Variable1D paramVar -> Variable1D (B02 paramVar)
-  B02d1 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b02d1 paramVal)
-    Variable1D paramVar -> Variable1D (B02d1 paramVar)
-  B02d2 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b02d2 paramVal)
-    Variable1D paramVar -> Variable1D (B02d2 paramVar)
-  B02d3 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b02d3 paramVal)
-    Variable1D paramVar -> Variable1D (B02d3 paramVar)
-  B10 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b10 paramVal)
-    Variable1D paramVar -> Variable1D (B10 paramVar)
-  B10d1 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b10d1 paramVal)
-    Variable1D paramVar -> Variable1D (B10d1 paramVar)
-  B10d2 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b10d2 paramVal)
-    Variable1D paramVar -> Variable1D (B10d2 paramVar)
-  B10d3 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b10d3 paramVal)
-    Variable1D paramVar -> Variable1D (B10d3 paramVar)
-  B11 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b11 paramVal)
-    Variable1D paramVar -> Variable1D (B11 paramVar)
-  B11d1 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b11d1 paramVal)
-    Variable1D paramVar -> Variable1D (B11d1 paramVar)
-  B11d2 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b11d2 paramVal)
-    Variable1D paramVar -> Variable1D (B11d2 paramVar)
-  B11d3 param . input = case param . input of
-    Constant1D paramVal -> Constant1D (evaluateCurve1D b11d3 paramVal)
-    Variable1D paramVar -> Variable1D (B11d3 paramVar)
 
 instance Composition (Ast2D UvPoint) (Ast2D input) (Ast2D input) where
   Constant2D outer . _ = Constant2D outer
@@ -1318,66 +1158,6 @@ bezierCurve3D (NonEmpty.One value) = constant3D value
 bezierCurve3D controlPoints =
   Variable3D (BezierCurve3D (NonEmpty.map Vector3D.erase controlPoints) CurveParameter)
 
-b00 :: Ast1D Number
-b00 = Variable1D (B00 CurveParameter)
-
-b00d1 :: Ast1D Number
-b00d1 = Variable1D (B00d1 CurveParameter)
-
-b00d2 :: Ast1D Number
-b00d2 = Variable1D (B00d2 CurveParameter)
-
-b00d3 :: Ast1D Number
-b00d3 = Variable1D (B00d3 CurveParameter)
-
-b01 :: Ast1D Number
-b01 = Variable1D (B01 CurveParameter)
-
-b01d1 :: Ast1D Number
-b01d1 = Variable1D (B01d1 CurveParameter)
-
-b01d2 :: Ast1D Number
-b01d2 = Variable1D (B01d2 CurveParameter)
-
-b01d3 :: Ast1D Number
-b01d3 = Variable1D (B01d3 CurveParameter)
-
-b02 :: Ast1D Number
-b02 = Variable1D (B02 CurveParameter)
-
-b02d1 :: Ast1D Number
-b02d1 = Variable1D (B02d1 CurveParameter)
-
-b02d2 :: Ast1D Number
-b02d2 = Variable1D (B02d2 CurveParameter)
-
-b02d3 :: Ast1D Number
-b02d3 = Variable1D (B02d3 CurveParameter)
-
-b10 :: Ast1D Number
-b10 = Variable1D (B10 CurveParameter)
-
-b10d1 :: Ast1D Number
-b10d1 = Variable1D (B10d1 CurveParameter)
-
-b10d2 :: Ast1D Number
-b10d2 = Variable1D (B10d2 CurveParameter)
-
-b10d3 :: Ast1D Number
-b10d3 = Variable1D (B10d3 CurveParameter)
-
-b11 :: Ast1D Number
-b11 = Variable1D (B11 CurveParameter)
-
-b11d1 :: Ast1D Number
-b11d1 = Variable1D (B11d1 CurveParameter)
-
-b11d2 :: Ast1D Number
-b11d2 = Variable1D (B11d2 CurveParameter)
-
-b11d3 :: Ast1D Number
-b11d3 = Variable1D (B11d3 CurveParameter)
-
 arc2D :: Vector2D units -> Vector2D units -> Angle -> Angle -> Ast2D Number
 arc2D vx vy theta1 theta2 =
   Variable2D (Arc2D (Vector2D.erase vx) (Vector2D.erase vy) theta1 theta2 CurveParameter)
@@ -1566,66 +1346,6 @@ compileVariable1D variable = case variable of
     rightIndex <- compileVariable1D right
     let instruction = Instruction.Desingularized1D parameterIndex leftIndex middleIndex rightIndex
     Compile.addVariable1D instruction
-  B00 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B00 argIndex)
-  B00d1 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B00d1 argIndex)
-  B00d2 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B00d2 argIndex)
-  B00d3 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B00d3 argIndex)
-  B01 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B01 argIndex)
-  B01d1 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B01d1 argIndex)
-  B01d2 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B01d2 argIndex)
-  B01d3 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B01d3 argIndex)
-  B02 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B02 argIndex)
-  B02d1 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B02d1 argIndex)
-  B02d2 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B02d2 argIndex)
-  B02d3 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B02d3 argIndex)
-  B10 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B10 argIndex)
-  B10d1 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B10d1 argIndex)
-  B10d2 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B10d2 argIndex)
-  B10d3 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B10d3 argIndex)
-  B11 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B11 argIndex)
-  B11d1 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B11d1 argIndex)
-  B11d2 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B11d2 argIndex)
-  B11d3 arg -> do
-    argIndex <- compileVariable1D arg
-    Compile.addVariable1D (Instruction.B11d3 argIndex)
 
 coordinates2D :: Vector2D Unitless -> NonEmpty Number
 coordinates2D (Vector2D x y) = NonEmpty.two x y

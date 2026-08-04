@@ -30,26 +30,6 @@ module OpenSolid.Expression
   , ProjectInto (projectInto)
   , BezierCurve
   , bezierCurve
-  , b00
-  , b00d1
-  , b00d2
-  , b00d3
-  , b01
-  , b01d1
-  , b01d2
-  , b01d3
-  , b02
-  , b02d1
-  , b02d2
-  , b02d3
-  , b10
-  , b10d1
-  , b10d2
-  , b10d3
-  , b11
-  , b11d1
-  , b11d2
-  , b11d3
   , desingularized
   , Arc
   , arc
@@ -1555,66 +1535,6 @@ instance BezierCurve (Vector3D units space) where
 
 instance BezierCurve (Point3D space) where
   bezierCurve controlPoints = curve3D (Ast.bezierCurve3D (Data.Coerce.coerce controlPoints))
-
-b00 :: Expression Number Number
-b00 = curve1D Ast.b00
-
-b00d1 :: Expression Number Number
-b00d1 = curve1D Ast.b00d1
-
-b00d2 :: Expression Number Number
-b00d2 = curve1D Ast.b00d2
-
-b00d3 :: Expression Number Number
-b00d3 = curve1D Ast.b00d3
-
-b01 :: Expression Number Number
-b01 = curve1D Ast.b01
-
-b01d1 :: Expression Number Number
-b01d1 = curve1D Ast.b01d1
-
-b01d2 :: Expression Number Number
-b01d2 = curve1D Ast.b01d2
-
-b01d3 :: Expression Number Number
-b01d3 = curve1D Ast.b01d3
-
-b02 :: Expression Number Number
-b02 = curve1D Ast.b02
-
-b02d1 :: Expression Number Number
-b02d1 = curve1D Ast.b02d1
-
-b02d2 :: Expression Number Number
-b02d2 = curve1D Ast.b02d2
-
-b02d3 :: Expression Number Number
-b02d3 = curve1D Ast.b02d3
-
-b10 :: Expression Number Number
-b10 = curve1D Ast.b10
-
-b10d1 :: Expression Number Number
-b10d1 = curve1D Ast.b10d1
-
-b10d2 :: Expression Number Number
-b10d2 = curve1D Ast.b10d2
-
-b10d3 :: Expression Number Number
-b10d3 = curve1D Ast.b10d3
-
-b11 :: Expression Number Number
-b11 = curve1D Ast.b11
-
-b11d1 :: Expression Number Number
-b11d1 = curve1D Ast.b11d1
-
-b11d2 :: Expression Number Number
-b11d2 = curve1D Ast.b11d2
-
-b11d3 :: Expression Number Number
-b11d3 = curve1D Ast.b11d3
 
 desingularized ::
   Expression input Number ->

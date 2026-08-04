@@ -41,11 +41,6 @@ module OpenSolid.Curve1D
   , sign
   , reverse
   , integrate
-  , b00
-  , b01
-  , b02
-  , b10
-  , b11
   , newtonRaphson
   , erase
   , unerase
@@ -691,46 +686,6 @@ isCrossingZero curveZero =
   -- Curve1D order 2 is cubic (crossing) zero
   -- Curve1D order 3 is quartic (non-crossing) zero, etc.
   Int.isEven curveZero.order
-
-b00 :: Curve1D Unitless
-b00 =
-  concrete Expression.b00 $
-    concrete Expression.b00d1 $
-      concrete Expression.b00d2 $
-        concrete Expression.b00d3 $
-          constant 72.0
-
-b01 :: Curve1D Unitless
-b01 =
-  concrete Expression.b01 $
-    concrete Expression.b01d1 $
-      concrete Expression.b01d2 $
-        concrete Expression.b01d3 $
-          constant 48.0
-
-b02 :: Curve1D Unitless
-b02 =
-  concrete Expression.b02 $
-    concrete Expression.b02d1 $
-      concrete Expression.b02d2 $
-        concrete Expression.b02d3 $
-          constant 12.0
-
-b10 :: Curve1D Unitless
-b10 =
-  concrete Expression.b10 $
-    concrete Expression.b10d1 $
-      concrete Expression.b10d2 $
-        concrete Expression.b10d3 $
-          constant -72.0
-
-b11 :: Curve1D Unitless
-b11 =
-  concrete Expression.b11 $
-    concrete Expression.b11d1 $
-      concrete Expression.b11d2 $
-        concrete Expression.b11d3 $
-          constant 24.0
 
 newtonRaphson :: Curve1D units -> Number -> Fuzzy Number
 newtonRaphson curve t0 = do
