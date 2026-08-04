@@ -36,9 +36,6 @@ module OpenSolid.Bytecode.Ast
   , bezierCurve1D
   , bezierCurve2D
   , bezierCurve3D
-  , desingularized1D
-  , desingularized2D
-  , desingularized3D
   , compileCurve1D
   , compileCurve2D
   , compileVectorCurve2D
@@ -69,7 +66,6 @@ import OpenSolid.Bytecode.Evaluate (Compiled)
 import OpenSolid.Bytecode.Evaluate qualified as Evaluate
 import OpenSolid.Bytecode.Instruction (ConstantIndex, VariableIndex (VariableIndex))
 import OpenSolid.Bytecode.Instruction qualified as Instruction
-import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
@@ -146,12 +142,6 @@ data Variable1D input where
   CrossVariableConstant2D :: Variable2D input -> Vector2D Unitless -> Variable1D input
   Dot3D :: Variable3D input -> Variable3D input -> Variable1D input
   DotVariableConstant3D :: Variable3D input -> Vector3D Unitless Void -> Variable1D input
-  Desingularized1D ::
-    Variable1D input ->
-    Variable1D input ->
-    Variable1D input ->
-    Variable1D input ->
-    Variable1D input
 
 deriving instance Eq (Variable1D input)
 
@@ -189,12 +179,6 @@ data Variable2D input where
   TransformPoint2D :: Transform2D.Affine Unitless -> Variable2D input -> Variable2D input
   ProjectVector3D :: Plane -> Variable3D input -> Variable2D input
   ProjectPoint3D :: Plane -> Variable3D input -> Variable2D input
-  Desingularized2D ::
-    Variable1D input ->
-    Variable2D input ->
-    Variable2D input ->
-    Variable2D input ->
-    Variable2D input
   Arc2D ::
     Vector2D Unitless ->
     Vector2D Unitless ->
@@ -245,12 +229,6 @@ data Variable3D input where
   TransformPoint3D :: Transform3D.Affine Void -> Variable3D input -> Variable3D input
   PlaceVector2D :: Plane -> Variable2D input -> Variable3D input
   PlacePoint2D :: Plane -> Variable2D input -> Variable3D input
-  Desingularized3D ::
-    Variable1D input ->
-    Variable3D input ->
-    Variable3D input ->
-    Variable3D input ->
-    Variable3D input
   Arc3D ::
     Vector3D Unitless Void ->
     Vector3D Unitless Void ->
@@ -314,8 +292,6 @@ instance Composition (Variable1D Number) (Variable1D input) (Ast1D input) where
   CrossVariableConstant2D lhs rhs . input = lhs . input `cross` rhs
   Dot3D lhs rhs . input = lhs . input `dot` rhs . input
   DotVariableConstant3D lhs rhs . input = lhs . input `dot` rhs
-  Desingularized1D parameter left middle right . input =
-    desingularized1D (parameter . input) (left . input) (middle . input) (right . input)
 
 instance Composition (Ast2D Number) (Ast1D input) (Ast2D input) where
   Constant2D outer . _ = Constant2D outer
@@ -348,8 +324,6 @@ instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
     projectVector3dInto plane (vector . input)
   ProjectPoint3D plane point . input =
     projectPoint3dInto plane (point . input)
-  Desingularized2D parameter left middle right . input =
-    desingularized2D (parameter . input) (left . input) (middle . input) (right . input)
   Arc2D vx vy theta1 theta2 param . input = case param . input of
     Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (arc2D vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable2D (Arc2D vx vy theta1 theta2 paramVar)
@@ -388,8 +362,6 @@ instance Composition (Variable3D Number) (Variable1D input) (Ast3D input) where
     placeVector2DOn plane (vector . input)
   PlacePoint2D plane point . input =
     placePoint2DOn plane (point . input)
-  Desingularized3D parameter left middle right . input =
-    desingularized3D (parameter . input) (left . input) (middle . input) (right . input)
   Arc3D vx vy theta1 theta2 param . input = case param . input of
     Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (arc3D vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable3D (Arc3D vx vy theta1 theta2 paramVar)
@@ -436,8 +408,6 @@ instance Composition (Variable1D UvPoint) (Variable2D input) (Ast1D input) where
   CrossVariableConstant2D lhs rhs . input = lhs . input `cross` rhs
   Dot3D lhs rhs . input = lhs . input `dot` rhs . input
   DotVariableConstant3D lhs rhs . input = lhs . input `dot` rhs
-  Desingularized1D parameter left middle right . input =
-    desingularized1D (parameter . input) (left . input) (middle . input) (right . input)
 
 instance Composition (Ast2D UvPoint) (Ast2D input) (Ast2D input) where
   Constant2D outer . _ = Constant2D outer
@@ -471,8 +441,6 @@ instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
     projectVector3dInto plane (vector . input)
   ProjectPoint3D plane point . input =
     projectPoint3dInto plane (point . input)
-  Desingularized2D parameter left middle right . input =
-    desingularized2D (parameter . input) (left . input) (middle . input) (right . input)
   Arc2D vx vy theta1 theta2 param . input = case param . input of
     Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (arc2D vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable2D (Arc2D vx vy theta1 theta2 paramVar)
@@ -507,8 +475,6 @@ instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
   TransformPoint3D transform point . input = transformPoint3D transform (point . input)
   PlaceVector2D plane vector . input = placeVector2DOn plane (vector . input)
   PlacePoint2D plane point . input = placePoint2DOn plane (point . input)
-  Desingularized3D parameter left middle right . input =
-    desingularized3D (parameter . input) (left . input) (middle . input) (right . input)
   Arc3D vx vy theta1 theta2 param . input = case param . input of
     Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (arc3D vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable3D (Arc3D vx vy theta1 theta2 paramVar)
@@ -1174,33 +1140,6 @@ involute3D :: Int -> Vector3D units space -> Vector3D units space -> Angle -> An
 involute3D n vx vy theta1 theta2 =
   Variable3D (Involute3D n (Vector3D.erase vx) (Vector3D.erase vy) theta1 theta2 CurveParameter)
 
-desingularized1D :: Ast1D input -> Ast1D input -> Ast1D input -> Ast1D input -> Ast1D input
-desingularized1D (Constant1D parameter) left middle right =
-  Desingularization.value parameter left middle right
-desingularized1D _ (Constant1D left) _ _ = Constant1D left
-desingularized1D _ _ (Constant1D middle) _ = Constant1D middle
-desingularized1D _ _ _ (Constant1D right) = Constant1D right
-desingularized1D (Variable1D parameter) (Variable1D left) (Variable1D middle) (Variable1D right) =
-  Variable1D (Desingularized1D parameter left middle right)
-
-desingularized2D :: Ast1D input -> Ast2D input -> Ast2D input -> Ast2D input -> Ast2D input
-desingularized2D (Constant1D parameter) left middle right =
-  Desingularization.value parameter left middle right
-desingularized2D _ (Constant2D left) _ _ = Constant2D left
-desingularized2D _ _ (Constant2D middle) _ = Constant2D middle
-desingularized2D _ _ _ (Constant2D right) = Constant2D right
-desingularized2D (Variable1D parameter) (Variable2D left) (Variable2D middle) (Variable2D right) =
-  Variable2D (Desingularized2D parameter left middle right)
-
-desingularized3D :: Ast1D input -> Ast3D input -> Ast3D input -> Ast3D input -> Ast3D input
-desingularized3D (Constant1D parameter) left middle right =
-  Desingularization.value parameter left middle right
-desingularized3D _ (Constant3D left) _ _ = Constant3D left
-desingularized3D _ _ (Constant3D middle) _ = Constant3D middle
-desingularized3D _ _ _ (Constant3D right) = Constant3D right
-desingularized3D (Variable1D parameter) (Variable3D left) (Variable3D middle) (Variable3D right) =
-  Variable3D (Desingularized3D parameter left middle right)
-
 addVectorTransform2D :: VectorTransform2D.Affine -> Compile.Step ConstantIndex
 addVectorTransform2D (VectorTransform2D i j) = do
   let Vector2D iX iY = i
@@ -1339,13 +1278,6 @@ compileVariable1D variable = case variable of
     lhsIndex <- compileVariable3D lhs
     rhsIndex <- Compile.addConstant3D rhs
     Compile.addVariable1D (Instruction.DotVariableConstant3D lhsIndex rhsIndex)
-  Desingularized1D parameter left middle right -> do
-    parameterIndex <- compileVariable1D parameter
-    leftIndex <- compileVariable1D left
-    middleIndex <- compileVariable1D middle
-    rightIndex <- compileVariable1D right
-    let instruction = Instruction.Desingularized1D parameterIndex leftIndex middleIndex rightIndex
-    Compile.addVariable1D instruction
 
 coordinates2D :: Vector2D Unitless -> NonEmpty Number
 coordinates2D (Vector2D x y) = NonEmpty.two x y
@@ -1429,13 +1361,6 @@ compileVariable2D variable = case variable of
     planeIndex <- addPlane plane
     pointIndex <- compileVariable3D point
     Compile.addVariable2D (Instruction.ProjectPoint3D planeIndex pointIndex)
-  Desingularized2D parameter left middle right -> do
-    parameterIndex <- compileVariable1D parameter
-    leftIndex <- compileVariable2D left
-    middleIndex <- compileVariable2D middle
-    rightIndex <- compileVariable2D right
-    let instruction = Instruction.Desingularized2D parameterIndex leftIndex middleIndex rightIndex
-    Compile.addVariable2D instruction
   Arc2D vx vy theta1 theta2 parameter -> do
     vxIndex <- Compile.addConstant2D vx
     vyIndex <- Compile.addConstant2D vy
@@ -1524,13 +1449,6 @@ compileVariable3D variable = case variable of
     planeIndex <- addPlane plane
     pointIndex <- compileVariable2D point
     Compile.addVariable3D (Instruction.PlacePoint2D planeIndex pointIndex)
-  Desingularized3D parameter left middle right -> do
-    parameterIndex <- compileVariable1D parameter
-    leftIndex <- compileVariable3D left
-    middleIndex <- compileVariable3D middle
-    rightIndex <- compileVariable3D right
-    let instruction = Instruction.Desingularized3D parameterIndex leftIndex middleIndex rightIndex
-    Compile.addVariable3D instruction
   Arc3D vx vy theta1 theta2 parameter -> do
     vxIndex <- Compile.addConstant3D vx
     vyIndex <- Compile.addConstant3D vy

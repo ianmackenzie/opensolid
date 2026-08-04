@@ -91,9 +91,6 @@ data Instruction
   | TransformPoint3D ConstantIndex VariableIndex
   | PlaceVector2D ConstantIndex VariableIndex
   | PlacePoint2D ConstantIndex VariableIndex
-  | Desingularized1D VariableIndex VariableIndex VariableIndex VariableIndex
-  | Desingularized2D VariableIndex VariableIndex VariableIndex VariableIndex
-  | Desingularized3D VariableIndex VariableIndex VariableIndex VariableIndex
   | Cube1D VariableIndex
   | Arc2D ConstantIndex ConstantIndex ConstantIndex ConstantIndex VariableIndex
   | Arc3D ConstantIndex ConstantIndex ConstantIndex ConstantIndex VariableIndex
@@ -460,24 +457,6 @@ encodeOpcodeAndArguments instruction = case instruction of
     Encode.int 84
       <> encodeConstantIndex matrix
       <> encodeVariableIndex point
-  Desingularized1D parameterValue left middle right ->
-    Encode.int 85
-      <> encodeVariableIndex parameterValue
-      <> encodeVariableIndex left
-      <> encodeVariableIndex middle
-      <> encodeVariableIndex right
-  Desingularized2D parameterValue left middle right ->
-    Encode.int 86
-      <> encodeVariableIndex parameterValue
-      <> encodeVariableIndex left
-      <> encodeVariableIndex middle
-      <> encodeVariableIndex right
-  Desingularized3D parameterValue left middle right ->
-    Encode.int 87
-      <> encodeVariableIndex parameterValue
-      <> encodeVariableIndex left
-      <> encodeVariableIndex middle
-      <> encodeVariableIndex right
   Cube1D arg ->
     Encode.int 91
       <> encodeVariableIndex arg

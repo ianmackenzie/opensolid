@@ -10,13 +10,6 @@
 #include "vector2d.h"
 #include "vector3d.h"
 
-// Used when evaluating Desingularized#d opcodes,
-// to determine whether a given parameter value is at a given endpoint
-// or whether a given parameter range includes a given endpoint;
-// should be kept in sync with the constants used in Desingularization.hs
-#define T0 0.00390625 // 1/256
-#define T1 0.99609375 // 255/256
-
 template <class T>
 T
 invalid();
@@ -587,26 +580,6 @@ involute(
   auto [a, b] = involuteCoefficients(n, theta);
   double scale = n == 0 ? 1.0 : std::pow(theta2 - theta1, n);
   return scale * ((n - 1) * (a * vx + b * vy) + theta * (a * vy - b * vx));
-}
-
-inline bool
-isStart(double t) {
-  return t <= T0;
-}
-
-inline bool
-isStart(Bounds t) {
-  return t.upper <= T0;
-}
-
-inline bool
-isEnd(double t) {
-  return t >= T1;
-}
-
-inline bool
-isEnd(Bounds t) {
-  return t.lower >= T1;
 }
 
 template <class T>
@@ -1280,51 +1253,6 @@ evaluate(
           matrix[1] * input.x + matrix[4] * input.y + matrix[7],
           matrix[2] * input.x + matrix[5] * input.y + matrix[8]
         );
-        break;
-      }
-      case Desingularized1d: {
-        T t = getScalar();
-        T start = getScalar();
-        T middle = getScalar();
-        T end = getScalar();
-        T* output = getScalarPointer();
-        if (isStart(t)) {
-          *output = start;
-        } else if (isEnd(t)) {
-          *output = end;
-        } else {
-          *output = middle;
-        }
-        break;
-      }
-      case Desingularized2d: {
-        T t = getScalar();
-        Vector2d<T> start = getVector2d();
-        Vector2d<T> middle = getVector2d();
-        Vector2d<T> end = getVector2d();
-        Vector2d<T>* output = getVector2dPointer();
-        if (isStart(t)) {
-          *output = start;
-        } else if (isEnd(t)) {
-          *output = end;
-        } else {
-          *output = middle;
-        }
-        break;
-      }
-      case Desingularized3d: {
-        T t = getScalar();
-        Vector3d<T> start = getVector3d();
-        Vector3d<T> middle = getVector3d();
-        Vector3d<T> end = getVector3d();
-        Vector3d<T>* output = getVector3dPointer();
-        if (isStart(t)) {
-          *output = start;
-        } else if (isEnd(t)) {
-          *output = end;
-        } else {
-          *output = middle;
-        }
         break;
       }
       case Cube1d: {
