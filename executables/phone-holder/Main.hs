@@ -65,9 +65,9 @@ main = Tolerance.using Length.defaultTolerance do
       & Result.andThen (Path2D.addLine (Length.centimeters 1.0))
       & Result.andThen (Path2D.addArc rSmall (Angle.degrees -90.0))
       & Result.andThen (Path2D.addLine (Length.centimeters 1.0))
-      & Result.orFail
+      ?? fail
 
-  profile2D <- Path2D.thickenLeftwardBy thickness profilePath & Result.orFail
+  profile2D <- Path2D.thickenLeftwardBy thickness profilePath ?? fail
 
   let midPlane = World3D.rightPlane
   let rightPlane = midPlane & Plane3D.offsetBy (0.5 * width)
@@ -104,7 +104,7 @@ main = Tolerance.using Length.defaultTolerance do
         let loop = NonEmpty.four leftEdge endEdge rightEdge startEdge
         Ok (advancedFaceEntity loop surface)
 
-  extrudedFaces <- Result.collect extrudedFace (NonEmpty.loop (,) profile2D) & Result.orFail
+  extrudedFaces <- Result.collect extrudedFace (NonEmpty.loop (,) profile2D) ?? fail
   let allFaces = extrudedFaces & NonEmpty.push leftFace & NonEmpty.push rightFace
   let closedShell =
         Step.entity "CLOSED_SHELL" $

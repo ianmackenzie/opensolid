@@ -20,7 +20,8 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Triangle3D qualified as Triangle3D
 import OpenSolid.Volume (Volume)
 import OpenSolid.World3D qualified as World3D
-import Test
+import Test (Test)
+import Test qualified
 
 tests :: List Test
 tests =
@@ -46,7 +47,7 @@ sphereMeshing :: Test
 sphereMeshing = Test.verify "Sphere meshing" do
   let diameter = Length.centimeters 10.0
   let resolution = Resolution.maxError (0.01 * diameter)
-  sphere <- Body3D.sphere (#centerPoint World3D.originPoint) (#diameter diameter) & Result.orFail
+  sphere <- Body3D.sphere (#centerPoint World3D.originPoint) (#diameter diameter) ?? fail
   let mesh = Body3D.toPointMesh resolution sphere
   let approximateArea = meshArea mesh
   let approximateVolume = meshVolume mesh
@@ -74,8 +75,8 @@ revolvedNormals = Test.verify "Revolved normals" do
   let r1 = Length.centimeters 5.0
   let r2 = Length.centimeters 10.0
   let interval = Interval r1 r2
-  leftRegion <- Region2D.rectangle (Bounds2D -interval interval) & Result.orFail
-  rightRegion <- Region2D.rectangle (Bounds2D interval interval) & Result.orFail
+  leftRegion <- Region2D.rectangle (Bounds2D -interval interval) ?? fail
+  rightRegion <- Region2D.rectangle (Bounds2D interval interval) ?? fail
   let profiles = [leftRegion, rightRegion]
   bodies <-
     Result.all
@@ -84,7 +85,7 @@ revolvedNormals = Test.verify "Revolved normals" do
       , axis <- axes
       , sweptAngle <- sweptAngles
       ]
-      & Result.orFail
+      ?? fail
   let resolution = Resolution.maxError (0.01 * r1)
   let exactVolume =
         (r2 - r1) * 0.5 * Angle.inRadians angle * (Quantity.squared r2 - Quantity.squared r1)

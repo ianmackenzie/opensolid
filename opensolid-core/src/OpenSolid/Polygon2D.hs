@@ -49,7 +49,7 @@ instance FFI (Polygon2D Meters) where
 instance FFI (Polygon2D Unitless) where
   representation = FFI.classRepresentation "UvPolygon"
 
-data IsEmpty = IsEmpty deriving (Eq, Show)
+data IsEmpty = IsEmpty deriving (Eq, Show, Err)
 
 {-| Create a regular polygon with the given number of vertices/sides.
 

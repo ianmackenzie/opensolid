@@ -13,7 +13,6 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.World3D qualified as World3D
@@ -30,8 +29,8 @@ main = Tolerance.using Length.defaultTolerance do
       , Curve2D.arcFrom p2 p3 Angle.quarterTurn
       , Curve2D.lineFrom p3 p1
       ]
-      & Result.orFail
-  body <- Body3D.revolved World3D.frontPlane profile Axis2D.y Angle.twoPi & Result.orFail
+      ?? fail
+  body <- Body3D.revolved World3D.frontPlane profile Axis2D.y Angle.twoPi ?? fail
   let material = PbrMaterial.nonmetal Color.blue (#roughness 0.2)
   let model = Model3D.bodyWith [Model3D.pbrMaterial material] body
   let resolution = Resolution.maxSize (Length.centimeters 20.0)

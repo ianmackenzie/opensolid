@@ -488,7 +488,7 @@ degeneracyTolerance curve =
 
 ----- ZERO FINDING -----
 
-data IsZero = IsZero deriving (Eq, Show)
+data IsZero = IsZero deriving (Eq, Show, Err)
 
 {-| Find all points at which the given curve is zero.
 
@@ -627,7 +627,7 @@ solveMonotonic m fm fn tRange = do
             Solve1D.Exact t0 -> Resolved [(t0, Solve1D.neighborhood n (value fn t0))]
             Solve1D.Closest _ -> Unresolved
 
-data CrossesZero = CrossesZero deriving (Eq, Show)
+data CrossesZero = CrossesZero deriving (Eq, Show, Err)
 
 {-| Attempt to find the (consistent) sign of all values on the curve.
 

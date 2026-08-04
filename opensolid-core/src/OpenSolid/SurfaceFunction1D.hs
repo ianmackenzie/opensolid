@@ -447,7 +447,7 @@ cos function =
     (CompiledFunction.map Expression.cos Angle.cos Interval.cos function.compiled)
     (\p -> negate (sin function) * (derivative p function / Angle.radian))
 
-data IsZero = IsZero deriving (Eq, Show)
+data IsZero = IsZero deriving (Eq, Show, Err)
 
 zeros :: Tolerance units => SurfaceFunction1D units -> Result IsZero Zeros
 zeros function

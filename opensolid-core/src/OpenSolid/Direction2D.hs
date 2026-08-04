@@ -94,7 +94,7 @@ x = Unit2D (Vector2D 1.0 0.0)
 y :: Direction2D
 y = Unit2D (Vector2D 0.0 1.0)
 
-data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show)
+data PointsAreCoincident = PointsAreCoincident deriving (Eq, Show, Err)
 
 from :: Tolerance units => Point2D units -> Point2D units -> Result PointsAreCoincident Direction2D
 from p1 p2 = do

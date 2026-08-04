@@ -153,7 +153,7 @@ boundedBy curves = do
   loops <- connect curves
   classifyLoops loops
 
-data EmptyRegion = EmptyRegion deriving (Eq, Show)
+data EmptyRegion = EmptyRegion deriving (Eq, Show, Err)
 
 {-| Create a rectangular region.
 
@@ -209,8 +209,8 @@ fillet ::
   Result Text (Region2D units)
 fillet points ("radius" ::: radius) region = do
   let initialCurves = Set2D.toList (boundaryCurves region)
-  filletedCurves <- initialCurves & Result.forEach points (addFillet radius) & Result.orFail
-  boundedBy filletedCurves & Result.orFail
+  filletedCurves <- initialCurves & Result.forEach points (addFillet radius) ?? fail
+  boundedBy filletedCurves ?? fail
 
 addFillet ::
   Tolerance units =>
@@ -238,15 +238,15 @@ addFillet radius point curves = do
     List.One _ -> couldNotFindPointToFillet
     List.ThreeOrMore -> couldNotFindPointToFillet
     List.Two firstCandidate secondCandidate -> do
-      firstCurve <- Curve.nonzero firstCandidate & Result.orFail
-      secondCurve <- Curve.nonzero secondCandidate & Result.orFail
+      firstCurve <- Curve.nonzero firstCandidate ?? fail
+      secondCurve <- Curve.nonzero secondCandidate ?? fail
       let firstEndDirection = Curve2D.Nonzero.tangentDirection firstCurve 1.0
       let secondStartDirection = Curve2D.Nonzero.tangentDirection secondCurve 0.0
       let cornerAngle = Direction2D.angleFrom firstEndDirection secondStartDirection
       let offset = Quantity.sign cornerAngle * Quantity.abs radius
       let firstOffsetCurve = Curve2D.Nonzero.offsetLeftwardBy offset firstCurve
       let secondOffsetCurve = Curve2D.Nonzero.offsetLeftwardBy offset secondCurve
-      maybeIntersections <- Curve2D.intersections firstOffsetCurve secondOffsetCurve & Result.orFail
+      maybeIntersections <- Curve2D.intersections firstOffsetCurve secondOffsetCurve ?? fail
       case maybeIntersections of
         Nothing -> couldNotSolveForFilletLocation
         Just Curve.OverlappingSegments{} -> couldNotSolveForFilletLocation

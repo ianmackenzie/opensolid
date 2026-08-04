@@ -118,7 +118,7 @@ strip = Data.Text.strip
 toUtf8 :: Text -> Builder
 toUtf8 = Data.Text.Encoding.encodeUtf8Builder
 
-data InvalidUtf8 = InvalidUtf8 deriving (Eq, Show)
+data InvalidUtf8 = InvalidUtf8 deriving (Eq, Show, Err)
 
 decodeUtf8 :: ByteString -> Result InvalidUtf8 Text
 decodeUtf8 byteString =

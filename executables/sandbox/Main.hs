@@ -36,7 +36,6 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2D qualified as Solve2D
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
@@ -132,14 +131,14 @@ testListOperations = do
 
 getCrossProduct :: Tolerance Meters => Result Text Number
 getCrossProduct = do
-  vectorDirection <- Vector2D.direction (Vector2D.meters 2.0 3.0) & Result.orFail
-  lineDirection <- Direction2D.from Point2D.origin Point2D.origin & Result.orFail
+  vectorDirection <- Vector2D.direction (Vector2D.meters 2.0 3.0) ?? fail
+  lineDirection <- Direction2D.from Point2D.origin Point2D.origin ?? fail
   Ok (vectorDirection `cross` lineDirection)
 
 testTry :: Tolerance Meters => IO ()
 testTry =
   IO.onError IO.printLine do
-    crossProduct <- getCrossProduct & Result.orFail
+    crossProduct <- getCrossProduct ?? fail
     log "Got cross product" crossProduct
 
 testIOIteration :: IO ()
@@ -147,7 +146,7 @@ testIOIteration = IO.forEach [1 .. 3] (log "Looping")
 
 doublingIO :: Text -> IO Int
 doublingIO input = do
-  value <- Int.parse input & Result.orFail
+  value <- Int.parse input ?? fail
   let doubled = 2 * value
   IO.succeed doubled
 
@@ -188,7 +187,7 @@ testPlaneTorusIntersection = do
   -- Other possibilities: Direction3D.xy (Angle.degrees 45), Direction3D.z
   let planeNormal = Direction3D.polar World3D.frontPlane (alpha + Angle.halfPi)
   let f = planeNormal `dot` (Surface3D.function surface - World3D.originPoint)
-  zeros <- SurfaceFunction1D.zeros f & Result.orFail
+  zeros <- SurfaceFunction1D.zeros f ?? fail
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
   log "  Crossing curves" (List.length zeros.crossingCurves)
@@ -199,7 +198,7 @@ testPlaneParaboloidIntersection = Tolerance.using Tolerance.unitless do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
   let f = SurfaceFunction1D.squared u + SurfaceFunction1D.squared v - 0.5
-  zeros <- SurfaceFunction1D.zeros f & Result.orFail
+  zeros <- SurfaceFunction1D.zeros f ?? fail
   drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
   log "  Crossing curves" (List.length zeros.crossingCurves)
@@ -348,17 +347,17 @@ testExplicitRandomStep = do
 
 textSum :: Text -> Text -> Result Text Int
 textSum t1 t2 = do
-  n1 <- Int.parse t1 & Result.orFail
-  n2 <- Int.parse t2 & Result.orFail
+  n1 <- Int.parse t1
+  n2 <- Int.parse t2
   Ok (n1 + n2)
 
 testTextSum :: IO ()
 testTextSum = do
   IO.onError IO.printLine do
-    sum <- textSum "5" "abc" & Result.orFail
+    sum <- textSum "5" "abc" ?? fail
     log "sum" sum
   IO.onError IO.printLine do
-    sum <- textSum "2" "3" & Result.orFail
+    sum <- textSum "2" "3" ?? fail
     log "sum" sum
 
 testNewtonRaphson2D :: IO ()

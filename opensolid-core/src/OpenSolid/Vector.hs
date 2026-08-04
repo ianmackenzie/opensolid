@@ -87,7 +87,7 @@ class
     Vector dimension units space ->
     Vector dimension units space
 
-data IsZero = IsZero deriving (Eq, Show)
+data IsZero = IsZero deriving (Eq, Show, Err)
 
 instance Exists 1 units Void where
   {-# INLINEABLE squaredMagnitude_ #-}

@@ -4,7 +4,6 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Zero (Zero (Zero))
 import OpenSolid.Prelude
-import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
@@ -22,7 +21,7 @@ crossingZeros = Test.verifyWith Tolerance.unitless "crossingZeros" do
   let x = 3.0 * Curve1D.t
   let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
   let expectedZeros = [Zero 0.0 0 Positive, Zero (1 / 3) 0 Negative, Zero (2 / 3) 0 Positive]
-  zeros <- Curve1D.zeros y & Result.orFail
+  zeros <- Curve1D.zeros y ?? fail
   Test.expect (matching zeros expectedZeros)
     & Test.output "zeros" zeros
     & Test.output "expectedZeros" expectedZeros
@@ -32,7 +31,7 @@ tangentZeros = Test.verifyWith Tolerance.unitless "tangentZeros" do
   let theta = Angle.twoPi * Curve1D.t
   let expression = Curve1D.squared (Curve1D.sin theta)
   let expectedZeros = [Zero t 1 Positive | t <- [0.0, 0.5, 1.0]]
-  zeros <- Curve1D.zeros expression & Result.orFail
+  zeros <- Curve1D.zeros expression ?? fail
   Test.expect (matching zeros expectedZeros)
     & Test.output "zeros" zeros
     & Test.output "expectedZeros" expectedZeros

@@ -110,7 +110,7 @@ instance FFI (Body3D Void) where
 
 ----- CONSTRUCTION -----
 
-data EmptyBody = EmptyBody deriving (Eq, Show)
+data EmptyBody = EmptyBody deriving (Eq, Show, Err)
 
 {-| Create a rectangular block body.
 

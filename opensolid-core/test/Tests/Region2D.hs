@@ -17,7 +17,6 @@ import OpenSolid.Quantity (zero)
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Region2D.BoundedBy qualified as Region2D.BoundedBy
-import OpenSolid.Result qualified as Result
 import Test (Test)
 import Test qualified
 
@@ -48,7 +47,7 @@ squareArea = Test.verify "squareArea" do
   let line2 = Curve2D.lineFrom p2 p3
   let line3 = Curve2D.lineFrom p4 p3
   let line4 = Curve2D.lineFrom p4 p1
-  region <- Region2D.boundedBy [line1, line3, line2, line4] & Result.orFail
+  region <- Region2D.boundedBy [line1, line3, line2, line4] ?? fail
   Test.expect (areaIsApproximately (width * width) region)
 
 quarterCircleArea :: Test
@@ -60,7 +59,7 @@ quarterCircleArea = Test.verify "quarterCircleArea" do
   let line1 = Curve2D.lineFrom p1 p2
   let line2 = Curve2D.lineFrom p1 p3
   let arc = Curve2D.arcFrom p2 p3 Angle.quarterTurn
-  region <- Region2D.boundedBy [line1, line2, arc] & Result.orFail
+  region <- Region2D.boundedBy [line1, line2, arc] ?? fail
   let expectedArea = 0.25 * Number.pi * radius * radius
   Test.expect (areaIsApproximately expectedArea region)
 
@@ -79,7 +78,7 @@ squareWithHoleArea = Test.verify "squareWithHoleArea" do
   let holeDiameter = 0.5 * width
   let holeRadius = 0.5 * holeDiameter
   let hole = Curve2D.circle (Circle2D.withDiameter holeDiameter centerPoint)
-  region <- Region2D.boundedBy [line1, line3, line2, line4, hole] & Result.orFail
+  region <- Region2D.boundedBy [line1, line3, line2, line4, hole] ?? fail
   let expectedArea = width * width - Number.pi * holeRadius * holeRadius
   Test.expect (areaIsApproximately expectedArea region)
 
@@ -159,7 +158,7 @@ pointContainment = Test.verify "pointContainment" do
           , circle 2.5 0.5
           , square 2.5 1.5
           ]
-  region <- Region2D.boundedBy boundaryCurves & Result.orFail
+  region <- Region2D.boundedBy boundaryCurves ?? fail
   let expectInside points = Test.combine (Test.expect . intersects region) points
   let expectOutside points = Test.combine (Test.expect . not . intersects region) points
   Test.all

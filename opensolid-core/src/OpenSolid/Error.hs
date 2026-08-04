@@ -1,11 +1,25 @@
 module OpenSolid.Error
-  ( IsZero (IsZero)
+  ( Err (message)
+  , IsZero (IsZero)
   , IsDegenerate (IsDegenerate)
   )
 where
 
-import OpenSolid.Prelude
+import Data.Text (Text)
+import Data.Text qualified
+import Prelude (Eq, Show, String, id, (.))
+import Prelude qualified
 
-data IsDegenerate = IsDegenerate deriving (Eq, Show)
+class Show x => Err x where
+  message :: x -> Text
+  message = Data.Text.pack . Prelude.show
 
-data IsZero = IsZero deriving (Eq, Show)
+instance Err String where
+  message = Data.Text.pack
+
+instance Err Text where
+  message = id
+
+data IsDegenerate = IsDegenerate deriving (Eq, Show, Err)
+
+data IsZero = IsZero deriving (Eq, Show, Err)

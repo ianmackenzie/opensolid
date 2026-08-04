@@ -12,7 +12,6 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
-import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3D qualified as World3D
@@ -67,7 +66,7 @@ curveOverlap1 = Test.verify "curveOverlap1" do
   let arc2 =
         Curve3D.on World3D.topPlane $
           Curve2D.arcFrom (Point2D.meters 0.0 -1.0) (Point2D.meters 0.0 1.0) Angle.halfTurn
-  (sign, actualSegments) <- overlappingSegments arc1 arc2 & Result.orFail
+  (sign, actualSegments) <- overlappingSegments arc1 arc2 ?? fail
   let expectedSegments = NonEmpty.one (Interval 0.0 0.5, Interval 0.5 1.0)
   Test.all
     [ Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
@@ -90,7 +89,7 @@ curveOverlap2 = Test.verify "curveOverlap2" do
             (#radius Length.meter)
             (#startAngle (Angle.degrees -45.0))
             (#endAngle (Angle.degrees 225.0))
-  (sign, segments) <- overlappingSegments arc1 arc2 & Result.orFail
+  (sign, segments) <- overlappingSegments arc1 arc2 ?? fail
   let expectedSegments =
         NonEmpty.two
           (Interval 0.0 (1 / 4), Interval 0.0 (1 / 6))
@@ -108,11 +107,11 @@ crossingIntersection = Test.verify "crossingIntersection" do
   let arc2 =
         Curve3D.on World3D.topPlane $
           Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
-  nondegenerate1 <- Curve.nondegenerate arc1 & Result.orFail
-  nondegenerate2 <- Curve.nondegenerate arc2 & Result.orFail
+  nondegenerate1 <- Curve.nondegenerate arc1 ?? fail
+  nondegenerate2 <- Curve.nondegenerate arc2 ?? fail
   let curvePoint1 t1 = CurvePoint.on nondegenerate1 t1
   let curvePoint2 t2 = CurvePoint.on nondegenerate2 t2
-  intersections <- Curve3D.intersections arc1 arc2 & Result.orFail
+  intersections <- Curve3D.intersections arc1 arc2 ?? fail
   let expectedIntersectionPoints =
         NonEmpty.two
           (IntersectionPoint.crossing (curvePoint1 0.0, curvePoint2 0.0))
@@ -142,11 +141,11 @@ tangentIntersection = Test.verify "tangentIntersection" do
             (#radius (Length.meters 0.5))
             (#startAngle -Angle.pi)
             (#endAngle Angle.zero)
-  nondegenerate1 <- Curve.nondegenerate arc1 & Result.orFail
-  nondegenerate2 <- Curve.nondegenerate arc2 & Result.orFail
+  nondegenerate1 <- Curve.nondegenerate arc1 ?? fail
+  nondegenerate2 <- Curve.nondegenerate arc2 ?? fail
   let curvePoint1 t1 = CurvePoint.on nondegenerate1 t1
   let curvePoint2 t2 = CurvePoint.on nondegenerate2 t2
-  intersections <- Curve3D.intersections arc1 arc2 & Result.orFail
+  intersections <- Curve3D.intersections arc1 arc2 ?? fail
   let expectedIntersectionPoints =
         NonEmpty.one (IntersectionPoint.tangent Negative (curvePoint1 0.5, curvePoint2 0.5))
   case intersections of

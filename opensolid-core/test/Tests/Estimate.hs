@@ -20,7 +20,6 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
-import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import Test (Test)
@@ -86,7 +85,7 @@ area = Test.verify "area" do
   let expectedArea = Area.squareMeters Number.halfPi
   areaIsCorrect <-
     Tolerance.using (Area.squareMeters 1e-4) do
-      resolvesTo expectedArea areaEstimate & Result.orFail
+      resolvesTo expectedArea areaEstimate ?? fail
   Test.expect areaIsCorrect
 
 minimumBy :: Test

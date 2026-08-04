@@ -7,4 +7,4 @@ data Error
   | BoundaryHasGaps
   | BoundaryIntersectsItself
   | MultipleDisjointRegions
-  deriving (Eq, Show)
+  deriving (Eq, Show, Err)

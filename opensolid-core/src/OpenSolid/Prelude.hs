@@ -5,7 +5,14 @@ module OpenSolid.Prelude
   , NonEmpty ((:|))
   , Text
   , Fuzzy (Resolved, Unresolved)
+  , Err
   , Result (Ok, Error)
+  , OnError
+  , succeed
+  , fail
+  , report
+  , catch
+  , (??)
   , Exception
   , Void
   , data NonEmpty
@@ -81,6 +88,8 @@ import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
 import GHC.TypeLits (KnownSymbol, Symbol)
 import GHC.TypeLits qualified
+import OpenSolid.Error (Err)
+import OpenSolid.Error qualified as Error
 import OpenSolid.Show qualified as Show
 import OpenSolid.Units (HasUnits, Meters, Radians, Unitless, type (?*?), type (?/?))
 import OpenSolid.Units qualified as Units
@@ -433,7 +442,7 @@ instance Monad Fuzzy where
 
 data Result x a where
   Ok :: a -> Result x a
-  Error :: Show x => x -> Result x a
+  Error :: Err x => x -> Result x a
 
 deriving instance (Eq x, Eq a) => Eq (Result x a)
 
@@ -461,6 +470,39 @@ instance Monad (Result x) where
 instance MonadFail (Result Text) where
   {-# INLINE fail #-}
   fail message = Error (Data.Text.pack message)
+
+data OnError x a
+  = Succeed a
+  | Fail
+  | Report Text
+  | Catch (x -> OnError x a)
+
+succeed :: a -> OnError x a
+succeed = Succeed
+
+fail :: OnError x a
+fail = Fail
+
+report :: Text -> OnError x a
+report = Report
+
+catch :: (x -> OnError x a) -> OnError x a
+catch = Catch
+
+succeedWith :: Monad m => a -> m a
+succeedWith = Prelude.return
+
+failWith :: MonadFail m => Text -> m a
+failWith message = Prelude.fail (Data.Text.unpack message)
+
+(??) :: MonadFail m => Result x a -> OnError x a -> m a
+Ok value ?? _ = succeedWith value
+Error _ ?? Succeed value = succeedWith value
+Error _ ?? Report message = failWith message
+Error err ?? Fail = failWith (Error.message err)
+Error err ?? Catch callback = Error err ?? callback err
+
+infixl 0 ??
 
 ----- Quantity -----
 

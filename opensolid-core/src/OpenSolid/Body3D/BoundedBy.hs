@@ -6,4 +6,4 @@ data Error
   = EmptyBody
   | BoundaryHasGaps
   | BoundaryIntersectsItself
-  deriving (Eq, Show)
+  deriving (Eq, Show, Err)

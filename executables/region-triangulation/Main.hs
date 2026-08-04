@@ -11,7 +11,6 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Result qualified as Result
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Triangle2D (Triangle2D (Triangle2D))
@@ -37,7 +36,7 @@ main = Tolerance.using Length.defaultTolerance do
       , Curve2D.lineFrom p4 p0
       , Curve2D.circle (Circle2D.withDiameter holeDiameter holeCenter)
       ]
-      & Result.orFail
+      ?? fail
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   Svg.write "executables/region-triangulation/region.svg" (Svg.padding Length.centimeter) do
     Svg.regionWith [Svg.blackStroke, Svg.fillColor Color.lightGrey] resolution region

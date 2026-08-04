@@ -27,9 +27,8 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (fail)
 import OpenSolid.Random qualified as Random
-import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
@@ -38,7 +37,18 @@ import System.Environment
 import Text.Printf qualified
 import Prelude qualified
 
-type TestResult a = Result (List Text) a
+data TestResult a = Succeeded a | Failed (List Text)
+
+instance Functor TestResult where
+  fmap function (Succeeded value) = Succeeded (function value)
+  fmap _ (Failed messages) = Failed messages
+
+instance Applicative TestResult where
+  pure = Succeeded
+
+  Succeeded function <*> Succeeded value = Succeeded (function value)
+  Failed messages <*> _ = Failed messages
+  Succeeded _ <*> Failed messages = Failed messages
 
 newtype Generator a = Generator (Random.Generator (TestResult a))
 
@@ -46,10 +56,10 @@ unwrap :: Generator a -> Random.Generator (TestResult a)
 unwrap (Generator generator) = generator
 
 instance Functor Generator where
-  fmap function (Generator generator) = Generator (Random.map (Result.map function) generator)
+  fmap function (Generator generator) = Generator (Random.map (Prelude.fmap function) generator)
 
 instance Applicative Generator where
-  pure value = Generator (Random.return (Ok value))
+  pure value = Generator (Random.return (Succeeded value))
   Generator functionGenerator <*> Generator valueGenerator = Generator do
     functionResult <- functionGenerator
     valueResult <- valueGenerator
@@ -61,14 +71,14 @@ instance Monad Generator where
   Generator generator >>= function = Generator do
     result <- generator
     case result of
-      Ok value -> unwrap (function value)
-      Error errors -> Random.return (Error errors)
+      Succeeded value -> unwrap (function value)
+      Failed errors -> Random.return (Failed errors)
 
 instance MonadFail Generator where
-  fail message = Generator (Random.return (Error [Text.pack message]))
+  fail message = Generator (Random.return (Failed [Text.pack message]))
 
 generate :: Random.Generator a -> Generator a
-generate generator = Generator (Random.map Ok generator)
+generate generator = Generator (Random.map Succeeded generator)
 
 data Test
   = Abort Text
@@ -183,25 +193,25 @@ fuzzImpl context n seed expectation = case n of
     let Generator generator = expectation
     let (testResult, updatedSeed) = Random.step generator seed
     case testResult of
-      Ok () -> fuzzImpl context (n - 1) updatedSeed expectation
-      Error messages -> reportError context messages
+      Succeeded () -> fuzzImpl context (n - 1) updatedSeed expectation
+      Failed messages -> reportError context messages
 
 pass :: Expectation
-pass = Generator (Random.return (Ok ()))
+pass = Generator (Random.return (Succeeded ()))
 
 fail :: Text -> Expectation
-fail message = Generator (Random.return (Error [message]))
+fail message = Generator (Random.return (Failed [message]))
 
 expect :: Bool -> Expectation
 expect True = pass
-expect False = Generator (Random.return (Error []))
+expect False = Generator (Random.return (Failed []))
 
 combineTestResults :: List (TestResult ()) -> TestResult ()
-combineTestResults [] = Ok ()
-combineTestResults (Ok () : rest) = combineTestResults rest
-combineTestResults (Error messages : rest) = case combineTestResults rest of
-  Ok () -> Error messages
-  Error restMessages -> Error (messages <> restMessages)
+combineTestResults [] = Succeeded ()
+combineTestResults (Succeeded () : rest) = combineTestResults rest
+combineTestResults (Failed messages : rest) = case combineTestResults rest of
+  Succeeded () -> Failed messages
+  Failed restMessages -> Failed (messages <> restMessages)
 
 all :: List Expectation -> Expectation
 all expectations =
@@ -215,8 +225,8 @@ output label value (Generator generator) =
   Generator (Random.map (addOutput label value) generator)
 
 addOutput :: Show a => Text -> a -> TestResult () -> TestResult ()
-addOutput _ _ (Ok ()) = Ok ()
-addOutput label value (Error messages) = Error (messages <> [label <> ": " <> Text.show value])
+addOutput _ _ (Succeeded ()) = Succeeded ()
+addOutput label value (Failed messages) = Failed (messages <> [label <> ": " <> Text.show value])
 
 newtype Lines a = Lines (List a)
 

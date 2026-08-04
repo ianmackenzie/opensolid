@@ -11,7 +11,6 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Result qualified as Result
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3D qualified as World3D
@@ -35,8 +34,8 @@ main = Tolerance.using Length.defaultTolerance do
       , Curve2D.lineFrom p3 p4
       , Curve2D.lineFrom p4 p0
       ]
-      & Result.orFail
-  body <- Body3D.revolved World3D.rightPlane profile Axis2D.y (Angle.degrees 270.0) & Result.orFail
+      ?? fail
+  body <- Body3D.revolved World3D.rightPlane profile Axis2D.y (Angle.degrees 270.0) ?? fail
   let resolution = Resolution.maxError (Length.millimeters 0.2)
   let mesh = Body3D.toPointMesh resolution body
   Stl.writeBinary "executables/funky-moulding/mesh.stl" Convention3D.yUp Length.inMillimeters mesh

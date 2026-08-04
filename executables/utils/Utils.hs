@@ -33,7 +33,7 @@ showMostComplexCurve body = do
         SurfaceCurve3D.curve surfaceCurve
           & Curve3D.compiled
           & CompiledFunction.expression
-  expressions <- Result.collect getExpression surfaceCurves & Result.orFail
+  expressions <- Result.collect getExpression surfaceCurves ?? fail
   let strings = NonEmpty.map Expression.debug expressions
   let longestString = NonEmpty.maximumBy numLines strings
   IO.printLine longestString

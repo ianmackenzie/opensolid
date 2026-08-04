@@ -166,7 +166,7 @@ type Compiled dimension units space =
     (Interval Unitless)
     (Bounds dimension units space)
 
-data HasDegeneracy = HasDegeneracy deriving (Eq, Show)
+data HasDegeneracy = HasDegeneracy deriving (Eq, Show, Err)
 
 type BisectionTree dimension units space =
   Bisection.Tree (Interval Unitless) (Segment dimension units space)

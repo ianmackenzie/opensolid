@@ -19,7 +19,6 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Result qualified as Result
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
@@ -60,7 +59,7 @@ testSplineAndLine = do
 testCurveMedialAxis :: Tolerance Meters => Text -> Curve2D Meters -> Curve2D Meters -> IO ()
 testCurveMedialAxis label curve1 curve2 = do
   timer <- Timer.start
-  segments <- Curve2D.medialAxis curve1 curve2 & Result.orFail
+  segments <- Curve2D.medialAxis curve1 curve2 ?? fail
   let drawTangentCircles (segment :: Curve2D.MedialAxis.Segment Meters) = do
         let drawTangentCircle r = do
               let t = Curve2D.uniformParameterization segment.curve r
