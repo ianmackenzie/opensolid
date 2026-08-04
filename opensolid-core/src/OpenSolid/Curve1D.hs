@@ -18,8 +18,6 @@ module OpenSolid.Curve1D
   , derivativeRange
   , secondDerivativeValue
   , secondDerivativeRange
-  , desingularize
-  , desingularized
   , t
   , interpolateFrom
   , bezier
@@ -54,8 +52,6 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import {-# SOURCE #-} OpenSolid.Curve1D.Nonzero qualified as Curve1D.Nonzero
 import OpenSolid.Curve1D.Zero (Zero)
 import OpenSolid.Curve1D.Zero qualified as Zero
-import OpenSolid.Desingularization qualified as Desingularization
-import OpenSolid.Desingularization.Curve qualified as Desingularization.Curve
 import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
@@ -140,13 +136,6 @@ instance
   Intersects (Quantity units1) (Curve1D units2) (Tolerance units1)
   where
   quantity `intersects` curve = curve `intersects` quantity
-
-instance Desingularization.Curve (Curve1D units) (Quantity units) (Quantity units) where
-  value = value
-  derivativeValue = derivativeValue
-  secondDerivativeValue = secondDerivativeValue
-  bezier = bezier
-  desingularized = desingularized
 
 new :: Compiled units -> Curve1D units -> Curve1D units
 new = Curve1D
@@ -405,19 +394,6 @@ secondDerivativeValue curve tValue = value (secondDerivative curve) tValue
 {-# INLINE secondDerivativeRange #-}
 secondDerivativeRange :: Curve1D units -> Interval Unitless -> Interval units
 secondDerivativeRange curve tRange = range (secondDerivative curve) tRange
-
-desingularize ::
-  Maybe (Quantity units, Quantity units) ->
-  Curve1D units ->
-  Maybe (Quantity units, Quantity units) ->
-  Curve1D units
-desingularize = Desingularization.curve
-
-desingularized :: Curve1D units -> Curve1D units -> Curve1D units -> Curve1D units
-desingularized start middle end =
-  new
-    (CompiledFunction.desingularized (compiled t) (compiled start) (compiled middle) (compiled end))
-    (desingularized (derivative start) (derivative middle) (derivative end))
 
 instance Division_ (Curve1D units1) (Nonzero (Curve1D units2)) (Curve1D (units1 ?/? units2)) where
   lhs ?/? Nonzero rhs = do

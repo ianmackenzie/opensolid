@@ -15,7 +15,6 @@ module OpenSolid.Curve1D
   , range
   , zeros
   , degeneracyTolerance
-  , desingularized
   , squared_
   , erase
   , unerase
@@ -103,7 +102,6 @@ secondDerivativeValue :: Curve1D units -> Number -> Quantity units
 range :: Curve1D units -> Interval Unitless -> Interval units
 zeros :: Tolerance units => Curve1D units -> Result IsZero (List Zero)
 degeneracyTolerance :: Curve1D units -> Quantity units
-desingularized :: Curve1D units -> Curve1D units -> Curve1D units -> Curve1D units
 squared_ :: Curve1D units -> Curve1D (units ?*? units)
 erase :: Curve1D units -> Curve1D Unitless
 unerase :: Curve1D Unitless -> Curve1D units
