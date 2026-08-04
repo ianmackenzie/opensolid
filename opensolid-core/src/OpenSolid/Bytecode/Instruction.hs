@@ -122,7 +122,7 @@ data Instruction
   deriving (Eq, Ord, Show, Generic, Hashable)
 
 maxValues :: Int
-maxValues = 32768
+maxValues = 65536
 
 newtype TooManyVariables = TooManyVariables Int deriving (Show)
 
