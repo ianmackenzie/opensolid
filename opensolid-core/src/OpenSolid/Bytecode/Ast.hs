@@ -918,7 +918,7 @@ instance input1 ~ input2 => Multiplication (Ast2D input1) (Ast1D input2) (Ast2D 
 instance input1 ~ input2 => Multiplication (Ast1D input1) (Ast2D input2) (Ast2D input1) where
   lhs * rhs = rhs * lhs
 
-instance Multiplication (Ast2D input1) (Quantity units) (Ast2D input1) where
+instance Multiplication (Ast2D input) (Quantity units) (Ast2D input) where
   lhs * rhs = lhs * constant1D rhs
 
 instance Multiplication (Quantity units) (Ast2D input) (Ast2D input) where
