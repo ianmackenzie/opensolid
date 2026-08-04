@@ -15,6 +15,7 @@ import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.Curve2D.Nonzero qualified as Curve2D.Nonzero
 import OpenSolid.CurvePoint qualified as CurvePoint
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Interval (Interval (Interval))
@@ -33,9 +34,6 @@ import OpenSolid.Random qualified as Random
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (InverseMeters)
-import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2D (Vector2D)
 import Test (Expectation, Test)
 import Test qualified
 import Tests.Matching (matching)
@@ -262,13 +260,10 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" do
   p0 <- Test.generate Random.point2D
   p1 <- Test.generate Random.point2D
   p2 <- Test.generate Random.point2D
-  let curve = Curve2D.cubicBezier p0 p0 p1 p2
+  curve <- Curve.nondegenerate (Curve2D.cubicBezier p0 p0 p1 p2) & Result.orFail
   let decreasingTValues = [2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-  nondegenerateCurve <- Curve.nondegenerate curve & Result.orFail
-  let startTangent = Curve.Nondegenerate.tangentDirectionValue nondegenerateCurve 0.0
-  let otherTangents =
-        decreasingTValues
-          & List.map (Curve.Nondegenerate.tangentDirectionValue nondegenerateCurve)
+  let startTangent = Curve.Nondegenerate.tangentDirection curve 0.0
+  let otherTangents = List.map (Curve.Nondegenerate.tangentDirection curve) decreasingTValues
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom startTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -278,13 +273,10 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" do
   p0 <- Test.generate Random.point2D
   p1 <- Test.generate Random.point2D
   p2 <- Test.generate Random.point2D
-  let curve = Curve2D.cubicBezier p0 p1 p2 p2
+  curve <- Curve.nondegenerate (Curve2D.cubicBezier p0 p1 p2 p2) & Result.orFail
   let increasingTValues = [1.0 - 2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-  nondegenerateCurve <- Curve.nondegenerate curve & Result.orFail
-  let endTangent = Curve.Nondegenerate.tangentDirectionValue nondegenerateCurve 1.0
-  let otherTangents =
-        increasingTValues
-          & List.map (Curve.Nondegenerate.tangentDirectionValue nondegenerateCurve)
+  let endTangent = Curve.Nondegenerate.tangentDirection curve 1.0
+  let otherTangents = List.map (Curve.Nondegenerate.tangentDirection curve) increasingTValues
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom endTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -407,20 +399,17 @@ g2 = Test.check 100 "G2 continuity" do
   p2 <- Test.generate Random.point2D
   p3 <- Test.generate Random.point2D
   p4 <- Test.generate Random.point2D
-  let spline = Curve2D.cubicBezier p1 p2 p3 p4
+  spline <- Curve.nonzero (Curve2D.cubicBezier p1 p2 p3 p4) & Result.orFail
   t <- Test.generate Parameter.random
-  let point = Curve2D.point spline t
-  nonzeroSpline <- Curve.nonzero spline & Result.orFail
-  let nondegenerateSpline = Nondegenerate.fromNonzero nonzeroSpline
-  let tangentDirection = Curve.Nondegenerate.tangentDirectionValue nondegenerateSpline t
-  let curvatureVector :: Vector2D InverseMeters =
-        Units.specialize (Curve.Nonzero.curvatureVectorValue_ nonzeroSpline t)
+  let point = Curve2D.Nonzero.point spline t
+  let tangentDirection = Curve.Nonzero.tangentDirection spline t
+  let curvatureVector = Curve.Nonzero.curvatureVector spline t
   let signedRadius = 1.0 / (tangentDirection `cross` curvatureVector)
   let normalDirection = Direction2D.rotateLeft tangentDirection
   let arcCenter = point + signedRadius * normalDirection
   let arc = Curve2D.sweptArc arcCenter point (Quantity.sign signedRadius * Angle.degrees 30.0)
   nondegenerateArc <- Curve.nondegenerate arc & Result.orFail
-  let splinePoint = CurvePoint.on nondegenerateSpline t
+  let splinePoint = CurvePoint.on (Nondegenerate.fromNonzero spline) t
   let arcPoint = CurvePoint.on nondegenerateArc 0.0
   let continuity = CurvePoint.continuity splinePoint arcPoint
   Test.expect (continuity == Just (Continuity.Indistinguishable Positive))

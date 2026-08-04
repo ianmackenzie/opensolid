@@ -1,8 +1,11 @@
 {-# LANGUAGE UnboxedTuples #-}
 
 module OpenSolid.Curve.Nondegenerate
-  ( derivative
-  , tangentDirectionValue
+  ( point
+  , derivative
+  , derivativeValue
+  , secondDerivativeValue
+  , tangentDirection
   , findPoint
   , intersections
   )
@@ -25,8 +28,17 @@ import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
+import OpenSolid.Vector (Vector)
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
+
+{-# INLINE point #-}
+point ::
+  Curve.Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) ->
+  Number ->
+  Point dimension units space
+point (Nondegenerate curve) parameterValue = Curve.point curve parameterValue
 
 derivative ::
   Curve.Exists dimension units space =>
@@ -34,13 +46,31 @@ derivative ::
   Nondegenerate (VectorCurve dimension units space)
 derivative (Nondegenerate curve) = Nondegenerate (Curve.derivative curve)
 
-tangentDirectionValue ::
+{-# INLINE derivativeValue #-}
+derivativeValue ::
+  Curve.Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) ->
+  Number ->
+  Vector dimension units space
+derivativeValue (Nondegenerate curve) parameterValue =
+  Curve.derivativeValue curve parameterValue
+
+{-# INLINE secondDerivativeValue #-}
+secondDerivativeValue ::
+  Curve.Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) ->
+  Number ->
+  Vector dimension units space
+secondDerivativeValue (Nondegenerate curve) parameterValue =
+  Curve.secondDerivativeValue curve parameterValue
+
+tangentDirection ::
   (Curve.Exists dimension units space, Direction.Exists dimension space) =>
   Nondegenerate (Curve dimension units space) ->
   Number ->
   Direction dimension space
-tangentDirectionValue (Nondegenerate curve) tValue =
-  VectorCurve.Nondegenerate.directionValue (Nondegenerate (Curve.derivative curve)) tValue
+tangentDirection curve tValue =
+  VectorCurve.Nondegenerate.directionValue (derivative curve) tValue
 
 data Monotonic = Monotonic deriving (Eq)
 
@@ -49,23 +79,22 @@ findPoint ::
   Point dimension units space ->
   Nondegenerate (Curve dimension units space) ->
   List Number
-findPoint point nondegenerateCurve = do
-  let Nondegenerate curve = nondegenerateCurve
-  let endpointSolutions = [t | t <- [0.0, 1.0], Curve.point curve t ~= point]
+findPoint givenPoint givenCurve = do
+  let endpointSolutions = [t | t <- [0.0, 1.0], point givenCurve t ~= givenPoint]
   let endpointSolutionSet = Bag.pack Interval.constant endpointSolutions
-  let isDistant segment = not (point `intersects` Curve.Segment.range segment)
+  let isDistant segment = not (givenPoint `intersects` Curve.Segment.range segment)
   let resolvedMonotonicity _ segment
         | isDistant segment = Resolved Nothing
         | Curve.Segment.isMonotonic segment = Resolved (Just Monotonic)
         | Curve.Segment.isDegenerate segment = Resolved (Just Monotonic)
         | otherwise = Unresolved
   let evaluate tValue =
-        (# Curve.point curve tValue - point, Curve.derivativeValue curve tValue #)
+        (# point givenCurve tValue - givenPoint, derivativeValue givenCurve tValue #)
   let resolvedSolution Monotonic tRange segment
         | isDistant segment = Resolved Nothing
         | otherwise = Fuzzy.map Just (NewtonRaphson.Curve.solveIn tRange evaluate)
   let clusters =
-        Curve.bisectionTree nondegenerateCurve
+        Curve.bisectionTree givenCurve
           & Bisection.clusters endpointSolutionSet resolvedMonotonicity
   let interiorSolutions = List.filterMap (Bisection.find resolvedSolution) clusters
   List.sort (endpointSolutions <> interiorSolutions)

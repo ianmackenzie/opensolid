@@ -475,10 +475,10 @@ buildArcLengthParameterization ::
   Nondegenerate (Curve dimension units space) ->
   (Quantity units, Number -> Number)
 buildArcLengthParameterization curve = do
-  let dsdt t = Vector.magnitude (derivativeValue (Nondegenerate.unwrap curve) t)
-  let d2sdt2 t = do
-        let tangent = Curve.Nondegenerate.tangentDirectionValue curve t
-        secondDerivativeValue (Nondegenerate.unwrap curve) t `dot` tangent
+  let dsdt tValue = Vector.magnitude (Curve.Nondegenerate.derivativeValue curve tValue)
+  let d2sdt2 tValue =
+        Curve.Nondegenerate.secondDerivativeValue curve tValue
+          `dot` Curve.Nondegenerate.tangentDirection curve tValue
   ArcLength.parameterization dsdt d2sdt2
 
 constant ::

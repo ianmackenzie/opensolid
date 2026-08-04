@@ -127,6 +127,7 @@ library
     OpenSolid.Curve1D.Zero
     OpenSolid.Curve2D
     OpenSolid.Curve2D.MedialAxis
+    OpenSolid.Curve2D.Nonzero
     OpenSolid.Curve3D
     OpenSolid.Curve3D.IntersectionPointWithSurface
     OpenSolid.Curve3D.IntersectionsWithSurface

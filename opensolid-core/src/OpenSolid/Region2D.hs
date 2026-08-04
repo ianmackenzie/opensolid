@@ -45,10 +45,10 @@ import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as Curve.IntersectionPoint
-import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.Curve2D.Nonzero qualified as Curve2D.Nonzero
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
@@ -65,6 +65,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nonzero qualified as Nonzero
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D (Point2D))
@@ -236,17 +237,15 @@ addFillet radius point curves = do
     [] -> couldNotFindPointToFillet
     List.One _ -> couldNotFindPointToFillet
     List.ThreeOrMore -> couldNotFindPointToFillet
-    List.Two firstCurve secondCurve -> do
-      nondegenerateFirstCurve <- Curve.nondegenerate firstCurve & Result.orFail
-      nondegenerateSecondCurve <- Curve.nondegenerate secondCurve & Result.orFail
-      let firstEndDirection =
-            Curve.Nondegenerate.tangentDirectionValue nondegenerateFirstCurve 1.0
-      let secondStartDirection =
-            Curve.Nondegenerate.tangentDirectionValue nondegenerateSecondCurve 0.0
+    List.Two firstCandidate secondCandidate -> do
+      firstCurve <- Curve.nonzero firstCandidate & Result.orFail
+      secondCurve <- Curve.nonzero secondCandidate & Result.orFail
+      let firstEndDirection = Curve2D.Nonzero.tangentDirection firstCurve 1.0
+      let secondStartDirection = Curve2D.Nonzero.tangentDirection secondCurve 0.0
       let cornerAngle = Direction2D.angleFrom firstEndDirection secondStartDirection
       let offset = Quantity.sign cornerAngle * Quantity.abs radius
-      firstOffsetCurve <- Curve2D.offsetLeftwardBy offset firstCurve & Result.orFail
-      secondOffsetCurve <- Curve2D.offsetLeftwardBy offset secondCurve & Result.orFail
+      let firstOffsetCurve = Curve2D.Nonzero.offsetLeftwardBy offset firstCurve
+      let secondOffsetCurve = Curve2D.Nonzero.offsetLeftwardBy offset secondCurve
       maybeIntersections <- Curve2D.intersections firstOffsetCurve secondOffsetCurve & Result.orFail
       case maybeIntersections of
         Nothing -> couldNotSolveForFilletLocation
@@ -265,14 +264,14 @@ addFillet radius point curves = do
             else do
               let (t1, t2) = intersection1
               let centerPoint = Curve2D.point firstOffsetCurve t1
-              let startPoint = Curve2D.point firstCurve t1
+              let startPoint = Curve2D.Nonzero.point firstCurve t1
               let sweptAngle =
                     Direction2D.angleFrom
-                      (Curve.Nondegenerate.tangentDirectionValue nondegenerateFirstCurve t1)
-                      (Curve.Nondegenerate.tangentDirectionValue nondegenerateSecondCurve t2)
+                      (Curve2D.Nonzero.tangentDirection firstCurve t1)
+                      (Curve2D.Nonzero.tangentDirection secondCurve t2)
               let filletArc = Curve2D.sweptArc centerPoint startPoint sweptAngle
-              let trimmedFirstCurve = firstCurve . Curve1D.interpolateFrom 0.0 t1
-              let trimmedSecondCurve = secondCurve . Curve1D.interpolateFrom t2 1.0
+              let trimmedFirstCurve = Nonzero.unwrap firstCurve . Curve1D.interpolateFrom 0.0 t1
+              let trimmedSecondCurve = Nonzero.unwrap secondCurve . Curve1D.interpolateFrom t2 1.0
               Ok (filletArc : trimmedFirstCurve : trimmedSecondCurve : otherCurves)
 
 curveIncidence :: Tolerance units => Point2D units -> Curve2D units -> (Curve2D units, Maybe Number)

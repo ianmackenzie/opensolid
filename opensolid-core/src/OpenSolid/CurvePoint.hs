@@ -48,22 +48,17 @@ on ::
   Nondegenerate (Curve dimension units space) ->
   Number ->
   CurvePoint dimension units space
-on nondegenerateCurve givenParameterValue = do
-  let Nondegenerate curve = nondegenerateCurve
+on curve tValue =
   recursive \curvePoint ->
     CurvePoint
-      { parameterValue = givenParameterValue
-      , point = Curve.point curve givenParameterValue
-      , derivative = Curve.derivativeValue curve givenParameterValue
-      , tangentDirection =
-          Curve.Nondegenerate.tangentDirectionValue nondegenerateCurve givenParameterValue
+      { parameterValue = tValue
+      , point = Curve.Nondegenerate.point curve tValue
+      , derivative = Curve.Nondegenerate.derivativeValue curve tValue
+      , tangentDirection = Curve.Nondegenerate.tangentDirection curve tValue
       , curvatureVector_ =
           curvePoint
-            & Nondegenerate.field do
-              \_nondegeneratePoint ->
-                Curve.Nonzero.curvatureVectorValue_
-                  (Nondegenerate.interior nondegenerateCurve)
-                  givenParameterValue
+            & Nondegenerate.field \_ ->
+              Curve.Nonzero.curvatureVector_ (Nondegenerate.interior curve) tValue
       }
 
 parameterValue :: CurvePoint dimension units space -> Number

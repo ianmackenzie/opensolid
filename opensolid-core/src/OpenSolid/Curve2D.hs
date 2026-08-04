@@ -38,8 +38,6 @@ module OpenSolid.Curve2D
   , derivative
   , secondDerivative
   , tangentDirectionRange
-  , offsetLeftwardBy
-  , offsetRightwardBy
   , reverse
   , bounds
   , IntersectionPoint
@@ -461,24 +459,6 @@ secondDerivative = Curve.secondDerivative
 
 tangentDirectionRange :: Curve2D units -> Interval Unitless -> DirectionBounds2D
 tangentDirectionRange = Curve.tangentDirectionRange
-
-offsetLeftwardBy ::
-  Tolerance units =>
-  Quantity units ->
-  Curve2D units ->
-  Result Curve.HasDegeneracy (Curve2D units)
-offsetLeftwardBy offset curve = do
-  nonzeroCurve <- Curve.nonzero curve
-  let Nonzero tangentCurve = VectorCurve.Nonzero.normalize (Curve.Nonzero.derivative nonzeroCurve)
-  let offsetCurve = VectorCurve2D.rotateBy Angle.quarterTurn (offset * tangentCurve)
-  Ok (curve + offsetCurve)
-
-offsetRightwardBy ::
-  Tolerance units =>
-  Quantity units ->
-  Curve2D units ->
-  Result Curve.HasDegeneracy (Curve2D units)
-offsetRightwardBy distance = offsetLeftwardBy -distance
 
 distanceAlong :: Axis2D units -> Curve2D units -> Curve1D units
 distanceAlong (Axis2D p0 d) curve = (curve - p0) `dot` d
