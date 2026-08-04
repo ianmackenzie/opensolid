@@ -5,7 +5,6 @@ module OpenSolid.CompiledFunction
   , abstract
   , IsAbstract (IsAbstract)
   , expression
-  , desingularized
   , value
   , range
   , evaluators
@@ -17,10 +16,8 @@ module OpenSolid.CompiledFunction
   )
 where
 
-import OpenSolid.Desingularization qualified as Desingularization
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
-import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 
@@ -314,15 +311,6 @@ expression ::
   Result IsAbstract (Expression inputValue outputValue)
 expression (Concrete expr) = Ok expr
 expression Abstract{} = Error IsAbstract
-
-desingularized ::
-  Expression.Evaluation inputValue outputValue inputBounds outputBounds =>
-  CompiledFunction inputValue Number inputBounds (Interval Unitless) ->
-  CompiledFunction inputValue outputValue inputBounds outputBounds ->
-  CompiledFunction inputValue outputValue inputBounds outputBounds ->
-  CompiledFunction inputValue outputValue inputBounds outputBounds ->
-  CompiledFunction inputValue outputValue inputBounds outputBounds
-desingularized = map4 Expression.desingularized Desingularization.value Desingularization.range
 
 map ::
   Expression.Evaluation inputValue outputValue2 inputBounds outputBounds2 =>
