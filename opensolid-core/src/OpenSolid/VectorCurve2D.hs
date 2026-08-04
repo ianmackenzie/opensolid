@@ -27,8 +27,6 @@ module OpenSolid.VectorCurve2D
   , quadraticBezier
   , cubicBezier
   , bezier
-  , desingularize
-  , desingularized
   , squaredMagnitude
   , squaredMagnitude_
   , reverse
@@ -154,20 +152,6 @@ startValue = VectorCurve.startValue
 
 endValue :: VectorCurve2D units -> Vector2D units
 endValue = VectorCurve.endValue
-
-desingularize ::
-  Maybe (Vector2D units, Vector2D units) ->
-  VectorCurve2D units ->
-  Maybe (Vector2D units, Vector2D units) ->
-  VectorCurve2D units
-desingularize = VectorCurve.desingularize
-
-desingularized ::
-  VectorCurve2D units ->
-  VectorCurve2D units ->
-  VectorCurve2D units ->
-  VectorCurve2D units
-desingularized = VectorCurve.desingularized
 
 {-| Evaluate a curve at a given parameter value.
 

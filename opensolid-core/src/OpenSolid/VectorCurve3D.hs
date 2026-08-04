@@ -25,8 +25,6 @@ module OpenSolid.VectorCurve3D
   , quadraticBezier
   , cubicBezier
   , bezier
-  , desingularize
-  , desingularized
   , squaredMagnitude
   , squaredMagnitude_
   , reverse
@@ -150,20 +148,6 @@ startValue = VectorCurve.startValue
 
 endValue :: VectorCurve3D units space -> Vector3D units space
 endValue = VectorCurve.endValue
-
-desingularize ::
-  Maybe (Vector3D units space, Vector3D units space) ->
-  VectorCurve3D units space ->
-  Maybe (Vector3D units space, Vector3D units space) ->
-  VectorCurve3D units space
-desingularize = VectorCurve.desingularize
-
-desingularized ::
-  VectorCurve3D units space ->
-  VectorCurve3D units space ->
-  VectorCurve3D units space ->
-  VectorCurve3D units space
-desingularized = VectorCurve.desingularized
 
 value :: VectorCurve3D units space -> Number -> Vector3D units space
 value = VectorCurve.value

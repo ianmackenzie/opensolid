@@ -35,8 +35,6 @@ module OpenSolid.VectorCurve
   , reverse
   , transformBy
   , zeros
-  , desingularized
-  , desingularize
   , erase
   , unerase
   , coerce
@@ -56,8 +54,6 @@ import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
-import OpenSolid.Desingularization qualified as Desingularization
-import OpenSolid.Desingularization.Curve qualified as Desingularization.Curve
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction3D (Direction3D)
@@ -209,10 +205,6 @@ class
       (VectorCurve dimension units space)
       (Curve1D units)
   , NewtonRaphson.Curve.Solver dimension units space
-  , Desingularization.Curve
-      (VectorCurve dimension units space)
-      (Vector dimension units space)
-      (Vector dimension units space)
   ) =>
   Exists dimension units space
 
@@ -976,25 +968,6 @@ instance
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
-instance Desingularization.Curve (VectorCurve2D units) (Vector2D units) (Vector2D units) where
-  value = value
-  derivativeValue = derivativeValue
-  secondDerivativeValue = secondDerivativeValue
-  bezier = bezier
-  desingularized = desingularized
-
-instance
-  Desingularization.Curve
-    (VectorCurve3D units space)
-    (Vector3D units space)
-    (Vector3D units space)
-  where
-  value = value
-  derivativeValue = derivativeValue
-  secondDerivativeValue = secondDerivativeValue
-  bezier = bezier
-  desingularized = desingularized
-
 instance Exists 2 units Void
 
 instance Exists 3 units space
@@ -1214,31 +1187,6 @@ zeros vectorCurve =
   case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.zeros (squaredMagnitude_ vectorCurve)) of
     Ok zeros1D -> Ok (List.map (.location) zeros1D)
     Error Curve1D.IsZero -> Error IsDegenerate
-
-desingularize ::
-  Exists dimension units space =>
-  Maybe (Vector dimension units space, Vector dimension units space) ->
-  VectorCurve dimension units space ->
-  Maybe (Vector dimension units space, Vector dimension units space) ->
-  VectorCurve dimension units space
-desingularize = Desingularization.curve
-
-desingularized ::
-  Exists dimension units space =>
-  VectorCurve dimension units space ->
-  VectorCurve dimension units space ->
-  VectorCurve dimension units space ->
-  VectorCurve dimension units space
-desingularized start middle end = do
-  let compiledDesingularized =
-        CompiledFunction.desingularized
-          (Curve1D.compiled Curve1D.t)
-          (compiled start)
-          (compiled middle)
-          (compiled end)
-  let desingularizedDerivative =
-        desingularized (derivative start) (derivative middle) (derivative end)
-  new compiledDesingularized desingularizedDerivative
 
 squaredMagnitude_ ::
   Exists dimension units space =>
