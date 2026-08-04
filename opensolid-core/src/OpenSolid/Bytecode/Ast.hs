@@ -933,6 +933,12 @@ instance Multiplication (Ast2D input1) (Quantity units) (Ast2D input1) where
 instance Multiplication (Quantity units) (Ast2D input) (Ast2D input) where
   lhs * rhs = constant1D lhs * rhs
 
+instance Multiplication (Vector2D units) (Ast1D input) (Ast2D input) where
+  lhs * rhs = constant2D lhs * rhs
+
+instance Multiplication (Ast1D input) (Vector2D units) (Ast2D input) where
+  lhs * rhs = lhs * constant2D rhs
+
 instance input1 ~ input2 => Division (Ast2D input1) (Ast1D input2) (Ast2D input1) where
   Constant2D lhs / Constant1D rhs = Constant2D (lhs / rhs)
   Constant2D lhs / _ | lhs == Vector2D.zero = Constant2D Vector2D.zero
@@ -1033,6 +1039,12 @@ instance Multiplication (Ast3D input1) (Quantity units) (Ast3D input1) where
 
 instance Multiplication (Quantity units) (Ast3D input) (Ast3D input) where
   lhs * rhs = constant1D lhs * rhs
+
+instance Multiplication (Vector3D units space) (Ast1D input) (Ast3D input) where
+  lhs * rhs = constant3D lhs * rhs
+
+instance Multiplication (Ast1D input) (Vector3D units space) (Ast3D input) where
+  lhs * rhs = lhs * constant3D rhs
 
 instance input1 ~ input2 => Division (Ast3D input1) (Ast1D input2) (Ast3D input1) where
   Constant3D lhs / Constant1D rhs = Constant3D (lhs / rhs)
