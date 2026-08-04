@@ -1636,27 +1636,6 @@ evaluate(
 
 template <class F, class D>
 double
-solveMonotonic(double tol, F f, D d, double xMin, double xMax, bool pos1, double x1, double x2) {
-  double xMid = 0.5 * (x1 + x2);
-  if (xMid == x1 || xMid == x2) return xMid; // Found a root by bisection
-  double yMid = f(xMid);
-  if (yMid == 0.0) return xMid; // Got lucky, root was exactly at the subdomain midpoint
-  double x = newtonRaphson(tol, f, d, xMin, xMax, xMid, yMid, 0); // Attempt Newton-Raphson
-  if (std::isnan(x)) { // Newton-Raphson did not converge
-    if ((yMid > 0) == pos1) {
-      // yMid has the same sign as y1, so replace x1 with xMid
-      return solveMonotonic(tol, f, d, xMin, xMax, pos1, xMid, x2);
-    } else {
-      // yMid has the same sign as y2, so replace x2 with xMid
-      return solveMonotonic(tol, f, d, xMin, xMax, pos1, x1, xMid);
-    }
-  } else { // Newton-Raphson converged, so return the found root
-    return x;
-  }
-}
-
-template <class F, class D>
-double
 newtonRaphson(double tol, F f, D d, double xMin, double xMax, double x1, double y1, int n) {
   if (n > 10) return NAN; // Too many iterations
   double dy1 = d(x1);
@@ -1686,6 +1665,27 @@ newtonRaphson(double tol, F f, D d, double xMin, double xMax, double x1, double 
   } else {
     // We're still converging, so keep going
     return newtonRaphson(tol, f, d, xMin, xMax, x2, y2, n + 1);
+  }
+}
+
+template <class F, class D>
+double
+solveMonotonic(double tol, F f, D d, double xMin, double xMax, bool pos1, double x1, double x2) {
+  double xMid = 0.5 * (x1 + x2);
+  if (xMid == x1 || xMid == x2) return xMid; // Found a root by bisection
+  double yMid = f(xMid);
+  if (yMid == 0.0) return xMid; // Got lucky, root was exactly at the subdomain midpoint
+  double x = newtonRaphson(tol, f, d, xMin, xMax, xMid, yMid, 0); // Attempt Newton-Raphson
+  if (std::isnan(x)) { // Newton-Raphson did not converge
+    if ((yMid > 0) == pos1) {
+      // yMid has the same sign as y1, so replace x1 with xMid
+      return solveMonotonic(tol, f, d, xMin, xMax, pos1, xMid, x2);
+    } else {
+      // yMid has the same sign as y2, so replace x2 with xMid
+      return solveMonotonic(tol, f, d, xMin, xMax, pos1, x1, xMid);
+    }
+  } else { // Newton-Raphson converged, so return the found root
+    return x;
   }
 }
 
