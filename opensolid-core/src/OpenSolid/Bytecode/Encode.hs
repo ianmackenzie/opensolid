@@ -1,12 +1,10 @@
-module OpenSolid.Bytecode.Encode (word, int, number, list) where
+module OpenSolid.Bytecode.Encode (word, int, number) where
 
 import Control.Exception qualified
 import Data.ByteString.Builder qualified as Builder
 import Data.Word (Word16)
 import GHC.ByteOrder qualified
 import OpenSolid.Binary (Builder)
-import OpenSolid.Binary qualified as Binary
-import OpenSolid.List qualified as List
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
@@ -33,6 +31,3 @@ double = case GHC.ByteOrder.targetByteOrder of
 
 number :: Number -> Builder
 number (Number value) = double value
-
-list :: (a -> Builder) -> List a -> Builder
-list encodeItem items = int (List.length items) <> Binary.combine encodeItem items
