@@ -434,7 +434,7 @@ instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
   DifferenceConstantVariable2D lhs rhs . input = lhs - rhs . input
   Product2D lhs rhs . input = lhs . input * rhs . input
   ProductVariableConstant2D lhs rhs . input = lhs . input * rhs
-  ProductConstantVariable2D lhs rhs . input = Constant2D lhs * rhs . input
+  ProductConstantVariable2D lhs rhs . input = lhs * rhs . input
   Quotient2D lhs rhs . input = lhs . input / rhs . input
   QuotientConstantVariable2D lhs rhs . input = lhs / rhs . input
   BezierCurve2D controlPoints param . input = case param . input of
@@ -472,9 +472,9 @@ instance Composition (Variable3D Number) (Variable1D input) (Ast3D input) where
   DifferenceConstantVariable3D lhs rhs . input = lhs - rhs . input
   Product3D lhs rhs . input = lhs . input * rhs . input
   ProductVariableConstant3D lhs rhs . input = lhs . input * rhs
-  ProductConstantVariable3D lhs rhs . input = Constant3D lhs * rhs . input
+  ProductConstantVariable3D lhs rhs . input = lhs * rhs . input
   Quotient3D lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable3D lhs rhs . input = Constant3D lhs / rhs . input
+  QuotientConstantVariable3D lhs rhs . input = lhs / rhs . input
   BezierCurve3D controlPoints param . input = case param . input of
     Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (bezierCurve3D controlPoints) paramVal)
     Variable1D paramVar -> Variable3D (BezierCurve3D controlPoints paramVar)
@@ -617,7 +617,7 @@ instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
   DifferenceConstantVariable2D lhs rhs . input = lhs - rhs . input
   Product2D lhs rhs . input = lhs . input * rhs . input
   ProductVariableConstant2D lhs rhs . input = lhs . input * rhs
-  ProductConstantVariable2D lhs rhs . input = Constant2D lhs * rhs . input
+  ProductConstantVariable2D lhs rhs . input = lhs * rhs . input
   Quotient2D lhs rhs . input = lhs . input / rhs . input
   QuotientConstantVariable2D lhs rhs . input = lhs / rhs . input
   BezierCurve2D controlPoints param . input = case param . input of
@@ -655,7 +655,7 @@ instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
   DifferenceConstantVariable3D lhs rhs . input = lhs - rhs . input
   Product3D lhs rhs . input = lhs . input * rhs . input
   ProductVariableConstant3D lhs rhs . input = lhs . input * rhs
-  ProductConstantVariable3D lhs rhs . input = Constant3D lhs * rhs . input
+  ProductConstantVariable3D lhs rhs . input = lhs * rhs . input
   Quotient3D lhs rhs . input = lhs . input / rhs . input
   QuotientConstantVariable3D lhs rhs . input = lhs / rhs . input
   BezierCurve3D controlPoints param . input = case param . input of
@@ -800,10 +800,8 @@ instance input1 ~ input2 => Multiplication (Ast1D input1) (Ast1D input2) (Ast1D 
   Constant1D 1.0 * rhs = rhs
   lhs * Constant1D -1.0 = -lhs
   Constant1D -1.0 * rhs = -rhs
-  Variable1D (ProductVariableConstant1D a b) * Constant1D c =
-    Variable1D a * Constant1D (b * c)
-  Constant1D a * Variable1D (ProductVariableConstant1D b c) =
-    Constant1D (a * c) * Variable1D b
+  Variable1D (ProductVariableConstant1D a b) * Constant1D c = Variable1D a * (b * c)
+  Constant1D a * Variable1D (ProductVariableConstant1D b c) = (a * c) * Variable1D b
   Variable1D lhs * Constant1D rhs = Variable1D (ProductVariableConstant1D lhs rhs)
   Constant1D lhs * Variable1D rhs = Variable1D (ProductVariableConstant1D rhs lhs)
   Variable1D lhs * Variable1D rhs =
@@ -907,10 +905,8 @@ instance input1 ~ input2 => Multiplication (Ast2D input1) (Ast1D input2) (Ast2D 
   Constant2D lhs * _ | lhs == Vector2D.zero = Constant2D Vector2D.zero
   lhs * Constant1D 1.0 = lhs
   lhs * Constant1D -1.0 = -lhs
-  Variable2D (ProductVariableConstant2D a b) * Constant1D c =
-    Variable2D a * Constant1D (b * c)
-  Constant2D a * Variable1D (ProductVariableConstant1D b c) =
-    Constant2D (a * c) * Variable1D b
+  Variable2D (ProductVariableConstant2D a b) * Constant1D c = Variable2D a * (b * c)
+  Constant2D a * Variable1D (ProductVariableConstant1D b c) = (a * c) * Variable1D b
   Variable2D lhs * Constant1D rhs = Variable2D (ProductVariableConstant2D lhs rhs)
   Constant2D lhs * Variable1D rhs = Variable2D (ProductConstantVariable2D lhs rhs)
   Variable2D lhs * Variable1D rhs = Variable2D (Product2D lhs rhs)
@@ -1016,8 +1012,8 @@ instance input1 ~ input2 => Multiplication (Ast3D input1) (Ast1D input2) (Ast3D 
   Constant3D lhs * _ | lhs == Vector3D.zero = Constant3D Vector3D.zero
   lhs * Constant1D 1.0 = lhs
   lhs * Constant1D -1.0 = -lhs
-  Variable3D (ProductVariableConstant3D a b) * Constant1D c = Variable3D a * Constant1D (b * c)
-  Constant3D a * Variable1D (ProductVariableConstant1D b c) = Constant3D (a * c) * Variable1D b
+  Variable3D (ProductVariableConstant3D a b) * Constant1D c = Variable3D a * (b * c)
+  Constant3D a * Variable1D (ProductVariableConstant1D b c) = (a * c) * Variable1D b
   Variable3D lhs * Constant1D rhs = Variable3D (ProductVariableConstant3D lhs rhs)
   Constant3D lhs * Variable1D rhs = Variable3D (ProductConstantVariable3D lhs rhs)
   Variable3D lhs * Variable1D rhs = Variable3D (Product3D lhs rhs)
