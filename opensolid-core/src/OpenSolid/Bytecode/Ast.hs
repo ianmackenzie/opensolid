@@ -1136,7 +1136,7 @@ sin (Constant1D val) = Constant1D (Number.sin val)
 sin (Variable1D var) = Variable1D (Sin1D var)
 
 cos :: Ast1D input -> Ast1D input
-cos (Constant1D val) = constant1D (Number.cos val)
+cos (Constant1D val) = Constant1D (Number.cos val)
 cos (Variable1D var) = Variable1D (Cos1D var)
 
 squaredMagnitude2D :: Ast2D input -> Ast1D input
