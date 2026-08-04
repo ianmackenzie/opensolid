@@ -706,6 +706,7 @@ surfaceParameters = Variable2D SurfaceParameters
 
 xComponent :: Ast2D input -> Ast1D input
 xComponent (Constant2D val) = Constant1D (Vector2D.xComponent val)
+xComponent (Variable2D SurfaceParameters) = Variable1D (SurfaceParameter U)
 xComponent (Variable2D (XY xVar _)) = Variable1D xVar
 xComponent (Variable2D (XC xVar _)) = Variable1D xVar
 xComponent (Variable2D (CY xVal _)) = Constant1D xVal
@@ -715,6 +716,7 @@ xComponent (Variable2D var) = Variable1D (XComponent var)
 
 yComponent :: Ast2D input -> Ast1D input
 yComponent (Constant2D val) = Constant1D (Vector2D.yComponent val)
+yComponent (Variable2D SurfaceParameters) = Variable1D (SurfaceParameter V)
 yComponent (Variable2D (XY _ yVar)) = Variable1D yVar
 yComponent (Variable2D (XC _ yVal)) = Constant1D yVal
 yComponent (Variable2D (CY _ yVar)) = Variable1D yVar
