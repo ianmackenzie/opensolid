@@ -27,6 +27,9 @@ module OpenSolid.NonEmpty
   , eight
   , toList
   , fromList
+  , fromTuple2
+  , fromTuple3
+  , fromTuple4
   , push
   , extend
   , length
@@ -194,6 +197,15 @@ toList = Data.List.NonEmpty.toList
 
 fromList :: List a -> Maybe (NonEmpty a)
 fromList = Data.List.NonEmpty.nonEmpty
+
+fromTuple2 :: (a, a) -> NonEmpty a
+fromTuple2 (item1, item2) = two item1 item2
+
+fromTuple3 :: (a, a, a) -> NonEmpty a
+fromTuple3 (item1, item2, item3) = three item1 item2 item3
+
+fromTuple4 :: (a, a, a, a) -> NonEmpty a
+fromTuple4 (item1, item2, item3, item4) = four item1 item2 item3 item4
 
 {-# INLINE push #-}
 push :: a -> NonEmpty a -> NonEmpty a
