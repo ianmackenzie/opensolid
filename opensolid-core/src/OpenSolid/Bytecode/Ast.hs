@@ -438,8 +438,7 @@ instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
   Quotient2D lhs rhs . input = lhs . input / rhs . input
   QuotientConstantVariable2D lhs rhs . input = lhs / rhs . input
   BezierCurve2D controlPoints param . input = case param . input of
-    Constant1D paramVal ->
-      Constant2D (evaluateVectorCurve2D (bezierCurve2D controlPoints) paramVal)
+    Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (bezierCurve2D controlPoints) paramVal)
     Variable1D paramVar -> Variable2D (BezierCurve2D controlPoints paramVar)
   TransformVector2D transform vector . input =
     transformVector2D transform (vector . input)
@@ -452,8 +451,7 @@ instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
   Desingularized2D parameter left middle right . input =
     desingularized2D (parameter . input) (left . input) (middle . input) (right . input)
   Arc2D vx vy theta1 theta2 param . input = case param . input of
-    Constant1D paramVal ->
-      Constant2D (evaluateVectorCurve2D (arc2D vx vy theta1 theta2) paramVal)
+    Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (arc2D vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable2D (Arc2D vx vy theta1 theta2 paramVar)
   Involute2D n vx vy theta1 theta2 param . input = case param . input of
     Constant1D paramVal ->
@@ -478,8 +476,7 @@ instance Composition (Variable3D Number) (Variable1D input) (Ast3D input) where
   Quotient3D lhs rhs . input = lhs . input / rhs . input
   QuotientConstantVariable3D lhs rhs . input = Constant3D lhs / rhs . input
   BezierCurve3D controlPoints param . input = case param . input of
-    Constant1D paramVal ->
-      Constant3D (evaluateVectorCurve3D (bezierCurve3D controlPoints) paramVal)
+    Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (bezierCurve3D controlPoints) paramVal)
     Variable1D paramVar -> Variable3D (BezierCurve3D controlPoints paramVar)
   Cross3D lhs rhs . input = lhs . input `cross` rhs . input
   CrossVariableConstant3D lhs rhs . input = lhs . input `cross` rhs
@@ -494,8 +491,7 @@ instance Composition (Variable3D Number) (Variable1D input) (Ast3D input) where
   Desingularized3D parameter left middle right . input =
     desingularized3D (parameter . input) (left . input) (middle . input) (right . input)
   Arc3D vx vy theta1 theta2 param . input = case param . input of
-    Constant1D paramVal ->
-      Constant3D (evaluateVectorCurve3D (arc3D vx vy theta1 theta2) paramVal)
+    Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (arc3D vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable3D (Arc3D vx vy theta1 theta2 paramVar)
   Involute3D n vx vy theta1 theta2 param . input = case param . input of
     Constant1D paramVal ->
@@ -528,8 +524,7 @@ instance Composition (Variable1D UvPoint) (Variable2D input) (Ast1D input) where
   Sin1D arg . input = sin (arg . input)
   Cos1D arg . input = cos (arg . input)
   BezierCurve1D controlPoints param . input = case param . input of
-    Constant1D paramVal ->
-      Constant1D (evaluateCurve1D (bezierCurve1D controlPoints) paramVal)
+    Constant1D paramVal -> Constant1D (evaluateCurve1D (bezierCurve1D controlPoints) paramVal)
     Variable1D paramVar -> Variable1D (BezierCurve1D controlPoints paramVar)
   SquaredMagnitude2D arg . input = squaredMagnitude2D (arg . input)
   SquaredMagnitude3D arg . input = squaredMagnitude3D (arg . input)
@@ -626,8 +621,7 @@ instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
   Quotient2D lhs rhs . input = lhs . input / rhs . input
   QuotientConstantVariable2D lhs rhs . input = lhs / rhs . input
   BezierCurve2D controlPoints param . input = case param . input of
-    Constant1D paramVal ->
-      Constant2D (evaluateVectorCurve2D (bezierCurve2D controlPoints) paramVal)
+    Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (bezierCurve2D controlPoints) paramVal)
     Variable1D paramVar -> Variable2D (BezierCurve2D controlPoints paramVar)
   TransformVector2D transform vector . input =
     transformVector2D transform (vector . input)
@@ -640,8 +634,7 @@ instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
   Desingularized2D parameter left middle right . input =
     desingularized2D (parameter . input) (left . input) (middle . input) (right . input)
   Arc2D vx vy theta1 theta2 param . input = case param . input of
-    Constant1D paramVal ->
-      Constant2D (evaluateVectorCurve2D (arc2D vx vy theta1 theta2) paramVal)
+    Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (arc2D vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable2D (Arc2D vx vy theta1 theta2 paramVar)
   Involute2D n vx vy theta1 theta2 param . input = case param . input of
     Constant1D paramVal ->
@@ -666,8 +659,7 @@ instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
   Quotient3D lhs rhs . input = lhs . input / rhs . input
   QuotientConstantVariable3D lhs rhs . input = lhs / rhs . input
   BezierCurve3D controlPoints param . input = case param . input of
-    Constant1D paramVal ->
-      Constant3D (evaluateVectorCurve3D (bezierCurve3D controlPoints) paramVal)
+    Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (bezierCurve3D controlPoints) paramVal)
     Variable1D paramVar -> Variable3D (BezierCurve3D controlPoints paramVar)
   Cross3D lhs rhs . input = lhs . input `cross` rhs . input
   CrossVariableConstant3D lhs rhs . input = lhs . input `cross` rhs
@@ -678,8 +670,7 @@ instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
   Desingularized3D parameter left middle right . input =
     desingularized3D (parameter . input) (left . input) (middle . input) (right . input)
   Arc3D vx vy theta1 theta2 param . input = case param . input of
-    Constant1D paramVal ->
-      Constant3D (evaluateVectorCurve3D (arc3D vx vy theta1 theta2) paramVal)
+    Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (arc3D vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable3D (Arc3D vx vy theta1 theta2 paramVar)
   Involute3D n vx vy theta1 theta2 param . input = case param . input of
     Constant1D paramVal ->
