@@ -4,8 +4,6 @@ module OpenSolid.VectorSurfaceFunction2D
   ( VectorSurfaceFunction2D
   , Compiled
   , new
-  , desingularize
-  , desingularized
   , zero
   , constant
   , xy
@@ -37,7 +35,6 @@ import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import OpenSolid.SurfaceFunction1D.Blending qualified as SurfaceFunction1D.Blending
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
 import OpenSolid.Units (HasUnits)
 import OpenSolid.Units qualified as Units
@@ -397,32 +394,6 @@ new c derivativeFunction = do
   let dv = derivativeFunction V
   let dv' = VectorSurfaceFunction2D (compiled dv) (derivative V du) (derivative V dv)
   VectorSurfaceFunction2D c du dv'
-
-desingularize ::
-  VectorSurfaceFunction2D units ->
-  "singularityU0" ::: Maybe (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units) ->
-  "singularityU1" ::: Maybe (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units) ->
-  "singularityV0" ::: Maybe (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units) ->
-  "singularityV1" ::: Maybe (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units) ->
-  VectorSurfaceFunction2D units
-desingularize = SurfaceFunction1D.Blending.desingularize desingularized
-
-desingularized ::
-  SurfaceFunction1D Unitless ->
-  VectorSurfaceFunction2D units ->
-  VectorSurfaceFunction2D units ->
-  VectorSurfaceFunction2D units ->
-  VectorSurfaceFunction2D units
-desingularized t start middle end = do
-  let compiledDesingularized =
-        CompiledFunction.desingularized
-          (SurfaceFunction1D.compiled t)
-          start.compiled
-          middle.compiled
-          end.compiled
-  let desingularizedDerivative p =
-        desingularized t (derivative p start) (derivative p middle) (derivative p end)
-  new compiledDesingularized desingularizedDerivative
 
 zero :: VectorSurfaceFunction2D units
 zero = constant Vector2D.zero

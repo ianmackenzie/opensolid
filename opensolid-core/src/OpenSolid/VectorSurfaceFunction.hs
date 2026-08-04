@@ -6,14 +6,14 @@ module OpenSolid.VectorSurfaceFunction
 where
 
 import OpenSolid.Prelude
-import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
+import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
+import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
+import OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import OpenSolid.SurfaceParameter (SurfaceParameter)
-import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
-import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
-import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
-import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
+import OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
+import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
+import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
+import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
 type family
   VectorSurfaceFunction dimension units space =

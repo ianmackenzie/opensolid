@@ -295,7 +295,6 @@ library
     OpenSolid.Step.Encode
     OpenSolid.Step.Entities
     OpenSolid.Step.Types
-    OpenSolid.SurfaceFunction1D.Blending
     OpenSolid.SurfaceFunction1D.HorizontalCurve
     OpenSolid.SurfaceFunction1D.ImplicitCurveRange
     OpenSolid.SurfaceFunction1D.Internal

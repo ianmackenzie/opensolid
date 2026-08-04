@@ -10,8 +10,6 @@ module OpenSolid.VectorSurfaceFunction3D
   , degenerateV0
   , degenerateV1
   , nondegenerate
-  , desingularize
-  , desingularized
   , zero
   , constant
   , value
@@ -47,7 +45,6 @@ import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import OpenSolid.SurfaceFunction1D.Blending qualified as SurfaceFunction1D.Blending
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
@@ -507,36 +504,6 @@ nondegenerate ::
   VectorSurfaceFunction3D units space ->
   Result IsDegenerate (Nondegenerate (VectorSurfaceFunction3D units space))
 nondegenerate function = if isZero function then Error IsDegenerate else Ok (Nondegenerate function)
-
-desingularize ::
-  VectorSurfaceFunction3D units space ->
-  "singularityU0"
-    ::: Maybe (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
-  "singularityU1"
-    ::: Maybe (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
-  "singularityV0"
-    ::: Maybe (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
-  "singularityV1"
-    ::: Maybe (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space) ->
-  VectorSurfaceFunction3D units space
-desingularize = SurfaceFunction1D.Blending.desingularize desingularized
-
-desingularized ::
-  SurfaceFunction1D Unitless ->
-  VectorSurfaceFunction3D units space ->
-  VectorSurfaceFunction3D units space ->
-  VectorSurfaceFunction3D units space ->
-  VectorSurfaceFunction3D units space
-desingularized t start middle end = do
-  let compiledDesingularized =
-        CompiledFunction.desingularized
-          (SurfaceFunction1D.compiled t)
-          start.compiled
-          middle.compiled
-          end.compiled
-  let desingularizedDerivative p =
-        desingularized t (derivative p start) (derivative p middle) (derivative p end)
-  new compiledDesingularized desingularizedDerivative
 
 zero :: VectorSurfaceFunction3D units space
 zero = constant Vector3D.zero
