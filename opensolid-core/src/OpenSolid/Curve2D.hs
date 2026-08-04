@@ -27,8 +27,8 @@ module OpenSolid.Curve2D
   , derivativeRange
   , secondDerivativeValue
   , secondDerivativeRange
-  , desingularize
-  , desingularized
+  , desingularizeStart
+  , desingularizeEnd
   , point
   , startPoint
   , endPoint
@@ -405,15 +405,19 @@ secondDerivativeValue = Curve.secondDerivativeValue
 secondDerivativeRange :: Curve2D units -> Interval Unitless -> VectorBounds2D units
 secondDerivativeRange = Curve.secondDerivativeRange
 
-desingularize ::
-  Maybe (Point2D units, Vector2D units) ->
+desingularizeStart ::
+  Point2D units ->
+  Vector2D units ->
   Curve2D units ->
-  Maybe (Point2D units, Vector2D units) ->
-  Curve2D units
-desingularize = Curve.desingularize
+  (Curve2D units, Curve2D units)
+desingularizeStart = Curve.desingularizeStart
 
-desingularized :: Curve2D units -> Curve2D units -> Curve2D units -> Curve2D units
-desingularized = Curve.desingularized
+desingularizeEnd ::
+  Curve2D units ->
+  Point2D units ->
+  Vector2D units ->
+  (Curve2D units, Curve2D units)
+desingularizeEnd = Curve.desingularizeEnd
 
 {-| Get the point on a curve at a given parameter value.
 

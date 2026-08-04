@@ -40,8 +40,8 @@ module OpenSolid.Curve
   , nondegenerate
   , nonzero
   , distanceAlong
-  , desingularize
-  , desingularized
+  , desingularizeStart
+  , desingularizeEnd
   , findPoint
   , bisectionTree
   , crossingSolver
@@ -84,8 +84,6 @@ import {-# SOURCE #-} OpenSolid.Curve.TangentSolver2D qualified as Curve.Tangent
 import {-# SOURCE #-} OpenSolid.Curve.TangentSolver3D qualified as Curve.TangentSolver3D
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Desingularization qualified as Desingularization
-import OpenSolid.Desingularization.Curve qualified as Desingularization.Curve
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
@@ -437,10 +435,6 @@ class
       (Point dimension units space)
       (Curve dimension units space)
       (VectorCurve dimension units space)
-  , Desingularization.Curve
-      (Curve dimension units space)
-      (Point dimension units space)
-      (Vector dimension units space)
   , Intersects (Curve dimension units space) (Point dimension units space) (Tolerance units)
   , Intersects (Point dimension units space) (Curve dimension units space) (Tolerance units)
   , NewtonRaphson.Curve.Solver dimension units space
@@ -452,20 +446,6 @@ class
 
 crossingSolver :: Solver dimension units space
 crossingSolver = Curve.CrossingSolver.solver
-
-instance Desingularization.Curve (Curve2D units) (Point2D units) (Vector2D units) where
-  value = point
-  derivativeValue = derivativeValue
-  secondDerivativeValue = secondDerivativeValue
-  bezier = bezier
-  desingularized = desingularized
-
-instance Desingularization.Curve (Curve3D space) (Point3D space) (Vector3D Meters space) where
-  value = point
-  derivativeValue = derivativeValue
-  secondDerivativeValue = secondDerivativeValue
-  bezier = bezier
-  desingularized = desingularized
 
 instance Exists 2 units Void where
   tangentSolver = Curve.TangentSolver2D.solver
@@ -693,30 +673,44 @@ distanceAlong ::
   Curve1D units
 distanceAlong axis curve = (curve - Axis.originPoint axis) `dot` Axis.direction axis
 
-desingularize ::
-  Exists dimension units space =>
-  Maybe (Point dimension units space, Vector dimension units space) ->
-  Curve dimension units space ->
-  Maybe (Point dimension units space, Vector dimension units space) ->
-  Curve dimension units space
-desingularize = Desingularization.curve
+affixWidth :: Number
+affixWidth = 1 / 256
 
-desingularized ::
+desingularizeStart ::
+  Exists dimension units space =>
+  Point dimension units space ->
+  Vector dimension units space ->
+  Curve dimension units space ->
+  (Curve dimension units space, Curve dimension units space)
+desingularizeStart givenStartPoint givenStartDerivative curve = do
+  let tInner = affixWidth
+  let prefix =
+        hermite
+          givenStartPoint
+          [affixWidth * givenStartDerivative]
+          (point curve tInner)
+          [ affixWidth * derivativeValue curve tInner
+          , affixWidth * affixWidth * secondDerivativeValue curve tInner
+          ]
+  (prefix, curve . Curve1D.interpolateFrom tInner 1.0)
+
+desingularizeEnd ::
   Exists dimension units space =>
   Curve dimension units space ->
-  Curve dimension units space ->
-  Curve dimension units space ->
-  Curve dimension units space
-desingularized start middle end = do
-  let compiledDesingularized =
-        CompiledFunction.desingularized
-          (Curve1D.compiled Curve1D.t)
-          (compiled start)
-          (compiled middle)
-          (compiled end)
-  let desingularizedDerivative =
-        VectorCurve.desingularized start.derivative middle.derivative end.derivative
-  new compiledDesingularized desingularizedDerivative
+  Point dimension units space ->
+  Vector dimension units space ->
+  (Curve dimension units space, Curve dimension units space)
+desingularizeEnd curve givenEndPoint givenEndDerivative = do
+  let tInner = 1.0 - affixWidth
+  let suffix =
+        hermite
+          (point curve tInner)
+          [ affixWidth * derivativeValue curve tInner
+          , affixWidth * affixWidth * secondDerivativeValue curve tInner
+          ]
+          givenEndPoint
+          [affixWidth * givenEndDerivative]
+  (curve . Curve1D.interpolateFrom 0.0 tInner, suffix)
 
 findPoint ::
   (Exists dimension units space, Tolerance units) =>

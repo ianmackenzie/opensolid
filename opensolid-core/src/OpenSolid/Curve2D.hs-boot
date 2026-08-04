@@ -14,7 +14,8 @@ module OpenSolid.Curve2D
   , xy
   , lineFrom
   , hermite
-  , desingularize
+  , desingularizeStart
+  , desingularizeEnd
   , transformBy
   , piecewise
   )
@@ -48,10 +49,15 @@ hermite ::
   Point2D units ->
   List (Vector2D units) ->
   Curve2D units
-desingularize ::
-  Maybe (Point2D units, Vector2D units) ->
+desingularizeStart ::
+  Point2D units ->
+  Vector2D units ->
   Curve2D units ->
-  Maybe (Point2D units, Vector2D units) ->
-  Curve2D units
+  (Curve2D units, Curve2D units)
+desingularizeEnd ::
+  Curve2D units ->
+  Point2D units ->
+  Vector2D units ->
+  (Curve2D units, Curve2D units)
 transformBy :: Transform2D tag units -> Curve2D units -> Curve2D units
 piecewise :: Tolerance units => NonEmpty (Curve2D units) -> Curve2D units

@@ -6,7 +6,7 @@ module OpenSolid.SurfaceFunction1D.SaddleRegion
   , subdomain
   , bounds
   , quadratic
-  , connectingCurve
+  , connectingCurves
   )
 where
 
@@ -108,12 +108,12 @@ secondDerivative fuu fuv fvv direction = do
   let Direction2D du dv = direction
   du * du * fuu + 2.0 * du * dv * fuv + dv * dv * fvv
 
-connectingCurve ::
+connectingCurves ::
   Tolerance units =>
   JoiningCurve ->
   SaddleRegion units ->
-  Curve2D Unitless
-connectingCurve joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
+  NonEmpty (Curve2D Unitless)
+connectingCurves joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
   let Point2D x y = Point2D.relativeTo frame (joiningPoint joiningCurve)
   let saddlePoint = Frame2D.originPoint frame
   let dx = Frame2D.xDirection frame
@@ -136,7 +136,7 @@ connect ::
   Direction2D ->
   JoiningCurve ->
   List (Axis2D Unitless) ->
-  Curve2D Unitless
+  NonEmpty (Curve2D Unitless)
 connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
   let saddlePoint = Frame2D.originPoint frame
   let Subproblem{f, dvdu, dudv, uvRange} = subproblem
@@ -152,12 +152,12 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
           let dudt = uP - uC
           let endDerivative = Vector2D dudt (dudt * (dv / du))
           let implicitCurve = HorizontalCurve.bounded f dvdu uC uP implicitBounds frame boundingAxes
-          Curve2D.desingularize Nothing implicitCurve (Just (saddlePoint, endDerivative))
+          NonEmpty.fromTuple2 (Curve2D.desingularizeEnd implicitCurve saddlePoint endDerivative)
         Outgoing _ -> do
           let dudt = uC - uP
           let startDerivative = Vector2D dudt (dudt * (dv / du))
           let implicitCurve = HorizontalCurve.bounded f dvdu uP uC implicitBounds frame boundingAxes
-          Curve2D.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing
+          NonEmpty.fromTuple2 (Curve2D.desingularizeStart saddlePoint startDerivative implicitCurve)
     else do
       let implicitBounds = NonEmpty.one (Bounds2D uRange (Interval vP vC))
       case joiningCurve of
@@ -165,9 +165,9 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
           let dvdt = vP - vC
           let endDerivative = Vector2D (dvdt * (du / dv)) dvdt
           let implicitCurve = VerticalCurve.bounded f dudv vC vP implicitBounds frame boundingAxes
-          Curve2D.desingularize Nothing implicitCurve (Just (saddlePoint, endDerivative))
+          NonEmpty.fromTuple2 (Curve2D.desingularizeEnd implicitCurve saddlePoint endDerivative)
         Outgoing _ -> do
           let dvdt = vC - vP
           let startDerivative = Vector2D (dvdt * (du / dv)) dvdt
           let implicitCurve = VerticalCurve.bounded f dudv vP vC implicitBounds frame boundingAxes
-          Curve2D.desingularize (Just (saddlePoint, startDerivative)) implicitCurve Nothing
+          NonEmpty.fromTuple2 (Curve2D.desingularizeStart saddlePoint startDerivative implicitCurve)
