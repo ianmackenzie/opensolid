@@ -745,6 +745,7 @@ evaluate(
   const uint16_t* wordsPointer,
   const double* constantsPointer,
   T* variablesPointer,
+  int,
   T* returnValuesPointer
 ) {
   auto getInt = [&]() -> int {
@@ -1704,7 +1705,12 @@ struct Function {
 
 extern "C" {
   void
-  opensolid_curve_value(const char* functionPointer, double t, double* returnValuesPointer) {
+  opensolid_curve_value(
+    const char* functionPointer,
+    double t,
+    int dimension,
+    double* returnValuesPointer
+  ) {
     Function function(functionPointer);
     double* variablesPointer = (double*)alloca(sizeof(double) * function.numVariableComponents);
     variablesPointer[0] = t;
@@ -1712,6 +1718,7 @@ extern "C" {
       function.wordsPointer,
       function.constantsPointer,
       variablesPointer,
+      dimension,
       returnValuesPointer
     );
   }
@@ -1721,6 +1728,7 @@ extern "C" {
     const char* functionPointer,
     double tLower,
     double tUpper,
+    int dimension,
     double* returnValuesPointer
   ) {
     Function function(functionPointer);
@@ -1730,6 +1738,7 @@ extern "C" {
       function.wordsPointer,
       function.constantsPointer,
       variablesPointer,
+      dimension,
       (Bounds*)returnValuesPointer
     );
   }
@@ -1739,6 +1748,7 @@ extern "C" {
     const char* functionPointer,
     double u,
     double v,
+    int dimension,
     double* returnValuesPointer
   ) {
     Function function(functionPointer);
@@ -1749,6 +1759,7 @@ extern "C" {
       function.wordsPointer,
       function.constantsPointer,
       variablesPointer,
+      dimension,
       returnValuesPointer
     );
   }
@@ -1760,6 +1771,7 @@ extern "C" {
     double uUpper,
     double vLower,
     double vUpper,
+    int dimension,
     double* returnValuesPointer
   ) {
     Function function(functionPointer);
@@ -1770,6 +1782,7 @@ extern "C" {
       function.wordsPointer,
       function.constantsPointer,
       variablesPointer,
+      dimension,
       (Bounds*)returnValuesPointer
     );
   }
@@ -1793,7 +1806,13 @@ extern "C" {
       functionVariablesPointer[0] = u;
       functionVariablesPointer[1] = v;
       double result;
-      evaluate(function.wordsPointer, function.constantsPointer, functionVariablesPointer, &result);
+      evaluate(
+        function.wordsPointer,
+        function.constantsPointer,
+        functionVariablesPointer,
+        1,
+        &result
+      );
       return result;
     };
     auto d = [derivative, derivativeVariablesPointer, v](double u) {
@@ -1804,6 +1823,7 @@ extern "C" {
         derivative.wordsPointer,
         derivative.constantsPointer,
         derivativeVariablesPointer,
+        1,
         &result
       );
       return result;
@@ -1838,7 +1858,13 @@ extern "C" {
       functionVariablesPointer[0] = u;
       functionVariablesPointer[1] = v;
       double result;
-      evaluate(function.wordsPointer, function.constantsPointer, functionVariablesPointer, &result);
+      evaluate(
+        function.wordsPointer,
+        function.constantsPointer,
+        functionVariablesPointer,
+        1,
+        &result
+      );
       return result;
     };
     auto d = [derivative, derivativeVariablesPointer, u](double v) {
@@ -1849,6 +1875,7 @@ extern "C" {
         derivative.wordsPointer,
         derivative.constantsPointer,
         derivativeVariablesPointer,
+        1,
         &result
       );
       return result;

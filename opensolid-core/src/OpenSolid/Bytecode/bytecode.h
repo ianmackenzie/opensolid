@@ -122,13 +122,19 @@ extern "C" {
 #endif
 
   void
-  opensolid_curve_value(const char* functionPointer, double t, double* returnValuesPointer);
+  opensolid_curve_value(
+    const char* functionPointer,
+    double t,
+    int dimension,
+    double* returnValuesPointer
+  );
 
   void
   opensolid_curve_bounds(
     const char* functionPointer,
     double tLower,
     double tUpper,
+    int dimension,
     double* returnValuesPointer
   );
 
@@ -137,6 +143,7 @@ extern "C" {
     const char* functionPointer,
     double u,
     double v,
+    int dimension,
     double* returnValuesPointer
   );
 
@@ -147,6 +154,7 @@ extern "C" {
     double uUpper,
     double vLower,
     double vUpper,
+    int dimension,
     double* returnValuesPointer
   );
 
