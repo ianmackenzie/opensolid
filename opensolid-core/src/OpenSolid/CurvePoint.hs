@@ -78,7 +78,9 @@ derivative = (.derivative)
 tangentDirection :: CurvePoint dimension units space -> Direction dimension space
 tangentDirection = (.tangentDirection)
 
-curvatureVector_ :: Nondegenerate (CurvePoint dimension units space) -> Vector dimension (Unitless ?/? units) space
+curvatureVector_ ::
+  Nondegenerate (CurvePoint dimension units space) ->
+  Vector dimension (Unitless ?/? units) space
 curvatureVector_ = Nondegenerate.get (.curvatureVector_)
 
 isEndpoint :: CurvePoint dimension units space -> Bool
