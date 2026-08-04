@@ -1,8 +1,15 @@
-Move functions from e.g. Curve.Nondegenerate into Curve?
-- in particular Curve.Nondegenerate.tangentDirectionValue (and rename to just tangentDirection)
+Refactor curve intersection code to *only* work with nondegenerate curves
+- don't unwrap to Curve values, just use functions in Curve.Nondegenerate module
 
-Remove division by nondegenerate Curve1D/SurfaceFunction1D?
-- only leave division by non-zero curves/surfaces
+Move Curve.bisectionTree into Curve.Nondegenerate module
+
+Try to move most calls into Curve.Nondegeneate from Curve *into* Curve.Nondegenerate
+- e.g. move buildArcLengthParameterization into Curve.Nondegenerate,
+  so that 'derivativeValue', 'secondDerivativeValue' and 'tangentDirection' calls can be direct
+  (instead of going through a {-# SOURCE #-} import)
+
+Add Curve.Nonzero.compiled
+- then division instances can avoid wrapping/unwrapping Nonzero values (search for '\(Nonzero [a-z]' as a regex)
 
 Add Show.partialRecord function
 - use for records where some fields are left out and replaced with an ellipsis
@@ -26,14 +33,16 @@ Cache normal direction in PlaneOrientation3D?
 
 Switch transforms to be flat structs of unboxed Double# components
 
-Optimize curves to reuse arc lengths and uniform parameterizations where possible
-- can simply reuse as is for rigid transformations and coordinate conversions
-- can scale arc length (by absolute value of uniform scale) for uniform transformations, and reuse uniform parameterization
-
 Rework CDT code to encode arrays using Builder and then Data.ByteString.Unsafe.unsafeUseAsCStringLen
 
 Add support for 'Nondegenerate Surface3D'
 - then refactor Body3D to store a set of 'Nondegenerate Surface3D'
+
+Implement Surface3D.findPoint
+
+Implement Curve3D-Surface3D intersection
+
+Implement Surface3D-Surface3D intersection...
 
 Tweak meshing to require monotonicity?
 - resolved normal/tangent direction
@@ -47,22 +56,9 @@ Optimize bytecode compilation
   - one candidate: add specialized SurfaceFunction3D.planar, use in Surface3D.on constructor
   - generally dig through curve construction functions used in gear generation example and try to simplify/optimize?
 
-Implement 'perfect' Body3D stitching?
-- tweak Set indexing to be cyclic, so that it's possible to use index increment/decrement to get the next/previous edge in a loop?
-- build up *vertex* adjacency map of some sort
-
-Implement Surface3D.findPoint
-
-Implement Curve3D-Surface3D intersection
-
-Implement Surface3D-Surface3D intersection...
-
-Switch e.g. Curve.arcLengthParameterization to only return the 'Curve1D Unitless'
-- have separate 'Curve.arcLengthAndParameterization' to return the tuple
-- similarly 'Curve.arcLengthParameterizationFunction' and 'Curve.arcLengthAndParameterizationFunction'
-- what about 'Curve.parameterizeByArcLength'?
-
-Move piecewise curve construction into Curve module
+Optimize curves to reuse arc lengths and uniform parameterizations where possible
+- can simply reuse as is for rigid transformations and coordinate conversions
+- can scale arc length (by absolute value of uniform scale) for uniform transformations, and reuse uniform parameterization
 
 Add support for simple enums to target languages
 - no payloads, at least for now
