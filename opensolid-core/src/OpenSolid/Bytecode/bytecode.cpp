@@ -434,7 +434,7 @@ quarticBezier(const Vector2d<double>* p, Bounds t) {
   return Vector2d<Bounds>::hull5(a, b, c, d, e);
 }
 
-inline Vector3d<Bounds>
+Vector3d<Bounds>
 quarticBezier(const Vector3d<double>* p, Bounds t) {
   Vector3d<double> a = quarticBlossom(p, t.lower, t.lower, t.lower, t.lower);
   Vector3d<double> b = quarticBlossom(p, t.lower, t.lower, t.lower, t.upper);
