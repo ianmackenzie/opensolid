@@ -30,7 +30,6 @@ module OpenSolid.Expression
   , ProjectInto (projectInto)
   , BezierCurve
   , bezierCurve
-  , desingularized
   , Arc
   , arc
   , Involute
@@ -1535,73 +1534,6 @@ instance BezierCurve (Vector3D units space) where
 
 instance BezierCurve (Point3D space) where
   bezierCurve controlPoints = curve3D (Ast.bezierCurve3D (Data.Coerce.coerce controlPoints))
-
-desingularized ::
-  Expression input Number ->
-  Expression input output ->
-  Expression input output ->
-  Expression input output ->
-  Expression input output
-desingularized
-  (Curve1D parameter _)
-  (Curve1D left _)
-  (Curve1D middle _)
-  (Curve1D right _) =
-    curve1D (Ast.desingularized1D parameter left middle right)
-desingularized
-  (Surface1D parameter _)
-  (Surface1D left _)
-  (Surface1D middle _)
-  (Surface1D right _) =
-    surface1D (Ast.desingularized1D parameter left middle right)
-desingularized
-  (Curve1D parameter _)
-  (Curve2D left _)
-  (Curve2D middle _)
-  (Curve2D right _) =
-    curve2D (Ast.desingularized2D parameter left middle right)
-desingularized
-  (Surface1D parameter _)
-  (Surface2D left _)
-  (Surface2D middle _)
-  (Surface2D right _) =
-    surface2D (Ast.desingularized2D parameter left middle right)
-desingularized
-  (Curve1D parameter _)
-  (VectorCurve2D left _)
-  (VectorCurve2D middle _)
-  (VectorCurve2D right _) =
-    vectorCurve2D (Ast.desingularized2D parameter left middle right)
-desingularized
-  (Surface1D parameter _)
-  (VectorSurface2D left _)
-  (VectorSurface2D middle _)
-  (VectorSurface2D right _) =
-    vectorSurface2D (Ast.desingularized2D parameter left middle right)
-desingularized
-  (Curve1D parameter _)
-  (Curve3D left _)
-  (Curve3D middle _)
-  (Curve3D right _) =
-    curve3D (Ast.desingularized3D parameter left middle right)
-desingularized
-  (Surface1D parameter _)
-  (Surface3D left _)
-  (Surface3D middle _)
-  (Surface3D right _) =
-    surface3D (Ast.desingularized3D parameter left middle right)
-desingularized
-  (Curve1D parameter _)
-  (VectorCurve3D left _)
-  (VectorCurve3D middle _)
-  (VectorCurve3D right _) =
-    vectorCurve3D (Ast.desingularized3D parameter left middle right)
-desingularized
-  (Surface1D parameter _)
-  (VectorSurface3D left _)
-  (VectorSurface3D middle _)
-  (VectorSurface3D right _) =
-    vectorSurface3D (Ast.desingularized3D parameter left middle right)
 
 class Arc output where
   arc :: output -> output -> Angle -> Angle -> Expression Number output
