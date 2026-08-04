@@ -114,7 +114,6 @@ enum Opcode {
   Arc3d = 113,
   Involute2d = 114,
   Involute3d = 115,
-  OPCODE_END
 };
 
 #ifdef __cplusplus

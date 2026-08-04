@@ -745,7 +745,7 @@ evaluate(
   const uint16_t* wordsPointer,
   const double* constantsPointer,
   T* variablesPointer,
-  int,
+  int dimension,
   T* returnValuesPointer
 ) {
   auto getInt = [&]() -> int {
@@ -791,10 +791,8 @@ evaluate(
   };
   while (true) {
     int opcode = getInt();
-    assert(opcode < OPCODE_END && "Unrecognized opcode");
     switch (Opcode(opcode)) {
       case Return: {
-        int dimension = getInt();
         T* valuesPointer = getScalarPointer();
         std::memcpy(returnValuesPointer, valuesPointer, sizeof(T) * dimension);
         return;
@@ -1627,9 +1625,12 @@ evaluate(
         *output = involute(order, vx, vy, theta1, theta2, parameter);
         break;
       }
-      case OPCODE_END: {
-        assert(false && "Should never hit dummy OPCODE_END value");
-        break;
+      default: {
+        assert(false && "Unrecognized opcode");
+        for (int i = 0; i < dimension; ++i) {
+          returnValuesPointer[i] = invalid<T>();
+        }
+        return;
       }
     }
   }

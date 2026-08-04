@@ -592,6 +592,5 @@ encodeOpcodeAndArguments instruction = case instruction of
       <> encodeConstantIndex theta2
       <> encodeVariableIndex t
 
-return :: Int -> VariableIndex -> Builder
-return dimension variableIndex =
-  Encode.int 0 <> Encode.int dimension <> encodeVariableIndex variableIndex
+return :: VariableIndex -> Builder
+return variableIndex = Encode.int 0 <> encodeVariableIndex variableIndex

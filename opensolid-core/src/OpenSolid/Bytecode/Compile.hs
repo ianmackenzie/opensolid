@@ -167,8 +167,8 @@ init (InputComponents inputComponents) =
     , variableComponents = NumComponents inputComponents
     }
 
-compile :: InputComponents -> OutputComponents -> Step VariableIndex -> ByteString
-compile (InputComponents inputComponents) (OutputComponents outputComponents) (Step step) = do
+compile :: InputComponents -> Step VariableIndex -> ByteString
+compile (InputComponents inputComponents) (Step step) = do
   let (# finalState, finalOutput #) = step (init (InputComponents inputComponents))
   let NumComponents numConstantComponents = finalState.constantComponents
   let NumComponents numVariableComponents = finalState.variableComponents
@@ -180,26 +180,26 @@ compile (InputComponents inputComponents) (OutputComponents outputComponents) (S
       , Encode.int 0
       , finalState.constantsBuilder
       , finalState.variablesBuilder
-      , Instruction.return outputComponents finalOutput
+      , Instruction.return finalOutput
       ]
 
 curve1D :: Step VariableIndex -> ByteString
-curve1D = compile (InputComponents 1) (OutputComponents 1)
+curve1D = compile (InputComponents 1)
 
 curve2D :: Step VariableIndex -> ByteString
-curve2D = compile (InputComponents 1) (OutputComponents 2)
+curve2D = compile (InputComponents 1)
 
 curve3D :: Step VariableIndex -> ByteString
-curve3D = compile (InputComponents 1) (OutputComponents 3)
+curve3D = compile (InputComponents 1)
 
 surface1D :: Step VariableIndex -> ByteString
-surface1D = compile (InputComponents 2) (OutputComponents 1)
+surface1D = compile (InputComponents 2)
 
 surface2D :: Step VariableIndex -> ByteString
-surface2D = compile (InputComponents 2) (OutputComponents 2)
+surface2D = compile (InputComponents 2)
 
 surface3D :: Step VariableIndex -> ByteString
-surface3D = compile (InputComponents 2) (OutputComponents 3)
+surface3D = compile (InputComponents 2)
 
 debug :: InputComponents -> Step VariableIndex -> Text
 debug (InputComponents inputComponents) step = do
