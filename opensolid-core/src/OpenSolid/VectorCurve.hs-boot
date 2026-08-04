@@ -169,20 +169,6 @@ instance
   Division (VectorCurve3D units1 space) (Nonzero (Curve1D units2)) (VectorCurve3D units3 space)
 
 instance
-  Units.Quotient units1 units2 units3 =>
-  Division
-    (VectorCurve2D units1)
-    (Nondegenerate (Curve1D units2))
-    (VectorCurve2D units3)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division
-    (VectorCurve3D units1 space)
-    (Nondegenerate (Curve1D units2))
-    (VectorCurve3D units3 space)
-
-instance
   DotMultiplication_
     (VectorCurve2D units1)
     (VectorCurve2D units2)

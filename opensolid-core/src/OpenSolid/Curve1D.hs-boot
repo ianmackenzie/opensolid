@@ -91,10 +91,6 @@ instance
   Units.Quotient units1 units2 units3 =>
   Division (Curve1D units1) (Nonzero (Curve1D units2)) (Curve1D units3)
 
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (Curve1D units1) (Nondegenerate (Curve1D units2)) (Curve1D units3)
-
 new :: Compiled units -> Curve1D units -> Curve1D units
 constant :: Quantity units -> Curve1D units
 zero :: Curve1D units

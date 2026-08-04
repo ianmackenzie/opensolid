@@ -6,12 +6,12 @@ import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Result qualified as Result
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2D (Vector2D (Vector2D))
@@ -19,7 +19,7 @@ import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 main :: IO ()
 main = Tolerance.using Length.defaultTolerance do
-  let weightCurve = Curve1D.quadraticSpline 1.0 (1.0 / Number.sqrt 2.0) 1.0
+  let weightCurve = Nonzero (Curve1D.quadraticSpline 1.0 (1.0 / Number.sqrt 2.0) 1.0)
   let vE = Vector2D 1.0 0.0
   let vNE = Vector2D 1.0 1.0 / Number.sqrt 2.0
   let vN = Vector2D 0.0 1.0
@@ -30,10 +30,7 @@ main = Tolerance.using Length.defaultTolerance do
   let vSE = Vector2D 1.0 -1.0 / Number.sqrt 2.0
   let radius = Length.centimeters 10.0
   let arc v1 v2 v3 = do
-        radialUnitVector <-
-          Tolerance.using Tolerance.unitless do
-            VectorCurve2D.quotient (VectorCurve2D.quadraticBezier v1 v2 v3) weightCurve
-              & Result.orFail
+        let radialUnitVector = VectorCurve2D.quadraticBezier v1 v2 v3 / weightCurve
         IO.succeed (Point2D.origin + radius * radialUnitVector)
   arc1 <- arc vE vNE vN
   arc2 <- arc vN vNW vW

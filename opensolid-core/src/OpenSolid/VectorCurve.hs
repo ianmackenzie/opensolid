@@ -180,14 +180,6 @@ class
       (VectorCurve dimension units space)
       (Nonzero (Curve1D units))
       (VectorCurve dimension Unitless space)
-  , Division
-      (VectorCurve dimension units space)
-      (Nondegenerate (Curve1D Unitless))
-      (VectorCurve dimension units space)
-  , Division
-      (VectorCurve dimension units space)
-      (Nondegenerate (Curve1D units))
-      (VectorCurve dimension Unitless space)
   , DotMultiplication
       (VectorCurve dimension Unitless space)
       (VectorCurve dimension units space)
@@ -980,40 +972,6 @@ instance
   Division
     (VectorCurve3D units1 space)
     (Nonzero (Curve1D units2))
-    (VectorCurve3D units3 space)
-  where
-  lhs / rhs = Units.specialize (lhs ?/? rhs)
-
-instance
-  Division_
-    (VectorCurve2D units1)
-    (Nondegenerate (Curve1D units2))
-    (VectorCurve2D (units1 ?/? units2))
-  where
-  (?/?) = Desingularization.curveQuotient_
-
-instance
-  Division_
-    (VectorCurve3D units1 space)
-    (Nondegenerate (Curve1D units2))
-    (VectorCurve3D (units1 ?/? units2) space)
-  where
-  (?/?) = Desingularization.curveQuotient_
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division
-    (VectorCurve2D units1)
-    (Nondegenerate (Curve1D units2))
-    (VectorCurve2D units3)
-  where
-  lhs / rhs = Units.specialize (lhs ?/? rhs)
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division
-    (VectorCurve3D units1 space)
-    (Nondegenerate (Curve1D units2))
     (VectorCurve3D units3 space)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)

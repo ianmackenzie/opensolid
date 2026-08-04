@@ -296,12 +296,10 @@ library
     OpenSolid.Step.Entities
     OpenSolid.Step.Types
     OpenSolid.SurfaceFunction1D.Blending
-    OpenSolid.SurfaceFunction1D.Desingularization
     OpenSolid.SurfaceFunction1D.HorizontalCurve
     OpenSolid.SurfaceFunction1D.ImplicitCurveRange
     OpenSolid.SurfaceFunction1D.Internal
     OpenSolid.SurfaceFunction1D.PartialZeros
-    OpenSolid.SurfaceFunction1D.Quotient
     OpenSolid.SurfaceFunction1D.SaddleRegion
     OpenSolid.SurfaceFunction1D.Subproblem
     OpenSolid.SurfaceFunction1D.VerticalCurve

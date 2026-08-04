@@ -29,8 +29,6 @@ module OpenSolid.Curve1D
   , rationalBezier
   , rationalQuadraticSpline
   , rationalCubicSpline
-  , quotient
-  , quotient_
   , squared
   , squared_
   , cubed
@@ -86,7 +84,6 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Result qualified as Result
 import OpenSolid.Solve1D qualified as Solve1D
 import OpenSolid.Stream (Stream)
 import OpenSolid.Stream qualified as Stream
@@ -355,10 +352,15 @@ rationalBezier ::
   NonEmpty (Quantity units, Number) ->
   Result DivisionByZero (Curve1D units)
 rationalBezier pointsAndWeights = do
-  let scaledPoint (point, weight) = point * weight
-  let numerator = bezier (NonEmpty.map scaledPoint pointsAndWeights)
-  let denominator = bezier (NonEmpty.map Pair.second pointsAndWeights)
-  Tolerance.using Tolerance.unitless (quotient numerator denominator)
+  let weights = NonEmpty.map Pair.second pointsAndWeights
+  if NonEmpty.all (>= Tolerance.unitless) weights
+    then do
+      let scaledPoint (point, weight) = point * weight
+      let scaledPoints = NonEmpty.map scaledPoint pointsAndWeights
+      let numerator = bezier scaledPoints
+      let denominator = Nonzero (bezier weights)
+      Ok (numerator / denominator)
+    else Error DivisionByZero
 
 rationalQuadraticSpline ::
   (Quantity units, Number) ->
@@ -422,23 +424,6 @@ desingularized start middle end =
     (CompiledFunction.desingularized (compiled t) (compiled start) (compiled middle) (compiled end))
     (desingularized (derivative start) (derivative middle) (derivative end))
 
-quotient ::
-  (Units.Quotient units1 units2 units3, Tolerance units2) =>
-  Curve1D units1 ->
-  Curve1D units2 ->
-  Result DivisionByZero (Curve1D units3)
-quotient lhs rhs = Result.map Units.specialize (quotient_ lhs rhs)
-
-quotient_ ::
-  Tolerance units2 =>
-  Curve1D units1 ->
-  Curve1D units2 ->
-  Result DivisionByZero (Curve1D (units1 ?/? units2))
-quotient_ lhs rhs =
-  if rhs ~= zero
-    then Error DivisionByZero
-    else Ok (lhs ?/? Nondegenerate rhs)
-
 instance Division_ (Curve1D units1) (Nonzero (Curve1D units2)) (Curve1D (units1 ?/? units2)) where
   lhs ?/? Nonzero rhs = do
     let quotientCompiled = compiled lhs ?/? compiled rhs
@@ -462,20 +447,6 @@ instance HasUnits (Nonzero (Curve1D units)) units
 
 instance Units.Coercion (Nonzero (Curve1D units1)) (Nonzero (Curve1D units2)) where
   coerce (Nonzero curve) = Nonzero (Units.coerce curve)
-
-instance
-  Division_
-    (Curve1D units1)
-    (Nondegenerate (Curve1D units2))
-    (Curve1D (units1 ?/? units2))
-  where
-  (?/?) = Desingularization.curveQuotient_
-
-instance
-  Units.Quotient units1 units2 units3 =>
-  Division (Curve1D units1) (Nondegenerate (Curve1D units2)) (Curve1D units3)
-  where
-  lhs / rhs = Units.specialize (lhs ?/? rhs)
 
 instance
   Units.Quotient units1 units2 units3 =>

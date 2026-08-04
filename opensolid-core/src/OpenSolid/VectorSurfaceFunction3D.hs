@@ -23,10 +23,6 @@ module OpenSolid.VectorSurfaceFunction3D
   , placeIn
   , relativeTo
   , transformBy
-  , quotient
-  , quotient_
-  , unsafeQuotient
-  , unsafeQuotient_
   , squaredMagnitude
   , squaredMagnitude_
   , directionRange
@@ -38,7 +34,6 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
-import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
@@ -50,11 +45,9 @@ import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
-import OpenSolid.Result qualified as Result
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction1D.Blending qualified as SurfaceFunction1D.Blending
-import OpenSolid.SurfaceFunction1D.Quotient qualified as SurfaceFunction1D.Quotient
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceParameter (SurfaceParameter (U, V))
@@ -616,53 +609,6 @@ transformBy transform function = do
           (VectorBounds3D.transformBy transform)
           function.compiled
   new compiledTransformed (\p -> transformBy transform (derivative p function))
-
-quotient ::
-  (Units.Quotient units1 units2 units3, Tolerance units2) =>
-  VectorSurfaceFunction3D units1 space ->
-  SurfaceFunction1D units2 ->
-  Result DivisionByZero (VectorSurfaceFunction3D units3 space)
-quotient lhs rhs = Result.map Units.specialize (quotient_ lhs rhs)
-
-quotient_ ::
-  Tolerance units2 =>
-  VectorSurfaceFunction3D units1 space ->
-  SurfaceFunction1D units2 ->
-  Result DivisionByZero (VectorSurfaceFunction3D (units1 ?/? units2) space)
-quotient_ numerator denominator = do
-  let lhopital p = do
-        let numerator' = derivative p numerator
-        let numerator'' = derivative p numerator'
-        let denominator' = SurfaceFunction1D.derivative p denominator
-        let denominator'' = SurfaceFunction1D.derivative p denominator'
-        let lhopitalSurface = unsafeQuotient_ numerator' denominator'
-        let lhopitalDerivative =
-              Units.simplify $
-                unsafeQuotient_
-                  (numerator'' ?*? denominator' - numerator' ?*? denominator'')
-                  (2.0 * SurfaceFunction1D.squared_ denominator')
-        (lhopitalSurface, lhopitalDerivative)
-  SurfaceFunction1D.Quotient.impl unsafeQuotient_ lhopital desingularize numerator denominator
-
-unsafeQuotient ::
-  Units.Quotient units1 units2 units3 =>
-  VectorSurfaceFunction3D units1 space ->
-  SurfaceFunction1D units2 ->
-  VectorSurfaceFunction3D units3 space
-unsafeQuotient lhs rhs = Units.specialize (unsafeQuotient_ lhs rhs)
-
-unsafeQuotient_ ::
-  VectorSurfaceFunction3D units1 space ->
-  SurfaceFunction1D units2 ->
-  VectorSurfaceFunction3D (units1 ?/? units2) space
-unsafeQuotient_ lhs rhs = do
-  let compiledQuotient =
-        CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled (SurfaceFunction1D.compiled rhs)
-  recursive \self -> do
-    let quotientDerivative p =
-          unsafeQuotient_ (derivative p lhs) rhs
-            - self * SurfaceFunction1D.unsafeQuotient (SurfaceFunction1D.derivative p rhs) rhs
-    new compiledQuotient quotientDerivative
 
 squaredMagnitude_ :: VectorSurfaceFunction3D units space -> SurfaceFunction1D (units ?*? units)
 squaredMagnitude_ function = do

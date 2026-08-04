@@ -615,11 +615,8 @@ medialAxis curve1 curve2 = do
       assert (List.isEmpty zeros.crossingLoops && List.isEmpty zeros.tangentPoints) do
         let Nonzero tangentVector1 = VectorCurve.Nonzero.normalize (Curve.Nonzero.derivative nonzero1)
         let normal1 = VectorCurve2D.rotateBy Angle.quarterTurn tangentVector1
-        let radius :: SurfaceFunction1D units =
-              Units.coerce $
-                SurfaceFunction1D.unsafeQuotient_
-                  (d `dot_` d)
-                  (2.0 * (tangentVector1 . SurfaceFunction1D.u) `cross` d)
+        let radius :: SurfaceFunction1D units = Units.coerce do
+              (d `dot_` d) ?/? Nonzero (2.0 * (tangentVector1 . SurfaceFunction1D.u) `cross` d)
         let curve :: SurfaceFunction2D units =
               (curve1 . SurfaceFunction1D.u) + radius * (normal1 . SurfaceFunction1D.u)
         let toSegment solutionCurve =

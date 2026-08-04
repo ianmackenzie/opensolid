@@ -27,8 +27,6 @@ module OpenSolid.VectorCurve3D
   , bezier
   , desingularize
   , desingularized
-  , quotient
-  , quotient_
   , squaredMagnitude
   , squaredMagnitude_
   , reverse
@@ -42,7 +40,6 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve1D (Curve1D)
-import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
@@ -51,7 +48,6 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
-import OpenSolid.Result qualified as Result
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D (Vector3D)
@@ -196,20 +192,6 @@ secondDerivativeRange = VectorCurve.secondDerivativeRange
 
 reverse :: VectorCurve3D units space -> VectorCurve3D units space
 reverse = VectorCurve.reverse
-
-quotient ::
-  (Units.Quotient units1 units2 units3, Tolerance units2) =>
-  VectorCurve3D units1 space ->
-  Curve1D units2 ->
-  Result DivisionByZero (VectorCurve3D units3 space)
-quotient lhs rhs = Result.map Units.specialize (quotient_ lhs rhs)
-
-quotient_ ::
-  Tolerance units2 =>
-  VectorCurve3D units1 space ->
-  Curve1D units2 ->
-  Result DivisionByZero (VectorCurve3D (units1 ?/? units2) space)
-quotient_ = VectorCurve.quotient_
 
 squaredMagnitude :: Units.Squared units1 units2 => VectorCurve3D units1 space -> Curve1D units2
 squaredMagnitude = VectorCurve.squaredMagnitude

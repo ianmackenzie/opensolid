@@ -15,10 +15,6 @@ module OpenSolid.SurfaceFunction1D
   , IsZero (IsZero)
   , zeros
   , new
-  , quotient
-  , quotient_
-  , unsafeQuotient
-  , unsafeQuotient_
   , squared
   , squared_
   , cubed
@@ -37,7 +33,6 @@ import OpenSolid.Curve1D qualified as Curve1D
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D (Direction2D))
 import OpenSolid.Direction3D (Direction3D)
-import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.Domain2D (Domain2D (Domain2D))
 import OpenSolid.Domain2D qualified as Domain2D
@@ -54,14 +49,11 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Result qualified as Result
 import OpenSolid.Solve2D qualified as Solve2D
-import OpenSolid.SurfaceFunction1D.Blending qualified as SurfaceFunction1D.Blending
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.HorizontalCurve qualified as HorizontalCurve
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.Nonzero qualified as SurfaceFunction1D.Nonzero
 import OpenSolid.SurfaceFunction1D.PartialZeros (PartialZeros)
 import OpenSolid.SurfaceFunction1D.PartialZeros qualified as PartialZeros
-import OpenSolid.SurfaceFunction1D.Quotient qualified as SurfaceFunction1D.Quotient
 import OpenSolid.SurfaceFunction1D.SaddleRegion (SaddleRegion)
 import OpenSolid.SurfaceFunction1D.SaddleRegion qualified as SaddleRegion
 import OpenSolid.SurfaceFunction1D.Subproblem (CornerValues (..), Subproblem (..))
@@ -388,53 +380,6 @@ new c derivativeFunction = do
   let dv' = SurfaceFunction1D (compiled dv) (derivative V du) (derivative V dv)
   SurfaceFunction1D c du dv'
 
-desingularize ::
-  SurfaceFunction1D units ->
-  "singularityU0" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
-  "singularityU1" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
-  "singularityV0" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
-  "singularityV1" ::: Maybe (SurfaceFunction1D units, SurfaceFunction1D units) ->
-  SurfaceFunction1D units
-desingularize = SurfaceFunction1D.Blending.desingularize desingularized
-
-desingularized ::
-  SurfaceFunction1D Unitless ->
-  SurfaceFunction1D units ->
-  SurfaceFunction1D units ->
-  SurfaceFunction1D units ->
-  SurfaceFunction1D units
-desingularized t start middle end =
-  new
-    (CompiledFunction.desingularized t.compiled start.compiled middle.compiled end.compiled)
-    (\p -> desingularized t (derivative p start) (derivative p middle) (derivative p end))
-
-quotient ::
-  (Units.Quotient units1 units2 units3, Tolerance units2) =>
-  SurfaceFunction1D units1 ->
-  SurfaceFunction1D units2 ->
-  Result DivisionByZero (SurfaceFunction1D units3)
-quotient lhs rhs = Result.map Units.specialize (quotient_ lhs rhs)
-
-quotient_ ::
-  Tolerance units2 =>
-  SurfaceFunction1D units1 ->
-  SurfaceFunction1D units2 ->
-  Result DivisionByZero (SurfaceFunction1D (units1 ?/? units2))
-quotient_ numerator denominator = do
-  let lhopital p = do
-        let numerator' = derivative p numerator
-        let numerator'' = derivative p numerator'
-        let denominator' = derivative p denominator
-        let denominator'' = derivative p denominator'
-        let lhopitalSurface = unsafeQuotient_ numerator' denominator'
-        let lhopitalDerivative =
-              Units.simplify $
-                unsafeQuotient_
-                  (numerator'' ?*? denominator' - numerator' ?*? denominator'')
-                  (2.0 * squared_ denominator')
-        (lhopitalSurface, lhopitalDerivative)
-  SurfaceFunction1D.Quotient.impl unsafeQuotient_ lhopital desingularize numerator denominator
-
 instance HasUnits (Nonzero (SurfaceFunction1D units)) units
 
 instance
@@ -475,24 +420,6 @@ instance
   where
   coerce (Nondegenerate function) = Nondegenerate (Units.coerce function)
 
-unsafeQuotient ::
-  Units.Quotient units1 units2 units3 =>
-  SurfaceFunction1D units1 ->
-  SurfaceFunction1D units2 ->
-  SurfaceFunction1D units3
-unsafeQuotient numerator denominator = Units.specialize (unsafeQuotient_ numerator denominator)
-
-unsafeQuotient_ ::
-  SurfaceFunction1D units1 ->
-  SurfaceFunction1D units2 ->
-  SurfaceFunction1D (units1 ?/? units2)
-unsafeQuotient_ lhs rhs = do
-  let compiledQuotient = CompiledFunction.map2 (?/?) (?/?) (?/?) lhs.compiled rhs.compiled
-  recursive \self -> do
-    let quotientDerivative p =
-          unsafeQuotient_ (derivative p lhs) rhs - self * unsafeQuotient (derivative p rhs) rhs
-    new compiledQuotient quotientDerivative
-
 squared :: Units.Squared units1 units2 => SurfaceFunction1D units1 -> SurfaceFunction1D units2
 squared function = Units.specialize (squared_ function)
 
@@ -528,11 +455,11 @@ zeros function
   | otherwise = do
       let fu = derivative U function
       let fv = derivative V function
-      -- Using unsafeQuotient should be OK here
+      -- Using Nonzero should be OK here
       -- since we only actually use dudv and dvdu
       -- in subdomains where we know the denominator is non-zero
-      let dudv = unsafeQuotient -fv fu
-      let dvdu = unsafeQuotient -fu fv
+      let dudv = -fv / Nonzero fu
+      let dvdu = -fu / Nonzero fv
       case Solve2D.search (findZeros function dudv dvdu) AllZeroTypes of
         Ok solutions -> do
           let partialZeros = PartialZeros.empty & forEach solutions addSolution

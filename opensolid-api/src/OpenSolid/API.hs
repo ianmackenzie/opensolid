@@ -194,8 +194,6 @@ length =
     , Class.divBySelf
     , Class.divBy @UnitlessInterval Self
     , Class.divBy @Interval Self
-    , Class.divByU (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
-    , Class.divByM (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.floorDivBySelf
     , Class.modBySelf
     ]
@@ -237,9 +235,6 @@ area =
     , Class.divBy @UnitlessInterval Self
     , Class.divBy @Interval Self
     , Class.divBy @AreaInterval Self
-    , Class.divByU (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
-    , Class.divByM (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
-    , Class.divByS (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.floorDivBySelf
     , Class.modBySelf
     ]
@@ -293,8 +288,6 @@ angle =
     , Class.divBySelf
     , Class.divBy @UnitlessInterval Self
     , Class.divBy @AngleInterval Self
-    , Class.divByU (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
-    , Class.divByR (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.floorDivBySelf
     , Class.modBySelf
     ]
@@ -875,7 +868,6 @@ unitlessCurve1D =
     , Class.numberPlus
     , Class.numberMinus
     , Class.numberTimes
-    , Class.numberDivByU (\val crv -> Curve1D.quotient (Curve1D.constant val) crv)
     , Class.plusNumber
     , Class.plusSelf
     , Class.minusNumber
@@ -889,7 +881,6 @@ unitlessCurve1D =
     , Class.times @AreaCurve1D Self
     , Class.times @AngleCurve1D Self
     , Class.divByNumber
-    , Class.divByU Curve1D.quotient
     ]
 
 type AngleCurve1D = Curve1D.Curve1D Radians
@@ -915,9 +906,7 @@ angleCurve1D =
     , Class.timesNumber
     , Class.times @UnitlessCurve1D Self
     , Class.divByNumber
-    , Class.divByR Curve1D.quotient
     , Class.divBy @Angle Self
-    , Class.divByU Curve1D.quotient
     ]
 
 type Curve1D = Curve1D.Curve1D Meters
@@ -944,9 +933,7 @@ curve1D =
     , Class.times @Length Self
     , Class.times @UnitlessCurve1D Self
     , Class.divByNumber
-    , Class.divByM Curve1D.quotient
     , Class.divBy @Length Self
-    , Class.divByU Curve1D.quotient
     , Class.nested @Curve1D.Zero "A point where a given curve is equal to zero." $
         [ Class.property "Location" (.location) "The parameter value at which the curve is zero."
         , Class.property "Order" (.order) "The order of the solution: 0 for crossing, 1 for tangent, etc."
@@ -975,11 +962,8 @@ areaCurve1D =
     , Class.timesNumber
     , Class.times @UnitlessCurve1D Self
     , Class.divByNumber
-    , Class.divByS Curve1D.quotient
     , Class.divBy @Length Self
     , Class.divBy @Area Self
-    , Class.divByU Curve1D.quotient
-    , Class.divByM Curve1D.quotient
     ]
 
 type Svg = Svg.Svg

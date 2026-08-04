@@ -13,16 +13,11 @@ module OpenSolid.SurfaceFunction1D
   , squared
   , squared_
   , cubed
-  , quotient
-  , quotient_
-  , unsafeQuotient
-  , unsafeQuotient_
   )
 where
 
 import {-# SOURCE #-} OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
-import OpenSolid.DivisionByZero (DivisionByZero)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceParameter (SurfaceParameter)
@@ -112,22 +107,3 @@ derivative :: SurfaceParameter -> SurfaceFunction1D units -> SurfaceFunction1D u
 squared :: Units.Squared units1 units2 => SurfaceFunction1D units1 -> SurfaceFunction1D units2
 squared_ :: SurfaceFunction1D units1 -> SurfaceFunction1D (units1 ?*? units1)
 cubed :: SurfaceFunction1D Unitless -> SurfaceFunction1D Unitless
-quotient ::
-  (Units.Quotient units1 units2 units3, Tolerance units2) =>
-  SurfaceFunction1D units1 ->
-  SurfaceFunction1D units2 ->
-  Result DivisionByZero (SurfaceFunction1D units3)
-quotient_ ::
-  Tolerance units2 =>
-  SurfaceFunction1D units1 ->
-  SurfaceFunction1D units2 ->
-  Result DivisionByZero (SurfaceFunction1D (units1 ?/? units2))
-unsafeQuotient ::
-  Units.Quotient units1 units2 units3 =>
-  SurfaceFunction1D units1 ->
-  SurfaceFunction1D units2 ->
-  SurfaceFunction1D units3
-unsafeQuotient_ ::
-  SurfaceFunction1D units1 ->
-  SurfaceFunction1D units2 ->
-  SurfaceFunction1D (units1 ?/? units2)
