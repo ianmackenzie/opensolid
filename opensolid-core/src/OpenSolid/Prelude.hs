@@ -498,8 +498,8 @@ failWith message = Prelude.fail (Data.Text.unpack message)
 (??) :: MonadFail m => Result x a -> OnError x a -> m a
 Ok value ?? _ = succeedWith value
 Error _ ?? Succeed value = succeedWith value
-Error _ ?? Report message = failWith message
 Error err ?? Fail = failWith (Error.message err)
+Error _ ?? Report message = failWith message
 Error err ?? Catch callback = Error err ?? callback err
 
 infixl 0 ??
