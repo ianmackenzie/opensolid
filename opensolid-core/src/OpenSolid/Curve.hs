@@ -135,6 +135,7 @@ import OpenSolid.VectorBounds (VectorBounds)
 import OpenSolid.VectorBounds qualified as VectorBounds
 import OpenSolid.VectorCurve (VectorCurve)
 import OpenSolid.VectorCurve qualified as VectorCurve
+import OpenSolid.VectorCurve.Nondegenerate qualified as VectorCurve.Nondegenerate
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -473,11 +474,12 @@ buildArcLengthParameterization ::
   Exists dimension units space =>
   Nondegenerate (Curve dimension units space) ->
   (Quantity units, Number -> Number)
-buildArcLengthParameterization curve = do
-  let dsdt tValue = Vector.magnitude (Curve.Nondegenerate.derivativeValue curve tValue)
-  let d2sdt2 tValue =
-        Curve.Nondegenerate.secondDerivativeValue curve tValue
-          `dot` Curve.Nondegenerate.tangentDirection curve tValue
+buildArcLengthParameterization (Nondegenerate curve) = do
+  let dsdt tValue = Vector.magnitude (derivativeValue curve tValue)
+  let nondegenerateDerivative = Nondegenerate (derivative curve)
+  let tangentDirection tValue =
+        VectorCurve.Nondegenerate.directionValue nondegenerateDerivative tValue
+  let d2sdt2 tValue = secondDerivativeValue curve tValue `dot` tangentDirection tValue
   ArcLength.parameterization dsdt d2sdt2
 
 constant ::
