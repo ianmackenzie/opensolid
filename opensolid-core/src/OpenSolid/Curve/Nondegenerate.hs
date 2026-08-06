@@ -7,6 +7,7 @@ module OpenSolid.Curve.Nondegenerate
   , derivativeValue
   , secondDerivativeValue
   , tangentDirection
+  , bisectionTree
   , findPoint
   , intersections
   )
@@ -79,6 +80,11 @@ tangentDirection ::
   Direction dimension space
 tangentDirection curve tValue =
   VectorCurve.Nondegenerate.directionValue (derivative curve) tValue
+
+bisectionTree ::
+  Nondegenerate (Curve dimension units space) ->
+  Curve.BisectionTree dimension units space
+bisectionTree = Curve.bisectionTree
 
 data Monotonic = Monotonic deriving (Eq)
 
