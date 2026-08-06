@@ -8,7 +8,7 @@ module OpenSolid.Curve
   , Solver (..)
   , Compiled
   , Segment
-  , Tree (Tree)
+  , BisectionTree
   , HasDegeneracy (HasDegeneracy)
   , new
   , constant
@@ -65,7 +65,6 @@ import OpenSolid.ArcLength qualified as ArcLength
 import OpenSolid.Axis (Axis)
 import OpenSolid.Axis qualified as Axis
 import OpenSolid.Bezier qualified as Bezier
-import OpenSolid.Bisection (Tree (Tree))
 import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
@@ -180,7 +179,7 @@ buildBisectionTree tRange curve = do
   let (tLeft, tRight) = Interval.bisect tRange
   let left = buildBisectionTree tLeft curve
   let right = buildBisectionTree tRight curve
-  Tree tRange (Curve.Segment.new curve tRange) (NonEmpty.two left right)
+  Bisection.Tree tRange (Curve.Segment.new curve tRange) (NonEmpty.two left right)
 
 instance Units.Coercion (Curve2D units1) (Curve2D units2) where
   coerce curve =
