@@ -477,8 +477,7 @@ buildArcLengthParameterization ::
 buildArcLengthParameterization (Nondegenerate curve) = do
   let dsdt tValue = Vector.magnitude (derivativeValue curve tValue)
   let nondegenerateDerivative = Nondegenerate (derivative curve)
-  let tangentDirection tValue =
-        VectorCurve.Nondegenerate.directionValue nondegenerateDerivative tValue
+  let tangentDirection tValue = VectorCurve.Nondegenerate.direction nondegenerateDerivative tValue
   let d2sdt2 tValue = secondDerivativeValue curve tValue `dot` tangentDirection tValue
   ArcLength.parameterization dsdt d2sdt2
 

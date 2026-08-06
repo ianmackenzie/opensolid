@@ -1,4 +1,4 @@
-module OpenSolid.VectorSurfaceFunction3D.Nondegenerate (directionValue) where
+module OpenSolid.VectorSurfaceFunction3D.Nondegenerate (direction) where
 
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
@@ -12,11 +12,8 @@ import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
-directionValue ::
-  Nondegenerate (VectorSurfaceFunction3D units space) ->
-  UvPoint ->
-  Direction3D space
-directionValue (Nondegenerate function) uvPoint = do
+direction :: Nondegenerate (VectorSurfaceFunction3D units space) -> UvPoint -> Direction3D space
+direction (Nondegenerate function) uvPoint = do
   let UvPoint uValue vValue = uvPoint
   Direction3D.unsafe $
     Tolerance.using Quantity.zero $

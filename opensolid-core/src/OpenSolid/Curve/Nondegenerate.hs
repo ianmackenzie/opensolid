@@ -79,7 +79,7 @@ tangentDirection ::
   Number ->
   Direction dimension space
 tangentDirection curve tValue =
-  VectorCurve.Nondegenerate.directionValue (derivative curve) tValue
+  VectorCurve.Nondegenerate.direction (derivative curve) tValue
 
 bisectionTree ::
   Nondegenerate (Curve dimension units space) ->

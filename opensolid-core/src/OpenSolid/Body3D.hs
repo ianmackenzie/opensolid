@@ -337,7 +337,7 @@ toSurfaceMesh resolution body =
   body & toMesh resolution \function uvPoint ->
     SurfaceVertex3D
       (SurfaceFunction3D.Nondegenerate.point function uvPoint)
-      (SurfaceFunction3D.Nondegenerate.normalDirectionValue function uvPoint)
+      (SurfaceFunction3D.Nondegenerate.normalDirection function uvPoint)
 
 toMesh ::
   Tolerance Meters =>
@@ -391,7 +391,7 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
   let vMid = Interval.midpoint vRange
   let uvCenter = UvPoint uMid vMid
   let pCenter = SurfaceFunction3D.Nondegenerate.point function uvCenter
-  let nCenter = SurfaceFunction3D.Nondegenerate.normalDirectionValue function uvCenter
+  let nCenter = SurfaceFunction3D.Nondegenerate.normalDirection function uvCenter
   let error point = Quantity.abs ((point - pCenter) `dot` nCenter)
   let maxCornerError = error p11 `max` error p12 `max` error p21 `max` error p22
   let uWidth = Interval.width uRange

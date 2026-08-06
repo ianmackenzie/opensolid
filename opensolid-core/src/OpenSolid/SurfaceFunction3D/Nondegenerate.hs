@@ -1,7 +1,7 @@
 module OpenSolid.SurfaceFunction3D.Nondegenerate
   ( point
   , derivative
-  , normalDirectionValue
+  , normalDirection
   )
 where
 
@@ -20,10 +20,7 @@ import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D.Nondegenerate qualified as VectorSurfaceFunction3D.Nondegenerate
 
-point ::
-  Nondegenerate (SurfaceFunction3D space) ->
-  UvPoint ->
-  Point3D space
+point :: Nondegenerate (SurfaceFunction3D space) -> UvPoint -> Point3D space
 point (Nondegenerate function) uvPoint = SurfaceFunction3D.point function uvPoint
 
 derivative ::
@@ -33,15 +30,12 @@ derivative ::
 derivative parameter (Nondegenerate function) =
   Nondegenerate (SurfaceFunction3D.derivative parameter function)
 
-normalDirectionValue ::
-  Nondegenerate (SurfaceFunction3D space) ->
-  UvPoint ->
-  Direction3D space
-normalDirectionValue function uvPoint = do
+normalDirection :: Nondegenerate (SurfaceFunction3D space) -> UvPoint -> Direction3D space
+normalDirection function uvPoint = do
   let du = derivative U function
   let dv = derivative V function
-  let duDirection = VectorSurfaceFunction3D.Nondegenerate.directionValue du uvPoint
-  let dvDirection = VectorSurfaceFunction3D.Nondegenerate.directionValue dv uvPoint
+  let duDirection = VectorSurfaceFunction3D.Nondegenerate.direction du uvPoint
+  let dvDirection = VectorSurfaceFunction3D.Nondegenerate.direction dv uvPoint
   Direction3D.unsafe $
     Tolerance.using Quantity.zero $
       Vector3D.normalize (duDirection `cross` dvDirection)

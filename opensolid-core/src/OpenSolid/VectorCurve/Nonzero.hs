@@ -3,7 +3,7 @@ module OpenSolid.VectorCurve.Nonzero
   , squaredMagnitude_
   , magnitude
   , normalize
-  , directionValue
+  , direction
   )
 where
 
@@ -42,11 +42,11 @@ normalize ::
   Nonzero (VectorCurve dimension Unitless space)
 normalize (Nonzero curve) = Nonzero (curve / magnitude (Nonzero curve))
 
-directionValue ::
+direction ::
   VectorCurve.Exists dimension units space =>
   Nonzero (VectorCurve dimension units space) ->
   Number ->
   Direction dimension space
-directionValue (Nonzero curve) tValue = do
+direction (Nonzero curve) tValue = do
   let vector = VectorCurve.value curve tValue
   Direction.unsafe (vector / Vector.magnitude vector)
