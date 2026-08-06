@@ -1,12 +1,13 @@
-Refactor curve intersection code to *only* work with nondegenerate curves
-- don't unwrap to Curve values, just use functions in Curve.Nondegenerate module
+Remove no-longer-used 'upcast' support
 
-Move Curve.bisectionTree into Curve.Nondegenerate module
+Add support for 'Nondegenerate Surface3D'
+- then refactor Body3D to store a set of 'Nondegenerate Surface3D'
 
-Try to move most calls into Curve.Nondegeneate from Curve *into* Curve.Nondegenerate
-- e.g. move buildArcLengthParameterization into Curve.Nondegenerate,
-  so that 'derivativeValue', 'secondDerivativeValue' and 'tangentDirection' calls can be direct
-  (instead of going through a {-# SOURCE #-} import)
+Implement Surface3D.findPoint
+
+Implement Curve3D-Surface3D intersection
+
+Implement Surface3D-Surface3D intersection...
 
 Add Curve.Nonzero.compiled
 - then division instances can avoid wrapping/unwrapping Nonzero values (search for '\(Nonzero [a-z]' as a regex)
@@ -34,15 +35,6 @@ Cache normal direction in PlaneOrientation3D?
 Switch transforms to be flat structs of unboxed Double# components
 
 Rework CDT code to encode arrays using Builder and then Data.ByteString.Unsafe.unsafeUseAsCStringLen
-
-Add support for 'Nondegenerate Surface3D'
-- then refactor Body3D to store a set of 'Nondegenerate Surface3D'
-
-Implement Surface3D.findPoint
-
-Implement Curve3D-Surface3D intersection
-
-Implement Surface3D-Surface3D intersection...
 
 Tweak meshing to require monotonicity?
 - resolved normal/tangent direction
@@ -104,16 +96,8 @@ Optimize findPoint to immediately reject monotonic segments where no solution is
 
 Rework VectorCurve.zeros to match Curve.findPoint instead of using Curve1D.zeros
 
-Try to reuse compiled expressions when composing them into larger expressions?
-- in particular: compose UV curve with 3D surface function to make 3D curve
-  - but UV curve and 3D surface function might have common subexpressions...
-    - recompile 3D surface function "on top of" precompiled UV curve?
-
 Add Region2D.unsafe?
 - take correct, preconstructed loops directly
-
-Replace uses of tangentDirection etc. curves/functions with direct tangentDirectionBounds etc.?
-- *might* be able to avoid funky desingularization logic entirely
 
 Add a few functions like Surface3D.asPlane :: Surface3D space -> Maybe (Plane3D space local)
 - useful for feature detection etc.
@@ -136,9 +120,6 @@ Move remaining generic functionality from Curve#D modules into Curve module
 - g2? (rework to use tangent direction and curvature vector)
 - rework curvature functions to use curvature vector
 
-Remove support for inheritance in target language API?
-- only used for directions, should be OK for those to be separate from vectors...
-
 Tighten vector bounds normalization
 - add C++ code callable via primop that computes normalized vector bounds
   - properly handle cases where component intervals cross zero
@@ -157,27 +138,17 @@ Add Bounds#D.expandBy?
 Add Curve#D.steps etc. functions
 - then search for uses of Parameter.steps etc. that can be replaced
 
-Try to remove unsafeQuotient and unsafeSqrt functions in favour of using Nonzero/Nondegenerate machinery?
-- maybe after implementing generic SurfaceFunction and VectorSurfaceFunction...
-
 Add ParameterRange module and move 'includes' and 'isInterior' functions there
 - rename UvBounds to UvRange?
 - also move Bounds2D.includes and Domain.isInterior to UvRange.[includes,isInterior]
 - generally avoid having no-tolerance functions in units-generic modules
 - maybe also move 'overlapping' functions from Search.Domain into ParameterInterval and UvBounds
 
-Have Nondegenerate.normalize return a NonZero value
-
 Deduplicate code from Tests.Curve2D and Tests.Curve3D into Tests.Curve?
 
 Rename OpenSolid.Search to OpenSolid.Bisection?
 - rename 'exclusive' to just 'search'
 - add 'find' that just attempts to find a *single* solution
-
-Add generic Curve.g2 that uses curvature vector
-- then switch Curve2D.g2 to use it
-
-Add Curve.clean for stripping cached values from Curve value?
 
 Switch to Vector, VectorBounds purely *forwarding* to Vector2D, VectorBounds2D etc.?
 - don't call back into e.g. Vector from Vector2D
@@ -280,15 +251,10 @@ Switch back to 'normal' (non-recursive) form of quotient derivatives
 
 Rework Curve2D.medialAxis to use tangent directions instead of derivative vectors
 
-Remove 'unconvert' functions
-
 Clean up division by 'Curve units' or 'SurfaceFunction units' that is (approximately) identically zero by replacing with division by actual constant zero
 -> or just *multiplication* by infinity...
 -> Faster to evaluate, gives actual infinities instead of just extremely large values (more correct!)
 -> Maybe also for division by e.g. 'Qty units', so division by *approximately* zero gives actual infinity?
-
-Add Component3D class to Python library?
--> 'front_plane', 'upward_direction', 'rightward_axis' etc. convenience accessors in addition to 'frame'
 
 Add vectorTransformations3D helper list in API module
 
@@ -296,11 +262,6 @@ Add indentation to debug output of Ast values for easier inspection
 
 Optimization: check when e.g. VectorCurve#D or VectorSurface#D (squared) magnitude is a constant (within current tolerance)
 -> avoid expensive square root (or even squared magnitude calculation!)
-
-Add dedicated 'blend' expression
--> will still explode out to large derivative...
--> maybe even dedicated first derivative expression?
--> could then share computation of t^2, t^3, t^4 between coefficients...
 
 Optimize dot and cross products of constants with Bezier curves in Ast module
 
