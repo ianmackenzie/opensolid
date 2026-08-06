@@ -2,6 +2,7 @@
 
 module OpenSolid.Curve.Nondegenerate
   ( point
+  , bounds
   , derivative
   , derivativeValue
   , secondDerivativeValue
@@ -13,6 +14,7 @@ where
 
 import OpenSolid.Bag qualified as Bag
 import OpenSolid.Bisection qualified as Bisection
+import OpenSolid.Bounds (Bounds)
 import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
@@ -39,6 +41,12 @@ point ::
   Number ->
   Point dimension units space
 point (Nondegenerate curve) parameterValue = Curve.point curve parameterValue
+
+bounds ::
+  Curve.Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) ->
+  Bounds dimension units space
+bounds (Nondegenerate curve) = Curve.bounds curve
 
 derivative ::
   Curve.Exists dimension units space =>
