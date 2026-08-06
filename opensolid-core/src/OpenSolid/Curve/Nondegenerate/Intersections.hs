@@ -22,14 +22,13 @@ import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate)
-import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Prelude
 
 type Problem dimension units space =
   ( Curve.Exists dimension units space
   , Tolerance units
-  , ?nondegenerate1 :: Nondegenerate (Curve dimension units space)
-  , ?nondegenerate2 :: Nondegenerate (Curve dimension units space)
+  , ?curve1 :: Nondegenerate (Curve dimension units space)
+  , ?curve2 :: Nondegenerate (Curve dimension units space)
   , ?bisectionTree :: BisectionTree dimension units space
   )
 
@@ -38,17 +37,11 @@ type BisectionTree dimension units space =
     (Interval Unitless, Interval Unitless)
     (Curve.Segment dimension units space, Curve.Segment dimension units space)
 
-nondegenerate1 :: Problem dimension units space => Nondegenerate (Curve dimension units space)
-nondegenerate1 = ?nondegenerate1
+curve1 :: Problem dimension units space => Nondegenerate (Curve dimension units space)
+curve1 = ?curve1
 
-nondegenerate2 :: Problem dimension units space => Nondegenerate (Curve dimension units space)
-nondegenerate2 = ?nondegenerate2
-
-curve1 :: Problem dimension units space => Curve dimension units space
-curve1 = Nondegenerate.unwrap nondegenerate1
-
-curve2 :: Problem dimension units space => Curve dimension units space
-curve2 = Nondegenerate.unwrap nondegenerate2
+curve2 :: Problem dimension units space => Nondegenerate (Curve dimension units space)
+curve2 = ?curve2
 
 bisectionTree :: Problem dimension units space => BisectionTree dimension units space
 bisectionTree = ?bisectionTree
@@ -61,17 +54,17 @@ intersections ::
   Nondegenerate (Curve dimension units space) ->
   Nondegenerate (Curve dimension units space) ->
   Maybe (Intersections dimension units space)
-intersections givenNondegenerate1 givenNondegenerate2 = do
-  let ?nondegenerate1 = givenNondegenerate1
-  let ?nondegenerate2 = givenNondegenerate2
-  let tree1 = Curve.bisectionTree givenNondegenerate1
-  let tree2 = Curve.bisectionTree givenNondegenerate2
+intersections givenCurve1 givenCurve2 = do
+  let ?curve1 = givenCurve1
+  let ?curve2 = givenCurve2
+  let tree1 = Curve.bisectionTree givenCurve1
+  let tree2 = Curve.bisectionTree givenCurve2
   let ?bisectionTree = Bisection.pairwise tree1 tree2
   findIntersections
 
 findIntersections :: Problem dimension units space => Maybe (Intersections dimension units space)
 findIntersections
-  | not (Curve.bounds curve1 `intersects` Curve.bounds curve2) = Nothing
+  | not (Curve.Nondegenerate.bounds curve1 `intersects` Curve.Nondegenerate.bounds curve2) = Nothing
   | otherwise = do
       let endpointIntersections = findEndpointIntersections
       if List.any IntersectionPoint.isIndistinguishable endpointIntersections
@@ -82,14 +75,14 @@ findEndpointIntersections ::
   Problem dimension units space =>
   List (IntersectionPoint dimension units space)
 findEndpointIntersections = do
-  let findPoint curve t nondegenerateSearchCurve =
-        Curve.Nondegenerate.findPoint (Curve.point curve t) nondegenerateSearchCurve
-  let endpoints1On2 = [(t1, t2) | t1 <- [0.0, 1.0], t2 <- findPoint curve1 t1 nondegenerate2]
-  let endpoints2On1 = [(t1, t2) | t2 <- [0.0, 1.0], t1 <- findPoint curve2 t2 nondegenerate1]
+  let findPoint curve t searchCurve =
+        Curve.Nondegenerate.findPoint (Curve.Nondegenerate.point curve t) searchCurve
+  let endpoints1On2 = [(t1, t2) | t1 <- [0.0, 1.0], t2 <- findPoint curve1 t1 curve2]
+  let endpoints2On1 = [(t1, t2) | t2 <- [0.0, 1.0], t1 <- findPoint curve2 t2 curve1]
   List.sortAndDeduplicate (endpoints1On2 <> endpoints2On1)
     & List.filterMap \(t1, t2) -> do
-      let p1 = CurvePoint.on nondegenerate1 t1
-      let p2 = CurvePoint.on nondegenerate2 t2
+      let p1 = CurvePoint.on curve1 t1
+      let p2 = CurvePoint.on curve2 t2
       continuity <- CurvePoint.continuity p1 p2
       Just (IntersectionPoint continuity (p1, p2))
 
@@ -150,11 +143,9 @@ findInteriorIntersections
             boundarySubdomains (List.filter IntersectionPoint.isCrossing endpointIntersections)
         , searchTree = bisectionTree
         , resolveTangent = resolveTangent
-        , solveTangent =
-            List.maybe . Bisection.find (solveTangent nondegenerate1 nondegenerate2)
+        , solveTangent = List.maybe . Bisection.find (solveTangent curve1 curve2)
         , resolveCrossing = resolveCrossing
-        , solveCrossing =
-            List.maybe . Bisection.find (solveCrossing nondegenerate1 nondegenerate2)
+        , solveCrossing = List.maybe . Bisection.find (solveCrossing curve1 curve2)
         }
 
 boundarySubdomains ::
