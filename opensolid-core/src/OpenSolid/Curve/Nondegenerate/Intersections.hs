@@ -75,14 +75,17 @@ findEndpointIntersections ::
   Problem dimension units space =>
   List (IntersectionPoint dimension units space)
 findEndpointIntersections = do
-  let findPoint curve t searchCurve =
-        Curve.Nondegenerate.findPoint (Curve.Nondegenerate.point curve t) searchCurve
-  let endpoints1On2 = [(t1, t2) | t1 <- [0.0, 1.0], t2 <- findPoint curve1 t1 curve2]
-  let endpoints2On1 = [(t1, t2) | t2 <- [0.0, 1.0], t1 <- findPoint curve2 t2 curve1]
-  List.sortAndDeduplicate (endpoints1On2 <> endpoints2On1)
-    & List.filterMap \(t1, t2) -> do
-      let p1 = CurvePoint.on curve1 t1
-      let p2 = CurvePoint.on curve2 t2
+  let start1 = Curve.Nondegenerate.curvePoint curve1 0.0
+  let end1 = Curve.Nondegenerate.curvePoint curve1 1.0
+  let start2 = Curve.Nondegenerate.curvePoint curve2 0.0
+  let end2 = Curve.Nondegenerate.curvePoint curve2 1.0
+  let findPoint curvePoint searchCurve =
+        Curve.Nondegenerate.findPoint (CurvePoint.point curvePoint) searchCurve
+  let endpoints1On2 = [(p1, p2) | p1 <- [start1, end1], p2 <- findPoint p1 curve2]
+  let endpoints2On1 = [(p1, p2) | p2 <- [start2, end2], p1 <- findPoint p2 curve1]
+  let location (p1, p2) = (CurvePoint.location p1, CurvePoint.location p2)
+  List.sortAndDeduplicateBy location (endpoints1On2 <> endpoints2On1)
+    & List.filterMap \(p1, p2) -> do
       continuity <- CurvePoint.continuity p1 p2
       Just (IntersectionPoint continuity (p1, p2))
 

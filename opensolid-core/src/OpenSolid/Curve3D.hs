@@ -47,6 +47,7 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve3D)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2D (Curve2D)
+import OpenSolid.CurvePoint3D (CurvePoint3D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.Error (IsDegenerate)
 import OpenSolid.Expression qualified as Expression
@@ -220,7 +221,11 @@ placeIn frame curve = do
 relativeTo :: Frame3D global local -> Curve3D global -> Curve3D local
 relativeTo frame curve = placeIn (Frame3D.inverse frame) curve
 
-findPoint :: Tolerance Meters => Point3D space -> Curve3D space -> Result IsDegenerate (List Number)
+findPoint ::
+  Tolerance Meters =>
+  Point3D space ->
+  Curve3D space ->
+  Result IsDegenerate (List (CurvePoint3D space))
 findPoint = Curve.findPoint
 
 type IntersectionPoint space = Curve.IntersectionPoint 3 Meters space

@@ -9,6 +9,7 @@ where
 
 import {-# SOURCE #-} OpenSolid.Curve (Curve)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
+import OpenSolid.CurvePoint (CurvePoint)
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.Nondegenerate (Nondegenerate)
@@ -40,4 +41,4 @@ findPoint ::
   (Curve.Exists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Nondegenerate (Curve dimension units space) ->
-  List Number
+  List (CurvePoint dimension units space)

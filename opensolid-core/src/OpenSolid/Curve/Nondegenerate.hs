@@ -2,6 +2,7 @@
 
 module OpenSolid.Curve.Nondegenerate
   ( point
+  , curvePoint
   , bounds
   , derivative
   , derivativeValue
@@ -20,15 +21,19 @@ import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Nondegenerate.Intersections qualified as Curve.Nondegenerate.Intersections
+import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve.Segment qualified as Curve.Segment
+import OpenSolid.CurveLocation qualified as CurveLocation
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.Fuzzy qualified as Fuzzy
+import OpenSolid.Internal.CurvePoint (CurvePoint (..))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.Vector (Vector)
@@ -42,6 +47,24 @@ point ::
   Number ->
   Point dimension units space
 point (Nondegenerate curve) parameterValue = Curve.point curve parameterValue
+
+curvePoint ::
+  Curve.Exists dimension units space =>
+  Nondegenerate (Curve dimension units space) ->
+  Number ->
+  CurvePoint dimension units space
+curvePoint curve tValue =
+  recursive \result ->
+    CurvePoint
+      { location = CurveLocation.fromParameterValue tValue
+      , point = point curve tValue
+      , derivative = derivativeValue curve tValue
+      , tangentDirection = tangentDirection curve tValue
+      , curvatureVector_ =
+          result
+            & Nondegenerate.field \_ ->
+              Curve.Nonzero.curvatureVector_ (Nondegenerate.interior curve) tValue
+      }
 
 bounds ::
   Curve.Exists dimension units space =>
@@ -92,7 +115,7 @@ findPoint ::
   (Curve.Exists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Nondegenerate (Curve dimension units space) ->
-  List Number
+  List (CurvePoint dimension units space)
 findPoint givenPoint givenCurve = do
   let endpointSolutions = [t | t <- [0.0, 1.0], point givenCurve t ~= givenPoint]
   let endpointSolutionSet = Bag.pack Interval.constant endpointSolutions
@@ -112,6 +135,7 @@ findPoint givenPoint givenCurve = do
           & Bisection.clusters endpointSolutionSet resolvedMonotonicity
   let interiorSolutions = List.filterMap (Bisection.find resolvedSolution) clusters
   List.sort (endpointSolutions <> interiorSolutions)
+    & List.map (curvePoint givenCurve)
 
 intersections ::
   ( Curve.Exists dimension units space

@@ -6,7 +6,6 @@ module OpenSolid.CurvePoint
   , curvatureVector_
   , location
   , parameterValue
-  , on
   , isEndpoint
   , isDegenerate
   , nondegenerate
@@ -16,52 +15,22 @@ where
 
 import OpenSolid.Continuity (Continuity)
 import OpenSolid.Continuity qualified as Continuity
-import OpenSolid.Curve (Curve)
-import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
-import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.CurveLocation (CurveLocation)
 import OpenSolid.CurveLocation qualified as CurveLocation
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
+import OpenSolid.Internal.CurvePoint (CurvePoint (..))
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point (Point)
+import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
-
-data CurvePoint dimension units space = CurvePoint
-  { location :: CurveLocation
-  , point :: ~(Point dimension units space)
-  , derivative :: ~(Vector dimension units space)
-  , tangentDirection :: ~(Direction dimension space)
-  , curvatureVector_ :: Nondegenerate.Field (Vector dimension (Unitless ?/? units) space)
-  }
-
-deriving instance Curve.Exists dimension units space => Show (CurvePoint dimension units space)
-
-on ::
-  Curve.Exists dimension units space =>
-  Nondegenerate (Curve dimension units space) ->
-  Number ->
-  CurvePoint dimension units space
-on curve tValue =
-  recursive \curvePoint ->
-    CurvePoint
-      { location = CurveLocation.fromParameterValue tValue
-      , point = Curve.Nondegenerate.point curve tValue
-      , derivative = Curve.Nondegenerate.derivativeValue curve tValue
-      , tangentDirection = Curve.Nondegenerate.tangentDirection curve tValue
-      , curvatureVector_ =
-          curvePoint
-            & Nondegenerate.field \_ ->
-              Curve.Nonzero.curvatureVector_ (Nondegenerate.interior curve) tValue
-      }
 
 location :: CurvePoint dimension units space -> CurveLocation
 location = (.location)
@@ -87,20 +56,24 @@ isEndpoint :: CurvePoint dimension units space -> Bool
 isEndpoint = Parameter.isEndpoint . parameterValue
 
 isDegenerate ::
-  (Curve.Exists dimension units space, Tolerance units) =>
+  (Vector.Exists dimension units space, Tolerance units) =>
   CurvePoint dimension units space ->
   Bool
 isDegenerate curvePoint = derivative curvePoint ~= Vector.zero
 
 nondegenerate ::
-  (Curve.Exists dimension units space, Tolerance units) =>
+  (Vector.Exists dimension units space, Tolerance units) =>
   CurvePoint dimension units space ->
   Result IsDegenerate (Nondegenerate (CurvePoint dimension units space))
 nondegenerate curvePoint =
   if isDegenerate curvePoint then Error IsDegenerate else Ok (Nondegenerate curvePoint)
 
 continuity ::
-  (Curve.Exists dimension units space, Tolerance units) =>
+  ( Point.Exists dimension units space
+  , Vector.Exists dimension units space
+  , Vector.Exists dimension (Unitless ?/? units) space
+  , Tolerance units
+  ) =>
   CurvePoint dimension units space ->
   CurvePoint dimension units space ->
   Maybe Continuity

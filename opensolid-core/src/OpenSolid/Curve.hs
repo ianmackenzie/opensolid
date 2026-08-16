@@ -83,6 +83,7 @@ import {-# SOURCE #-} OpenSolid.Curve.TangentSolver2D qualified as Curve.Tangent
 import {-# SOURCE #-} OpenSolid.Curve.TangentSolver3D qualified as Curve.TangentSolver3D
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
+import OpenSolid.CurvePoint (CurvePoint)
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Error (IsDegenerate (IsDegenerate))
@@ -716,7 +717,7 @@ findPoint ::
   (Exists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Curve dimension units space ->
-  Result IsDegenerate (List Number)
+  Result IsDegenerate (List (CurvePoint dimension units space))
 findPoint givenPoint curve =
   Result.map (Curve.Nondegenerate.findPoint givenPoint) (nondegenerate curve)
 

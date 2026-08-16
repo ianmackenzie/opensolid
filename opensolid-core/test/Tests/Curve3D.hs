@@ -3,10 +3,10 @@ module Tests.Curve3D (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
+import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
-import OpenSolid.CurvePoint qualified as CurvePoint
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -109,8 +109,8 @@ crossingIntersection = Test.verify "crossingIntersection" do
           Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
   nondegenerate1 <- Curve.nondegenerate arc1 ?? fail
   nondegenerate2 <- Curve.nondegenerate arc2 ?? fail
-  let curvePoint1 t1 = CurvePoint.on nondegenerate1 t1
-  let curvePoint2 t2 = CurvePoint.on nondegenerate2 t2
+  let curvePoint1 t1 = Curve.Nondegenerate.curvePoint nondegenerate1 t1
+  let curvePoint2 t2 = Curve.Nondegenerate.curvePoint nondegenerate2 t2
   intersections <- Curve3D.intersections arc1 arc2 ?? fail
   let expectedIntersectionPoints =
         NonEmpty.two
@@ -143,8 +143,8 @@ tangentIntersection = Test.verify "tangentIntersection" do
             (#endAngle Angle.zero)
   nondegenerate1 <- Curve.nondegenerate arc1 ?? fail
   nondegenerate2 <- Curve.nondegenerate arc2 ?? fail
-  let curvePoint1 t1 = CurvePoint.on nondegenerate1 t1
-  let curvePoint2 t2 = CurvePoint.on nondegenerate2 t2
+  let curvePoint1 t1 = Curve.Nondegenerate.curvePoint nondegenerate1 t1
+  let curvePoint2 t2 = Curve.Nondegenerate.curvePoint nondegenerate2 t2
   intersections <- Curve3D.intersections arc1 arc2 ?? fail
   let expectedIntersectionPoints =
         NonEmpty.one (IntersectionPoint.tangent Negative (curvePoint1 0.5, curvePoint2 0.5))

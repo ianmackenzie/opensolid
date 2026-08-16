@@ -94,6 +94,7 @@ import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
 import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
+import OpenSolid.CurvePoint2D (CurvePoint2D)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
@@ -506,7 +507,11 @@ yCoordinate curve = do
 coordinates :: Curve2D units -> (Curve1D units, Curve1D units)
 coordinates curve = (xCoordinate curve, yCoordinate curve)
 
-findPoint :: Tolerance units => Point2D units -> Curve2D units -> Result IsDegenerate (List Number)
+findPoint ::
+  Tolerance units =>
+  Point2D units ->
+  Curve2D units ->
+  Result IsDegenerate (List (CurvePoint2D units))
 findPoint = Curve.findPoint
 
 type IntersectionPoint units = Curve.IntersectionPoint 2 units Void

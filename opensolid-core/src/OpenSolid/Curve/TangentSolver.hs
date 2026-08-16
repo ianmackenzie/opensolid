@@ -14,6 +14,7 @@ import OpenSolid.Curve (Curve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
+import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.CurvePoint qualified as CurvePoint
 import OpenSolid.InternalError qualified as InternalError
@@ -64,8 +65,8 @@ solve ::
   Fuzzy (Maybe (IntersectionPoint dimension units space))
 solve nondegenerateA nondegenerateB tRangeA tRangeB function = do
   UvPoint tA tB <- NewtonRaphson.Surface.solveIn (UvBounds tRangeA tRangeB) function
-  let p1 = CurvePoint.on nondegenerateA tA
-  let p2 = CurvePoint.on nondegenerateB tB
+  let p1 = Curve.Nondegenerate.curvePoint nondegenerateA tA
+  let p2 = Curve.Nondegenerate.curvePoint nondegenerateB tB
   case CurvePoint.continuity p1 p2 of
     Nothing -> Unresolved
     Just continuity -> case continuity of

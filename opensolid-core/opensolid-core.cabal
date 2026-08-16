@@ -288,6 +288,7 @@ library
     OpenSolid.Curve.TangentSolver3D
     OpenSolid.Curve1D.Bisection
     OpenSolid.HasZero
+    OpenSolid.Internal.CurvePoint
     OpenSolid.Lobatto
     OpenSolid.Quadrature
     OpenSolid.Region2D.BoundaryTree
