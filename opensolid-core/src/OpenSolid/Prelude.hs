@@ -471,22 +471,22 @@ instance MonadFail (Result Text) where
   {-# INLINE fail #-}
   fail message = Error (Data.Text.pack message)
 
-data OnError x a
-  = Succeed a
-  | Fail
-  | Report Text
-  | Catch (x -> OnError x a)
+data OnError m x a where
+  Succeed :: Monad m => a -> OnError m x a
+  Fail :: MonadFail m => OnError m x a
+  Report :: MonadFail m => Text -> OnError m x a
+  Catch :: (x -> OnError m x a) -> OnError m x a
 
-succeed :: a -> OnError x a
+succeed :: Monad m => a -> OnError m x a
 succeed = Succeed
 
-fail :: OnError x a
+fail :: MonadFail m => OnError m x a
 fail = Fail
 
-report :: Text -> OnError x a
+report :: MonadFail m => Text -> OnError m x a
 report = Report
 
-catch :: (x -> OnError x a) -> OnError x a
+catch :: (x -> OnError m x a) -> OnError m x a
 catch = Catch
 
 succeedWith :: Monad m => a -> m a
@@ -495,7 +495,7 @@ succeedWith = Prelude.return
 failWith :: MonadFail m => Text -> m a
 failWith message = Prelude.fail (Data.Text.unpack message)
 
-(??) :: MonadFail m => Result x a -> OnError x a -> m a
+(??) :: Monad m => Result x a -> OnError m x a -> m a
 Ok value ?? _ = succeedWith value
 Error _ ?? Succeed value = succeedWith value
 Error err ?? Fail = failWith (Error.message err)
