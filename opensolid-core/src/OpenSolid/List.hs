@@ -42,6 +42,7 @@ module OpenSolid.List
   , sortBy
   , sortWith
   , sortAndDeduplicate
+  , sortAndDeduplicateBy
   , isOrdered
   , isNonDescending
   , isAscending
@@ -205,17 +206,20 @@ sortWith :: (a -> a -> Ordering) -> List a -> List a
 sortWith = Data.List.sortBy
 
 sortAndDeduplicate :: Ord a => List a -> List a
-sortAndDeduplicate list = deduplicate (sort list)
+sortAndDeduplicate = sortAndDeduplicateBy id
 
-deduplicate :: Eq a => List a -> List a
-deduplicate [] = []
-deduplicate (first : rest) = dedup first rest
+sortAndDeduplicateBy :: Ord b => (a -> b) -> List a -> List a
+sortAndDeduplicateBy property list = sortBy property list & deduplicateBy property
 
-dedup :: Eq a => a -> List a -> List a
-dedup current [] = [current]
-dedup current (next : remaining)
-  | current == next = dedup current remaining
-  | otherwise = current : dedup next remaining
+deduplicateBy :: Eq b => (a -> b) -> List a -> List a
+deduplicateBy _ [] = []
+deduplicateBy property (first : rest) = dedupBy property first rest
+
+dedupBy :: Eq b => (a -> b) -> a -> List a -> List a
+dedupBy _ current [] = [current]
+dedupBy property current (next : remaining)
+  | property current == property next = dedupBy property current remaining
+  | otherwise = current : dedupBy property next remaining
 
 isOrdered :: (a -> a -> Bool) -> List a -> Bool
 isOrdered _ [] = True
