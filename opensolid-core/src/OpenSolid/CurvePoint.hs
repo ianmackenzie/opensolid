@@ -32,7 +32,6 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Result qualified as Result
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector qualified as Vector
 
@@ -113,9 +112,8 @@ continuity p1 p2 = do
       if Direction.parallel tangent1 tangent2
         then do
           let sign = Number.sign (tangent1 `dot` tangent2)
-          case Result.map2 (,) (nondegenerate p1) (nondegenerate p2) of
-            Error IsDegenerate -> Just (Continuity.Indistinguishable sign)
-            Ok (nondegenerate1, nondegenerate2) -> do
+          case (nondegenerate p1, nondegenerate p2) of
+            (Ok nondegenerate1, Ok nondegenerate2) -> do
               let l1 = Vector.magnitude (derivative p1)
               let l2 = Vector.magnitude (derivative p2)
               let l = Quantity.erase (min l1 l2)
@@ -125,5 +123,6 @@ continuity p1 p2 = do
               if Vector.unerase (k * l * l / 2.0) ~= Vector.zero
                 then Just (Continuity.Indistinguishable sign)
                 else Just (Continuity.Tangent sign)
+            _ -> Just (Continuity.Indistinguishable sign)
         else Just Continuity.Crossing
     else Nothing
