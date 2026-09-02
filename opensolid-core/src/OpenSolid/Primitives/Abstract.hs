@@ -50,7 +50,7 @@ import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D (Vector3D)
@@ -129,7 +129,7 @@ type family
 
 class
   ( HasZero (Vector dimension units space)
-  , HasUnits (Vector dimension units space) units
+  , Units (Vector dimension units space) units
   , Coercible (Vector dimension units space) (Vector dimension Unitless space)
   , Coercible (Vector dimension Unitless space) (Vector dimension units space)
   , Eq (Vector dimension units space)
@@ -350,7 +350,7 @@ class
   ( VectorExists dimension units space
   , VectorBoundsExists dimension Unitless space
   , DirectionBoundsExists dimension space
-  , HasUnits (VectorBounds dimension units space) units
+  , Units (VectorBounds dimension units space) units
   , Coercible (VectorBounds dimension units space) (VectorBounds dimension Unitless space)
   , Coercible (VectorBounds dimension Unitless space) (VectorBounds dimension units space)
   , Show (VectorBounds dimension units space)

@@ -29,7 +29,7 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Prelude
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 
 type role Curve1D nominal
@@ -45,15 +45,15 @@ type Compiled units = CompiledFunction Number (Quantity units) (Interval Unitles
 
 instance FFI (Curve1D Unitless)
 
-instance HasUnits (Curve1D units) units
+instance Units (Curve1D units) units
 
 instance Units.Coercion (Curve1D units1) (Curve1D units2)
 
-instance HasUnits (Nonzero (Curve1D units)) units
+instance Units (Nonzero (Curve1D units)) units
 
 instance Units.Coercion (Nonzero (Curve1D units1)) (Nonzero (Curve1D units2))
 
-instance HasUnits (Nondegenerate (Curve1D units)) units
+instance Units (Nondegenerate (Curve1D units)) units
 
 instance Units.Coercion (Nondegenerate (Curve1D units1)) (Nondegenerate (Curve1D units2))
 

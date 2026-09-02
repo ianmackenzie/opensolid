@@ -66,7 +66,7 @@ import OpenSolid.Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform3D (Transform3D)
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -168,13 +168,13 @@ debug expression = case expression of
 --- UNITS ---
 -------------
 
-instance HasUnits (Expression input (Quantity units)) units
+instance Units (Expression input (Quantity units)) units
 
-instance HasUnits (Expression input (Vector2D units)) units
+instance Units (Expression input (Vector2D units)) units
 
-instance HasUnits (Expression input (Vector3D units space)) units
+instance Units (Expression input (Vector3D units space)) units
 
-instance HasUnits (Expression input (Point2D units)) units
+instance Units (Expression input (Point2D units)) units
 
 instance
   input1 ~ input2 =>

@@ -89,7 +89,7 @@ import GHC.TypeLits qualified
 import OpenSolid.Error (Err)
 import OpenSolid.Error qualified as Error
 import OpenSolid.Show qualified as Show
-import OpenSolid.Units (HasUnits, Meters, Radians, Unitless, type (?*?), type (?/?))
+import OpenSolid.Units (Meters, Radians, Unitless, Units, type (?*?), type (?/?))
 import OpenSolid.Units qualified as Units
 import System.Random.Stateful qualified
 import Prelude
@@ -536,7 +536,7 @@ deriving newtype instance Prelude.RealFloat Number
 
 deriving newtype instance Prelude.Read Number
 
-instance HasUnits (Quantity units) units
+instance Units (Quantity units) units
 
 instance Units.Coercion (Quantity units1) (Quantity units2) where
   {-# INLINE coerce #-}
@@ -654,7 +654,7 @@ instance Show Sign where
   show Positive = "Positive"
   show Negative = "Negative"
 
-instance HasUnits Sign Unitless
+instance Units Sign Unitless
 
 instance ApproximateEquality Sign () where (~=) = (==)
 

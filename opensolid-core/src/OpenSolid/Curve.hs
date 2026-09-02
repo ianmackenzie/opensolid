@@ -125,7 +125,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.Transform (Transform, TransformExists)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform.Tag qualified as Transform.Tag
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector, VectorExists)
 import OpenSolid.Vector qualified as Vector
@@ -200,7 +200,7 @@ instance FFI (Curve2D Meters) where
 instance FFI (Curve2D Unitless) where
   representation = FFI.classRepresentation "UvCurve"
 
-instance HasUnits (Curve dimension units space) units
+instance Units (Curve dimension units space) units
 
 instance
   CurveExists dimension units space =>

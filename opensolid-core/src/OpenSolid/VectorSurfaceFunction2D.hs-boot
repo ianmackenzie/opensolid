@@ -16,7 +16,7 @@ import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Vector2D, VectorBounds2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -29,7 +29,7 @@ data VectorSurfaceFunction2D units
 type Compiled units =
   CompiledFunction UvPoint (Vector2D units) UvBounds (VectorBounds2D units)
 
-instance HasUnits (VectorSurfaceFunction2D units) units
+instance Units (VectorSurfaceFunction2D units) units
 
 instance Units.Coercion (VectorSurfaceFunction2D units1) (VectorSurfaceFunction2D units2)
 

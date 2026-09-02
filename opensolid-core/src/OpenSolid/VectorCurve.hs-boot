@@ -23,7 +23,7 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Prelude
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector)
 import OpenSolid.VectorBounds (VectorBounds)
@@ -45,7 +45,7 @@ type Compiled dimension units space =
     (Interval Unitless)
     (VectorBounds dimension units space)
 
-instance HasUnits (VectorCurve dimension units space) units
+instance Units (VectorCurve dimension units space) units
 
 instance Units.Coercion (VectorCurve2D units1) (VectorCurve2D units2)
 
@@ -53,7 +53,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (VectorCurve3D units1 space1) (VectorCurve3D units2 space2)
 
-instance HasUnits (Nondegenerate (VectorCurve dimension units space)) units
+instance Units (Nondegenerate (VectorCurve dimension units space)) units
 
 instance
   Units.Coercion

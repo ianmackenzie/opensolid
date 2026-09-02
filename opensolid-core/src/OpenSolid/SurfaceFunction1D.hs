@@ -66,7 +66,7 @@ import OpenSolid.SurfaceFunction1D.Subproblem (CornerValues (..), Subproblem (..
 import OpenSolid.SurfaceFunction1D.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceFunction1D.Zeros (Zeros (..))
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -88,7 +88,7 @@ data SurfaceFunction1D units = SurfaceFunction1D
 
 type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interval units)
 
-instance HasUnits (SurfaceFunction1D units) units
+instance Units (SurfaceFunction1D units) units
 
 instance Units.Coercion (SurfaceFunction1D units1) (SurfaceFunction1D units2) where
   coerce function =
@@ -438,7 +438,7 @@ new givenCompiled givenPartialDerivatives = do
         PartialDerivatives.merge new compiled partialDerivatives givenPartialDerivatives
   SurfaceFunction1D givenCompiled mergedPartialDerivatives
 
-instance HasUnits (Nonzero (SurfaceFunction1D units)) units
+instance Units (Nonzero (SurfaceFunction1D units)) units
 
 instance
   Units.Coercion
@@ -474,7 +474,7 @@ instance
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
-instance HasUnits (Nondegenerate (SurfaceFunction1D units)) units
+instance Units (Nondegenerate (SurfaceFunction1D units)) units
 
 instance
   Units.Coercion

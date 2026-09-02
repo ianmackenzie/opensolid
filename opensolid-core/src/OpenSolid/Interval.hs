@@ -79,7 +79,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random qualified as Random
 import OpenSolid.Show qualified as Show
 import OpenSolid.Unboxed.Math
-import OpenSolid.Units (HasUnits, SquareMeters)
+import OpenSolid.Units (Units, SquareMeters)
 import OpenSolid.Units qualified as Units
 import Prelude qualified
 
@@ -135,7 +135,7 @@ instance FFI (Interval Meters) where
 instance FFI (Interval SquareMeters) where
   representation = FFI.classRepresentation "AreaInterval"
 
-instance HasUnits (Interval units) units
+instance Units (Interval units) units
 
 instance Units.Coercion (Interval units1) (Interval units2) where
   {-# INLINE coerce #-}

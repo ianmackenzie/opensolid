@@ -84,7 +84,7 @@ import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -108,7 +108,7 @@ instance FFI (Region2D Meters) where
 instance FFI (Region2D Unitless) where
   representation = FFI.classRepresentation "UvRegion"
 
-instance HasUnits (Region2D units) units
+instance Units (Region2D units) units
 
 instance Units.Coercion (Region2D units1) (Region2D units2) where
   coerce region =

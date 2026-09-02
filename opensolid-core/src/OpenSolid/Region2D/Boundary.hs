@@ -28,7 +28,7 @@ import OpenSolid.Set2D (Set2D)
 import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 
 data Boundary units = Boundary
@@ -36,7 +36,7 @@ data Boundary units = Boundary
   , tree :: ~(BoundaryTree units)
   }
 
-instance HasUnits (Boundary units) units
+instance Units (Boundary units) units
 
 instance Units.Coercion (Boundary units1) (Boundary units2) where
   coerce boundary =

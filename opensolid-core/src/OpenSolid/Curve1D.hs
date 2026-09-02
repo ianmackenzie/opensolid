@@ -78,7 +78,7 @@ import OpenSolid.Solve1D qualified as Solve1D
 import OpenSolid.Stream (Stream)
 import OpenSolid.Stream qualified as Stream
 import OpenSolid.Tolerance qualified as Tolerance
-import OpenSolid.Units (HasUnits, SquareMeters)
+import OpenSolid.Units (SquareMeters, Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector3D (Vector3D)
@@ -103,7 +103,7 @@ instance FFI (Curve1D SquareMeters) where
 instance FFI (Curve1D Radians) where
   representation = FFI.classRepresentation "AngleCurve1D"
 
-instance HasUnits (Curve1D units) units
+instance Units (Curve1D units) units
 
 instance Units.Coercion (Curve1D units1) (Curve1D units2) where
   coerce curve =
@@ -413,12 +413,12 @@ instance
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
 
-instance HasUnits (Nondegenerate (Curve1D units)) units
+instance Units (Nondegenerate (Curve1D units)) units
 
 instance Units.Coercion (Nondegenerate (Curve1D units1)) (Nondegenerate (Curve1D units2)) where
   coerce (Nondegenerate curve) = Nondegenerate (Units.coerce curve)
 
-instance HasUnits (Nonzero (Curve1D units)) units
+instance Units (Nonzero (Curve1D units)) units
 
 instance Units.Coercion (Nonzero (Curve1D units1)) (Nonzero (Curve1D units2)) where
   coerce (Nonzero curve) = Nonzero (Units.coerce curve)

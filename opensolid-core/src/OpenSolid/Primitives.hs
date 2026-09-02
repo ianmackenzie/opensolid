@@ -38,7 +38,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Show qualified as Show
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
-import OpenSolid.Units (HasUnits, SquareMeters)
+import OpenSolid.Units (SquareMeters, Units)
 import OpenSolid.Units qualified as Units
 
 ----- Vector2D -----
@@ -75,7 +75,7 @@ instance FFI (Vector2D Meters) where
 instance FFI (Vector2D SquareMeters) where
   representation = FFI.classRepresentation "AreaVector2D"
 
-instance HasUnits (Vector2D units) units
+instance Units (Vector2D units) units
 
 instance Units.Coercion (Vector2D units1) (Vector2D units2) where
   {-# INLINE coerce #-}
@@ -331,7 +331,7 @@ instance FFI (Point2D Meters) where
 instance FFI (Point2D Unitless) where
   representation = FFI.classRepresentation "UvPoint"
 
-instance HasUnits (Point2D units) units
+instance Units (Point2D units) units
 
 instance Units.Coercion (Point2D units1) (Point2D units2) where
   {-# INLINE coerce #-}
@@ -386,7 +386,7 @@ data VectorBounds2D units
     VectorBounds2D (Interval units) (Interval units)
   deriving (Eq, Show)
 
-instance HasUnits (VectorBounds2D units) units
+instance Units (VectorBounds2D units) units
 
 instance Units.Coercion (VectorBounds2D units1) (VectorBounds2D units2) where
   {-# INLINE coerce #-}
@@ -698,7 +698,7 @@ instance Show (Bounds2D units) where
   showsPrec precedence (Bounds2D bx by) =
     Show.constructor2 precedence "Bounds2D" bx by
 
-instance HasUnits (Bounds2D units) units
+instance Units (Bounds2D units) units
 
 instance Units.Coercion (Bounds2D units1) (Bounds2D units2) where
   {-# INLINE coerce #-}
@@ -808,7 +808,7 @@ deriving instance Eq (Axis2D units)
 
 deriving instance Show (Axis2D units)
 
-instance HasUnits (Axis2D units) units
+instance Units (Axis2D units) units
 
 instance FFI (Axis2D Meters) where
   representation = FFI.classRepresentation "Axis2D"
@@ -909,7 +909,7 @@ deriving instance Ord (Transform2D tag units)
 
 deriving instance Show (Transform2D tag units)
 
-instance HasUnits (Transform2D tag units) units
+instance Units (Transform2D tag units) units
 
 instance
   tag1 ~ tag2 =>
@@ -981,7 +981,7 @@ instance FFI (Vector3D Meters Void) where
 instance FFI (Vector3D SquareMeters Void) where
   representation = FFI.classRepresentation "AreaVector3D"
 
-instance HasUnits (Vector3D units space) units
+instance Units (Vector3D units space) units
 
 instance
   space1 ~ space2 =>
@@ -1396,7 +1396,7 @@ instance Show (VectorBounds3D units space) where
   showsPrec precedence (VectorBounds3D x y z) =
     Show.constructor3 precedence "VectorBounds3D" x y z
 
-instance HasUnits (VectorBounds3D units space) units
+instance Units (VectorBounds3D units space) units
 
 instance
   space1 ~ space2 =>

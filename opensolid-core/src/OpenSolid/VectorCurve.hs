@@ -79,7 +79,7 @@ import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform.Tag qualified as Transform.Tag
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector, VectorExists)
 import OpenSolid.Vector qualified as Vector
@@ -217,7 +217,7 @@ instance FFI (VectorCurve3D Unitless Void) where
 instance FFI (VectorCurve3D Meters Void) where
   representation = FFI.classRepresentation "VectorCurve3D"
 
-instance HasUnits (VectorCurve dimension units space) units
+instance Units (VectorCurve dimension units space) units
 
 instance Units.Coercion (VectorCurve2D units1) (VectorCurve2D units2) where
   coerce curve =
@@ -242,7 +242,7 @@ instance
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
       }
 
-instance HasUnits (Nondegenerate (VectorCurve dimension units space)) units
+instance Units (Nondegenerate (VectorCurve dimension units space)) units
 
 instance
   Units.Coercion
@@ -259,7 +259,7 @@ instance
   where
   coerce (Nondegenerate curve) = Nondegenerate (Units.coerce curve)
 
-instance HasUnits (Nonzero (VectorCurve dimension units space)) units
+instance Units (Nonzero (VectorCurve dimension units space)) units
 
 instance
   Units.Coercion

@@ -36,7 +36,7 @@ import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -55,7 +55,7 @@ data SurfaceFunction2D units = SurfaceFunction2D
 type Compiled units =
   CompiledFunction UvPoint (Point2D units) UvBounds (Bounds2D units)
 
-instance HasUnits (SurfaceFunction2D units) units
+instance Units (SurfaceFunction2D units) units
 
 instance Units.Coercion (SurfaceFunction2D units1) (SurfaceFunction2D units2) where
   coerce function =

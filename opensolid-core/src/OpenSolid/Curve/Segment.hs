@@ -28,7 +28,7 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
 import OpenSolid.VectorBounds qualified as VectorBounds
@@ -44,7 +44,7 @@ data Segment dimension units space = Segment
   , isDegenerate :: ~Bool
   }
 
-instance HasUnits (Segment dimension units space) units
+instance Units (Segment dimension units space) units
 
 instance
   ( dimension1 ~ dimension2

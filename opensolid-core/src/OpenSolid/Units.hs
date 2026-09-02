@@ -1,5 +1,5 @@
 module OpenSolid.Units
-  ( HasUnits
+  ( Units
   , Coercion (coerce)
   , erase
   , unerase
@@ -32,17 +32,17 @@ import Data.Kind (Constraint, Type)
 import Data.List.NonEmpty (NonEmpty)
 import Prelude (Eq, Int, Maybe (Just, Nothing), Show, type (~))
 
-class HasUnits (a :: k) units | a -> units
+class Units (a :: k) units | a -> units
 
 data Unitless deriving (Eq, Show)
 
-instance HasUnits Int Unitless
+instance Units Int Unitless
 
-instance HasUnits a units => HasUnits (Maybe a) units
+instance Units a units => Units (Maybe a) units
 
-instance HasUnits a units => HasUnits [a] units
+instance Units a units => Units [a] units
 
-instance HasUnits a units => HasUnits (NonEmpty a) units
+instance Units a units => Units (NonEmpty a) units
 
 type Coercion :: Type -> Type -> Constraint
 class Coercion a b where
@@ -59,11 +59,11 @@ instance (Coercion a b, Data.Coerce.Coercible a b) => Coercion (NonEmpty a) (Non
   coerce = Data.Coerce.coerce
 
 {-# INLINE erase #-}
-erase :: (Coercion a b, HasUnits a units, HasUnits b Unitless) => a -> b
+erase :: (Coercion a b, Units a units, Units b Unitless) => a -> b
 erase = coerce
 
 {-# INLINE unerase #-}
-unerase :: (Coercion a b, HasUnits a Unitless, HasUnits b units) => a -> b
+unerase :: (Coercion a b, Units a Unitless, Units b units) => a -> b
 unerase = coerce
 
 data a ?*? b
@@ -71,36 +71,15 @@ data a ?*? b
 data a ?/? b
 
 {-# INLINE specialize #-}
-specialize ::
-  ( Coercion a b
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , Specialize unitsA unitsB
-  ) =>
-  a ->
-  b
+specialize :: (Coercion a b, Units a unitsA, Units b unitsB, Specialize unitsA unitsB) => a -> b
 specialize = coerce
 
 {-# INLINE unspecialize #-}
-unspecialize ::
-  ( Coercion b a
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , Specialize unitsA unitsB
-  ) =>
-  b ->
-  a
+unspecialize :: (Coercion b a, Units a unitsA, Units b unitsB, Specialize unitsA unitsB) => b -> a
 unspecialize = coerce
 
 {-# INLINE simplify #-}
-simplify ::
-  ( Coercion a b
-  , HasUnits a unitsA
-  , HasUnits b unitsB
-  , Simplification unitsA unitsB
-  ) =>
-  a ->
-  b
+simplify :: (Coercion a b, Units a unitsA, Units b unitsB, Simplification unitsA unitsB) => a -> b
 simplify = coerce
 
 class Simplification units1 units2

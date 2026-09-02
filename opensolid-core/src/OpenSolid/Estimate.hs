@@ -28,7 +28,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude hiding (max, min)
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 
 class Interface a units | a -> units where
@@ -43,7 +43,7 @@ data Estimate units where
   Estimate :: Interface a units => a -> Interval units -> Estimate units
   Coerce :: Estimate units1 -> Estimate units2
 
-instance HasUnits (Estimate units) units
+instance Units (Estimate units) units
 
 instance Units.Coercion (Estimate units1) (Estimate units2) where
   coerce (Coerce estimate) = Coerce estimate

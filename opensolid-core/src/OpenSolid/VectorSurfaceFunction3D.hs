@@ -53,7 +53,7 @@ import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
-import OpenSolid.Units (HasUnits)
+import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -82,7 +82,7 @@ type Compiled units space =
     UvBounds
     (VectorBounds3D units space)
 
-instance HasUnits (VectorSurfaceFunction3D units space) units
+instance Units (VectorSurfaceFunction3D units space) units
 
 instance
   space1 ~ space2 =>
