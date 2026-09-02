@@ -34,7 +34,6 @@ import OpenSolid.DirectionBounds2D qualified as DirectionBounds2D
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionBounds3D qualified as DirectionBounds3D
 import OpenSolid.Error (IsZero (IsZero))
-import OpenSolid.HasZero (HasZero)
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Point2D (Point2D)
@@ -63,6 +62,7 @@ import OpenSolid.VectorTransform2D (VectorTransform2D)
 import OpenSolid.VectorTransform2D qualified as VectorTransform2D
 import OpenSolid.VectorTransform3D (VectorTransform3D)
 import OpenSolid.VectorTransform3D qualified as VectorTransform3D
+import OpenSolid.Zero (Zero)
 
 type family
   Vector dimension units space =
@@ -128,7 +128,7 @@ type family
   Transform 3 tag Meters space = Transform3D tag space
 
 class
-  ( HasZero (Vector dimension units space)
+  ( Zero (Vector dimension units space)
   , Units (Vector dimension units space) units
   , Coercible (Vector dimension units space) (Vector dimension Unitless space)
   , Coercible (Vector dimension Unitless space) (Vector dimension units space)

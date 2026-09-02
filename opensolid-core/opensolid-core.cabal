@@ -269,6 +269,7 @@ library
     OpenSolid.VectorTransform3D
     OpenSolid.Volume
     OpenSolid.World3D
+    OpenSolid.Zero
 
   other-modules:
     OpenSolid.Body3D.HalfEdge
@@ -286,7 +287,6 @@ library
     OpenSolid.Curve.TangentSolver2D
     OpenSolid.Curve.TangentSolver3D
     OpenSolid.Curve1D.Bisection
-    OpenSolid.HasZero
     OpenSolid.Lobatto
     OpenSolid.PartialDerivatives
     OpenSolid.Primitives.Abstract

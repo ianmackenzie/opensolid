@@ -29,8 +29,6 @@ where
 import Data.Coerce qualified
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.HasZero (HasZero)
-import OpenSolid.HasZero qualified as HasZero
 import OpenSolid.Interval (Interval (I#))
 import OpenSolid.Length (Length)
 import OpenSolid.Prelude
@@ -40,6 +38,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units (SquareMeters, Units)
 import OpenSolid.Units qualified as Units
+import OpenSolid.Zero (Zero (zero))
 
 ----- Vector2D -----
 
@@ -85,7 +84,7 @@ instance ApproximateEquality (Vector2D units) (Tolerance units) where
   {-# INLINE (~=) #-}
   V2D# x1# y1# ~= V2D# x2# y2# = B# (hypot2# (x2# -# x1#) (y2# -# y1#) ~=# 0.0##)
 
-instance HasZero (Vector2D units) where
+instance Zero (Vector2D units) where
   {-# INLINE zero #-}
   zero = V2D# 0.0## 0.0##
 
@@ -993,7 +992,7 @@ instance ApproximateEquality (Vector3D units space) (Tolerance units) where
   Vector3D x1 y1 z1 ~= Vector3D x2 y2 z2 =
     Quantity.hypot3 (x2 - x1) (y2 - y1) (z2 - z1) ~= Quantity.zero
 
-instance HasZero (Vector3D units space) where
+instance Zero (Vector3D units space) where
   zero = Vector3D Quantity.zero Quantity.zero Quantity.zero
 
 instance Negation (Vector3D units space) where
@@ -1357,7 +1356,7 @@ instance
   space1 ~ space2 =>
   Intersects (Point3D space1) (Axis3D space2) (Tolerance Meters)
   where
-  p `intersects` (Axis3D p0 d) = (p - p0) `cross` d ~= HasZero.zero
+  p `intersects` (Axis3D p0 d) = (p - p0) `cross` d ~= zero
 
 instance
   space1 ~ space2 =>

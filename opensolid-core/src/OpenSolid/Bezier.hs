@@ -9,15 +9,15 @@ module OpenSolid.Bezier
   )
 where
 
-import OpenSolid.HasZero (HasZero (zero))
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
+import OpenSolid.Zero (Zero (zero))
 
 type Vector vector =
-  ( HasZero vector
+  ( Zero vector
   , Addition vector vector vector
   , Subtraction vector vector vector
   , Multiplication vector Number vector
