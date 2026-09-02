@@ -105,20 +105,11 @@ simplify = coerce
 
 class Simplification units1 units2
 
-instance
-  Simplification
-    (Unitless ?*? units)
-    units
+instance Simplification (Unitless ?*? units) units
 
-instance
-  Simplification
-    (units ?*? Unitless)
-    units
+instance Simplification (units ?*? Unitless) units
 
-instance
-  Simplification
-    (units ?/? Unitless)
-    units
+instance Simplification (units ?/? Unitless) units
 
 instance
   Simplification
