@@ -32,7 +32,7 @@ import Data.Kind (Constraint, Type)
 import Data.List.NonEmpty (NonEmpty)
 import Prelude (Eq, Int, Maybe (Just, Nothing), Show, type (~))
 
-class Units (a :: k) units | a -> units
+class Units a units | a -> units
 
 data Unitless deriving (Eq, Show)
 
