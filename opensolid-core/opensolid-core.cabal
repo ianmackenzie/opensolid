@@ -154,6 +154,7 @@ library
     OpenSolid.Frame3D
     OpenSolid.Fuzzy
     OpenSolid.Gltf
+    OpenSolid.HasZero
     OpenSolid.HigherOrderZero
     OpenSolid.IO
     OpenSolid.IO.Parallel
