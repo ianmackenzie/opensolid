@@ -86,8 +86,8 @@ import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
 import GHC.TypeLits (KnownSymbol, Symbol)
 import GHC.TypeLits qualified
-import OpenSolid.Error (Err)
-import OpenSolid.Error qualified as Error
+import OpenSolid.Err (Err)
+import OpenSolid.Err qualified as Err
 import OpenSolid.Show qualified as Show
 import OpenSolid.Units (Meters, Radians, Unitless, Units, type (?*?), type (?/?))
 import OpenSolid.Units qualified as Units
@@ -478,7 +478,7 @@ Err err ?? fallback = let ?err = err in fallback
 infixl 0 ??
 
 fail :: MonadFail m => OnError x (m a)
-fail = Prelude.fail (Data.Text.unpack (Error.message ?err))
+fail = Prelude.fail (Data.Text.unpack (Err.message ?err))
 
 catch :: (x -> OnError x a) -> OnError x a
 catch callback = callback ?err

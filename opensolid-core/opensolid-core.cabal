@@ -145,6 +145,7 @@ library
     OpenSolid.Domain1D
     OpenSolid.Domain2D
     OpenSolid.Duration
+    OpenSolid.Err
     OpenSolid.Error
     OpenSolid.Estimate
     OpenSolid.Expression
