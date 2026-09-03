@@ -9,7 +9,7 @@ where
 
 import Foreign (Ptr)
 import OpenSolid.API.Argument qualified as Argument
-import OpenSolid.API.ImplicitArgument (ImplicitArgument (..))
+import OpenSolid.API.ImplicitTolerance (ImplicitTolerance (ImplicitTolerance))
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.InternalError qualified as InternalError
@@ -204,21 +204,21 @@ invoke function = case function of
       (arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10)
 
-type Signature = (Maybe ImplicitArgument, List (Name, FFI.Type, Argument.Kind), FFI.Type)
+type Signature = (Maybe ImplicitTolerance, List (Name, FFI.Type, Argument.Kind), FFI.Type)
 
 normalizeSignature ::
-  (Maybe ImplicitArgument, List (Name, FFI.Type, Argument.Kind), FFI.Type) ->
-  (Maybe ImplicitArgument, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
-normalizeSignature (maybeImplicitArgument, arguments, returnType) =
+  (Maybe ImplicitTolerance, List (Name, FFI.Type, Argument.Kind), FFI.Type) ->
+  (Maybe ImplicitTolerance, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
+normalizeSignature (maybeImplicitTolerance, arguments, returnType) =
   if not (List.isOrdered (\(_, _, kind1) (_, _, kind2) -> kind1 <= kind2) arguments)
     then InternalError.throw "Named arguments should always come after positional arguments"
     else do
       let args desiredKind = [(name, typ) | (name, typ, kind) <- arguments, kind == desiredKind]
-      (maybeImplicitArgument, args Argument.Positional, args Argument.Named, returnType)
+      (maybeImplicitTolerance, args Argument.Positional, args Argument.Named, returnType)
 
 signature ::
   StaticFunction ->
-  (Maybe ImplicitArgument, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
+  (Maybe ImplicitTolerance, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
 signature staticFunction = normalizeSignature $ case staticFunction of
   StaticFunction1 arg1 f _ -> signature1 arg1 f
   StaticFunctionM1 arg1 f _ -> signatureM1 arg1 f
@@ -253,7 +253,7 @@ signatureM1 ::
   (Tolerance Meters => a -> b) ->
   Signature
 signatureM1 arg1 _ =
-  (Just ToleranceMeters, [arg a arg1], FFI.typeOf b)
+  (Just ImplicitTolerance, [arg a arg1], FFI.typeOf b)
 
 signature2 ::
   forall a b c.
@@ -273,7 +273,7 @@ signatureM2 ::
   (Tolerance Meters => a -> b -> c) ->
   Signature
 signatureM2 arg1 arg2 _ =
-  (Just ToleranceMeters, [arg a arg1, arg b arg2], FFI.typeOf c)
+  (Just ImplicitTolerance, [arg a arg1, arg b arg2], FFI.typeOf c)
 
 signature3 ::
   forall a b c d.
@@ -295,7 +295,7 @@ signatureM3 ::
   (Tolerance Meters => a -> b -> c -> d) ->
   Signature
 signatureM3 arg1 arg2 arg3 _ =
-  (Just ToleranceMeters, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf d)
+  (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf d)
 
 signature4 ::
   forall a b c d e.
@@ -319,7 +319,7 @@ signatureM4 ::
   (Tolerance Meters => a -> b -> c -> d -> e) ->
   Signature
 signatureM4 arg1 arg2 arg3 arg4 _ =
-  (Just ToleranceMeters, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf e)
+  (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf e)
 
 signature5 ::
   forall a b c d e f.
@@ -345,7 +345,7 @@ signatureM5 ::
   (Tolerance Meters => a -> b -> c -> d -> e -> f) ->
   Signature
 signatureM5 arg1 arg2 arg3 arg4 arg5 _ =
-  (Just ToleranceMeters, [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5], FFI.typeOf f)
+  (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5], FFI.typeOf f)
 
 signature6 ::
   forall a b c d e f g.
@@ -373,7 +373,7 @@ signatureM6 ::
   (Tolerance Meters => a -> b -> c -> d -> e -> f -> g) ->
   Signature
 signatureM6 arg1 arg2 arg3 arg4 arg5 arg6 _ =
-  (Just ToleranceMeters, [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5, arg f arg6], FFI.typeOf g)
+  (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5, arg f arg6], FFI.typeOf g)
 
 signature10 ::
   forall a b c d e f g h i j k.

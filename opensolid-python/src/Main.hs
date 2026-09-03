@@ -5,7 +5,7 @@ import OpenSolid.API.Class (Class (Class))
 import OpenSolid.API.Class qualified as Class
 import OpenSolid.API.Function (Function)
 import OpenSolid.API.Function qualified as Function
-import OpenSolid.API.ImplicitArgument (ImplicitArgument)
+import OpenSolid.API.ImplicitTolerance (ImplicitTolerance)
 import OpenSolid.API.Upcast (Upcast)
 import OpenSolid.API.Upcast qualified as Upcast
 import OpenSolid.FFI qualified as FFI
@@ -305,15 +305,14 @@ allExportsDefinition = do
 registerFunctionTypes :: Function -> Registry -> Registry
 registerFunctionTypes function registry =
   registry
-    & registerArgumentTypes (Function.implicitArgument function) (Function.argumentTypes function)
+    & registerArgumentTypes (Function.implicitTolerance function) (Function.argumentTypes function)
     & Python.FFI.registerType (Function.returnType function)
 
-registerArgumentTypes :: Maybe ImplicitArgument -> List FFI.Type -> Registry -> Registry
-registerArgumentTypes maybeImplicitArgument argumentTypes registry = do
-  let implicitArgumentType implicitArgument =
-        Pair.second (Python.Function.implicitValue implicitArgument)
-  let maybeImplicitArgumentType = Maybe.map implicitArgumentType maybeImplicitArgument
-  case List.maybe maybeImplicitArgumentType <> argumentTypes of
+registerArgumentTypes :: Maybe ImplicitTolerance -> List FFI.Type -> Registry -> Registry
+registerArgumentTypes implicitTolerance argumentTypes registry = do
+  let implicitToleranceType = Pair.second . Python.Function.implicitToleranceArgument
+  let implicitArgumentType = Maybe.map implicitToleranceType implicitTolerance
+  case List.maybe implicitArgumentType <> argumentTypes of
     [] -> registry
     [type1] -> Python.FFI.registerType type1 registry
     type1 : type2 : rest -> Python.FFI.registerType (FFI.Tuple type1 type2 rest) registry

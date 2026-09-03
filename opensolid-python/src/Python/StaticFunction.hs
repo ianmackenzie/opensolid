@@ -15,12 +15,13 @@ import Python.Type qualified
 definition :: FFI.ClassName -> (Name, StaticFunction) -> Text
 definition className (functionName, staticFunction) = do
   let ffiFunctionName = StaticFunction.ffiName className functionName staticFunction
-  let (maybeImplicitArgument, positionalArguments, namedArguments, returnType) =
+  let (implicitTolerance, positionalArguments, namedArguments, returnType) =
         StaticFunction.signature staticFunction
-  let maybeImplicitValue = Maybe.map Python.Function.implicitValue maybeImplicitArgument
+  let implicitToleranceArgument =
+        Maybe.map Python.Function.implicitToleranceArgument implicitTolerance
   let normalArguments =
         List.map (Pair.mapFirst FFI.snakeCase) (positionalArguments <> namedArguments)
-  let ffiArguments = List.maybe maybeImplicitValue <> normalArguments
+  let ffiArguments = List.maybe implicitToleranceArgument <> normalArguments
   Python.lines
     [ "@staticmethod"
     , "def "

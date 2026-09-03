@@ -9,8 +9,7 @@ where
 
 import Foreign (Ptr)
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator
-import OpenSolid.API.ImplicitArgument (ImplicitArgument)
-import OpenSolid.API.ImplicitArgument qualified as ImplicitArgument
+import OpenSolid.API.ImplicitTolerance (ImplicitTolerance (ImplicitTolerance))
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
@@ -33,14 +32,14 @@ ffiName className operatorId overload = case overload of
   PreOperatorOverloadM f ->
     BinaryOperator.ffiName className operatorId (BinaryOperator.functionSignatureM f)
 
-signature :: PreOperatorOverload -> (Maybe ImplicitArgument, FFI.Type, FFI.Type)
+signature :: PreOperatorOverload -> (Maybe ImplicitTolerance, FFI.Type, FFI.Type)
 signature overload = case overload of
   PreOperatorOverload f -> do
     let (lhsType, _selfType, returnType) = BinaryOperator.functionSignature f
     (Nothing, lhsType, returnType)
   PreOperatorOverloadM f -> do
     let (lhsType, _selfType, returnType) = BinaryOperator.functionSignatureM f
-    (Just ImplicitArgument.ToleranceMeters, lhsType, returnType)
+    (Just ImplicitTolerance, lhsType, returnType)
 
 lhsName :: Name
 lhsName = FFI.name "Lhs"

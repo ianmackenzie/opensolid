@@ -2,7 +2,7 @@ module Python.PostOperator (definition) where
 
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator
 import OpenSolid.API.Class (FallbackFunction)
-import OpenSolid.API.ImplicitArgument (ImplicitArgument)
+import OpenSolid.API.ImplicitTolerance (ImplicitTolerance)
 import OpenSolid.API.PostOperatorOverload (PostOperatorOverload (..))
 import OpenSolid.API.PostOperatorOverload qualified as PostOperatorOverload
 import OpenSolid.FFI qualified as FFI
@@ -76,10 +76,10 @@ overloadComponents ::
 overloadComponents className operatorId (overload, _) = do
   let ffiFunctionName = PostOperatorOverload.ffiName className operatorId overload
   let selfType = FFI.Class className
-  let (maybeImplicitArgument, rhsType, returnType) = PostOperatorOverload.signature overload
+  let (implicitTolerance, rhsType, returnType) = PostOperatorOverload.signature overload
   let signature = overloadSignature operatorId rhsType returnType
   let matchPattern = Python.Function.typePattern rhsType
-  let body = overloadBody ffiFunctionName maybeImplicitArgument selfType rhsType returnType
+  let body = overloadBody ffiFunctionName implicitTolerance selfType rhsType returnType
   (signature, matchPattern, body)
 
 overloadSignature :: BinaryOperator.Id -> FFI.Type -> FFI.Type -> Text
@@ -89,8 +89,10 @@ overloadSignature operatorId rhsType returnType = do
   let rhsArgument = rhsArgName <> ": " <> rhsTypeName
   "def " <> functionName operatorId <> "(self, " <> rhsArgument <> ") -> " <> returnTypeName <> ":"
 
-overloadBody :: Text -> Maybe ImplicitArgument -> FFI.Type -> FFI.Type -> FFI.Type -> Text
-overloadBody ffiFunctionName maybeImplicitArgument selfType rhsType returnType = do
-  let maybeImplicitValue = Maybe.map Python.Function.implicitValue maybeImplicitArgument
-  let ffiArguments = List.maybe maybeImplicitValue <> [("self", selfType), (rhsArgName, rhsType)]
+overloadBody :: Text -> Maybe ImplicitTolerance -> FFI.Type -> FFI.Type -> FFI.Type -> Text
+overloadBody ffiFunctionName implicitTolerance selfType rhsType returnType = do
+  let implicitToleranceArgument =
+        Maybe.map Python.Function.implicitToleranceArgument implicitTolerance
+  let ffiArguments =
+        List.maybe implicitToleranceArgument <> [("self", selfType), (rhsArgName, rhsType)]
   Python.Function.body ffiFunctionName ffiArguments returnType

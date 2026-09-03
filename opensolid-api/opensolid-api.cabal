@@ -39,7 +39,7 @@ library
     OpenSolid.API.EqualityFunction
     OpenSolid.API.Function
     OpenSolid.API.HashFunction
-    OpenSolid.API.ImplicitArgument
+    OpenSolid.API.ImplicitTolerance
     OpenSolid.API.MemberFunction
     OpenSolid.API.NegationFunction
     OpenSolid.API.PostOperatorOverload

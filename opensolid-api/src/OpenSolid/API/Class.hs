@@ -1167,7 +1167,7 @@ upcastInfo className maybeToParent = case maybeToParent of
     List.singleton $
       Function
         { ffiName = Upcast.ffiName className
-        , implicitArgument = Nothing
+        , implicitTolerance = Nothing
         , argumentTypes = [FFI.Class className]
         , returnType = FFI.Class (Upcast.parentClassName toParent)
         , invoke = Upcast.invoke toParent
@@ -1177,7 +1177,7 @@ constantFunctionInfo :: FFI.ClassName -> (FFI.Name, Constant) -> Function
 constantFunctionInfo className (constantName, constantFunction@(Constant @t _ _)) =
   Function
     { ffiName = Constant.ffiName className constantName
-    , implicitArgument = Nothing
+    , implicitTolerance = Nothing
     , argumentTypes = []
     , returnType = FFI.typeOf t
     , invoke = Constant.invoke constantFunction
@@ -1191,7 +1191,7 @@ constructorInfo className maybeConstructor = case maybeConstructor of
     List.singleton $
       Function
         { ffiName = Constructor.ffiName className constructor
-        , implicitArgument = Nothing
+        , implicitTolerance = Nothing
         , argumentTypes = List.map Pair.second arguments
         , returnType = FFI.Class className
         , invoke = Constructor.invoke constructor
@@ -1199,12 +1199,12 @@ constructorInfo className maybeConstructor = case maybeConstructor of
 
 staticFunctionInfo :: FFI.ClassName -> (FFI.Name, StaticFunction) -> Function
 staticFunctionInfo className (functionName, staticFunction) = do
-  let (implicitArgument, positionalArguments, namedArguments, returnType) =
+  let (implicitTolerance, positionalArguments, namedArguments, returnType) =
         StaticFunction.signature staticFunction
   let arguments = positionalArguments <> namedArguments
   Function
     { ffiName = StaticFunction.ffiName className functionName staticFunction
-    , implicitArgument
+    , implicitTolerance
     , argumentTypes = List.map Pair.second arguments
     , returnType
     , invoke = StaticFunction.invoke staticFunction
@@ -1215,7 +1215,7 @@ propertyInfo className (propertyName, prop) = do
   let selfType = FFI.Class className
   Function
     { ffiName = Property.ffiName className propertyName
-    , implicitArgument = Nothing
+    , implicitTolerance = Nothing
     , argumentTypes = [selfType]
     , returnType = Property.returnType prop
     , invoke = Property.invoke prop
@@ -1224,12 +1224,12 @@ propertyInfo className (propertyName, prop) = do
 memberFunctionInfo :: FFI.ClassName -> (FFI.Name, MemberFunction) -> Function
 memberFunctionInfo className (functionName, memberFunction) = do
   let selfType = FFI.Class className
-  let (implicitArgument, positionalArguments, namedArguments, returnType) =
+  let (implicitTolerance, positionalArguments, namedArguments, returnType) =
         MemberFunction.signature memberFunction
   let arguments = positionalArguments <> namedArguments
   Function
     { ffiName = MemberFunction.ffiName className functionName memberFunction
-    , implicitArgument
+    , implicitTolerance
     , argumentTypes = List.map Pair.second arguments <> [selfType]
     , returnType
     , invoke = MemberFunction.invoke memberFunction
@@ -1243,7 +1243,7 @@ negationFunctionInfo className maybeNegationFunction = case maybeNegationFunctio
     List.singleton $
       Function
         { ffiName = NegationFunction.ffiName className
-        , implicitArgument = Nothing
+        , implicitTolerance = Nothing
         , argumentTypes = [selfType]
         , returnType = selfType
         , invoke = NegationFunction.invoke negationFunction
@@ -1257,7 +1257,7 @@ absFunctionInfo className maybeAbsFunction = case maybeAbsFunction of
     List.singleton $
       Function
         { ffiName = AbsFunction.ffiName className
-        , implicitArgument = Nothing
+        , implicitTolerance = Nothing
         , argumentTypes = [selfType]
         , returnType = selfType
         , invoke = AbsFunction.invoke absFunction
@@ -1274,7 +1274,7 @@ equalityAndHashFunctionInfo className maybeFunctions = case maybeFunctions of
     let equalityFunctionInfo =
           Function
             { ffiName = EqualityFunction.ffiName className
-            , implicitArgument = Nothing
+            , implicitTolerance = Nothing
             , argumentTypes = [selfType, selfType]
             , returnType = FFI.typeOf Bool
             , invoke = EqualityFunction.invoke equalityFunction
@@ -1282,7 +1282,7 @@ equalityAndHashFunctionInfo className maybeFunctions = case maybeFunctions of
     let hashFunctionInfo =
           Function
             { ffiName = HashFunction.ffiName className
-            , implicitArgument = Nothing
+            , implicitTolerance = Nothing
             , argumentTypes = [selfType]
             , returnType = FFI.typeOf Int
             , invoke = HashFunction.invoke hashFunction
@@ -1297,7 +1297,7 @@ comparisonFunctionInfo className maybeComparisonFunction = case maybeComparisonF
     List.singleton $
       Function
         { ffiName = ComparisonFunction.ffiName className
-        , implicitArgument = Nothing
+        , implicitTolerance = Nothing
         , argumentTypes = [selfType, selfType]
         , returnType = FFI.typeOf Int
         , invoke = ComparisonFunction.invoke comparisonFunction
@@ -1306,10 +1306,10 @@ comparisonFunctionInfo className maybeComparisonFunction = case maybeComparisonF
 preOperatorOverload :: FFI.ClassName -> BinaryOperator.Id -> PreOperatorOverload -> Function
 preOperatorOverload className operatorId overload = do
   let selfType = FFI.Class className
-  let (implicitArgument, lhsType, returnType) = PreOperatorOverload.signature overload
+  let (implicitTolerance, lhsType, returnType) = PreOperatorOverload.signature overload
   Function
     { ffiName = PreOperatorOverload.ffiName className operatorId overload
-    , implicitArgument = implicitArgument
+    , implicitTolerance = implicitTolerance
     , argumentTypes = [lhsType, selfType]
     , returnType = returnType
     , invoke = PreOperatorOverload.invoke overload
@@ -1329,10 +1329,10 @@ postOperatorOverload ::
   Function
 postOperatorOverload className operatorId overload = do
   let selfType = FFI.Class className
-  let (implicitArgument, rhsType, returnType) = PostOperatorOverload.signature overload
+  let (implicitTolerance, rhsType, returnType) = PostOperatorOverload.signature overload
   Function
     { ffiName = PostOperatorOverload.ffiName className operatorId overload
-    , implicitArgument = implicitArgument
+    , implicitTolerance = implicitTolerance
     , argumentTypes = [selfType, rhsType]
     , returnType = returnType
     , invoke = PostOperatorOverload.invoke overload

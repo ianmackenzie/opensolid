@@ -2,7 +2,7 @@ module Python.Function
   ( overloadDeclaration
   , overloadCase
   , matchPattern
-  , implicitValue
+  , implicitToleranceArgument
   , typePattern
   , arguments
   , argument
@@ -10,8 +10,8 @@ module Python.Function
   )
 where
 
-import OpenSolid.API.ImplicitArgument (ImplicitArgument)
-import OpenSolid.API.ImplicitArgument qualified as ImplicitArgument
+import OpenSolid.API.ImplicitTolerance (ImplicitTolerance (ImplicitTolerance))
+import OpenSolid.API.ImplicitTolerance qualified as ImplicitTolerance
 import OpenSolid.FFI (Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.InternalError qualified as InternalError
@@ -87,12 +87,8 @@ tuplePattern type1 type2 rest = do
   let itemPatterns = List.map typePattern (type1 : type2 : rest)
   "(" <> Text.join "," itemPatterns <> ")"
 
-implicitValue :: ImplicitArgument -> (Text, FFI.Type)
-implicitValue argType = (implicitGetter argType, ImplicitArgument.ffiType argType)
-
-implicitGetter :: ImplicitArgument -> Text
-implicitGetter argType = case argType of
-  ImplicitArgument.ToleranceMeters -> "_tolerance()"
+implicitToleranceArgument :: ImplicitTolerance -> (Text, FFI.Type)
+implicitToleranceArgument ImplicitTolerance = ("_tolerance()", ImplicitTolerance.ffiType)
 
 arguments :: "includeSelf" ::: Bool -> List (Name, FFI.Type) -> List (Name, FFI.Type) -> Text
 arguments ("includeSelf" ::: includeSelf) positional named = do

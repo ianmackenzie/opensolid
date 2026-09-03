@@ -9,7 +9,7 @@ where
 
 import Foreign (Ptr)
 import OpenSolid.API.Argument qualified as Argument
-import OpenSolid.API.ImplicitArgument (ImplicitArgument (..))
+import OpenSolid.API.ImplicitTolerance (ImplicitTolerance (ImplicitTolerance))
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.InternalError qualified as InternalError
@@ -145,21 +145,21 @@ invoke function = case function of
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))
 
-type Signature = (Maybe ImplicitArgument, List (Name, FFI.Type, Argument.Kind), FFI.Type)
+type Signature = (Maybe ImplicitTolerance, List (Name, FFI.Type, Argument.Kind), FFI.Type)
 
 normalizeSignature ::
-  (Maybe ImplicitArgument, List (Name, FFI.Type, Argument.Kind), FFI.Type) ->
-  (Maybe ImplicitArgument, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
-normalizeSignature (maybeImplicitArgument, arguments, returnType) =
+  (Maybe ImplicitTolerance, List (Name, FFI.Type, Argument.Kind), FFI.Type) ->
+  (Maybe ImplicitTolerance, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
+normalizeSignature (maybeImplicitTolerance, arguments, returnType) =
   if not (List.isOrdered (\(_, _, kind1) (_, _, kind2) -> kind1 <= kind2) arguments)
     then InternalError.throw "Named arguments should always come after positional arguments"
     else do
       let args desiredKind = [(name, typ) | (name, typ, kind) <- arguments, kind == desiredKind]
-      (maybeImplicitArgument, args Argument.Positional, args Argument.Named, returnType)
+      (maybeImplicitTolerance, args Argument.Positional, args Argument.Named, returnType)
 
 signature ::
   MemberFunction ->
-  (Maybe ImplicitArgument, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
+  (Maybe ImplicitTolerance, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
 signature memberFunction = normalizeSignature $ case memberFunction of
   MemberFunction0 f _ -> signature0 f
   MemberFunctionM0 f _ -> signatureM0 f
@@ -188,7 +188,7 @@ signatureM0 ::
   (Tolerance Meters => value -> result) ->
   Signature
 signatureM0 _ =
-  (Just ToleranceMeters, [], FFI.typeOf result)
+  (Just ImplicitTolerance, [], FFI.typeOf result)
 
 signature1 ::
   forall a value result.
@@ -205,7 +205,7 @@ signatureM1 ::
   Name ->
   (Tolerance Meters => a -> value -> result) ->
   Signature
-signatureM1 arg1 _ = (Just ToleranceMeters, [arg a arg1], FFI.typeOf result)
+signatureM1 arg1 _ = (Just ImplicitTolerance, [arg a arg1], FFI.typeOf result)
 
 signature2 ::
   forall a b value result.
@@ -225,7 +225,7 @@ signatureM2 ::
   (Tolerance Meters => a -> b -> value -> result) ->
   Signature
 signatureM2 arg1 arg2 _ =
-  (Just ToleranceMeters, [arg a arg1, arg b arg2], FFI.typeOf result)
+  (Just ImplicitTolerance, [arg a arg1, arg b arg2], FFI.typeOf result)
 
 signature3 ::
   forall a b c value result.
@@ -247,7 +247,7 @@ signatureM3 ::
   (Tolerance Meters => a -> b -> c -> value -> result) ->
   Signature
 signatureM3 arg1 arg2 arg3 _ =
-  (Just ToleranceMeters, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf result)
+  (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf result)
 
 signature4 ::
   forall a b c d value result.
@@ -271,7 +271,7 @@ signatureM4 ::
   (Tolerance Meters => a -> b -> c -> d -> value -> result) ->
   Signature
 signatureM4 arg1 arg2 arg3 arg4 _ =
-  (Just ToleranceMeters, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf result)
+  (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf result)
 
 documentation :: MemberFunction -> Text
 documentation memberFunction = case memberFunction of
