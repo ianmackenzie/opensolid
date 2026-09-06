@@ -90,7 +90,7 @@ isDegenerate :: Segment dimension units space -> Bool
 isDegenerate = (.isDegenerate)
 
 isMonotonic :: VectorBoundsExists dimension units space => Segment dimension units space -> Bool
-isMonotonic segment = Interval.isResolved (VectorBounds.magnitude segment.derivativeRange)
+isMonotonic = VectorBounds.isResolved . derivativeRange
 
 areDistinct ::
   (BoundsExists dimension units space, Tolerance units) =>
