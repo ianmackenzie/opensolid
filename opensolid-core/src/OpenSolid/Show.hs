@@ -1,4 +1,11 @@
-module OpenSolid.Show (constructor, constructor2, constructor3) where
+module OpenSolid.Show
+  ( constructor
+  , constructor2
+  , constructor3
+  , record
+  , partialRecord
+  )
+where
 
 import Data.List qualified
 import Data.String (fromString)
@@ -23,6 +30,22 @@ constructorN :: Int -> Text -> [ShowS] -> ShowS
 constructorN precedence name fields =
   Text.Show.showParen (precedence > 10) $
     join space (literal name : fields)
+
+record :: Int -> Text -> [(Text, Text)] -> ShowS
+record precedence name fields =
+  Text.Show.showParen (precedence > 10) $
+    concat [literal name, space, literal "{", recordFields fields, literal "}"]
+
+partialRecord :: Int -> Text -> [(Text, Text)] -> ShowS
+partialRecord precedence name fields =
+  Text.Show.showParen (precedence > 10) $
+    concat [literal name, space, literal "{", recordFields fields, literal ", ..", literal "}"]
+
+recordFields :: [(Text, Text)] -> ShowS
+recordFields fields = join (literal ", ") (fmap recordField fields)
+
+recordField :: (Text, Text) -> ShowS
+recordField (label, value) = concat (fmap literal [label, " = ", value])
 
 literal :: Text -> ShowS
 literal = Text.Show.showString . Data.Text.unpack
