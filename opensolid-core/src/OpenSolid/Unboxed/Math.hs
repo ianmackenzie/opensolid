@@ -15,7 +15,7 @@ module OpenSolid.Unboxed.Math
   , (<#)
   , (>=#)
   , (<=#)
-  , (~=#)
+  , equalWithin#
   , (&&#)
   , (||#)
   , squared#
@@ -123,11 +123,9 @@ infix 4 >=#
 
 infix 4 <=#
 
-{-# INLINE (~=#) #-}
-(~=#) :: Tolerance units => Double# -> Double# -> Int#
-(~=#) x# y# = let !(Q# tolerance#) = ?tolerance in abs# (x# -# y#) <=# tolerance#
-
-infix 4 ~=#
+{-# INLINE equalWithin# #-}
+equalWithin# :: Double# -> Double# -> Double# -> Int#
+equalWithin# tolerance# x# y# = abs# (x# -# y#) <=# tolerance#
 
 {-# INLINE (&&#) #-}
 (&&#) :: Int# -> Int# -> Int#

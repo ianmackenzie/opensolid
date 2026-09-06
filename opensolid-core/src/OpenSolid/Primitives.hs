@@ -82,7 +82,10 @@ instance Units.Coercion (Vector2D units1) (Vector2D units2) where
 
 instance ApproximateEquality (Vector2D units) (Tolerance units) where
   {-# INLINE (~=) #-}
-  V2D# x1# y1# ~= V2D# x2# y2# = B# (hypot2# (x2# -# x1#) (y2# -# y1#) ~=# 0.0##)
+  V2D# x1# y1# ~= V2D# x2# y2# = do
+    let !(Q# tolerance#) = ?tolerance
+    let magnitude# = hypot2# (x2# -# x1#) (y2# -# y1#)
+    B# (equalWithin# tolerance# magnitude# 0.0##)
 
 instance Zero (Vector2D units) where
   {-# INLINE zero #-}
