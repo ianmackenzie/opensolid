@@ -8,6 +8,8 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as Curve.IntersectionPoint
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Root qualified as Curve1D.Root
+import OpenSolid.Curve3D qualified as Curve3D
+import OpenSolid.Curve3D.IntersectionPointWithSurface qualified as Curve3D.IntersectionPointWithSurface
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
@@ -55,3 +57,9 @@ instance Matching Curve.IntersectionPoint where
       && matching
         (Curve.IntersectionPoint.parameterValues first)
         (Curve.IntersectionPoint.parameterValues second)
+
+instance Matching Curve3D.IntersectionPointWithSurface where
+  matching first second = Tolerance.using Tolerance.unitless do
+    first.kind == second.kind
+      && first.t ~= second.t
+      && first.uv ~= second.uv

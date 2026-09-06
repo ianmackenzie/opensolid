@@ -2,6 +2,7 @@ module OpenSolid.Curve3D
   ( Curve3D
   , Compiled
   , Segment
+  , IntersectionPointWithSurface
   , new
   , constant
   , on
@@ -50,6 +51,7 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve3D, Intersections)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2D (Curve2D)
+import OpenSolid.Curve3D.IntersectionPointWithSurface (IntersectionPointWithSurface)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D

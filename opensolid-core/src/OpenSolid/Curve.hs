@@ -208,7 +208,7 @@ instance Units (Curve dimension units space) units
 
 instance
   CurveExists dimension units space =>
-  ApproximateEquality (Curve dimension units space) (Tolerance units)
+  ApproximateEquality (Curve dimension units space) units
   where
   curve1 ~= curve2 = testPoints curve1 ~= testPoints curve2
 

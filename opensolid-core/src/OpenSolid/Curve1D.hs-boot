@@ -55,7 +55,7 @@ instance Units (Nondegenerate (Curve1D units)) units
 
 instance Units.Coercion (Nondegenerate (Curve1D units1)) (Nondegenerate (Curve1D units2))
 
-instance ApproximateEquality (Curve1D units) (Tolerance units)
+instance ApproximateEquality (Curve1D units) units
 
 instance Negation (Curve1D units)
 

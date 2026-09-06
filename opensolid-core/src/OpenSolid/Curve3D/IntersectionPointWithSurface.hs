@@ -7,7 +7,6 @@ module OpenSolid.Curve3D.IntersectionPointWithSurface
 where
 
 import OpenSolid.Prelude
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvPoint (UvPoint)
 
 data Kind = Crossing Sign | Tangent deriving (Eq, Ord, Show)
@@ -18,10 +17,6 @@ data IntersectionPointWithSurface = IntersectionPointWithSurface
   , kind :: Kind
   }
   deriving (Eq, Ord, Show)
-
-instance ApproximateEquality IntersectionPointWithSurface () where
-  first ~= second = Tolerance.using Tolerance.unitless do
-    first.kind == second.kind && first.t ~= second.t && first.uv ~= second.uv
 
 crossing :: Number -> UvPoint -> Sign -> IntersectionPointWithSurface
 crossing t uv sign = IntersectionPointWithSurface{t, uv, kind = Crossing sign}

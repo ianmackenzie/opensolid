@@ -3,6 +3,7 @@ module OpenSolid.Direction
   , DirectionExists
   , unsafe
   , unwrap
+  , areEqual
   , areParallel
   , areIndependent
   , arePerpendicular
@@ -26,6 +27,14 @@ unwrap ::
   Direction dimension space ->
   Vector dimension Unitless space
 unwrap = Primitives.Abstract.directionUnwrap
+
+{-# INLINE areEqual #-}
+areEqual ::
+  DirectionExists dimension space =>
+  Direction dimension space ->
+  Direction dimension space ->
+  Bool
+areEqual = Primitives.Abstract.directionAreEqual
 
 {-# INLINE areParallel #-}
 areParallel ::

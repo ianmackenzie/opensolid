@@ -34,7 +34,6 @@ import OpenSolid.Length (Length)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Show qualified as Show
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units (SquareMeters, Units)
 import OpenSolid.Units qualified as Units
@@ -80,7 +79,7 @@ instance Units.Coercion (Vector2D units1) (Vector2D units2) where
   {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
 
-instance ApproximateEquality (Vector2D units) (Tolerance units) where
+instance ApproximateEquality (Vector2D units) units where
   {-# INLINE (~=) #-}
   V2D# x1# y1# ~= V2D# x2# y2# = do
     let !(Q# tolerance#) = ?tolerance
@@ -254,10 +253,6 @@ instance Show Direction2D where
 instance FFI Direction2D where
   representation = FFI.classRepresentation "Direction2D"
 
-instance ApproximateEquality Direction2D () where
-  {-# INLINE (~=) #-}
-  Unit2D v1 ~= Unit2D v2 = Tolerance.using Tolerance.unitless (v1 ~= v2)
-
 instance Negation Direction2D where
   {-# INLINE negate #-}
   negate (Unit2D v) = Unit2D (negate v)
@@ -374,7 +369,7 @@ instance
   {-# INLINE (-) #-}
   Position2D p - vb = PositionBounds2D (p - vb)
 
-instance ApproximateEquality (Point2D units) (Tolerance units) where
+instance ApproximateEquality (Point2D units) units where
   {-# INLINE (~=) #-}
   Position2D p1 ~= Position2D p2 = p1 ~= p2
 
@@ -991,7 +986,7 @@ instance
   where
   coerce = Data.Coerce.coerce
 
-instance ApproximateEquality (Vector3D units space) (Tolerance units) where
+instance ApproximateEquality (Vector3D units space) units where
   Vector3D x1 y1 z1 ~= Vector3D x2 y2 z2 =
     Quantity.hypot3 (x2 - x1) (y2 - y1) (z2 - z1) ~= Quantity.zero
 
@@ -1190,9 +1185,6 @@ instance Show (Direction3D space) where
 instance FFI (Direction3D Void) where
   representation = FFI.classRepresentation "Direction3D"
 
-instance ApproximateEquality (Direction3D space) () where
-  Unit3D v1 ~= Unit3D v2 = Tolerance.using Tolerance.unitless (v1 ~= v2)
-
 instance Negation (Direction3D space) where
   negate (Unit3D vector) = Unit3D (negate vector)
 
@@ -1344,7 +1336,7 @@ instance
   where
   Position3D p - vb = PositionBounds3D (p - vb)
 
-instance ApproximateEquality (Point3D space) (Tolerance Meters) where
+instance ApproximateEquality (Point3D space) Meters where
   Position3D p1 ~= Position3D p2 = p1 ~= p2
 
 instance

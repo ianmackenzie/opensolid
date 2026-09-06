@@ -282,7 +282,7 @@ instance
 
 instance
   VectorCurveExists dimension units space =>
-  ApproximateEquality (VectorCurve dimension units space) (Tolerance units)
+  ApproximateEquality (VectorCurve dimension units space) units
   where
   curve1 ~= curve2 = do
     let equalValuesAt t = valueAt t curve1 ~= valueAt t curve2

@@ -37,7 +37,7 @@ type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interv
 
 instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFunction1D units)
 
-instance ApproximateEquality (SurfaceFunction1D units) (Tolerance units)
+instance ApproximateEquality (SurfaceFunction1D units) units
 
 instance Negation (SurfaceFunction1D units)
 

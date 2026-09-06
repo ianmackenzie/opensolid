@@ -135,7 +135,7 @@ class
   , Eq (Vector dimension units space)
   , Ord (Vector dimension units space)
   , Show (Vector dimension units space)
-  , ApproximateEquality (Vector dimension units space) (Tolerance units)
+  , ApproximateEquality (Vector dimension units space) units
   , Negation (Vector dimension units space)
   , Addition
       (Vector dimension units space)
@@ -261,13 +261,13 @@ class
   , Ord (Direction dimension space)
   , Show (Direction dimension space)
   , Negation (Direction dimension space)
-  , ApproximateEquality (Direction dimension space) ()
   , DotMultiplication (Direction dimension space) (Direction dimension space) Number
   ) =>
   DirectionExists (dimension :: Natural) (space :: Type)
   where
   directionUnsafe :: Vector dimension Unitless space -> Direction dimension space
   directionUnwrap :: Direction dimension space -> Vector dimension Unitless space
+  directionAreEqual :: Direction dimension space -> Direction dimension space -> Bool
   directionAreParallel :: Direction dimension space -> Direction dimension space -> Bool
   directionAreIndependent :: Direction dimension space -> Direction dimension space -> Bool
   directionArePerpendicular :: Direction dimension space -> Direction dimension space -> Bool
@@ -277,6 +277,8 @@ instance DirectionExists 1 Void where
   directionUnsafe = Quantity.sign
   {-# INLINE directionUnwrap #-}
   directionUnwrap = Sign.value
+  {-# INLINE directionAreEqual #-}
+  directionAreEqual = (==)
   {-# INLINE directionAreParallel #-}
   directionAreParallel _ _ = True
   {-# INLINE directionAreIndependent #-}
@@ -289,6 +291,8 @@ instance DirectionExists 2 Void where
   directionUnsafe = Direction2D.unsafe
   {-# INLINE directionUnwrap #-}
   directionUnwrap = Direction2D.unwrap
+  {-# INLINE directionAreEqual #-}
+  directionAreEqual = Direction2D.areEqual
   {-# INLINE directionAreParallel #-}
   directionAreParallel = Direction2D.areParallel
   {-# INLINE directionAreIndependent #-}
@@ -301,6 +305,8 @@ instance DirectionExists 3 space where
   directionUnsafe = Direction3D.unsafe
   {-# INLINE directionUnwrap #-}
   directionUnwrap = Direction3D.unwrap
+  {-# INLINE directionAreEqual #-}
+  directionAreEqual = Direction3D.areEqual
   {-# INLINE directionAreParallel #-}
   directionAreParallel = Direction3D.areParallel
   {-# INLINE directionAreIndependent #-}
@@ -314,7 +320,7 @@ class
   , Eq (Point dimension units space)
   , Ord (Point dimension units space)
   , Show (Point dimension units space)
-  , ApproximateEquality (Point dimension units space) (Tolerance units)
+  , ApproximateEquality (Point dimension units space) units
   , Addition
       (Point dimension units space)
       (Vector dimension units space)

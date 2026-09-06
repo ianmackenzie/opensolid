@@ -97,7 +97,7 @@ instance Units.Coercion (SurfaceFunction1D units1) (SurfaceFunction1D units2) wh
       , partialDerivatives = Pair.map Units.coerce function.partialDerivatives
       }
 
-instance ApproximateEquality (SurfaceFunction1D units) (Tolerance units) where
+instance ApproximateEquality (SurfaceFunction1D units) units where
   function1 ~= function2 = do
     let equalValuesAt uvPoint = valueAt uvPoint function1 ~= valueAt uvPoint function2
     NonEmpty.all equalValuesAt UvPoint.interiorSamples

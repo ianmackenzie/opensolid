@@ -127,7 +127,7 @@ instance Units.Coercion (Curve1D units1) (Curve1D units2) where
       , maxSampledAbsoluteValue = Units.coerce curve.maxSampledAbsoluteValue
       }
 
-instance ApproximateEquality (Curve1D units) (Tolerance units) where
+instance ApproximateEquality (Curve1D units) units where
   curve1 ~= curve2 = do
     let equalPointsAt tValue = valueAt tValue curve1 ~= valueAt tValue curve2
     NonEmpty.all equalPointsAt Parameter.samples
