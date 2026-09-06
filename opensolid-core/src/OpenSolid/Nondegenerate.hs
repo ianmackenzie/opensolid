@@ -14,7 +14,7 @@ import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 
-newtype Nondegenerate a = Nondegenerate a
+newtype Nondegenerate a = Nondegenerate a deriving (Show)
 
 {-# INLINE unwrap #-}
 unwrap :: Nondegenerate a -> a
