@@ -118,6 +118,7 @@ library
     OpenSolid.Csg
     OpenSolid.Curve
     OpenSolid.Curve.IntersectionPoint
+    OpenSolid.Curve.Intersections
     OpenSolid.Curve.Nondegenerate
     OpenSolid.Curve.Nonzero
     OpenSolid.Curve.Segment
@@ -287,7 +288,6 @@ library
     OpenSolid.CDT
     OpenSolid.Curve.CrossingSolver
     OpenSolid.Curve.CurvatureVector
-    OpenSolid.Curve.Intersections
     OpenSolid.Curve.Nondegenerate.Intersections
     OpenSolid.Curve.TangentSolver
     OpenSolid.Curve.TangentSolver2D
