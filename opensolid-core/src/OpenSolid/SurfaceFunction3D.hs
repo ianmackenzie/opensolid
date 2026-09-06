@@ -48,6 +48,7 @@ import {-# SOURCE #-} OpenSolid.Surface3D (Surface3D)
 import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.UvBounds (UvBounds)
@@ -68,10 +69,10 @@ data SurfaceFunction3D space = SurfaceFunction3D
       , VectorSurfaceFunction3D Meters space
       )
   , maxSampledInteriorDivergence :: ~Length
-  , maxSampledLeftDivergence :: ~Length
-  , maxSampledRightDivergence :: ~Length
-  , maxSampledBottomDivergence :: ~Length
-  , maxSampledTopDivergence :: ~Length
+  , degenerateLeft :: ~Bool
+  , degenerateRight :: ~Bool
+  , degenerateBottom :: ~Bool
+  , degenerateTop :: ~Bool
   }
 
 type Compiled space =
@@ -186,16 +187,21 @@ new givenCompiled givenPartialDerivatives = do
           VectorSurfaceFunction3D.compiled
           VectorSurfaceFunction3D.partialDerivatives
           givenPartialDerivatives
-  recursive \result ->
+  recursive \result -> do
+    let maxSampledInteriorDivergence =
+          NonEmpty.maximumOf (divergence result) UvPoint.interiorSamples
+    let degeneracyTolerance = Tolerance.unitless * maxSampledInteriorDivergence
+    let degenerateEdge samplePoints = do
+          let maxSampledDivergence = NonEmpty.maximumOf (divergence result) samplePoints
+          Tolerance.using degeneracyTolerance (maxSampledDivergence ~= Length.zero)
     SurfaceFunction3D
       { compiled = givenCompiled
       , partialDerivatives = mergedPartialDerivatives
-      , maxSampledInteriorDivergence =
-          NonEmpty.maximumOf (divergence result) UvPoint.interiorSamples
-      , maxSampledLeftDivergence = NonEmpty.maximumOf (divergence result) UvPoint.leftSamples
-      , maxSampledRightDivergence = NonEmpty.maximumOf (divergence result) UvPoint.rightSamples
-      , maxSampledBottomDivergence = NonEmpty.maximumOf (divergence result) UvPoint.bottomSamples
-      , maxSampledTopDivergence = NonEmpty.maximumOf (divergence result) UvPoint.topSamples
+      , maxSampledInteriorDivergence
+      , degenerateLeft = degenerateEdge UvPoint.leftSamples
+      , degenerateRight = degenerateEdge UvPoint.rightSamples
+      , degenerateBottom = degenerateEdge UvPoint.bottomSamples
+      , degenerateTop = degenerateEdge UvPoint.topSamples
       }
 
 constant :: Point3D space -> SurfaceFunction3D space
@@ -277,17 +283,17 @@ secondPartialDerivatives function = do
   let (_, fvv) = VectorSurfaceFunction3D.partialDerivatives fv
   (fuu, fuv, fvv)
 
-degenerateLeft :: Tolerance Meters => SurfaceFunction3D space -> Bool
-degenerateLeft function = function.maxSampledLeftDivergence ~= Length.zero
+degenerateLeft :: SurfaceFunction3D space -> Bool
+degenerateLeft = (.degenerateLeft)
 
-degenerateRight :: Tolerance Meters => SurfaceFunction3D space -> Bool
-degenerateRight function = function.maxSampledRightDivergence ~= Length.zero
+degenerateRight :: SurfaceFunction3D space -> Bool
+degenerateRight = (.degenerateRight)
 
-degenerateBottom :: Tolerance Meters => SurfaceFunction3D space -> Bool
-degenerateBottom function = function.maxSampledBottomDivergence ~= Length.zero
+degenerateBottom :: SurfaceFunction3D space -> Bool
+degenerateBottom = (.degenerateBottom)
 
-degenerateTop :: Tolerance Meters => SurfaceFunction3D space -> Bool
-degenerateTop function = function.maxSampledTopDivergence ~= Length.zero
+degenerateTop :: SurfaceFunction3D space -> Bool
+degenerateTop = (.degenerateTop)
 
 nondegenerate ::
   Tolerance Meters =>
