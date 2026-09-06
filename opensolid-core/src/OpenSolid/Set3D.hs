@@ -35,6 +35,7 @@ module OpenSolid.Set3D
   , pairwiseFilterWithIndices
   , pairwiseFilterMapWithIndices
   , clusters
+  , strip
   )
 where
 
@@ -192,3 +193,6 @@ clusters ::
   Set3D space item ->
   NonEmpty (NonEmpty item)
 clusters = Set.clusters
+
+strip :: Set3D space item -> Set3D space ()
+strip = Set.strip

@@ -20,6 +20,7 @@ module OpenSolid.Bag3D
   , all
   , pairwiseAny
   , clusters
+  , strip
   )
 where
 
@@ -101,3 +102,6 @@ clusters ::
   Bag3D space item ->
   List (NonEmpty item)
 clusters = Bag.clusters
+
+strip :: Bag3D space item -> Bag3D space ()
+strip = Bag.strip

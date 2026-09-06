@@ -37,6 +37,7 @@ module OpenSolid.Set
   , clusters
   , foldr
   , foldl
+  , strip
   )
 where
 
@@ -545,3 +546,8 @@ clusters boundsPredicate itemPredicate set = do
 
 buildCluster :: Bounds b => Set b a -> Graph.Tree Int -> NonEmpty a
 buildCluster set tree = NonEmpty.map (set !!) (Data.Foldable1.toNonEmpty tree)
+
+strip :: Set b a -> Set b ()
+strip set = case set of
+  Leaf{} -> set{leafItem = ()}
+  Node{} -> set{children = NonEmpty.map strip set.children}
