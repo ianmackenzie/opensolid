@@ -99,6 +99,12 @@ instance
   where
   (^) = pairwiseAny (^) (^)
 
+instance Intersects a b units => Intersects a (Set b ()) units where
+  value ^ set = set & any (value ^) (const True)
+
+instance Intersects a b units => Intersects (Set b ()) a units where
+  set ^ value = value ^ set
+
 get :: Int -> Set b a -> Maybe a
 get index set = case set of
   Node{children} -> getInChildren index children

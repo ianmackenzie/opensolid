@@ -59,6 +59,13 @@ instance
   _ ^ Empty = False
   Full set1 ^ Full set2 = set1 ^ set2
 
+instance Intersects a b units => Intersects a (Bag b ()) units where
+  _ ^ Empty = False
+  value ^ Full set = value ^ set
+
+instance Intersects a b units => Intersects (Bag b ()) a units where
+  bag ^ value = value ^ bag
+
 empty :: Bag b a
 empty = Empty
 
