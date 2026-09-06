@@ -1,13 +1,25 @@
-module OpenSolid.VectorSurfaceFunction3D.Nondegenerate (directionAt) where
+module OpenSolid.VectorSurfaceFunction3D.Nondegenerate
+  ( valueAt
+  , directionAt
+  )
+where
 
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
+import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D.Nonzero qualified as Vector3D.Nonzero
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
+
+{-# INLINE valueAt #-}
+valueAt ::
+  UvPoint ->
+  Nondegenerate (VectorSurfaceFunction3D units space) ->
+  Vector3D units space
+valueAt uvPoint (Nondegenerate function) = VectorSurfaceFunction3D.valueAt uvPoint function
 
 directionAt ::
   Tolerance units =>
