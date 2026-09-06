@@ -244,6 +244,7 @@ library
     OpenSolid.Unboxed.Math
     OpenSolid.Units
     OpenSolid.UvBounds
+    OpenSolid.UvCurve
     OpenSolid.UvEdge
     OpenSolid.UvPoint
     OpenSolid.UvRegion
