@@ -11,6 +11,7 @@ module OpenSolid.IO
   , onError
   , attempt
   , mapError
+  , bracket
   , printLine
   , readUtf8
   , writeUtf8
@@ -22,6 +23,7 @@ module OpenSolid.IO
 where
 
 import Control.Concurrent qualified
+import Control.Exception qualified
 import Data.ByteString qualified
 import Data.ByteString.Builder qualified as Builder
 import Data.Foldable qualified
@@ -79,6 +81,9 @@ attempt io = onError (succeed . Err) (map Ok io)
 
 mapError :: (Text -> Text) -> IO a -> IO a
 mapError function = onError (function >> fail)
+
+bracket :: IO a -> (a -> IO b) -> (a -> IO c) -> IO c
+bracket = Control.Exception.bracket
 
 printLine :: Text -> IO ()
 printLine = Data.Text.IO.Utf8.putStrLn
