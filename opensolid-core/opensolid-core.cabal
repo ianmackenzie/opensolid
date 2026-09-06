@@ -229,6 +229,7 @@ library
     OpenSolid.SurfaceFunction2D
     OpenSolid.SurfaceFunction3D
     OpenSolid.SurfaceFunction3D.Nondegenerate
+    OpenSolid.SurfaceLocation
     OpenSolid.SurfaceVertex3D
     OpenSolid.Svg
     OpenSolid.Text
@@ -243,6 +244,7 @@ library
     OpenSolid.Unboxed.Math
     OpenSolid.Units
     OpenSolid.UvBounds
+    OpenSolid.UvEdge
     OpenSolid.UvPoint
     OpenSolid.UvRegion
     OpenSolid.Vector
