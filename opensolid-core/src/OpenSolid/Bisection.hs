@@ -27,7 +27,7 @@ import OpenSolid.Set qualified as Set
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 
-class (Set.Bounds domain, Intersects domain domain (Tolerance Unitless)) => Domain domain where
+class (Set.Bounds domain, Intersects domain domain Unitless) => Domain domain where
   contains :: domain -> domain -> Bool
 
 instance Domain (Interval Unitless) where

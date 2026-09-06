@@ -119,14 +119,14 @@ instance Units.Coercion (Region2D units1) (Region2D units2) where
       , boundaries = Units.coerce region.boundaries
       }
 
-instance Intersects (Point2D units) (Region2D units) (Tolerance units) where
+instance Intersects (Point2D units) (Region2D units) units where
   intersects point region =
     case classify point region of
       Inside -> True
       Outside -> False
       OnBoundary -> True
 
-instance Intersects (Region2D units) (Point2D units) (Tolerance units) where
+instance Intersects (Region2D units) (Point2D units) units where
   intersects region point = intersects point region
 
 unsafe :: Boundary units -> Bag2D units (Boundary units) -> Region2D units

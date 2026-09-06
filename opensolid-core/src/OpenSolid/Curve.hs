@@ -316,25 +316,25 @@ instance Composition (SurfaceFunction3D space) (Curve2D Unitless) (Curve3D space
 
 instance
   units1 ~ units2 =>
-  Intersects (Curve2D units1) (Point2D units2) (Tolerance units1)
+  Intersects (Curve2D units1) (Point2D units2) units1
   where
   intersects curve givenPoint = intersects givenPoint curve
 
 instance
   units1 ~ units2 =>
-  Intersects (Point2D units1) (Curve2D units2) (Tolerance units1)
+  Intersects (Point2D units1) (Curve2D units2) units1
   where
   intersects = intersectsPoint
 
 instance
   space1 ~ space2 =>
-  Intersects (Curve3D space1) (Point3D space2) (Tolerance Meters)
+  Intersects (Curve3D space1) (Point3D space2) Meters
   where
   intersects curve givenPoint = intersects givenPoint curve
 
 instance
   space1 ~ space2 =>
-  Intersects (Point3D space1) (Curve3D space2) (Tolerance Meters)
+  Intersects (Point3D space1) (Curve3D space2) Meters
   where
   intersects = intersectsPoint
 
@@ -448,8 +448,8 @@ class
       (Point dimension units space)
       (Curve dimension units space)
       (VectorCurve dimension units space)
-  , Intersects (Curve dimension units space) (Point dimension units space) (Tolerance units)
-  , Intersects (Point dimension units space) (Curve dimension units space) (Tolerance units)
+  , Intersects (Curve dimension units space) (Point dimension units space) units
+  , Intersects (Point dimension units space) (Curve dimension units space) units
   , NewtonRaphson.Curve.Solver dimension units space
   , NewtonRaphson.Surface.Solver dimension units space
   ) =>

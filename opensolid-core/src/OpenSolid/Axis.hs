@@ -24,8 +24,8 @@ type family
 class
   ( PointExists dimension units space
   , DirectionExists dimension space
-  , Intersects (Point dimension units space) (Axis dimension units space) (Tolerance units)
-  , Intersects (Axis dimension units space) (Point dimension units space) (Tolerance units)
+  , Intersects (Point dimension units space) (Axis dimension units space) units
+  , Intersects (Axis dimension units space) (Point dimension units space) units
   , Show (Axis dimension units space)
   ) =>
   AxisExists dimension units space

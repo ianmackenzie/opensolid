@@ -290,27 +290,27 @@ instance
 
 instance
   units1 ~ units2 =>
-  Intersects (VectorCurve2D units1) (Vector2D units2) (Tolerance units1)
+  Intersects (VectorCurve2D units1) (Vector2D units2) units1
   where
   curve `intersects` vector = Tolerance.using (Quantity.squared_ ?tolerance) do
     squaredMagnitude_ (curve - vector) `intersects` Quantity.zero
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Intersects (VectorCurve3D units1 space1) (Vector3D units2 space2) (Tolerance units1)
+  Intersects (VectorCurve3D units1 space1) (Vector3D units2 space2) units1
   where
   curve `intersects` vector = Tolerance.using (Quantity.squared_ ?tolerance) do
     squaredMagnitude_ (curve - vector) `intersects` Quantity.zero
 
 instance
   units1 ~ units2 =>
-  Intersects (Vector2D units1) (VectorCurve2D units2) (Tolerance units1)
+  Intersects (Vector2D units1) (VectorCurve2D units2) units1
   where
   vector `intersects` curve = curve `intersects` vector
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Vector3D units1 space1) (VectorCurve3D units2 space2) (Tolerance units1)
+  Intersects (Vector3D units1 space1) (VectorCurve3D units2 space2) units1
   where
   vector `intersects` curve = curve `intersects` vector
 

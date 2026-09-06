@@ -391,21 +391,21 @@ instance Units.Coercion (VectorBounds2D units1) (VectorBounds2D units2) where
 
 instance
   units1 ~ units2 =>
-  Intersects (Vector2D units1) (VectorBounds2D units2) (Tolerance units1)
+  Intersects (Vector2D units1) (VectorBounds2D units2) units1
   where
   {-# INLINE intersects #-}
   Vector2D vx vy `intersects` VectorBounds2D bx by = vx `intersects` bx && vy `intersects` by
 
 instance
   units1 ~ units2 =>
-  Intersects (VectorBounds2D units1) (Vector2D units2) (Tolerance units1)
+  Intersects (VectorBounds2D units1) (Vector2D units2) units1
   where
   {-# INLINE intersects #-}
   box `intersects` point = point `intersects` box
 
 instance
   units1 ~ units2 =>
-  Intersects (VectorBounds2D units1) (VectorBounds2D units2) (Tolerance units1)
+  Intersects (VectorBounds2D units1) (VectorBounds2D units2) units1
   where
   {-# INLINE intersects #-}
   VectorBounds2D x1 y1 `intersects` VectorBounds2D x2 y2 =
@@ -758,33 +758,33 @@ instance
 
 instance
   units1 ~ units2 =>
-  Intersects (Point2D units1) (Axis2D units2) (Tolerance units1)
+  Intersects (Point2D units1) (Axis2D units2) units1
   where
   p `intersects` (Axis2D p0 d) = (p - p0) `cross` d ~= Quantity.zero
 
 instance
   units1 ~ units2 =>
-  Intersects (Axis2D units2) (Point2D units1) (Tolerance units1)
+  Intersects (Axis2D units2) (Point2D units1) units1
   where
   axis `intersects` point = point `intersects` axis
 
 instance
   units1 ~ units2 =>
-  Intersects (Point2D units1) (Bounds2D units2) (Tolerance units1)
+  Intersects (Point2D units1) (Bounds2D units2) units1
   where
   {-# INLINE intersects #-}
   Position2D p `intersects` PositionBounds2D pb = p `intersects` pb
 
 instance
   units1 ~ units2 =>
-  Intersects (Bounds2D units1) (Point2D units2) (Tolerance units1)
+  Intersects (Bounds2D units1) (Point2D units2) units1
   where
   {-# INLINE intersects #-}
   box `intersects` point = point `intersects` box
 
 instance
   units1 ~ units2 =>
-  Intersects (Bounds2D units1) (Bounds2D units2) (Tolerance units1)
+  Intersects (Bounds2D units1) (Bounds2D units2) units1
   where
   {-# INLINE intersects #-}
   PositionBounds2D pb1 `intersects` PositionBounds2D pb2 = pb1 `intersects` pb2
@@ -1341,13 +1341,13 @@ instance ApproximateEquality (Point3D space) Meters where
 
 instance
   space1 ~ space2 =>
-  Intersects (Point3D space1) (Axis3D space2) (Tolerance Meters)
+  Intersects (Point3D space1) (Axis3D space2) Meters
   where
   p `intersects` (Axis3D p0 d) = (p - p0) `cross` d ~= zero
 
 instance
   space1 ~ space2 =>
-  Intersects (Axis3D space2) (Point3D space1) (Tolerance Meters)
+  Intersects (Axis3D space2) (Point3D space1) Meters
   where
   axis `intersects` point = point `intersects` axis
 
@@ -1392,20 +1392,20 @@ instance
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Intersects (Vector3D units1 space1) (VectorBounds3D units2 space2) (Tolerance units1)
+  Intersects (Vector3D units1 space1) (VectorBounds3D units2 space2) units1
   where
   Vector3D vR vF vU `intersects` VectorBounds3D bR bF bU =
     vR `intersects` bR && vF `intersects` bF && vU `intersects` bU
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Intersects (VectorBounds3D units1 space1) (Vector3D units2 space2) (Tolerance units1)
+  Intersects (VectorBounds3D units1 space1) (Vector3D units2 space2) units1
   where
   box `intersects` point = point `intersects` box
 
 instance
   (space1 ~ space2, units1 ~ units2) =>
-  Intersects (VectorBounds3D units1 space1) (VectorBounds3D units2 space2) (Tolerance units1)
+  Intersects (VectorBounds3D units1 space1) (VectorBounds3D units2 space2) units1
   where
   VB3D# xl1# xh1# yl1# yh1# zl1# zh1# `intersects` VB3D# xl2# xh2# yl2# yh2# zl2# zh2# = do
     let !(Q# tolerance#) = ?tolerance
@@ -1877,19 +1877,19 @@ instance
 
 instance
   space1 ~ space2 =>
-  Intersects (Point3D space1) (Bounds3D space2) (Tolerance Meters)
+  Intersects (Point3D space1) (Bounds3D space2) Meters
   where
   Position3D p `intersects` PositionBounds3D pb = p `intersects` pb
 
 instance
   space1 ~ space2 =>
-  Intersects (Bounds3D space1) (Point3D space2) (Tolerance Meters)
+  Intersects (Bounds3D space1) (Point3D space2) Meters
   where
   box `intersects` point = point `intersects` box
 
 instance
   space1 ~ space2 =>
-  Intersects (Bounds3D space1) (Bounds3D space2) (Tolerance Meters)
+  Intersects (Bounds3D space1) (Bounds3D space2) Meters
   where
   PositionBounds3D pb1 `intersects` PositionBounds3D pb2 = pb1 `intersects` pb2
 

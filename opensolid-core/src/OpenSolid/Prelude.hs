@@ -627,22 +627,22 @@ instance Hashable key => Indexed (HashMap key value) key value where
 
 ----- Intersection -----
 
-class Intersects a b constraint | a b -> constraint where
-  intersects :: constraint => a -> b -> Bool
+class Intersects a b units | a b -> units where
+  intersects :: Tolerance units => a -> b -> Bool
 
 infix 4 `intersects`
 
 instance
-  ( Intersects a1 a2 constraintA
-  , Intersects b1 b2 constraintB
-  , constraintA ~ constraintB
+  ( Intersects a1 a2 unitsA
+  , Intersects b1 b2 unitsB
+  , unitsA ~ unitsB
   ) =>
-  Intersects (a1, b1) (a2, b2) constraintA
+  Intersects (a1, b1) (a2, b2) unitsA
   where
   intersects (a1, b1) (a2, b2) = intersects a1 a2 && intersects b1 b2
 
 {-# INLINE (^) #-}
-(^) :: Intersects a b (Tolerance Unitless) => a -> b -> Bool
+(^) :: Intersects a b Unitless => a -> b -> Bool
 first ^ second = let ?tolerance = 1e-9 in first `intersects` second
 
 infix 4 ^

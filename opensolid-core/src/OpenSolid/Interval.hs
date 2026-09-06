@@ -140,15 +140,15 @@ instance Units.Coercion (Interval units1) (Interval units2) where
   {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
 
-instance units1 ~ units2 => Intersects (Quantity units1) (Interval units2) (Tolerance units1) where
+instance units1 ~ units2 => Intersects (Quantity units1) (Interval units2) units1 where
   {-# INLINE intersects #-}
   value `intersects` interval = exclusion value interval <= ?tolerance
 
-instance units1 ~ units2 => Intersects (Interval units1) (Quantity units2) (Tolerance units1) where
+instance units1 ~ units2 => Intersects (Interval units1) (Quantity units2) units1 where
   {-# INLINE intersects #-}
   interval `intersects` value = value `intersects` interval
 
-instance units1 ~ units2 => Intersects (Interval units1) (Interval units2) (Tolerance units1) where
+instance units1 ~ units2 => Intersects (Interval units1) (Interval units2) units1 where
   {-# INLINE intersects #-}
   first `intersects` second = separation first second <= ?tolerance
 

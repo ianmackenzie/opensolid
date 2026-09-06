@@ -561,9 +561,9 @@ class
   , VectorBoundsExists dimension units space
   , Show (Bounds dimension units space)
   , Set.Bounds (Bounds dimension units space)
-  , Intersects (Point dimension units space) (Bounds dimension units space) (Tolerance units)
-  , Intersects (Bounds dimension units space) (Point dimension units space) (Tolerance units)
-  , Intersects (Bounds dimension units space) (Bounds dimension units space) (Tolerance units)
+  , Intersects (Point dimension units space) (Bounds dimension units space) units
+  , Intersects (Bounds dimension units space) (Point dimension units space) units
+  , Intersects (Bounds dimension units space) (Bounds dimension units space) units
   , Addition
       (Bounds dimension units space)
       (VectorBounds dimension units space)

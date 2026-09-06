@@ -104,7 +104,7 @@ instance ApproximateEquality (SurfaceFunction1D units) units where
 
 instance
   units1 ~ units2 =>
-  Intersects (SurfaceFunction1D units1) (Quantity units2) (Tolerance units1)
+  Intersects (SurfaceFunction1D units1) (Quantity units2) units1
   where
   function `intersects` quantity =
     -- TODO optimize this to use a special Solve2D.find or similar
@@ -117,7 +117,7 @@ instance
 
 instance
   units1 ~ units2 =>
-  Intersects (Quantity units1) (SurfaceFunction1D units2) (Tolerance units1)
+  Intersects (Quantity units1) (SurfaceFunction1D units2) units1
   where
   quantity `intersects` function = function `intersects` quantity
 
