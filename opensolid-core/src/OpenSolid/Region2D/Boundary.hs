@@ -14,6 +14,7 @@ module OpenSolid.Region2D.Boundary
   )
 where
 
+import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Curve2D (Curve2D)
@@ -26,6 +27,7 @@ import OpenSolid.Region2D.BoundaryTree (BoundaryTree)
 import OpenSolid.Region2D.BoundaryTree qualified as Region2D.BoundaryTree
 import OpenSolid.Set2D (Set2D)
 import OpenSolid.Set2D qualified as Set2D
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units (Units)
@@ -92,9 +94,16 @@ convert factor = map (Quantity.sign factor) (Curve2D.convert factor)
 unconvert :: Quantity (units2 ?/? units1) -> Boundary units2 -> Boundary units1
 unconvert factor = map (Quantity.sign factor) (Curve2D.unconvert factor)
 
+classifySweptAngle :: Angle -> Classification
+classifySweptAngle sweptAngle =
+  Tolerance.using Angle.tolerance $
+    if
+      | sweptAngle ~= Angle.zero -> External
+      | Quantity.abs sweptAngle ~= Angle.twoPi -> Internal
+      | otherwise ->
+          error "Swept angle of a boundary around a point should be either zero or a full turn"
+
 classifyPoint :: Tolerance units => Point2D units -> Boundary units -> Classification
 classifyPoint point boundary
   | intersects point boundary = Intersected
-  | otherwise = do
-      let sweptAngle = Region2D.BoundaryTree.pointSweptAngle point boundary.tree
-      if Quantity.abs sweptAngle > Angle.pi then Internal else External
+  | otherwise = classifySweptAngle (Region2D.BoundaryTree.pointSweptAngle point boundary.tree)
