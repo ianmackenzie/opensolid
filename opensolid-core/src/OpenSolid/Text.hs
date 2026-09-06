@@ -12,6 +12,7 @@ module OpenSolid.Text
   , length
   , replace
   , split
+  , sentence
   , lines
   , multiline
   , indent
@@ -23,6 +24,7 @@ module OpenSolid.Text
   , toLower
   , toUpper
   , capitalize
+  , pluralize
   , strip
   , toUtf8
   , InvalidUtf8 (InvalidUtf8)
@@ -75,6 +77,9 @@ replace = Data.Text.replace
 split :: Text -> Text -> List Text
 split = Data.Text.splitOn
 
+sentence :: List Text -> Text
+sentence = join " "
+
 lines :: Text -> List Text
 lines text = split "\n" (replace "\r\n" "\n" text)
 
@@ -111,6 +116,10 @@ capitalize text =
   case Data.Text.uncons text of
     Just (first, rest) -> Data.Text.cons (Data.Char.toUpper first) rest
     Nothing -> text
+
+pluralize :: Text -> Text -> Int -> Text
+pluralize singular plural count =
+  if count == 1 then singular else plural
 
 strip :: Text -> Text
 strip = Data.Text.strip
