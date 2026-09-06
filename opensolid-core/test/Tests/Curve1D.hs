@@ -4,7 +4,6 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Root (Root (Root))
 import OpenSolid.Prelude
-import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
 import Tests.Matching (matching)
@@ -17,7 +16,7 @@ tests =
   ]
 
 crossingRoots :: Test
-crossingRoots = Test.verifyWith Tolerance.unitless "crossingRoots" do
+crossingRoots = Test.verify "crossingRoots" $ unitless do
   let x = 3.0 * Curve1D.t
   let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
   let expectedRoots = [Root 0.0 0 Positive, Root (1 / 3) 0 Negative, Root (2 / 3) 0 Positive]
@@ -27,7 +26,7 @@ crossingRoots = Test.verifyWith Tolerance.unitless "crossingRoots" do
     & Test.output "expectedRoots" expectedRoots
 
 tangentRoots :: Test
-tangentRoots = Test.verifyWith Tolerance.unitless "tangentRoots" do
+tangentRoots = Test.verify "tangentRoots" $ unitless do
   let theta = Angle.twoPi * Curve1D.t
   let expression = Curve1D.squared (Curve1D.sin theta)
   let expectedRoots = [Root t 1 Positive | t <- [0.0, 0.5, 1.0]]
@@ -37,7 +36,7 @@ tangentRoots = Test.verifyWith Tolerance.unitless "tangentRoots" do
     & Test.output "expectedRoots" expectedRoots
 
 approximateEquality :: Test
-approximateEquality = Test.verifyWith Tolerance.unitless "approximateEquality" do
+approximateEquality = Test.verify "approximateEquality" $ unitless do
   let theta = Angle.twoPi * Curve1D.t
   let sinTheta = Curve1D.sin theta
   let cosTheta = Curve1D.cos theta

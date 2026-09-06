@@ -1,7 +1,6 @@
 module Tests.DivMod (tests) where
 
 import OpenSolid.Prelude
-import OpenSolid.Tolerance qualified as Tolerance
 import Test (Test)
 import Test qualified
 
@@ -37,6 +36,6 @@ numberDiv =
 numberMod :: Test
 numberMod =
   Test.group "Number %" $
-    [ Test.verifyWith Tolerance.unitless "1.7 % 0.5" (Test.expect (1.7 % 0.5 ~= 0.2))
-    , Test.verifyWith Tolerance.unitless "-1.7 % 0.5" (Test.expect (-1.7 % 0.5 ~= 0.3))
+    [ Test.verify "1.7 % 0.5" (Test.expect (unitless (1.7 % 0.5 ~= 0.2)))
+    , Test.verify "-1.7 % 0.5" (Test.expect (unitless (-1.7 % 0.5 ~= 0.3)))
     ]

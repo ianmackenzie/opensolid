@@ -5,9 +5,7 @@ module Test
   , generate
   , abort
   , verify
-  , verifyWith
   , check
-  , checkWith
   , group
   , run
   , expect
@@ -88,18 +86,12 @@ data Test
 abort :: Text -> Test
 abort = Abort
 
-verifyWith :: Quantity units -> Text -> (Tolerance units => Expectation) -> Test
-verifyWith tolerance = checkWith tolerance 1
-
 verify :: Text -> (Tolerance Meters => Expectation) -> Test
-verify = verifyWith Length.defaultTolerance
-
-checkWith :: Quantity units -> Int -> Text -> (Tolerance units => Expectation) -> Test
-checkWith tolerance count label expectation =
-  Check count label (Tolerance.using tolerance expectation)
+verify = check 1
 
 check :: Int -> Text -> (Tolerance Meters => Expectation) -> Test
-check = checkWith Length.defaultTolerance
+check count label expectation =
+  Check count label (Tolerance.using Length.defaultTolerance expectation)
 
 group :: Text -> List Test -> Test
 group = Group
