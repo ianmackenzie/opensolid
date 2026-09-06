@@ -1,6 +1,7 @@
 module OpenSolid.Region2D.Boundary
   ( Boundary
-  , Classification (Internal, External, Intersected)
+  , PointClassification (InteriorPoint, ExteriorPoint, IncidentPoint)
+  , BoundsClassification (InteriorBounds, ExteriorBounds)
   , unsafe
   , bounds
   , curves
@@ -11,6 +12,7 @@ module OpenSolid.Region2D.Boundary
   , convert
   , unconvert
   , classifyPoint
+  , classifyBounds
   )
 where
 
@@ -56,7 +58,16 @@ instance units1 ~ units2 => Intersects (Point2D units1) (Boundary units2) (Toler
 instance units1 ~ units2 => Intersects (Boundary units2) (Point2D units1) (Tolerance units1) where
   intersects boundary point = intersects point boundary
 
-data Classification = Internal | External | Intersected deriving (Eq, Show, Bounded, Enum)
+data PointClassification
+  = InteriorPoint
+  | ExteriorPoint
+  | IncidentPoint
+  deriving (Eq, Show)
+
+data BoundsClassification
+  = InteriorBounds
+  | ExteriorBounds
+  deriving (Eq, Show)
 
 unsafe :: NonEmpty (Curve2D units) -> Boundary units
 unsafe givenCurves = build (Set2D.linear Curve2D.bounds givenCurves)
@@ -94,16 +105,21 @@ convert factor = map (Quantity.sign factor) (Curve2D.convert factor)
 unconvert :: Quantity (units2 ?/? units1) -> Boundary units2 -> Boundary units1
 unconvert factor = map (Quantity.sign factor) (Curve2D.unconvert factor)
 
-classifySweptAngle :: Angle -> Classification
-classifySweptAngle sweptAngle =
-  Tolerance.using Angle.tolerance $
-    if
-      | sweptAngle ~= Angle.zero -> External
-      | Quantity.abs sweptAngle ~= Angle.twoPi -> Internal
-      | otherwise ->
-          error "Swept angle of a boundary around a point should be either zero or a full turn"
+isInterior :: Angle -> Bool
+isInterior sweptAngle = Tolerance.using Angle.tolerance do
+  if
+    | sweptAngle ~= Angle.zero -> False
+    | Quantity.abs sweptAngle ~= Angle.twoPi -> True
+    | otherwise -> error "Boundary swept angle should be either zero or a full turn"
 
-classifyPoint :: Tolerance units => Point2D units -> Boundary units -> Classification
+classifyPoint :: Tolerance units => Point2D units -> Boundary units -> PointClassification
 classifyPoint point boundary
-  | intersects point boundary = Intersected
-  | otherwise = classifySweptAngle (Region2D.BoundaryTree.pointSweptAngle point boundary.tree)
+  | intersects point boundary = IncidentPoint
+  | otherwise = do
+      let sweptAngle = Region2D.BoundaryTree.pointSweptAngle point boundary.tree
+      if isInterior sweptAngle then InteriorPoint else ExteriorPoint
+
+classifyBounds :: Bounds2D units -> Boundary units -> Fuzzy BoundsClassification
+classifyBounds givenBounds boundary = do
+  sweptAngle <- Region2D.BoundaryTree.boundsSweptAngle givenBounds boundary.tree
+  Resolved (if isInterior sweptAngle then InteriorBounds else ExteriorBounds)

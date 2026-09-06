@@ -28,6 +28,7 @@ module OpenSolid.Region2D
   , convert
   , unconvert
   , classify
+  , classifyBounds
   , bounds
   , area
   , toMesh
@@ -40,6 +41,7 @@ import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Bag2D (Bag2D)
 import OpenSolid.Bag2D qualified as Bag2D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
+import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CDT qualified as CDT
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
@@ -461,11 +463,11 @@ classify :: Tolerance units => Point2D units -> Region2D units -> Classification
 classify point region =
   case Boundary.classifyPoint point region.outerBoundary of
     -- Point is outside outer boundary, so outside region as a whole
-    Boundary.External -> Outside
+    Boundary.ExteriorPoint -> Outside
     -- Point is on outer boundary
-    Boundary.Intersected -> OnBoundary
+    Boundary.IncidentPoint -> OnBoundary
     -- Point is enclosed within outer boundary, so have to check inner boundaries
-    Boundary.Internal ->
+    Boundary.InteriorPoint ->
       region.innerBoundaries
         & Bag2D.cull (intersects point)
         & Bag2D.toList
@@ -475,10 +477,32 @@ classifyInner :: Tolerance units => Point2D units -> List (Boundary units) -> Cl
 classifyInner point candidateInnerBoundaries = case candidateInnerBoundaries of
   first : rest ->
     case Boundary.classifyPoint point first of
-      Boundary.Internal -> Outside -- Point is inside a hole, so outside the region
-      Boundary.Intersected -> OnBoundary -- Point is on a hole boundary
-      Boundary.External -> classifyInner point rest -- Point is outside this hole, so check the rest
+      Boundary.InteriorPoint -> Outside -- Point is inside a hole, so outside the region
+      Boundary.IncidentPoint -> OnBoundary -- Point is on a hole boundary
+      Boundary.ExteriorPoint -> classifyInner point rest -- Point is outside this hole, so check the rest
   [] -> Inside -- Point is not inside or on the boundary of any hole, so is inside the region
+
+classifyBounds :: Bounds2D units -> Region2D units -> Fuzzy Classification
+classifyBounds givenBounds region = do
+  outerBoundaryClassification <- Boundary.classifyBounds givenBounds region.outerBoundary
+  case outerBoundaryClassification of
+    -- Bounding box is outside outer boundary, so outside region as a whole
+    Boundary.ExteriorBounds -> Resolved Outside
+    -- Point is enclosed within outer boundary, so have to check inner boundaries
+    Boundary.InteriorBounds ->
+      region.innerBoundaries
+        & Bag2D.cull (not . Bounds2D.areDistinct givenBounds)
+        & Bag2D.toList
+        & classifyInnerBounds givenBounds
+
+classifyInnerBounds :: Bounds2D units -> List (Boundary units) -> Fuzzy Classification
+classifyInnerBounds givenBounds candidateInnerBoundaries = case candidateInnerBoundaries of
+  first : rest -> do
+    firstClassification <- Boundary.classifyBounds givenBounds first
+    case firstClassification of
+      Boundary.InteriorBounds -> Resolved Outside -- Bounding box is inside a hole, so outside the region
+      Boundary.ExteriorBounds -> classifyInnerBounds givenBounds rest -- Bounding box is outside this hole, so check the rest
+  [] -> Resolved Inside -- Bounding box is not inside any hole, so is inside the region
 
 classifyLoops :: Tolerance units => List (Loop units) -> Result BoundedBy.Error (Region2D units)
 classifyLoops [] = Err BoundedBy.EmptyRegion
@@ -524,10 +548,10 @@ boundaryIsInside :: Tolerance units => Boundary units -> Boundary units -> Bool
 boundaryIsInside outer inner = do
   let testPoint = Curve2D.startPoint (Boundary.curves inner !! 0)
   case Boundary.classifyPoint testPoint outer of
-    Boundary.Internal -> True
-    Boundary.External -> False
+    Boundary.InteriorPoint -> True
+    Boundary.ExteriorPoint -> False
     -- Shouldn't happen, loops should be guaranteed not to be touching by this point
-    Boundary.Intersected -> error "Unexpected contact between region boundaries"
+    Boundary.IncidentPoint -> error "Unexpected contact between region boundaries"
 
 bounds :: Region2D units -> Bounds2D units
 bounds region = Boundary.bounds region.outerBoundary
