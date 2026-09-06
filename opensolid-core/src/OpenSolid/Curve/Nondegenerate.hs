@@ -150,9 +150,11 @@ findPoint givenPoint givenCurve = do
         | otherwise = Unresolved
   let evaluate tValue =
         (# pointAt tValue givenCurve - givenPoint, derivativeAt tValue givenCurve #)
+  let validateSolution tValue =
+        if pointAt tValue givenCurve ~= givenPoint then Just tValue else Nothing
   let resolvedSolution Monotonic tRange segment
         | isDistant segment = Resolved Nothing
-        | otherwise = Fuzzy.map Just (NewtonRaphson.Curve.solveIn tRange evaluate)
+        | otherwise = Fuzzy.map validateSolution (NewtonRaphson.Curve.solveIn tRange evaluate)
   let clusters =
         Curve.bisectionTree givenCurve
           & Bisection.clusters endpointSolutionSet resolvedMonotonicity
