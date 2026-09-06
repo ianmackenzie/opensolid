@@ -30,8 +30,9 @@ import OpenSolid.Random qualified as Random
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
-import System.Console.ANSI qualified
+import System.Console.ANSI qualified as AnsiTerminal
 import System.Environment
+import System.Exit qualified
 import Text.Printf qualified
 import Prelude qualified
 
@@ -96,10 +97,18 @@ check count label expectation =
 group :: Text -> List Test -> Test
 group = Group
 
-testCount :: Int -> Text -> Text
-testCount count description = do
-  let pluralized = if count == 1 then "test" else "tests"
-  Text.join " " [Text.int count, pluralized, description]
+successColor :: AnsiTerminal.Color
+successColor = AnsiTerminal.Green
+
+errorColor :: AnsiTerminal.Color
+errorColor = AnsiTerminal.Red
+
+withTextColor :: AnsiTerminal.Color -> IO a -> IO a
+withTextColor color io = do
+  let setColorSGR = AnsiTerminal.SetColor AnsiTerminal.Foreground AnsiTerminal.Vivid color
+  let setColor = AnsiTerminal.setSGR [setColorSGR]
+  let resetColor = AnsiTerminal.setSGR [AnsiTerminal.Reset]
+  IO.bracket setColor (const resetColor) (const io)
 
 run :: List Test -> IO ()
 run tests = do
@@ -108,28 +117,25 @@ run tests = do
   let args = List.map Text.pack argStrings
   results <- IO.collect (runImpl args "") tests
   let (successes, failures) = sum results
+  let printSummary color count description =
+        withTextColor color $
+          IO.printLine $
+            Text.sentence
+              [ Text.int count
+              , Text.pluralize "test" "tests" count
+              , description
+              ]
   if failures == 0
     then do
-      System.Console.ANSI.setSGR
-        [ System.Console.ANSI.SetColor
-            System.Console.ANSI.Foreground
-            System.Console.ANSI.Vivid
-            System.Console.ANSI.Green
-        ]
-      IO.printLine (testCount successes "passed")
-      System.Console.ANSI.setSGR [System.Console.ANSI.Reset]
-    else Prelude.fail (Text.unpack (testCount failures "failed"))
+      printSummary successColor successes "passed"
+      System.Exit.exitSuccess
+    else do
+      printSummary errorColor failures "failed"
+      System.Exit.exitFailure
 
 reportError :: Text -> List Text -> IO (Int, Int)
 reportError context messages = do
-  System.Console.ANSI.setSGR
-    [ System.Console.ANSI.SetColor
-        System.Console.ANSI.Foreground
-        System.Console.ANSI.Vivid
-        System.Console.ANSI.Red
-    ]
-  IO.printLine (context <> " failed:")
-  System.Console.ANSI.setSGR [System.Console.ANSI.Reset]
+  withTextColor errorColor (IO.printLine (context <> " failed:"))
   IO.forEach messages (Text.indent "   " >> IO.printLine)
   IO.succeed (0, 1)
 
