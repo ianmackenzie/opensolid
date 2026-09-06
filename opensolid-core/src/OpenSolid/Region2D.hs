@@ -120,14 +120,14 @@ instance Units.Coercion (Region2D units1) (Region2D units2) where
       }
 
 instance Intersects (Point2D units) (Region2D units) units where
-  intersects point region =
+  point ^ region =
     case classify point region of
       Inside -> True
       Outside -> False
       OnBoundary -> True
 
 instance Intersects (Region2D units) (Point2D units) units where
-  intersects region point = intersects point region
+  region ^ point = point ^ region
 
 unsafe :: Boundary units -> Bag2D units (Boundary units) -> Region2D units
 unsafe givenOuterBoundary givenInnerBoundaries =
@@ -469,7 +469,7 @@ classify point region =
     -- Point is enclosed within outer boundary, so have to check inner boundaries
     Boundary.InteriorPoint ->
       region.innerBoundaries
-        & Bag2D.cull (intersects point)
+        & Bag2D.cull (^ point)
         & Bag2D.toList
         & classifyInner point
 

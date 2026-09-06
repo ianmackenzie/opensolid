@@ -318,25 +318,25 @@ instance
   units1 ~ units2 =>
   Intersects (Curve2D units1) (Point2D units2) units1
   where
-  intersects curve givenPoint = intersects givenPoint curve
+  curve ^ givenPoint = givenPoint ^ curve
 
 instance
   units1 ~ units2 =>
   Intersects (Point2D units1) (Curve2D units2) units1
   where
-  intersects = intersectsPoint
+  (^) = intersectsPoint
 
 instance
   space1 ~ space2 =>
   Intersects (Curve3D space1) (Point3D space2) Meters
   where
-  intersects curve givenPoint = intersects givenPoint curve
+  curve ^ givenPoint = givenPoint ^ curve
 
 instance
   space1 ~ space2 =>
   Intersects (Point3D space1) (Curve3D space2) Meters
   where
-  intersects = intersectsPoint
+  (^) = intersectsPoint
 
 intersectsPoint ::
   (CurveExists dimension units space, Tolerance units) =>
@@ -614,7 +614,7 @@ isOnAxis ::
   Axis dimension units space ->
   Curve dimension units space ->
   Bool
-isOnAxis axis curve = NonEmpty.all (intersects axis) (testPoints curve)
+isOnAxis axis curve = NonEmpty.all (^ axis) (testPoints curve)
 
 nondegenerate ::
   (CurveExists dimension units space, Tolerance units) =>

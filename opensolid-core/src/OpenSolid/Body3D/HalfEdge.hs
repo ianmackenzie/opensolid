@@ -56,7 +56,7 @@ findMatingHalfEdges ::
   List (HalfEdge space)
 findMatingHalfEdges halfEdgeSet halfEdge = do
   let halfEdgeBounds = bounds halfEdge
-  halfEdgeSet & Set3D.filter (intersects halfEdgeBounds) (isMateOf halfEdge)
+  halfEdgeSet & Set3D.filter (^ halfEdgeBounds) (isMateOf halfEdge)
 
 isMateOf :: Tolerance Meters => HalfEdge space -> HalfEdge space -> Bool
 isMateOf halfEdge1 halfEdge2 =

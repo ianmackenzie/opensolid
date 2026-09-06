@@ -85,3 +85,6 @@ compose = (.)
 
 approximatelyEquals :: (ApproximateEquality a units, Tolerance units) => a -> a -> Bool
 approximatelyEquals = (~=)
+
+intersects :: (Intersects a b units, Tolerance units) => a -> b -> Bool
+intersects = (^)

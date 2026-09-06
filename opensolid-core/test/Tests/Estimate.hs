@@ -64,7 +64,7 @@ dummyEstimates = do
 
 resolvesTo :: Tolerance units => Quantity units -> Estimate units -> Result Text Bool
 resolvesTo value estimate
-  | not (value `intersects` Estimate.bounds estimate) = Ok False
+  | not (value ^ Estimate.bounds estimate) = Ok False
   | Interval.width (Estimate.bounds estimate) ~= Quantity.zero = Ok True
   | otherwise = do
       let refinedEstimate = Estimate.refine estimate

@@ -97,8 +97,7 @@ areDistinct ::
   Segment dimension units space ->
   Segment dimension units space ->
   Bool
-areDistinct segment1 segment2 =
-  not (range segment1 `intersects` range segment2)
+areDistinct segment1 segment2 = not (range segment1 ^ range segment2)
 
 haveCrossingTangents ::
   VectorBoundsExists dimension units space =>

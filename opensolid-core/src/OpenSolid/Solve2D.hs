@@ -191,7 +191,7 @@ solveUnique ::
   Maybe UvPoint
 solveUnique localBounds fBounds f fu fv globalBounds =
   -- First check if it's *possible* that there's a solution within localBounds
-  if fBounds localBounds `intersects` Vector2D.zero
+  if fBounds localBounds ^ Vector2D.zero
     then do
       let Bounds2D uBounds vBounds = localBounds
       let uMid = Interval.midpoint uBounds

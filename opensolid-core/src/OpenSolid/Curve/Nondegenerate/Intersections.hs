@@ -63,7 +63,7 @@ intersections givenCurve1 givenCurve2 = do
 
 findIntersections :: Problem dimension units space => Maybe Intersections
 findIntersections
-  | not (Curve.Nondegenerate.bounds curve1 `intersects` Curve.Nondegenerate.bounds curve2) = Nothing
+  | not (Curve.Nondegenerate.bounds curve1 ^ Curve.Nondegenerate.bounds curve2) = Nothing
   | otherwise = do
       let endpointIntersections = findEndpointIntersections
       if List.any IntersectionPoint.isIndistinguishable endpointIntersections

@@ -101,7 +101,7 @@ touching ::
   Bag domain existing ->
   Set domain (tag, Tree domain segment) ->
   Bool
-touching existing set = Bag.full set & Bag.pairwiseAny (^) (\_ _ -> True) existing
+touching existing set = Bag.full set & Bag.pairwiseAny (unitless (^)) (\_ _ -> True) existing
 
 clusters ::
   forall domain segment existing tag.
@@ -112,7 +112,7 @@ clusters ::
   List (Set domain (tag, Tree domain segment))
 clusters existing resolveFunction tree = do
   resolve existing resolveFunction tree
-    & Bag.clusters (^) (\_ _ -> True)
+    & Bag.clusters (unitless (^)) (\_ _ -> True)
     & List.map (Set.build (subdomain . Pair.second))
     & List.filter (not . touching existing)
 

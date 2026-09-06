@@ -37,8 +37,7 @@ module OpenSolid.Prelude
   , unitless
   , ApproximateEquality ((~=))
   , Indexed ((!!))
-  , Intersects (intersects)
-  , (^)
+  , Intersects ((^))
   , Quantity (Quantity, Q#)
   , Unitless
   , Radians
@@ -633,9 +632,9 @@ instance Hashable key => Indexed (HashMap key value) key value where
 ----- Intersection -----
 
 class Intersects a b units | a b -> units where
-  intersects :: Tolerance units => a -> b -> Bool
+  (^) :: Tolerance units => a -> b -> Bool
 
-infix 4 `intersects`
+infix 4 ^
 
 instance
   ( Intersects a1 a2 unitsA
@@ -644,13 +643,7 @@ instance
   ) =>
   Intersects (a1, b1) (a2, b2) unitsA
   where
-  intersects (a1, b1) (a2, b2) = intersects a1 a2 && intersects b1 b2
-
-{-# INLINE (^) #-}
-(^) :: Intersects a b Unitless => a -> b -> Bool
-first ^ second = let ?tolerance = 1e-9 in first `intersects` second
-
-infix 4 ^
+  (a1, b1) ^ (a2, b2) = a1 ^ a2 && b1 ^ b2
 
 ----- Sign -----
 

@@ -557,10 +557,10 @@ validEdge :: UvBounds -> Number -> Set2D Unitless UvBounds -> Bool
 validEdge edgeBounds edgeLength surfaceSegments = unitless do
   case surfaceSegments of
     Set2D.Node nodeBounds children ->
-      not (intersects edgeBounds nodeBounds)
+      not (edgeBounds ^ nodeBounds)
         || NonEmpty.all (validEdge edgeBounds edgeLength) children
     Set2D.Leaf leafBounds _ ->
-      not (intersects edgeBounds leafBounds)
+      not (edgeBounds ^ leafBounds)
         || edgeLength <= Number.sqrt 2.0 * Bounds2D.diameter leafBounds
 
 surfaceMesh ::

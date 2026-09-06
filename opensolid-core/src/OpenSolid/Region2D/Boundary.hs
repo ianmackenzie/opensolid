@@ -53,10 +53,10 @@ instance Indexed (Boundary units) Int (Curve2D units) where
   boundary !! index = boundary.curves !! index
 
 instance units1 ~ units2 => Intersects (Point2D units1) (Boundary units2) units1 where
-  intersects point boundary = Set2D.any (intersects point) (intersects point) (curves boundary)
+  point ^ boundary = Set2D.any (^ point) (^ point) (curves boundary)
 
 instance units1 ~ units2 => Intersects (Boundary units2) (Point2D units1) units1 where
-  intersects boundary point = intersects point boundary
+  boundary ^ point = point ^ boundary
 
 data PointClassification
   = InteriorPoint
@@ -114,7 +114,7 @@ isInterior sweptAngle = Tolerance.using Angle.tolerance do
 
 classifyPoint :: Tolerance units => Point2D units -> Boundary units -> PointClassification
 classifyPoint point boundary
-  | intersects point boundary = IncidentPoint
+  | point ^ boundary = IncidentPoint
   | otherwise = do
       let sweptAngle = Region2D.BoundaryTree.pointSweptAngle point boundary.tree
       if isInterior sweptAngle then InteriorPoint else ExteriorPoint

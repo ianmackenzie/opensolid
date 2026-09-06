@@ -347,7 +347,7 @@ rangeConsistency curve = do
   tValue <- Test.generate (Random.map (Interval.interpolate tRange) Parameter.random)
   let curveValue = Curve2D.pointAt tValue curve
   let curveRange = Curve2D.range tRange curve
-  Test.expect (curveValue `intersects` curveRange)
+  Test.expect (curveValue ^ curveRange)
     & Test.output "tValue" tValue
     & Test.output "tRange" tRange
     & Test.output "curveValue" curveValue

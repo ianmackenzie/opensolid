@@ -55,9 +55,9 @@ instance
   ) =>
   Intersects (Bag b1 a1) (Bag b2 a2) boundsUnits
   where
-  intersects Empty _ = False
-  intersects _ Empty = False
-  intersects (Full set1) (Full set2) = intersects set1 set2
+  Empty ^ _ = False
+  _ ^ Empty = False
+  Full set1 ^ Full set2 = set1 ^ set2
 
 empty :: Bag b a
 empty = Empty

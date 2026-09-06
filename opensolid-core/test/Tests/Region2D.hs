@@ -159,16 +159,16 @@ pointContainment = Test.verify "pointContainment" do
           , square 2.5 1.5
           ]
   region <- Region2D.boundedBy boundaryCurves ?? fail
-  let expectInside points = Test.combine (Test.expect . intersects region) points
-  let expectOutside points = Test.combine (Test.expect . not . intersects region) points
+  let expectInside givenPoint = Test.expect (givenPoint ^ region)
+  let expectOutside givenPoint = Test.expect (not (givenPoint ^ region))
   Test.all
-    [ expectInside outerLoopPoints
-    , expectInside
+    [ Test.combine expectInside outerLoopPoints
+    , Test.combine expectInside $
         [ point 1.0 0.5
         , point 1.5 0.75
         , point 2.75 1.75
         ]
-    , expectOutside
+    , Test.combine expectOutside $
         [ point -0.5 0.5
         , point 0.5 0.5
         , point 0.5 1.5

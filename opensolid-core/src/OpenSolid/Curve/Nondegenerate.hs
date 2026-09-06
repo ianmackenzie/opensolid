@@ -142,7 +142,7 @@ findPoint ::
 findPoint givenPoint givenCurve = do
   let endpointSolutions = [t | t <- [0.0, 1.0], pointAt t givenCurve ~= givenPoint]
   let endpointSolutionSet = Bag.pack Interval.constant endpointSolutions
-  let isDistant segment = not (givenPoint `intersects` Curve.Segment.range segment)
+  let isDistant segment = not (givenPoint ^ Curve.Segment.range segment)
   let resolvedMonotonicity _ segment
         | isDistant segment = Resolved Nothing
         | Curve.Segment.isMonotonic segment = Resolved (Just Monotonic)

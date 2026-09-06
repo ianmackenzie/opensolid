@@ -36,7 +36,7 @@ placeIn = Test.check 100 "placeIn" do
   frame <- Test.generate Tests.Random.frame3D
   let globalBounds = Bounds3D.placeIn frame localBounds
   let globalPoint = Point3D.placeIn frame localPoint
-  Test.expect (globalPoint `intersects` globalBounds)
+  Test.expect (globalPoint ^ globalBounds)
 
 relativeTo :: Test
 relativeTo = Test.check 100 "relativeTo" do
@@ -44,7 +44,7 @@ relativeTo = Test.check 100 "relativeTo" do
   frame <- Test.generate Tests.Random.frame3D
   let localBounds = Bounds3D.relativeTo frame globalBounds
   let localPoint = Point3D.relativeTo frame globalPoint
-  Test.expect (localPoint `intersects` localBounds)
+  Test.expect (localPoint ^ localBounds)
 
 projectInto :: Test
 projectInto = Test.check 100 "projectInto" do
@@ -52,7 +52,7 @@ projectInto = Test.check 100 "projectInto" do
   plane <- Test.generate Tests.Random.plane3D
   let bounds2D = Bounds3D.projectInto plane bounds3D
   let point2D = Point3D.projectInto plane point3D
-  Test.expect (point2D `intersects` bounds2D)
+  Test.expect (point2D ^ bounds2D)
 
 distanceAlong :: Test
 distanceAlong = Test.check 100 "distanceAlong" do
@@ -60,7 +60,7 @@ distanceAlong = Test.check 100 "distanceAlong" do
   axis <- Test.generate Tests.Random.axis3D
   let distanceBounds = Bounds3D.distanceAlong axis bounds3D
   let distance = Point3D.distanceAlong axis point3D
-  Test.expect (distance `intersects` distanceBounds)
+  Test.expect (distance ^ distanceBounds)
 
 transformBy :: Test
 transformBy = Test.check 100 "transformBy" do
@@ -68,4 +68,4 @@ transformBy = Test.check 100 "transformBy" do
   transform <- Test.generate Tests.Random.affineTransform3D
   let transformedBounds = Bounds3D.transformBy transform originalBounds
   let transformedPoint = Point3D.transformBy transform originalPoint
-  Test.expect (transformedPoint `intersects` transformedBounds)
+  Test.expect (transformedPoint ^ transformedBounds)

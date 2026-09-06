@@ -152,7 +152,7 @@ tightRange Subproblem{uvRange, fValues, fRange, fuRange, fvRange} = do
 isZeroCandidate :: Tolerance units => Subproblem units -> Bool
 isZeroCandidate subproblem = do
   let Subproblem{fRange} = subproblem
-  fRange `intersects` Quantity.zero && tightRange subproblem `intersects` Quantity.zero
+  fRange ^ Quantity.zero && tightRange subproblem ^ Quantity.zero
 
 leftEdgeRange :: Subproblem units -> Interval units
 leftEdgeRange Subproblem{uvRange, fvRange, fValues} = do

@@ -36,7 +36,7 @@ rangeConsistency vectorCurve = do
   tValue <- Test.generate (Random.map (Interval.interpolate tRange) Parameter.random)
   let vectorCurveValue = VectorCurve2D.valueAt tValue vectorCurve
   let vectorCurveRange = VectorCurve2D.range tRange vectorCurve
-  Test.expect (vectorCurveValue `intersects` vectorCurveRange)
+  Test.expect (vectorCurveValue ^ vectorCurveRange)
     & Test.output "tValue" tValue
     & Test.output "tRange" tRange
     & Test.output "vectorCurveValue" vectorCurveValue

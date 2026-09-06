@@ -97,7 +97,7 @@ instance
   ) =>
   Intersects (Set b1 a1) (Set b2 a2) boundsUnits
   where
-  intersects = pairwiseAny intersects intersects
+  (^) = pairwiseAny (^) (^)
 
 get :: Int -> Set b a -> Maybe a
 get index set = case set of
