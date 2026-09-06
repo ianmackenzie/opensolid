@@ -11,17 +11,17 @@ where
 
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Curve1D (Curve1D)
-import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvCurve (UvCurve)
 
 data SurfaceCurve3D space = SurfaceCurve3D
   { surfaceFunction :: SurfaceFunction3D space
-  , uvCurve :: Curve2D Unitless
+  , uvCurve :: UvCurve
   , curve :: Curve3D space
   }
 
@@ -29,7 +29,7 @@ instance Composition (SurfaceCurve3D space) (Curve1D Unitless) (SurfaceCurve3D s
   surfaceCurve . parameterization =
     new (surfaceFunction surfaceCurve) (uvCurve surfaceCurve . parameterization)
 
-new :: SurfaceFunction3D space -> Curve2D Unitless -> SurfaceCurve3D space
+new :: SurfaceFunction3D space -> UvCurve -> SurfaceCurve3D space
 new givenSurfaceFunction givenUvCurve =
   SurfaceCurve3D
     { surfaceFunction = givenSurfaceFunction
@@ -40,7 +40,7 @@ new givenSurfaceFunction givenUvCurve =
 curve :: SurfaceCurve3D space -> Curve3D space
 curve = (.curve)
 
-uvCurve :: SurfaceCurve3D space -> Curve2D Unitless
+uvCurve :: SurfaceCurve3D space -> UvCurve
 uvCurve = (.uvCurve)
 
 surfaceFunction :: SurfaceCurve3D space -> SurfaceFunction3D space
