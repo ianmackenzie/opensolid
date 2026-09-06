@@ -16,7 +16,6 @@ import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionBounds3D qualified as DirectionBounds3D
 import OpenSolid.Prelude
 import OpenSolid.VectorBounds3D (VectorBounds3D)
-import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 
 data Segment space = Segment
   { range :: ~(Bounds3D space)
@@ -28,6 +27,7 @@ data Segment space = Segment
       )
   , normalDirectionRange :: ~(DirectionBounds3D space)
   , isDegenerate :: ~Bool
+  , isMonotonic :: ~Bool
   }
 
 range :: Segment space -> Bounds3D space
@@ -53,9 +53,7 @@ isDegenerate :: Segment space -> Bool
 isDegenerate = (.isDegenerate)
 
 isMonotonic :: Segment space -> Bool
-isMonotonic segment = do
-  let (duBounds, dvBounds) = partialDerivativeRanges segment
-  VectorBounds3D.areIndependent duBounds dvBounds
+isMonotonic = (.isMonotonic)
 
 areDistinct :: Tolerance Meters => Segment space -> Segment space -> Bool
 areDistinct segment1 segment2 = not (range segment1 ^ range segment2)

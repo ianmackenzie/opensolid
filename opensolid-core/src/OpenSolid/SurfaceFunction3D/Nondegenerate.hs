@@ -151,12 +151,15 @@ segment uvRange function = do
   let isDegenerateRight = uLow >= Degeneracy.tEnd && degenerateRight function
   let isDegenerateBottom = vHigh <= Degeneracy.tStart && degenerateBottom function
   let isDegenerateTop = vLow >= Degeneracy.tEnd && degenerateTop function
+  let derivativeRanges = partialDerivativeRanges uvRange function
+  let (duRange, dvRange) = derivativeRanges
   Segment
     { range = range uvRange function
-    , partialDerivativeRanges = partialDerivativeRanges uvRange function
+    , partialDerivativeRanges = derivativeRanges
     , secondPartialDerivativeRanges = secondPartialDerivativeRanges uvRange function
     , normalDirectionRange = normalDirectionRange uvRange function
     , isDegenerate = isDegenerateLeft || isDegenerateRight || isDegenerateBottom || isDegenerateTop
+    , isMonotonic = VectorBounds3D.areIndependent duRange dvRange
     }
 
 bisectionTree :: Nondegenerate (SurfaceFunction3D space) -> SurfaceFunction3D.BisectionTree space
