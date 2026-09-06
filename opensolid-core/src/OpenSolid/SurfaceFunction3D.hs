@@ -1,6 +1,8 @@
 module OpenSolid.SurfaceFunction3D
   ( SurfaceFunction3D
   , Compiled
+  , Segment
+  , BisectionTree
   , new
   , constant
   , pointAt
@@ -18,6 +20,7 @@ module OpenSolid.SurfaceFunction3D
   , degenerateBottom
   , degenerateTop
   , nondegenerate
+  , bisectionTree
   , normalDirectionRange
   , placeIn
   , relativeTo
@@ -25,6 +28,7 @@ module OpenSolid.SurfaceFunction3D
   )
 where
 
+import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
@@ -33,11 +37,13 @@ import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.PartialDerivatives qualified as PartialDerivatives
 import OpenSolid.Point3D (Point3D)
@@ -48,10 +54,13 @@ import {-# SOURCE #-} OpenSolid.Surface3D (Surface3D)
 import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
+import {-# SOURCE #-} OpenSolid.SurfaceFunction3D.Nondegenerate qualified as SurfaceFunction3D.Nondegenerate
+import OpenSolid.SurfaceFunction3D.Segment (Segment)
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
-import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvBounds (UvBounds, data UvBounds)
+import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector3D (Vector3D)
@@ -73,10 +82,13 @@ data SurfaceFunction3D space = SurfaceFunction3D
   , degenerateRight :: ~Bool
   , degenerateBottom :: ~Bool
   , degenerateTop :: ~Bool
+  , bisectionTree :: Nondegenerate.Field (BisectionTree space)
   }
 
 type Compiled space =
   CompiledFunction UvPoint (Point3D space) UvBounds (Bounds3D space)
+
+type BisectionTree space = Bisection.Tree UvBounds (Segment space)
 
 instance
   space1 ~ space2 =>
@@ -202,7 +214,21 @@ new givenCompiled givenPartialDerivatives = do
       , degenerateRight = degenerateEdge UvPoint.rightSamples
       , degenerateBottom = degenerateEdge UvPoint.bottomSamples
       , degenerateTop = degenerateEdge UvPoint.topSamples
+      , bisectionTree = Nondegenerate.field (buildBisectionTree UvBounds.unitSquare) result
       }
+
+buildBisectionTree :: UvBounds -> Nondegenerate (SurfaceFunction3D space) -> BisectionTree space
+buildBisectionTree uvRange function = do
+  let segment = SurfaceFunction3D.Nondegenerate.segment uvRange function
+  let UvBounds uRange vRange = uvRange
+  let (uLeft, uRight) = Interval.bisect uRange
+  let (vBottom, vTop) = Interval.bisect vRange
+  let bottomLeft = buildBisectionTree (UvBounds uLeft vBottom) function
+  let bottomRight = buildBisectionTree (UvBounds uRight vBottom) function
+  let topLeft = buildBisectionTree (UvBounds uLeft vTop) function
+  let topRight = buildBisectionTree (UvBounds uRight vTop) function
+  let children = NonEmpty.four bottomLeft bottomRight topLeft topRight
+  Bisection.Tree uvRange segment children
 
 constant :: Point3D space -> SurfaceFunction3D space
 constant value =
@@ -303,6 +329,9 @@ nondegenerate function =
   if function.maxSampledInteriorDivergence ~= Length.zero
     then Err IsDegenerate
     else Ok (Nondegenerate function)
+
+bisectionTree :: Nondegenerate (SurfaceFunction3D space) -> BisectionTree space
+bisectionTree = Nondegenerate.get (.bisectionTree)
 
 normalDirectionRange ::
   Tolerance Meters =>

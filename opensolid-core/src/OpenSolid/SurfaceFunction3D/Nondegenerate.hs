@@ -15,6 +15,7 @@ module OpenSolid.SurfaceFunction3D.Nondegenerate
   , degenerateBottom
   , degenerateTop
   , segment
+  , bisectionTree
   )
 where
 
@@ -157,3 +158,6 @@ segment uvRange function = do
     , normalDirectionRange = normalDirectionRange uvRange function
     , isDegenerate = isDegenerateLeft || isDegenerateRight || isDegenerateBottom || isDegenerateTop
     }
+
+bisectionTree :: Nondegenerate (SurfaceFunction3D space) -> SurfaceFunction3D.BisectionTree space
+bisectionTree = SurfaceFunction3D.bisectionTree
