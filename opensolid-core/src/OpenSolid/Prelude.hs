@@ -34,6 +34,7 @@ module OpenSolid.Prelude
   , Exponentiation ((**))
   , Composition ((.), (>>))
   , Tolerance
+  , unitless
   , ApproximateEquality ((~=))
   , Indexed ((!!))
   , Intersects (intersects)
@@ -293,6 +294,10 @@ instance Exponentiation Number Int Number where
 ----- Tolerance -----
 
 type Tolerance units = ?tolerance :: Quantity units
+
+{-# INLINE unitless #-}
+unitless :: (Tolerance Unitless => a) -> a
+unitless expression = let ?tolerance = 1e-9 in expression
 
 ----- Approximate equality -----
 

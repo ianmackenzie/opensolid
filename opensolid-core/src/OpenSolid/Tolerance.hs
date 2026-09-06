@@ -5,7 +5,8 @@ module OpenSolid.Tolerance
   )
 where
 
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (unitless)
+import OpenSolid.Prelude qualified
 
 using :: Quantity units -> (Tolerance units => a) -> a
 using tolerance expression = let ?tolerance = tolerance in expression
@@ -19,5 +20,6 @@ For example, it is used in some places to assess whether two directions are para
 or if two curve parameter values are equal
 (since curve parameters are always in the range 0 to 1).
 -}
+{-# INLINE unitless #-}
 unitless :: Number
-unitless = 1e-9
+unitless = OpenSolid.Prelude.unitless ?tolerance
