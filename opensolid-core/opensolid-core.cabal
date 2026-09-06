@@ -230,6 +230,7 @@ library
     OpenSolid.SurfaceFunction2D
     OpenSolid.SurfaceFunction3D
     OpenSolid.SurfaceFunction3D.Nondegenerate
+    OpenSolid.SurfaceFunction3D.Segment
     OpenSolid.SurfaceLocation
     OpenSolid.SurfaceVertex3D
     OpenSolid.Svg
