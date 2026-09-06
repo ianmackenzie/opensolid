@@ -7,6 +7,7 @@ module OpenSolid.Surface3D.Nondegenerate
   , innerLoops
   , boundaries
   , boundaryLoops
+  , boundaryCurves
   )
 where
 
@@ -43,3 +44,6 @@ boundaries (Nondegenerate surface) = Surface3D.boundaries surface
 
 boundaryLoops :: Nondegenerate (Surface3D space) -> NonEmpty (NonEmpty (SurfaceCurve3D space))
 boundaryLoops (Nondegenerate surface) = Surface3D.boundaryLoops surface
+
+boundaryCurves :: Nondegenerate (Surface3D space) -> Set3D space (SurfaceCurve3D space)
+boundaryCurves (Nondegenerate surface) = Surface3D.boundaryCurves surface
