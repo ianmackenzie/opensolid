@@ -14,10 +14,12 @@ module OpenSolid.SurfaceFunction3D.Nondegenerate
   , degenerateRight
   , degenerateBottom
   , degenerateTop
+  , segment
   )
 where
 
 import OpenSolid.Bounds3D (Bounds3D)
+import OpenSolid.Degeneracy qualified as Degeneracy
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.Interval (Interval (Interval))
@@ -28,6 +30,7 @@ import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
+import OpenSolid.SurfaceFunction3D.Segment (Segment (..))
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.Vector3D (Vector3D)
@@ -139,3 +142,18 @@ degenerateBottom (Nondegenerate function) = SurfaceFunction3D.degenerateBottom f
 
 degenerateTop :: Nondegenerate (SurfaceFunction3D space) -> Bool
 degenerateTop (Nondegenerate function) = SurfaceFunction3D.degenerateTop function
+
+segment :: UvBounds -> Nondegenerate (SurfaceFunction3D space) -> Segment space
+segment uvRange function = do
+  let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvRange
+  let isDegenerateLeft = uHigh <= Degeneracy.tStart && degenerateLeft function
+  let isDegenerateRight = uLow >= Degeneracy.tEnd && degenerateRight function
+  let isDegenerateBottom = vHigh <= Degeneracy.tStart && degenerateBottom function
+  let isDegenerateTop = vLow >= Degeneracy.tEnd && degenerateTop function
+  Segment
+    { range = range uvRange function
+    , partialDerivativeRanges = partialDerivativeRanges uvRange function
+    , secondPartialDerivativeRanges = secondPartialDerivativeRanges uvRange function
+    , normalDirectionRange = normalDirectionRange uvRange function
+    , isDegenerate = isDegenerateLeft || isDegenerateRight || isDegenerateBottom || isDegenerateTop
+    }
