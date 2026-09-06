@@ -10,6 +10,7 @@ module OpenSolid.Curve
   , Segment
   , BisectionTree
   , HasDegeneracy (HasDegeneracy)
+  , IsDegenerateAndCoincidentWithPoint (IsDegenerateAndCoincidentWithPoint)
   , new
   , constant
   , line
@@ -119,7 +120,6 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Result qualified as Result
 import OpenSolid.Show qualified as Show
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
@@ -186,6 +186,10 @@ type Compiled dimension units space =
     (Bounds dimension units space)
 
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show, Err)
+
+data IsDegenerateAndCoincidentWithPoint
+  = IsDegenerateAndCoincidentWithPoint
+  deriving (Eq, Show, Err)
 
 type BisectionTree dimension units space =
   Bisection.Tree (Interval Unitless) (Segment dimension units space)
@@ -768,9 +772,15 @@ findPoint ::
   (CurveExists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Curve dimension units space ->
-  Result IsDegenerate (List Number)
+  Result IsDegenerateAndCoincidentWithPoint (List Number)
 findPoint givenPoint curve =
-  Result.map (Curve.Nondegenerate.findPoint givenPoint) (nondegenerate curve)
+  case nondegenerate curve of
+    Ok nondegenerateCurve ->
+      Ok (Curve.Nondegenerate.findPoint givenPoint nondegenerateCurve)
+    Err IsDegenerate ->
+      if givenPoint ~= startPoint curve
+        then Err IsDegenerateAndCoincidentWithPoint
+        else Ok []
 
 intersections ::
   ( CurveExists dimension units space

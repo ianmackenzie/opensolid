@@ -227,7 +227,11 @@ placeIn frame curve = do
 relativeTo :: Frame3D global local -> Curve3D global -> Curve3D local
 relativeTo frame curve = placeIn (Frame3D.inverse frame) curve
 
-findPoint :: Tolerance Meters => Point3D space -> Curve3D space -> Result IsDegenerate (List Number)
+findPoint ::
+  Tolerance Meters =>
+  Point3D space ->
+  Curve3D space ->
+  Result Curve.IsDegenerateAndCoincidentWithPoint (List Number)
 findPoint = Curve.findPoint
 
 intersections ::
