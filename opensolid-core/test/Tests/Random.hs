@@ -10,7 +10,6 @@ module Tests.Random
   , axis3D
   , plane3D
   , orientation2D
-  , planeOrientation3D
   , orientation3D
   , frame2D
   , frame3D
@@ -63,7 +62,6 @@ import OpenSolid.Orientation2D (Orientation2D)
 import OpenSolid.Orientation2D qualified as Orientation2D
 import OpenSolid.Orientation3D (Orientation3D)
 import OpenSolid.Plane3D (Plane3D (Plane3D))
-import OpenSolid.PlaneOrientation3D (PlaneOrientation3D)
 import OpenSolid.PlaneOrientation3D qualified as PlaneOrientation3D
 import OpenSolid.Point2D (Point2D, data Point2D)
 import OpenSolid.Point3D (Point3D)
@@ -119,19 +117,11 @@ axis3D = Random.map2 Axis3D point3D Direction3D.random
 orientation2D :: Generator Orientation2D
 orientation2D = Random.map Orientation2D.fromXDirection Direction2D.random
 
-planeOrientation3D :: Generator (PlaneOrientation3D space)
-planeOrientation3D =
-  Random.retry $
-    Random.map2
-      (Tolerance.using 0.1 PlaneOrientation3D.fromDirections)
-      Direction3D.random
-      Direction3D.random
-
 orientation3D :: Generator (Orientation3D space)
 orientation3D = Random.map Frame3D.orientation frame3D
 
 plane3D :: Generator (Plane3D space)
-plane3D = Random.map2 Plane3D point3D planeOrientation3D
+plane3D = Random.map2 Plane3D point3D PlaneOrientation3D.random
 
 frame2D :: Generator (Frame2D Meters)
 frame2D = Random.map Frame2D.fromXAxis axis2D
