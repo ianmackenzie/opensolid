@@ -120,12 +120,14 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
+import OpenSolid.Show qualified as Show
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
+import OpenSolid.Text qualified as Text
 import OpenSolid.Transform (Transform, TransformExists)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform.Tag qualified as Transform.Tag
@@ -159,8 +161,22 @@ data Curve dimension units space = Curve
 -- | A parametric curve in 2D space.
 type Curve2D units = Curve 2 units Void
 
+instance Show (Curve2D units) where
+  showsPrec precedence curve =
+    Show.partialRecord precedence "Curve2D" $
+      [ ("startPoint", Text.show curve.startPoint)
+      , ("endPoint", Text.show curve.endPoint)
+      ]
+
 -- | A parametric curve in 3D space.
 type Curve3D space = Curve 3 Meters space
+
+instance Show (Curve3D space) where
+  showsPrec precedence curve =
+    Show.partialRecord precedence "Curve3D" $
+      [ ("startPoint", Text.show curve.startPoint)
+      , ("endPoint", Text.show curve.endPoint)
+      ]
 
 type Compiled dimension units space =
   CompiledFunction
