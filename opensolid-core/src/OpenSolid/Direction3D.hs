@@ -55,7 +55,6 @@ import OpenSolid.Primitives
   , Vector3D (Vector3D)
   )
 import OpenSolid.Random qualified as Random
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorTransform3D (VectorTransform3D)
@@ -165,7 +164,7 @@ angleFrom :: Direction3D space -> Direction3D space -> Angle
 angleFrom d1 d2 = Angle.atan2 (Vector3D.magnitude (d1 `cross` d2)) (d1 `dot` d2)
 
 areEqual :: Direction3D space -> Direction3D space -> Bool
-areEqual (Unit3D v1) (Unit3D v2) = Tolerance.using Tolerance.unitless (v1 ~= v2)
+areEqual (Unit3D v1) (Unit3D v2) = unitless (v1 ~= v2)
 
 areParallel :: Direction3D space -> Direction3D space -> Bool
 areParallel d1 d2 = areEqual d1 d2 || areEqual d1 -d2
@@ -174,7 +173,7 @@ areIndependent :: Direction3D space -> Direction3D space -> Bool
 areIndependent d1 d2 = not (areParallel d1 d2)
 
 arePerpendicular :: Direction3D space -> Direction3D space -> Bool
-arePerpendicular d1 d2 = Tolerance.using Tolerance.unitless (d1 `dot` d2 ~= 0.0)
+arePerpendicular d1 d2 = unitless (d1 `dot` d2 ~= 0.0)
 
 -- | Convert a direction defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3D global local -> Direction3D local -> Direction3D global

@@ -193,7 +193,7 @@ testPlaneTorusIntersection = do
   log "  Saddle points" (List.length zeros.saddlePoints)
 
 testPlaneParaboloidIntersection :: IO ()
-testPlaneParaboloidIntersection = Tolerance.using Tolerance.unitless do
+testPlaneParaboloidIntersection = unitless do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
   let f = SurfaceFunction1D.squared u + SurfaceFunction1D.squared v - 0.5
@@ -360,7 +360,7 @@ testTextSum = do
     log "sum" sum
 
 testNewtonRaphson2D :: IO ()
-testNewtonRaphson2D = Tolerance.using Tolerance.unitless do
+testNewtonRaphson2D = unitless do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
   let f = SurfaceFunction1D.squared u + SurfaceFunction1D.squared v - 4.0

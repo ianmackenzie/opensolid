@@ -153,10 +153,9 @@ isUniform :: VectorTransform2D tag -> Bool
 isUniform transform = uniformScale transform /= Nothing
 
 orthonormalSign :: VectorTransform2D tag -> Maybe Sign
-orthonormalSign transform =
-  Tolerance.using Tolerance.unitless do
-    scaleFactor <- uniformScale transform
-    if Number.abs scaleFactor ~= 1.0 then Just (Number.sign scaleFactor) else Nothing
+orthonormalSign transform = unitless do
+  scaleFactor <- uniformScale transform
+  if Number.abs scaleFactor ~= 1.0 then Just (Number.sign scaleFactor) else Nothing
 
 uniformScale :: VectorTransform2D tag -> Maybe Number
 uniformScale (VectorTransform2D vx vy) = do

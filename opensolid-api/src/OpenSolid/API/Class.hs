@@ -413,7 +413,7 @@ staticU1 ::
   Member value
 staticU1 name arg1 f docs =
   Static (FFI.name name) $
-    StaticFunction1 (FFI.name arg1) (Tolerance.using Tolerance.unitless f) docs
+    StaticFunction1 (FFI.name arg1) (unitless f) docs
 
 staticM1 ::
   (FFI a, FFI result) =>
@@ -445,7 +445,7 @@ staticU2 ::
   Member value
 staticU2 name arg1 arg2 f docs =
   Static (FFI.name name) $
-    StaticFunction2 (FFI.name arg1) (FFI.name arg2) (Tolerance.using Tolerance.unitless f) docs
+    StaticFunction2 (FFI.name arg1) (FFI.name arg2) (unitless f) docs
 
 staticM2 ::
   (FFI a, FFI b, FFI result) =>
@@ -481,12 +481,7 @@ staticU3 ::
   Member value
 staticU3 name arg1 arg2 arg3 f docs =
   Static (FFI.name name) $
-    StaticFunction3
-      (FFI.name arg1)
-      (FFI.name arg2)
-      (FFI.name arg3)
-      (Tolerance.using Tolerance.unitless f)
-      docs
+    StaticFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (unitless f) docs
 
 staticM3 ::
   (FFI a, FFI b, FFI c, FFI result) =>
@@ -531,7 +526,7 @@ staticU4 name arg1 arg2 arg3 arg4 f docs =
       (FFI.name arg2)
       (FFI.name arg3)
       (FFI.name arg4)
-      (Tolerance.using Tolerance.unitless f)
+      (unitless f)
       docs
 
 staticM4 ::
@@ -638,8 +633,7 @@ memberU0 ::
   (Tolerance Unitless => value -> result) ->
   Text ->
   Member value
-memberU0 name f docs =
-  Member (FFI.name name) (MemberFunction0 (Tolerance.using Tolerance.unitless f) docs)
+memberU0 name f docs = Member (FFI.name name) (MemberFunction0 (unitless f) docs)
 
 memberR0 ::
   (FFI value, FFI result) =>
@@ -688,11 +682,7 @@ memberU2 ::
   Member value
 memberU2 name arg1 arg2 f docs =
   Member (FFI.name name) $
-    MemberFunction2
-      (FFI.name arg1)
-      (FFI.name arg2)
-      (Tolerance.using Tolerance.unitless f)
-      docs
+    MemberFunction2 (FFI.name arg1) (FFI.name arg2) (unitless f) docs
 
 memberM2 ::
   (FFI a, FFI b, FFI value, FFI result) =>
@@ -798,8 +788,8 @@ numberDivideByNonzeroU ::
   Member value
 numberDivideByNonzeroU nonzero = do
   let implementation :: Number -> value -> Result HasZero result
-      implementation number value = do
-        nonzeroValue <- Tolerance.using Tolerance.unitless (nonzero value)
+      implementation number value = unitless do
+        nonzeroValue <- nonzero value
         Ok (number / nonzeroValue)
   PreOverload BinaryOperator.Div (PreOperatorOverload implementation)
 
@@ -846,8 +836,8 @@ divideByNonzeroU ::
   Member value
 divideByNonzeroU nonzero = do
   let implementation :: value -> rhs -> Result HasZero result
-      implementation value rhs = do
-        nonzeroRhs <- Tolerance.using Tolerance.unitless (nonzero rhs)
+      implementation value rhs = unitless do
+        nonzeroRhs <- nonzero rhs
         Ok (value / nonzeroRhs)
   PostOverload BinaryOperator.Div (PostOperatorOverload implementation)
 

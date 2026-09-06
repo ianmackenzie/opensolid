@@ -53,7 +53,6 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Random qualified as Random
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Vector2D qualified as Vector2D
 
@@ -154,10 +153,10 @@ angleFrom :: Direction2D -> Direction2D -> Angle
 angleFrom (Unit2D v1) (Unit2D v2) = Vector2D.angleFrom v1 v2
 
 areEqual :: Direction2D -> Direction2D -> Bool
-areEqual (Unit2D v1) (Unit2D v2) = Tolerance.using Tolerance.unitless (v1 ~= v2)
+areEqual (Unit2D v1) (Unit2D v2) = unitless (v1 ~= v2)
 
 arePerpendicular :: Direction2D -> Direction2D -> Bool
-arePerpendicular d1 d2 = Tolerance.using Tolerance.unitless (d1 `dot` d2 ~= 0.0)
+arePerpendicular d1 d2 = unitless (d1 `dot` d2 ~= 0.0)
 
 areParallel :: Direction2D -> Direction2D -> Bool
 areParallel d1 d2 = areEqual d1 d2 || areEqual d1 -d2

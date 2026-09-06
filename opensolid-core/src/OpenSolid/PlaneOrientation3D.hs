@@ -32,7 +32,6 @@ import OpenSolid.Primitives
   , VectorTransform3D
   )
 import OpenSolid.Random qualified as Random
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Vector3D qualified as Vector3D
 
@@ -72,9 +71,7 @@ fromYDirection :: Direction3D space -> PlaneOrientation3D space
 fromYDirection dy = unsafe (Direction3D.perpendicularDirection dy) dy
 
 fromDirections :: Direction3D space -> Direction3D space -> Maybe (PlaneOrientation3D space)
-fromDirections dx dxy =
-  Tolerance.using Tolerance.unitless do
-    gramSchmidt dx (Vector3D.unit dxy)
+fromDirections dx dxy = unitless (gramSchmidt dx (Vector3D.unit dxy))
 
 fromVectors ::
   Tolerance units =>

@@ -6,7 +6,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Random qualified as Random
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
 import Test (Test)
 import Test qualified
@@ -88,6 +87,6 @@ unboxedQuinticHermiteEvaluation = Test.check 100 "unboxedQuinticHermiteEvaluatio
   let !(Q# t#) = t
   let actual = Q# (quinticBezier# p1# p2# p3# p4# p5# p6# t#)
   let expected = Curve1D.valueAt t curve
-  Test.expect (Tolerance.using Tolerance.unitless (actual ~= expected))
+  Test.expect (unitless (actual ~= expected))
     & Test.output "actual" actual
     & Test.output "expected" expected

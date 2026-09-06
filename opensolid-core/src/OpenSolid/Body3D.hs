@@ -554,7 +554,7 @@ degenerateEdgeLinearizationPredicate uvCurve surfaceSegments (Interval tStart tE
   validEdge edgeBounds edgeSize surfaceSegments
 
 validEdge :: UvBounds -> Number -> Set2D Unitless UvBounds -> Bool
-validEdge edgeBounds edgeLength surfaceSegments = Tolerance.using Tolerance.unitless do
+validEdge edgeBounds edgeLength surfaceSegments = unitless do
   case surfaceSegments of
     Set2D.Node nodeBounds children ->
       not (intersects edgeBounds nodeBounds)
