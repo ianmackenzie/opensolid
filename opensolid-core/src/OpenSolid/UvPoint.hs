@@ -1,6 +1,10 @@
 module OpenSolid.UvPoint
   ( UvPoint
   , data UvPoint
+  , origin
+  , coordinates
+  , uCoordinate
+  , vCoordinate
   , interiorSamples
   , leftSamples
   , rightSamples
@@ -13,6 +17,7 @@ where
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D (Point2D))
+import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quadrature qualified as Quadrature
 import OpenSolid.Random qualified as Random
@@ -26,6 +31,25 @@ type UvPoint = Point2D Unitless
 {-# INLINE UvPoint #-}
 pattern UvPoint :: Number -> Number -> UvPoint
 pattern UvPoint u v = Point2D u v
+
+-- | The point (0, 0) in UV space.
+origin :: UvPoint
+origin = Point2D.origin
+
+-- | Get the U and V coordinates of a point.
+{-# INLINE coordinates #-}
+coordinates :: UvPoint -> (Number, Number)
+coordinates = Point2D.coordinates
+
+-- | Get the U coordinate of a point.
+{-# INLINE uCoordinate #-}
+uCoordinate :: UvPoint -> Number
+uCoordinate = Point2D.xCoordinate
+
+-- | Get the V coordinate of a point.
+{-# INLINE vCoordinate #-}
+vCoordinate :: UvPoint -> Number
+vCoordinate = Point2D.yCoordinate
 
 interiorSamples :: NonEmpty UvPoint
 interiorSamples = do
