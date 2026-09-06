@@ -15,6 +15,7 @@ module OpenSolid.Surface3D
   , translational
   , ruled
   , revolved
+  , nondegenerate
   , bounds
   , boundaryCurves
   , flip
@@ -38,6 +39,8 @@ import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
+import OpenSolid.IsDegenerate (IsDegenerate)
+import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D
@@ -45,6 +48,7 @@ import OpenSolid.Prelude
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Region2D.Boundary qualified as Region2D.Boundary
+import OpenSolid.Result qualified as Result
 import OpenSolid.Set qualified as Set
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
@@ -162,6 +166,14 @@ revolved plane curve axis angle = do
           + radius * SurfaceFunction1D.sin theta * Frame3D.forwardDirection frame3D
           + height * Frame3D.upwardDirection frame3D
   parametric surfaceFunction UvRegion.unitSquare
+
+nondegenerate ::
+  Tolerance Meters =>
+  Surface3D space ->
+  Result IsDegenerate (Nondegenerate (Surface3D space))
+nondegenerate surface =
+  Result.map (\_ -> Nondegenerate surface) $
+    SurfaceFunction3D.nondegenerate (function surface)
 
 bounds :: Surface3D space -> Bounds3D space
 bounds surface = SurfaceFunction3D.range (Region2D.bounds surface.domain) surface.function
