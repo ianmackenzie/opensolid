@@ -35,7 +35,6 @@ module OpenSolid.Curve1D
   , cos
   , degeneracyTolerance
   , isZero
-  , nondegenerate
   , nonzero
   , IsZero (IsZero)
   , roots
@@ -69,7 +68,6 @@ import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.Int qualified as Int
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
@@ -527,13 +525,6 @@ degeneracyTolerance curve = Tolerance.unitless * curve.maxSampledAbsoluteValue
 
 isZero :: Tolerance units => Curve1D units -> Bool
 isZero curve = curve.maxSampledAbsoluteValue ~= Quantity.zero
-
-nondegenerate ::
-  Tolerance units =>
-  Curve1D units ->
-  Result IsDegenerate (Nondegenerate (Curve1D units))
-nondegenerate curve =
-  if isZero curve then Err IsDegenerate else Ok (Nondegenerate curve)
 
 nonzero ::
   Tolerance units =>

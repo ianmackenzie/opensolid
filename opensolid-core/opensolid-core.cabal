@@ -122,7 +122,6 @@ library
     OpenSolid.Curve.Nonzero
     OpenSolid.Curve.Segment
     OpenSolid.Curve1D
-    OpenSolid.Curve1D.Nondegenerate
     OpenSolid.Curve1D.Nonzero
     OpenSolid.Curve1D.Root
     OpenSolid.Curve2D
