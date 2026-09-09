@@ -366,8 +366,7 @@ intersectsPoint ::
 intersectsPoint givenPoint curve = case nondegenerate curve of
   Err IsDegenerate -> givenPoint ~= startPoint curve
   Ok nondegenerateCurve ->
-    Curve.Nondegenerate.findPoint givenPoint nondegenerateCurve
-      & not . List.isEmpty
+    not (List.isEmpty (Curve.Nondegenerate.findPoint givenPoint nondegenerateCurve))
 
 instance
   CurveExists dimension units space =>
