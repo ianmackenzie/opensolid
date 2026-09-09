@@ -24,6 +24,7 @@ import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Axis3D (Axis3D (Axis3D))
 import OpenSolid.Axis3D qualified as Axis3D
+import OpenSolid.Bag3D qualified as Bag3D
 import OpenSolid.Body3D.BoundedBy qualified as BoundedBy
 import OpenSolid.Body3D.HalfEdge (HalfEdge (..))
 import OpenSolid.Body3D.HalfEdge qualified as HalfEdge
@@ -314,12 +315,12 @@ registerSeam halfEdgeSet halfEdge accumulated =
       if Curve3D.isPoint curve
         then Ok (accumulated & HashMap.insert halfEdge.id Nothing) -- Degenerate half-edge has no mating half-edge
         else case HalfEdge.findMatingHalfEdges halfEdgeSet halfEdge of
-          List.One matingHalfEdge -> Ok do
+          Bag3D.Empty -> Err BoundedBy.BoundaryHasGaps -- No mating half-edge found
+          Bag3D.Full (Set3D.Leaf _ matingHalfEdge) -> Ok do
             accumulated
               & HashMap.insert halfEdge.id (Just matingHalfEdge.id)
               & HashMap.insert matingHalfEdge.id (Just halfEdge.id)
-          [] -> Err BoundedBy.BoundaryHasGaps
-          List.TwoOrMore -> Err BoundedBy.BoundaryIntersectsItself
+          Bag3D.Full Set3D.Node{} -> Err BoundedBy.BoundaryIntersectsItself -- More than one mating half-edge found
 
 ----- MESHING -----
 

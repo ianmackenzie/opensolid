@@ -23,10 +23,6 @@ module OpenSolid.Set
   , toListWithIndex
   , cull
   , filter
-  , filterMap
-  , filterWithIndex
-  , filterMapWithIndex
-  , subset
   , any
   , all
   , pairwiseFilter
@@ -335,64 +331,17 @@ cullChildren boundsPredicate (first : rest) =
     Bag.Empty -> cullChildren boundsPredicate rest
     Bag.Full culledFirst -> culledFirst : cullChildren boundsPredicate rest
 
-filter :: (b -> Bool) -> (a -> Bool) -> Set b a -> List a
+filter :: Bounds b => (b -> Bool) -> (a -> Bool) -> Set b a -> Bag b a
 filter boundsPredicate itemPredicate set =
-  filterWithIndex boundsPredicate (const itemPredicate) set
+  Bag.fromMaybeSet (filterImpl boundsPredicate itemPredicate set)
 
-filterMap :: (b -> Bool) -> (a1 -> Maybe a2) -> Set b a1 -> List a2
-filterMap boundsPredicate callback set =
-  filterMapWithIndex boundsPredicate (const callback) set
-
-filterWithIndex :: (b -> Bool) -> (Int -> a -> Bool) -> Set b a -> List a
-filterWithIndex boundsPredicate itemPredicate set = do
-  let callback index item = if itemPredicate index item then Just item else Nothing
-  filterMapWithIndex boundsPredicate callback set
-
-filterMapWithIndex :: (b -> Bool) -> (Int -> a1 -> Maybe a2) -> Set b a1 -> List a2
-filterMapWithIndex boundsPredicate callback set =
-  filterMapWithIndexImpl 0 boundsPredicate callback set []
-
-filterMapWithIndexImpl ::
-  Int ->
-  (b -> Bool) ->
-  (Int -> a1 -> Maybe a2) ->
-  Set b a1 ->
-  List a2 ->
-  List a2
-filterMapWithIndexImpl startIndex boundsPredicate callback set accumulated = case set of
-  Leaf{leafBounds, leafItem} ->
-    if boundsPredicate leafBounds
-      then case callback startIndex leafItem of
-        Just result -> result : accumulated
-        Nothing -> accumulated
-      else accumulated
-  Node{nodeBounds, children} ->
-    if boundsPredicate nodeBounds
-      then filterMapChildrenWithIndex startIndex boundsPredicate callback children accumulated
-      else accumulated
-
-filterMapChildrenWithIndex ::
-  Int ->
-  (b -> Bool) ->
-  (Int -> a1 -> Maybe a2) ->
-  NonEmpty (Set b a1) ->
-  List a2 ->
-  List a2
-filterMapChildrenWithIndex startIndex boundsPredicate callback children accumulated =
-  case children of
-    child :| [] -> filterMapWithIndexImpl startIndex boundsPredicate callback child accumulated
-    first :| NonEmpty rest ->
-      accumulated
-        & filterMapChildrenWithIndex (startIndex + size first) boundsPredicate callback rest
-        & filterMapWithIndexImpl startIndex boundsPredicate callback first
-
-subset :: Bounds b => (b -> Bool) -> (a -> Bool) -> Set b a -> Maybe (Set b a)
-subset boundsPredicate itemPredicate set = case set of
+filterImpl :: Bounds b => (b -> Bool) -> (a -> Bool) -> Set b a -> Maybe (Set b a)
+filterImpl boundsPredicate itemPredicate set = case set of
   Leaf{leafBounds, leafItem} ->
     if boundsPredicate leafBounds && itemPredicate leafItem then Just set else Nothing
   Node{nodeBounds, children} ->
     if boundsPredicate nodeBounds
-      then case NonEmpty.filterMap (subset boundsPredicate itemPredicate) children of
+      then case NonEmpty.filterMap (filterImpl boundsPredicate itemPredicate) children of
         NonEmpty filteredChildren -> Just (node filteredChildren)
         [] -> Nothing
       else Nothing

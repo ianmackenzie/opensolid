@@ -11,6 +11,7 @@ where
 
 import Data.Hashable (Hashable)
 import GHC.Generics (Generic)
+import OpenSolid.Bag3D (Bag3D)
 import OpenSolid.Body3D.Ids (BoundaryId, CurveId, SurfaceId)
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Curve2D (Curve2D)
@@ -53,7 +54,7 @@ findMatingHalfEdges ::
   Tolerance Meters =>
   Set3D space (HalfEdge space) ->
   HalfEdge space ->
-  List (HalfEdge space)
+  Bag3D space (HalfEdge space)
 findMatingHalfEdges halfEdgeSet halfEdge = do
   let halfEdgeBounds = bounds halfEdge
   halfEdgeSet & Set3D.filter (^ halfEdgeBounds) (isMateOf halfEdge)
