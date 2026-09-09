@@ -48,15 +48,15 @@ where
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve3D, Intersections)
+import OpenSolid.Curve (Curve3D)
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.Intersections qualified as Curve.Intersections
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve3D.IntersectionPointWithSurface (IntersectionPointWithSurface)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
-import OpenSolid.IsDegenerate (IsDegenerate)
 import OpenSolid.Length (Length)
 import OpenSolid.Line3D (Line3D)
 import OpenSolid.Plane3D (Plane3D)
@@ -238,5 +238,5 @@ intersections ::
   Tolerance Meters =>
   Curve3D space ->
   Curve3D space ->
-  Result (IsDegenerate ()) (Maybe Intersections)
+  Result (Curve.Intersections.Error 3 Meters space) (Maybe Curve.Intersections)
 intersections = Curve.intersections

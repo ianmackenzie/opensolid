@@ -47,6 +47,7 @@ import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as Curve.IntersectionPoint
+import OpenSolid.Curve.Intersections qualified as Curve.Intersections
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
@@ -60,7 +61,6 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Line2D (data Line2D)
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
@@ -247,11 +247,13 @@ addFillet radius point curves = do
       let offset = Quantity.sign cornerAngle * Quantity.abs radius
       let firstOffsetCurve = Curve2D.Nonzero.offsetLeftwardBy offset firstCurve
       let secondOffsetCurve = Curve2D.Nonzero.offsetLeftwardBy offset secondCurve
-      maybeIntersections <- Curve2D.intersections firstOffsetCurve secondOffsetCurve ?? fail
-      case maybeIntersections of
-        Nothing -> couldNotSolveForFilletLocation
-        Just Curve.OverlappingSegments{} -> couldNotSolveForFilletLocation
-        Just (Curve.IntersectionPoints intersectionPoints) -> do
+      case Curve2D.intersections firstOffsetCurve secondOffsetCurve of
+        Err Curve.Intersections.DegenerateCoincident{} -> couldNotSolveForFilletLocation
+        Err Curve.Intersections.DegenerateFirstOnSecond{} -> couldNotSolveForFilletLocation
+        Err Curve.Intersections.DegenerateSecondOnFirst{} -> couldNotSolveForFilletLocation
+        Ok Nothing -> couldNotSolveForFilletLocation
+        Ok (Just Curve.OverlappingSegments{}) -> couldNotSolveForFilletLocation
+        Ok (Just (Curve.IntersectionPoints intersectionPoints)) -> do
           let intersection1 =
                 intersectionPoints
                   & NonEmpty.maximumBy Curve.IntersectionPoint.firstParameterValue
@@ -314,7 +316,9 @@ checkCurvesForInnerIntersection curve1 curve2 =
     -- We can ignore cases where either curve is actually a point,
     -- since we'll still find any inner intersections
     -- when we check with the *neighbours* of those degenerate curves
-    Err (IsDegenerate ()) -> Ok ()
+    Err Curve.Intersections.DegenerateCoincident{} -> Ok ()
+    Err Curve.Intersections.DegenerateFirstOnSecond{} -> Ok ()
+    Err Curve.Intersections.DegenerateSecondOnFirst{} -> Ok ()
     -- Any overlap between boundary curves is bad
     Ok (Just Curve.OverlappingSegments{}) -> Err BoundedBy.BoundaryIntersectsItself
     -- If there are no intersections at all then we're good!

@@ -90,8 +90,9 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve2D, Intersections)
+import OpenSolid.Curve (Curve2D)
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.Intersections qualified as Curve.Intersections
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
@@ -103,7 +104,6 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval (Interval))
-import OpenSolid.IsDegenerate (IsDegenerate)
 import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.List qualified as List
@@ -531,7 +531,7 @@ intersections ::
   Tolerance units =>
   Curve2D units ->
   Curve2D units ->
-  Result (IsDegenerate ()) (Maybe Intersections)
+  Result (Curve.Intersections.Error 2 units Void) (Maybe Curve.Intersections)
 intersections = Curve.intersections
 
 placeIn :: Frame2D units -> Curve2D units -> Curve2D units

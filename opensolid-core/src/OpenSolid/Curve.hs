@@ -790,15 +790,21 @@ intersections ::
   ) =>
   Curve dimension units space ->
   Curve dimension units space ->
-  Result (IsDegenerate ()) (Maybe Intersections)
+  Result (Intersections.Error dimension units space) (Maybe Intersections)
 intersections curve1 curve2 =
   case (nondegenerate curve1, nondegenerate curve2) of
     (Err (IsDegenerate point1), Err (IsDegenerate point2)) ->
-      if point1 ~= point2 then Err (IsDegenerate ()) else Ok Nothing
-    (Ok _, Err (IsDegenerate point2)) ->
-      if point2 ^ curve1 then Err (IsDegenerate ()) else Ok Nothing
-    (Err (IsDegenerate point1), Ok _) ->
-      if point1 ^ curve2 then Err (IsDegenerate ()) else Ok Nothing
+      if point1 ~= point2
+        then Err (Intersections.DegenerateCoincident point1)
+        else Ok Nothing
+    (Err (IsDegenerate point1), Ok nondegenerate2) ->
+      case Curve.Nondegenerate.findPoint point1 nondegenerate2 of
+        NonEmpty tValues2 -> Err (Intersections.DegenerateFirstOnSecond point1 tValues2)
+        [] -> Ok Nothing
+    (Ok nondegenerate1, Err (IsDegenerate point2)) ->
+      case Curve.Nondegenerate.findPoint point2 nondegenerate1 of
+        NonEmpty tValues1 -> Err (Intersections.DegenerateSecondOnFirst point2 tValues1)
+        [] -> Ok Nothing
     (Ok nondegenerate1, Ok nondegenerate2) ->
       Ok (Curve.Nondegenerate.Intersections.intersections nondegenerate1 nondegenerate2)
 

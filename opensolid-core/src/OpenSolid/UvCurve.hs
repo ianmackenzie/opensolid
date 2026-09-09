@@ -10,6 +10,7 @@ module OpenSolid.UvCurve
 where
 
 import OpenSolid.Curve qualified as Curve
+import OpenSolid.Curve.Intersections qualified as Curve.Intersections
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.IsDegenerate (IsDegenerate)
@@ -34,5 +35,8 @@ pointOn = Curve2D.pointOn
 nondegenerate :: UvCurve -> Result (IsDegenerate UvPoint) (Nondegenerate UvCurve)
 nondegenerate = unitless Curve.nondegenerate
 
-intersections :: UvCurve -> UvCurve -> Result (IsDegenerate ()) (Maybe Curve.Intersections)
+intersections ::
+  UvCurve ->
+  UvCurve ->
+  Result (Curve.Intersections.Error 2 Unitless Void) (Maybe Curve.Intersections)
 intersections = unitless Curve2D.intersections
