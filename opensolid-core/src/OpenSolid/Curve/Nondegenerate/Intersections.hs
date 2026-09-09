@@ -1,8 +1,4 @@
-module OpenSolid.Curve.Nondegenerate.Intersections
-  ( Intersections (..)
-  , intersections
-  )
-where
+module OpenSolid.Curve.Nondegenerate.Intersections (intersections) where
 
 import OpenSolid.Bag (Bag)
 import OpenSolid.Bag qualified as Bag
@@ -11,7 +7,8 @@ import OpenSolid.Curve (Curve, CurveExists)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint (IntersectionPoint))
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
-import OpenSolid.Curve.Intersections (Intersections (..))
+import OpenSolid.Curve.Intersections (Intersections)
+import OpenSolid.Curve.Intersections qualified as Curve.Intersections
 import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Intersection qualified as Intersection
 import OpenSolid.Interval (Interval (Interval))
@@ -97,7 +94,8 @@ findOverlappingIntersections endpointIntersections =
               let (tStart1, tStart2) = IntersectionPoint.parameterValues startIntersectionPoint
               let (tEnd1, tEnd2) = IntersectionPoint.parameterValues endIntersectionPoint
               (Interval tStart1 tEnd1, Interval tStart2 tEnd2)
-        let overlappingSegments segments = OverlappingSegments alignment segments joins
+        let overlappingSegments segments =
+              Curve.Intersections.OverlappingSegments alignment segments joins
         case NonEmpty.sortBy IntersectionPoint.firstParameterValue candidateEndpoints of
           NonEmpty.Two first second -> do
             let segment = overlappingSegment first second
@@ -155,4 +153,4 @@ maybeIntersectionPoints :: List IntersectionPoint -> Maybe Intersections
 maybeIntersectionPoints [] = Nothing
 maybeIntersectionPoints (NonEmpty intersectionPoints) = do
   let sorted = NonEmpty.sortBy IntersectionPoint.parameterValues intersectionPoints
-  Just (IntersectionPoints sorted)
+  Just (Curve.Intersections.IntersectionPoints sorted)
