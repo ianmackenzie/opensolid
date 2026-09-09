@@ -58,7 +58,7 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval)
-import OpenSolid.IsDegenerate (IsDegenerate)
+import OpenSolid.IsZero (IsZero)
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Plane3D (Plane3D)
@@ -88,7 +88,7 @@ derivative = VectorCurve.derivative
 nondegenerate ::
   Tolerance units =>
   VectorCurve2D units ->
-  Result IsDegenerate (Nondegenerate (VectorCurve2D units))
+  Result IsZero (Nondegenerate (VectorCurve2D units))
 nondegenerate = VectorCurve.nondegenerate
 
 transformBy :: VectorTransform2D tag -> VectorCurve2D units -> VectorCurve2D units
@@ -247,7 +247,7 @@ hasDegenerateStart = VectorCurve.hasDegenerateStart
 hasDegenerateEnd :: VectorCurve2D units -> Bool
 hasDegenerateEnd = VectorCurve.hasDegenerateEnd
 
-zeros :: Tolerance units => VectorCurve2D units -> Result IsDegenerate (List Number)
+zeros :: Tolerance units => VectorCurve2D units -> Result IsZero (List Number)
 zeros = VectorCurve.zeros
 
 placeIn :: Frame2D frameUnits -> VectorCurve2D units -> VectorCurve2D units

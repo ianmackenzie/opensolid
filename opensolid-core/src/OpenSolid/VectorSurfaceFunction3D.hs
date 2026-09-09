@@ -40,7 +40,7 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval (Interval))
-import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
@@ -507,8 +507,8 @@ degenerateTop function = function.maxSampledTopMagnitude ~= Quantity.zero
 nondegenerate ::
   Tolerance units =>
   VectorSurfaceFunction3D units space ->
-  Result IsDegenerate (Nondegenerate (VectorSurfaceFunction3D units space))
-nondegenerate function = if isZero function then Err IsDegenerate else Ok (Nondegenerate function)
+  Result IsZero (Nondegenerate (VectorSurfaceFunction3D units space))
+nondegenerate function = if isZero function then Err IsZero else Ok (Nondegenerate function)
 
 zero :: VectorSurfaceFunction3D units space
 zero = constant Vector3D.zero

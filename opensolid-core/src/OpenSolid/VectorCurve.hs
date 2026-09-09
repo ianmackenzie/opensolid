@@ -68,7 +68,7 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Interval (Interval)
-import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -1038,8 +1038,8 @@ compiled = (.compiled)
 nondegenerate ::
   (VectorCurveExists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
-  Result IsDegenerate (Nondegenerate (VectorCurve dimension units space))
-nondegenerate curve = if isZero curve then Err IsDegenerate else Ok (Nondegenerate curve)
+  Result IsZero (Nondegenerate (VectorCurve dimension units space))
+nondegenerate curve = if isZero curve then Err IsZero else Ok (Nondegenerate curve)
 
 {-# INLINE derivative #-}
 derivative ::
@@ -1209,11 +1209,11 @@ transformBy transform curve = do
 zeros ::
   (VectorCurveExists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
-  Result IsDegenerate (List Number)
+  Result IsZero (List Number)
 zeros vectorCurve =
   case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.roots (squaredMagnitude_ vectorCurve)) of
     Ok zeros1D -> Ok (List.map Curve1D.Root.location zeros1D)
-    Err Curve1D.IsZero -> Err IsDegenerate
+    Err Curve1D.IsZero -> Err IsZero
 
 squaredMagnitude_ ::
   VectorCurveExists dimension units space =>
