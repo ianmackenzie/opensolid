@@ -364,7 +364,7 @@ intersectsPoint ::
   Curve dimension units space ->
   Bool
 intersectsPoint givenPoint curve = case nondegenerate curve of
-  Err IsDegenerate -> givenPoint ~= startPoint curve
+  Err (IsDegenerate point) -> givenPoint ~= point
   Ok nondegenerateCurve ->
     not (List.isEmpty (Curve.Nondegenerate.findPoint givenPoint nondegenerateCurve))
 
@@ -638,9 +638,11 @@ isOnAxis axis curve = NonEmpty.all (^ axis) (testPoints curve)
 nondegenerate ::
   (CurveExists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  Result IsDegenerate (Nondegenerate (Curve dimension units space))
+  Result (IsDegenerate (Point dimension units space)) (Nondegenerate (Curve dimension units space))
 nondegenerate curve =
-  if VectorCurve.isZero (derivative curve) then Err IsDegenerate else Ok (Nondegenerate curve)
+  if VectorCurve.isZero (derivative curve)
+    then Err (IsDegenerate (startPoint curve))
+    else Ok (Nondegenerate curve)
 
 nonzero ::
   (CurveExists dimension units space, Tolerance units) =>
@@ -776,8 +778,8 @@ findPoint givenPoint curve =
   case nondegenerate curve of
     Ok nondegenerateCurve ->
       Ok (Curve.Nondegenerate.findPoint givenPoint nondegenerateCurve)
-    Err IsDegenerate ->
-      if givenPoint ~= startPoint curve
+    Err (IsDegenerate point) ->
+      if givenPoint ~= point
         then Err IsDegenerateAndCoincidentWithPoint
         else Ok []
 
@@ -788,11 +790,17 @@ intersections ::
   ) =>
   Curve dimension units space ->
   Curve dimension units space ->
-  Result IsDegenerate (Maybe Intersections)
-intersections curve1 curve2 = do
-  nondegenerate1 <- nondegenerate curve1
-  nondegenerate2 <- nondegenerate curve2
-  Ok (Curve.Nondegenerate.Intersections.intersections nondegenerate1 nondegenerate2)
+  Result (IsDegenerate ()) (Maybe Intersections)
+intersections curve1 curve2 =
+  case (nondegenerate curve1, nondegenerate curve2) of
+    (Err (IsDegenerate point1), Err (IsDegenerate point2)) ->
+      if point1 ~= point2 then Err (IsDegenerate ()) else Ok Nothing
+    (Ok _, Err (IsDegenerate point2)) ->
+      if point2 ^ curve1 then Err (IsDegenerate ()) else Ok Nothing
+    (Err (IsDegenerate point1), Ok _) ->
+      if point1 ^ curve2 then Err (IsDegenerate ()) else Ok Nothing
+    (Ok nondegenerate1, Ok nondegenerate2) ->
+      Ok (Curve.Nondegenerate.Intersections.intersections nondegenerate1 nondegenerate2)
 
 linearDeviation ::
   CurveExists dimension units space =>
@@ -859,7 +867,7 @@ arcLengthParameterization ::
 arcLengthParameterization curve =
   case nondegenerate curve of
     Ok nondegenerateCurve -> Nondegenerate.get (.arcLengthParameterization) nondegenerateCurve
-    Err IsDegenerate -> (Quantity.zero, id)
+    Err (IsDegenerate _) -> (Quantity.zero, id)
 
 length ::
   (CurveExists dimension units space, Tolerance units) =>

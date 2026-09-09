@@ -238,5 +238,5 @@ intersections ::
   Tolerance Meters =>
   Curve3D space ->
   Curve3D space ->
-  Result IsDegenerate (Maybe Intersections)
+  Result (IsDegenerate ()) (Maybe Intersections)
 intersections = Curve.intersections

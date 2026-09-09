@@ -314,7 +314,7 @@ checkCurvesForInnerIntersection curve1 curve2 =
     -- We can ignore cases where either curve is actually a point,
     -- since we'll still find any inner intersections
     -- when we check with the *neighbours* of those degenerate curves
-    Err IsDegenerate -> Ok ()
+    Err (IsDegenerate ()) -> Ok ()
     -- Any overlap between boundary curves is bad
     Ok (Just Curve.OverlappingSegments{}) -> Err BoundedBy.BoundaryIntersectsItself
     -- If there are no intersections at all then we're good!

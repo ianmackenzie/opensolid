@@ -531,7 +531,7 @@ intersections ::
   Tolerance units =>
   Curve2D units ->
   Curve2D units ->
-  Result IsDegenerate (Maybe Intersections)
+  Result (IsDegenerate ()) (Maybe Intersections)
 intersections = Curve.intersections
 
 placeIn :: Frame2D units -> Curve2D units -> Curve2D units

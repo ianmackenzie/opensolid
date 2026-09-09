@@ -2,4 +2,4 @@ module OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate)) where
 
 import OpenSolid.Prelude
 
-data IsDegenerate = IsDegenerate deriving (Eq, Show, Err)
+data IsDegenerate a = IsDegenerate a deriving (Eq, Show, Err)

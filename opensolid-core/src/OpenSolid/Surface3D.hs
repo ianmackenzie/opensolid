@@ -170,7 +170,7 @@ revolved plane curve axis angle = do
 nondegenerate ::
   Tolerance Meters =>
   Surface3D space ->
-  Result IsDegenerate (Nondegenerate (Surface3D space))
+  Result (IsDegenerate ()) (Nondegenerate (Surface3D space))
 nondegenerate surface =
   Result.map (\_ -> Nondegenerate surface) $
     SurfaceFunction3D.nondegenerate (function surface)

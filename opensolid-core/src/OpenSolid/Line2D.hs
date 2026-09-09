@@ -65,7 +65,7 @@ endpoints = Line.endpoints
 length :: Line2D units -> Quantity units
 length = Line.length
 
-direction :: Tolerance units => Line2D units -> Result IsDegenerate Direction2D
+direction :: Tolerance units => Line2D units -> Result (IsDegenerate (Point2D units)) Direction2D
 direction = Line.direction
 
 bounds :: Line2D units -> Bounds2D units
@@ -113,7 +113,7 @@ offsetLeftwardBy ::
   Tolerance units =>
   Quantity units ->
   Line2D units ->
-  Result IsDegenerate (Line2D units)
+  Result (IsDegenerate (Point2D units)) (Line2D units)
 offsetLeftwardBy distance line = do
   lineDirection <- direction line
   Ok (translateIn (Direction2D.rotateLeft lineDirection) distance line)
@@ -122,5 +122,5 @@ offsetRightwardBy ::
   Tolerance units =>
   Quantity units ->
   Line2D units ->
-  Result IsDegenerate (Line2D units)
+  Result (IsDegenerate (Point2D units)) (Line2D units)
 offsetRightwardBy distance = offsetLeftwardBy -distance

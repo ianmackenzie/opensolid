@@ -31,8 +31,8 @@ pointAt = Curve2D.pointAt
 pointOn :: UvCurve -> Number -> UvPoint
 pointOn = Curve2D.pointOn
 
-nondegenerate :: UvCurve -> Result IsDegenerate (Nondegenerate UvCurve)
+nondegenerate :: UvCurve -> Result (IsDegenerate UvPoint) (Nondegenerate UvCurve)
 nondegenerate = unitless Curve.nondegenerate
 
-intersections :: UvCurve -> UvCurve -> Result IsDegenerate (Maybe Curve.Intersections)
+intersections :: UvCurve -> UvCurve -> Result (IsDegenerate ()) (Maybe Curve.Intersections)
 intersections = unitless Curve2D.intersections

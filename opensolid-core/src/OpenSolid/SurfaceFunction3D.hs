@@ -324,10 +324,10 @@ degenerateTop = (.degenerateTop)
 nondegenerate ::
   Tolerance Meters =>
   SurfaceFunction3D space ->
-  Result IsDegenerate (Nondegenerate (SurfaceFunction3D space))
+  Result (IsDegenerate ()) (Nondegenerate (SurfaceFunction3D space))
 nondegenerate function =
   if function.maxSampledInteriorDivergence ~= Length.zero
-    then Err IsDegenerate
+    then Err (IsDegenerate ())
     else Ok (Nondegenerate function)
 
 bisectionTree :: Nondegenerate (SurfaceFunction3D space) -> BisectionTree space

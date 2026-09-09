@@ -370,7 +370,7 @@ surfaceSegmentsEntry resolution surfaceIndex surface = do
             let p12 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u1 v2) function
             let p22 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u2 v2) function
             buildSurfaceSegmentSet resolution function uvBounds p11 p21 p12 p22
-          Err IsDegenerate -> Set2D.leaf uvBounds uvBounds
+          Err (IsDegenerate ()) -> Set2D.leaf uvBounds uvBounds
   (SurfaceId surfaceIndex, surfaceSegmentSet)
 
 buildSurfaceSegmentSet ::
@@ -573,7 +573,7 @@ surfaceMesh ::
   Mesh vertex
 surfaceMesh surfaceSegmentsMap leadingEdgeVerticesMap toVertex surfaceIndex surface =
   case SurfaceFunction3D.nondegenerate (Surface3D.function surface) of
-    Err IsDegenerate -> Mesh.empty
+    Err (IsDegenerate ()) -> Mesh.empty
     Ok nondegenerateSurfaceFunction -> do
       let surfaceId = SurfaceId surfaceIndex
       let boundaryPolygons =

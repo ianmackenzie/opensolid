@@ -57,11 +57,11 @@ direction ::
   , Tolerance units
   ) =>
   Line dimension units space ->
-  Result IsDegenerate (Direction dimension space)
+  Result (IsDegenerate (Point dimension units space)) (Direction dimension space)
 direction (Line p1 p2) =
   case Vector.direction (p2 - p1) of
     Ok lineDirection -> Ok lineDirection
-    Err IsZero -> Err IsDegenerate
+    Err IsZero -> Err (IsDegenerate p1)
 
 bounds ::
   PointExists dimension units space =>
