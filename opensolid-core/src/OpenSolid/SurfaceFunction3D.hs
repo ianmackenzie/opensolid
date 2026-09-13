@@ -3,6 +3,7 @@ module OpenSolid.SurfaceFunction3D
   , Compiled
   , Segment
   , BisectionTree
+  , new
   , unsafe
   , constant
   , displacedFrom
@@ -150,6 +151,17 @@ instance
           , dfdx * dxdv + dfdy * dydv
           )
     unsafe compiledComposed composedPartialDerivatives
+
+new ::
+  Tolerance Meters =>
+  Compiled space ->
+  (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space) ->
+  Result (IsDegenerate ()) (SurfaceFunction3D space)
+new givenCompiled givenPartialDerivatives = do
+  let candidate = unsafe givenCompiled givenPartialDerivatives
+  if candidate.maxSampledInteriorDivergence ~= Length.zero
+    then Err (IsDegenerate ())
+    else Ok candidate
 
 unsafe ::
   Compiled space ->
