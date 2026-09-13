@@ -280,7 +280,7 @@ since all others will be flipped if necessary to match it.
 boundedBy :: Tolerance Meters => List (Surface3D space) -> Result BoundedBy.Error (Body3D space)
 boundedBy [] = Err BoundedBy.EmptyBody
 boundedBy (NonEmpty givenSurfaces) = do
-  let surfaceSet = Set3D.build Surface3D.bounds givenSurfaces
+  let surfaceSet = Set3D.build givenSurfaces
   let halfEdgeSet = buildHalfEdgeSet surfaceSet
   seams <- HashMap.empty & Result.forEach halfEdgeSet (registerSeam halfEdgeSet)
   Ok Body3D{surfaces = surfaceSet, seams}
@@ -299,7 +299,7 @@ buildHalfEdgeSet surfaceSet =
         let curveId = CurveId curveIndex
         let halfEdgeId = HalfEdge.Id{surfaceId, boundaryId, curveId}
         let halfEdge = HalfEdge{id = halfEdgeId, surfaceCurve}
-        Set3D.leaf (HalfEdge.bounds halfEdge) halfEdge
+        Set3D.leaf halfEdge
 
 registerSeam ::
   Tolerance Meters =>
@@ -371,7 +371,7 @@ surfaceSegmentsEntry resolution surfaceIndex surface = do
             let p12 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u1 v2) function
             let p22 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u2 v2) function
             buildSurfaceSegmentSet resolution function uvBounds p11 p21 p12 p22
-          Err (IsDegenerate ()) -> Set2D.leaf uvBounds uvBounds
+          Err (IsDegenerate ()) -> Set2D.leaf uvBounds
   (SurfaceId surfaceIndex, surfaceSegmentSet)
 
 buildSurfaceSegmentSet ::
@@ -416,7 +416,7 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
           `max` interiorError12
           `max` interiorError22
   if Resolution.acceptable (#size size) (#error maxError) resolution
-    then Set2D.leaf uvRange uvRange
+    then Set2D.leaf uvRange
     else do
       let Interval u1 u2 = uRange
       let Interval v1 v2 = vRange
@@ -581,7 +581,7 @@ surfaceMesh surfaceSegmentsMap leadingEdgeVerticesMap toVertex surfaceIndex surf
             Surface3D.boundaries surface
               & Set3D.toNonEmptyWithIndex (toPolygon leadingEdgeVerticesMap surfaceId)
       let boundarySegments = NonEmpty.combine Polygon2D.edges boundaryPolygons
-      let boundarySegmentSet = Set2D.build Line2D.bounds boundarySegments
+      let boundarySegmentSet = Set2D.build boundarySegments
       let surfaceSegments = surfaceSegmentsMap !! surfaceId
       let steinerPoints =
             if Set2D.size surfaceSegments == 1
@@ -634,7 +634,7 @@ surfaces = (.surfaces)
 
 orthonormalTransform :: (Surface3D space1 -> Surface3D space2) -> Body3D space1 -> Body3D space2
 orthonormalTransform function body =
-  Body3D{surfaces = Set3D.map function Surface3D.bounds body.surfaces, seams = body.seams}
+  Body3D{surfaces = Set3D.map function body.surfaces, seams = body.seams}
 
 -- | Convert a body defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3D global local -> Body3D local -> Body3D global

@@ -13,6 +13,8 @@ where
 
 import OpenSolid.Bag (Bag)
 import OpenSolid.Bag qualified as Bag
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
@@ -58,6 +60,22 @@ instance
       , children = NonEmpty.map Units.coerce tree.children
       }
 
+instance
+  forall domain1 domain2 segment.
+  domain1 ~ domain2 =>
+  Bounded (Tree domain1 segment) domain2
+  where
+  {-# INLINE bounds #-}
+  bounds = subdomain
+
+instance
+  forall domain1 domain2 segment tag.
+  domain1 ~ domain2 =>
+  Bounded (tag, Tree domain1 segment) domain2
+  where
+  {-# INLINE bounds #-}
+  bounds = subdomain . Pair.second
+
 pairwise ::
   Tree domain1 segment1 ->
   Tree domain2 segment2 ->
@@ -89,7 +107,7 @@ resolve existing callback tree =
     then Bag.empty
     else case callback tree.subdomain tree.segment of
       Resolved Nothing -> Bag.empty
-      Resolved (Just tag) -> Bag.singleton tree.subdomain (tag, tree)
+      Resolved (Just tag) -> Bag.singleton (tag, tree)
       Unresolved -> Bag.group (List.map (resolve existing callback) (NonEmpty.toList tree.children))
 
 containedIn :: forall domain existing. Domain domain => Bag domain existing -> domain -> Bool
@@ -113,7 +131,7 @@ clusters ::
 clusters existing resolveFunction tree = do
   resolve existing resolveFunction tree
     & Bag.clusters (unitless (^)) (\_ _ -> True)
-    & List.map (Set.build (subdomain . Pair.second))
+    & List.map Set.build
     & List.filter (not . touching existing)
 
 find ::

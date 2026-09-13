@@ -15,6 +15,8 @@ import Data.Hashable (Hashable)
 import GHC.Generics (Generic)
 import OpenSolid.Bag3D (Bag3D)
 import OpenSolid.Body3D.Ids (BoundaryId, CurveId, SurfaceId)
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve3D (Curve3D)
@@ -32,6 +34,14 @@ data HalfEdge space = HalfEdge
   { id :: Id
   , surfaceCurve :: SurfaceCurve3D space
   }
+
+instance space1 ~ space2 => Bounded (HalfEdge space1) (Bounds3D space2) where
+  {-# INLINE bounds #-}
+  bounds = bounds
+
+instance Bounded (HalfEdge space) UvBounds where
+  {-# INLINE bounds #-}
+  bounds = uvBounds
 
 -- | ID of a half-edge (a boundary curve of a boundary surface) within a body
 data Id = Id

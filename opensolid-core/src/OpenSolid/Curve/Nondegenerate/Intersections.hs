@@ -1,6 +1,5 @@
 module OpenSolid.Curve.Nondegenerate.Intersections (intersections) where
 
-import OpenSolid.Bag (Bag)
 import OpenSolid.Bag qualified as Bag
 import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.Curve (Curve, CurveExists)
@@ -12,7 +11,6 @@ import OpenSolid.Curve.Intersections qualified as Curve.Intersections
 import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Intersection qualified as Intersection
 import OpenSolid.Interval (Interval (Interval))
-import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
@@ -131,23 +129,15 @@ findInteriorIntersections
     Intersection.solveInterior $
       Intersection.Problem
         { boundaryTangentSubdomains =
-            boundarySubdomains (List.filter IntersectionPoint.isTangent endpointIntersections)
+            Bag.pack (List.filter IntersectionPoint.isTangent endpointIntersections)
         , boundaryCrossingSubdomains =
-            boundarySubdomains (List.filter IntersectionPoint.isCrossing endpointIntersections)
+            Bag.pack (List.filter IntersectionPoint.isCrossing endpointIntersections)
         , searchTree = bisectionTree
         , resolveTangent = resolveTangent
         , solveTangent = List.maybe . Bisection.find (solveTangent curve1 curve2)
         , resolveCrossing = resolveCrossing
         , solveCrossing = List.maybe . Bisection.find (solveCrossing curve1 curve2)
         }
-
-boundarySubdomains ::
-  List IntersectionPoint ->
-  Bag (Interval Unitless, Interval Unitless) IntersectionPoint
-boundarySubdomains =
-  Bag.pack \intersectionPoint -> do
-    let (t1, t2) = IntersectionPoint.parameterValues intersectionPoint
-    (Interval.constant t1, Interval.constant t2)
 
 maybeIntersectionPoints :: List IntersectionPoint -> Maybe Intersections
 maybeIntersectionPoints [] = Nothing

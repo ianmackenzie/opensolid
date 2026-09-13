@@ -134,10 +134,7 @@ unsafe givenOuterBoundary givenInnerBoundaries =
   Region2D
     { outerBoundary = givenOuterBoundary
     , innerBoundaries = givenInnerBoundaries
-    , boundaries =
-        Set2D.extend
-          (Set2D.leaf (Boundary.bounds givenOuterBoundary) givenOuterBoundary)
-          givenInnerBoundaries
+    , boundaries = givenInnerBoundaries & Set2D.extend (Set2D.leaf givenOuterBoundary)
     }
 
 {-| Create a region bounded by the given curves.
@@ -418,13 +415,13 @@ boundaryLoops region = outerLoop region :| innerLoops region
 boundaryCurves :: Region2D units -> Set2D units (Curve2D units)
 boundaryCurves region =
   boundaries region
-    & Set2D.map Boundary.curves Set2D.bounds
+    & Set2D.map Boundary.curves
     & Set2D.flatten
 
 map :: (Boundary units1 -> Boundary units2) -> Region2D units1 -> Region2D units2
 map function region = do
   let mappedOuterBoundary = function region.outerBoundary
-  let mappedInnerBoundaries = Bag2D.map function Boundary.bounds region.innerBoundaries
+  let mappedInnerBoundaries = Bag2D.map function region.innerBoundaries
   unsafe mappedOuterBoundary mappedInnerBoundaries
 
 placeIn :: Frame2D units -> Region2D units -> Region2D units
@@ -516,7 +513,7 @@ classifyLoops (NonEmpty loops) = do
   let innerBoundaryCandidates = List.map (Boundary.unsafe . fixSign Negative) smallerLoops
   if List.all (boundaryIsInside outerBoundaryCandidate) innerBoundaryCandidates
     then do
-      let innerBoundaryBag = Bag2D.pack Boundary.bounds innerBoundaryCandidates
+      let innerBoundaryBag = Bag2D.pack innerBoundaryCandidates
       Ok (unsafe outerBoundaryCandidate innerBoundaryBag)
     else Err BoundedBy.MultipleDisjointRegions
 

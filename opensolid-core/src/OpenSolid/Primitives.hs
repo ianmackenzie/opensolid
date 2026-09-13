@@ -27,9 +27,12 @@ module OpenSolid.Primitives
 where
 
 import Data.Coerce qualified
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Interval (Interval (I#))
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -329,6 +332,10 @@ instance FFI (Point2D Unitless) where
   representation = FFI.classRepresentation "UvPoint"
 
 instance Units (Point2D units) units
+
+instance units1 ~ units2 => Bounded (Point2D units1) (Bounds2D units2) where
+  {-# INLINE bounds #-}
+  bounds (Point2D px py) = Bounds2D (Interval.constant px) (Interval.constant py)
 
 instance Units.Coercion (Point2D units1) (Point2D units2) where
   {-# INLINE coerce #-}
@@ -695,6 +702,10 @@ instance Show (Bounds2D units) where
     Show.constructor2 precedence "Bounds2D" bx by
 
 instance Units (Bounds2D units) units
+
+instance units1 ~ units2 => Bounded (Bounds2D units1) (Bounds2D units2) where
+  {-# INLINE bounds #-}
+  bounds = id
 
 instance Units.Coercion (Bounds2D units1) (Bounds2D units2) where
   {-# INLINE coerce #-}
@@ -1290,6 +1301,11 @@ instance Show (Point3D space) where
 instance FFI (Point3D Void) where
   representation = FFI.classRepresentation "Point3D"
 
+instance space1 ~ space2 => Bounded (Point3D space1) (Bounds3D space2) where
+  {-# INLINE bounds #-}
+  bounds (Point3D px py pz) =
+    Bounds3D (Interval.constant px) (Interval.constant py) (Interval.constant pz)
+
 instance
   space1 ~ space2 =>
   Addition
@@ -1806,6 +1822,10 @@ pattern Bounds3D bx by bz <- PositionBounds3D (VectorBounds3D bx by bz)
 instance Show (Bounds3D space) where
   showsPrec precedence (Bounds3D bx by bz) =
     Show.constructor3 precedence "Bounds3D" bx by bz
+
+instance space1 ~ space2 => Bounded (Bounds3D space1) (Bounds3D space2) where
+  {-# INLINE bounds #-}
+  bounds = id
 
 instance FFI (Bounds3D Void) where
   representation = FFI.classRepresentation "Bounds3D"

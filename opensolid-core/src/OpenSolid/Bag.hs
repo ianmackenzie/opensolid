@@ -22,6 +22,7 @@ module OpenSolid.Bag
   )
 where
 
+import OpenSolid.Bounded (Bounded)
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -89,8 +90,8 @@ size :: Bag b a -> Int
 size Empty = 0
 size (Full set) = Set.size set
 
-singleton :: b -> a -> Bag b a
-singleton givenBounds givenItem = Full (Set.leaf givenBounds givenItem)
+singleton :: Bounded a b => a -> Bag b a
+singleton = Full . Set.leaf
 
 group :: Set.Bounds b => List (Bag b a) -> Bag b a
 group bags =
@@ -98,9 +99,9 @@ group bags =
     [] -> Empty
     NonEmpty subsets -> Full (Set.node subsets)
 
-pack :: Set.Bounds b => (a -> b) -> List a -> Bag b a
-pack _ [] = Empty
-pack boundsFunction (NonEmpty items) = Full (Set.build boundsFunction items)
+pack :: (Bounded a b, Set.Bounds b) => List a -> Bag b a
+pack [] = Empty
+pack (NonEmpty items) = Full (Set.build items)
 
 aggregate :: Set.Bounds b => List (Bag b a) -> Bag b a
 aggregate bags =
@@ -115,9 +116,9 @@ toListOf :: (a1 -> a2) -> Bag b a1 -> List a2
 toListOf _ Empty = []
 toListOf function (Full set) = Set.toListOf function set
 
-map :: Set.Bounds b2 => (a1 -> a2) -> (a2 -> b2) -> Bag b1 a1 -> Bag b2 a2
-map _ _ Empty = Empty
-map function boundsFunction (Full set) = Full (Set.map function boundsFunction set)
+map :: (Bounded a2 b2, Set.Bounds b2) => (a1 -> a2) -> Bag b1 a1 -> Bag b2 a2
+map _ Empty = Empty
+map function (Full set) = Full (Set.map function set)
 
 cull :: Set.Bounds b => (b -> Bool) -> Bag b a -> Bag b a
 cull _ Empty = Empty

@@ -43,6 +43,8 @@ import Data.List.NonEmpty qualified
 import Data.Proxy (Proxy (Proxy))
 import {-# SOURCE #-} OpenSolid.Bag (Bag)
 import {-# SOURCE #-} OpenSolid.Bag qualified as Bag
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -55,6 +57,10 @@ import Prelude qualified
 data Set b a where
   Leaf :: {leafBounds :: b, leafItem :: a} -> Set b a
   Node :: {nodeBounds :: b, nodeSize :: Int, children :: NonEmpty (Set b a)} -> Set b a
+
+instance b1 ~ b2 => Bounded (Set b1 a) b2 where
+  {-# INLINE bounds #-}
+  bounds = bounds
 
 deriving instance (Show b, Show a) => Show (Set b a)
 
@@ -124,8 +130,8 @@ bounds :: Set b a -> b
 bounds Node{nodeBounds} = nodeBounds
 bounds Leaf{leafBounds} = leafBounds
 
-leaf :: b -> a -> Set b a
-leaf = Leaf
+leaf :: Bounded a b => a -> Set b a
+leaf item = Leaf (Bounded.bounds item) item
 
 node :: Bounds b => NonEmpty (Set b a) -> Set b a
 node (NonEmpty.One child) = child
@@ -139,15 +145,11 @@ node children =
 node2 :: Bounds b => Set b a -> Set b a -> Set b a
 node2 left right = node (NonEmpty.two left right)
 
-build :: Bounds b => (a -> b) -> NonEmpty a -> Set b a
-build boundsFunction items = do
-  let toLeaf item = leaf (boundsFunction item) item
-  aggregate (NonEmpty.map toLeaf items)
+build :: (Bounded a b, Bounds b) => NonEmpty a -> Set b a
+build items = aggregate (NonEmpty.map leaf items)
 
-linear :: Bounds b => (a -> b) -> NonEmpty a -> Set b a
-linear boundsFunction items = do
-  let toLeaf item = leaf (boundsFunction item) item
-  buildLinear (NonEmpty.map toLeaf items)
+linear :: (Bounded a b, Bounds b) => NonEmpty a -> Set b a
+linear items = buildLinear (NonEmpty.map leaf items)
 
 buildLinear :: Bounds b => NonEmpty (Set b a) -> Set b a
 buildLinear sets =
@@ -210,24 +212,17 @@ extend :: Bounds b => Set b a -> Bag b a -> Set b a
 extend set Bag.Empty = set
 extend set1 (Bag.Full set2) = node2 set1 set2
 
-map :: Bounds b2 => (a1 -> a2) -> (a2 -> b2) -> Set b1 a1 -> Set b2 a2
-map function boundsFunction set = mapWithIndex (const function) boundsFunction set
+map :: (Bounded a2 b2, Bounds b2) => (a1 -> a2) -> Set b1 a1 -> Set b2 a2
+map function set = mapWithIndex (const function) set
 
-mapWithIndex :: Bounds b2 => (Int -> a1 -> a2) -> (a2 -> b2) -> Set b1 a1 -> Set b2 a2
-mapWithIndex function boundsFunction =
-  combineWithIndex \index item1 -> do
-    let item2 = function index item1
-    let bounds2 = boundsFunction item2
-    leaf bounds2 item2
+mapWithIndex :: (Bounded a2 b2, Bounds b2) => (Int -> a1 -> a2) -> Set b1 a1 -> Set b2 a2
+mapWithIndex function = combineWithIndex \index item -> leaf (function index item)
 
-reverseMap :: Bounds b2 => (a1 -> a2) -> (a2 -> b2) -> Set b1 a1 -> Set b2 a2
-reverseMap function boundsFunction set = case set of
-  Leaf{leafItem} -> do
-    let mappedItem = function leafItem
-    let mappedBounds = boundsFunction mappedItem
-    Leaf{leafBounds = mappedBounds, leafItem = mappedItem}
+reverseMap :: (Bounded a2 b2, Bounds b2) => (a1 -> a2) -> Set b1 a1 -> Set b2 a2
+reverseMap function set = case set of
+  Leaf{leafItem} -> leaf (function leafItem)
   Node{nodeSize, children} -> do
-    let reverseMappedChildren = NonEmpty.reverseMap (reverseMap function boundsFunction) children
+    let reverseMappedChildren = NonEmpty.reverseMap (reverseMap function) children
     Node
       { nodeBounds = Set.Bounds.aggregateOf bounds reverseMappedChildren
       , nodeSize

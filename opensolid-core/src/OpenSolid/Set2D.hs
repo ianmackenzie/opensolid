@@ -36,6 +36,7 @@ module OpenSolid.Set2D
 where
 
 import {-# SOURCE #-} OpenSolid.Bag2D (Bag2D)
+import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Prelude
 import OpenSolid.Set (Set)
@@ -54,7 +55,7 @@ pattern Node nodeBounds children <- Set.Node{nodeBounds, children}
 bounds :: Set2D units item -> Bounds2D units
 bounds = Set.bounds
 
-leaf :: Bounds2D units -> item -> Set2D units item
+leaf :: Bounded item (Bounds2D units) => item -> Set2D units item
 leaf = Set.leaf
 
 node :: NonEmpty (Set2D units item) -> Set2D units item
@@ -63,10 +64,10 @@ node = Set.node
 size :: Set2D units item -> Int
 size = Set.size
 
-build :: (item -> Bounds2D units) -> NonEmpty item -> Set2D units item
+build :: Bounded item (Bounds2D units) => NonEmpty item -> Set2D units item
 build = Set.build
 
-linear :: (item -> Bounds2D units) -> NonEmpty item -> Set2D units item
+linear :: Bounded item (Bounds2D units) => NonEmpty item -> Set2D units item
 linear = Set.linear
 
 aggregate :: NonEmpty (Set2D units item) -> Set2D units item
@@ -96,19 +97,23 @@ toListOf = Set.toListOf
 toListWithIndex :: (Int -> item -> a) -> Set2D units item -> List a
 toListWithIndex = Set.toListWithIndex
 
-map :: (item1 -> item2) -> (item2 -> Bounds2D units2) -> Set2D units1 item1 -> Set2D units2 item2
+map ::
+  Bounded item2 (Bounds2D units2) =>
+  (item1 -> item2) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2
 map = Set.map
 
 mapWithIndex ::
+  Bounded item2 (Bounds2D units2) =>
   (Int -> item1 -> item2) ->
-  (item2 -> Bounds2D units2) ->
   Set2D units1 item1 ->
   Set2D units2 item2
 mapWithIndex = Set.mapWithIndex
 
 reverseMap ::
+  Bounded item2 (Bounds2D units2) =>
   (item1 -> item2) ->
-  (item2 -> Bounds2D units2) ->
   Set2D units1 item1 ->
   Set2D units2 item2
 reverseMap = Set.reverseMap

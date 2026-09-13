@@ -26,6 +26,7 @@ where
 
 import OpenSolid.Bag (Bag)
 import OpenSolid.Bag qualified as Bag
+import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Prelude
 import OpenSolid.Set2D (Set2D)
@@ -58,13 +59,13 @@ isEmpty = Bag.isEmpty
 size :: Bag2D units item -> Int
 size = Bag.size
 
-singleton :: Bounds2D units -> item -> Bag2D units item
+singleton :: Bounded item (Bounds2D units) => item -> Bag2D units item
 singleton = Bag.singleton
 
 group :: List (Bag2D units item) -> Bag2D units item
 group = Bag.group
 
-pack :: (item -> Bounds2D units) -> List item -> Bag2D units item
+pack :: Bounded item (Bounds2D units) => List item -> Bag2D units item
 pack = Bag.pack
 
 aggregate :: List (Bag2D units item) -> Bag2D units item
@@ -76,7 +77,11 @@ toList = Bag.toList
 toListOf :: (item1 -> item2) -> Bag2D units item1 -> List item2
 toListOf = Bag.toListOf
 
-map :: (item1 -> item2) -> (item2 -> Bounds2D units2) -> Bag2D units1 item1 -> Bag2D units2 item2
+map ::
+  Bounded item2 (Bounds2D units2) =>
+  (item1 -> item2) ->
+  Bag2D units1 item1 ->
+  Bag2D units2 item2
 map = Bag.map
 
 cull :: (Bounds2D units -> Bool) -> Bag2D units item -> Bag2D units item

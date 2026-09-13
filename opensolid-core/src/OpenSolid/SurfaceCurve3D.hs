@@ -9,6 +9,8 @@ module OpenSolid.SurfaceCurve3D
   )
 where
 
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve2D qualified as Curve2D
@@ -24,6 +26,14 @@ data SurfaceCurve3D space = SurfaceCurve3D
   , uvCurve :: UvCurve
   , curve :: Curve3D space
   }
+
+instance space1 ~ space2 => Bounded (SurfaceCurve3D space1) (Bounds3D space2) where
+  {-# INLINE bounds #-}
+  bounds = bounds
+
+instance Bounded (SurfaceCurve3D space) UvBounds where
+  {-# INLINE bounds #-}
+  bounds = uvBounds
 
 instance Composition (SurfaceCurve3D space) (Curve1D Unitless) (SurfaceCurve3D space) where
   surfaceCurve . parameterization =

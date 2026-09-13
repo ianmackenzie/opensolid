@@ -18,6 +18,8 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
@@ -49,6 +51,10 @@ instance Units.Coercion (Boundary units1) (Boundary units2) where
       , tree = Units.coerce boundary.tree
       }
 
+instance units1 ~ units2 => Bounded (Boundary units1) (Bounds2D units2) where
+  {-# INLINE bounds #-}
+  bounds = bounds
+
 instance Indexed (Boundary units) Int (Curve2D units) where
   boundary !! index = boundary.curves !! index
 
@@ -70,7 +76,7 @@ data BoundsClassification
   deriving (Eq, Show)
 
 unsafe :: NonEmpty (Curve2D units) -> Boundary units
-unsafe givenCurves = build (Set2D.linear Curve2D.bounds givenCurves)
+unsafe givenCurves = build (Set2D.linear givenCurves)
 
 build :: Set2D units (Curve2D units) -> Boundary units
 build givenCurves = Boundary givenCurves (Region2D.BoundaryTree.build givenCurves)
@@ -87,8 +93,8 @@ loop = Set2D.toNonEmpty . curves
 map :: Sign -> (Curve2D units1 -> Curve2D units2) -> Boundary units1 -> Boundary units2
 map sign function boundary =
   build $ case sign of
-    Positive -> Set2D.map function Curve2D.bounds (curves boundary)
-    Negative -> Set2D.reverseMap (Curve2D.reverse . function) Curve2D.bounds (curves boundary)
+    Positive -> Set2D.map function (curves boundary)
+    Negative -> Set2D.reverseMap (Curve2D.reverse . function) (curves boundary)
 
 transformBy :: Transform2D tag units -> Boundary units -> Boundary units
 transformBy transform = map (Transform2D.handedness transform) (Curve2D.transformBy transform)

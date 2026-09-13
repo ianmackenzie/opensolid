@@ -36,7 +36,6 @@ import OpenSolid.Direction qualified as Direction
 import OpenSolid.DirectionBounds (DirectionBounds, DirectionBoundsExists)
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Interval (Interval)
-import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
@@ -141,7 +140,7 @@ findPoint ::
   List Number
 findPoint givenPoint givenCurve = do
   let endpointSolutions = [t | t <- [0.0, 1.0], pointAt t givenCurve ~= givenPoint]
-  let endpointSolutionSet = Bag.pack Interval.constant endpointSolutions
+  let endpointSolutionSet = Bag.pack endpointSolutions
   let isDistant segment = not (givenPoint ^ Curve.Segment.range segment)
   let resolvedMonotonicity _ segment
         | isDistant segment = Resolved Nothing

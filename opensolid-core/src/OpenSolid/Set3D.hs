@@ -36,6 +36,7 @@ module OpenSolid.Set3D
 where
 
 import {-# SOURCE #-} OpenSolid.Bag3D (Bag3D)
+import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Prelude
 import OpenSolid.Set (Set)
@@ -57,16 +58,16 @@ size = Set.size
 bounds :: Set3D space item -> Bounds3D space
 bounds = Set.bounds
 
-leaf :: Bounds3D space -> item -> Set3D space item
+leaf :: Bounded item (Bounds3D space) => item -> Set3D space item
 leaf = Set.leaf
 
 node :: NonEmpty (Set3D space item) -> Set3D space item
 node = Set.node
 
-build :: (item -> Bounds3D space) -> NonEmpty item -> Set3D space item
+build :: Bounded item (Bounds3D space) => NonEmpty item -> Set3D space item
 build = Set.build
 
-linear :: (item -> Bounds3D space) -> NonEmpty item -> Set3D space item
+linear :: Bounded item (Bounds3D space) => NonEmpty item -> Set3D space item
 linear = Set.linear
 
 aggregate :: NonEmpty (Set3D space item) -> Set3D space item
@@ -96,19 +97,23 @@ toListOf = Set.toListOf
 toListWithIndex :: (Int -> item -> a) -> Set3D space item -> List a
 toListWithIndex = Set.toListWithIndex
 
-map :: (item1 -> item2) -> (item2 -> Bounds3D space2) -> Set3D space1 item1 -> Set3D space2 item2
+map ::
+  Bounded item2 (Bounds3D space2) =>
+  (item1 -> item2) ->
+  Set3D space1 item1 ->
+  Set3D space2 item2
 map = Set.map
 
 mapWithIndex ::
+  Bounded item2 (Bounds3D space2) =>
   (Int -> item1 -> item2) ->
-  (item2 -> Bounds3D space2) ->
   Set3D space1 item1 ->
   Set3D space2 item2
 mapWithIndex = Set.mapWithIndex
 
 reverseMap ::
+  Bounded item2 (Bounds3D space2) =>
   (item1 -> item2) ->
-  (item2 -> Bounds3D space2) ->
   Set3D space1 item1 ->
   Set3D space2 item2
 reverseMap = Set.reverseMap

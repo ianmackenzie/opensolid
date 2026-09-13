@@ -27,7 +27,7 @@ point x y = Point2D.centimeters (Number.fromInt x) (Number.fromInt y)
 
 testSet :: Set2D Meters (Point2D Meters)
 testSet =
-  Set2D.build Bounds2D.constant $
+  Set2D.build $
     NonEmpty.eight
       (point 1 1)
       (point 3 5)
@@ -57,17 +57,17 @@ clusters = Test.verify "clusters" do
   let e = UvBounds (Interval 0.3 0.4) (Interval 0.3 0.4)
   let f = UvBounds (Interval 0.5 0.6) (Interval 0.1 0.2)
   let items = NonEmpty.six a b c d e f
-  let set = Set2D.build id items
+  let set = Set2D.build items
   let boundsPredicate bounds1 bounds2 = Bounds2D.overlap bounds1 bounds2 >= 0.0
   let itemPredicate _ _ = True
   case NonEmpty.sortBy NonEmpty.length (Set2D.clusters boundsPredicate itemPredicate set) of
     NonEmpty.Three first second third ->
       Test.all
-        [ Test.expect (equalSets (Set2D.build id first) (Set2D.build id (NonEmpty.one f)))
+        [ Test.expect (equalSets (Set2D.build first) (Set2D.build (NonEmpty.one f)))
             & Test.output "first" first
-        , Test.expect (equalSets (Set2D.build id second) (Set2D.build id (NonEmpty.two d e)))
+        , Test.expect (equalSets (Set2D.build second) (Set2D.build (NonEmpty.two d e)))
             & Test.output "second" second
-        , Test.expect (equalSets (Set2D.build id third) (Set2D.build id (NonEmpty.three a b c)))
+        , Test.expect (equalSets (Set2D.build third) (Set2D.build (NonEmpty.three a b c)))
             & Test.output "third" third
         ]
     unexpected ->

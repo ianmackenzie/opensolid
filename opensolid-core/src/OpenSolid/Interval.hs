@@ -68,6 +68,8 @@ where
 
 import Data.Coerce qualified
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -135,6 +137,14 @@ instance FFI (Interval SquareMeters) where
   representation = FFI.classRepresentation "AreaInterval"
 
 instance Units (Interval units) units
+
+instance units1 ~ units2 => Bounded (Interval units1) (Interval units2) where
+  {-# INLINE bounds #-}
+  bounds = id
+
+instance units1 ~ units2 => Bounded (Quantity units1) (Interval units2) where
+  {-# INLINE bounds #-}
+  bounds = constant
 
 instance Units.Coercion (Interval units1) (Interval units2) where
   {-# INLINE coerce #-}

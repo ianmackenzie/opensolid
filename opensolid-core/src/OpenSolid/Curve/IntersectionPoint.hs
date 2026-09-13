@@ -15,8 +15,12 @@ module OpenSolid.Curve.IntersectionPoint
   )
 where
 
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Continuity (Continuity)
 import OpenSolid.Continuity qualified as Continuity
+import OpenSolid.Interval (Interval)
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
@@ -26,6 +30,10 @@ data IntersectionPoint = IntersectionPoint
   , parameterValues :: (Number, Number)
   }
   deriving (Show)
+
+instance Bounded IntersectionPoint (Interval Unitless, Interval Unitless) where
+  {-# INLINE bounds #-}
+  bounds intersectionPoint = Pair.map Interval.constant (parameterValues intersectionPoint)
 
 crossing :: (Number, Number) -> IntersectionPoint
 crossing = IntersectionPoint Continuity.Crossing

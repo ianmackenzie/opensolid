@@ -72,9 +72,13 @@ import OpenSolid.Axis (Axis, AxisExists)
 import OpenSolid.Axis qualified as Axis
 import OpenSolid.Bezier qualified as Bezier
 import OpenSolid.Bisection qualified as Bisection
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds (Bounds, BoundsExists)
 import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Bounds2D qualified as Bounds2D
+import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import {-# SOURCE #-} OpenSolid.Curve.CrossingSolver qualified as Curve.CrossingSolver
@@ -161,6 +165,10 @@ data Curve dimension units space = Curve
 -- | A parametric curve in 2D space.
 type Curve2D units = Curve 2 units Void
 
+instance units1 ~ units2 => Bounded (Curve2D units1) (Bounds2D units2) where
+  {-# INLINE bounds #-}
+  bounds = bounds
+
 instance Show (Curve2D units) where
   showsPrec precedence curve =
     Show.partialRecord precedence "Curve2D" $
@@ -170,6 +178,10 @@ instance Show (Curve2D units) where
 
 -- | A parametric curve in 3D space.
 type Curve3D space = Curve 3 Meters space
+
+instance space1 ~ space2 => Bounded (Curve3D space1) (Bounds3D space2) where
+  {-# INLINE bounds #-}
+  bounds = bounds
 
 instance Show (Curve3D space) where
   showsPrec precedence curve =

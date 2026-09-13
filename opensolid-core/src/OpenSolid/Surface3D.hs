@@ -30,6 +30,8 @@ import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bag qualified as Bag
 import OpenSolid.Bag3D (Bag3D)
 import OpenSolid.Bag3D qualified as Bag3D
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Curve1D qualified as Curve1D
@@ -71,6 +73,10 @@ data Surface3D space = Surface3D
   , boundaries :: ~(Set3D space (Boundary space))
   }
 
+instance space1 ~ space2 => Bounded (Surface3D space1) (Bounds3D space2) where
+  {-# INLINE bounds #-}
+  bounds = bounds
+
 type Boundary space = Set3D space (SurfaceCurve3D space)
 
 function :: Surface3D space -> SurfaceFunction3D space
@@ -101,14 +107,10 @@ parametric :: SurfaceFunction3D space -> UvRegion -> Surface3D space
 parametric givenFunction givenDomain = do
   let surfaceBoundary domainBoundary =
         Region2D.Boundary.curves domainBoundary
-          & Set.map (SurfaceCurve3D.new givenFunction) SurfaceCurve3D.bounds
+          & Set.map (SurfaceCurve3D.new givenFunction)
   let surfaceOuterBoundary = surfaceBoundary (Region2D.outerBoundary givenDomain)
-  let surfaceInnerBoundaries =
-        Bag.map surfaceBoundary Set.bounds (Region2D.innerBoundaries givenDomain)
-  let surfaceBoundaries =
-        Set3D.extend
-          (Set3D.leaf (Set3D.bounds surfaceOuterBoundary) surfaceOuterBoundary)
-          surfaceInnerBoundaries
+  let surfaceInnerBoundaries = Bag.map surfaceBoundary (Region2D.innerBoundaries givenDomain)
+  let surfaceBoundaries = Set3D.extend (Set3D.leaf surfaceOuterBoundary) surfaceInnerBoundaries
   Surface3D
     { function = givenFunction
     , domain = givenDomain

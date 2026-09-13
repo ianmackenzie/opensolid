@@ -104,6 +104,7 @@ library
     OpenSolid.Bisection
     OpenSolid.Body3D
     OpenSolid.Body3D.BoundedBy
+    OpenSolid.Bounded
     OpenSolid.Bounds
     OpenSolid.Bounds2D
     OpenSolid.Bounds3D

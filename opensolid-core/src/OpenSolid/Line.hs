@@ -11,8 +11,12 @@ module OpenSolid.Line
   )
 where
 
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds (Bounds)
 import OpenSolid.Bounds qualified as Bounds
+import OpenSolid.Bounds2D (Bounds2D)
+import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Direction (Direction)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
@@ -27,6 +31,14 @@ import OpenSolid.Vector qualified as Vector
 
 data Line dimension units space
   = Line (Point dimension units space) (Point dimension units space)
+
+instance units1 ~ units2 => Bounded (Line 2 units1 Void) (Bounds2D units2) where
+  {-# INLINE bounds #-}
+  bounds = bounds
+
+instance space1 ~ space2 => Bounded (Line 3 Meters space1) (Bounds3D space2) where
+  {-# INLINE bounds #-}
+  bounds = bounds
 
 instance FFI (Line 2 Meters Void) where
   representation = FFI.classRepresentation "Line2D"
