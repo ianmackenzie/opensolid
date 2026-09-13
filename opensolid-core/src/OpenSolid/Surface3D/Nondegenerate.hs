@@ -8,6 +8,8 @@ module OpenSolid.Surface3D.Nondegenerate
   , boundaries
   , boundaryLoops
   , boundaryCurves
+  , vertices
+  , edges
   )
 where
 
@@ -19,6 +21,7 @@ import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
+import OpenSolid.SurfacePoint3D (SurfacePoint3D)
 import OpenSolid.UvRegion (UvRegion)
 
 function :: Nondegenerate (Surface3D space) -> Nondegenerate (SurfaceFunction3D space)
@@ -47,3 +50,15 @@ boundaryLoops (Nondegenerate surface) = Surface3D.boundaryLoops surface
 
 boundaryCurves :: Nondegenerate (Surface3D space) -> Set3D space (SurfaceCurve3D space)
 boundaryCurves (Nondegenerate surface) = Surface3D.boundaryCurves surface
+
+vertices ::
+  Tolerance Meters =>
+  Nondegenerate (Surface3D space) ->
+  Bag3D space (SurfacePoint3D space)
+vertices (Nondegenerate surface) = Surface3D.vertices surface
+
+edges ::
+  Tolerance Meters =>
+  Nondegenerate (Surface3D space) ->
+  Bag3D space (Nondegenerate (SurfaceCurve3D space))
+edges (Nondegenerate surface) = Surface3D.edges surface

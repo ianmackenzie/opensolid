@@ -9,6 +9,8 @@ module OpenSolid.Surface3D
   , innerLoops
   , boundaries
   , boundaryLoops
+  , vertices
+  , edges
   , parametric
   , on
   , extruded
@@ -38,10 +40,11 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
+import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
-import OpenSolid.IsDegenerate (IsDegenerate)
+import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
@@ -60,6 +63,9 @@ import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
+import OpenSolid.SurfacePoint3D (SurfacePoint3D)
+import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
+import OpenSolid.UvCurve qualified as UvCurve
 import OpenSolid.UvRegion (UvRegion)
 import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.Vector3D (Vector3D)
@@ -102,6 +108,30 @@ boundaries = (.boundaries)
 
 boundaryLoops :: Surface3D space -> NonEmpty (NonEmpty (SurfaceCurve3D space))
 boundaryLoops surface = outerLoop surface :| innerLoops surface
+
+vertices :: Tolerance Meters => Surface3D space -> Bag3D space (SurfacePoint3D space)
+vertices surface = do
+  let surfaceCurves = Set3D.flatten (boundaries surface)
+  let toPole surfaceCurve = case SurfaceCurve3D.nondegenerate surfaceCurve of
+        Ok{} -> Nothing
+        Err (IsDegenerate surfacePoint) -> case surfacePoint of
+          SurfacePoint3D.Point{} -> Nothing
+          SurfacePoint3D.Pole{} -> Just surfacePoint
+  let poles = Set3D.filterMap (const True) toPole surfaceCurves
+  let startPoint surfaceCurve = do
+        let uvPoint = UvCurve.startPoint (SurfaceCurve3D.uvCurve surfaceCurve)
+        let point = Curve3D.startPoint (SurfaceCurve3D.curve surfaceCurve)
+        SurfacePoint3D.Point uvPoint point
+  let startPoints = Set3D.map startPoint surfaceCurves
+  let intersectsPole vertex = Bag3D.any (^ vertex) (^ vertex) poles
+  let nonPoles = Set3D.filter (const True) (not . intersectsPole) startPoints
+  poles <> nonPoles
+
+edges :: Tolerance Meters => Surface3D space -> Bag3D space (Nondegenerate (SurfaceCurve3D space))
+edges surface = do
+  let surfaceCurves = Set3D.flatten (boundaries surface)
+  let toEdge surfaceCurve = SurfaceCurve3D.nondegenerate surfaceCurve ?? Nothing
+  Set3D.filterMap (const True) toEdge surfaceCurves
 
 parametric :: SurfaceFunction3D space -> UvRegion -> Surface3D space
 parametric givenFunction givenDomain = do
