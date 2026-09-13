@@ -65,6 +65,7 @@ import OpenSolid.Primitives
   , VectorBounds3D
   )
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Units (Units)
@@ -1354,7 +1355,7 @@ instance
     vectorSurface2D (Ast.transformVector2D transform ast)
 
 instance
-  units1 ~ units2 =>
+  (Transform.Tag.IsOrthonormal tag, units1 ~ units2) =>
   TransformBy
     (Transform2D tag units1)
     (Expression input (Point2D units2))
@@ -1378,7 +1379,7 @@ instance
     vectorSurface3D (Ast.transformVector3D transform ast)
 
 instance
-  space1 ~ space2 =>
+  (Transform.Tag.IsOrthonormal tag, space1 ~ space2) =>
   TransformBy
     (Transform3D tag space1)
     (Expression input (Point3D space2))

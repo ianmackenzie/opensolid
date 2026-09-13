@@ -399,7 +399,7 @@ class
   , Expression.Constant Number (Point dimension units space)
   , Expression.BezierCurve (Point dimension units space)
   , Expression.TransformBy
-      (Transform dimension Transform.Tag.Affine units space)
+      (Transform dimension Transform.Tag.Orthonormal units space)
       (Expression Number (Point dimension units space))
       (Expression Number (Point dimension units space))
   , Expression.Evaluation
@@ -876,7 +876,7 @@ transformBy transform curve =
   recursive \transformed -> do
     let compiledTransformed =
           CompiledFunction.map
-            (Expression.transformBy (Transform.asAffine transform))
+            (Expression.transformBy (Transform.asOrthonormal transform))
             (Point.transformBy transform)
             (Bounds.transformBy transform)
             (compiled curve)
