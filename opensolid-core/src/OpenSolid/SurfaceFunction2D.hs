@@ -34,6 +34,7 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units (Units)
@@ -194,7 +195,11 @@ partialDerivatives ::
   (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)
 partialDerivatives = (.partialDerivatives)
 
-transformBy :: Transform2D tag units -> SurfaceFunction2D units -> SurfaceFunction2D units
+transformBy ::
+  Transform.Tag.IsOrthonormal tag =>
+  Transform2D tag units ->
+  SurfaceFunction2D units ->
+  SurfaceFunction2D units
 transformBy transform function = do
   let compiledTransformed =
         CompiledFunction.map
