@@ -2,7 +2,6 @@ module OpenSolid.SurfaceFunction3D
   ( SurfaceFunction3D
   , Compiled
   , unsafe
-  , constant
   , pointAt
   , pointOn
   , range
@@ -34,7 +33,6 @@ unsafe ::
   Compiled space ->
   (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space) ->
   SurfaceFunction3D space
-constant :: Point3D space -> SurfaceFunction3D space
 pointAt :: UvPoint -> SurfaceFunction3D space -> Point3D space
 pointOn :: SurfaceFunction3D space -> UvPoint -> Point3D space
 range :: UvBounds -> SurfaceFunction3D space -> Bounds3D space

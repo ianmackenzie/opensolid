@@ -5,7 +5,6 @@ module OpenSolid.SurfaceFunction3D
   , BisectionTree
   , new
   , unsafe
-  , constant
   , displacedFrom
   , pointAt
   , pointOn
@@ -113,7 +112,10 @@ instance
     (Point3D space2)
     (VectorSurfaceFunction3D Meters space1)
   where
-  function - point = function - constant point
+  function - point =
+    VectorSurfaceFunction3D.new
+      (compiled function - CompiledFunction.constant point)
+      (partialDerivatives function)
 
 instance
   space1 ~ space2 =>
@@ -122,7 +124,10 @@ instance
     (SurfaceFunction3D space2)
     (VectorSurfaceFunction3D Meters space1)
   where
-  point - function = constant point - function
+  point - function =
+    VectorSurfaceFunction3D.new
+      (CompiledFunction.constant point - compiled function)
+      (Pair.map negate (partialDerivatives function))
 
 instance
   Composition
@@ -205,14 +210,11 @@ buildBisectionTree uvRange function = do
   let children = NonEmpty.four bottomLeft bottomRight topLeft topRight
   Bisection.Tree uvRange segment children
 
-constant :: Point3D space -> SurfaceFunction3D space
-constant value =
-  unsafe
-    (CompiledFunction.constant value)
-    (VectorSurfaceFunction3D.zero, VectorSurfaceFunction3D.zero)
-
 displacedFrom :: Point3D space -> VectorSurfaceFunction3D Meters space -> SurfaceFunction3D space
-displacedFrom point displacementFunction = constant point & displaceBy displacementFunction
+displacedFrom point displacementFunction =
+  unsafe
+    (CompiledFunction.constant point + VectorSurfaceFunction3D.compiled displacementFunction)
+    (VectorSurfaceFunction3D.partialDerivatives displacementFunction)
 
 divergence :: SurfaceFunction3D space -> UvPoint -> Length
 divergence function uvPoint = do
