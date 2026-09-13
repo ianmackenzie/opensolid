@@ -39,9 +39,17 @@ instance space1 ~ space2 => Bounded (SurfaceCurve3D space1) (Bounds3D space2) wh
   {-# INLINE bounds #-}
   bounds = bounds
 
+instance space1 ~ space2 => Bounded (Nondegenerate (SurfaceCurve3D space1)) (Bounds3D space2) where
+  {-# INLINE bounds #-}
+  bounds (Nondegenerate surfaceCurve) = bounds surfaceCurve
+
 instance Bounded (SurfaceCurve3D space) UvBounds where
   {-# INLINE bounds #-}
   bounds = uvBounds
+
+instance Bounded (Nondegenerate (SurfaceCurve3D space)) UvBounds where
+  {-# INLINE bounds #-}
+  bounds (Nondegenerate surfaceCurve) = uvBounds surfaceCurve
 
 data Degenerate space
   = Point UvPoint (Point3D space) -- a single point in UV space, and the corresponding 3D point
