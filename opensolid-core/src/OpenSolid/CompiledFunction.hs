@@ -2,6 +2,9 @@ module OpenSolid.CompiledFunction
   ( CompiledFunction (..)
   , concrete
   , constant
+  , t
+  , u
+  , v
   , abstract
   , IsAbstract (IsAbstract)
   , expression
@@ -18,8 +21,11 @@ where
 
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
+import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
+import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvPoint (UvPoint)
 
 data CompiledFunction inputValue outputValue inputBounds outputBounds where
   Concrete ::
@@ -298,6 +304,15 @@ constant ::
   CompiledFunction inputValue outputValue inputBounds outputBounds
 constant = Concrete . Expression.constant
 
+t :: CompiledFunction Number Number (Interval Unitless) (Interval Unitless)
+t = concrete Expression.t
+
+u :: CompiledFunction UvPoint Number UvBounds (Interval Unitless)
+u = concrete Expression.u
+
+v :: CompiledFunction UvPoint Number UvBounds (Interval Unitless)
+v = concrete Expression.v
+
 abstract ::
   (inputValue -> outputValue) ->
   (inputBounds -> outputBounds) ->
@@ -360,8 +375,8 @@ map2 _ combineValues combineBounds compiled1 compiled2 = do
   let (value1, range1) = evaluators compiled1
   let (value2, range2) = evaluators compiled2
   Abstract
-    (\t -> combineValues (value1 t) (value2 t))
-    (\t -> combineBounds (range1 t) (range2 t))
+    (\tValue -> combineValues (value1 tValue) (value2 tValue))
+    (\tRange -> combineBounds (range1 tRange) (range2 tRange))
 
 map3 ::
   Expression.Evaluation inputValue outputValue4 inputBounds outputBounds4 =>
@@ -383,8 +398,8 @@ map3 _ combineValues combineBounds compiled1 compiled2 compiled3 = do
   let (value2, range2) = evaluators compiled2
   let (value3, range3) = evaluators compiled3
   Abstract
-    (\t -> combineValues (value1 t) (value2 t) (value3 t))
-    (\t -> combineBounds (range1 t) (range2 t) (range3 t))
+    (\tValue -> combineValues (value1 tValue) (value2 tValue) (value3 tValue))
+    (\tRange -> combineBounds (range1 tRange) (range2 tRange) (range3 tRange))
 
 map4 ::
   Expression.Evaluation inputValue outputValue5 inputBounds outputBounds5 =>
@@ -413,8 +428,8 @@ map4 combineExpressions combineValues combineBounds compiled1 compiled2 compiled
       let (value3, range3) = evaluators compiled3
       let (value4, range4) = evaluators compiled4
       Abstract
-        (\t -> combineValues (value1 t) (value2 t) (value3 t) (value4 t))
-        (\t -> combineBounds (range1 t) (range2 t) (range3 t) (range4 t))
+        (\tValue -> combineValues (value1 tValue) (value2 tValue) (value3 tValue) (value4 tValue))
+        (\tRange -> combineBounds (range1 tRange) (range2 tRange) (range3 tRange) (range4 tRange))
 
 instance
   ( innerOutputValue ~ outerInputValue
