@@ -20,5 +20,5 @@ ffiName className =
 
 invoke :: ComparisonFunction -> FFI.Function
 invoke (ComparisonFunction f) inputPtr outputPtr errorPtr = do
-  (lhs, rhs) <- FFI.load inputPtr 0
+  (lhs, rhs) <- FFI.read inputPtr
   FFI.invoke (IO.succeed (f lhs rhs)) outputPtr errorPtr

@@ -20,5 +20,5 @@ ffiName className =
 
 invoke :: HashFunction -> FFI.Function
 invoke (HashFunction f) inputPtr outputPtr errorPtr = do
-  value <- FFI.load inputPtr 0
+  value <- FFI.read inputPtr
   FFI.invoke (IO.succeed (f value)) outputPtr errorPtr

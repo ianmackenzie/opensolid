@@ -21,7 +21,7 @@ ffiName className propertyName =
 
 invoke :: Property -> FFI.Function
 invoke (Property f _) inputPtr outputPtr errorPtr = do
-  self <- FFI.load inputPtr 0
+  self <- FFI.read inputPtr
   FFI.invoke (f self) outputPtr errorPtr
 
 returnType :: Property -> FFI.Type

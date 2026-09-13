@@ -151,55 +151,55 @@ invoke :: StaticFunction -> FFI.Function
 invoke function = case function of
   StaticFunction1 _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      arg1 <- FFI.load inputPtr 0
+      arg1 <- FFI.read inputPtr
       FFI.invoke (f arg1) outputPtr errorPtr
   StaticFunctionM1 _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (tolerance, arg1) <- FFI.load inputPtr 0
+      (tolerance, arg1) <- FFI.read inputPtr
       FFI.invoke (Tolerance.using tolerance (f arg1)) outputPtr errorPtr
   StaticFunction2 _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, arg2) <- FFI.load inputPtr 0
+      (arg1, arg2) <- FFI.read inputPtr
       FFI.invoke (f arg1 arg2) outputPtr errorPtr
   StaticFunctionM2 _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (tolerance, arg1, arg2) <- FFI.load inputPtr 0
+      (tolerance, arg1, arg2) <- FFI.read inputPtr
       FFI.invoke (Tolerance.using tolerance (f arg1 arg2)) outputPtr errorPtr
   StaticFunction3 _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, arg2, arg3) <- FFI.load inputPtr 0
+      (arg1, arg2, arg3) <- FFI.read inputPtr
       FFI.invoke (f arg1 arg2 arg3) outputPtr errorPtr
   StaticFunctionM3 _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (tolerance, arg1, arg2, arg3) <- FFI.load inputPtr 0
+      (tolerance, arg1, arg2, arg3) <- FFI.read inputPtr
       FFI.invoke (Tolerance.using tolerance (f arg1 arg2 arg3)) outputPtr errorPtr
   StaticFunction4 _ _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
+      (arg1, arg2, arg3, arg4) <- FFI.read inputPtr
       FFI.invoke (f arg1 arg2 arg3 arg4) outputPtr errorPtr
   StaticFunctionM4 _ _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (tolerance, arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
+      (tolerance, arg1, arg2, arg3, arg4) <- FFI.read inputPtr
       FFI.invoke (Tolerance.using tolerance (f arg1 arg2 arg3 arg4)) outputPtr errorPtr
   StaticFunction5 _ _ _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, arg2, arg3, arg4, arg5) <- FFI.load inputPtr 0
+      (arg1, arg2, arg3, arg4, arg5) <- FFI.read inputPtr
       FFI.invoke (f arg1 arg2 arg3 arg4 arg5) outputPtr errorPtr
   StaticFunctionM5 _ _ _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (tolerance, arg1, arg2, arg3, arg4, arg5) <- FFI.load inputPtr 0
+      (tolerance, arg1, arg2, arg3, arg4, arg5) <- FFI.read inputPtr
       FFI.invoke (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5)) outputPtr errorPtr
   StaticFunction6 _ _ _ _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.load inputPtr 0
+      (arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.read inputPtr
       FFI.invoke (f arg1 arg2 arg3 arg4 arg5 arg6) outputPtr errorPtr
   StaticFunctionM6 _ _ _ _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (tolerance, arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.load inputPtr 0
+      (tolerance, arg1, arg2, arg3, arg4, arg5, arg6) <- FFI.read inputPtr
       FFI.invoke (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 arg5 arg6)) outputPtr errorPtr
   StaticFunction10 _ _ _ _ _ _ _ _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) <- FFI.load inputPtr 0
+      (arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) <- FFI.read inputPtr
       FFI.invoke (f arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10) outputPtr errorPtr
 
 normalizeSignature ::

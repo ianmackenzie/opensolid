@@ -19,5 +19,5 @@ ffiName className =
 
 invoke :: AbsFunction -> FFI.Function
 invoke (AbsFunction f) inputPtr outputPtr errorPtr = do
-  value <- FFI.load inputPtr 0
+  value <- FFI.read inputPtr
   FFI.invoke (f value) outputPtr errorPtr

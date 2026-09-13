@@ -60,19 +60,19 @@ invoke :: Constructor -> FFI.Function
 invoke function = case function of
   Constructor1 _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      arg1 <- FFI.load inputPtr 0
+      arg1 <- FFI.read inputPtr
       FFI.invoke (f arg1) outputPtr errorPtr
   Constructor2 _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, arg2) <- FFI.load inputPtr 0
+      (arg1, arg2) <- FFI.read inputPtr
       FFI.invoke (f arg1 arg2) outputPtr errorPtr
   Constructor3 _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, arg2, arg3) <- FFI.load inputPtr 0
+      (arg1, arg2, arg3) <- FFI.read inputPtr
       FFI.invoke (f arg1 arg2 arg3) outputPtr errorPtr
   Constructor4 _ _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
+      (arg1, arg2, arg3, arg4) <- FFI.read inputPtr
       FFI.invoke (f arg1 arg2 arg3 arg4) outputPtr errorPtr
 
 signature :: Constructor -> List (Name, FFI.Type)

@@ -104,43 +104,43 @@ invoke :: MemberFunction -> FFI.Function
 invoke function = case function of
   MemberFunction0 f _ ->
     \inputPtr outputPtr errorPtr -> do
-      self <- FFI.load inputPtr 0
+      self <- FFI.read inputPtr
       FFI.invoke (f self) outputPtr errorPtr
   MemberFunctionT0 f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (tolerance, self) <- FFI.load inputPtr 0
+      (tolerance, self) <- FFI.read inputPtr
       FFI.invoke (Tolerance.using tolerance (f self)) outputPtr errorPtr
   MemberFunction1 _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, self) <- FFI.load inputPtr 0
+      (arg1, self) <- FFI.read inputPtr
       FFI.invoke (f arg1 self) outputPtr errorPtr
   MemberFunctionT1 _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (tolerance, arg1, self) <- FFI.load inputPtr 0
+      (tolerance, arg1, self) <- FFI.read inputPtr
       FFI.invoke (Tolerance.using tolerance (f arg1 self)) outputPtr errorPtr
   MemberFunction2 _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, arg2, self) <- FFI.load inputPtr 0
+      (arg1, arg2, self) <- FFI.read inputPtr
       FFI.invoke (f arg1 arg2 self) outputPtr errorPtr
   MemberFunctionT2 _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (tolerance, arg1, arg2, self) <- FFI.load inputPtr 0
+      (tolerance, arg1, arg2, self) <- FFI.read inputPtr
       FFI.invoke (Tolerance.using tolerance (f arg1 arg2 self)) outputPtr errorPtr
   MemberFunction3 _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, arg2, arg3, self) <- FFI.load inputPtr 0
+      (arg1, arg2, arg3, self) <- FFI.read inputPtr
       FFI.invoke (f arg1 arg2 arg3 self) outputPtr errorPtr
   MemberFunctionT3 _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (tolerance, arg1, arg2, arg3, self) <- FFI.load inputPtr 0
+      (tolerance, arg1, arg2, arg3, self) <- FFI.read inputPtr
       FFI.invoke (Tolerance.using tolerance (f arg1 arg2 arg3 self)) outputPtr errorPtr
   MemberFunction4 _ _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
+      (arg1, arg2, arg3, arg4, self) <- FFI.read inputPtr
       FFI.invoke (f arg1 arg2 arg3 arg4 self) outputPtr errorPtr
   MemberFunctionT4 _ _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
-      (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
+      (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.read inputPtr
       FFI.invoke (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self)) outputPtr errorPtr
 
 normalizeSignature ::

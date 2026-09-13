@@ -18,9 +18,9 @@ module OpenSolid.FFI
   , unqualifiedName
   , concatenatedName
   , size
-  , store
+  , write
   , invoke
-  , load
+  , read
   , Representation
   , isNamedArgument
   )
@@ -353,6 +353,9 @@ instance
 instance FFI a => FFI (Maybe a) where
   representation _ = MaybeRep
 
+write :: FFI value => Ptr Void -> value -> IO ()
+write ptr = store ptr 0
+
 store :: forall value parent. FFI value => Ptr parent -> Int -> value -> IO ()
 store ptr offset value = do
   let proxy = Proxy @value
@@ -526,6 +529,9 @@ invoke computation outputPtr errorPtr = do
     Left exception -> do
       store errorPtr 0 (Text.show exception)
       IO.succeed (fromIntegral 1)
+
+read :: FFI value => Ptr Void -> IO value
+read ptr = load ptr 0
 
 load :: forall value parent. FFI value => Ptr parent -> Int -> IO value
 load ptr offset = do

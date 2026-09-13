@@ -46,8 +46,8 @@ rhsName = FFI.name "Rhs"
 invoke :: PostOperatorOverload -> FFI.Function
 invoke overload inputPtr outputPtr errorPtr = case overload of
   PostOperatorOverload f -> do
-    (value, other) <- FFI.load inputPtr 0
+    (value, other) <- FFI.read inputPtr
     FFI.invoke (f value other) outputPtr errorPtr
   PostOperatorOverloadT f -> do
-    (tolerance, value, other) <- FFI.load inputPtr 0
+    (tolerance, value, other) <- FFI.read inputPtr
     FFI.invoke (Tolerance.using tolerance (f value other)) outputPtr errorPtr
