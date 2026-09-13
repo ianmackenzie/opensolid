@@ -28,6 +28,7 @@ module OpenSolid.Expression
   , RelativeTo (relativeTo)
   , PlaceOn (placeOn)
   , ProjectInto (projectInto)
+  , Convert (convert)
   , BezierCurve
   , bezierCurve
   , Arc
@@ -1517,6 +1518,49 @@ instance
   where
   projectInto plane (Curve3D ast _) = curve2D (Ast.projectPoint3dInto plane ast)
   projectInto plane (Surface3D ast _) = surface2D (Ast.projectPoint3dInto plane ast)
+
+class Convert units1 units2 expression1 expression2 where
+  convert :: Quantity (units2 ?/? units1) -> expression1 -> expression2
+
+instance
+  Convert
+    units1
+    units2
+    (Expression input (Quantity units1))
+    (Expression input (Quantity units2))
+  where
+  convert factor (Curve1D ast _) = curve1D (factor * ast)
+  convert factor (Surface1D ast _) = surface1D (factor * ast)
+
+instance
+  Convert
+    units1
+    units2
+    (Expression input (Vector2D units1))
+    (Expression input (Vector2D units2))
+  where
+  convert factor (VectorCurve2D ast _) = vectorCurve2D (factor * ast)
+  convert factor (VectorSurface2D ast _) = vectorSurface2D (factor * ast)
+
+instance
+  Convert
+    units1
+    units2
+    (Expression input (Vector3D units1 space))
+    (Expression input (Vector3D units2 space))
+  where
+  convert factor (VectorCurve3D ast _) = vectorCurve3D (factor * ast)
+  convert factor (VectorSurface3D ast _) = vectorSurface3D (factor * ast)
+
+instance
+  Convert
+    units1
+    units2
+    (Expression input (Point2D units1))
+    (Expression input (Point2D units2))
+  where
+  convert factor (Curve2D ast _) = curve2D (factor * ast)
+  convert factor (Surface2D ast _) = surface2D (factor * ast)
 
 class BezierCurve output where
   bezierCurve :: NonEmpty output -> Expression Number output
