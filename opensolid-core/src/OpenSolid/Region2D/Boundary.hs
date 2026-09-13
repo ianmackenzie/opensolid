@@ -32,6 +32,7 @@ import OpenSolid.Region2D.BoundaryTree qualified as Region2D.BoundaryTree
 import OpenSolid.Set2D (Set2D)
 import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units (Units)
@@ -96,7 +97,11 @@ map sign function boundary =
     Positive -> Set2D.map function (curves boundary)
     Negative -> Set2D.reverseMap (Curve2D.reverse . function) (curves boundary)
 
-transformBy :: Transform2D tag units -> Boundary units -> Boundary units
+transformBy ::
+  Transform.Tag.IsOrthonormal tag =>
+  Transform2D tag units ->
+  Boundary units ->
+  Boundary units
 transformBy transform = map (Transform2D.handedness transform) (Curve2D.transformBy transform)
 
 placeIn :: Frame2D units -> Boundary units -> Boundary units

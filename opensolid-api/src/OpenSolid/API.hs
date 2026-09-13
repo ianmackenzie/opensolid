@@ -1577,7 +1577,7 @@ region2D =
     , Class.factoryM1R "Polygon" "Polygon" Region2D.polygon $(docs 'Region2D.polygon)
     , Class.memberM2 "Fillet" "Points" "Radius" Region2D.fillet $(docs 'Region2D.fillet)
     ]
-      <> affineTransformations2D Region2D.transformBy
+      <> orthonormalTransformations2D Region2D.transformBy
 
 uvRegion :: Class
 uvRegion =
@@ -1590,7 +1590,7 @@ uvRegion =
     , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
     , Class.property "Boundary Curves" (Set2D.toNonEmpty . Region2D.boundaryCurves) $(docs 'Region2D.boundaryCurves)
     ]
-      <> affineTransformations2D Region2D.transformBy
+      <> orthonormalTransformations2D Region2D.transformBy
 
 type Body3D = Body3D.Body3D Void
 

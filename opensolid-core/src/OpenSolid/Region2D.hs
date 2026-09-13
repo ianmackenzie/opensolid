@@ -23,8 +23,6 @@ module OpenSolid.Region2D
   , translateAlong
   , rotateAround
   , mirrorAcross
-  , scaleAbout
-  , scaleAlong
   , convert
   , unconvert
   , classify
@@ -83,6 +81,7 @@ import OpenSolid.Result qualified as Result
 import OpenSolid.Set2D (Set2D)
 import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units (Units)
@@ -430,7 +429,7 @@ placeIn frame = map (Boundary.placeIn frame)
 relativeTo :: Frame2D units -> Region2D units -> Region2D units
 relativeTo frame = map (Boundary.relativeTo frame)
 
-transformBy :: Transform2D tag units -> Region2D units -> Region2D units
+transformBy :: Transform.Tag.IsOrthonormal tag => Transform2D tag units -> Region2D units -> Region2D units
 transformBy transform = map (Boundary.transformBy transform)
 
 translateBy :: Vector2D units -> Region2D units -> Region2D units
@@ -447,12 +446,6 @@ rotateAround = Transform2D.rotateAroundImpl transformBy
 
 mirrorAcross :: Axis2D units -> Region2D units -> Region2D units
 mirrorAcross = Transform2D.mirrorAcrossImpl transformBy
-
-scaleAbout :: Point2D units -> Number -> Region2D units -> Region2D units
-scaleAbout = Transform2D.scaleAboutImpl transformBy
-
-scaleAlong :: Axis2D units -> Number -> Region2D units -> Region2D units
-scaleAlong = Transform2D.scaleAlongImpl transformBy
 
 convert :: Quantity (units2 ?/? units1) -> Region2D units1 -> Region2D units2
 convert factor = map (Boundary.convert factor)
