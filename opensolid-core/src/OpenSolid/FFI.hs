@@ -59,7 +59,7 @@ newtype Name = Name (NonEmpty Text) deriving (Eq, Ord, Show)
 
 newtype ClassName = ClassName (NonEmpty Text) deriving (Show)
 
-type Function = Ptr () -> Ptr () -> Ptr () -> IO Int64
+type Function = Ptr Void -> Ptr Void -> Ptr Text -> IO Int64
 
 name :: Text -> Name
 name input =
@@ -516,7 +516,7 @@ store ptr offset value = do
     NamedArgumentRep{} ->
       error "Should never have a named argument as a Haskell return type"
 
-invoke :: FFI a => IO a -> Ptr () -> Ptr () -> IO Int64
+invoke :: FFI a => IO a -> Ptr Void -> Ptr Text -> IO Int64
 invoke computation outputPtr errorPtr = do
   result <- Control.Exception.try @SomeException computation
   case result of
