@@ -348,10 +348,10 @@ instance
   function ?/? quantity = Units.simplify (function ?*? (1.0 ?/? quantity))
 
 instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFunction1D units) where
-  f . g = do
-    let dfdt = Curve1D.derivative f . g
+  f << g = do
+    let dfdt = Curve1D.derivative f << g
     let (dtdu, dtdv) = partialDerivatives g
-    new (Curve1D.compiled f . compiled g) (dfdt * dtdu, dfdt * dtdv)
+    new (Curve1D.compiled f << compiled g) (dfdt * dtdu, dfdt * dtdv)
 
 {-# INLINE valueAt #-}
 valueAt :: UvPoint -> SurfaceFunction1D units -> Quantity units

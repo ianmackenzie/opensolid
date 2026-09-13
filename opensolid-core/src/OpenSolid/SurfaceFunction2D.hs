@@ -212,10 +212,10 @@ instance
     (Curve2D Unitless)
     (Curve2D units)
   where
-  f . g = do
-    let (dfdu, dfdv) = Pair.map (. g) (partialDerivatives f)
+  f << g = do
+    let (dfdu, dfdv) = Pair.map (<< g) (partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative g)
-    Curve2D.new (compiled f . Curve2D.compiled g) (dfdu * dudt + dfdv * dvdt)
+    Curve2D.new (compiled f << Curve2D.compiled g) (dfdu * dudt + dfdv * dvdt)
 
 instance
   Composition
@@ -223,12 +223,12 @@ instance
     (SurfaceFunction2D Unitless)
     (SurfaceFunction1D units)
   where
-  f . g = do
-    let (dfdx, dfdy) = Pair.map (. g) (SurfaceFunction1D.partialDerivatives f)
+  f << g = do
+    let (dfdx, dfdy) = Pair.map (<< g) (SurfaceFunction1D.partialDerivatives f)
     let (dgdu, dgdv) = partialDerivatives g
     let (dxdu, dydu) = VectorSurfaceFunction2D.components dgdu
     let (dxdv, dydv) = VectorSurfaceFunction2D.components dgdv
-    let compiledComposed = SurfaceFunction1D.compiled f . compiled g
+    let compiledComposed = SurfaceFunction1D.compiled f << compiled g
     let composedPartialDerivatives =
           ( dfdx * dxdu + dfdy * dydu
           , dfdx * dxdv + dfdy * dydv
@@ -241,12 +241,12 @@ instance
     (SurfaceFunction2D Unitless)
     (VectorSurfaceFunction2D units)
   where
-  f . g = do
-    let (dfdx, dfdy) = Pair.map (. g) (VectorSurfaceFunction2D.partialDerivatives f)
+  f << g = do
+    let (dfdx, dfdy) = Pair.map (<< g) (VectorSurfaceFunction2D.partialDerivatives f)
     let (dgdu, dgdv) = partialDerivatives g
     let (dxdu, dydu) = VectorSurfaceFunction2D.components dgdu
     let (dxdv, dydv) = VectorSurfaceFunction2D.components dgdv
-    let compiledComposed = VectorSurfaceFunction2D.compiled f . compiled g
+    let compiledComposed = VectorSurfaceFunction2D.compiled f << compiled g
     let composedPartialDerivatives =
           ( dfdx * dxdu + dfdy * dydu
           , dfdx * dxdv + dfdy * dydv
@@ -259,12 +259,12 @@ instance
     (SurfaceFunction2D Unitless)
     (VectorSurfaceFunction3D units space)
   where
-  f . g = do
-    let (dfdx, dfdy) = Pair.map (. g) (VectorSurfaceFunction3D.partialDerivatives f)
+  f << g = do
+    let (dfdx, dfdy) = Pair.map (<< g) (VectorSurfaceFunction3D.partialDerivatives f)
     let (dgdu, dgdv) = partialDerivatives g
     let (dxdu, dydu) = VectorSurfaceFunction2D.components dgdu
     let (dxdv, dydv) = VectorSurfaceFunction2D.components dgdv
-    let compiledComposed = VectorSurfaceFunction3D.compiled f . compiled g
+    let compiledComposed = VectorSurfaceFunction3D.compiled f << compiled g
     let composedPartialDerivatives =
           ( dfdx * dxdu + dfdy * dydu
           , dfdx * dxdv + dfdy * dydv

@@ -20,52 +20,52 @@ data Uniform = Uniform deriving (Eq, Show)
 data Affine = Affine deriving (Eq, Show)
 
 instance Composition Rigid Rigid Rigid where
-  Rigid . Rigid = Rigid
+  Rigid << Rigid = Rigid
 
 instance Composition Orthonormal Rigid Orthonormal where
-  Orthonormal . Rigid = Orthonormal
+  Orthonormal << Rigid = Orthonormal
 
 instance Composition Uniform Rigid Uniform where
-  Uniform . Rigid = Uniform
+  Uniform << Rigid = Uniform
 
 instance Composition Affine Rigid Affine where
-  Affine . Rigid = Affine
+  Affine << Rigid = Affine
 
 instance Composition Rigid Orthonormal Orthonormal where
-  Rigid . Orthonormal = Orthonormal
+  Rigid << Orthonormal = Orthonormal
 
 instance Composition Orthonormal Orthonormal Orthonormal where
-  Orthonormal . Orthonormal = Orthonormal
+  Orthonormal << Orthonormal = Orthonormal
 
 instance Composition Uniform Orthonormal Uniform where
-  Uniform . Orthonormal = Uniform
+  Uniform << Orthonormal = Uniform
 
 instance Composition Affine Orthonormal Affine where
-  Affine . Orthonormal = Affine
+  Affine << Orthonormal = Affine
 
 instance Composition Rigid Uniform Uniform where
-  Rigid . Uniform = Uniform
+  Rigid << Uniform = Uniform
 
 instance Composition Orthonormal Uniform Uniform where
-  Orthonormal . Uniform = Uniform
+  Orthonormal << Uniform = Uniform
 
 instance Composition Uniform Uniform Uniform where
-  Uniform . Uniform = Uniform
+  Uniform << Uniform = Uniform
 
 instance Composition Affine Uniform Affine where
-  Affine . Uniform = Affine
+  Affine << Uniform = Affine
 
 instance Composition Rigid Affine Affine where
-  Rigid . Affine = Affine
+  Rigid << Affine = Affine
 
 instance Composition Orthonormal Affine Affine where
-  Orthonormal . Affine = Affine
+  Orthonormal << Affine = Affine
 
 instance Composition Uniform Affine Affine where
-  Uniform . Affine = Affine
+  Uniform << Affine = Affine
 
 instance Composition Affine Affine Affine where
-  Affine . Affine = Affine
+  Affine << Affine = Affine
 
 class IsOrthonormal tag => IsRigid tag
 

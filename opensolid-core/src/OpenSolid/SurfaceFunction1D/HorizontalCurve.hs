@@ -129,5 +129,5 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
             Bounds2D (Interval u1 u2) segmentVRange
   recursive \self -> do
     let dudt = Curve1D.constant (uEnd - uStart)
-    let dvdt = dudt * dvdu . self
+    let dvdt = dudt * dvdu << self
     Curve2D.new (CompiledFunction.abstract value range) (VectorCurve2D.xy dudt dvdt)

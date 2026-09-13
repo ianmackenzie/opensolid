@@ -32,7 +32,7 @@ module OpenSolid.Prelude
   , CrossMultiplication (cross)
   , DivMod ((//), (%))
   , Exponentiation ((**))
-  , Composition ((.))
+  , Composition ((<<))
   , Tolerance
   , unitless
   , ApproximateEquality ((~=))
@@ -122,6 +122,7 @@ import Prelude
   , seq
   , ($)
   , (&&)
+  , (.)
   , (/=)
   , (<)
   , (<$>)
@@ -383,13 +384,9 @@ instance
 ----- Composition -----
 
 class Composition f g h | f g -> h where
-  (.) :: f -> g -> h
+  (<<) :: f -> g -> h
 
-instance b1 ~ b2 => Composition (b2 -> c) (a -> b1) (a -> c) where
-  {-# INLINE (.) #-}
-  (.) = (Prelude..)
-
-infixr 9 .
+infixr 9 <<
 
 ----- List -----
 

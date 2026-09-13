@@ -882,10 +882,10 @@ instance
     (Curve1D Unitless)
     (VectorCurve dimension units space)
   where
-  f . g =
+  f << g =
     new
-      (compiled f . Curve1D.compiled g)
-      ((derivative f . g) * Curve1D.derivative g)
+      (compiled f << Curve1D.compiled g)
+      ((derivative f << g) * Curve1D.derivative g)
 
 instance
   Composition
@@ -893,10 +893,10 @@ instance
     (SurfaceFunction1D Unitless)
     (VectorSurfaceFunction2D units)
   where
-  f . g = do
-    let dfdt = derivative f . g
+  f << g = do
+    let dfdt = derivative f << g
     let (dtdu, dtdv) = SurfaceFunction1D.partialDerivatives g
-    let compiledComposed = compiled f . SurfaceFunction1D.compiled g
+    let compiledComposed = compiled f << SurfaceFunction1D.compiled g
     let composedPartialDerivatives = (dfdt * dtdu, dfdt * dtdv)
     VectorSurfaceFunction2D.new compiledComposed composedPartialDerivatives
 
@@ -906,10 +906,10 @@ instance
     (SurfaceFunction1D Unitless)
     (VectorSurfaceFunction3D units space)
   where
-  f . g = do
-    let dfdt = derivative f . g
+  f << g = do
+    let dfdt = derivative f << g
     let (dtdu, dtdv) = SurfaceFunction1D.partialDerivatives g
-    let compiledComposed = compiled f . SurfaceFunction1D.compiled g
+    let compiledComposed = compiled f << SurfaceFunction1D.compiled g
     let composedPartialDerivatives = (dfdt * dtdu, dfdt * dtdv)
     VectorSurfaceFunction3D.new compiledComposed composedPartialDerivatives
 
@@ -1189,7 +1189,7 @@ reverse ::
   VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
   VectorCurve dimension units space
-reverse curve = curve . (1.0 - Curve1D.t)
+reverse curve = curve << (1.0 - Curve1D.t)
 
 transformBy ::
   VectorCurveExists dimension units space =>

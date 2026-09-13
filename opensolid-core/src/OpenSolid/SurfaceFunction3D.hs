@@ -168,7 +168,7 @@ instance
     (Region2D Unitless)
     (Surface3D space)
   where
-  function . domain = Surface3D.parametric function domain
+  function << domain = Surface3D.parametric function domain
 
 instance
   Composition
@@ -176,12 +176,12 @@ instance
     (SurfaceFunction2D Unitless)
     (SurfaceFunction3D space)
   where
-  f . g = do
-    let (dfdx, dfdy) = Pair.map (. g) (partialDerivatives f)
+  f << g = do
+    let (dfdx, dfdy) = Pair.map (<< g) (partialDerivatives f)
     let (dgdu, dgdv) = SurfaceFunction2D.partialDerivatives g
     let (dxdu, dydu) = VectorSurfaceFunction2D.components dgdu
     let (dxdv, dydv) = VectorSurfaceFunction2D.components dgdv
-    let compiledComposed = compiled f . SurfaceFunction2D.compiled g
+    let compiledComposed = compiled f << SurfaceFunction2D.compiled g
     let composedPartialDerivatives =
           ( dfdx * dxdu + dfdy * dydu
           , dfdx * dxdv + dfdy * dydv

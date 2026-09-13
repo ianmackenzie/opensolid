@@ -599,10 +599,10 @@ medialAxis ::
 medialAxis curve1 curve2 = do
   nonzero1 <- Curve.nonzero curve1
   _ <- Curve.nonzero curve2
-  let p1 = curve1 . SurfaceFunction1D.u
-  let p2 = curve2 . SurfaceFunction1D.v
-  let v1 = derivative curve1 . SurfaceFunction1D.u
-  let v2 = derivative curve2 . SurfaceFunction1D.v
+  let p1 = curve1 << SurfaceFunction1D.u
+  let p2 = curve2 << SurfaceFunction1D.v
+  let v1 = derivative curve1 << SurfaceFunction1D.u
+  let v2 = derivative curve2 << SurfaceFunction1D.v
   let d = p2 - p1
   let target =
         v2 `cross_` (2.0 * (v1 `dot_` d) ?*? d - VectorSurfaceFunction2D.squaredMagnitude_ d ?*? v1)
@@ -614,16 +614,16 @@ medialAxis curve1 curve2 = do
         let Nonzero tangentVector1 = VectorCurve.Nonzero.normalize (Curve.Nonzero.derivative nonzero1)
         let normal1 = VectorCurve2D.rotateBy Angle.quarterTurn tangentVector1
         let radius :: SurfaceFunction1D units = Units.coerce do
-              (d `dot_` d) ?/? Nonzero (2.0 * (tangentVector1 . SurfaceFunction1D.u) `cross` d)
+              (d `dot_` d) ?/? Nonzero (2.0 * (tangentVector1 << SurfaceFunction1D.u) `cross` d)
         let curve :: SurfaceFunction2D units =
-              (curve1 . SurfaceFunction1D.u) + radius * (normal1 . SurfaceFunction1D.u)
+              (curve1 << SurfaceFunction1D.u) + radius * (normal1 << SurfaceFunction1D.u)
         let toSegment solutionCurve =
               MedialAxis.Segment
                 { t1 = xCoordinate solutionCurve
                 , t2 = yCoordinate solutionCurve
                 , t12 = solutionCurve
-                , curve = curve . solutionCurve
-                , radius = radius . solutionCurve
+                , curve = curve << solutionCurve
+                , radius = radius << solutionCurve
                 }
         Ok (List.map toSegment zeros.crossingCurves)
 

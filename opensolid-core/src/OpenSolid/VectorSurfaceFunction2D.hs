@@ -409,10 +409,10 @@ instance
     (Curve2D Unitless)
     (VectorCurve2D units)
   where
-  f . g = do
-    let (dfdu, dfdv) = Pair.map (. g) (partialDerivatives f)
+  f << g = do
+    let (dfdu, dfdv) = Pair.map (<< g) (partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative g)
-    let compiledComposed = compiled f . Curve2D.compiled g
+    let compiledComposed = compiled f << Curve2D.compiled g
     let composedDerivative = dfdu * dudt + dfdv * dvdt
     VectorCurve2D.new compiledComposed composedDerivative
 

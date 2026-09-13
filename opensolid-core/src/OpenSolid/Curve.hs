@@ -310,18 +310,18 @@ instance
   givenPoint - curve = constant givenPoint - curve
 
 instance Composition (Curve2D units) (SurfaceFunction1D Unitless) (SurfaceFunction2D units) where
-  f . g = do
-    let dfdt = derivative f . g
+  f << g = do
+    let dfdt = derivative f << g
     let (dtdu, dtdv) = SurfaceFunction1D.partialDerivatives g
-    let compiledComposed = compiled f . SurfaceFunction1D.compiled g
+    let compiledComposed = compiled f << SurfaceFunction1D.compiled g
     let composedPartialDerivatives = (dfdt * dtdu, dfdt * dtdv)
     SurfaceFunction2D.new compiledComposed composedPartialDerivatives
 
 instance Composition (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units) where
-  f . g = do
-    let (dfdu, dfdv) = Pair.map (. g) (SurfaceFunction1D.partialDerivatives f)
+  f << g = do
+    let (dfdu, dfdv) = Pair.map (<< g) (SurfaceFunction1D.partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (derivative g)
-    let compiledComposed = SurfaceFunction1D.compiled f . compiled g
+    let compiledComposed = SurfaceFunction1D.compiled f << compiled g
     let composedDerivative = dfdu * dudt + dfdv * dvdt
     Curve1D.new compiledComposed composedDerivative
 
@@ -331,18 +331,18 @@ instance
     (Curve2D Unitless)
     (VectorCurve3D units space)
   where
-  f . g = do
-    let (dfdu, dfdv) = Pair.map (. g) (VectorSurfaceFunction3D.partialDerivatives f)
+  f << g = do
+    let (dfdu, dfdv) = Pair.map (<< g) (VectorSurfaceFunction3D.partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (derivative g)
-    let compiledComposed = VectorSurfaceFunction3D.compiled f . compiled g
+    let compiledComposed = VectorSurfaceFunction3D.compiled f << compiled g
     let composedDerivative = dfdu * dudt + dfdv * dvdt
     VectorCurve3D.new compiledComposed composedDerivative
 
 instance Composition (SurfaceFunction3D space) (Curve2D Unitless) (Curve3D space) where
-  f . g = do
-    let (dfdu, dfdv) = Pair.map (. g) (SurfaceFunction3D.partialDerivatives f)
+  f << g = do
+    let (dfdu, dfdv) = Pair.map (<< g) (SurfaceFunction3D.partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (derivative g)
-    let compiledComposed = SurfaceFunction3D.compiled f . compiled g
+    let compiledComposed = SurfaceFunction3D.compiled f << compiled g
     let composedDerivative = dfdu * dudt + dfdv * dvdt
     new compiledComposed composedDerivative
 
@@ -384,7 +384,7 @@ instance
   CurveExists dimension units space =>
   Composition (Curve dimension units space) (Curve1D Unitless) (Curve dimension units space)
   where
-  f . g = new (compiled f . Curve1D.compiled g) ((derivative f . g) * Curve1D.derivative g)
+  f << g = new (compiled f << Curve1D.compiled g) ((derivative f << g) * Curve1D.derivative g)
 
 instance
   space1 ~ space2 =>
@@ -411,10 +411,10 @@ instance
   lhs - rhs = constant lhs - rhs
 
 instance Composition (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
-  f . g = do
-    let dfdt = derivative f . g
+  f << g = do
+    let dfdt = derivative f << g
     let (dtdu, dtdv) = SurfaceFunction1D.partialDerivatives g
-    let compiledComposed = compiled f . SurfaceFunction1D.compiled g
+    let compiledComposed = compiled f << SurfaceFunction1D.compiled g
     let composedPartialDerivatives = (dfdt * dtdu, dfdt * dtdv)
     SurfaceFunction3D.new compiledComposed composedPartialDerivatives
 
@@ -724,7 +724,7 @@ reverse ::
 reverse curve =
   recursive \reversed ->
     Curve
-      { compiled = compiled curve . Curve1D.compiled (1.0 - Curve1D.t)
+      { compiled = compiled curve << Curve1D.compiled (1.0 - Curve1D.t)
       , derivative = negate (VectorCurve.reverse (derivative curve))
       , startPoint = curve.endPoint
       , endPoint = curve.startPoint
@@ -761,7 +761,7 @@ desingularizeStart givenStartPoint givenStartDerivative curve = do
           [ affixWidth * derivativeAt tInner curve
           , affixWidth * affixWidth * secondDerivativeAt tInner curve
           ]
-  (prefix, curve . Curve1D.interpolateFrom tInner 1.0)
+  (prefix, curve << Curve1D.interpolateFrom tInner 1.0)
 
 desingularizeEnd ::
   CurveExists dimension units space =>
@@ -779,7 +779,7 @@ desingularizeEnd curve givenEndPoint givenEndDerivative = do
           ]
           givenEndPoint
           [affixWidth * givenEndDerivative]
-  (curve . Curve1D.interpolateFrom 0.0 tInner, suffix)
+  (curve << Curve1D.interpolateFrom 0.0 tInner, suffix)
 
 findPoint ::
   (CurveExists dimension units space, Tolerance units) =>

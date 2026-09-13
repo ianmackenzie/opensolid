@@ -270,8 +270,8 @@ addFillet radius point curves = do
                       (Curve2D.Nonzero.tangentDirectionAt t1 firstCurve)
                       (Curve2D.Nonzero.tangentDirectionAt t2 secondCurve)
               let filletArc = Curve2D.sweptArc centerPoint startPoint sweptAngle
-              let trimmedFirstCurve = Nonzero.unwrap firstCurve . Curve1D.interpolateFrom 0.0 t1
-              let trimmedSecondCurve = Nonzero.unwrap secondCurve . Curve1D.interpolateFrom t2 1.0
+              let trimmedFirstCurve = Nonzero.unwrap firstCurve << Curve1D.interpolateFrom 0.0 t1
+              let trimmedSecondCurve = Nonzero.unwrap secondCurve << Curve1D.interpolateFrom t2 1.0
               Ok (filletArc : trimmedFirstCurve : trimmedSecondCurve : otherCurves)
 
 curveIncidence :: Tolerance units => Point2D units -> Curve2D units -> (Curve2D units, Maybe Number)

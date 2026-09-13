@@ -172,12 +172,12 @@ extruded curve displacement = translational curve (displacement * Curve1D.t)
 
 translational :: Curve3D space -> VectorCurve3D Meters space -> Surface3D space
 translational uCurve vCurve =
-  parametric (uCurve . SurfaceFunction1D.u + vCurve . SurfaceFunction1D.v) UvRegion.unitSquare
+  parametric (uCurve << SurfaceFunction1D.u + vCurve << SurfaceFunction1D.v) UvRegion.unitSquare
 
 ruled :: Curve3D space -> Curve3D space -> Surface3D space
 ruled bottom top = do
-  let f1 = bottom . SurfaceFunction1D.u
-  let f2 = top . SurfaceFunction1D.u
+  let f1 = bottom << SurfaceFunction1D.u
+  let f2 = top << SurfaceFunction1D.u
   parametric (f1 + SurfaceFunction1D.v * (f2 - f1)) UvRegion.unitSquare
 
 revolved ::
@@ -192,8 +192,8 @@ revolved plane curve axis angle = do
   let localCurve = Curve2D.relativeTo frame2D curve
   let (xCoordinate, yCoordinate) = Curve2D.coordinates localCurve
   let frame3D = Frame3D.fromBackPlane (Frame2D.placeOn plane frame2D)
-  let radius = xCoordinate . SurfaceFunction1D.u
-  let height = yCoordinate . SurfaceFunction1D.u
+  let radius = xCoordinate << SurfaceFunction1D.u
+  let height = yCoordinate << SurfaceFunction1D.u
   let theta = angle * SurfaceFunction1D.v
   let surfaceFunction =
         frame3D.originPoint
@@ -219,7 +219,7 @@ boundaryCurves = Set3D.flatten . boundaries
 flip :: Surface3D space -> Surface3D space
 flip surface =
   parametric
-    (surface.function . SurfaceFunction2D.xy -SurfaceFunction1D.u SurfaceFunction1D.v)
+    (function surface << SurfaceFunction2D.xy -SurfaceFunction1D.u SurfaceFunction1D.v)
     (Region2D.mirrorAcross Axis2D.y surface.domain)
 
 -- | Convert a surface defined in local coordinates to one defined in global coordinates.

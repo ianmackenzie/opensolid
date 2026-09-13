@@ -49,17 +49,17 @@ instance Bounded (Nondegenerate (SurfaceCurve3D space)) UvBounds where
   bounds (Nondegenerate surfaceCurve) = uvBounds surfaceCurve
 
 instance Composition (SurfaceCurve3D space) (Curve1D Unitless) (SurfaceCurve3D space) where
-  surfaceCurve . parameterization =
+  surfaceCurve << parameterization =
     SurfaceCurve3D
-      { uvCurve = uvCurve surfaceCurve . parameterization
-      , curve = curve surfaceCurve . parameterization
+      { uvCurve = uvCurve surfaceCurve << parameterization
+      , curve = curve surfaceCurve << parameterization
       }
 
 new :: SurfaceFunction3D space -> UvCurve -> SurfaceCurve3D space
 new givenSurfaceFunction givenUvCurve =
   SurfaceCurve3D
     { uvCurve = givenUvCurve
-    , curve = givenSurfaceFunction . givenUvCurve
+    , curve = givenSurfaceFunction << givenUvCurve
     }
 
 curve :: SurfaceCurve3D space -> Curve3D space

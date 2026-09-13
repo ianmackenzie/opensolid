@@ -1079,13 +1079,13 @@ instance
     (Expression Number Number)
     (Expression Number output)
   where
-  curve . Curve1D inner _ =
+  curve << Curve1D inner _ =
     case curve of
-      Curve1D outer _ -> curve1D (outer . inner)
-      Curve2D outer _ -> curve2D (outer . inner)
-      VectorCurve2D outer _ -> vectorCurve2D (outer . inner)
-      Curve3D outer _ -> curve3D (outer . inner)
-      VectorCurve3D outer _ -> vectorCurve3D (outer . inner)
+      Curve1D outer _ -> curve1D (outer << inner)
+      Curve2D outer _ -> curve2D (outer << inner)
+      VectorCurve2D outer _ -> vectorCurve2D (outer << inner)
+      Curve3D outer _ -> curve3D (outer << inner)
+      VectorCurve3D outer _ -> vectorCurve3D (outer << inner)
 
 instance
   Composition
@@ -1093,13 +1093,13 @@ instance
     (Expression UvPoint Number)
     (Expression UvPoint output)
   where
-  curve . Surface1D inner _ =
+  curve << Surface1D inner _ =
     case curve of
-      Curve1D outer _ -> surface1D (outer . inner)
-      Curve2D outer _ -> surface2D (outer . inner)
-      VectorCurve2D outer _ -> vectorSurface2D (outer . inner)
-      Curve3D outer _ -> surface3D (outer . inner)
-      VectorCurve3D outer _ -> vectorSurface3D (outer . inner)
+      Curve1D outer _ -> surface1D (outer << inner)
+      Curve2D outer _ -> surface2D (outer << inner)
+      VectorCurve2D outer _ -> vectorSurface2D (outer << inner)
+      Curve3D outer _ -> surface3D (outer << inner)
+      VectorCurve3D outer _ -> vectorSurface3D (outer << inner)
 
 instance
   Composition
@@ -1107,13 +1107,13 @@ instance
     (Expression Number UvPoint)
     (Expression Number output)
   where
-  surface . Curve2D inner _ =
+  surface << Curve2D inner _ =
     case surface of
-      Surface1D outer _ -> curve1D (outer . inner)
-      Surface2D outer _ -> curve2D (outer . inner)
-      VectorSurface2D outer _ -> vectorCurve2D (outer . inner)
-      Surface3D outer _ -> curve3D (outer . inner)
-      VectorSurface3D outer _ -> vectorCurve3D (outer . inner)
+      Surface1D outer _ -> curve1D (outer << inner)
+      Surface2D outer _ -> curve2D (outer << inner)
+      VectorSurface2D outer _ -> vectorCurve2D (outer << inner)
+      Surface3D outer _ -> curve3D (outer << inner)
+      VectorSurface3D outer _ -> vectorCurve3D (outer << inner)
 
 instance
   Composition
@@ -1121,13 +1121,13 @@ instance
     (Expression UvPoint UvPoint)
     (Expression UvPoint output)
   where
-  surface . Surface2D inner _ =
+  surface << Surface2D inner _ =
     case surface of
-      Surface1D outer _ -> surface1D (outer . inner)
-      Surface2D outer _ -> surface2D (outer . inner)
-      VectorSurface2D outer _ -> vectorSurface2D (outer . inner)
-      Surface3D outer _ -> surface3D (outer . inner)
-      VectorSurface3D outer _ -> vectorSurface3D (outer . inner)
+      Surface1D outer _ -> surface1D (outer << inner)
+      Surface2D outer _ -> surface2D (outer << inner)
+      VectorSurface2D outer _ -> vectorSurface2D (outer << inner)
+      Surface3D outer _ -> surface3D (outer << inner)
+      VectorSurface3D outer _ -> vectorSurface3D (outer << inner)
 
 -----------------
 --- FUNCTIONS ---

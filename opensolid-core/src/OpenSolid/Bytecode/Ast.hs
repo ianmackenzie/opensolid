@@ -244,230 +244,230 @@ uvPoint :: Vector2D Unitless -> UvPoint
 uvPoint position = Position2D position
 
 instance Composition (Ast1D Number) (Ast1D input) (Ast1D input) where
-  Constant1D outer . _ = Constant1D outer
-  Variable1D outer . Variable1D inner = outer . inner
-  outer . Constant1D inner = Constant1D (evaluateCurve1D outer inner)
+  Constant1D outer << _ = Constant1D outer
+  Variable1D outer << Variable1D inner = outer << inner
+  outer << Constant1D inner = Constant1D (evaluateCurve1D outer inner)
 
 instance Composition (Variable1D Number) (Variable1D input) (Ast1D input) where
-  input . T = Variable1D input
-  T . input = Variable1D input
-  XComponent arg . input = xComponent (arg . input)
-  YComponent arg . input = yComponent (arg . input)
-  Negated1D arg . input = negate (arg . input)
-  Sum1D lhs rhs . input = lhs . input + rhs . input
-  SumVariableConstant1D lhs rhs . input = lhs . input + rhs
-  Difference1D lhs rhs . input = lhs . input - rhs . input
-  DifferenceConstantVariable1D lhs rhs . input = lhs - rhs . input
-  Product1D lhs rhs . input = lhs . input * rhs . input
-  ProductVariableConstant1D lhs rhs . input = lhs . input * rhs
-  Quotient1D lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable1D lhs rhs . input = lhs / rhs . input
-  Squared1D arg . input = squared (arg . input)
-  Cubed1D arg . input = cubed (arg . input)
-  Sqrt1D arg . input = sqrt (arg . input)
-  Sin1D arg . input = sin (arg . input)
-  Cos1D arg . input = cos (arg . input)
-  BezierCurve1D controlPoints param . input = case param . input of
+  input << T = Variable1D input
+  T << input = Variable1D input
+  XComponent arg << input = xComponent (arg << input)
+  YComponent arg << input = yComponent (arg << input)
+  Negated1D arg << input = negate (arg << input)
+  Sum1D lhs rhs << input = lhs << input + rhs << input
+  SumVariableConstant1D lhs rhs << input = lhs << input + rhs
+  Difference1D lhs rhs << input = lhs << input - rhs << input
+  DifferenceConstantVariable1D lhs rhs << input = lhs - rhs << input
+  Product1D lhs rhs << input = lhs << input * rhs << input
+  ProductVariableConstant1D lhs rhs << input = lhs << input * rhs
+  Quotient1D lhs rhs << input = lhs << input / rhs << input
+  QuotientConstantVariable1D lhs rhs << input = lhs / rhs << input
+  Squared1D arg << input = squared (arg << input)
+  Cubed1D arg << input = cubed (arg << input)
+  Sqrt1D arg << input = sqrt (arg << input)
+  Sin1D arg << input = sin (arg << input)
+  Cos1D arg << input = cos (arg << input)
+  BezierCurve1D controlPoints param << input = case param << input of
     Constant1D paramVal ->
       Constant1D (evaluateCurve1D (bezierCurve1D controlPoints) paramVal)
     Variable1D paramVar -> Variable1D (BezierCurve1D controlPoints paramVar)
-  SquaredMagnitude2D arg . input = squaredMagnitude2D (arg . input)
-  SquaredMagnitude3D arg . input = squaredMagnitude3D (arg . input)
-  Magnitude2D arg . input = magnitude2D (arg . input)
-  Magnitude3D arg . input = magnitude3D (arg . input)
-  Dot2D lhs rhs . input = lhs . input `dot` rhs . input
-  DotVariableConstant2D lhs rhs . input = lhs . input `dot` rhs
-  Cross2D lhs rhs . input = lhs . input `cross` rhs . input
-  CrossVariableConstant2D lhs rhs . input = lhs . input `cross` rhs
-  Dot3D lhs rhs . input = lhs . input `dot` rhs . input
-  DotVariableConstant3D lhs rhs . input = lhs . input `dot` rhs
+  SquaredMagnitude2D arg << input = squaredMagnitude2D (arg << input)
+  SquaredMagnitude3D arg << input = squaredMagnitude3D (arg << input)
+  Magnitude2D arg << input = magnitude2D (arg << input)
+  Magnitude3D arg << input = magnitude3D (arg << input)
+  Dot2D lhs rhs << input = lhs << input `dot` rhs << input
+  DotVariableConstant2D lhs rhs << input = lhs << input `dot` rhs
+  Cross2D lhs rhs << input = lhs << input `cross` rhs << input
+  CrossVariableConstant2D lhs rhs << input = lhs << input `cross` rhs
+  Dot3D lhs rhs << input = lhs << input `dot` rhs << input
+  DotVariableConstant3D lhs rhs << input = lhs << input `dot` rhs
 
 instance Composition (Ast2D Number) (Ast1D input) (Ast2D input) where
-  Constant2D outer . _ = Constant2D outer
-  Variable2D outer . Variable1D inner = outer . inner
-  outer . Constant1D inner = Constant2D (evaluateVectorCurve2D outer inner)
+  Constant2D outer << _ = Constant2D outer
+  Variable2D outer << Variable1D inner = outer << inner
+  outer << Constant1D inner = Constant2D (evaluateVectorCurve2D outer inner)
 
 instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
-  input . T = Variable2D input
-  XY x y . input = xy (x . input) (y . input)
-  XC x y . input = xy (x . input) (Constant1D y)
-  CY x y . input = xy (Constant1D x) (y . input)
-  Negated2D arg . input = negate (arg . input)
-  Sum2D lhs rhs . input = lhs . input + rhs . input
-  SumVariableConstant2D lhs rhs . input = lhs . input + rhs
-  Difference2D lhs rhs . input = lhs . input - rhs . input
-  DifferenceConstantVariable2D lhs rhs . input = lhs - rhs . input
-  Product2D lhs rhs . input = lhs . input * rhs . input
-  ProductVariableConstant2D lhs rhs . input = lhs . input * rhs
-  ProductConstantVariable2D lhs rhs . input = lhs * rhs . input
-  Quotient2D lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable2D lhs rhs . input = lhs / rhs . input
-  BezierCurve2D controlPoints param . input = case param . input of
+  input << T = Variable2D input
+  XY x y << input = xy (x << input) (y << input)
+  XC x y << input = xy (x << input) (Constant1D y)
+  CY x y << input = xy (Constant1D x) (y << input)
+  Negated2D arg << input = negate (arg << input)
+  Sum2D lhs rhs << input = lhs << input + rhs << input
+  SumVariableConstant2D lhs rhs << input = lhs << input + rhs
+  Difference2D lhs rhs << input = lhs << input - rhs << input
+  DifferenceConstantVariable2D lhs rhs << input = lhs - rhs << input
+  Product2D lhs rhs << input = lhs << input * rhs << input
+  ProductVariableConstant2D lhs rhs << input = lhs << input * rhs
+  ProductConstantVariable2D lhs rhs << input = lhs * rhs << input
+  Quotient2D lhs rhs << input = lhs << input / rhs << input
+  QuotientConstantVariable2D lhs rhs << input = lhs / rhs << input
+  BezierCurve2D controlPoints param << input = case param << input of
     Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (bezierCurve2D controlPoints) paramVal)
     Variable1D paramVar -> Variable2D (BezierCurve2D controlPoints paramVar)
-  TransformVector2D transform vector . input =
-    transformVector2D transform (vector . input)
-  TransformPoint2D transform point . input =
-    transformPoint2D transform (point . input)
-  ProjectVector3D plane vector . input =
-    projectVector3dInto plane (vector . input)
-  ProjectPoint3D plane point . input =
-    projectPoint3dInto plane (point . input)
-  Arc2D vx vy theta1 theta2 param . input = case param . input of
+  TransformVector2D transform vector << input =
+    transformVector2D transform (vector << input)
+  TransformPoint2D transform point << input =
+    transformPoint2D transform (point << input)
+  ProjectVector3D plane vector << input =
+    projectVector3dInto plane (vector << input)
+  ProjectPoint3D plane point << input =
+    projectPoint3dInto plane (point << input)
+  Arc2D vx vy theta1 theta2 param << input = case param << input of
     Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (arc2D vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable2D (Arc2D vx vy theta1 theta2 paramVar)
-  Involute2D n vx vy theta1 theta2 param . input = case param . input of
+  Involute2D n vx vy theta1 theta2 param << input = case param << input of
     Constant1D paramVal ->
       Constant2D (evaluateVectorCurve2D (involute2D n vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable2D (Involute2D n vx vy theta1 theta2 paramVar)
 
 instance Composition (Ast3D Number) (Ast1D input) (Ast3D input) where
-  Constant3D outer . _ = Constant3D outer
-  Variable3D outer . Variable1D inner = outer . inner
-  outer . Constant1D inner = Constant3D (evaluateVectorCurve3D outer inner)
+  Constant3D outer << _ = Constant3D outer
+  Variable3D outer << Variable1D inner = outer << inner
+  outer << Constant1D inner = Constant3D (evaluateVectorCurve3D outer inner)
 
 instance Composition (Variable3D Number) (Variable1D input) (Ast3D input) where
-  input . T = Variable3D input
-  Negated3D arg . input = negate (arg . input)
-  Sum3D lhs rhs . input = lhs . input + rhs . input
-  SumVariableConstant3D lhs rhs . input = lhs . input + rhs
-  Difference3D lhs rhs . input = lhs . input - rhs . input
-  DifferenceConstantVariable3D lhs rhs . input = lhs - rhs . input
-  Product3D lhs rhs . input = lhs . input * rhs . input
-  ProductVariableConstant3D lhs rhs . input = lhs . input * rhs
-  ProductConstantVariable3D lhs rhs . input = lhs * rhs . input
-  Quotient3D lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable3D lhs rhs . input = lhs / rhs . input
-  BezierCurve3D controlPoints param . input = case param . input of
+  input << T = Variable3D input
+  Negated3D arg << input = negate (arg << input)
+  Sum3D lhs rhs << input = lhs << input + rhs << input
+  SumVariableConstant3D lhs rhs << input = lhs << input + rhs
+  Difference3D lhs rhs << input = lhs << input - rhs << input
+  DifferenceConstantVariable3D lhs rhs << input = lhs - rhs << input
+  Product3D lhs rhs << input = lhs << input * rhs << input
+  ProductVariableConstant3D lhs rhs << input = lhs << input * rhs
+  ProductConstantVariable3D lhs rhs << input = lhs * rhs << input
+  Quotient3D lhs rhs << input = lhs << input / rhs << input
+  QuotientConstantVariable3D lhs rhs << input = lhs / rhs << input
+  BezierCurve3D controlPoints param << input = case param << input of
     Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (bezierCurve3D controlPoints) paramVal)
     Variable1D paramVar -> Variable3D (BezierCurve3D controlPoints paramVar)
-  Cross3D lhs rhs . input = lhs . input `cross` rhs . input
-  CrossVariableConstant3D lhs rhs . input = lhs . input `cross` rhs
-  TransformVector3D transform vector . input =
-    transformVector3D transform (vector . input)
-  TransformPoint3D transform point . input =
-    transformPoint3D transform (point . input)
-  PlaceVector2D plane vector . input =
-    placeVector2DOn plane (vector . input)
-  PlacePoint2D plane point . input =
-    placePoint2DOn plane (point . input)
-  Arc3D vx vy theta1 theta2 param . input = case param . input of
+  Cross3D lhs rhs << input = lhs << input `cross` rhs << input
+  CrossVariableConstant3D lhs rhs << input = lhs << input `cross` rhs
+  TransformVector3D transform vector << input =
+    transformVector3D transform (vector << input)
+  TransformPoint3D transform point << input =
+    transformPoint3D transform (point << input)
+  PlaceVector2D plane vector << input =
+    placeVector2DOn plane (vector << input)
+  PlacePoint2D plane point << input =
+    placePoint2DOn plane (point << input)
+  Arc3D vx vy theta1 theta2 param << input = case param << input of
     Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (arc3D vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable3D (Arc3D vx vy theta1 theta2 paramVar)
-  Involute3D n vx vy theta1 theta2 param . input = case param . input of
+  Involute3D n vx vy theta1 theta2 param << input = case param << input of
     Constant1D paramVal ->
       Constant3D (evaluateVectorCurve3D (involute3D n vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable3D (Involute3D n vx vy theta1 theta2 paramVar)
 
 instance Composition (Ast1D UvPoint) (Ast2D input) (Ast1D input) where
-  Constant1D outer . _ = Constant1D outer
-  Variable1D outer . Variable2D inner = outer . inner
-  outer . Constant2D parameter = Constant1D (evaluateSurface1D outer (uvPoint parameter))
+  Constant1D outer << _ = Constant1D outer
+  Variable1D outer << Variable2D inner = outer << inner
+  outer << Constant2D parameter = Constant1D (evaluateSurface1D outer (uvPoint parameter))
 
 instance Composition (Variable1D UvPoint) (Variable2D input) (Ast1D input) where
-  input . UV = Variable1D input
-  U . input = xComponent (Variable2D input)
-  V . input = yComponent (Variable2D input)
-  XComponent arg . input = xComponent (arg . input)
-  YComponent arg . input = yComponent (arg . input)
-  Negated1D arg . input = negate (arg . input)
-  Sum1D lhs rhs . input = lhs . input + rhs . input
-  SumVariableConstant1D lhs rhs . input = lhs . input + rhs
-  Difference1D lhs rhs . input = lhs . input - rhs . input
-  DifferenceConstantVariable1D lhs rhs . input = lhs - rhs . input
-  Product1D lhs rhs . input = lhs . input * rhs . input
-  ProductVariableConstant1D lhs rhs . input = lhs . input * rhs
-  Quotient1D lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable1D lhs rhs . input = lhs / rhs . input
-  Squared1D arg . input = squared (arg . input)
-  Cubed1D arg . input = cubed (arg . input)
-  Sqrt1D arg . input = sqrt (arg . input)
-  Sin1D arg . input = sin (arg . input)
-  Cos1D arg . input = cos (arg . input)
-  BezierCurve1D controlPoints param . input = case param . input of
+  input << UV = Variable1D input
+  U << input = xComponent (Variable2D input)
+  V << input = yComponent (Variable2D input)
+  XComponent arg << input = xComponent (arg << input)
+  YComponent arg << input = yComponent (arg << input)
+  Negated1D arg << input = negate (arg << input)
+  Sum1D lhs rhs << input = lhs << input + rhs << input
+  SumVariableConstant1D lhs rhs << input = lhs << input + rhs
+  Difference1D lhs rhs << input = lhs << input - rhs << input
+  DifferenceConstantVariable1D lhs rhs << input = lhs - rhs << input
+  Product1D lhs rhs << input = lhs << input * rhs << input
+  ProductVariableConstant1D lhs rhs << input = lhs << input * rhs
+  Quotient1D lhs rhs << input = lhs << input / rhs << input
+  QuotientConstantVariable1D lhs rhs << input = lhs / rhs << input
+  Squared1D arg << input = squared (arg << input)
+  Cubed1D arg << input = cubed (arg << input)
+  Sqrt1D arg << input = sqrt (arg << input)
+  Sin1D arg << input = sin (arg << input)
+  Cos1D arg << input = cos (arg << input)
+  BezierCurve1D controlPoints param << input = case param << input of
     Constant1D paramVal -> Constant1D (evaluateCurve1D (bezierCurve1D controlPoints) paramVal)
     Variable1D paramVar -> Variable1D (BezierCurve1D controlPoints paramVar)
-  SquaredMagnitude2D arg . input = squaredMagnitude2D (arg . input)
-  SquaredMagnitude3D arg . input = squaredMagnitude3D (arg . input)
-  Magnitude2D arg . input = magnitude2D (arg . input)
-  Magnitude3D arg . input = magnitude3D (arg . input)
-  Dot2D lhs rhs . input = lhs . input `dot` rhs . input
-  DotVariableConstant2D lhs rhs . input = lhs . input `dot` rhs
-  Cross2D lhs rhs . input = lhs . input `cross` rhs . input
-  CrossVariableConstant2D lhs rhs . input = lhs . input `cross` rhs
-  Dot3D lhs rhs . input = lhs . input `dot` rhs . input
-  DotVariableConstant3D lhs rhs . input = lhs . input `dot` rhs
+  SquaredMagnitude2D arg << input = squaredMagnitude2D (arg << input)
+  SquaredMagnitude3D arg << input = squaredMagnitude3D (arg << input)
+  Magnitude2D arg << input = magnitude2D (arg << input)
+  Magnitude3D arg << input = magnitude3D (arg << input)
+  Dot2D lhs rhs << input = lhs << input `dot` rhs << input
+  DotVariableConstant2D lhs rhs << input = lhs << input `dot` rhs
+  Cross2D lhs rhs << input = lhs << input `cross` rhs << input
+  CrossVariableConstant2D lhs rhs << input = lhs << input `cross` rhs
+  Dot3D lhs rhs << input = lhs << input `dot` rhs << input
+  DotVariableConstant3D lhs rhs << input = lhs << input `dot` rhs
 
 instance Composition (Ast2D UvPoint) (Ast2D input) (Ast2D input) where
-  Constant2D outer . _ = Constant2D outer
-  Variable2D outer . Variable2D inner = outer . inner
-  outer . Constant2D parameter = Constant2D (evaluateVectorSurface2D outer (uvPoint parameter))
+  Constant2D outer << _ = Constant2D outer
+  Variable2D outer << Variable2D inner = outer << inner
+  outer << Constant2D parameter = Constant2D (evaluateVectorSurface2D outer (uvPoint parameter))
 
 instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
-  input . UV = Variable2D input
-  UV . input = Variable2D input
-  XY x y . input = xy (x . input) (y . input)
-  XC x y . input = xy (x . input) (Constant1D y)
-  CY x y . input = xy (Constant1D x) (y . input)
-  Negated2D arg . input = negate (arg . input)
-  Sum2D lhs rhs . input = lhs . input + rhs . input
-  SumVariableConstant2D lhs rhs . input = lhs . input + rhs
-  Difference2D lhs rhs . input = lhs . input - rhs . input
-  DifferenceConstantVariable2D lhs rhs . input = lhs - rhs . input
-  Product2D lhs rhs . input = lhs . input * rhs . input
-  ProductVariableConstant2D lhs rhs . input = lhs . input * rhs
-  ProductConstantVariable2D lhs rhs . input = lhs * rhs . input
-  Quotient2D lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable2D lhs rhs . input = lhs / rhs . input
-  BezierCurve2D controlPoints param . input = case param . input of
+  input << UV = Variable2D input
+  UV << input = Variable2D input
+  XY x y << input = xy (x << input) (y << input)
+  XC x y << input = xy (x << input) (Constant1D y)
+  CY x y << input = xy (Constant1D x) (y << input)
+  Negated2D arg << input = negate (arg << input)
+  Sum2D lhs rhs << input = lhs << input + rhs << input
+  SumVariableConstant2D lhs rhs << input = lhs << input + rhs
+  Difference2D lhs rhs << input = lhs << input - rhs << input
+  DifferenceConstantVariable2D lhs rhs << input = lhs - rhs << input
+  Product2D lhs rhs << input = lhs << input * rhs << input
+  ProductVariableConstant2D lhs rhs << input = lhs << input * rhs
+  ProductConstantVariable2D lhs rhs << input = lhs * rhs << input
+  Quotient2D lhs rhs << input = lhs << input / rhs << input
+  QuotientConstantVariable2D lhs rhs << input = lhs / rhs << input
+  BezierCurve2D controlPoints param << input = case param << input of
     Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (bezierCurve2D controlPoints) paramVal)
     Variable1D paramVar -> Variable2D (BezierCurve2D controlPoints paramVar)
-  TransformVector2D transform vector . input =
-    transformVector2D transform (vector . input)
-  TransformPoint2D transform point . input =
-    transformPoint2D transform (point . input)
-  ProjectVector3D plane vector . input =
-    projectVector3dInto plane (vector . input)
-  ProjectPoint3D plane point . input =
-    projectPoint3dInto plane (point . input)
-  Arc2D vx vy theta1 theta2 param . input = case param . input of
+  TransformVector2D transform vector << input =
+    transformVector2D transform (vector << input)
+  TransformPoint2D transform point << input =
+    transformPoint2D transform (point << input)
+  ProjectVector3D plane vector << input =
+    projectVector3dInto plane (vector << input)
+  ProjectPoint3D plane point << input =
+    projectPoint3dInto plane (point << input)
+  Arc2D vx vy theta1 theta2 param << input = case param << input of
     Constant1D paramVal -> Constant2D (evaluateVectorCurve2D (arc2D vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable2D (Arc2D vx vy theta1 theta2 paramVar)
-  Involute2D n vx vy theta1 theta2 param . input = case param . input of
+  Involute2D n vx vy theta1 theta2 param << input = case param << input of
     Constant1D paramVal ->
       Constant2D (evaluateVectorCurve2D (involute2D n vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable2D (Involute2D n vx vy theta1 theta2 paramVar)
 
 instance Composition (Ast3D UvPoint) (Ast2D input) (Ast3D input) where
-  Constant3D outer . _ = Constant3D outer
-  Variable3D outer . Variable2D inner = outer . inner
-  outer . Constant2D parameter = Constant3D (evaluateVectorSurface3D outer (uvPoint parameter))
+  Constant3D outer << _ = Constant3D outer
+  Variable3D outer << Variable2D inner = outer << inner
+  outer << Constant2D parameter = Constant3D (evaluateVectorSurface3D outer (uvPoint parameter))
 
 instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
-  input . UV = Variable3D input
-  Negated3D arg . input = negate (arg . input)
-  Sum3D lhs rhs . input = lhs . input + rhs . input
-  SumVariableConstant3D lhs rhs . input = lhs . input + rhs
-  Difference3D lhs rhs . input = lhs . input - rhs . input
-  DifferenceConstantVariable3D lhs rhs . input = lhs - rhs . input
-  Product3D lhs rhs . input = lhs . input * rhs . input
-  ProductVariableConstant3D lhs rhs . input = lhs . input * rhs
-  ProductConstantVariable3D lhs rhs . input = lhs * rhs . input
-  Quotient3D lhs rhs . input = lhs . input / rhs . input
-  QuotientConstantVariable3D lhs rhs . input = lhs / rhs . input
-  BezierCurve3D controlPoints param . input = case param . input of
+  input << UV = Variable3D input
+  Negated3D arg << input = negate (arg << input)
+  Sum3D lhs rhs << input = lhs << input + rhs << input
+  SumVariableConstant3D lhs rhs << input = lhs << input + rhs
+  Difference3D lhs rhs << input = lhs << input - rhs << input
+  DifferenceConstantVariable3D lhs rhs << input = lhs - rhs << input
+  Product3D lhs rhs << input = lhs << input * rhs << input
+  ProductVariableConstant3D lhs rhs << input = lhs << input * rhs
+  ProductConstantVariable3D lhs rhs << input = lhs * rhs << input
+  Quotient3D lhs rhs << input = lhs << input / rhs << input
+  QuotientConstantVariable3D lhs rhs << input = lhs / rhs << input
+  BezierCurve3D controlPoints param << input = case param << input of
     Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (bezierCurve3D controlPoints) paramVal)
     Variable1D paramVar -> Variable3D (BezierCurve3D controlPoints paramVar)
-  Cross3D lhs rhs . input = lhs . input `cross` rhs . input
-  CrossVariableConstant3D lhs rhs . input = lhs . input `cross` rhs
-  TransformVector3D transform vector . input = transformVector3D transform (vector . input)
-  TransformPoint3D transform point . input = transformPoint3D transform (point . input)
-  PlaceVector2D plane vector . input = placeVector2DOn plane (vector . input)
-  PlacePoint2D plane point . input = placePoint2DOn plane (point . input)
-  Arc3D vx vy theta1 theta2 param . input = case param . input of
+  Cross3D lhs rhs << input = lhs << input `cross` rhs << input
+  CrossVariableConstant3D lhs rhs << input = lhs << input `cross` rhs
+  TransformVector3D transform vector << input = transformVector3D transform (vector << input)
+  TransformPoint3D transform point << input = transformPoint3D transform (point << input)
+  PlaceVector2D plane vector << input = placeVector2DOn plane (vector << input)
+  PlacePoint2D plane point << input = placePoint2DOn plane (point << input)
+  Arc3D vx vy theta1 theta2 param << input = case param << input of
     Constant1D paramVal -> Constant3D (evaluateVectorCurve3D (arc3D vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable3D (Arc3D vx vy theta1 theta2 paramVar)
-  Involute3D n vx vy theta1 theta2 param . input = case param . input of
+  Involute3D n vx vy theta1 theta2 param << input = case param << input of
     Constant1D paramVal ->
       Constant3D (evaluateVectorCurve3D (involute3D n vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable3D (Involute3D n vx vy theta1 theta2 paramVar)
@@ -968,7 +968,7 @@ transformVector2D transform ast = do
     Constant2D val -> Constant2D (transformValue val)
     Variable2D var -> Variable2D $ case var of
       TransformVector2D existingTransform underlyingVar ->
-        TransformVector2D (erasedTransform . existingTransform) underlyingVar
+        TransformVector2D (erasedTransform << existingTransform) underlyingVar
       BezierCurve2D controlPoints param ->
         BezierCurve2D (NonEmpty.map transformValue controlPoints) param
       Arc2D vx vy theta1 theta2 param ->
@@ -985,7 +985,7 @@ transformVector3D transform ast = do
     Constant3D val -> Constant3D (transformValue val)
     Variable3D var -> Variable3D $ case var of
       TransformVector3D existing underlyingVar ->
-        TransformVector3D (erasedTransform . existing) underlyingVar
+        TransformVector3D (erasedTransform << existing) underlyingVar
       BezierCurve3D controlPoints param ->
         BezierCurve3D (NonEmpty.map transformValue controlPoints) param
       Arc3D vx vy theta1 theta2 param ->
@@ -1002,7 +1002,7 @@ transformPoint2D transform ast = do
       let Position2D transformed = Point2D.transformBy erasedTransform (Position2D val)
       Constant2D transformed
     Variable2D (TransformPoint2D existing var) ->
-      Variable2D (TransformPoint2D (erasedTransform . existing) var)
+      Variable2D (TransformPoint2D (erasedTransform << existing) var)
     Variable2D (BezierCurve2D controlPoints param) -> do
       let transformedControlPoints =
             controlPoints
@@ -1021,7 +1021,7 @@ transformPoint3D transform ast = do
       let Position3D transformed = Point3D.transformBy erasedTransform point
       Constant3D (Vector3D.erase transformed)
     Variable3D (TransformPoint3D existing var) ->
-      Variable3D (TransformPoint3D (erasedTransform . existing) var)
+      Variable3D (TransformPoint3D (erasedTransform << existing) var)
     Variable3D (BezierCurve3D controlPoints param) -> do
       let transformedControlPoints =
             controlPoints

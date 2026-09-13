@@ -898,7 +898,7 @@ instance
     (VectorTransform2D inner)
     (VectorTransform2D composed)
   where
-  outer . inner =
+  outer << inner =
     VectorTransform2D
       (Vector2D 1.0 0.0 * inner * outer)
       (Vector2D 0.0 1.0 * inner * outer)
@@ -949,10 +949,10 @@ instance
     (Transform2D inner units2)
     (Transform2D composed units1)
   where
-  outer . inner = do
+  outer << inner = do
     let Transform2D _ vectorOuter = outer
     let Transform2D _ vectorInner = inner
-    Transform2D (Point2D Quantity.zero Quantity.zero * inner * outer) (vectorOuter . vectorInner)
+    Transform2D (Point2D Quantity.zero Quantity.zero * inner * outer) (vectorOuter << vectorInner)
 
 ----- Vector3D -----
 
@@ -2061,7 +2061,7 @@ instance
     (VectorTransform3D inner space2)
     (VectorTransform3D composed space1)
   where
-  outer . inner =
+  outer << inner =
     VectorTransform3D
       (Vector3D 1.0 0.0 0.0 * inner * outer)
       (Vector3D 0.0 1.0 0.0 * inner * outer)
@@ -2125,9 +2125,9 @@ instance
     (Transform3D inner space2)
     (Transform3D composed space1)
   where
-  outer . inner = do
+  outer << inner = do
     let Transform3D _ vectorOuter = outer
     let Transform3D _ vectorInner = inner
     Transform3D
       (Point3D Quantity.zero Quantity.zero Quantity.zero * inner * outer)
-      (vectorOuter . vectorInner)
+      (vectorOuter << vectorInner)
