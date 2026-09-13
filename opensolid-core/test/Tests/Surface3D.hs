@@ -17,7 +17,7 @@ import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import Test (Test)
 import Test qualified
-import Tests.Matching (matching)
+import Tests.Matching ((~~))
 import Tests.Random qualified as Random
 
 spherePatch :: Tolerance Meters => Generator (Surface3D space)
@@ -55,7 +55,7 @@ findPole = Test.check 100 "findPole" do
   case solutions of
     [SurfacePoint3D.Pole (Nondegenerate poleCurve) _] -> do
       let expectedPoleCurve = Curve2D.lineFrom (UvPoint 1.0 0.0) (UvPoint 1.0 1.0)
-      Test.expect (matching poleCurve expectedPoleCurve)
+      Test.expect (poleCurve ~~ expectedPoleCurve)
     _ ->
       Test.fail "Expected a single solution"
         & Test.output "solutions" solutions
@@ -69,7 +69,7 @@ findInteriorPoint = Test.check 100 "findInterior" do
   solutions <- Surface3D.findPoint point surface ?? fail
   case solutions of
     [SurfacePoint3D.Point solution _] ->
-      Test.expect (matching solution uvPoint)
+      Test.expect (solution ~~ uvPoint)
     _ ->
       Test.fail "Expected a single solution"
         & Test.output "solutions" solutions

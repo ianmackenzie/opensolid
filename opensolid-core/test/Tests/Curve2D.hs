@@ -35,7 +35,7 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import Test (Expectation, Test)
 import Test qualified
-import Tests.Matching (matching)
+import Tests.Matching ((~~))
 import Tests.Random qualified as Random
 
 curveGenerators :: List (Text, Generator (Curve2D Meters))
@@ -200,7 +200,7 @@ overlapAndJoin = Test.verify "overlapAndJoin" do
         & Test.output "segments" segments
         & Test.output "expectedSegments" expectedSegments
     , Test.expect (sign == Negative)
-    , Test.expect (points `matching` expectedPoints)
+    , Test.expect (points ~~ expectedPoints)
         & Test.output "points" (List.map IntersectionPoint.parameterValues points)
         & Test.output "expectedPoints" (List.map IntersectionPoint.parameterValues expectedPoints)
     ]
@@ -217,7 +217,7 @@ crossingIntersection = Test.verify "crossingIntersection" do
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
-      Test.expect (matching actualIntersectionPoints expectedIntersectionPoints)
+      Test.expect (actualIntersectionPoints ~~ expectedIntersectionPoints)
         & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
         & Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just Curve.OverlappingSegments{} ->
@@ -242,7 +242,7 @@ tangentIntersection = Test.verify "tangentIntersection" do
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
-      Test.expect (matching actualIntersectionPoints expectedIntersectionPoints)
+      Test.expect (actualIntersectionPoints ~~ expectedIntersectionPoints)
         & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
         & Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just Curve.OverlappingSegments{} ->

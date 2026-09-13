@@ -6,7 +6,7 @@ import OpenSolid.Curve1D.Root (Root (Root))
 import OpenSolid.Prelude
 import Test (Test)
 import Test qualified
-import Tests.Matching (matching)
+import Tests.Matching ((~~))
 
 tests :: List Test
 tests =
@@ -21,7 +21,7 @@ crossingRoots = Test.verify "crossingRoots" $ unitless do
   let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
   let expectedRoots = [Root 0.0 0 Positive, Root (1 / 3) 0 Negative, Root (2 / 3) 0 Positive]
   roots <- Curve1D.roots y ?? fail
-  Test.expect (matching roots expectedRoots)
+  Test.expect (roots ~~ expectedRoots)
     & Test.output "roots" roots
     & Test.output "expectedRoots" expectedRoots
 
@@ -31,7 +31,7 @@ tangentRoots = Test.verify "tangentRoots" $ unitless do
   let expression = Curve1D.squared (Curve1D.sin theta)
   let expectedRoots = [Root t 1 Positive | t <- [0.0, 0.5, 1.0]]
   roots <- Curve1D.roots expression ?? fail
-  Test.expect (matching roots expectedRoots)
+  Test.expect (roots ~~ expectedRoots)
     & Test.output "roots" roots
     & Test.output "expectedRoots" expectedRoots
 

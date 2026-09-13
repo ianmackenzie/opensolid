@@ -1,9 +1,4 @@
-module Tests.Matching
-  ( Matching (impl)
-  , matching
-  , matchingBy
-  )
-where
+module Tests.Matching (Matching, (~~)) where
 
 import OpenSolid.Curve (Curve, CurveExists)
 import OpenSolid.Curve qualified as Curve
@@ -18,68 +13,72 @@ import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
 
 class Matching a where
-  impl :: Tolerance Meters => a -> a -> Bool
+  (~~) :: a -> a -> Bool
 
-matching :: Matching a => a -> a -> Bool
-matching first second = Tolerance.using Length.defaultTolerance (impl first second)
+infix 4 ~~
 
-matchingBy :: Matching b => (a -> b) -> a -> a -> Bool
-matchingBy function first second = matching (function first) (function second)
+spatial :: (Tolerance Meters => a) -> a
+spatial = Tolerance.using Length.defaultTolerance
 
 instance (Matching a, Matching b) => Matching (a, b) where
-  impl (a1, b1) (a2, b2) = matching a1 a2 && matching b1 b2
+  (a1, b1) ~~ (a2, b2) = a1 ~~ a2 && b1 ~~ b2
 
 instance Matching a => Matching (List a) where
-  impl [] [] = True
-  impl NonEmpty{} [] = False
-  impl [] NonEmpty{} = False
-  impl (x : xs) (y : ys) = matching x y && matching xs ys
+  [] ~~ [] = True
+  NonEmpty _ ~~ [] = False
+  [] ~~ NonEmpty _ = False
+  x : xs ~~ y : ys = x ~~ y && xs ~~ ys
 
 instance Matching a => Matching (NonEmpty a) where
-  impl (x :| xs) (y :| ys) = matching x y && matching xs ys
+  x :| xs ~~ y :| ys = x ~~ y && xs ~~ ys
 
 instance Matching a => Matching (Maybe a) where
-  impl (Just first) (Just second) = matching first second
-  impl Nothing Nothing = True
-  impl Just{} Nothing = False
-  impl Nothing Just{} = False
+  Just first ~~ Just second = first ~~ second
+  Nothing ~~ Nothing = True
+  Just _ ~~ Nothing = False
+  Nothing ~~ Just _ = False
 
 instance Matching Number where
-  impl first second = unitless (first ~= second)
+  (~~) = unitless (~=)
 
 instance Matching Length where
-  impl first second = first ~= second
+  (~~) = spatial (~=)
+
+instance Matching (Point3D space) where
+  (~~) = spatial (~=)
 
 instance Matching Curve1D.Root where
-  impl root1 root2 =
-    matching (Curve1D.Root.location root1) (Curve1D.Root.location root2)
-      && (Curve1D.Root.order root1 == Curve1D.Root.order root2)
-      && (Curve1D.Root.sign root1 == Curve1D.Root.sign root2)
+  root1 ~~ root2 =
+    Curve1D.Root.location root1 ~~ Curve1D.Root.location root2
+      && Curve1D.Root.order root1 == Curve1D.Root.order root2
+      && Curve1D.Root.sign root1 == Curve1D.Root.sign root2
 
 instance Matching Curve.IntersectionPoint where
-  impl first second =
-    (Curve.IntersectionPoint.continuity first == Curve.IntersectionPoint.continuity second)
-      && matching
-        (Curve.IntersectionPoint.parameterValues first)
-        (Curve.IntersectionPoint.parameterValues second)
+  first ~~ second = do
+    let firstContinuity = Curve.IntersectionPoint.continuity first
+    let secondContinuity = Curve.IntersectionPoint.continuity second
+    let firstParameterValues = Curve.IntersectionPoint.parameterValues first
+    let secondParameterValues = Curve.IntersectionPoint.parameterValues second
+    firstContinuity == secondContinuity && firstParameterValues ~~ secondParameterValues
 
 instance Matching Curve3D.IntersectionPointWithSurface where
-  impl first second =
+  first ~~ second =
     first.kind == second.kind
-      && unitless (first.t ~= second.t)
-      && unitless (first.uv ~= second.uv)
+      && first.t ~~ second.t
+      && first.uv ~~ second.uv
 
 instance Matching UvPoint where
-  impl point1 point2 = unitless (point1 ~= point2)
+  (~~) = unitless (~=)
 
 instance Matching UvCurve where
-  impl = unitless matchingCurves
+  (~~) = unitless matchingCurves
 
 matchingCurves ::
   (CurveExists dimension units space, Tolerance units) =>

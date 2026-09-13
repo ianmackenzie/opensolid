@@ -16,7 +16,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3D qualified as World3D
 import Test (Test)
 import Test qualified
-import Tests.Matching (matching)
+import Tests.Matching ((~~))
 
 tests :: List Test
 tests =
@@ -114,7 +114,7 @@ crossingIntersection = Test.verify "crossingIntersection" do
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
-      Test.expect (matching actualIntersectionPoints expectedIntersectionPoints)
+      Test.expect (actualIntersectionPoints ~~ expectedIntersectionPoints)
         & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
         & Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just Curve.OverlappingSegments{} ->
@@ -141,7 +141,7 @@ tangentIntersection = Test.verify "tangentIntersection" do
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
-      Test.expect (matching actualIntersectionPoints expectedIntersectionPoints)
+      Test.expect (actualIntersectionPoints ~~ expectedIntersectionPoints)
         & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
         & Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just (Curve.OverlappingSegments{}) ->
