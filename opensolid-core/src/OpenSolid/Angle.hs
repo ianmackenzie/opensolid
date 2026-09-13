@@ -30,7 +30,6 @@ where
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Tolerance qualified as Tolerance
 
 {-|  An angle in degrees, radians, turns etc.
 
@@ -52,7 +51,7 @@ This is used to e.g. check if a 'revolve' operation is a full revolution
 (by checking if the angle of revolution is equal to 360 degrees, within a tolerance).
 -}
 tolerance :: Angle
-tolerance = radians Tolerance.unitless
+tolerance = OpenSolid.Prelude.angular ?tolerance
 
 -- | Compute the sine of an angle.
 sin :: Angle -> Number

@@ -1253,7 +1253,7 @@ divideByNonzeroR ::
 divideByNonzeroR nonzero = do
   let implementation :: value -> rhs -> Result HasZero result
       implementation value rhs = do
-        nonzeroRhs <- Tolerance.using Angle.tolerance (nonzero rhs)
+        nonzeroRhs <- angular (nonzero rhs)
         Ok (value / nonzeroRhs)
   PostOverload BinaryOperator.Div (PostOperatorOverload (wrap2R implementation))
 

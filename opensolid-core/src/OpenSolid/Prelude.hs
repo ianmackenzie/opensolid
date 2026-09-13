@@ -35,6 +35,7 @@ module OpenSolid.Prelude
   , Composition ((<<))
   , Tolerance
   , unitless
+  , angular
   , ApproximateEquality ((~=))
   , Indexed ((!!))
   , Intersects ((^))
@@ -295,6 +296,10 @@ type Tolerance units = ?tolerance :: Quantity units
 {-# INLINE unitless #-}
 unitless :: (Tolerance Unitless => a) -> a
 unitless expression = let ?tolerance = 1e-9 in expression
+
+{-# INLINE angular #-}
+angular :: (Tolerance Radians => a) -> a
+angular expression = let ?tolerance = Quantity 1e-9 in expression
 
 ----- Approximate equality -----
 

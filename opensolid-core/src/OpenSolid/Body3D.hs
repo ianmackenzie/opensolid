@@ -85,7 +85,6 @@ import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfaceFunction3D.Nondegenerate qualified as SurfaceFunction3D.Nondegenerate
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D))
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
@@ -273,7 +272,7 @@ revolved sketchPlane profile givenAxis givenSweptAngle = do
   let sweptAngle = Quantity.abs givenSweptAngle
   let startCap = Surface3D.flip (Surface3D.on startPlane profile)
   let endCap = Surface3D.on endPlane profile
-  let isFullRevolution = Tolerance.using Angle.tolerance (sweptAngle ~= Angle.twoPi)
+  let isFullRevolution = angular (sweptAngle ~= Angle.twoPi)
   let endSurfaces = if isFullRevolution then [] else [startCap, endCap]
   -- A 2D axis such that the profile is to the *left* of the axis
   -- (such that it comes "out of the page" when revolved,

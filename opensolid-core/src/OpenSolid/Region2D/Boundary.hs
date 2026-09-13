@@ -31,7 +31,6 @@ import OpenSolid.Region2D.BoundaryTree (BoundaryTree)
 import OpenSolid.Region2D.BoundaryTree qualified as Region2D.BoundaryTree
 import OpenSolid.Set2D (Set2D)
 import OpenSolid.Set2D qualified as Set2D
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
@@ -117,11 +116,10 @@ unconvert :: Quantity (units2 ?/? units1) -> Boundary units2 -> Boundary units1
 unconvert factor = map (Quantity.sign factor) (Curve2D.unconvert factor)
 
 isInterior :: Angle -> Bool
-isInterior sweptAngle = Tolerance.using Angle.tolerance do
-  if
-    | sweptAngle ~= Angle.zero -> False
-    | Quantity.abs sweptAngle ~= Angle.twoPi -> True
-    | otherwise -> error "Boundary swept angle should be either zero or a full turn"
+isInterior sweptAngle
+  | angular (sweptAngle ~= Angle.zero) = False
+  | angular (Quantity.abs sweptAngle ~= Angle.twoPi) = True
+  | otherwise = error "Boundary swept angle should be either zero or a full turn"
 
 classifyPoint :: Tolerance units => Point2D units -> Boundary units -> PointClassification
 classifyPoint point boundary
