@@ -7,7 +7,6 @@ module OpenSolid.API.PostOperatorOverload
   )
 where
 
-import Foreign (Ptr)
 import OpenSolid.API.BinaryOperator qualified as BinaryOperator
 import OpenSolid.API.ImplicitTolerance (ImplicitTolerance (ImplicitTolerance))
 import OpenSolid.FFI (FFI, Name)
@@ -18,11 +17,11 @@ import OpenSolid.Tolerance qualified as Tolerance
 data PostOperatorOverload where
   PostOperatorOverload ::
     (FFI value, FFI other, FFI result) =>
-    (value -> other -> result) ->
+    (value -> other -> IO result) ->
     PostOperatorOverload
   PostOperatorOverloadM ::
     (FFI value, FFI other, FFI result) =>
-    (Tolerance Meters => value -> other -> result) ->
+    (Tolerance Meters => value -> other -> IO result) ->
     PostOperatorOverload
 
 ffiName :: FFI.ClassName -> BinaryOperator.Id -> PostOperatorOverload -> Text
@@ -44,11 +43,11 @@ signature overload = case overload of
 rhsName :: Name
 rhsName = FFI.name "Rhs"
 
-invoke :: PostOperatorOverload -> Ptr () -> Ptr () -> IO ()
-invoke overload inputPtr outputPtr = case overload of
+invoke :: PostOperatorOverload -> FFI.Function
+invoke overload inputPtr outputPtr errorPtr = case overload of
   PostOperatorOverload f -> do
     (value, other) <- FFI.load inputPtr 0
-    FFI.store outputPtr 0 (f value other)
+    FFI.invoke (f value other) outputPtr errorPtr
   PostOperatorOverloadM f -> do
     (tolerance, value, other) <- FFI.load inputPtr 0
-    FFI.store outputPtr 0 (Tolerance.using tolerance (f value other))
+    FFI.invoke (Tolerance.using tolerance (f value other)) outputPtr errorPtr

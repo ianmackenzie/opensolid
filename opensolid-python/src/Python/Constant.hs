@@ -27,12 +27,27 @@ definition className (name, (Constant @t _ _)) = do
   let constantName = FFI.snakeCase name
   let pythonClassName = Python.Class.qualifiedName className
   let helperFunctionName = "_" <> Text.toLower pythonClassName <> "_" <> constantName
+  let outputName = "output"
+  let errorMessageName = "error_message"
+  let statusName = "status"
   Python.lines
     [ "def " <> helperFunctionName <> "() -> " <> Python.Type.qualifiedName valueType <> ":"
     , Python.indent
-        [ "output = " <> Python.FFI.dummyValue valueType
-        , Python.FFI.invoke ffiFunctionName "c_void_p()" "ctypes.byref(output)"
-        , "return " <> Python.FFI.outputValue valueType "output"
+        [ outputName <> " = " <> Python.FFI.dummyValue valueType
+        , errorMessageName <> " = " <> Python.FFI.dummyValue FFI.Text
+        , Text.sentence
+            [ statusName
+            , "="
+            , Python.FFI.invoke
+                ffiFunctionName
+                "c_void_p()"
+                ("ctypes.byref(" <> outputName <> ")")
+                ("ctypes.byref(" <> errorMessageName <> ")")
+            ]
+        , "if " <> statusName <> " == 0:"
+        , "    return " <> Python.FFI.outputValue valueType outputName
+        , "else:"
+        , "    _error(_text_to_str(" <> errorMessageName <> "))"
         ]
     , pythonClassName <> "." <> constantName <> " = " <> helperFunctionName <> "()"
     ]

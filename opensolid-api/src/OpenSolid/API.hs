@@ -515,7 +515,7 @@ vector2D =
     , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
     , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
     , Class.member1 "Component In" "Direction" Vector2D.componentIn $(docs 'Vector2D.componentIn)
-    , Class.memberU0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
+    , Class.memberU0R "Direction" Vector2D.direction $(docs 'Vector2D.direction)
     , Class.memberU0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
@@ -560,7 +560,7 @@ displacement2D =
     , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
     , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
     , Class.member1 "Component In" "Direction" Vector2D.componentIn $(docs 'Vector2D.componentIn)
-    , Class.memberM0 "Direction" Vector2D.direction $(docs 'Vector2D.direction)
+    , Class.memberM0R "Direction" Vector2D.direction $(docs 'Vector2D.direction)
     , Class.memberM0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
@@ -865,7 +865,7 @@ curve =
     , Class.member0 "Sin" (Curve1D.sin . (Angle.radian *)) $(docs 'Curve1D.sin)
     , Class.member0 "Cos" (Curve1D.cos . (Angle.radian *)) $(docs 'Curve1D.cos)
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
-    , Class.memberU0 "Roots" Curve1D.roots $(docs 'Curve1D.roots)
+    , Class.memberU0R "Roots" Curve1D.roots $(docs 'Curve1D.roots)
     , Class.memberU0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negation
     , Class.numberPlus
@@ -905,7 +905,7 @@ angleCurve =
     , Class.member0 "Sin" Curve1D.sin $(docs 'Curve1D.sin)
     , Class.member0 "Cos" Curve1D.cos $(docs 'Curve1D.cos)
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
-    , Class.memberR0 "Roots" Curve1D.roots $(docs 'Curve1D.roots)
+    , Class.memberR0R "Roots" Curve1D.roots $(docs 'Curve1D.roots)
     , Class.memberR0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negation
     , Class.numberTimes
@@ -932,7 +932,7 @@ lengthCurve =
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
     , Class.member0 "Squared" Curve1D.squared $(docs 'Curve1D.squared)
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
-    , Class.memberM0 "Roots" Curve1D.roots $(docs 'Curve1D.roots)
+    , Class.memberM0R "Roots" Curve1D.roots $(docs 'Curve1D.roots)
     , Class.memberM0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negation
     , Class.numberTimes
@@ -981,7 +981,7 @@ svg :: Class
 svg =
   Class.new @Svg $(docs ''Svg.Svg) $
     [ Class.member1 "To Text" "Layout" Svg.toText $(docs 'Svg.toText)
-    , Class.member2 "Write" "Path" "Layout" Svg.write $(docs 'Svg.write)
+    , Class.member2I "Write" "Path" "Layout" Svg.write $(docs 'Svg.write)
     , Class.static1 "View Box" "View Box" Svg.viewBox $(docs 'Svg.viewBox)
     , Class.static1 "Padding" "Padding" Svg.padding $(docs 'Svg.padding)
     , Class.factory1 "Group" "Children" Svg.group $(docs 'Svg.group)
@@ -1085,7 +1085,7 @@ vector3D =
     , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
     , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
     , Class.member1 "Component In" "Direction" Vector3D.componentIn $(docs 'Vector3D.componentIn)
-    , Class.memberU0 "Direction" Vector3D.direction $(docs 'Vector3D.direction)
+    , Class.memberU0R "Direction" Vector3D.direction $(docs 'Vector3D.direction)
     , Class.memberU0 "Is Zero" (~= Vector3D.zero) "Check if a vector is zero, within the current tolerance."
     , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
     , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> Vector3D -> Vector3D) $(docs 'Vector3D.rotateAround)
@@ -1126,7 +1126,7 @@ displacement3D =
     , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
     , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
     , Class.member1 "Component In" "Direction" Vector3D.componentIn $(docs 'Vector3D.componentIn)
-    , Class.memberM0 "Direction" Vector3D.direction $(docs 'Vector3D.direction)
+    , Class.memberM0R "Direction" Vector3D.direction $(docs 'Vector3D.direction)
     , Class.memberM0 "Is Zero" (~= Vector3D.zero) "Check if a displacement is zero, within the current tolerance."
     , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
     , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> Displacement3D -> Displacement3D) $(docs 'Vector3D.rotateAround)
@@ -1568,7 +1568,7 @@ region2D =
     , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
     , Class.property "Boundary Curves" (Set2D.toNonEmpty . Region2D.boundaryCurves) $(docs 'Region2D.boundaryCurves)
     , Class.factoryM1R "Polygon" "Polygon" Region2D.polygon $(docs 'Region2D.polygon)
-    , Class.memberM2 "Fillet" "Points" "Radius" Region2D.fillet $(docs 'Region2D.fillet)
+    , Class.memberM2R "Fillet" "Points" "Radius" Region2D.fillet $(docs 'Region2D.fillet)
     ]
       <> orthonormalTransformations2D Region2D.transformBy
 
@@ -1604,8 +1604,8 @@ body3D = do
     , Class.factoryM4R "Cylinder Along" "Axis" "Start" "End" "Diameter" Body3D.cylinderAlong $(docs 'Body3D.cylinderAlong)
     , Class.member1 "Place In" "Frame" (Body3D.placeIn :: Frame3D -> Body3D -> Body3D) $(docs 'Body3D.placeIn)
     , Class.member1 "Relative To" "Frame" (Body3D.relativeTo :: Frame3D -> Body3D -> Body3D) $(docs 'Body3D.relativeTo)
-    , Class.memberM3 "Write STL" "Path" "Convention" "Resolution" writeStl "Write a body to a binary STL file, using units of millimeters."
-    , Class.memberM2 "Write Mitsuba" "Path" "Resolution" writeMitsuba "Write a body to Mitsuba 'serialized' file."
+    , Class.memberM3I "Write STL" "Path" "Convention" "Resolution" writeStl "Write a body to a binary STL file, using units of millimeters."
+    , Class.memberM2I "Write Mitsuba" "Path" "Resolution" writeMitsuba "Write a body to Mitsuba 'serialized' file."
     ]
 
 type Resolution = Resolution.Resolution Meters
@@ -1668,7 +1668,7 @@ gltf = do
   let writeBinary path res (Gltf model) = Gltf.writeBinary path model res
   Class.new @Gltf "A glTF model that can be written out to a file." $
     [ Class.constructor1 "Model" Gltf "Construct a glTF model from a generic 3D model."
-    , Class.member2 "Write Binary" "Path" "Resolution" writeBinary $(docs 'Gltf.writeBinary)
+    , Class.member2I "Write Binary" "Path" "Resolution" writeBinary $(docs 'Gltf.writeBinary)
     ]
 
 type Camera3D = Camera3D.Camera3D Void
@@ -1700,7 +1700,7 @@ mitsuba = do
           (#lighting lighting)
   Class.new @Mitsuba "A Mitsuba scene that can be written out to a file." $
     [ Class.constructor3 "Model" "Camera" "Lighting" Mitsuba "Construct a Mitsuba scene from a 3D model, a camera and some lighting."
-    , Class.member2 "Write Files" "Path" "Resolution" writeFiles $(docs 'Mitsuba.writeFiles)
+    , Class.member2I "Write Files" "Path" "Resolution" writeFiles $(docs 'Mitsuba.writeFiles)
     , Class.nested @(Mitsuba.Lighting Void) $(docs ''Mitsuba.Lighting) []
     , Class.static2 "Environment Map" "Frame" "Image" (Mitsuba.environmentMap :: Frame3D -> Text -> Mitsuba.Lighting Void) $(docs 'Mitsuba.environmentMap)
     ]
@@ -1731,7 +1731,7 @@ step = do
     , Class.nested @Step.SubEntity $(docs ''Step.SubEntity) []
     , Class.nested @Step.Attribute $(docs ''Step.Attribute) []
     , Class.factory2 "Model" "Header" "Entities" Step "Construct a STEP model from a header and a list of entities."
-    , Class.member1 "Write" "Path" write $(docs 'Step.write)
+    , Class.member1I "Write" "Path" write $(docs 'Step.write)
     , Class.static10 "Header" "Description" "Implementation Level" "File Name" "Timestamp" "Author" "Organization" "Preprocessor Version" "Originating System" "Authorization" "Schema Identifiers" Step.header $(docs 'Step.header)
     , Class.static2 "Entity" "Type Name" "Attributes" Step.entity $(docs 'Step.entity)
     , Class.static1 "Complex Entity" "Sub Entities" Step.complexEntity $(docs 'Step.complexEntity)

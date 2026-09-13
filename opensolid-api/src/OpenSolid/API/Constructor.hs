@@ -7,7 +7,6 @@ module OpenSolid.API.Constructor
   )
 where
 
-import Foreign (Ptr)
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
@@ -19,14 +18,14 @@ data Constructor where
   Constructor1 ::
     (FFI a, FFI value) =>
     Name ->
-    (a -> value) ->
+    (a -> IO value) ->
     Text ->
     Constructor
   Constructor2 ::
     (FFI a, FFI b, FFI value) =>
     Name ->
     Name ->
-    (a -> b -> value) ->
+    (a -> b -> IO value) ->
     Text ->
     Constructor
   Constructor3 ::
@@ -34,7 +33,7 @@ data Constructor where
     Name ->
     Name ->
     Name ->
-    (a -> b -> c -> value) ->
+    (a -> b -> c -> IO value) ->
     Text ->
     Constructor
   Constructor4 ::
@@ -43,7 +42,7 @@ data Constructor where
     Name ->
     Name ->
     Name ->
-    (a -> b -> c -> d -> value) ->
+    (a -> b -> c -> d -> IO value) ->
     Text ->
     Constructor
 
@@ -57,24 +56,24 @@ ffiName className constructor = do
       : "constructor"
       : List.map FFI.typeName argumentTypes
 
-invoke :: Constructor -> Ptr () -> Ptr () -> IO ()
+invoke :: Constructor -> FFI.Function
 invoke function = case function of
   Constructor1 _ f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       arg1 <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (f arg1)
+      FFI.invoke (f arg1) outputPtr errorPtr
   Constructor2 _ _ f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       (arg1, arg2) <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (f arg1 arg2)
+      FFI.invoke (f arg1 arg2) outputPtr errorPtr
   Constructor3 _ _ _ f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       (arg1, arg2, arg3) <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (f arg1 arg2 arg3)
+      FFI.invoke (f arg1 arg2 arg3) outputPtr errorPtr
   Constructor4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       (arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4)
+      FFI.invoke (f arg1 arg2 arg3 arg4) outputPtr errorPtr
 
 type Signature = List (Name, FFI.Type)
 
@@ -89,7 +88,7 @@ signature1 ::
   forall a value.
   (FFI a, FFI value) =>
   Name ->
-  (a -> value) ->
+  (a -> IO value) ->
   Signature
 signature1 arg1 _ = [(arg1, FFI.typeOf a)]
 
@@ -98,7 +97,7 @@ signature2 ::
   (FFI a, FFI b, FFI value) =>
   Name ->
   Name ->
-  (a -> b -> value) ->
+  (a -> b -> IO value) ->
   Signature
 signature2 arg1 arg2 _ =
   [(arg1, FFI.typeOf a), (arg2, FFI.typeOf b)]
@@ -109,7 +108,7 @@ signature3 ::
   Name ->
   Name ->
   Name ->
-  (a -> b -> c -> value) ->
+  (a -> b -> c -> IO value) ->
   Signature
 signature3 arg1 arg2 arg3 _ =
   [(arg1, FFI.typeOf a), (arg2, FFI.typeOf b), (arg3, FFI.typeOf c)]
@@ -121,7 +120,7 @@ signature4 ::
   Name ->
   Name ->
   Name ->
-  (a -> b -> c -> d -> value) ->
+  (a -> b -> c -> d -> IO value) ->
   Signature
 signature4 arg1 arg2 arg3 arg4 _ =
   [ (arg1, FFI.typeOf a)

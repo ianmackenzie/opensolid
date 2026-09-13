@@ -78,7 +78,6 @@ typePattern ffiType = case ffiType of
   FFI.Array itemType -> "[" <> typePattern itemType <> ", *_]"
   FFI.Tuple type1 type2 rest -> tuplePattern type1 type2 rest
   FFI.Maybe valueType -> typePattern valueType <> " | None"
-  FFI.Result{} -> error "Should never have Result as input argument"
   FFI.Class classId -> Python.Class.qualifiedName classId <> "()"
 
 tuplePattern :: FFI.Type -> FFI.Type -> List FFI.Type -> Text
@@ -100,13 +99,31 @@ arguments ("includeSelf" ::: includeSelf) positional named = do
 argument :: (Name, FFI.Type) -> Text
 argument (argName, argType) = FFI.snakeCase argName <> ": " <> Python.Type.qualifiedName argType
 
+return :: FFI.Type -> Text -> Text
+return FFI.Unit _ = "return"
+return ffiType varName = "return " <> Python.FFI.outputValue ffiType varName
+
 body :: Text -> List (Text, FFI.Type) -> FFI.Type -> Text
 body ffiFunctionName ffiArguments returnType = do
-  let inputsName = ffiFunctionName <> "_inputs"
+  let argumentsName = ffiFunctionName <> "_arguments"
   let outputName = ffiFunctionName <> "_output"
+  let statusName = ffiFunctionName <> "_status"
+  let errorMessageName = ffiFunctionName <> "_error_message"
   Python.lines
-    [ inputsName <> " = " <> Python.FFI.argumentValue ffiArguments
+    [ argumentsName <> " = " <> Python.FFI.argumentValue ffiArguments
     , outputName <> " = " <> Python.FFI.dummyValue returnType
-    , Python.FFI.invoke ffiFunctionName ("ctypes.byref(" <> inputsName <> ")") ("ctypes.byref(" <> outputName <> ")")
-    , "return " <> Python.FFI.outputValue returnType outputName
+    , errorMessageName <> " = " <> Python.FFI.dummyValue FFI.Text
+    , Text.sentence
+        [ statusName
+        , "="
+        , Python.FFI.invoke
+            ffiFunctionName
+            ("ctypes.byref(" <> argumentsName <> ")")
+            ("ctypes.byref(" <> outputName <> ")")
+            ("ctypes.byref(" <> errorMessageName <> ")")
+        ]
+    , "if " <> statusName <> " == 0:"
+    , "    " <> return returnType outputName
+    , "else:"
+    , "    _error(_text_to_str(" <> errorMessageName <> "))"
     ]

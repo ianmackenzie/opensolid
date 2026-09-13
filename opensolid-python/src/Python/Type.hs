@@ -21,5 +21,4 @@ qualifiedName ffiType = case ffiType of
     let itemTypeNames = List.map qualifiedName (first : second : rest)
     "tuple[" <> Text.join "," itemTypeNames <> "]"
   FFI.Maybe valueType -> qualifiedName valueType <> " | None"
-  FFI.Result valueType -> qualifiedName valueType
   FFI.Class classId -> Python.Class.qualifiedName classId

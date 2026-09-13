@@ -7,7 +7,6 @@ module OpenSolid.API.MemberFunction
   )
 where
 
-import Foreign (Ptr)
 import OpenSolid.API.Argument qualified as Argument
 import OpenSolid.API.ImplicitTolerance (ImplicitTolerance (ImplicitTolerance))
 import OpenSolid.FFI (FFI, Name)
@@ -21,38 +20,38 @@ import OpenSolid.Tolerance qualified as Tolerance
 data MemberFunction where
   MemberFunction0 ::
     (FFI value, FFI result) =>
-    (value -> result) ->
+    (value -> IO result) ->
     Text ->
     MemberFunction
   MemberFunctionM0 ::
     (FFI value, FFI result) =>
-    (Tolerance Meters => value -> result) ->
+    (Tolerance Meters => value -> IO result) ->
     Text ->
     MemberFunction
   MemberFunction1 ::
     (FFI a, FFI value, FFI result) =>
     Name ->
-    (a -> value -> result) ->
+    (a -> value -> IO result) ->
     Text ->
     MemberFunction
   MemberFunctionM1 ::
     (FFI a, FFI value, FFI result) =>
     Name ->
-    (Tolerance Meters => a -> value -> result) ->
+    (Tolerance Meters => a -> value -> IO result) ->
     Text ->
     MemberFunction
   MemberFunction2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
     Name ->
     Name ->
-    (a -> b -> value -> result) ->
+    (a -> b -> value -> IO result) ->
     Text ->
     MemberFunction
   MemberFunctionM2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
     Name ->
     Name ->
-    (Tolerance Meters => a -> b -> value -> result) ->
+    (Tolerance Meters => a -> b -> value -> IO result) ->
     Text ->
     MemberFunction
   MemberFunction3 ::
@@ -60,7 +59,7 @@ data MemberFunction where
     Name ->
     Name ->
     Name ->
-    (a -> b -> c -> value -> result) ->
+    (a -> b -> c -> value -> IO result) ->
     Text ->
     MemberFunction
   MemberFunctionM3 ::
@@ -68,7 +67,7 @@ data MemberFunction where
     Name ->
     Name ->
     Name ->
-    (Tolerance Meters => a -> b -> c -> value -> result) ->
+    (Tolerance Meters => a -> b -> c -> value -> IO result) ->
     Text ->
     MemberFunction
   MemberFunction4 ::
@@ -77,7 +76,7 @@ data MemberFunction where
     Name ->
     Name ->
     Name ->
-    (a -> b -> c -> d -> value -> result) ->
+    (a -> b -> c -> d -> value -> IO result) ->
     Text ->
     MemberFunction
   MemberFunctionM4 ::
@@ -86,7 +85,7 @@ data MemberFunction where
     Name ->
     Name ->
     Name ->
-    (Tolerance Meters => a -> b -> c -> d -> value -> result) ->
+    (Tolerance Meters => a -> b -> c -> d -> value -> IO result) ->
     Text ->
     MemberFunction
 
@@ -101,48 +100,48 @@ ffiName className functionName memberFunction = do
       : FFI.camelCase functionName
       : List.map FFI.typeName argumentTypes
 
-invoke :: MemberFunction -> Ptr () -> Ptr () -> IO ()
+invoke :: MemberFunction -> FFI.Function
 invoke function = case function of
   MemberFunction0 f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       self <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (f self)
+      FFI.invoke (f self) outputPtr errorPtr
   MemberFunctionM0 f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       (tolerance, self) <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (Tolerance.using tolerance (f self))
+      FFI.invoke (Tolerance.using tolerance (f self)) outputPtr errorPtr
   MemberFunction1 _ f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       (arg1, self) <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (f arg1 self)
+      FFI.invoke (f arg1 self) outputPtr errorPtr
   MemberFunctionM1 _ f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       (tolerance, arg1, self) <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 self))
+      FFI.invoke (Tolerance.using tolerance (f arg1 self)) outputPtr errorPtr
   MemberFunction2 _ _ f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       (arg1, arg2, self) <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (f arg1 arg2 self)
+      FFI.invoke (f arg1 arg2 self) outputPtr errorPtr
   MemberFunctionM2 _ _ f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       (tolerance, arg1, arg2, self) <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 self))
+      FFI.invoke (Tolerance.using tolerance (f arg1 arg2 self)) outputPtr errorPtr
   MemberFunction3 _ _ _ f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       (arg1, arg2, arg3, self) <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (f arg1 arg2 arg3 self)
+      FFI.invoke (f arg1 arg2 arg3 self) outputPtr errorPtr
   MemberFunctionM3 _ _ _ f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       (tolerance, arg1, arg2, arg3, self) <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 self))
+      FFI.invoke (Tolerance.using tolerance (f arg1 arg2 arg3 self)) outputPtr errorPtr
   MemberFunction4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       (arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (f arg1 arg2 arg3 arg4 self)
+      FFI.invoke (f arg1 arg2 arg3 arg4 self) outputPtr errorPtr
   MemberFunctionM4 _ _ _ _ f _ ->
-    \inputPtr outputPtr -> do
+    \inputPtr outputPtr errorPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
-      FFI.store outputPtr 0 (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self))
+      FFI.invoke (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self)) outputPtr errorPtr
 
 type Signature = (Maybe ImplicitTolerance, List (Name, FFI.Type, Argument.Kind), FFI.Type)
 
@@ -177,14 +176,14 @@ arg t name = (name, FFI.typeOf t, Argument.kind t)
 signature0 ::
   forall value result.
   (FFI value, FFI result) =>
-  (value -> result) ->
+  (value -> IO result) ->
   Signature
 signature0 _ = (Nothing, [], FFI.typeOf result)
 
 signatureM0 ::
   forall value result.
   (FFI value, FFI result) =>
-  (Tolerance Meters => value -> result) ->
+  (Tolerance Meters => value -> IO result) ->
   Signature
 signatureM0 _ =
   (Just ImplicitTolerance, [], FFI.typeOf result)
@@ -193,7 +192,7 @@ signature1 ::
   forall a value result.
   (FFI a, FFI value, FFI result) =>
   Name ->
-  (a -> value -> result) ->
+  (a -> value -> IO result) ->
   Signature
 signature1 arg1 _ =
   (Nothing, [arg a arg1], FFI.typeOf result)
@@ -202,7 +201,7 @@ signatureM1 ::
   forall a value result.
   (FFI a, FFI value, FFI result) =>
   Name ->
-  (Tolerance Meters => a -> value -> result) ->
+  (Tolerance Meters => a -> value -> IO result) ->
   Signature
 signatureM1 arg1 _ = (Just ImplicitTolerance, [arg a arg1], FFI.typeOf result)
 
@@ -211,7 +210,7 @@ signature2 ::
   (FFI a, FFI b, FFI value, FFI result) =>
   Name ->
   Name ->
-  (a -> b -> value -> result) ->
+  (a -> b -> value -> IO result) ->
   Signature
 signature2 arg1 arg2 _ =
   (Nothing, [arg a arg1, arg b arg2], FFI.typeOf result)
@@ -221,7 +220,7 @@ signatureM2 ::
   (FFI a, FFI b, FFI value, FFI result) =>
   Name ->
   Name ->
-  (Tolerance Meters => a -> b -> value -> result) ->
+  (Tolerance Meters => a -> b -> value -> IO result) ->
   Signature
 signatureM2 arg1 arg2 _ =
   (Just ImplicitTolerance, [arg a arg1, arg b arg2], FFI.typeOf result)
@@ -232,7 +231,7 @@ signature3 ::
   Name ->
   Name ->
   Name ->
-  (a -> b -> c -> value -> result) ->
+  (a -> b -> c -> value -> IO result) ->
   Signature
 signature3 arg1 arg2 arg3 _ =
   (Nothing, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf result)
@@ -243,7 +242,7 @@ signatureM3 ::
   Name ->
   Name ->
   Name ->
-  (Tolerance Meters => a -> b -> c -> value -> result) ->
+  (Tolerance Meters => a -> b -> c -> value -> IO result) ->
   Signature
 signatureM3 arg1 arg2 arg3 _ =
   (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf result)
@@ -255,7 +254,7 @@ signature4 ::
   Name ->
   Name ->
   Name ->
-  (a -> b -> c -> d -> value -> result) ->
+  (a -> b -> c -> d -> value -> IO result) ->
   Signature
 signature4 arg1 arg2 arg3 arg4 _ =
   (Nothing, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf result)
@@ -267,7 +266,7 @@ signatureM4 ::
   Name ->
   Name ->
   Name ->
-  (Tolerance Meters => a -> b -> c -> d -> value -> result) ->
+  (Tolerance Meters => a -> b -> c -> d -> value -> IO result) ->
   Signature
 signatureM4 arg1 arg2 arg3 arg4 _ =
   (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf result)

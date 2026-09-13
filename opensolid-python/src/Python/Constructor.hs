@@ -21,16 +21,29 @@ definition className maybeConstructor = case maybeConstructor of
     let arguments = Constructor.signature constructor
     let functionArguments = Text.join "," (List.map Python.Function.argument arguments)
     let ffiArguments = List.map (Pair.mapFirst FFI.snakeCase) arguments
+    let argumentsName = "arguments"
     let pointerFieldName = Python.Class.pointerFieldName className
+    let statusName = "status"
+    let errorMessageName = "error_message"
     Python.lines
       [ "def __init__(self, " <> functionArguments <> ") -> None:"
       , Python.indent
           [ Python.docstring (Constructor.documentation constructor)
-          , "inputs = " <> Python.FFI.argumentValue ffiArguments
+          , argumentsName <> " = " <> Python.FFI.argumentValue ffiArguments
           , "self." <> pointerFieldName <> " = " <> Python.FFI.dummyValue selfType
-          , Python.FFI.invoke
-              ffiFunctionName
-              "ctypes.byref(inputs)"
-              ("ctypes.byref(self." <> pointerFieldName <> ")")
+          , errorMessageName <> " = " <> Python.FFI.dummyValue FFI.Text
+          , Text.sentence
+              [ statusName
+              , "="
+              , Python.FFI.invoke
+                  ffiFunctionName
+                  ("ctypes.byref(" <> argumentsName <> ")")
+                  ("ctypes.byref(self." <> pointerFieldName <> ")")
+                  ("ctypes.byref(" <> errorMessageName <> ")")
+              ]
+          , Python.lines
+              [ "if " <> statusName <> " != 0:"
+              , "    _error(_text_to_str(" <> errorMessageName <> "))"
+              ]
           ]
       ]

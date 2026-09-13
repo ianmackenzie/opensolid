@@ -5,9 +5,9 @@ module OpenSolid.API.HashFunction
   )
 where
 
-import Foreign (Ptr)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
@@ -18,7 +18,7 @@ ffiName :: FFI.ClassName -> Text
 ffiName className =
   Text.join "_" ["opensolid", FFI.concatenatedName className, "hash"]
 
-invoke :: HashFunction -> Ptr () -> Ptr () -> IO ()
-invoke (HashFunction f) inputPtr outputPtr = do
+invoke :: HashFunction -> FFI.Function
+invoke (HashFunction f) inputPtr outputPtr errorPtr = do
   value <- FFI.load inputPtr 0
-  FFI.store outputPtr 0 (f value)
+  FFI.invoke (IO.succeed (f value)) outputPtr errorPtr

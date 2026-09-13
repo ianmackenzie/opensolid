@@ -5,20 +5,19 @@ module OpenSolid.API.NegationFunction
   )
 where
 
-import Foreign (Ptr)
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
 data NegationFunction where
-  NegationFunction :: FFI value => (value -> value) -> NegationFunction
+  NegationFunction :: FFI value => (value -> IO value) -> NegationFunction
 
 ffiName :: FFI.ClassName -> Text
 ffiName className =
   Text.join "_" ["opensolid", FFI.concatenatedName className, "neg"]
 
-invoke :: NegationFunction -> Ptr () -> Ptr () -> IO ()
-invoke (NegationFunction f) inputPtr outputPtr = do
+invoke :: NegationFunction -> FFI.Function
+invoke (NegationFunction f) inputPtr outputPtr errorPtr = do
   value <- FFI.load inputPtr 0
-  FFI.store outputPtr 0 (f value)
+  FFI.invoke (f value) outputPtr errorPtr

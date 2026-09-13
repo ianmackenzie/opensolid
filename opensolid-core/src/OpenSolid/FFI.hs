@@ -2,6 +2,7 @@ module OpenSolid.FFI
   ( FFI (representation)
   , Name
   , ClassName
+  , Function
   , name
   , pascalCase
   , camelCase
@@ -18,12 +19,15 @@ module OpenSolid.FFI
   , concatenatedName
   , size
   , store
+  , invoke
   , load
   , Representation
   , isNamedArgument
   )
 where
 
+import Control.Exception (SomeException)
+import Control.Exception qualified
 import Data.ByteString qualified
 import Data.Int (Int64)
 import Data.Proxy (Proxy (Proxy))
@@ -39,7 +43,6 @@ import OpenSolid.Area (Area)
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Color (Color)
-import OpenSolid.Err qualified as Err
 import OpenSolid.IO qualified as IO
 import OpenSolid.Int qualified as Int
 import OpenSolid.Length (Length)
@@ -55,6 +58,8 @@ class FFI a where
 newtype Name = Name (NonEmpty Text) deriving (Eq, Ord, Show)
 
 newtype ClassName = ClassName (NonEmpty Text) deriving (Show)
+
+type Function = Ptr () -> Ptr () -> Ptr () -> IO Int64
 
 name :: Text -> Name
 name input =
@@ -135,13 +140,8 @@ data Representation a where
   -- A struct with a 64-bit integer tag (0 = Just, 1 = Nothing)
   -- followed by the representation of the value
   MaybeRep :: FFI a => Representation (Maybe a)
-  -- A struct with a 64-bit signed integer tag (0 = Ok, 1+ = Err)
-  -- followed by the representation of the successful value or exception
-  ResultRep :: forall x a. FFI a => Representation (Result x a)
   -- A class containing an opaque pointer to a Haskell value
   ClassRep :: FFI a => ClassName -> Representation a
-  -- Some IO that returns a representable value
-  IORep :: FFI a => Representation (IO a)
   -- A function argument that should be named-only if supported
   NamedArgumentRep :: (KnownSymbol name, FFI a) => Representation (name ::: a)
 
@@ -168,7 +168,6 @@ data Type where
   Array :: Type -> Type
   Tuple :: Type -> Type -> List Type -> Type
   Maybe :: Type -> Type
-  Result :: Type -> Type
   Class :: ClassName -> Type
   deriving (Show)
 
@@ -207,9 +206,7 @@ typeOf t = case representation (Proxy @t) of
   Tuple10Rep @a @b @c @d @e @f @g @h @i @j ->
     Tuple (typeOf a) (typeOf b) [typeOf c, typeOf d, typeOf e, typeOf f, typeOf g, typeOf h, typeOf i, typeOf j]
   MaybeRep @a -> Maybe (typeOf a)
-  ResultRep @_x @a -> Result (typeOf a)
   ClassRep class_ -> Class class_
-  IORep @a -> Result (typeOf a)
   NamedArgumentRep @_name @a -> typeOf a
 
 typeName :: Type -> Text
@@ -228,7 +225,6 @@ typeName ffiType = case ffiType of
     let tupleSize = List.length itemTypes
     "Tuple" <> Text.int tupleSize <> Text.concat (List.map typeName itemTypes)
   Maybe valueType -> "Maybe" <> typeName valueType
-  Result valueType -> "Result" <> typeName valueType
   Class class_ -> concatenatedName class_
 
 concatenatedName :: ClassName -> Text
@@ -253,7 +249,6 @@ size ffiType = case ffiType of
   Array _ -> 16
   Tuple type1 type2 rest -> Int.sumOf size (type1 : type2 : rest)
   Maybe valueType -> 8 + size valueType
-  Result valueType -> 16 + size valueType
   Class _ -> 8
 
 sizeOf :: forall t -> FFI t => Int
@@ -357,12 +352,6 @@ instance
 
 instance FFI a => FFI (Maybe a) where
   representation _ = MaybeRep
-
-instance FFI a => FFI (Result x a) where
-  representation _ = ResultRep
-
-instance FFI a => FFI (IO a) where
-  representation _ = IORep
 
 store :: forall value parent. FFI value => Ptr parent -> Int -> value -> IO ()
 store ptr offset value = do
@@ -521,22 +510,22 @@ store ptr offset value = do
           store ptr (offset + 8) item
         Nothing ->
           store @Int ptr offset 1
-    ResultRep ->
-      case value of
-        Ok successfulValue -> do
-          store @Int ptr offset 0
-          store ptr (offset + 16) successfulValue
-        Err errorValue -> do
-          store @Int ptr offset 1
-          store ptr (offset + 8) (Err.message errorValue)
     ClassRep _ -> do
       stablePtr <- Foreign.newStablePtr value
       Foreign.pokeByteOff ptr offset stablePtr
-    IORep -> do
-      result <- IO.attempt value
-      store ptr offset result
     NamedArgumentRep{} ->
       error "Should never have a named argument as a Haskell return type"
+
+invoke :: FFI a => IO a -> Ptr () -> Ptr () -> IO Int64
+invoke computation outputPtr errorPtr = do
+  result <- Control.Exception.try @SomeException computation
+  case result of
+    Right value -> do
+      store outputPtr 0 value
+      IO.succeed (fromIntegral 0)
+    Left exception -> do
+      store errorPtr 0 (Text.show exception)
+      IO.succeed (fromIntegral 1)
 
 load :: forall value parent. FFI value => Ptr parent -> Int -> IO value
 load ptr offset = do
@@ -701,11 +690,9 @@ load ptr offset = do
       if tag == 0
         then IO.map Just (load ptr (offset + 8))
         else IO.succeed Nothing
-    ResultRep{} -> error "Passing Result values as FFI arguments is not supported"
     ClassRep _ -> do
       stablePtr <- Foreign.peekByteOff ptr offset
       Foreign.deRefStablePtr stablePtr
-    IORep -> error "Passing IO values as FFI arguments is not supported"
     NamedArgumentRep @name_ -> IO.map (name_ :::) (load ptr offset)
 
 isNamedArgument :: forall t -> FFI t => Bool

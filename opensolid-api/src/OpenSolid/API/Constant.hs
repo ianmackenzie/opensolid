@@ -6,9 +6,9 @@ module OpenSolid.API.Constant
   )
 where
 
-import Foreign (Ptr)
 import OpenSolid.FFI (FFI, Name)
 import OpenSolid.FFI qualified as FFI
+import OpenSolid.IO qualified as IO
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
 
@@ -19,8 +19,8 @@ ffiName :: FFI.ClassName -> Name -> Text
 ffiName className constantName = do
   Text.join "_" ["opensolid", FFI.concatenatedName className, FFI.camelCase constantName]
 
-invoke :: Constant -> Ptr () -> Ptr () -> IO ()
-invoke (Constant value _) _ outputPtr = FFI.store outputPtr 0 value
+invoke :: Constant -> FFI.Function
+invoke (Constant value _) _ = FFI.invoke (IO.succeed value)
 
 documentation :: Constant -> Text
 documentation (Constant _ docs) = docs
