@@ -59,7 +59,7 @@ instance Indexed (Boundary units) Int (Curve2D units) where
   boundary !! index = boundary.curves !! index
 
 instance units1 ~ units2 => Intersects (Point2D units1) (Boundary units2) units1 where
-  point ^ boundary = Set2D.any (^ point) (^ point) (curves boundary)
+  point ^ boundary = point ^ curves boundary
 
 instance units1 ~ units2 => Intersects (Boundary units2) (Point2D units1) units1 where
   boundary ^ point = point ^ boundary

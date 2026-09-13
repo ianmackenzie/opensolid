@@ -126,8 +126,8 @@ vertices surface = do
         let point = Curve3D.startPoint (SurfaceCurve3D.curve surfaceCurve)
         SurfacePoint3D.Point uvPoint point
   let startPoints = Set3D.map startPoint surfaceCurves
-  let intersectsPole vertex = Bag3D.any (^ vertex) (^ vertex) poles
-  let nonPoles = Set3D.filter (const True) (not . intersectsPole) startPoints
+  let nonPole surfacePoint = not (surfacePoint ^ poles)
+  let nonPoles = Set3D.filter (const True) nonPole startPoints
   poles <> nonPoles
 
 edges :: Tolerance Meters => Surface3D space -> Bag3D space (Nondegenerate (SurfaceCurve3D space))

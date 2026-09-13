@@ -96,19 +96,22 @@ instance Indexed (Set b a) Int a where
       Nothing -> throw IndexOutOfBounds{index = index, size = size set}
 
 instance
-  ( Intersects b1 b2 boundsUnits
-  , Intersects a1 a2 itemUnits
+  ( Intersects b c boundsUnits
+  , Intersects a c itemUnits
   , boundsUnits ~ itemUnits
   ) =>
-  Intersects (Set b1 a1) (Set b2 a2) boundsUnits
+  Intersects (Set b a) c boundsUnits
   where
-  (^) = pairwiseAny (^) (^)
+  set ^ value = set & any (^ value) (^ value)
 
-instance Intersects a b units => Intersects a (Set b ()) units where
-  value ^ set = set & any (value ^) (const True)
-
-instance Intersects a b units => Intersects (Set b ()) a units where
-  set ^ value = value ^ set
+instance
+  ( Intersects b c boundsUnits
+  , Intersects a c itemUnits
+  , boundsUnits ~ itemUnits
+  ) =>
+  Intersects c (Set b a) boundsUnits
+  where
+  value ^ set = set ^ value
 
 get :: Int -> Set b a -> Maybe a
 get index set = case set of
