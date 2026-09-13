@@ -3,7 +3,6 @@ module OpenSolid.SurfaceCurve3D
   , new
   , curve
   , uvCurve
-  , surfaceFunction
   , bounds
   , uvBounds
   , nondegenerate
@@ -29,8 +28,7 @@ import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvCurve qualified as UvCurve
 
 data SurfaceCurve3D space = SurfaceCurve3D
-  { surfaceFunction :: SurfaceFunction3D space
-  , uvCurve :: UvCurve
+  { uvCurve :: UvCurve
   , curve :: Curve3D space
   }
 
@@ -52,13 +50,15 @@ instance Bounded (Nondegenerate (SurfaceCurve3D space)) UvBounds where
 
 instance Composition (SurfaceCurve3D space) (Curve1D Unitless) (SurfaceCurve3D space) where
   surfaceCurve . parameterization =
-    new (surfaceFunction surfaceCurve) (uvCurve surfaceCurve . parameterization)
+    SurfaceCurve3D
+      { uvCurve = uvCurve surfaceCurve . parameterization
+      , curve = curve surfaceCurve . parameterization
+      }
 
 new :: SurfaceFunction3D space -> UvCurve -> SurfaceCurve3D space
 new givenSurfaceFunction givenUvCurve =
   SurfaceCurve3D
-    { surfaceFunction = givenSurfaceFunction
-    , uvCurve = givenUvCurve
+    { uvCurve = givenUvCurve
     , curve = givenSurfaceFunction . givenUvCurve
     }
 
@@ -67,9 +67,6 @@ curve = (.curve)
 
 uvCurve :: SurfaceCurve3D space -> UvCurve
 uvCurve = (.uvCurve)
-
-surfaceFunction :: SurfaceCurve3D space -> SurfaceFunction3D space
-surfaceFunction = (.surfaceFunction)
 
 bounds :: SurfaceCurve3D space -> Bounds3D space
 bounds = Curve3D.bounds . curve
