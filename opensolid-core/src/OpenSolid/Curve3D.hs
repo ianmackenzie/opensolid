@@ -63,6 +63,7 @@ import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds3D (VectorBounds3D)
@@ -211,7 +212,11 @@ fromUniform = Curve.fromUniform
 atUniform :: Tolerance Meters => Number -> Curve3D space -> Point3D space
 atUniform = Curve.atUniform
 
-transformBy :: Transform3D tag space -> Curve3D space -> Curve3D space
+transformBy ::
+  Transform.Tag.IsOrthonormal tag =>
+  Transform3D tag space ->
+  Curve3D space ->
+  Curve3D space
 transformBy = Curve.transformBy
 
 placeIn :: Frame3D global local -> Curve3D local -> Curve3D global

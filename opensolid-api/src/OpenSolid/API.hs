@@ -1529,7 +1529,7 @@ curve2D =
     , Class.minus @Curve2D
     , Class.minus @Point2D
     ]
-      <> affineTransformations2D Curve2D.transformBy
+      <> orthonormalTransformations2D Curve2D.transformBy
 
 type UvCurve = Curve2D.Curve2D Unitless
 
@@ -1561,7 +1561,7 @@ uvCurve =
     , Class.minus @UvCurve
     , Class.minus @UvPoint
     ]
-      <> affineTransformations2D Curve2D.transformBy
+      <> orthonormalTransformations2D Curve2D.transformBy
 
 type Region2D = Region2D.Region2D Meters
 

@@ -28,6 +28,7 @@ import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D, Point2D, Transform2D, Vector2D)
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 
 type Compiled units = Curve.Compiled 2 units Void
@@ -61,5 +62,9 @@ desingularizeEnd ::
   Point2D units ->
   Vector2D units ->
   (Curve2D units, Curve2D units)
-transformBy :: Transform2D tag units -> Curve2D units -> Curve2D units
+transformBy ::
+  Transform.Tag.IsOrthonormal tag =>
+  Transform2D tag units ->
+  Curve2D units ->
+  Curve2D units
 piecewise :: Tolerance units => NonEmpty (Curve2D units) -> Curve2D units

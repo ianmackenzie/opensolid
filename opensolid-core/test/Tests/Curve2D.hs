@@ -61,7 +61,7 @@ tests =
   , derivativeConsistency
   , reversalConsistency
   , arcConstruction
-  , arcDeformation
+  , arcTransformation
   , g2
   ]
 
@@ -370,10 +370,10 @@ arcConstruction = do
     , testArcMidpoint -180 (0.0, 1.0)
     ]
 
-arcDeformation :: Test
-arcDeformation = Test.check 100 "deformation" do
+arcTransformation :: Test
+arcTransformation = Test.check 100 "arc transformation" do
   initialArc <- Test.generate Random.arc2D
-  transform <- Test.generate Random.affineTransform2D
+  transform <- Test.generate Random.orthonormalTransform2D
   t <- Test.generate Parameter.random
   let transformedArc = Curve2D.transformBy transform initialArc
   let pointOnTransformed = Curve2D.pointAt t transformedArc

@@ -63,6 +63,7 @@ module OpenSolid.Curve
   , fromUniform
   , atUniform
   , transformBy
+  , convert
   , placeOn
   )
 where
@@ -916,7 +917,7 @@ atUniform ::
 atUniform r curve = pointAt (uniformParameterization curve r) curve
 
 transformBy ::
-  CurveExists dimension units space =>
+  (CurveExists dimension units space, Transform.Tag.IsOrthonormal tag) =>
   Transform dimension tag units space ->
   Curve dimension units space ->
   Curve dimension units space
@@ -937,12 +938,29 @@ transformBy transform curve =
       , endPoint = Point.transformBy transform curve.endPoint
       , bounds = CompiledFunction.range Interval.unit compiledTransformed
       , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) transformed
+      , arcLengthParameterization = curve.arcLengthParameterization
+      }
+
+convert :: Quantity (units2 ?/? units1) -> Curve2D units1 -> Curve2D units2
+convert factor curve =
+  recursive \converted ->
+    Curve
+      { compiled =
+          CompiledFunction.map
+            (Expression.convert factor)
+            (Point2D.convert factor)
+            (Bounds2D.convert factor)
+            (compiled curve)
+      , derivative = VectorCurve2D.convert factor (derivative curve)
+      , startPoint = Point2D.convert factor curve.startPoint
+      , endPoint = Point2D.convert factor curve.endPoint
+      , bounds = Bounds2D.convert factor curve.bounds
+      , bisectionTree =
+          -- TODO just apply units conversion to the existing bisection tree
+          Nondegenerate.field (buildBisectionTree Interval.unit) converted
       , arcLengthParameterization =
-          case Transform.uniformScale transform of
-            Just uniformScale ->
-              curve.arcLengthParameterization
-                & Nondegenerate.map (Pair.mapFirst (* Number.abs uniformScale))
-            Nothing -> Nondegenerate.field buildArcLengthParameterization transformed
+          curve.arcLengthParameterization
+            & Nondegenerate.map (Pair.mapFirst (Quantity.convert factor))
       }
 
 placeOn :: Plane3D space -> Curve2D Meters -> Curve3D space

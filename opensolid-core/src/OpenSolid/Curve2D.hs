@@ -63,8 +63,6 @@ module OpenSolid.Curve2D
   , translateAlong
   , rotateAround
   , mirrorAcross
-  , scaleAbout
-  , scaleAlong
   , convert
   , unconvert
   , toPolyline
@@ -121,6 +119,7 @@ import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction1D.Zeros qualified as SurfaceFunction1D.Zeros
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units qualified as Units
@@ -550,7 +549,11 @@ relativeTo frame = placeIn (Frame2D.inverse frame)
 placeOn :: Plane3D space -> Curve2D Meters -> Curve3D space
 placeOn = Curve.placeOn
 
-transformBy :: Transform2D tag units -> Curve2D units -> Curve2D units
+transformBy ::
+  Transform.Tag.IsOrthonormal tag =>
+  Transform2D tag units ->
+  Curve2D units ->
+  Curve2D units
 transformBy = Curve.transformBy
 
 -- | Translate by the given displacement.
@@ -573,16 +576,8 @@ rotateAround = Transform2D.rotateAroundImpl transformBy
 mirrorAcross :: Axis2D units -> Curve2D units -> Curve2D units
 mirrorAcross = Transform2D.mirrorAcrossImpl transformBy
 
--- | Scale uniformly about the given point by the given scaling factor.
-scaleAbout :: Point2D units -> Number -> Curve2D units -> Curve2D units
-scaleAbout = Transform2D.scaleAboutImpl transformBy
-
--- | Scale (stretch) along the given axis by the given scaling factor.
-scaleAlong :: Axis2D units -> Number -> Curve2D units -> Curve2D units
-scaleAlong = Transform2D.scaleAlongImpl transformBy
-
 convert :: Quantity (units2 ?/? units1) -> Curve2D units1 -> Curve2D units2
-convert factor curve = Units.coerce (scaleAbout Point2D.origin (Units.erase factor) curve)
+convert = Curve.convert
 
 unconvert :: Quantity (units2 ?/? units1) -> Curve2D units2 -> Curve2D units1
 unconvert factor curve = convert (Units.simplify (1.0 ?/? factor)) curve
