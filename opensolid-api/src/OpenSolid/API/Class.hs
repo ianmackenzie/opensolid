@@ -32,7 +32,14 @@ module OpenSolid.API.Class
   , static1I
   , static2
   , static3
+  , static3I
   , staticT3
+  , static4
+  , static4I
+  , static5
+  , static5I
+  , static6
+  , static6I
   , static10
   , property
   , member0
@@ -232,7 +239,8 @@ constructor2 ::
   (a -> b -> value) ->
   Text ->
   Member value
-constructor2 arg1 arg2 f docs = constructor2I arg1 arg2 (wrap2 f) docs
+constructor2 arg1 arg2 f docs =
+  constructor2I arg1 arg2 (wrap2 f) docs
 
 constructor2I ::
   (FFI a, FFI b, FFI value) =>
@@ -241,7 +249,8 @@ constructor2I ::
   (a -> b -> IO value) ->
   Text ->
   Member value
-constructor2I arg1 arg2 f docs = Constructor (Constructor2 (FFI.name arg1) (FFI.name arg2) f docs)
+constructor2I arg1 arg2 f docs =
+  Constructor (Constructor2 (FFI.name arg1) (FFI.name arg2) f docs)
 
 constructor3 ::
   (FFI a, FFI b, FFI c, FFI value) =>
@@ -557,7 +566,7 @@ staticT2 ::
   Text ->
   Member value
 staticT2 name arg1 arg2 f docs =
-  Static (FFI.name name) (StaticFunctionM2 (FFI.name arg1) (FFI.name arg2) (wrap2 f) docs)
+  staticT2I name arg1 arg2 (wrap2 f) docs
 
 staticT2R ::
   (FFI a, FFI b, FFI result) =>
@@ -591,8 +600,20 @@ static3 ::
   Text ->
   Member value
 static3 name arg1 arg2 arg3 f docs =
+  static3I name arg1 arg2 arg3 (wrap3 f) docs
+
+static3I ::
+  (FFI a, FFI b, FFI c, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> IO result) ->
+  Text ->
+  Member value
+static3I name arg1 arg2 arg3 f docs =
   Static (FFI.name name) $
-    StaticFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (wrap3 f) docs
+    StaticFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs
 
 staticT3 ::
   (FFI a, FFI b, FFI c, FFI result) =>
@@ -642,8 +663,21 @@ static4 ::
   Text ->
   Member value
 static4 name arg1 arg2 arg3 arg4 f docs =
+  static4I name arg1 arg2 arg3 arg4 (wrap4 f) docs
+
+static4I ::
+  (FFI a, FFI b, FFI c, FFI d, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> IO result) ->
+  Text ->
+  Member value
+static4I name arg1 arg2 arg3 arg4 f docs =
   Static (FFI.name name) $
-    StaticFunction4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) (wrap4 f) docs
+    StaticFunction4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f docs
 
 staticT4 ::
   (FFI a, FFI b, FFI c, FFI d, FFI result) =>
@@ -697,15 +731,22 @@ static5 ::
   Text ->
   Member value
 static5 name arg1 arg2 arg3 arg4 arg5 f docs =
+  static5I name arg1 arg2 arg3 arg4 arg5 (wrap5 f) docs
+
+static5I ::
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> e -> IO result) ->
+  Text ->
+  Member value
+static5I name arg1 arg2 arg3 arg4 arg5 f docs =
   Static (FFI.name name) $
-    StaticFunction5
-      (FFI.name arg1)
-      (FFI.name arg2)
-      (FFI.name arg3)
-      (FFI.name arg4)
-      (FFI.name arg5)
-      (wrap5 f)
-      docs
+    StaticFunction5 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) (FFI.name arg5) f docs
 
 static6 ::
   (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI result) =>
@@ -720,16 +761,23 @@ static6 ::
   Text ->
   Member value
 static6 name arg1 arg2 arg3 arg4 arg5 arg6 f docs =
+  static6I name arg1 arg2 arg3 arg4 arg5 arg6 (wrap6 f) docs
+
+static6I ::
+  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> e -> f -> IO result) ->
+  Text ->
+  Member value
+static6I name arg1 arg2 arg3 arg4 arg5 arg6 f docs =
   Static (FFI.name name) $
-    StaticFunction6
-      (FFI.name arg1)
-      (FFI.name arg2)
-      (FFI.name arg3)
-      (FFI.name arg4)
-      (FFI.name arg5)
-      (FFI.name arg6)
-      (wrap6 f)
-      docs
+    StaticFunction6 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) (FFI.name arg5) (FFI.name arg6) f docs
 
 static10 ::
   (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i, FFI j, FFI result) =>
@@ -781,7 +829,8 @@ memberT0 ::
   (Tolerance Meters => value -> result) ->
   Text ->
   Member value
-memberT0 name f docs = memberT0I name (wrap1 f) docs
+memberT0 name f docs =
+  memberT0I name (wrap1 f) docs
 
 memberT0R ::
   (FFI value, FFI result) =>
@@ -789,7 +838,8 @@ memberT0R ::
   (Tolerance Meters => value -> Result x result) ->
   Text ->
   Member value
-memberT0R name f docs = memberT0I name (wrap1R f) docs
+memberT0R name f docs =
+  memberT0I name (wrap1R f) docs
 
 memberT0I ::
   (FFI value, FFI result) =>
@@ -797,7 +847,8 @@ memberT0I ::
   (Tolerance Meters => value -> IO result) ->
   Text ->
   Member value
-memberT0I name f docs = Member (FFI.name name) (MemberFunctionT0 f docs)
+memberT0I name f docs =
+  Member (FFI.name name) (MemberFunctionT0 f docs)
 
 member1 ::
   (FFI a, FFI value, FFI result) =>
@@ -806,7 +857,8 @@ member1 ::
   (a -> value -> result) ->
   Text ->
   Member value
-member1 name arg1 f docs = member1I name arg1 (wrap2 f) docs
+member1 name arg1 f docs =
+  member1I name arg1 (wrap2 f) docs
 
 member1I ::
   (FFI a, FFI value, FFI result) =>
@@ -815,7 +867,8 @@ member1I ::
   (a -> value -> IO result) ->
   Text ->
   Member value
-member1I name arg1 f docs = Member (FFI.name name) (MemberFunction1 (FFI.name arg1) f docs)
+member1I name arg1 f docs =
+  Member (FFI.name name) (MemberFunction1 (FFI.name arg1) f docs)
 
 member2 ::
   (FFI a, FFI b, FFI value, FFI result) =>
@@ -825,7 +878,8 @@ member2 ::
   (a -> b -> value -> result) ->
   Text ->
   Member value
-member2 name arg1 arg2 f docs = member2I name arg1 arg2 (wrap3 f) docs
+member2 name arg1 arg2 f docs =
+  member2I name arg1 arg2 (wrap3 f) docs
 
 member2I ::
   (FFI a, FFI b, FFI value, FFI result) =>
@@ -846,7 +900,8 @@ memberT2 ::
   (Tolerance Meters => a -> b -> value -> result) ->
   Text ->
   Member value
-memberT2 name arg1 arg2 f docs = memberT2I name arg1 arg2 (wrap3 f) docs
+memberT2 name arg1 arg2 f docs =
+  memberT2I name arg1 arg2 (wrap3 f) docs
 
 memberT2R ::
   (FFI a, FFI b, FFI value, FFI result) =>
@@ -856,7 +911,8 @@ memberT2R ::
   (Tolerance Meters => a -> b -> value -> Result x result) ->
   Text ->
   Member value
-memberT2R name arg1 arg2 f docs = memberT2I name arg1 arg2 (wrap3R f) docs
+memberT2R name arg1 arg2 f docs =
+  memberT2I name arg1 arg2 (wrap3R f) docs
 
 memberT2I ::
   (FFI a, FFI b, FFI value, FFI result) =>
@@ -878,7 +934,8 @@ member3 ::
   (a -> b -> c -> value -> result) ->
   Text ->
   Member value
-member3 name arg1 arg2 arg3 f docs = member3I name arg1 arg2 arg3 (wrap4 f) docs
+member3 name arg1 arg2 arg3 f docs =
+  member3I name arg1 arg2 arg3 (wrap4 f) docs
 
 member3I ::
   (FFI a, FFI b, FFI c, FFI value, FFI result) =>
@@ -901,7 +958,8 @@ memberT3 ::
   (Tolerance Meters => a -> b -> c -> value -> result) ->
   Text ->
   Member value
-memberT3 name arg1 arg2 arg3 f docs = memberT3I name arg1 arg2 arg3 (wrap4 f) docs
+memberT3 name arg1 arg2 arg3 f docs =
+  memberT3I name arg1 arg2 arg3 (wrap4 f) docs
 
 memberT3I ::
   (FFI a, FFI b, FFI c, FFI value, FFI result) =>
@@ -925,7 +983,8 @@ member4 ::
   (a -> b -> c -> d -> value -> result) ->
   Text ->
   Member value
-member4 name arg1 arg2 arg3 arg4 f docs = member4I name arg1 arg2 arg3 arg4 (wrap5 f) docs
+member4 name arg1 arg2 arg3 arg4 f docs =
+  member4I name arg1 arg2 arg3 arg4 (wrap5 f) docs
 
 member4I ::
   (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
@@ -997,43 +1056,40 @@ numberDivideByNonzero ::
 numberDivideByNonzero nonzero = do
   let implementation :: Number -> value -> Result HasZero result
       implementation number value = Result.map (number /) (nonzero value)
-  PreOverload BinaryOperator.Div (PreOperatorOverload (wrap2R implementation))
+  PreOverload BinaryOperator.Div $
+    PreOperatorOverload (wrap2R implementation)
 
 plus ::
   forall rhs value result.
   (Addition value rhs result, FFI value, FFI rhs, FFI result) =>
   Member value
-plus = do
-  let operator :: value -> rhs -> result = (+)
-  let overload = PostOperatorOverload (wrap2 operator)
-  PostOverload BinaryOperator.Add overload
+plus =
+  PostOverload BinaryOperator.Add $
+    PostOperatorOverload (wrap2 ((+) :: value -> rhs -> result))
 
 minus ::
   forall rhs value result.
   (Subtraction value rhs result, FFI value, FFI rhs, FFI result) =>
   Member value
-minus = do
-  let operator :: value -> rhs -> result = (-)
-  let overload = PostOperatorOverload (wrap2 operator)
-  PostOverload BinaryOperator.Sub overload
+minus =
+  PostOverload BinaryOperator.Sub $
+    PostOperatorOverload (wrap2 ((-) :: value -> rhs -> result))
 
 times ::
   forall rhs value result.
   (Multiplication value rhs result, FFI value, FFI rhs, FFI result) =>
   Member value
-times = do
-  let operator :: value -> rhs -> result = (*)
-  let overload = PostOperatorOverload (wrap2 operator)
-  PostOverload BinaryOperator.Mul overload
+times =
+  PostOverload BinaryOperator.Mul $
+    PostOperatorOverload (wrap2 ((*) :: value -> rhs -> result))
 
 divideBy ::
   forall rhs value result.
   (Division value rhs result, FFI value, FFI rhs, FFI result) =>
   Member value
-divideBy = do
-  let operator :: value -> rhs -> result = (/)
-  let overload = PostOperatorOverload (wrap2 operator)
-  PostOverload BinaryOperator.Div overload
+divideBy =
+  PostOverload BinaryOperator.Div $
+    PostOperatorOverload (wrap2 ((/) :: value -> rhs -> result))
 
 divideByNonzero ::
   forall rhs value result.
@@ -1043,7 +1099,8 @@ divideByNonzero ::
 divideByNonzero nonzero = do
   let implementation :: value -> rhs -> Result HasZero result
       implementation value rhs = Result.map (value /) (nonzero rhs)
-  PostOverload BinaryOperator.Div (PostOperatorOverload (wrap2R implementation))
+  PostOverload BinaryOperator.Div $
+    PostOperatorOverload (wrap2R implementation)
 
 divideByNonzeroT ::
   forall rhs value result.
@@ -1053,7 +1110,8 @@ divideByNonzeroT ::
 divideByNonzeroT nonzero = do
   let implementation :: Tolerance Meters => value -> rhs -> Result HasZero result
       implementation value rhs = Result.map (value /) (nonzero rhs)
-  PostOverload BinaryOperator.Div (PostOperatorOverloadT (wrap2R implementation))
+  PostOverload BinaryOperator.Div $
+    PostOperatorOverloadT (wrap2R implementation)
 
 divMod :: FFI (Quantity units) => Member (Quantity units)
 divMod = DivMod
@@ -1062,19 +1120,17 @@ dot ::
   forall rhs value result.
   (DotMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
   Member value
-dot = do
-  let operator :: value -> rhs -> result = OpenSolid.Prelude.dot
-  let overload = PostOperatorOverload (wrap2 operator)
-  PostOverload BinaryOperator.Dot overload
+dot =
+  PostOverload BinaryOperator.Dot $
+    PostOperatorOverload (wrap2 (OpenSolid.Prelude.dot :: value -> rhs -> result))
 
 cross ::
   forall rhs value result.
   (CrossMultiplication value rhs result, FFI value, FFI rhs, FFI result) =>
   Member value
-cross = do
-  let operator :: value -> rhs -> result = OpenSolid.Prelude.cross
-  let overload = PostOperatorOverload (wrap2 operator)
-  PostOverload BinaryOperator.Cross overload
+cross =
+  PostOverload BinaryOperator.Cross $
+    PostOperatorOverload (wrap2 (OpenSolid.Prelude.cross :: value -> rhs -> result))
 
 nested :: FFI nestedValue => Text -> List (Member nestedValue) -> Member value
 nested = Nested
