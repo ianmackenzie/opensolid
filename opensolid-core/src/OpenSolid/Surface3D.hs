@@ -29,7 +29,6 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis2D (Axis2D)
-import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bag qualified as Bag
 import OpenSolid.Bag3D (Bag3D)
 import OpenSolid.Bag3D qualified as Bag3D
@@ -64,7 +63,6 @@ import {-# SOURCE #-} OpenSolid.Surface3D.Nondegenerate qualified as Surface3D.N
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfacePoint3D (SurfacePoint3D)
@@ -234,10 +232,7 @@ boundaryCurves :: Surface3D space -> Set3D space (SurfaceCurve3D space)
 boundaryCurves = Set3D.flatten . boundaries
 
 flip :: Surface3D space -> Surface3D space
-flip surface =
-  parametric
-    (function surface << SurfaceFunction2D.xy -SurfaceFunction1D.u SurfaceFunction1D.v)
-    (Region2D.mirrorAcross Axis2D.y surface.domain)
+flip surface = parametric (SurfaceFunction3D.flip surface.function) (UvRegion.flip surface.domain)
 
 -- | Convert a surface defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3D global local -> Surface3D local -> Surface3D global
