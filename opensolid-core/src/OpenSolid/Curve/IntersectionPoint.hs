@@ -7,6 +7,7 @@ module OpenSolid.Curve.IntersectionPoint
   , firstParameterValue
   , secondParameterValue
   , parameterValues
+  , parameterBounds
   , isJoin
   , isCrossing
   , isTangent
@@ -33,7 +34,7 @@ data IntersectionPoint = IntersectionPoint
 
 instance Bounded IntersectionPoint (Interval Unitless, Interval Unitless) where
   {-# INLINE bounds #-}
-  bounds intersectionPoint = Pair.map Interval.constant (parameterValues intersectionPoint)
+  bounds = parameterBounds
 
 crossing :: (Number, Number) -> IntersectionPoint
 crossing = IntersectionPoint Continuity.Crossing
@@ -55,6 +56,9 @@ firstParameterValue = Pair.first . parameterValues
 
 secondParameterValue :: IntersectionPoint -> Number
 secondParameterValue = Pair.second . parameterValues
+
+parameterBounds :: IntersectionPoint -> (Interval Unitless, Interval Unitless)
+parameterBounds = Pair.map Interval.constant . parameterValues
 
 isJoin :: IntersectionPoint -> Bool
 isJoin intersectionPoint = do
