@@ -373,6 +373,7 @@ test-suite opensolid-core-test
     Tests.Stream
     Tests.Surface3D
     Tests.SurfaceFunction1D
+    Tests.SurfaceFunction3D
     Tests.Text
     Tests.VectorBounds2D
     Tests.VectorBounds3D
