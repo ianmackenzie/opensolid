@@ -113,7 +113,7 @@ resolve existing callback tree =
       Unresolved -> Bag.group (List.map (resolve existing callback) (NonEmpty.toList tree.children))
 
 containedIn :: forall domain existing. Domain domain => Bag domain existing -> domain -> Bool
-containedIn existing candidate = Bag.any (contains candidate) (const True) existing
+containedIn existing candidate = existing & Bag.anyBounds (contains candidate)
 
 touching ::
   forall domain segment existing tag.
@@ -121,7 +121,9 @@ touching ::
   Bag domain existing ->
   Set domain (Subtree tag domain segment) ->
   Bool
-touching existing set = Bag.full set & Bag.pairwiseAny (unitless (^)) (\_ _ -> True) existing
+touching Bag.Empty _ = False
+touching (Bag.Full existing) cluster =
+  Set.pairwiseAnyBounds (unitless (^)) existing cluster
 
 clusters ::
   forall domain segment existing tag.

@@ -17,12 +17,20 @@ module OpenSolid.Bag3D
   , flatten
   , map
   , combine
-  , cull
   , filter
+  , filterBounds
+  , filterItems
   , filterMap
+  , filterMapItems
   , any
+  , anyBounds
+  , anyItem
   , all
+  , allBounds
+  , allItems
   , pairwiseAny
+  , pairwiseAnyBounds
+  , pairwiseAnyItems
   , clusters
   )
 where
@@ -93,11 +101,14 @@ map = Bag.map
 combine :: (item1 -> Bag3D space2 item2) -> Bag3D space1 item1 -> Bag3D space2 item2
 combine = Bag.combine
 
-cull :: (Bounds3D space -> Bool) -> Bag3D space item -> Bag3D space item
-cull = Bag.cull
-
 filter :: (Bounds3D space -> Bool) -> (item -> Bool) -> Bag3D space item -> Bag3D space item
 filter = Bag.filter
+
+filterBounds :: (Bounds3D space -> Bool) -> Bag3D space item -> Bag3D space item
+filterBounds = Bag.filterBounds
+
+filterItems :: (item -> Bool) -> Bag3D space item -> Bag3D space item
+filterItems = Bag.filterItems
 
 filterMap ::
   Bounded item2 (Bounds3D space2) =>
@@ -107,11 +118,30 @@ filterMap ::
   Bag3D space2 item2
 filterMap = Bag.filterMap
 
+filterMapItems ::
+  Bounded item2 (Bounds3D space2) =>
+  (item1 -> Maybe item2) ->
+  Bag3D space1 item1 ->
+  Bag3D space2 item2
+filterMapItems = Bag.filterMapItems
+
 any :: (Bounds3D space -> Bool) -> (item -> Bool) -> Bag3D space item -> Bool
 any = Bag.any
 
+anyBounds :: (Bounds3D space -> Bool) -> Bag3D space item -> Bool
+anyBounds = Bag.anyBounds
+
+anyItem :: (item -> Bool) -> Bag3D space item -> Bool
+anyItem = Bag.anyItem
+
 all :: (Bounds3D space -> Bool) -> (item -> Bool) -> Bag3D space item -> Bool
 all = Bag.all
+
+allBounds :: (Bounds3D space -> Bool) -> Bag3D space item -> Bool
+allBounds = Bag.allBounds
+
+allItems :: (item -> Bool) -> Bag3D space item -> Bool
+allItems = Bag.allItems
 
 pairwiseAny ::
   (Bounds3D space1 -> Bounds3D space2 -> Bool) ->
@@ -120,6 +150,20 @@ pairwiseAny ::
   Bag3D space2 item2 ->
   Bool
 pairwiseAny = Bag.pairwiseAny
+
+pairwiseAnyBounds ::
+  (Bounds3D space1 -> Bounds3D space2 -> Bool) ->
+  Bag3D space1 item1 ->
+  Bag3D space2 item2 ->
+  Bool
+pairwiseAnyBounds = Bag.pairwiseAnyBounds
+
+pairwiseAnyItems ::
+  (item1 -> item2 -> Bool) ->
+  Bag3D space1 item1 ->
+  Bag3D space2 item2 ->
+  Bool
+pairwiseAnyItems = Bag.pairwiseAnyItems
 
 clusters ::
   (Bounds3D space -> Bounds3D space -> Bool) ->

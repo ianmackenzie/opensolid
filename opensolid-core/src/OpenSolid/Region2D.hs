@@ -470,7 +470,7 @@ classify point region =
     -- Point is enclosed within outer boundary, so have to check inner boundaries
     Boundary.InteriorPoint ->
       region.innerBoundaries
-        & Bag2D.cull (^ point)
+        & Bag2D.filterBounds (^ point)
         & Bag2D.toList
         & classifyInner point
 
@@ -492,7 +492,7 @@ classifyBounds givenBounds region = do
     -- Point is enclosed within outer boundary, so have to check inner boundaries
     Boundary.InteriorBounds ->
       region.innerBoundaries
-        & Bag2D.cull (not . Bounds2D.areDistinct givenBounds)
+        & Bag2D.filterBounds (not . Bounds2D.areDistinct givenBounds)
         & Bag2D.toList
         & classifyInnerBounds givenBounds
 

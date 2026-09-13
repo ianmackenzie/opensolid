@@ -41,7 +41,7 @@ findPoint point surface = do
           & Bag3D.filter (^ point) (^ point)
   let edgeSolutions =
         Surface3D.Nondegenerate.edges surface
-          & Bag3D.cull (^ point)
+          & Bag3D.filterBounds (^ point)
           & Bag3D.combine (findInteriorEdgePoints point)
   let boundarySolutions = vertexSolutions <> edgeSolutions
   let boundaryExclusions = Bag.map SurfacePoint3D.uvBounds boundarySolutions

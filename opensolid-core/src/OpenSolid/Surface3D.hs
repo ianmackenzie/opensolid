@@ -120,21 +120,21 @@ vertices surface = do
         Err (IsDegenerate surfacePoint) -> case surfacePoint of
           SurfacePoint3D.Point{} -> Nothing
           SurfacePoint3D.Pole{} -> Just surfacePoint
-  let poles = Set3D.filterMap (const True) toPole surfaceCurves
+  let poles = Set3D.filterMapItems toPole surfaceCurves
   let startPoint surfaceCurve = do
         let uvPoint = UvCurve.startPoint (SurfaceCurve3D.uvCurve surfaceCurve)
         let point = Curve3D.startPoint (SurfaceCurve3D.curve surfaceCurve)
         SurfacePoint3D.Point uvPoint point
   let startPoints = Set3D.map startPoint surfaceCurves
   let nonPole surfacePoint = not (surfacePoint ^ poles)
-  let nonPoles = Set3D.filter (const True) nonPole startPoints
+  let nonPoles = Set3D.filterItems nonPole startPoints
   poles <> nonPoles
 
 edges :: Tolerance Meters => Surface3D space -> Bag3D space (Nondegenerate (SurfaceCurve3D space))
 edges surface = do
   let surfaceCurves = Set3D.flatten (boundaries surface)
   let toEdge surfaceCurve = SurfaceCurve3D.nondegenerate surfaceCurve ?? Nothing
-  Set3D.filterMap (const True) toEdge surfaceCurves
+  Set3D.filterMapItems toEdge surfaceCurves
 
 parametric :: SurfaceFunction3D space -> UvRegion -> Surface3D space
 parametric givenFunction givenDomain = do

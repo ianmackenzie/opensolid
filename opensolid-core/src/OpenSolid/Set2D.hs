@@ -22,15 +22,27 @@ module OpenSolid.Set2D
   , reverseMap
   , combine
   , combineWithIndex
-  , cull
   , filter
+  , filterBounds
+  , filterItems
   , filterMap
+  , filterMapItems
   , any
+  , anyBounds
+  , anyItem
   , all
+  , allBounds
+  , allItems
   , pairwiseFilter
+  , pairwiseFilterBounds
+  , pairwiseFilterItems
   , pairwiseFilterMap
+  , pairwiseFilterMapItems
   , pairwiseFilterWithIndices
   , pairwiseFilterMapWithIndices
+  , pairwiseAny
+  , pairwiseAnyBounds
+  , pairwiseAnyItems
   , clusters
   )
 where
@@ -124,11 +136,14 @@ combine = Set.combine
 combineWithIndex :: (Int -> item1 -> Set2D units2 item2) -> Set2D units1 item1 -> Set2D units2 item2
 combineWithIndex = Set.combineWithIndex
 
-cull :: (Bounds2D units -> Bool) -> Set2D units item -> Bag2D units item
-cull = Set.cull
-
 filter :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bag2D units item
 filter = Set.filter
+
+filterBounds :: (Bounds2D units -> Bool) -> Set2D units item -> Bag2D units item
+filterBounds = Set.filterBounds
+
+filterItems :: (item -> Bool) -> Set2D units item -> Bag2D units item
+filterItems = Set.filterItems
 
 filterMap ::
   Bounded item2 (Bounds2D units2) =>
@@ -138,11 +153,30 @@ filterMap ::
   Bag2D units2 item2
 filterMap = Set.filterMap
 
+filterMapItems ::
+  Bounded item2 (Bounds2D units2) =>
+  (item1 -> Maybe item2) ->
+  Set2D units1 item1 ->
+  Bag2D units2 item2
+filterMapItems = Set.filterMapItems
+
 any :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
 any = Set.any
 
+anyBounds :: (Bounds2D units -> Bool) -> Set2D units item -> Bool
+anyBounds = Set.anyBounds
+
+anyItem :: (item -> Bool) -> Set2D units item -> Bool
+anyItem = Set.anyItem
+
 all :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
 all = Set.all
+
+allBounds :: (Bounds2D units -> Bool) -> Set2D units item -> Bool
+allBounds = Set.allBounds
+
+allItems :: (item -> Bool) -> Set2D units item -> Bool
+allItems = Set.allItems
 
 pairwiseFilter ::
   (Bounds2D units1 -> Bounds2D units2 -> Bool) ->
@@ -152,6 +186,20 @@ pairwiseFilter ::
   List (item1, item2)
 pairwiseFilter = Set.pairwiseFilter
 
+pairwiseFilterBounds ::
+  (Bounds2D units1 -> Bounds2D units2 -> Bool) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2 ->
+  List (item1, item2)
+pairwiseFilterBounds = Set.pairwiseFilterBounds
+
+pairwiseFilterItems ::
+  (item1 -> item2 -> Bool) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2 ->
+  List (item1, item2)
+pairwiseFilterItems = Set.pairwiseFilterItems
+
 pairwiseFilterMap ::
   (Bounds2D units1 -> Bounds2D units2 -> Bool) ->
   (item1 -> item2 -> Maybe a) ->
@@ -159,6 +207,13 @@ pairwiseFilterMap ::
   Set2D units2 item2 ->
   List a
 pairwiseFilterMap = Set.pairwiseFilterMap
+
+pairwiseFilterMapItems ::
+  (item1 -> item2 -> Maybe a) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2 ->
+  List a
+pairwiseFilterMapItems = Set.pairwiseFilterMapItems
 
 pairwiseFilterWithIndices ::
   (Bounds2D units1 -> Bounds2D units2 -> Bool) ->
@@ -175,6 +230,28 @@ pairwiseFilterMapWithIndices ::
   Set2D units2 item2 ->
   List a
 pairwiseFilterMapWithIndices = Set.pairwiseFilterMapWithIndices
+
+pairwiseAny ::
+  (Bounds2D units1 -> Bounds2D units2 -> Bool) ->
+  (item1 -> item2 -> Bool) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2 ->
+  Bool
+pairwiseAny = Set.pairwiseAny
+
+pairwiseAnyBounds ::
+  (Bounds2D units1 -> Bounds2D units2 -> Bool) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2 ->
+  Bool
+pairwiseAnyBounds = Set.pairwiseAnyBounds
+
+pairwiseAnyItems ::
+  (item1 -> item2 -> Bool) ->
+  Set2D units1 item1 ->
+  Set2D units2 item2 ->
+  Bool
+pairwiseAnyItems = Set.pairwiseAnyItems
 
 clusters ::
   (Bounds2D units -> Bounds2D units -> Bool) ->

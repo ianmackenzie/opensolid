@@ -41,7 +41,7 @@ testSet =
 findAll :: Test
 findAll = Test.verify "findAll" do
   let searchBounds = Bounds2D.hull2 (point 2 2) (point 6 6)
-  let foundPoints = Set2D.cull (^ searchBounds) testSet & Bag2D.toList
+  let foundPoints = Set2D.filterBounds (^ searchBounds) testSet & Bag2D.toList
   let expectedPoints = [point 3 5, point 5 5]
   Test.expect (List.sort foundPoints == List.sort expectedPoints)
 

@@ -21,16 +21,27 @@ module OpenSolid.Set
   , toList
   , toListOf
   , toListWithIndex
-  , cull
   , filter
+  , filterBounds
+  , filterItems
   , filterMap
+  , filterMapItems
   , any
+  , anyBounds
+  , anyItem
   , all
+  , allBounds
+  , allItems
   , pairwiseFilter
+  , pairwiseFilterBounds
+  , pairwiseFilterItems
   , pairwiseFilterMap
+  , pairwiseFilterMapItems
   , pairwiseFilterWithIndices
   , pairwiseFilterMapWithIndices
   , pairwiseAny
+  , pairwiseAnyBounds
+  , pairwiseAnyItems
   , clusters
   , foldr
   , foldl
@@ -312,24 +323,6 @@ toListOf function = NonEmpty.toList . toNonEmptyOf function
 toListWithIndex :: (Int -> a1 -> a2) -> Set b a1 -> List a2
 toListWithIndex function = NonEmpty.toList . toNonEmptyWithIndex function
 
-cull :: Bounds b => (b -> Bool) -> Set b a -> Bag b a
-cull boundsPredicate set = case set of
-  Leaf{leafBounds} -> if boundsPredicate leafBounds then Bag.Full set else Bag.Empty
-  Node{nodeBounds, children} ->
-    if boundsPredicate nodeBounds
-      then case cullChildren boundsPredicate (NonEmpty.toList children) of
-        [] -> Bag.Empty
-        [culled] -> Bag.Full culled
-        NonEmpty culled -> Bag.Full (node culled)
-      else Bag.Empty
-
-cullChildren :: Bounds b => (b -> Bool) -> List (Set b a) -> List (Set b a)
-cullChildren _ [] = []
-cullChildren boundsPredicate (first : rest) =
-  case cull boundsPredicate first of
-    Bag.Empty -> cullChildren boundsPredicate rest
-    Bag.Full culledFirst -> culledFirst : cullChildren boundsPredicate rest
-
 filter :: Bounds b => (b -> Bool) -> (a -> Bool) -> Set b a -> Bag b a
 filter boundsPredicate itemPredicate set =
   Bag.fromMaybeSet (filterImpl boundsPredicate itemPredicate set)
@@ -344,6 +337,12 @@ filterImpl boundsPredicate itemPredicate set = case set of
         NonEmpty filteredChildren -> Just (node filteredChildren)
         [] -> Nothing
       else Nothing
+
+filterBounds :: Bounds b => (b -> Bool) -> Set b a -> Bag b a
+filterBounds predicate = filter predicate (const True)
+
+filterItems :: Bounds b => (a -> Bool) -> Set b a -> Bag b a
+filterItems predicate = filter (const True) predicate
 
 filterMap ::
   (Bounded a2 b2, Bounds b2) =>
@@ -372,12 +371,25 @@ filterMapImpl boundsPredicate itemFunction set = case set of
         [] -> Nothing
       else Nothing
 
+filterMapItems :: (Bounded a2 b2, Bounds b2) => (a1 -> Maybe a2) -> Set b1 a1 -> Bag b2 a2
+filterMapItems function = filterMap (const True) function
+
 any :: (b -> Bool) -> (a -> Bool) -> Set b a -> Bool
 any boundsPredicate itemPredicate set = case set of
   Leaf{leafBounds, leafItem} ->
     boundsPredicate leafBounds && itemPredicate leafItem
   Node{nodeBounds, children} ->
     boundsPredicate nodeBounds && NonEmpty.any (any boundsPredicate itemPredicate) children
+
+anyBounds :: (b -> Bool) -> Set b a -> Bool
+anyBounds predicate set = case set of
+  Leaf{leafBounds} -> predicate leafBounds
+  Node{nodeBounds, children} -> predicate nodeBounds && NonEmpty.any (anyBounds predicate) children
+
+anyItem :: (a -> Bool) -> Set b a -> Bool
+anyItem predicate set = case set of
+  Leaf{leafItem} -> predicate leafItem
+  Node{children} -> NonEmpty.any (anyItem predicate) children
 
 all :: (b -> Bool) -> (a -> Bool) -> Set b a -> Bool
 all boundsPredicate itemPredicate set = case set of
@@ -386,9 +398,21 @@ all boundsPredicate itemPredicate set = case set of
   Node{nodeBounds, children} ->
     boundsPredicate nodeBounds && NonEmpty.all (all boundsPredicate itemPredicate) children
 
+allBounds :: (b -> Bool) -> Set b a -> Bool
+allBounds predicate = all predicate (const True)
+
+allItems :: (a -> Bool) -> Set b a -> Bool
+allItems predicate = all (const True) predicate
+
 pairwiseAny :: (b1 -> b2 -> Bool) -> (a1 -> a2 -> Bool) -> Set b1 a1 -> Set b2 a2 -> Bool
 pairwiseAny boundsPredicate itemPredicate set1 set2 =
   not (List.isEmpty (pairwiseFilter boundsPredicate itemPredicate set1 set2))
+
+pairwiseAnyBounds :: (b1 -> b2 -> Bool) -> Set b1 a1 -> Set b2 a2 -> Bool
+pairwiseAnyBounds predicate = pairwiseAny predicate (\_ _ -> True)
+
+pairwiseAnyItems :: (a1 -> a2 -> Bool) -> Set b1 a1 -> Set b2 a2 -> Bool
+pairwiseAnyItems predicate = pairwiseAny (\_ _ -> True) predicate
 
 pairwiseFilter ::
   (b1 -> b2 -> Bool) ->
@@ -400,6 +424,20 @@ pairwiseFilter boundsPredicate itemPredicate set1 set2 = do
   let callback item1 item2 = if itemPredicate item1 item2 then Just (item1, item2) else Nothing
   pairwiseFilterMap boundsPredicate callback set1 set2
 
+pairwiseFilterBounds ::
+  (b1 -> b2 -> Bool) ->
+  Set b1 a1 ->
+  Set b2 a2 ->
+  List (a1, a2)
+pairwiseFilterBounds predicate = pairwiseFilter predicate (\_ _ -> True)
+
+pairwiseFilterItems ::
+  (a1 -> a2 -> Bool) ->
+  Set b1 a1 ->
+  Set b2 a2 ->
+  List (a1, a2)
+pairwiseFilterItems predicate = pairwiseFilter (\_ _ -> True) predicate
+
 pairwiseFilterMap ::
   (b1 -> b2 -> Bool) ->
   (a1 -> a2 -> Maybe a3) ->
@@ -408,6 +446,13 @@ pairwiseFilterMap ::
   List a3
 pairwiseFilterMap boundsPredicate callback set1 set2 =
   pairwiseFilterMapWithIndices boundsPredicate (\_ _ item1 item2 -> callback item1 item2) set1 set2
+
+pairwiseFilterMapItems ::
+  (a1 -> a2 -> Maybe a3) ->
+  Set b1 a1 ->
+  Set b2 a2 ->
+  List a3
+pairwiseFilterMapItems function = pairwiseFilterMap (\_ _ -> True) function
 
 pairwiseFilterWithIndices ::
   (b1 -> b2 -> Bool) ->
