@@ -194,7 +194,7 @@ length =
     , Class.divideBy @Length
     , Class.divideBy @Interval
     , Class.divideBy @LengthInterval
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideByNonzero @Curve (unitless Curve1D.nonzero)
     , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero
     , Class.divMod
     ]
@@ -235,7 +235,7 @@ area =
     , Class.divideBy @Interval
     , Class.divideBy @LengthInterval
     , Class.divideBy @AreaInterval
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideByNonzero @Curve (unitless Curve1D.nonzero)
     , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero
     , Class.divMod
     ]
@@ -267,7 +267,7 @@ angle =
     , Class.member0 "In Radians" Angle.inRadians $(docs 'Angle.inRadians)
     , Class.member0 "In Degrees" Angle.inDegrees $(docs 'Angle.inDegrees)
     , Class.member0 "In Turns" Angle.inTurns $(docs 'Angle.inTurns)
-    , Class.memberR0 "Is Zero" (~= Angle.zero) "Check if an angle is zero, within the current tolerance."
+    , Class.member0 "Is Zero" (angular (~= Angle.zero)) "Check if an angle is (approximately) zero."
     , Class.member0 "Sin" Angle.sin $(docs 'Angle.sin)
     , Class.member0 "Cos" Angle.cos $(docs 'Angle.cos)
     , Class.member0 "Tan" Angle.tan $(docs 'Angle.tan)
@@ -289,8 +289,8 @@ angle =
     , Class.divideBy @Angle
     , Class.divideBy @Interval
     , Class.divideBy @AngleInterval
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero
-    , Class.divideByNonzeroR @AngleCurve Curve1D.nonzero
+    , Class.divideByNonzero @Curve (unitless Curve1D.nonzero)
+    , Class.divideByNonzero @AngleCurve (angular Curve1D.nonzero)
     , Class.divMod
     ]
 
@@ -515,11 +515,11 @@ vector2D =
     , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
     , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
     , Class.member1 "Component In" "Direction" Vector2D.componentIn $(docs 'Vector2D.componentIn)
-    , Class.memberU0R "Direction" Vector2D.direction $(docs 'Vector2D.direction)
-    , Class.memberU0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
+    , Class.member0R "Direction" (unitless Vector2D.direction) $(docs 'Vector2D.direction)
+    , Class.member0 "Normalize" (unitless Vector2D.normalize) $(docs 'Vector2D.normalize)
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
-    , Class.memberU0 "Is Zero" (~= Vector2D.zero) "Check if a vector is zero, within the current tolerance."
+    , Class.member0 "Is Zero" (unitless (~= Vector2D.zero)) "Check if a vector is (approximately) zero."
     , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> Vector2D -> Vector3D) $(docs 'Vector2D.placeOn)
     , Class.negation
     , Class.numberTimes
@@ -865,13 +865,13 @@ curve =
     , Class.member0 "Sin" (Curve1D.sin . (Angle.radian *)) $(docs 'Curve1D.sin)
     , Class.member0 "Cos" (Curve1D.cos . (Angle.radian *)) $(docs 'Curve1D.cos)
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
-    , Class.memberU0R "Roots" Curve1D.roots $(docs 'Curve1D.roots)
-    , Class.memberU0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    , Class.member0R "Roots" (unitless Curve1D.roots) $(docs 'Curve1D.roots)
+    , Class.member0 "Is Zero" (unitless (~= Curve1D.zero)) "Check if a curve is (approximately) zero everywhere."
     , Class.negation
     , Class.numberPlus
     , Class.numberMinus
     , Class.numberTimes
-    , Class.numberDivideByNonzeroU Curve1D.nonzero
+    , Class.numberDivideByNonzero (unitless Curve1D.nonzero)
     , Class.plus @Number
     , Class.plus @Curve
     , Class.minus @Number
@@ -884,7 +884,7 @@ curve =
     , Class.times @LengthCurve
     , Class.times @AreaCurve
     , Class.times @AngleCurve
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideByNonzero @Curve (unitless Curve1D.nonzero)
     , Class.divideBy @Number
     , Class.nested @Curve1D.Root "A point where a given curve is equal to zero." $
         [ Class.property "Location" (Curve1D.Root.location) "The parameter value at which the curve is zero."
@@ -905,8 +905,8 @@ angleCurve =
     , Class.member0 "Sin" Curve1D.sin $(docs 'Curve1D.sin)
     , Class.member0 "Cos" Curve1D.cos $(docs 'Curve1D.cos)
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
-    , Class.memberR0R "Roots" Curve1D.roots $(docs 'Curve1D.roots)
-    , Class.memberR0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    , Class.member0R "Roots" (angular Curve1D.roots) $(docs 'Curve1D.roots)
+    , Class.member0 "Is Zero" (angular (~= Curve1D.zero)) "Check if a curve is (approximately) zero everywhere."
     , Class.negation
     , Class.numberTimes
     , Class.plus @AngleCurve
@@ -916,9 +916,9 @@ angleCurve =
     , Class.times @Number
     , Class.times @Curve
     , Class.divideBy @Number
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideByNonzero @Curve (unitless Curve1D.nonzero)
     , Class.divideBy @Angle
-    , Class.divideByNonzeroR @AngleCurve Curve1D.nonzero
+    , Class.divideByNonzero @AngleCurve (angular Curve1D.nonzero)
     ]
 
 type LengthCurve = Curve1D.Curve1D Meters
@@ -946,7 +946,7 @@ lengthCurve =
     , Class.times @Curve
     , Class.divideBy @Number
     , Class.divideBy @Length
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideByNonzero @Curve (unitless Curve1D.nonzero)
     , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero
     ]
 
@@ -968,7 +968,7 @@ areaCurve =
     , Class.minus @Area
     , Class.times @Curve
     , Class.times @Number
-    , Class.divideByNonzeroU @Curve Curve1D.nonzero
+    , Class.divideByNonzero @Curve (unitless Curve1D.nonzero)
     , Class.divideBy @Number
     , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero
     , Class.divideBy @Length
@@ -1085,8 +1085,8 @@ vector3D =
     , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
     , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
     , Class.member1 "Component In" "Direction" Vector3D.componentIn $(docs 'Vector3D.componentIn)
-    , Class.memberU0R "Direction" Vector3D.direction $(docs 'Vector3D.direction)
-    , Class.memberU0 "Is Zero" (~= Vector3D.zero) "Check if a vector is zero, within the current tolerance."
+    , Class.member0R "Direction" (unitless Vector3D.direction) $(docs 'Vector3D.direction)
+    , Class.member0 "Is Zero" (unitless (~= Vector3D.zero)) "Check if a vector is (approximately) zero."
     , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
     , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> Vector3D -> Vector3D) $(docs 'Vector3D.rotateAround)
     , Class.member1 "Mirror In" "Direction" Vector3D.mirrorIn $(docs 'Vector3D.mirrorIn)
@@ -1536,12 +1536,12 @@ uvCurve =
     [ Class.factory1 "Constant" "Point" Curve2D.constant $(docs 'Curve2D.constant)
     , Class.factory2 "UV" "U Coordinate" "V Coordinate" Curve2D.xy $(docs 'Curve2D.xy)
     , Class.factory1 "Line" "Line" Curve2D.line $(docs 'Curve2D.line)
-    , Class.factory2 "Line From" "Start Point" "End Point" Curve2D.lineFrom $(docs 'Curve2D.lineFrom)
-    , Class.factoryU3 "Arc From" "Start Point" "End Point" "Swept Angle" Curve2D.arcFrom $(docs 'Curve2D.arcFrom)
+    , Class.factory2 "Line From" "Start Point" "End Point" UvCurve.lineFrom $(docs 'UvCurve.lineFrom)
+    , Class.factory3 "Arc From" "Start Point" "End Point" "Swept Angle" UvCurve.arcFrom $(docs 'UvCurve.arcFrom)
     , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2D.polarArc $(docs 'Curve2D.polarArc)
     , Class.factory1 "Circle" "Circle" Curve2D.circle $(docs 'Curve2D.circle)
     , Class.factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2D.sweptArc $(docs 'Curve2D.sweptArc)
-    , Class.factoryU4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2D.cornerArc $(docs 'Curve2D.cornerArc)
+    , Class.factory4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" UvCurve.cornerArc $(docs 'UvCurve.cornerArc)
     , Class.factory1 "Bezier" "Control Points" Curve2D.bezier $(docs 'Curve2D.bezier)
     , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
     , Class.property "Start Point" (Curve2D.startPoint) "The start point of the curve."
@@ -1576,9 +1576,9 @@ uvRegion :: Class
 uvRegion =
   Class.new @UvRegion "A region in UV parameter space." $
     [ Class.constant "Unit Square" UvRegion.unitSquare $(docs 'UvRegion.unitSquare)
-    , Class.factoryU1R "Bounded By" "Curves" Region2D.boundedBy $(docs 'Region2D.boundedBy)
-    , Class.factoryU1R "Rectangle" "Bounding Box" Region2D.rectangle $(docs 'Region2D.rectangle)
-    , Class.factoryU1R "Circle" "Circle" Region2D.circle $(docs 'Region2D.circle)
+    , Class.factory1R "Bounded By" "Curves" UvRegion.boundedBy $(docs 'UvRegion.boundedBy)
+    , Class.factory1R "Rectangle" "Bounding Box" UvRegion.rectangle $(docs 'UvRegion.rectangle)
+    , Class.factory1R "Circle" "Circle" UvRegion.circle $(docs 'UvRegion.circle)
     , Class.property "Outer Loop" Region2D.outerLoop $(docs 'Region2D.outerLoop)
     , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
     , Class.property "Boundary Curves" (Set2D.toNonEmpty . Region2D.boundaryCurves) $(docs 'Region2D.boundaryCurves)
