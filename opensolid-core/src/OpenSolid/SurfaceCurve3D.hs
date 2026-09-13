@@ -1,6 +1,5 @@
 module OpenSolid.SurfaceCurve3D
   ( SurfaceCurve3D
-  , Degenerate (Point, Pole)
   , new
   , curve
   , uvCurve
@@ -21,13 +20,13 @@ import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
-import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
+import OpenSolid.SurfacePoint3D (SurfacePoint3D)
+import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvCurve qualified as UvCurve
-import OpenSolid.UvPoint (UvPoint)
 
 data SurfaceCurve3D space = SurfaceCurve3D
   { surfaceFunction :: SurfaceFunction3D space
@@ -50,11 +49,6 @@ instance Bounded (SurfaceCurve3D space) UvBounds where
 instance Bounded (Nondegenerate (SurfaceCurve3D space)) UvBounds where
   {-# INLINE bounds #-}
   bounds (Nondegenerate surfaceCurve) = uvBounds surfaceCurve
-
-data Degenerate space
-  = Point UvPoint (Point3D space) -- a single point in UV space, and the corresponding 3D point
-  | Pole (Point3D space) -- e.g. the top or bottom of a sphere, where a curve in UV space is a point in 3D space
-  deriving (Show)
 
 instance Composition (SurfaceCurve3D space) (Curve1D Unitless) (SurfaceCurve3D space) where
   surfaceCurve . parameterization =
@@ -86,13 +80,16 @@ uvBounds = Curve2D.bounds . uvCurve
 nondegenerate ::
   Tolerance Meters =>
   SurfaceCurve3D space ->
-  Result (IsDegenerate (Degenerate space)) (Nondegenerate (SurfaceCurve3D space))
+  Result (IsDegenerate (SurfacePoint3D space)) (Nondegenerate (SurfaceCurve3D space))
 nondegenerate surfaceCurve =
   case Curve.nondegenerate (curve surfaceCurve) of
     -- Assume that if 3D curve is nondegenerate, UV curve must be too
     Ok Nondegenerate{} -> Ok (Nondegenerate surfaceCurve)
     -- 3D curve is degenerate: check UV curve
     Err (IsDegenerate point) ->
-      case UvCurve.nondegenerate (uvCurve surfaceCurve) of
-        Ok Nondegenerate{} -> Err (IsDegenerate (Pole point))
-        Err (IsDegenerate uvPoint) -> Err (IsDegenerate (Point uvPoint point))
+      Err . IsDegenerate $
+        case UvCurve.nondegenerate (uvCurve surfaceCurve) of
+          Ok nondegenerateUvCurve ->
+            SurfacePoint3D.Pole nondegenerateUvCurve point
+          Err (IsDegenerate uvPoint) ->
+            SurfacePoint3D.Point uvPoint point
