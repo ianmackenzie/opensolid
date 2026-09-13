@@ -66,7 +66,7 @@ module OpenSolid.Curve
   , transformBy
   , convert
   , placeOn
-  , offsetBy
+  , displaceBy
   )
 where
 
@@ -481,7 +481,7 @@ displacedFrom ::
   Point dimension units space ->
   VectorCurve dimension units space ->
   Curve dimension units space
-displacedFrom point displacementCurve = constant point & offsetBy displacementCurve
+displacedFrom point displacementCurve = constant point & displaceBy displacementCurve
 
 line ::
   CurveExists dimension units space =>
@@ -934,7 +934,7 @@ placeOn plane curve =
       , arcLengthParameterization = curve.arcLengthParameterization
       }
 
-offsetBy ::
+displaceBy ::
   ( CurveExists dimension1 units1 space1
   , dimension1 ~ dimension2
   , space1 ~ space2
@@ -943,7 +943,7 @@ offsetBy ::
   VectorCurve dimension2 units2 space2 ->
   Curve dimension1 units1 space1 ->
   Curve dimension1 units1 space1
-offsetBy vectorCurve curve =
+displaceBy vectorCurve curve =
   new
     (compiled curve + VectorCurve.compiled vectorCurve)
     (derivative curve + VectorCurve.derivative vectorCurve)

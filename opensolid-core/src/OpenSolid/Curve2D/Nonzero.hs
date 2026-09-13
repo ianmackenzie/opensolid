@@ -51,7 +51,7 @@ offsetLeftwardBy ::
 offsetLeftwardBy offset curve = do
   let tangentCurve = VectorCurve.Nonzero.normalize (derivative curve)
   let offsetCurve = VectorCurve2D.rotateBy Angle.quarterTurn (offset * Nonzero.unwrap tangentCurve)
-  Nonzero.unwrap curve & Curve.offsetBy offsetCurve
+  Nonzero.unwrap curve & Curve.displaceBy offsetCurve
 
 offsetRightwardBy ::
   Tolerance units =>

@@ -175,7 +175,7 @@ translational :: Curve3D space -> VectorCurve3D Meters space -> Surface3D space
 translational baseCurve translationCurve = do
   let baseFunction = baseCurve << SurfaceFunction1D.u
   let translationFunction = translationCurve << SurfaceFunction1D.v
-  let translationalFunction = baseFunction & SurfaceFunction3D.offsetBy translationFunction
+  let translationalFunction = baseFunction & SurfaceFunction3D.displaceBy translationFunction
   parametric translationalFunction UvRegion.unitSquare
 
 ruled :: Curve3D space -> Curve3D space -> Surface3D space
@@ -183,7 +183,7 @@ ruled bottom top = do
   let bottomFunction = bottom << SurfaceFunction1D.u
   let topFunction = top << SurfaceFunction1D.u
   let displacementFunction = SurfaceFunction1D.v * (topFunction - bottomFunction)
-  let ruledFunction = bottomFunction & SurfaceFunction3D.offsetBy displacementFunction
+  let ruledFunction = bottomFunction & SurfaceFunction3D.displaceBy displacementFunction
   parametric ruledFunction UvRegion.unitSquare
 
 revolved ::

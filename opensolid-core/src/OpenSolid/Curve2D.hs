@@ -74,7 +74,7 @@ module OpenSolid.Curve2D
   , fromUniform
   , atUniform
   , piecewise
-  , offsetBy
+  , displaceBy
   )
 where
 
@@ -617,7 +617,7 @@ medialAxis curve1 curve2 = do
         let radius :: SurfaceFunction1D units = Units.coerce do
               (d `dot_` d) ?/? Nonzero (2.0 * (tangentVector1 << SurfaceFunction1D.u) `cross` d)
         let offset1 = radius * normal1 << SurfaceFunction1D.u
-        let curve = curve1 << SurfaceFunction1D.u & SurfaceFunction2D.offsetBy offset1
+        let curve = curve1 << SurfaceFunction1D.u & SurfaceFunction2D.displaceBy offset1
         let toSegment solutionCurve =
               MedialAxis.Segment
                 { t1 = xCoordinate solutionCurve
@@ -783,5 +783,5 @@ piecewiseDerivativeRange tree s1 s2 = case tree of
     let rRange = Interval (s1 / segmentLength) (s2 / segmentLength)
     VectorCurve2D.range rRange curve
 
-offsetBy :: VectorCurve2D units -> Curve2D units -> Curve2D units
-offsetBy = Curve.offsetBy
+displaceBy :: VectorCurve2D units -> Curve2D units -> Curve2D units
+displaceBy = Curve.displaceBy

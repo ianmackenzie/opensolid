@@ -16,7 +16,7 @@ module OpenSolid.SurfaceFunction2D
   , yCoordinate
   , coordinates
   , transformBy
-  , offsetBy
+  , displaceBy
   )
 where
 
@@ -136,7 +136,7 @@ constant value =
   new (CompiledFunction.constant value) (VectorSurfaceFunction2D.zero, VectorSurfaceFunction2D.zero)
 
 displacedFrom :: Point2D units -> VectorSurfaceFunction2D units -> SurfaceFunction2D units
-displacedFrom point displacementFunction = constant point & offsetBy displacementFunction
+displacedFrom point displacementFunction = constant point & displaceBy displacementFunction
 
 uv :: SurfaceFunction2D Unitless
 uv = xy SurfaceFunction1D.u SurfaceFunction1D.v
@@ -294,8 +294,8 @@ yCoordinate function = do
 coordinates :: SurfaceFunction2D units -> (SurfaceFunction1D units, SurfaceFunction1D units)
 coordinates function = (xCoordinate function, yCoordinate function)
 
-offsetBy :: VectorSurfaceFunction2D units -> SurfaceFunction2D units -> SurfaceFunction2D units
-offsetBy displacementFunction surfaceFunction = do
+displaceBy :: VectorSurfaceFunction2D units -> SurfaceFunction2D units -> SurfaceFunction2D units
+displaceBy displacementFunction surfaceFunction = do
   let compiledOffset =
         compiled surfaceFunction + VectorSurfaceFunction2D.compiled displacementFunction
   let compiledPartialDerivatives =

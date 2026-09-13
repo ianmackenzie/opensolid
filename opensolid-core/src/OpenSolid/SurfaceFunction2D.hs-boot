@@ -5,7 +5,7 @@ module OpenSolid.SurfaceFunction2D
   , compiled
   , new
   , xy
-  , offsetBy
+  , displaceBy
   )
 where
 
@@ -66,4 +66,4 @@ compiled :: SurfaceFunction2D units -> Compiled units
 partialDerivatives ::
   SurfaceFunction2D units ->
   (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)
-offsetBy :: VectorSurfaceFunction2D units -> SurfaceFunction2D units -> SurfaceFunction2D units
+displaceBy :: VectorSurfaceFunction2D units -> SurfaceFunction2D units -> SurfaceFunction2D units

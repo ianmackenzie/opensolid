@@ -9,7 +9,7 @@ module OpenSolid.SurfaceFunction3D
   , compiled
   , partialDerivatives
   , transformBy
-  , offsetBy
+  , displaceBy
   )
 where
 
@@ -47,7 +47,7 @@ transformBy ::
   Transform3D tag space ->
   SurfaceFunction3D space ->
   SurfaceFunction3D space
-offsetBy ::
+displaceBy ::
   VectorSurfaceFunction3D Meters space ->
   SurfaceFunction3D space ->
   SurfaceFunction3D space
