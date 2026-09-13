@@ -3,6 +3,8 @@ module OpenSolid.Body3D.HalfEdge
   , Id (..)
   , id
   , bounds
+  , uvBounds
+  , surfaceCurve
   , curve
   , uvCurve
   , findMatingHalfEdges
@@ -24,6 +26,7 @@ import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
+import OpenSolid.UvBounds (UvBounds)
 
 data HalfEdge space = HalfEdge
   { id :: Id
@@ -41,14 +44,20 @@ data Id = Id
 id :: HalfEdge space -> Id
 id = (.id)
 
+surfaceCurve :: HalfEdge space -> SurfaceCurve3D space
+surfaceCurve = (.surfaceCurve)
+
 bounds :: HalfEdge space -> Bounds3D space
-bounds halfEdge = SurfaceCurve3D.bounds halfEdge.surfaceCurve
+bounds = SurfaceCurve3D.bounds . surfaceCurve
+
+uvBounds :: HalfEdge space -> UvBounds
+uvBounds = SurfaceCurve3D.uvBounds . surfaceCurve
 
 curve :: HalfEdge space -> Curve3D space
-curve halfEdge = SurfaceCurve3D.curve halfEdge.surfaceCurve
+curve = SurfaceCurve3D.curve . surfaceCurve
 
 uvCurve :: HalfEdge space -> Curve2D Unitless
-uvCurve halfEdge = SurfaceCurve3D.uvCurve halfEdge.surfaceCurve
+uvCurve = SurfaceCurve3D.uvCurve . surfaceCurve
 
 findMatingHalfEdges ::
   Tolerance Meters =>
