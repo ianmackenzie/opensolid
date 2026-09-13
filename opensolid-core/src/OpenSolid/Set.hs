@@ -23,6 +23,7 @@ module OpenSolid.Set
   , toListWithIndex
   , cull
   , filter
+  , filterMap
   , any
   , all
   , pairwiseFilter
@@ -47,6 +48,7 @@ import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.List qualified as List
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Set.Bounds (Bounds)
@@ -337,6 +339,33 @@ filterImpl boundsPredicate itemPredicate set = case set of
   Node{nodeBounds, children} ->
     if boundsPredicate nodeBounds
       then case NonEmpty.filterMap (filterImpl boundsPredicate itemPredicate) children of
+        NonEmpty filteredChildren -> Just (node filteredChildren)
+        [] -> Nothing
+      else Nothing
+
+filterMap ::
+  (Bounded a2 b2, Bounds b2) =>
+  (b1 -> Bool) ->
+  (a1 -> Maybe a2) ->
+  Set b1 a1 ->
+  Bag b2 a2
+filterMap boundsPredicate itemFunction set =
+  Bag.fromMaybeSet (filterMapImpl boundsPredicate itemFunction set)
+
+filterMapImpl ::
+  (Bounded a2 b2, Bounds b2) =>
+  (b1 -> Bool) ->
+  (a1 -> Maybe a2) ->
+  Set b1 a1 ->
+  Maybe (Set b2 a2)
+filterMapImpl boundsPredicate itemFunction set = case set of
+  Leaf{leafBounds, leafItem} ->
+    if boundsPredicate leafBounds
+      then Maybe.map leaf (itemFunction leafItem)
+      else Nothing
+  Node{nodeBounds, children} ->
+    if boundsPredicate nodeBounds
+      then case NonEmpty.filterMap (filterMapImpl boundsPredicate itemFunction) children of
         NonEmpty filteredChildren -> Just (node filteredChildren)
         [] -> Nothing
       else Nothing

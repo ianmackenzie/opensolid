@@ -24,6 +24,7 @@ module OpenSolid.Set2D
   , combineWithIndex
   , cull
   , filter
+  , filterMap
   , any
   , all
   , pairwiseFilter
@@ -129,6 +130,14 @@ cull = Set.cull
 
 filter :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bag2D units item
 filter = Set.filter
+
+filterMap ::
+  Bounded item2 (Bounds2D units2) =>
+  (Bounds2D units1 -> Bool) ->
+  (item1 -> Maybe item2) ->
+  Set2D units1 item1 ->
+  Bag2D units2 item2
+filterMap = Set.filterMap
 
 any :: (Bounds2D units -> Bool) -> (item -> Bool) -> Set2D units item -> Bool
 any = Set.any

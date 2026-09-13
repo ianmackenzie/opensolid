@@ -24,6 +24,7 @@ module OpenSolid.Set3D
   , combineWithIndex
   , cull
   , filter
+  , filterMap
   , any
   , all
   , pairwiseFilter
@@ -129,6 +130,14 @@ cull = Set.cull
 
 filter :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bag3D space item
 filter = Set.filter
+
+filterMap ::
+  Bounded item2 (Bounds3D space2) =>
+  (Bounds3D space1 -> Bool) ->
+  (item1 -> Maybe item2) ->
+  Set3D space1 item1 ->
+  Bag3D space2 item2
+filterMap = Set.filterMap
 
 any :: (Bounds3D space -> Bool) -> (item -> Bool) -> Set3D space item -> Bool
 any = Set.any
