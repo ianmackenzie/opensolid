@@ -1,3 +1,29 @@
+Allow SurfaceFunction3D to be degenerate, enforce that Surface3D is nondegenerate?
+- remove VectorSurfaceFunction3D.Nondegenerate and most related machinery
+- general pattern: *Function can be zero/degenerate, but curves and surfaces can't
+
+Move Array and Color into OpenSolid.Prelude?
+
+Add Sketch3D type? Basically just Plane3D + Region2D
+
+"translational" -> "sweptBy"? (as opposed to "sweptAlong"...)
+
+Enforce nondegenerate curves/surfaces
+- rename 'new' to 'unsafe', add 'new' that enforces nondegenerateness
+- remove use of Nondegenerate vector curves (inline L'Hopital logic for tangent directions into Curve)
+
+Move PointClassification and BoundsClassification into Region, rename 'classify' to 'classifyPoint'?
+- more explicit, more type safe
+- rename IncidentPoint to BoundaryPoint so it makes sense in both modules (Region2D and Boundary)
+
+Add 'r', 'w' and 'wv' down to C++ bytecode level
+
+Restrict Units.Coercion for Curve.Segment to 2D and remove most constraints?
+
+Have 'erase' functions also erase space to Void?
+
+Rename Text.[int,number] -> Text.[fromInt,fromNumber]?
+
 Add support for 'Nondegenerate Surface3D'
 - then refactor Body3D to store a set of 'Nondegenerate Surface3D'
 
@@ -6,6 +32,37 @@ Implement Surface3D.findPoint
 Implement Curve3D-Surface3D intersection
 
 Implement Surface3D-Surface3D intersection...
+
+Restrict medial axis to Meters only
+
+Update code to use UvPoint type alias
+
+Add better error checking for translational swept bodies?
+- enforce that derivative of translation curve relative to sketch plane is only zero at endpoints
+
+Add arc length parameterization of non-vanishing curves
+- if derivative is non-vanishing, then can safely take derivative of arc length parameterization
+- derivative will always be non-vanishing for surface intersection curves, so they can always be joined piecewise!
+
+Have Set.pairwise* functions return *Set* values?
+- add plain Set.pairwise as well
+- probably need to add NonEmpty.pairs...
+
+Add Set.filterCombine?
+- hopefully allow removal of Set.Bounds constraint from Bag.combine...
+
+Turn off StrictData?
+- most important cases will be handled anyways by using unboxed Double# fields
+- any remaining cases can turn on strictness explicitly
+- in particular, seems like a good idea for Set fields to be lazy
+
+Add Convert typeclass? Allow for e.g. generic Convert instance for Bisection.Tree
+
+Switch to quaternions for Orientation3D, with basis directions lazily computed?
+- have our cake and eat it too...efficient rotations, no drift, but no repeated recomputations
+
+Make curve segment types concrete, have SegmentExists typeclass?
+- should then hopefully make it possible to use Data.Coerce.coerce for Space.Coercion instances of curve bisection trees...
 
 Do a pass to make sure anything using Tolerance.unitless is normalized
 - normalize NURBS points and weights (divide all points and weights by the largest weight)?
@@ -27,6 +84,44 @@ Optimize bytecode compilation
   - also has the benefit of making *evaluation* faster!
   - one candidate: add specialized SurfaceFunction3D.planar, use in Surface3D.on constructor
   - generally dig through curve construction functions used in gear generation example and try to simplify/optimize?
+
+Remove units parameter from 2D positional types (Point2D, Curve2D etc.),
+in favour of e.g. Point2D and UvPoint being *separate* types?
+- would mean duplicate logic between Point2D and UvPoint
+- would still have shared logic between Curve2D and UvCurve,
+  since those would still both be specializations of the generic Curve type
+- wouldn't have to immediately create Uv* versions of *all* 2D types right away
+  - e.g. could probably leave out:
+    - Arc2D
+    - Circle2D
+    - Polyline2D
+    - Polygon2D
+    - Surface2D
+    - SurfaceFunction2D
+    - Transform2D
+    - Triangle2D
+  - would probably need:
+    - UvAxis
+    - UvBag (shared Bag implementation)
+    - UvBounds
+    - UvCurve (shared Curve implementation)
+    - UvDirection
+    - UvDirectionBounds
+    - UvFrame
+    - UvLine (shared Line implementation)
+    - UvOrientation
+    - UvPoint
+    - UvRegion (change existing 'Region2D units' to 'Region units' generic type?)
+    - UvSet (shared Set implementation)
+    - UvVector
+    - UvVectorCurve
+    - UvVectorBounds
+- what about directional/vector types?
+  - Direction2D, Orientation2D used in both UV parameter space and 'real' space?
+    - Or have UvDirection, UvOrientation that are really just renamed copies...
+  - should Vector2D still have a units type?
+    - Vector2D has a units type and interoperates with Point2D;
+      UvVector has no units type and only interoperates with UvPoint
 
 Optimize curves to reuse arc lengths and uniform parameterizations where possible
 - can simply reuse as is for rigid transformations and coordinate conversions
