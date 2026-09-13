@@ -24,7 +24,6 @@ module OpenSolid.Bag2D
   , all
   , pairwiseAny
   , clusters
-  , strip
   )
 where
 
@@ -128,6 +127,3 @@ clusters ::
   Bag2D units item ->
   List (NonEmpty item)
 clusters = Bag.clusters
-
-strip :: Bag2D units item -> Bag2D units ()
-strip = Bag.strip

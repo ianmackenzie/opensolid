@@ -32,7 +32,6 @@ module OpenSolid.Set2D
   , pairwiseFilterWithIndices
   , pairwiseFilterMapWithIndices
   , clusters
-  , strip
   )
 where
 
@@ -183,6 +182,3 @@ clusters ::
   Set2D units item ->
   NonEmpty (NonEmpty item)
 clusters = Set.clusters
-
-strip :: Set2D units item -> Set2D units ()
-strip = Set.strip
