@@ -12,7 +12,9 @@ module OpenSolid.Bag
   , aggregate
   , toList
   , toListOf
+  , flatten
   , map
+  , combine
   , cull
   , filter
   , filterMap
@@ -118,9 +120,19 @@ toListOf :: (a1 -> a2) -> Bag b a1 -> List a2
 toListOf _ Empty = []
 toListOf function (Full set) = Set.toListOf function set
 
+flatten :: Set.Bounds b => Bag b (Bag b a) -> Bag b a
+flatten = combine id
+
 map :: (Bounded a2 b2, Set.Bounds b2) => (a1 -> a2) -> Bag b1 a1 -> Bag b2 a2
 map _ Empty = Empty
 map function (Full set) = Full (Set.map function set)
+
+combine :: Set.Bounds b2 => (a1 -> Bag b2 a2) -> Bag b1 a1 -> Bag b2 a2
+combine _ Empty = Empty
+combine function (Full set) =
+  case Set.filterMap (const True) (toMaybeSet . function) set of
+    Empty -> Empty
+    Full nestedSets -> Full (Set.flatten nestedSets)
 
 cull :: Set.Bounds b => (b -> Bool) -> Bag b a -> Bag b a
 cull _ Empty = Empty

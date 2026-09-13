@@ -14,7 +14,9 @@ module OpenSolid.Bag2D
   , aggregate
   , toList
   , toListOf
+  , flatten
   , map
+  , combine
   , cull
   , filter
   , filterMap
@@ -79,12 +81,18 @@ toList = Bag.toList
 toListOf :: (item1 -> item2) -> Bag2D units item1 -> List item2
 toListOf = Bag.toListOf
 
+flatten :: Bag2D units (Bag2D units item) -> Bag2D units item
+flatten = Bag.flatten
+
 map ::
   Bounded item2 (Bounds2D units2) =>
   (item1 -> item2) ->
   Bag2D units1 item1 ->
   Bag2D units2 item2
 map = Bag.map
+
+combine :: (item1 -> Bag2D units2 item2) -> Bag2D units1 item1 -> Bag2D units2 item2
+combine = Bag.combine
 
 cull :: (Bounds2D units -> Bool) -> Bag2D units item -> Bag2D units item
 cull = Bag.cull
