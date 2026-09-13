@@ -101,7 +101,7 @@ data Region2D units = Region2D
 
 type Loop units = NonEmpty (Curve2D units)
 
-data Classification = Inside | Outside | OnBoundary deriving (Eq, Show, Bounded, Enum)
+data Classification = Inside | Outside | OnBoundary deriving (Eq, Show)
 
 instance FFI (Region2D Meters) where
   representation = FFI.classRepresentation "Region2D"
