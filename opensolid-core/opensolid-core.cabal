@@ -225,6 +225,7 @@ library
     OpenSolid.Surface3D.Nondegenerate
     OpenSolid.Surface3D.OverlappingSegment
     OpenSolid.SurfaceCurve3D
+    OpenSolid.SurfaceCurve3D.Nondegenerate
     OpenSolid.SurfaceFunction1D
     OpenSolid.SurfaceFunction1D.Nonzero
     OpenSolid.SurfaceFunction1D.Zeros
