@@ -23,6 +23,7 @@ module OpenSolid.Surface3D
   , flip
   , placeIn
   , relativeTo
+  , findPoint
   )
 where
 
@@ -49,6 +50,7 @@ import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D
+import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
@@ -57,6 +59,7 @@ import OpenSolid.Result qualified as Result
 import OpenSolid.Set qualified as Set
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
+import {-# SOURCE #-} OpenSolid.Surface3D.Nondegenerate qualified as Surface3D.Nondegenerate
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
@@ -228,3 +231,11 @@ placeIn frame surface =
 relativeTo :: Frame3D global local -> Surface3D global -> Surface3D local
 relativeTo frame surface =
   parametric (SurfaceFunction3D.relativeTo frame surface.function) surface.domain
+
+findPoint ::
+  Tolerance Meters =>
+  Point3D space ->
+  Surface3D space ->
+  Result (IsDegenerate ()) (List (SurfacePoint3D space))
+findPoint point surface =
+  Result.map (Surface3D.Nondegenerate.findPoint point) (nondegenerate surface)

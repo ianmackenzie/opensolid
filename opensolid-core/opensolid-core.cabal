@@ -304,6 +304,7 @@ library
     OpenSolid.Step.Encode
     OpenSolid.Step.Entities
     OpenSolid.Step.Types
+    OpenSolid.Surface3D.Nondegenerate.FindPoint
     OpenSolid.SurfaceFunction1D.HorizontalCurve
     OpenSolid.SurfaceFunction1D.ImplicitCurveRange
     OpenSolid.SurfaceFunction1D.Internal
@@ -370,6 +371,7 @@ test-suite opensolid-core-test
     Tests.Region2D
     Tests.Set2D
     Tests.Stream
+    Tests.Surface3D
     Tests.SurfaceFunction1D
     Tests.Text
     Tests.VectorBounds2D

@@ -10,15 +10,18 @@ module OpenSolid.Surface3D.Nondegenerate
   , boundaryCurves
   , vertices
   , edges
+  , findPoint
   )
 where
 
 import OpenSolid.Bag3D (Bag3D)
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
+import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
+import {-# SOURCE #-} OpenSolid.Surface3D.Nondegenerate.FindPoint qualified as Surface3D.Nondegenerate.FindPoint
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfacePoint3D (SurfacePoint3D)
@@ -62,3 +65,10 @@ edges ::
   Nondegenerate (Surface3D space) ->
   Bag3D space (Nondegenerate (SurfaceCurve3D space))
 edges (Nondegenerate surface) = Surface3D.edges surface
+
+findPoint ::
+  Tolerance Meters =>
+  Point3D space ->
+  Nondegenerate (Surface3D space) ->
+  List (SurfacePoint3D space)
+findPoint = Surface3D.Nondegenerate.FindPoint.findPoint
