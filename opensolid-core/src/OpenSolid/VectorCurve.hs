@@ -54,10 +54,6 @@ import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Nonzero qualified as Curve1D.Nonzero
 import OpenSolid.Curve1D.Root qualified as Curve1D.Root
-import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
-import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
-import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
-import {-# SOURCE #-} OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction3D (Direction3D)
@@ -75,8 +71,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Point2D (Point2D)
-import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
@@ -850,30 +844,6 @@ instance
     (VectorCurve3D units space1)
   where
   lhs `cross` rhs = Vector3D.unit lhs `cross` rhs
-
-instance
-  units1 ~ units2 =>
-  Addition (Point2D units1) (VectorCurve2D units2) (Curve2D units1)
-  where
-  point + curve = Curve2D.constant point + curve
-
-instance
-  space1 ~ space2 =>
-  Addition (Point3D space1) (VectorCurve3D Meters space2) (Curve3D space1)
-  where
-  point + curve = Curve3D.constant point + curve
-
-instance
-  units1 ~ units2 =>
-  Subtraction (Point2D units1) (VectorCurve2D units2) (Curve2D units1)
-  where
-  point - curve = Curve2D.constant point - curve
-
-instance
-  space1 ~ space2 =>
-  Subtraction (Point3D space1) (VectorCurve3D Meters space2) (Curve3D space1)
-  where
-  point - curve = Curve3D.constant point - curve
 
 instance
   VectorCurveExists dimension units space =>

@@ -31,7 +31,8 @@ main = Tolerance.using Length.defaultTolerance do
   let radius = Length.centimeters 10.0
   let arc v1 v2 v3 = do
         let radialUnitVector = VectorCurve2D.quadraticBezier v1 v2 v3 / weightCurve
-        IO.succeed (Point2D.origin + radius * radialUnitVector)
+        let curve = Curve2D.displacedFrom Point2D.origin (radius * radialUnitVector)
+        IO.succeed curve
   arc1 <- arc vE vNE vN
   arc2 <- arc vN vNW vW
   arc3 <- arc vW vSW vS

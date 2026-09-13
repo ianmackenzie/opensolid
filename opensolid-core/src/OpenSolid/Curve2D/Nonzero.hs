@@ -10,6 +10,7 @@ module OpenSolid.Curve2D.Nonzero
 where
 
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Direction2D (Direction2D)
@@ -50,7 +51,7 @@ offsetLeftwardBy ::
 offsetLeftwardBy offset curve = do
   let tangentCurve = VectorCurve.Nonzero.normalize (derivative curve)
   let offsetCurve = VectorCurve2D.rotateBy Angle.quarterTurn (offset * Nonzero.unwrap tangentCurve)
-  Nonzero.unwrap curve + offsetCurve
+  Nonzero.unwrap curve & Curve.offsetBy offsetCurve
 
 offsetRightwardBy ::
   Tolerance units =>

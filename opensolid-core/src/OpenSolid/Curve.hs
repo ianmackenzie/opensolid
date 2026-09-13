@@ -13,6 +13,7 @@ module OpenSolid.Curve
   , IsDegenerateAndCoincidentWithPoint (IsDegenerateAndCoincidentWithPoint)
   , new
   , constant
+  , displacedFrom
   , line
   , lineFrom
   , bezier
@@ -65,6 +66,7 @@ module OpenSolid.Curve
   , transformBy
   , convert
   , placeOn
+  , offsetBy
   )
 where
 
@@ -249,34 +251,6 @@ instance
   , space1 ~ space2
   , units1 ~ units2
   ) =>
-  Addition
-    (Curve dimension1 units1 space1)
-    (VectorCurve dimension2 units2 space2)
-    (Curve dimension1 units1 space1)
-  where
-  lhs + rhs =
-    new (compiled lhs + VectorCurve.compiled rhs) (derivative lhs + VectorCurve.derivative rhs)
-
-instance
-  ( CurveExists dimension1 units1 space1
-  , dimension1 ~ dimension2
-  , space1 ~ space2
-  , units1 ~ units2
-  ) =>
-  Subtraction
-    (Curve dimension1 units1 space1)
-    (VectorCurve dimension2 units2 space2)
-    (Curve dimension1 units1 space1)
-  where
-  lhs - rhs =
-    new (compiled lhs - VectorCurve.compiled rhs) (derivative lhs - VectorCurve.derivative rhs)
-
-instance
-  ( CurveExists dimension1 units1 space1
-  , dimension1 ~ dimension2
-  , space1 ~ space2
-  , units1 ~ units2
-  ) =>
   Subtraction
     (Curve dimension1 units1 space1)
     (Curve dimension2 units2 space2)
@@ -439,10 +413,6 @@ class
       (Expression Number (Point dimension units space))
   , Subtraction
       (Expression Number (Point dimension units space))
-      (Expression Number (Vector dimension units space))
-      (Expression Number (Point dimension units space))
-  , Subtraction
-      (Expression Number (Point dimension units space))
       (Expression Number (Point dimension units space))
       (Expression Number (Vector dimension units space))
   , VectorCurveExists dimension units space
@@ -505,6 +475,13 @@ constant ::
   CurveExists dimension units space =>
   Point dimension units space -> Curve dimension units space
 constant givenPoint = new (CompiledFunction.constant givenPoint) VectorCurve.zero
+
+displacedFrom ::
+  CurveExists dimension units space =>
+  Point dimension units space ->
+  VectorCurve dimension units space ->
+  Curve dimension units space
+displacedFrom point displacementCurve = constant point & offsetBy displacementCurve
 
 line ::
   CurveExists dimension units space =>
@@ -956,3 +933,17 @@ placeOn plane curve =
       , bisectionTree = Nondegenerate.field (buildBisectionTree Interval.unit) placed
       , arcLengthParameterization = curve.arcLengthParameterization
       }
+
+offsetBy ::
+  ( CurveExists dimension1 units1 space1
+  , dimension1 ~ dimension2
+  , space1 ~ space2
+  , units1 ~ units2
+  ) =>
+  VectorCurve dimension2 units2 space2 ->
+  Curve dimension1 units1 space1 ->
+  Curve dimension1 units1 space1
+offsetBy vectorCurve curve =
+  new
+    (compiled curve + VectorCurve.compiled vectorCurve)
+    (derivative curve + VectorCurve.derivative vectorCurve)

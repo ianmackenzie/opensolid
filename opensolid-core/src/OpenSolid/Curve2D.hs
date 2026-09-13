@@ -4,6 +4,7 @@ module OpenSolid.Curve2D
   , Segment
   , new
   , constant
+  , displacedFrom
   , xy
   , line
   , lineFrom
@@ -151,6 +152,9 @@ xy x y = do
   let compiledXY = CompiledFunction.map2 Expression.xy Point2D Bounds2D compiledX compiledY
   let xyDerivative = VectorCurve2D.xy (Curve1D.derivative x) (Curve1D.derivative y)
   new compiledXY xyDerivative
+
+displacedFrom :: Point2D units -> VectorCurve2D units -> Curve2D units
+displacedFrom = Curve.displacedFrom
 
 -- | Convert a line to a curve.
 line :: Line2D units -> Curve2D units
@@ -306,7 +310,7 @@ customArc ::
   Angle ->
   Angle ->
   Curve2D units
-customArc p0 v1 v2 a b = p0 + VectorCurve2D.arc v1 v2 a b
+customArc p0 v1 v2 a b = displacedFrom p0 (VectorCurve2D.arc v1 v2 a b)
 
 -- | Create a curve from the given circle.
 circle :: Circle2D units -> Curve2D units
@@ -380,7 +384,8 @@ hermite = Curve.hermite
 
 involute :: Point2D units -> Vector2D units -> Angle -> Angle -> Curve2D units
 involute centerPoint radialVector startAngle endAngle =
-  centerPoint + involuteVector 0 radialVector (Vector2D.rotateLeft radialVector) startAngle endAngle
+  displacedFrom centerPoint $
+    involuteVector 0 radialVector (Vector2D.rotateLeft radialVector) startAngle endAngle
 
 involuteVector :: Int -> Vector2D units -> Vector2D units -> Angle -> Angle -> VectorCurve2D units
 involuteVector n vx vy theta1 theta2 =

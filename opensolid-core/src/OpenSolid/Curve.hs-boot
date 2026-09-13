@@ -63,20 +63,6 @@ type Compiled dimension units space =
 
 instance
   (CurveExists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
-  Addition
-    (Curve dimension1 units1 space1)
-    (VectorCurve dimension2 units2 space2)
-    (Curve dimension1 units1 space1)
-
-instance
-  (CurveExists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
-  Subtraction
-    (Curve dimension1 units1 space1)
-    (VectorCurve dimension2 units2 space2)
-    (Curve dimension1 units1 space1)
-
-instance
-  (CurveExists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
   Subtraction
     (Curve dimension1 units1 space1)
     (Curve dimension2 units2 space2)
