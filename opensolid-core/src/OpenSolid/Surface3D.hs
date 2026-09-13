@@ -164,21 +164,27 @@ on plane region = do
   let p0 = Point2D.placeOn plane centerPoint
   let vx = regionSize * Plane3D.xDirection plane
   let vy = regionSize * Plane3D.yDirection plane
-  let planeFunction = p0 + SurfaceFunction1D.u * vx + SurfaceFunction1D.v * vy
+  let displacementFunction = SurfaceFunction1D.u * vx + SurfaceFunction1D.v * vy
+  let planeFunction = SurfaceFunction3D.displacedFrom p0 displacementFunction
   parametric planeFunction normalizedRegion
 
 extruded :: Curve3D space -> Vector3D Meters space -> Surface3D space
 extruded curve displacement = translational curve (displacement * Curve1D.t)
 
 translational :: Curve3D space -> VectorCurve3D Meters space -> Surface3D space
-translational uCurve vCurve =
-  parametric (uCurve << SurfaceFunction1D.u + vCurve << SurfaceFunction1D.v) UvRegion.unitSquare
+translational baseCurve translationCurve = do
+  let baseFunction = baseCurve << SurfaceFunction1D.u
+  let translationFunction = translationCurve << SurfaceFunction1D.v
+  let translationalFunction = baseFunction & SurfaceFunction3D.offsetBy translationFunction
+  parametric translationalFunction UvRegion.unitSquare
 
 ruled :: Curve3D space -> Curve3D space -> Surface3D space
 ruled bottom top = do
-  let f1 = bottom << SurfaceFunction1D.u
-  let f2 = top << SurfaceFunction1D.u
-  parametric (f1 + SurfaceFunction1D.v * (f2 - f1)) UvRegion.unitSquare
+  let bottomFunction = bottom << SurfaceFunction1D.u
+  let topFunction = top << SurfaceFunction1D.u
+  let displacementFunction = SurfaceFunction1D.v * (topFunction - bottomFunction)
+  let ruledFunction = bottomFunction & SurfaceFunction3D.offsetBy displacementFunction
+  parametric ruledFunction UvRegion.unitSquare
 
 revolved ::
   Tolerance Meters =>
@@ -195,11 +201,11 @@ revolved plane curve axis angle = do
   let radius = xCoordinate << SurfaceFunction1D.u
   let height = yCoordinate << SurfaceFunction1D.u
   let theta = angle * SurfaceFunction1D.v
-  let surfaceFunction =
-        frame3D.originPoint
-          + radius * SurfaceFunction1D.cos theta * Frame3D.rightwardDirection frame3D
+  let displacementFunction =
+        radius * SurfaceFunction1D.cos theta * Frame3D.rightwardDirection frame3D
           + radius * SurfaceFunction1D.sin theta * Frame3D.forwardDirection frame3D
           + height * Frame3D.upwardDirection frame3D
+  let surfaceFunction = SurfaceFunction3D.displacedFrom frame3D.originPoint displacementFunction
   parametric surfaceFunction UvRegion.unitSquare
 
 nondegenerate ::

@@ -46,13 +46,10 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.PartialDerivatives qualified as PartialDerivatives
-import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
@@ -190,24 +187,6 @@ instance
     (VectorSurfaceFunction3D units1 space1)
   where
   v - f = constant v - f
-
-instance
-  space1 ~ space2 =>
-  Addition
-    (Point3D space1)
-    (VectorSurfaceFunction3D Meters space2)
-    (SurfaceFunction3D space1)
-  where
-  point + function = SurfaceFunction3D.constant point + function
-
-instance
-  space1 ~ space2 =>
-  Subtraction
-    (Point3D space1)
-    (VectorSurfaceFunction3D Meters space2)
-    (SurfaceFunction3D space1)
-  where
-  point - function = SurfaceFunction3D.constant point - function
 
 instance
   Units.Product units1 units2 units3 =>

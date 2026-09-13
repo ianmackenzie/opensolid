@@ -9,6 +9,7 @@ module OpenSolid.SurfaceFunction3D
   , compiled
   , partialDerivatives
   , transformBy
+  , offsetBy
   )
 where
 
@@ -29,20 +30,6 @@ data SurfaceFunction3D space
 type Compiled space =
   CompiledFunction UvPoint (Point3D space) UvBounds (Bounds3D space)
 
-instance
-  space1 ~ space2 =>
-  Addition
-    (SurfaceFunction3D space1)
-    (VectorSurfaceFunction3D Meters space2)
-    (SurfaceFunction3D space1)
-
-instance
-  space1 ~ space2 =>
-  Subtraction
-    (SurfaceFunction3D space1)
-    (VectorSurfaceFunction3D Meters space2)
-    (SurfaceFunction3D space1)
-
 new ::
   Compiled space ->
   (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space) ->
@@ -58,5 +45,9 @@ partialDerivatives ::
 transformBy ::
   Transform.Tag.IsOrthonormal tag =>
   Transform3D tag space ->
+  SurfaceFunction3D space ->
+  SurfaceFunction3D space
+offsetBy ::
+  VectorSurfaceFunction3D Meters space ->
   SurfaceFunction3D space ->
   SurfaceFunction3D space

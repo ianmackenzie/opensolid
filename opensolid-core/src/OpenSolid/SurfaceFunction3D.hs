@@ -5,6 +5,7 @@ module OpenSolid.SurfaceFunction3D
   , BisectionTree
   , new
   , constant
+  , displacedFrom
   , pointAt
   , pointOn
   , range
@@ -25,6 +26,7 @@ module OpenSolid.SurfaceFunction3D
   , placeIn
   , relativeTo
   , transformBy
+  , offsetBy
   )
 where
 
@@ -90,48 +92,6 @@ type Compiled space =
   CompiledFunction UvPoint (Point3D space) UvBounds (Bounds3D space)
 
 type BisectionTree space = Bisection.Tree UvBounds (Segment space)
-
-instance
-  space1 ~ space2 =>
-  Addition
-    (SurfaceFunction3D space1)
-    (VectorSurfaceFunction3D Meters space2)
-    (SurfaceFunction3D space1)
-  where
-  f + g =
-    new
-      (compiled f + VectorSurfaceFunction3D.compiled g)
-      (Pair.map2 (+) (partialDerivatives f) (VectorSurfaceFunction3D.partialDerivatives g))
-
-instance
-  space1 ~ space2 =>
-  Addition
-    (SurfaceFunction3D space1)
-    (Vector3D Meters space2)
-    (SurfaceFunction3D space1)
-  where
-  f + v = f + VectorSurfaceFunction3D.constant v
-
-instance
-  space1 ~ space2 =>
-  Subtraction
-    (SurfaceFunction3D space1)
-    (VectorSurfaceFunction3D Meters space2)
-    (SurfaceFunction3D space1)
-  where
-  f - g =
-    new
-      (compiled f - VectorSurfaceFunction3D.compiled g)
-      (Pair.map2 (-) (partialDerivatives f) (VectorSurfaceFunction3D.partialDerivatives g))
-
-instance
-  space1 ~ space2 =>
-  Subtraction
-    (SurfaceFunction3D space1)
-    (Vector3D Meters space2)
-    (SurfaceFunction3D space1)
-  where
-  f - v = f - VectorSurfaceFunction3D.constant v
 
 instance
   space1 ~ space2 =>
@@ -236,6 +196,9 @@ buildBisectionTree uvRange function = do
 constant :: Point3D space -> SurfaceFunction3D space
 constant value =
   new (CompiledFunction.constant value) (VectorSurfaceFunction3D.zero, VectorSurfaceFunction3D.zero)
+
+displacedFrom :: Point3D space -> VectorSurfaceFunction3D Meters space -> SurfaceFunction3D space
+displacedFrom point displacementFunction = constant point & offsetBy displacementFunction
 
 divergence :: SurfaceFunction3D space -> UvPoint -> Length
 divergence function uvPoint = do
@@ -379,3 +342,17 @@ placeIn frame function = do
 
 relativeTo :: Frame3D global local -> SurfaceFunction3D global -> SurfaceFunction3D local
 relativeTo frame = placeIn (Frame3D.inverse frame)
+
+offsetBy ::
+  VectorSurfaceFunction3D Meters space ->
+  SurfaceFunction3D space ->
+  SurfaceFunction3D space
+offsetBy displacementFunction surfaceFunction = do
+  let compiledOffset =
+        compiled surfaceFunction + VectorSurfaceFunction3D.compiled displacementFunction
+  let compiledPartialDerivatives =
+        Pair.map2
+          (+)
+          (partialDerivatives surfaceFunction)
+          (VectorSurfaceFunction3D.partialDerivatives displacementFunction)
+  new compiledOffset compiledPartialDerivatives

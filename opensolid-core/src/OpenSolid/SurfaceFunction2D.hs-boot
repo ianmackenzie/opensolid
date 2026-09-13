@@ -5,6 +5,7 @@ module OpenSolid.SurfaceFunction2D
   , compiled
   , new
   , xy
+  , offsetBy
   )
 where
 
@@ -25,13 +26,6 @@ data SurfaceFunction2D units
 
 type Compiled units =
   CompiledFunction UvPoint (Point2D units) UvBounds (Bounds2D units)
-
-instance
-  units1 ~ units2 =>
-  Addition
-    (SurfaceFunction2D units1)
-    (VectorSurfaceFunction2D units2)
-    (SurfaceFunction2D units1)
 
 instance
   units1 ~ units2 =>
@@ -72,3 +66,4 @@ compiled :: SurfaceFunction2D units -> Compiled units
 partialDerivatives ::
   SurfaceFunction2D units ->
   (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)
+offsetBy :: VectorSurfaceFunction2D units -> SurfaceFunction2D units -> SurfaceFunction2D units
