@@ -16,6 +16,8 @@ module OpenSolid.Bag3D
   , toListOf
   , map
   , cull
+  , filter
+  , filterMap
   , any
   , all
   , pairwiseAny
@@ -86,6 +88,17 @@ map = Bag.map
 
 cull :: (Bounds3D space -> Bool) -> Bag3D space item -> Bag3D space item
 cull = Bag.cull
+
+filter :: (Bounds3D space -> Bool) -> (item -> Bool) -> Bag3D space item -> Bag3D space item
+filter = Bag.filter
+
+filterMap ::
+  Bounded item2 (Bounds3D space2) =>
+  (Bounds3D space1 -> Bool) ->
+  (item1 -> Maybe item2) ->
+  Bag3D space1 item1 ->
+  Bag3D space2 item2
+filterMap = Bag.filterMap
 
 any :: (Bounds3D space -> Bool) -> (item -> Bool) -> Bag3D space item -> Bool
 any = Bag.any

@@ -14,6 +14,8 @@ module OpenSolid.Bag
   , toListOf
   , map
   , cull
+  , filter
+  , filterMap
   , any
   , all
   , pairwiseAny
@@ -123,6 +125,19 @@ map function (Full set) = Full (Set.map function set)
 cull :: Set.Bounds b => (b -> Bool) -> Bag b a -> Bag b a
 cull _ Empty = Empty
 cull boundsFunction (Full set) = Set.cull boundsFunction set
+
+filter :: Set.Bounds b => (b -> Bool) -> (a -> Bool) -> Bag b a -> Bag b a
+filter _ _ Empty = Empty
+filter boundsPredicate itemPredicate (Full set) = Set.filter boundsPredicate itemPredicate set
+
+filterMap ::
+  (Bounded a2 b2, Set.Bounds b2) =>
+  (b1 -> Bool) ->
+  (a1 -> Maybe a2) ->
+  Bag b1 a1 ->
+  Bag b2 a2
+filterMap _ _ Empty = Empty
+filterMap boundsPredicate itemFunction (Full set) = Set.filterMap boundsPredicate itemFunction set
 
 any :: (b -> Bool) -> (a -> Bool) -> Bag b a -> Bool
 any _ _ Empty = False
