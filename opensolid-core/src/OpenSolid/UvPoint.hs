@@ -2,6 +2,10 @@ module OpenSolid.UvPoint
   ( UvPoint
   , data UvPoint
   , origin
+  , left
+  , right
+  , bottom
+  , top
   , coordinates
   , uCoordinate
   , vCoordinate
@@ -36,6 +40,18 @@ pattern UvPoint u v = Point2D u v
 origin :: UvPoint
 origin = Point2D.origin
 
+left :: Number -> UvPoint
+left vValue = UvPoint 0.0 vValue
+
+right :: Number -> UvPoint
+right vValue = UvPoint 1.0 vValue
+
+bottom :: Number -> UvPoint
+bottom uValue = UvPoint uValue 0.0
+
+top :: Number -> UvPoint
+top uValue = UvPoint uValue 1.0
+
 -- | Get the U and V coordinates of a point.
 {-# INLINE coordinates #-}
 coordinates :: UvPoint -> (Number, Number)
@@ -61,20 +77,17 @@ interiorSamples = do
   let p5 = UvPoint t1 t4
   NonEmpty.five p1 p2 p3 p4 p5
 
-boundarySamples :: (Number -> UvPoint) -> NonEmpty UvPoint
-boundarySamples toPoint = NonEmpty.map toPoint Parameter.samples
-
 leftSamples :: NonEmpty UvPoint
-leftSamples = boundarySamples (\v -> UvPoint 0.0 v)
+leftSamples = NonEmpty.map left Parameter.samples
 
 rightSamples :: NonEmpty UvPoint
-rightSamples = boundarySamples (\v -> UvPoint 1.0 v)
+rightSamples = NonEmpty.map right Parameter.samples
 
 bottomSamples :: NonEmpty UvPoint
-bottomSamples = boundarySamples (\u -> UvPoint u 0.0)
+bottomSamples = NonEmpty.map bottom Parameter.samples
 
 topSamples :: NonEmpty UvPoint
-topSamples = boundarySamples (\u -> UvPoint u 1.0)
+topSamples = NonEmpty.map top Parameter.samples
 
 random :: Random.Generator UvPoint
 random = Random.map2 UvPoint Parameter.random Parameter.random
