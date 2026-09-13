@@ -3,7 +3,7 @@ module OpenSolid.SurfaceFunction3D
   , Compiled
   , Segment
   , BisectionTree
-  , new
+  , unsafe
   , constant
   , displacedFrom
   , pointAt
@@ -149,13 +149,13 @@ instance
           ( dfdx * dxdu + dfdy * dydu
           , dfdx * dxdv + dfdy * dydv
           )
-    new compiledComposed composedPartialDerivatives
+    unsafe compiledComposed composedPartialDerivatives
 
-new ::
+unsafe ::
   Compiled space ->
   (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space) ->
   SurfaceFunction3D space
-new givenCompiled givenPartialDerivatives = do
+unsafe givenCompiled givenPartialDerivatives = do
   let mergedPartialDerivatives =
         PartialDerivatives.merge
           VectorSurfaceFunction3D.new
@@ -195,7 +195,9 @@ buildBisectionTree uvRange function = do
 
 constant :: Point3D space -> SurfaceFunction3D space
 constant value =
-  new (CompiledFunction.constant value) (VectorSurfaceFunction3D.zero, VectorSurfaceFunction3D.zero)
+  unsafe
+    (CompiledFunction.constant value)
+    (VectorSurfaceFunction3D.zero, VectorSurfaceFunction3D.zero)
 
 displacedFrom :: Point3D space -> VectorSurfaceFunction3D Meters space -> SurfaceFunction3D space
 displacedFrom point displacementFunction = constant point & displaceBy displacementFunction
@@ -326,7 +328,7 @@ transformBy transform function = do
         VectorSurfaceFunction3D.transformBy (Transform3D.vectorTransform transform)
   let transformedDerivatives =
         Pair.map transformDerivative (partialDerivatives function)
-  new compiledTransformed transformedDerivatives
+  unsafe compiledTransformed transformedDerivatives
 
 placeIn :: Frame3D global local -> SurfaceFunction3D local -> SurfaceFunction3D global
 placeIn frame function = do
@@ -338,7 +340,7 @@ placeIn frame function = do
           function.compiled
   let placedPartialDerivatives =
         Pair.map (VectorSurfaceFunction3D.placeIn frame) (partialDerivatives function)
-  new compiledPlaced placedPartialDerivatives
+  unsafe compiledPlaced placedPartialDerivatives
 
 relativeTo :: Frame3D global local -> SurfaceFunction3D global -> SurfaceFunction3D local
 relativeTo frame = placeIn (Frame3D.inverse frame)
@@ -355,4 +357,4 @@ displaceBy displacementFunction surfaceFunction = do
           (+)
           (partialDerivatives surfaceFunction)
           (VectorSurfaceFunction3D.partialDerivatives displacementFunction)
-  new compiledOffset compiledPartialDerivatives
+  unsafe compiledOffset compiledPartialDerivatives

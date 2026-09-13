@@ -1,7 +1,7 @@
 module OpenSolid.SurfaceFunction3D
   ( SurfaceFunction3D
   , Compiled
-  , new
+  , unsafe
   , constant
   , pointAt
   , pointOn
@@ -30,7 +30,7 @@ data SurfaceFunction3D space
 type Compiled space =
   CompiledFunction UvPoint (Point3D space) UvBounds (Bounds3D space)
 
-new ::
+unsafe ::
   Compiled space ->
   (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space) ->
   SurfaceFunction3D space

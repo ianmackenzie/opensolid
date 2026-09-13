@@ -369,7 +369,7 @@ instance Composition () (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFun
     let (dtdu, dtdv) = SurfaceFunction1D.partialDerivatives g
     let compiledComposed = compiled f << SurfaceFunction1D.compiled g
     let composedPartialDerivatives = (dfdt * dtdu, dfdt * dtdv)
-    SurfaceFunction3D.new compiledComposed composedPartialDerivatives
+    SurfaceFunction3D.unsafe compiledComposed composedPartialDerivatives
 
 data Solver dimension units space where
   Solver ::
