@@ -3,9 +3,11 @@ module Tests.Surface3D (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Length qualified as Length
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point2D qualified as Point2D
+import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
@@ -15,10 +17,13 @@ import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
+import OpenSolid.VectorCurve3D (VectorCurve3D)
+import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 import Test (Test)
 import Test qualified
 import Tests.Matching ((~~))
 import Tests.Random qualified as Random
+import Tests.SurfaceFunction3D qualified
 
 spherePatch :: Tolerance Meters => Generator (Surface3D space)
 spherePatch = do
@@ -37,6 +42,8 @@ nonPoleUvPoint = UvPoint.random & Random.filter (not . isOnPole)
 tests :: List Test
 tests =
   [ findPoint
+  , ruledSurface
+  , translationalSurface
   ]
 
 findPoint :: Test
@@ -73,3 +80,72 @@ findInteriorPoint = Test.check 100 "findInterior" do
     _ ->
       Test.fail "Expected a single solution"
         & Test.output "solutions" solutions
+
+ruledSurface :: Test
+ruledSurface =
+  Test.group
+    "ruledSurface"
+    [ ruledSurfaceCorrectValue
+    , ruledSurfaceDerivativeConsistency
+    ]
+
+ruledSurfaceCorrectValue :: Test
+ruledSurfaceCorrectValue = Test.check 100 "ruledSurfaceCorrectValue" do
+  curve1 <- Test.generate Random.cubicSpline3D
+  curve2 <- Test.generate Random.cubicSpline3D
+  surface <- Surface3D.ruled curve1 curve2 ?? fail
+  uvPoint <- Test.generate UvPoint.random
+  let UvPoint u v = uvPoint
+  let p1 = Curve3D.pointAt u curve1
+  let p2 = Curve3D.pointAt u curve2
+  let expectedPoint = Point3D.interpolateFrom p1 p2 v
+  let actualPoint = SurfaceFunction3D.pointAt uvPoint (Surface3D.function surface)
+  Test.expect (actualPoint ~~ expectedPoint)
+    & Test.output "expectedPoint" expectedPoint
+    & Test.output "actualPoint" actualPoint
+
+ruledSurfaceDerivativeConsistency :: Test
+ruledSurfaceDerivativeConsistency = Test.check 100 "ruledSurfaceDerivativeConsistency" do
+  curve1 <- Test.generate Random.cubicSpline3D
+  curve2 <- Test.generate Random.cubicSpline3D
+  surface <- Surface3D.ruled curve1 curve2 ?? fail
+  Tests.SurfaceFunction3D.partialDerivativesAreConsistent (Surface3D.function surface)
+
+translationalSurface :: Test
+translationalSurface =
+  Test.group
+    "translationalSurface"
+    [ translationalSurfaceCorrectValue
+    , translationalSurfaceDerivativeConsistency
+    ]
+
+randomVectorCubicSpline :: Generator (VectorCurve3D Meters space)
+randomVectorCubicSpline =
+  Random.map4
+    VectorCurve3D.cubicBezier
+    Random.vector3D
+    Random.vector3D
+    Random.vector3D
+    Random.vector3D
+
+translationalSurfaceCorrectValue :: Test
+translationalSurfaceCorrectValue = Test.check 100 "translationalSurfaceCorrectValue" do
+  baseCurve <- Test.generate Random.cubicSpline3D
+  translationCurve <- Test.generate randomVectorCubicSpline
+  surface <- Surface3D.translational baseCurve translationCurve ?? fail
+  uvPoint <- Test.generate UvPoint.random
+  let UvPoint u v = uvPoint
+  let basePoint = Curve3D.pointAt u baseCurve
+  let translationVector = VectorCurve3D.valueAt v translationCurve
+  let expectedPoint = basePoint + translationVector
+  let actualPoint = SurfaceFunction3D.pointAt uvPoint (Surface3D.function surface)
+  Test.expect (actualPoint ~~ expectedPoint)
+    & Test.output "expectedPoint" expectedPoint
+    & Test.output "actualPoint" actualPoint
+
+translationalSurfaceDerivativeConsistency :: Test
+translationalSurfaceDerivativeConsistency = Test.check 100 "translationalSurfaceDerivativeConsistency" do
+  baseCurve <- Test.generate Random.cubicSpline3D
+  translationCurve <- Test.generate randomVectorCubicSpline
+  surface <- Surface3D.translational baseCurve translationCurve ?? fail
+  Tests.SurfaceFunction3D.partialDerivativesAreConsistent (Surface3D.function surface)

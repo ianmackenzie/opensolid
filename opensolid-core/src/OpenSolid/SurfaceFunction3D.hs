@@ -156,10 +156,10 @@ instance
 
 instance
   Composition
-    ()
+    (Tolerance Meters)
     (SurfaceFunction3D space)
     (SurfaceFunction2D Unitless)
-    (SurfaceFunction3D space)
+    (Result (IsDegenerate ()) (SurfaceFunction3D space))
   where
   f << g = do
     let (dfdx, dfdy) = Pair.map (<< g) (partialDerivatives f)
@@ -171,7 +171,7 @@ instance
           ( dfdx * dxdu + dfdy * dydu
           , dfdx * dxdv + dfdy * dydv
           )
-    unsafe compiledComposed composedPartialDerivatives
+    new compiledComposed composedPartialDerivatives
 
 new ::
   Tolerance Meters =>

@@ -36,6 +36,7 @@ import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
+import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
@@ -72,6 +73,7 @@ import OpenSolid.UvRegion (UvRegion)
 import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorCurve3D (VectorCurve3D)
+import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 
 data Surface3D space = Surface3D
   { function :: SurfaceFunction3D space
@@ -177,23 +179,46 @@ on plane region = do
   let planeFunction = SurfaceFunction3D.displacedFrom p0 displacementFunction
   parametric planeFunction normalizedRegion
 
-extruded :: Curve3D space -> Vector3D Meters space -> Surface3D space
+extruded ::
+  Tolerance Meters =>
+  Curve3D space ->
+  Vector3D Meters space ->
+  Result (IsDegenerate ()) (Surface3D space)
 extruded curve displacement = translational curve (displacement * Curve1D.t)
 
-translational :: Curve3D space -> VectorCurve3D Meters space -> Surface3D space
+translational ::
+  Tolerance Meters =>
+  Curve3D space ->
+  VectorCurve3D Meters space ->
+  Result (IsDegenerate ()) (Surface3D space)
 translational baseCurve translationCurve = do
-  let baseFunction = baseCurve << SurfaceFunction1D.u
-  let translationFunction = translationCurve << SurfaceFunction1D.v
-  let translationalFunction = baseFunction & SurfaceFunction3D.displaceBy translationFunction
-  parametric translationalFunction UvRegion.unitSquare
+  let compiledBase = Curve3D.compiled baseCurve << CompiledFunction.u
+  let compiledTranslation = VectorCurve3D.compiled translationCurve << CompiledFunction.v
+  let compiledFunction = compiledBase + compiledTranslation
+  let partialDerivatives =
+        ( Curve3D.derivative baseCurve << SurfaceFunction1D.u
+        , VectorCurve3D.derivative translationCurve << SurfaceFunction1D.v
+        )
+  translationalFunction <- SurfaceFunction3D.new compiledFunction partialDerivatives
+  Ok (parametric translationalFunction UvRegion.unitSquare)
 
-ruled :: Curve3D space -> Curve3D space -> Surface3D space
+ruled ::
+  Tolerance Meters =>
+  Curve3D space ->
+  Curve3D space ->
+  Result (IsDegenerate ()) (Surface3D space)
 ruled bottom top = do
-  let bottomFunction = bottom << SurfaceFunction1D.u
-  let topFunction = top << SurfaceFunction1D.u
-  let displacementFunction = SurfaceFunction1D.v * (topFunction - bottomFunction)
-  let ruledFunction = bottomFunction & SurfaceFunction3D.displaceBy displacementFunction
-  parametric ruledFunction UvRegion.unitSquare
+  let compiledBottom = Curve3D.compiled bottom << CompiledFunction.u
+  let compiledTop = Curve3D.compiled top << CompiledFunction.u
+  let compiledFunction = compiledBottom + (compiledTop - compiledBottom) * CompiledFunction.v
+  let bottomDerivative = Curve3D.derivative bottom << SurfaceFunction1D.u
+  let topDerivative = Curve3D.derivative top << SurfaceFunction1D.u
+  let partialDerivatives =
+        ( bottomDerivative * (1.0 - SurfaceFunction1D.v) + topDerivative * SurfaceFunction1D.v
+        , (top - bottom) << SurfaceFunction1D.u
+        )
+  ruledFunction <- SurfaceFunction3D.new compiledFunction partialDerivatives
+  Ok (parametric ruledFunction UvRegion.unitSquare)
 
 revolved ::
   Tolerance Meters =>

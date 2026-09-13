@@ -229,8 +229,11 @@ translational sketchPlane profile givenDisplacement = do
   let endPlane = Plane3D.translateBy (VectorCurve3D.endValue displacement) sketchPlane
   let startCap = Surface3D.flip (Surface3D.on startPlane profile)
   let endCap = Surface3D.on endPlane profile
-  let sideSurface curve = Surface3D.translational (Curve2D.placeOn sketchPlane curve) displacement
-  let sideSurfaces = Set2D.toListOf sideSurface (Region2D.boundaryCurves profile)
+  let profileCurves = Set2D.toList (Region2D.boundaryCurves profile)
+  let sideSurface curve =
+        Surface3D.translational (Curve2D.placeOn sketchPlane curve) displacement
+          ?? catch \IsDegenerate{} -> Err BoundedBy.EmptyBody
+  sideSurfaces <- Result.collect sideSurface profileCurves
   boundedBy (startCap : endCap : sideSurfaces)
 
 {-| Create a revolved body from a sketch plane and profile.
