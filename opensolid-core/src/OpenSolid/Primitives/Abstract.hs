@@ -649,6 +649,10 @@ class TransformExists dimension units space where
   transformVectorTransform ::
     Transform dimension tag units space ->
     VectorTransform dimension tag space
+  transformAsOrthonormal ::
+    Transform.Tag.IsOrthonormal tag =>
+    Transform dimension tag units space ->
+    Transform dimension Transform.Tag.Orthonormal units space
   transformAsAffine ::
     Transform dimension tag units space ->
     Transform dimension Transform.Tag.Affine units space
@@ -656,10 +660,12 @@ class TransformExists dimension units space where
 
 instance TransformExists 2 units Void where
   transformVectorTransform = Transform2D.vectorTransform
+  transformAsOrthonormal = Transform2D.asOrthonormal
   transformAsAffine = Transform2D.asAffine
   transformUniformScale = Transform2D.uniformScale
 
 instance TransformExists 3 Meters space where
   transformVectorTransform = Transform3D.vectorTransform
+  transformAsOrthonormal = Transform3D.asOrthonormal
   transformAsAffine = Transform3D.asAffine
   transformUniformScale = Transform3D.uniformScale

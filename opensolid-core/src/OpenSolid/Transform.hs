@@ -2,6 +2,7 @@ module OpenSolid.Transform
   ( Transform
   , TransformExists
   , vectorTransform
+  , asOrthonormal
   , asAffine
   , uniformScale
   )
@@ -17,6 +18,12 @@ vectorTransform ::
   Transform dimension tag units space ->
   VectorTransform dimension tag space
 vectorTransform = Primitives.Abstract.transformVectorTransform
+
+asOrthonormal ::
+  (TransformExists dimension units space, Transform.Tag.IsOrthonormal tag) =>
+  Transform dimension tag units space ->
+  Transform dimension Transform.Tag.Orthonormal units space
+asOrthonormal = Primitives.Abstract.transformAsOrthonormal
 
 asAffine ::
   TransformExists dimension units space =>
