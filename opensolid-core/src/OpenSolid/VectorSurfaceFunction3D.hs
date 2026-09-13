@@ -64,8 +64,7 @@ import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorTransform3D (VectorTransform3D)
 
-data VectorSurfaceFunction3D units space
-  = VectorSurfaceFunction3D
+data VectorSurfaceFunction3D units space = VectorSurfaceFunction3D
   { compiled :: Compiled units space
   , partialDerivatives :: (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space)
   , maxSampledInteriorMagnitude :: ~(Quantity units)
