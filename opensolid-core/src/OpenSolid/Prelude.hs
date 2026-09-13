@@ -679,7 +679,8 @@ instance Prelude.Bounded Sign where
 
 instance Prelude.Enum Sign where
   toEnum 0 = Negative
-  toEnum _ = Positive
+  toEnum 1 = Positive
+  toEnum _ = error "Out of range"
   fromEnum Negative = 0
   fromEnum Positive = 1
 
