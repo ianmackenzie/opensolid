@@ -140,8 +140,6 @@ import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector, VectorExists)
 import OpenSolid.Vector qualified as Vector
-import OpenSolid.Vector2D (Vector2D)
-import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
 import OpenSolid.VectorCurve (VectorCurve, VectorCurveExists)
 import OpenSolid.VectorCurve qualified as VectorCurve
@@ -288,18 +286,6 @@ instance
 
 instance
   units1 ~ units2 =>
-  Addition (Curve2D units1) (Vector2D units2) (Curve2D units1)
-  where
-  lhs + rhs = lhs + VectorCurve2D.constant rhs
-
-instance
-  units1 ~ units2 =>
-  Subtraction (Curve2D units1) (Vector2D units2) (Curve2D units1)
-  where
-  lhs - rhs = lhs - VectorCurve2D.constant rhs
-
-instance
-  units1 ~ units2 =>
   Subtraction (Curve2D units1) (Point2D units2) (VectorCurve2D units1)
   where
   curve - givenPoint = curve - constant givenPoint
@@ -387,18 +373,6 @@ instance
   Composition () (Curve dimension units space) (Curve1D Unitless) (Curve dimension units space)
   where
   f << g = new (compiled f << Curve1D.compiled g) ((derivative f << g) * Curve1D.derivative g)
-
-instance
-  space1 ~ space2 =>
-  Addition (Curve3D space1) (Vector3D Meters space2) (Curve3D space1)
-  where
-  lhs + rhs = lhs + VectorCurve3D.constant rhs
-
-instance
-  space1 ~ space2 =>
-  Subtraction (Curve3D space1) (Vector3D Meters space2) (Curve3D space1)
-  where
-  lhs - rhs = lhs - VectorCurve3D.constant rhs
 
 instance
   space1 ~ space2 =>

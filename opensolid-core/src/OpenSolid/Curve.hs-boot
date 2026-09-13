@@ -33,8 +33,6 @@ import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.Vector (Vector)
-import OpenSolid.Vector2D (Vector2D)
-import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds (VectorBounds)
 import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve, VectorCurve2D, VectorCurve3D)
 
@@ -86,25 +84,9 @@ instance
 
 instance
   units1 ~ units2 =>
-  Addition (Curve2D units1) (Vector2D units2) (Curve2D units1)
-
-instance
-  units1 ~ units2 =>
-  Subtraction (Curve2D units1) (Vector2D units2) (Curve2D units1)
-
-instance
-  units1 ~ units2 =>
   Subtraction (Point2D units1) (Curve2D units2) (VectorCurve2D units1)
 
 instance Composition () (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units)
-
-instance
-  space1 ~ space2 =>
-  Addition (Curve3D space1) (Vector3D Meters space2) (Curve3D space1)
-
-instance
-  space1 ~ space2 =>
-  Subtraction (Curve3D space1) (Vector3D Meters space2) (Curve3D space1)
 
 instance
   space1 ~ space2 =>
