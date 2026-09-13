@@ -27,6 +27,7 @@ module OpenSolid.SurfaceFunction3D
   , relativeTo
   , transformBy
   , displaceBy
+  , flip
   )
 where
 
@@ -379,3 +380,17 @@ displaceBy displacementFunction surfaceFunction = do
           (partialDerivatives surfaceFunction)
           (VectorSurfaceFunction3D.partialDerivatives displacementFunction)
   unsafe compiledOffset compiledPartialDerivatives
+
+flip :: SurfaceFunction3D space -> SurfaceFunction3D space
+flip function =
+  recursive \result ->
+    SurfaceFunction3D
+      { compiled = function.compiled << CompiledFunction.wv
+      , partialDerivatives = Pair.mapFirst negate function.partialDerivatives
+      , maxSampledInteriorDivergence = function.maxSampledInteriorDivergence
+      , degenerateLeft = function.degenerateRight
+      , degenerateRight = function.degenerateLeft
+      , degenerateBottom = function.degenerateBottom
+      , degenerateTop = function.degenerateTop
+      , bisectionTree = Nondegenerate.field (buildBisectionTree UvBounds.unitSquare) result
+      }
