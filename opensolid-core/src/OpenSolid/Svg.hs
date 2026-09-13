@@ -355,7 +355,7 @@ regionWith attributes resolution givenRegion = do
 
 loopPolygon :: Resolution Meters -> NonEmpty (Curve2D Meters) -> Polygon2D Meters
 loopPolygon resolution loop = do
-  let curvePoints = Curve2D.toPolyline resolution >> Polyline2D.vertices >> NonEmpty.rest
+  let curvePoints = NonEmpty.rest . Polyline2D.vertices . Curve2D.toPolyline resolution
   Polygon2D $
     case List.combine curvePoints loop of
       NonEmpty vertices -> vertices

@@ -32,8 +32,8 @@ import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Number qualified as Number
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude hiding (fail, forEach, forEachWithIndex)
+import OpenSolid.Prelude qualified
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
 import System.Directory
@@ -61,12 +61,12 @@ collect :: Traversable list => (a -> IO b) -> list a -> IO (list b)
 collect = Prelude.mapM
 
 forEach :: Foldable list => list a -> (a -> IO ()) -> IO ()
-forEach list function = Data.Foldable.foldMap function list
+forEach list function =
+  succeed () & OpenSolid.Prelude.forEach list \item -> (>> function item)
 
 forEachWithIndex :: Foldable list => list a -> (Int -> a -> IO ()) -> IO ()
-forEachWithIndex list function = do
-  let callback (i, acc) item = (i + 1, acc >> function i item)
-  Pair.second (Prelude.foldl' callback (0, succeed ()) list)
+forEachWithIndex list function =
+  succeed () & OpenSolid.Prelude.forEachWithIndex list \index item -> (>> function index item)
 
 sleep :: Duration -> IO ()
 sleep duration = Control.Concurrent.threadDelay (Number.round (Duration.inMicroseconds duration))
@@ -74,7 +74,7 @@ sleep duration = Control.Concurrent.threadDelay (Number.round (Duration.inMicros
 onError :: (Text -> IO a) -> IO a -> IO a
 onError callback io =
   System.IO.Error.catchIOError io do
-    System.IO.Error.ioeGetErrorString >> Text.pack >> callback
+    callback . Text.pack . System.IO.Error.ioeGetErrorString
 
 attempt :: IO a -> IO (Result Text a)
 attempt io = onError (succeed . Err) (map Ok io)

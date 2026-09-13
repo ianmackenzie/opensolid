@@ -248,7 +248,7 @@ reverseMap function (x :| xs) = go x xs []
   go item (next : following) acc = go next following (function item : acc)
 
 filterMap :: (a -> Maybe b) -> NonEmpty a -> List b
-filterMap function = toList >> List.filterMap function
+filterMap function = List.filterMap function . toList
 
 map2 :: (a -> b -> c) -> NonEmpty a -> NonEmpty b -> NonEmpty c
 map2 = Data.List.NonEmpty.zipWith
@@ -367,7 +367,7 @@ any :: (a -> Bool) -> NonEmpty a -> Bool
 any = Prelude.any
 
 successive :: (a -> a -> b) -> NonEmpty a -> List b
-successive function = toList >> List.successive function
+successive function = List.successive function . toList
 
 loop :: (a -> a -> b) -> NonEmpty a -> NonEmpty b
 loop function nonEmpty = do

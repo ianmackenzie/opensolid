@@ -308,11 +308,12 @@ prependChildrenToNonEmpty ::
   NonEmpty (Set b a1) ->
   NonEmpty a2 ->
   NonEmpty a2
-prependChildrenToNonEmpty startIndex function children = case children of
-  child :| [] -> prependToNonEmpty startIndex function child
-  first :| NonEmpty rest -> do
-    prependChildrenToNonEmpty (startIndex + size first) function rest
-    prependToNonEmpty startIndex function first
+prependChildrenToNonEmpty startIndex function children accumulated = case children of
+  child :| [] -> accumulated & prependToNonEmpty startIndex function child
+  first :| NonEmpty rest ->
+    accumulated
+      & prependChildrenToNonEmpty (startIndex + size first) function rest
+      & prependToNonEmpty startIndex function first
 
 toList :: Set b a -> List a
 toList = NonEmpty.toList . toNonEmpty
@@ -507,14 +508,23 @@ pairwiseFilterMapWithIndices1N ::
   NonEmpty (Set b2 a2) ->
   List a3 ->
   List a3
-pairwiseFilterMapWithIndices1N startIndex1 startIndex2 boundsPredicate callback set1 sets2 =
-  case sets2 of
-    set2 :| [] ->
-      pairwiseFilterMapWithIndices11 startIndex1 startIndex2 boundsPredicate callback set1 set2
-    first2 :| NonEmpty rest2 -> do
-      let restIndex2 = startIndex2 + size first2
-      pairwiseFilterMapWithIndices1N startIndex1 restIndex2 boundsPredicate callback set1 rest2
-      pairwiseFilterMapWithIndices11 startIndex1 startIndex2 boundsPredicate callback set1 first2
+pairwiseFilterMapWithIndices1N
+  startIndex1
+  startIndex2
+  boundsPredicate
+  callback
+  set1
+  sets2
+  accumulated =
+    case sets2 of
+      set2 :| [] ->
+        accumulated
+          & pairwiseFilterMapWithIndices11 startIndex1 startIndex2 boundsPredicate callback set1 set2
+      first2 :| NonEmpty rest2 -> do
+        let restIndex2 = startIndex2 + size first2
+        accumulated
+          & pairwiseFilterMapWithIndices1N startIndex1 restIndex2 boundsPredicate callback set1 rest2
+          & pairwiseFilterMapWithIndices11 startIndex1 startIndex2 boundsPredicate callback set1 first2
 
 pairwiseFilterMapWithIndicesN1 ::
   Int ->
@@ -525,14 +535,23 @@ pairwiseFilterMapWithIndicesN1 ::
   Set b2 a2 ->
   List a3 ->
   List a3
-pairwiseFilterMapWithIndicesN1 startIndex1 startIndex2 boundsPredicate callback sets1 set2 =
-  case sets1 of
-    set1 :| [] ->
-      pairwiseFilterMapWithIndices11 startIndex1 startIndex2 boundsPredicate callback set1 set2
-    first1 :| NonEmpty rest1 -> do
-      let restIndex1 = startIndex1 + size first1
-      pairwiseFilterMapWithIndicesN1 restIndex1 startIndex2 boundsPredicate callback rest1 set2
-      pairwiseFilterMapWithIndices11 startIndex1 startIndex2 boundsPredicate callback first1 set2
+pairwiseFilterMapWithIndicesN1
+  startIndex1
+  startIndex2
+  boundsPredicate
+  callback
+  sets1
+  set2
+  accumulated =
+    case sets1 of
+      set1 :| [] ->
+        accumulated
+          & pairwiseFilterMapWithIndices11 startIndex1 startIndex2 boundsPredicate callback set1 set2
+      first1 :| NonEmpty rest1 -> do
+        let restIndex1 = startIndex1 + size first1
+        accumulated
+          & pairwiseFilterMapWithIndicesN1 restIndex1 startIndex2 boundsPredicate callback rest1 set2
+          & pairwiseFilterMapWithIndices11 startIndex1 startIndex2 boundsPredicate callback first1 set2
 
 pairwiseFilterMapWithIndicesNN ::
   Int ->
@@ -543,14 +562,23 @@ pairwiseFilterMapWithIndicesNN ::
   NonEmpty (Set b2 a2) ->
   List a3 ->
   List a3
-pairwiseFilterMapWithIndicesNN startIndex1 startIndex2 boundsPredicate callback sets1 sets2 =
-  case sets1 of
-    set1 :| [] ->
-      pairwiseFilterMapWithIndices1N startIndex1 startIndex2 boundsPredicate callback set1 sets2
-    first1 :| NonEmpty rest1 -> do
-      let restIndex1 = startIndex1 + size first1
-      pairwiseFilterMapWithIndicesNN restIndex1 startIndex2 boundsPredicate callback rest1 sets2
-      pairwiseFilterMapWithIndices1N startIndex1 startIndex2 boundsPredicate callback first1 sets2
+pairwiseFilterMapWithIndicesNN
+  startIndex1
+  startIndex2
+  boundsPredicate
+  callback
+  sets1
+  sets2
+  accumulated =
+    case sets1 of
+      set1 :| [] ->
+        accumulated
+          & pairwiseFilterMapWithIndices1N startIndex1 startIndex2 boundsPredicate callback set1 sets2
+      first1 :| NonEmpty rest1 -> do
+        let restIndex1 = startIndex1 + size first1
+        accumulated
+          & pairwiseFilterMapWithIndicesNN restIndex1 startIndex2 boundsPredicate callback rest1 sets2
+          & pairwiseFilterMapWithIndices1N startIndex1 startIndex2 boundsPredicate callback first1 sets2
 
 clusters :: Bounds b => (b -> b -> Bool) -> (a -> a -> Bool) -> Set b a -> NonEmpty (NonEmpty a)
 clusters boundsPredicate itemPredicate set = do
