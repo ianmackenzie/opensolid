@@ -57,6 +57,7 @@ import OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D.Nondegenerate qualified as SurfaceFunction3D.Nondegenerate
 import OpenSolid.SurfaceFunction3D.Segment (Segment)
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
@@ -346,7 +347,11 @@ normalDirectionRange uvRange function = do
   let fvDirectionBounds = VectorSurfaceFunction3D.directionRange uvRange fv
   VectorBounds3D.direction (fuDirectionBounds `cross` fvDirectionBounds)
 
-transformBy :: Transform3D tag space -> SurfaceFunction3D space -> SurfaceFunction3D space
+transformBy ::
+  Transform.Tag.IsOrthonormal tag =>
+  Transform3D tag space ->
+  SurfaceFunction3D space ->
+  SurfaceFunction3D space
 transformBy transform function = do
   let compiledTransformed =
         CompiledFunction.map

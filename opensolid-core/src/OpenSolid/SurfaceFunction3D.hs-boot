@@ -15,6 +15,7 @@ where
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds3D, Point3D)
+import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -54,4 +55,8 @@ compiled :: SurfaceFunction3D space -> Compiled space
 partialDerivatives ::
   SurfaceFunction3D space ->
   (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space)
-transformBy :: Transform3D tag space -> SurfaceFunction3D space -> SurfaceFunction3D space
+transformBy ::
+  Transform.Tag.IsOrthonormal tag =>
+  Transform3D tag space ->
+  SurfaceFunction3D space ->
+  SurfaceFunction3D space
