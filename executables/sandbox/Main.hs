@@ -8,7 +8,6 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
-import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Direction3D qualified as Direction3D
@@ -45,6 +44,7 @@ import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds qualified as UvBounds
+import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D qualified as Vector3D
@@ -223,7 +223,7 @@ drawBounds bounds = do
   let vertices = NonEmpty.four (corner 0.0 0.0) (corner 1.0 0.0) (corner 1.0 1.0) (corner 0.0 1.0)
   Svg.polygon (Polygon2D vertices)
 
-drawCrossingCurve :: Int -> Curve2D Unitless -> Svg
+drawCrossingCurve :: Int -> UvCurve -> Svg
 drawCrossingCurve index curve = do
   let hue = (Number.fromInt index * Angle.goldenAngle) % Angle.twoPi
   let color = Color.hsl1 hue 0.5 0.5
@@ -232,7 +232,7 @@ drawCrossingCurve index curve = do
 toDrawing :: Quantity (Meters ?/? Unitless)
 toDrawing = Length.centimeters 10.0 ?/? 1.0
 
-drawUvCurve :: List Svg.Attribute -> Curve2D Unitless -> Svg
+drawUvCurve :: List Svg.Attribute -> UvCurve -> Svg
 drawUvCurve attributes curve = do
   let resolution = Resolution.maxError 0.0002
   let polyline = Curve2D.toPolyline resolution curve

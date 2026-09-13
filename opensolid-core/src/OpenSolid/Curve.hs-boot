@@ -1,6 +1,7 @@
 module OpenSolid.Curve
   ( Curve
   , Curve2D
+  , UvCurve
   , Curve3D
   , CurveExists
   , Solver
@@ -42,6 +43,8 @@ data Curve (dimension :: Natural) (units :: Type) (space :: Type)
 
 type Curve2D units = Curve 2 units Void
 
+type UvCurve = Curve 2 Unitless Void
+
 type Curve3D space = Curve 3 Meters space
 
 class CurveExists (dimension :: Natural) (units :: Type) (space :: Type)
@@ -72,7 +75,7 @@ instance
   units1 ~ units2 =>
   Subtraction (Point2D units1) (Curve2D units2) (VectorCurve2D units1)
 
-instance Composition () (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units)
+instance Composition () (SurfaceFunction1D units) UvCurve (Curve1D units)
 
 instance
   space1 ~ space2 =>

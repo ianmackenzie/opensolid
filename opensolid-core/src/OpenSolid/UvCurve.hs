@@ -10,17 +10,15 @@ module OpenSolid.UvCurve
   )
 where
 
+import OpenSolid.Curve (UvCurve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Intersections qualified as Curve.Intersections
-import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.IsDegenerate (IsDegenerate)
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Prelude
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-
-type UvCurve = Curve2D Unitless
 
 startPoint :: UvCurve -> UvPoint
 startPoint = Curve2D.startPoint

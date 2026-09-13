@@ -18,7 +18,6 @@ import OpenSolid.Body3D.Ids (BoundaryId, CurveId, SurfaceId)
 import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds3D (Bounds3D)
-import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -29,6 +28,7 @@ import OpenSolid.Set3D qualified as Set3D
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
 import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvCurve (UvCurve)
 
 data HalfEdge space = HalfEdge
   { id :: Id
@@ -66,7 +66,7 @@ uvBounds = SurfaceCurve3D.uvBounds . surfaceCurve
 curve :: HalfEdge space -> Curve3D space
 curve = SurfaceCurve3D.curve . surfaceCurve
 
-uvCurve :: HalfEdge space -> Curve2D Unitless
+uvCurve :: HalfEdge space -> UvCurve
 uvCurve = SurfaceCurve3D.uvCurve . surfaceCurve
 
 findMatingHalfEdges ::

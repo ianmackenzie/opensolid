@@ -4,13 +4,13 @@ module OpenSolid.SurfaceFunction1D.Zeros
   )
 where
 
-import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
 
 data Zeros = Zeros
-  { crossingCurves :: ~(List (Curve2D Unitless))
-  , crossingLoops :: ~(List (Curve2D Unitless))
+  { crossingCurves :: ~(List UvCurve)
+  , crossingLoops :: ~(List UvCurve)
   , tangentPoints :: List (UvPoint, Sign)
   , saddlePoints :: List UvPoint
   }

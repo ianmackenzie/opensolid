@@ -42,6 +42,7 @@ import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -195,13 +196,7 @@ transformBy transform function = do
         VectorSurfaceFunction2D.transformBy (Transform2D.vectorTransform transform)
   new compiledTransformed (Pair.map transformDerivative function.partialDerivatives)
 
-instance
-  Composition
-    ()
-    (SurfaceFunction2D units)
-    (Curve2D Unitless)
-    (Curve2D units)
-  where
+instance Composition () (SurfaceFunction2D units) UvCurve (Curve2D units) where
   f << g = do
     let (dfdu, dfdv) = Pair.map (<< g) (partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative g)

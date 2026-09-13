@@ -15,6 +15,7 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D, Point2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.UvBounds (UvBounds)
+import {-# SOURCE #-} OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
@@ -34,7 +35,7 @@ instance
     (SurfaceFunction2D units2)
     (VectorSurfaceFunction2D units1)
 
-instance Composition () (SurfaceFunction2D units) (Curve2D Unitless) (Curve2D units)
+instance Composition () (SurfaceFunction2D units) UvCurve (Curve2D units)
 
 instance
   Composition

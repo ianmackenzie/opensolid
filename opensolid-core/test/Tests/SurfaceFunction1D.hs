@@ -1,7 +1,6 @@
 module Tests.SurfaceFunction1D (tests) where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Length qualified as Length
@@ -13,6 +12,7 @@ import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction1D.Zeros qualified as SurfaceFunction1D.Zeros
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -43,7 +43,7 @@ firstDerivativeConsistency = Test.check 100 "firstDerivativeConsistency" do
   uvPoint <- Test.generate UvPoint.random
   firstDerivativesAreConsistent planeTorusSurface uvPoint
 
-withIntersectionCurves :: (NonEmpty (Curve2D Unitless) -> Test) -> Test
+withIntersectionCurves :: (NonEmpty UvCurve -> Test) -> Test
 withIntersectionCurves callback =
   Tolerance.using Length.defaultTolerance do
     case SurfaceFunction1D.zeros planeTorusSurface of

@@ -37,7 +37,6 @@ import OpenSolid.CDT qualified as CDT
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
@@ -87,6 +86,7 @@ import OpenSolid.SurfaceFunction3D.Nondegenerate qualified as SurfaceFunction3D.
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
+import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -504,9 +504,9 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
 edgeLinearizationPredicate ::
   Resolution Meters ->
   Curve3D space ->
-  Curve2D Unitless ->
+  UvCurve ->
   (Number -> Number) ->
-  Curve2D Unitless ->
+  UvCurve ->
   (Number -> Number) ->
   Set2D Unitless UvBounds ->
   Set2D Unitless UvBounds ->
@@ -543,7 +543,7 @@ edgeLinearizationPredicate
       && validEdge matingUvRange matingEdgeSize matingSurfaceSegments
 
 degenerateEdgeLinearizationPredicate ::
-  Curve2D Unitless ->
+  UvCurve ->
   Set2D Unitless UvBounds ->
   Interval Unitless ->
   Bool

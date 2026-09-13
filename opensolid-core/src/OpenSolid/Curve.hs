@@ -4,6 +4,7 @@ module OpenSolid.Curve
   ( Curve
   , Curve2D
   , Curve3D
+  , UvCurve
   , CurveExists
   , Solver (..)
   , Compiled
@@ -166,6 +167,8 @@ data Curve dimension units space = Curve
 -- | A parametric curve in 2D space.
 type Curve2D units = Curve 2 units Void
 
+type UvCurve = Curve 2 Unitless Void
+
 instance units1 ~ units2 => Bounded (Curve2D units1) (Bounds2D units2) where
   {-# INLINE bounds #-}
   bounds = bounds
@@ -234,7 +237,7 @@ instance Units.Coercion (Curve2D units1) (Curve2D units2) where
 instance FFI (Curve2D Meters) where
   representation = FFI.classRepresentation "Curve2D"
 
-instance FFI (Curve2D Unitless) where
+instance FFI UvCurve where
   representation = FFI.classRepresentation "UvCurve"
 
 instance Units (Curve dimension units space) units
@@ -278,7 +281,7 @@ instance Composition () (Curve2D units) (SurfaceFunction1D Unitless) (SurfaceFun
     let composedPartialDerivatives = (dfdt * dtdu, dfdt * dtdv)
     SurfaceFunction2D.new compiledComposed composedPartialDerivatives
 
-instance Composition () (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units) where
+instance Composition () (SurfaceFunction1D units) UvCurve (Curve1D units) where
   f << g = do
     let (dfdu, dfdv) = Pair.map (<< g) (SurfaceFunction1D.partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (derivative g)
@@ -290,7 +293,7 @@ instance
   Composition
     ()
     (VectorSurfaceFunction3D units space)
-    (Curve2D Unitless)
+    UvCurve
     (VectorCurve3D units space)
   where
   f << g = do
@@ -300,7 +303,7 @@ instance
     let composedDerivative = dfdu * dudt + dfdv * dvdt
     VectorCurve3D.new compiledComposed composedDerivative
 
-instance Composition () (SurfaceFunction3D space) (Curve2D Unitless) (Curve3D space) where
+instance Composition () (SurfaceFunction3D space) UvCurve (Curve3D space) where
   f << g = do
     let (dfdu, dfdv) = Pair.map (<< g) (SurfaceFunction3D.partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (derivative g)

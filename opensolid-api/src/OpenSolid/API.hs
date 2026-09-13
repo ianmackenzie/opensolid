@@ -63,6 +63,7 @@ import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Triangle2D qualified as Triangle2D
 import OpenSolid.Units (SquareMeters)
 import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvCurve qualified as UvCurve
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.UvRegion (UvRegion)
@@ -1527,7 +1528,7 @@ curve2D =
     ]
       <> orthonormalTransformations2D Curve2D.transformBy
 
-type UvCurve = Curve2D.Curve2D Unitless
+type UvCurve = UvCurve.UvCurve
 
 uvCurve :: Class
 uvCurve =

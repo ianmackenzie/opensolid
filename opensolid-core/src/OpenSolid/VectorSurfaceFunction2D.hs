@@ -26,7 +26,6 @@ where
 
 import OpenSolid.CompiledFunction (CompiledFunction)
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Expression qualified as Expression
@@ -41,6 +40,7 @@ import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
+import {-# SOURCE #-} OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
@@ -403,13 +403,7 @@ instance
   where
   lhs `dot` rhs = Vector2D.unit lhs `dot` rhs
 
-instance
-  Composition
-    ()
-    (VectorSurfaceFunction2D units)
-    (Curve2D Unitless)
-    (VectorCurve2D units)
-  where
+instance Composition () (VectorSurfaceFunction2D units) UvCurve (VectorCurve2D units) where
   f << g = do
     let (dfdu, dfdv) = Pair.map (<< g) (partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative g)

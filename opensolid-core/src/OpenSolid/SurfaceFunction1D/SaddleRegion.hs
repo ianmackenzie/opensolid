@@ -13,7 +13,6 @@ where
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
-import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D (Direction2D))
 import OpenSolid.Direction2D qualified as Direction2D
@@ -33,6 +32,7 @@ import OpenSolid.SurfaceFunction1D.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
+import {-# SOURCE #-} OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
@@ -47,8 +47,8 @@ data SaddleRegion units = SaddleRegion
 type Frame = Frame2D Unitless
 
 data JoiningCurve
-  = Incoming (Curve2D Unitless)
-  | Outgoing (Curve2D Unitless)
+  = Incoming UvCurve
+  | Outgoing UvCurve
 
 joiningPoint :: JoiningCurve -> UvPoint
 joiningPoint (Incoming curve) = Curve2D.endPoint curve
@@ -100,11 +100,7 @@ secondDerivative fuu fuv fvv direction = do
   let Direction2D du dv = direction
   du * du * fuu + 2.0 * du * dv * fuv + dv * dv * fvv
 
-connectingCurves ::
-  Tolerance units =>
-  JoiningCurve ->
-  SaddleRegion units ->
-  NonEmpty (Curve2D Unitless)
+connectingCurves :: Tolerance units => JoiningCurve -> SaddleRegion units -> NonEmpty UvCurve
 connectingCurves joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
   let Point2D x y = Point2D.relativeTo frame (joiningPoint joiningCurve)
   let saddlePoint = Frame2D.originPoint frame
@@ -128,7 +124,7 @@ connect ::
   Direction2D ->
   JoiningCurve ->
   List (Axis2D Unitless) ->
-  NonEmpty (Curve2D Unitless)
+  NonEmpty UvCurve
 connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
   let saddlePoint = Frame2D.originPoint frame
   let Subproblem{f, dvdu, dudv, uvRange} = subproblem

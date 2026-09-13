@@ -11,7 +11,6 @@ import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D (Direction2D))
 import OpenSolid.Expression qualified as Expression
@@ -29,6 +28,7 @@ import OpenSolid.SurfaceFunction1D.ImplicitCurveRange (ImplicitCurveRange)
 import OpenSolid.SurfaceFunction1D.ImplicitCurveRange qualified as ImplicitCurveRange
 import OpenSolid.SurfaceFunction1D.Internal qualified as Internal
 import OpenSolid.UvBounds (UvBounds)
+import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (data UvPoint)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
@@ -49,7 +49,7 @@ new ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Curve2D Unitless
+  UvCurve
 new derivatives dvdu uStart uEnd boxes =
   horizontalCurve derivatives dvdu uStart uEnd boxes NotMonotonic []
 
@@ -60,7 +60,7 @@ monotonic ::
   Number ->
   Number ->
   NonEmpty UvBounds ->
-  Curve2D Unitless
+  UvCurve
 monotonic derivatives dvdu uStart uEnd boxes =
   horizontalCurve derivatives dvdu uStart uEnd boxes Monotonic []
 
@@ -73,7 +73,7 @@ bounded ::
   NonEmpty UvBounds ->
   Frame2D Unitless ->
   List (Axis2D Unitless) ->
-  Curve2D Unitless
+  UvCurve
 bounded derivatives dvdu uStart uEnd boxes monotonicFrame boundingAxes = do
   let monotonicity = MonotonicIn (Frame2D.coerce monotonicFrame)
   horizontalCurve derivatives dvdu uStart uEnd boxes monotonicity boundingAxes
@@ -87,7 +87,7 @@ horizontalCurve ::
   NonEmpty UvBounds ->
   Monotonicity ->
   List (Axis2D Unitless) ->
-  Curve2D Unitless
+  UvCurve
 horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
   let curveRange = implicitCurveRange boxes
   let clampedVRange uValue =
