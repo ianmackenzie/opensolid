@@ -7,7 +7,9 @@ module OpenSolid.Bytecode.Ast
   , constant2D
   , constant3D
   , t
+  , r
   , u
+  , w
   , v
   , xComponent
   , yComponent
@@ -33,6 +35,7 @@ module OpenSolid.Bytecode.Ast
   , projectVector3dInto
   , projectPoint3dInto
   , uv
+  , wv
   , xy
   , bezierCurve1D
   , bezierCurve2D
@@ -484,14 +487,23 @@ constant3D = Constant3D . Vector3D.erase
 t :: Ast1D Number
 t = Variable1D T
 
+r :: Ast1D Number
+r = 1.0 - t
+
 u :: Ast1D UvPoint
 u = Variable1D U
+
+w :: Ast1D UvPoint
+w = 1.0 - u
 
 v :: Ast1D UvPoint
 v = Variable1D V
 
 uv :: Ast2D UvPoint
 uv = Variable2D UV
+
+wv :: Ast2D UvPoint
+wv = xy w v
 
 xComponent :: Ast2D input -> Ast1D input
 xComponent (Constant2D val) = Constant1D (Vector2D.xComponent val)

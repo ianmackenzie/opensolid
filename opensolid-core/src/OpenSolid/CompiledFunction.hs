@@ -3,8 +3,12 @@ module OpenSolid.CompiledFunction
   , concrete
   , constant
   , t
+  , r
   , u
+  , w
   , v
+  , uv
+  , wv
   , abstract
   , IsAbstract (IsAbstract)
   , expression
@@ -322,11 +326,23 @@ constant = Concrete . Expression.constant
 t :: CompiledFunction Number Number (Interval Unitless) (Interval Unitless)
 t = concrete Expression.t
 
+r :: CompiledFunction Number Number (Interval Unitless) (Interval Unitless)
+r = concrete Expression.r
+
 u :: CompiledFunction UvPoint Number UvBounds (Interval Unitless)
 u = concrete Expression.u
 
+w :: CompiledFunction UvPoint Number UvBounds (Interval Unitless)
+w = concrete Expression.w
+
 v :: CompiledFunction UvPoint Number UvBounds (Interval Unitless)
 v = concrete Expression.v
+
+uv :: CompiledFunction UvPoint UvPoint UvBounds UvBounds
+uv = concrete Expression.uv
+
+wv :: CompiledFunction UvPoint UvPoint UvBounds UvBounds
+wv = concrete Expression.wv
 
 abstract ::
   (inputValue -> outputValue) ->

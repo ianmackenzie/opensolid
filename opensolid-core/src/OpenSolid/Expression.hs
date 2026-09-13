@@ -10,9 +10,12 @@ module OpenSolid.Expression
   , xCoordinate
   , yCoordinate
   , t
+  , r
   , u
+  , w
   , v
   , uv
+  , wv
   , sqrt
   , sqrt_
   , squared
@@ -1262,14 +1265,23 @@ yCoordinate (Surface2D ast _) = surface1D (Ast.yComponent ast)
 t :: Expression Number Number
 t = curve1D Ast.t
 
+r :: Expression Number Number
+r = curve1D Ast.r
+
 u :: Expression UvPoint Number
 u = surface1D Ast.u
+
+w :: Expression UvPoint Number
+w = surface1D Ast.w
 
 v :: Expression UvPoint Number
 v = surface1D Ast.v
 
 uv :: Expression UvPoint UvPoint
 uv = surface2D Ast.uv
+
+wv :: Expression UvPoint UvPoint
+wv = surface2D Ast.wv
 
 squared_ :: Expression input (Quantity units) -> Expression input (Quantity (units ?*? units))
 squared_ (Curve1D ast _) = curve1D (Ast.squared ast)
