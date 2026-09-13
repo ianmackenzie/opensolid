@@ -2,10 +2,7 @@ module OpenSolid.API.BinaryOperator
   ( Id (..)
   , ffiName
   , functionSignature
-  , functionSignatureU
-  , functionSignatureR
-  , functionSignatureM
-  , functionSignatureS
+  , functionSignatureT
   )
 where
 
@@ -13,7 +10,6 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
 import OpenSolid.Text qualified as Text
-import OpenSolid.Units (SquareMeters)
 
 data Id = Add | Sub | Mul | Div | FloorDiv | Mod | Dot | Cross deriving (Eq)
 
@@ -45,30 +41,9 @@ functionSignature ::
   (FFI.Type, FFI.Type, FFI.Type)
 functionSignature _ = (FFI.typeOf a, FFI.typeOf b, FFI.typeOf c)
 
-functionSignatureU ::
-  forall a b c.
-  (FFI a, FFI b, FFI c) =>
-  (Tolerance Unitless => a -> b -> IO c) ->
-  (FFI.Type, FFI.Type, FFI.Type)
-functionSignatureU _ = (FFI.typeOf a, FFI.typeOf b, FFI.typeOf c)
-
-functionSignatureR ::
-  forall a b c.
-  (FFI a, FFI b, FFI c) =>
-  (Tolerance Radians => a -> b -> IO c) ->
-  (FFI.Type, FFI.Type, FFI.Type)
-functionSignatureR _ = (FFI.typeOf a, FFI.typeOf b, FFI.typeOf c)
-
-functionSignatureM ::
+functionSignatureT ::
   forall a b c.
   (FFI a, FFI b, FFI c) =>
   (Tolerance Meters => a -> b -> IO c) ->
   (FFI.Type, FFI.Type, FFI.Type)
-functionSignatureM _ = (FFI.typeOf a, FFI.typeOf b, FFI.typeOf c)
-
-functionSignatureS ::
-  forall a b c.
-  (FFI a, FFI b, FFI c) =>
-  (Tolerance SquareMeters => a -> b -> IO c) ->
-  (FFI.Type, FFI.Type, FFI.Type)
-functionSignatureS _ = (FFI.typeOf a, FFI.typeOf b, FFI.typeOf c)
+functionSignatureT _ = (FFI.typeOf a, FFI.typeOf b, FFI.typeOf c)

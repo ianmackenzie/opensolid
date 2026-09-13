@@ -75,59 +75,26 @@ invoke function = case function of
       (arg1, arg2, arg3, arg4) <- FFI.load inputPtr 0
       FFI.invoke (f arg1 arg2 arg3 arg4) outputPtr errorPtr
 
-type Signature = List (Name, FFI.Type)
-
 signature :: Constructor -> List (Name, FFI.Type)
 signature constructor = case constructor of
-  Constructor1 arg1 f _ -> signature1 arg1 f
-  Constructor2 arg1 arg2 f _ -> signature2 arg1 arg2 f
-  Constructor3 arg1 arg2 arg3 f _ -> signature3 arg1 arg2 arg3 f
-  Constructor4 arg1 arg2 arg3 arg4 f _ -> signature4 arg1 arg2 arg3 arg4 f
-
-signature1 ::
-  forall a value.
-  (FFI a, FFI value) =>
-  Name ->
-  (a -> IO value) ->
-  Signature
-signature1 arg1 _ = [(arg1, FFI.typeOf a)]
-
-signature2 ::
-  forall a b value.
-  (FFI a, FFI b, FFI value) =>
-  Name ->
-  Name ->
-  (a -> b -> IO value) ->
-  Signature
-signature2 arg1 arg2 _ =
-  [(arg1, FFI.typeOf a), (arg2, FFI.typeOf b)]
-
-signature3 ::
-  forall a b c value.
-  (FFI a, FFI b, FFI c, FFI value) =>
-  Name ->
-  Name ->
-  Name ->
-  (a -> b -> c -> IO value) ->
-  Signature
-signature3 arg1 arg2 arg3 _ =
-  [(arg1, FFI.typeOf a), (arg2, FFI.typeOf b), (arg3, FFI.typeOf c)]
-
-signature4 ::
-  forall a b c d value.
-  (FFI a, FFI b, FFI c, FFI d, FFI value) =>
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  (a -> b -> c -> d -> IO value) ->
-  Signature
-signature4 arg1 arg2 arg3 arg4 _ =
-  [ (arg1, FFI.typeOf a)
-  , (arg2, FFI.typeOf b)
-  , (arg3, FFI.typeOf c)
-  , (arg4, FFI.typeOf d)
-  ]
+  Constructor1 @a arg1 _ _ ->
+    [ (arg1, FFI.typeOf a)
+    ]
+  Constructor2 @a @b arg1 arg2 _ _ ->
+    [ (arg1, FFI.typeOf a)
+    , (arg2, FFI.typeOf b)
+    ]
+  Constructor3 @a @b @c arg1 arg2 arg3 _ _ ->
+    [ (arg1, FFI.typeOf a)
+    , (arg2, FFI.typeOf b)
+    , (arg3, FFI.typeOf c)
+    ]
+  Constructor4 @a @b @c @d arg1 arg2 arg3 arg4 _ _ ->
+    [ (arg1, FFI.typeOf a)
+    , (arg2, FFI.typeOf b)
+    , (arg3, FFI.typeOf c)
+    , (arg4, FFI.typeOf d)
+    ]
 
 documentation :: Constructor -> Text
 documentation constructor = case constructor of

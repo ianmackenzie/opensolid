@@ -19,7 +19,7 @@ data PreOperatorOverload where
     (FFI other, FFI value, FFI result) =>
     (other -> value -> IO result) ->
     PreOperatorOverload
-  PreOperatorOverloadM ::
+  PreOperatorOverloadT ::
     (FFI other, FFI value, FFI result) =>
     (Tolerance Meters => other -> value -> IO result) ->
     PreOperatorOverload
@@ -28,16 +28,16 @@ ffiName :: FFI.ClassName -> BinaryOperator.Id -> PreOperatorOverload -> Text
 ffiName className operatorId overload = case overload of
   PreOperatorOverload f ->
     BinaryOperator.ffiName className operatorId (BinaryOperator.functionSignature f)
-  PreOperatorOverloadM f ->
-    BinaryOperator.ffiName className operatorId (BinaryOperator.functionSignatureM f)
+  PreOperatorOverloadT f ->
+    BinaryOperator.ffiName className operatorId (BinaryOperator.functionSignatureT f)
 
 signature :: PreOperatorOverload -> (Maybe ImplicitTolerance, FFI.Type, FFI.Type)
 signature overload = case overload of
   PreOperatorOverload f -> do
     let (lhsType, _selfType, returnType) = BinaryOperator.functionSignature f
     (Nothing, lhsType, returnType)
-  PreOperatorOverloadM f -> do
-    let (lhsType, _selfType, returnType) = BinaryOperator.functionSignatureM f
+  PreOperatorOverloadT f -> do
+    let (lhsType, _selfType, returnType) = BinaryOperator.functionSignatureT f
     (Just ImplicitTolerance, lhsType, returnType)
 
 lhsName :: Name
@@ -48,6 +48,6 @@ invoke overload inputPtr outputPtr errorPtr = case overload of
   PreOperatorOverload f -> do
     (other, value) <- FFI.load inputPtr 0
     FFI.invoke (f other value) outputPtr errorPtr
-  PreOperatorOverloadM f -> do
+  PreOperatorOverloadT f -> do
     (tolerance, other, value) <- FFI.load inputPtr 0
     FFI.invoke (Tolerance.using tolerance (f other value)) outputPtr errorPtr

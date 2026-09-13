@@ -797,7 +797,7 @@ memberT0I ::
   (Tolerance Meters => value -> IO result) ->
   Text ->
   Member value
-memberT0I name f docs = Member (FFI.name name) (MemberFunctionM0 f docs)
+memberT0I name f docs = Member (FFI.name name) (MemberFunctionT0 f docs)
 
 member1 ::
   (FFI a, FFI value, FFI result) =>
@@ -867,7 +867,7 @@ memberT2I ::
   Text ->
   Member value
 memberT2I name arg1 arg2 f docs =
-  Member (FFI.name name) (MemberFunctionM2 (FFI.name arg1) (FFI.name arg2) f docs)
+  Member (FFI.name name) (MemberFunctionT2 (FFI.name arg1) (FFI.name arg2) f docs)
 
 member3 ::
   (FFI a, FFI b, FFI c, FFI value, FFI result) =>
@@ -913,7 +913,7 @@ memberT3I ::
   Text ->
   Member value
 memberT3I name arg1 arg2 arg3 f docs =
-  Member (FFI.name name) (MemberFunctionM3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs)
+  Member (FFI.name name) (MemberFunctionT3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs)
 
 member4 ::
   (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
@@ -1053,7 +1053,7 @@ divideByNonzeroT ::
 divideByNonzeroT nonzero = do
   let implementation :: Tolerance Meters => value -> rhs -> Result HasZero result
       implementation value rhs = Result.map (value /) (nonzero rhs)
-  PostOverload BinaryOperator.Div (PostOperatorOverloadM (wrap2R implementation))
+  PostOverload BinaryOperator.Div (PostOperatorOverloadT (wrap2R implementation))
 
 divMod :: FFI (Quantity units) => Member (Quantity units)
 divMod = DivMod

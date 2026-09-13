@@ -23,7 +23,7 @@ data MemberFunction where
     (value -> IO result) ->
     Text ->
     MemberFunction
-  MemberFunctionM0 ::
+  MemberFunctionT0 ::
     (FFI value, FFI result) =>
     (Tolerance Meters => value -> IO result) ->
     Text ->
@@ -34,7 +34,7 @@ data MemberFunction where
     (a -> value -> IO result) ->
     Text ->
     MemberFunction
-  MemberFunctionM1 ::
+  MemberFunctionT1 ::
     (FFI a, FFI value, FFI result) =>
     Name ->
     (Tolerance Meters => a -> value -> IO result) ->
@@ -47,7 +47,7 @@ data MemberFunction where
     (a -> b -> value -> IO result) ->
     Text ->
     MemberFunction
-  MemberFunctionM2 ::
+  MemberFunctionT2 ::
     (FFI a, FFI b, FFI value, FFI result) =>
     Name ->
     Name ->
@@ -62,7 +62,7 @@ data MemberFunction where
     (a -> b -> c -> value -> IO result) ->
     Text ->
     MemberFunction
-  MemberFunctionM3 ::
+  MemberFunctionT3 ::
     (FFI a, FFI b, FFI c, FFI value, FFI result) =>
     Name ->
     Name ->
@@ -79,7 +79,7 @@ data MemberFunction where
     (a -> b -> c -> d -> value -> IO result) ->
     Text ->
     MemberFunction
-  MemberFunctionM4 ::
+  MemberFunctionT4 ::
     (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
     Name ->
     Name ->
@@ -106,7 +106,7 @@ invoke function = case function of
     \inputPtr outputPtr errorPtr -> do
       self <- FFI.load inputPtr 0
       FFI.invoke (f self) outputPtr errorPtr
-  MemberFunctionM0 f _ ->
+  MemberFunctionT0 f _ ->
     \inputPtr outputPtr errorPtr -> do
       (tolerance, self) <- FFI.load inputPtr 0
       FFI.invoke (Tolerance.using tolerance (f self)) outputPtr errorPtr
@@ -114,7 +114,7 @@ invoke function = case function of
     \inputPtr outputPtr errorPtr -> do
       (arg1, self) <- FFI.load inputPtr 0
       FFI.invoke (f arg1 self) outputPtr errorPtr
-  MemberFunctionM1 _ f _ ->
+  MemberFunctionT1 _ f _ ->
     \inputPtr outputPtr errorPtr -> do
       (tolerance, arg1, self) <- FFI.load inputPtr 0
       FFI.invoke (Tolerance.using tolerance (f arg1 self)) outputPtr errorPtr
@@ -122,7 +122,7 @@ invoke function = case function of
     \inputPtr outputPtr errorPtr -> do
       (arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.invoke (f arg1 arg2 self) outputPtr errorPtr
-  MemberFunctionM2 _ _ f _ ->
+  MemberFunctionT2 _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
       (tolerance, arg1, arg2, self) <- FFI.load inputPtr 0
       FFI.invoke (Tolerance.using tolerance (f arg1 arg2 self)) outputPtr errorPtr
@@ -130,7 +130,7 @@ invoke function = case function of
     \inputPtr outputPtr errorPtr -> do
       (arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.invoke (f arg1 arg2 arg3 self) outputPtr errorPtr
-  MemberFunctionM3 _ _ _ f _ ->
+  MemberFunctionT3 _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
       (tolerance, arg1, arg2, arg3, self) <- FFI.load inputPtr 0
       FFI.invoke (Tolerance.using tolerance (f arg1 arg2 arg3 self)) outputPtr errorPtr
@@ -138,12 +138,10 @@ invoke function = case function of
     \inputPtr outputPtr errorPtr -> do
       (arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.invoke (f arg1 arg2 arg3 arg4 self) outputPtr errorPtr
-  MemberFunctionM4 _ _ _ _ f _ ->
+  MemberFunctionT4 _ _ _ _ f _ ->
     \inputPtr outputPtr errorPtr -> do
       (tolerance, arg1, arg2, arg3, arg4, self) <- FFI.load inputPtr 0
       FFI.invoke (Tolerance.using tolerance (f arg1 arg2 arg3 arg4 self)) outputPtr errorPtr
-
-type Signature = (Maybe ImplicitTolerance, List (Name, FFI.Type, Argument.Kind), FFI.Type)
 
 normalizeSignature ::
   (Maybe ImplicitTolerance, List (Name, FFI.Type, Argument.Kind), FFI.Type) ->
@@ -159,127 +157,69 @@ signature ::
   MemberFunction ->
   (Maybe ImplicitTolerance, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
 signature memberFunction = normalizeSignature $ case memberFunction of
-  MemberFunction0 f _ -> signature0 f
-  MemberFunctionM0 f _ -> signatureM0 f
-  MemberFunction1 arg1 f _ -> signature1 arg1 f
-  MemberFunctionM1 arg1 f _ -> signatureM1 arg1 f
-  MemberFunction2 arg1 arg2 f _ -> signature2 arg1 arg2 f
-  MemberFunctionM2 arg1 arg2 f _ -> signatureM2 arg1 arg2 f
-  MemberFunction3 arg1 arg2 arg3 f _ -> signature3 arg1 arg2 arg3 f
-  MemberFunctionM3 arg1 arg2 arg3 f _ -> signatureM3 arg1 arg2 arg3 f
-  MemberFunction4 arg1 arg2 arg3 arg4 f _ -> signature4 arg1 arg2 arg3 arg4 f
-  MemberFunctionM4 arg1 arg2 arg3 arg4 f _ -> signatureM4 arg1 arg2 arg3 arg4 f
+  MemberFunction0 @_ @result _ _ ->
+    ( Nothing
+    , []
+    , FFI.typeOf result
+    )
+  MemberFunctionT0 @_ @result _ _ ->
+    ( Just ImplicitTolerance
+    , []
+    , FFI.typeOf result
+    )
+  MemberFunction1 @a @_ @result arg1 _ _ ->
+    ( Nothing
+    , [arg a arg1]
+    , FFI.typeOf result
+    )
+  MemberFunctionT1 @a @_ @result arg1 _ _ ->
+    ( Just ImplicitTolerance
+    , [arg a arg1]
+    , FFI.typeOf result
+    )
+  MemberFunction2 @a @b @_ @result arg1 arg2 _ _ ->
+    ( Nothing
+    , [arg a arg1, arg b arg2]
+    , FFI.typeOf result
+    )
+  MemberFunctionT2 @a @b @_ @result arg1 arg2 _ _ ->
+    ( Just ImplicitTolerance
+    , [arg a arg1, arg b arg2]
+    , FFI.typeOf result
+    )
+  MemberFunction3 @a @b @c @_ @result arg1 arg2 arg3 _ _ ->
+    ( Nothing
+    , [arg a arg1, arg b arg2, arg c arg3]
+    , FFI.typeOf result
+    )
+  MemberFunctionT3 @a @b @c @_ @result arg1 arg2 arg3 _ _ ->
+    ( Just ImplicitTolerance
+    , [arg a arg1, arg b arg2, arg c arg3]
+    , FFI.typeOf result
+    )
+  MemberFunction4 @a @b @c @d @_ @result arg1 arg2 arg3 arg4 _ _ ->
+    ( Nothing
+    , [arg a arg1, arg b arg2, arg c arg3, arg d arg4]
+    , FFI.typeOf result
+    )
+  MemberFunctionT4 @a @b @c @d @_ @result arg1 arg2 arg3 arg4 _ _ ->
+    ( Just ImplicitTolerance
+    , [arg a arg1, arg b arg2, arg c arg3, arg d arg4]
+    , FFI.typeOf result
+    )
 
 arg :: forall t -> FFI t => Name -> (Name, FFI.Type, Argument.Kind)
 arg t name = (name, FFI.typeOf t, Argument.kind t)
 
-signature0 ::
-  forall value result.
-  (FFI value, FFI result) =>
-  (value -> IO result) ->
-  Signature
-signature0 _ = (Nothing, [], FFI.typeOf result)
-
-signatureM0 ::
-  forall value result.
-  (FFI value, FFI result) =>
-  (Tolerance Meters => value -> IO result) ->
-  Signature
-signatureM0 _ =
-  (Just ImplicitTolerance, [], FFI.typeOf result)
-
-signature1 ::
-  forall a value result.
-  (FFI a, FFI value, FFI result) =>
-  Name ->
-  (a -> value -> IO result) ->
-  Signature
-signature1 arg1 _ =
-  (Nothing, [arg a arg1], FFI.typeOf result)
-
-signatureM1 ::
-  forall a value result.
-  (FFI a, FFI value, FFI result) =>
-  Name ->
-  (Tolerance Meters => a -> value -> IO result) ->
-  Signature
-signatureM1 arg1 _ = (Just ImplicitTolerance, [arg a arg1], FFI.typeOf result)
-
-signature2 ::
-  forall a b value result.
-  (FFI a, FFI b, FFI value, FFI result) =>
-  Name ->
-  Name ->
-  (a -> b -> value -> IO result) ->
-  Signature
-signature2 arg1 arg2 _ =
-  (Nothing, [arg a arg1, arg b arg2], FFI.typeOf result)
-
-signatureM2 ::
-  forall a b value result.
-  (FFI a, FFI b, FFI value, FFI result) =>
-  Name ->
-  Name ->
-  (Tolerance Meters => a -> b -> value -> IO result) ->
-  Signature
-signatureM2 arg1 arg2 _ =
-  (Just ImplicitTolerance, [arg a arg1, arg b arg2], FFI.typeOf result)
-
-signature3 ::
-  forall a b c value result.
-  (FFI a, FFI b, FFI c, FFI value, FFI result) =>
-  Name ->
-  Name ->
-  Name ->
-  (a -> b -> c -> value -> IO result) ->
-  Signature
-signature3 arg1 arg2 arg3 _ =
-  (Nothing, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf result)
-
-signatureM3 ::
-  forall a b c value result.
-  (FFI a, FFI b, FFI c, FFI value, FFI result) =>
-  Name ->
-  Name ->
-  Name ->
-  (Tolerance Meters => a -> b -> c -> value -> IO result) ->
-  Signature
-signatureM3 arg1 arg2 arg3 _ =
-  (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf result)
-
-signature4 ::
-  forall a b c d value result.
-  (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  (a -> b -> c -> d -> value -> IO result) ->
-  Signature
-signature4 arg1 arg2 arg3 arg4 _ =
-  (Nothing, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf result)
-
-signatureM4 ::
-  forall a b c d value result.
-  (FFI a, FFI b, FFI c, FFI d, FFI value, FFI result) =>
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  (Tolerance Meters => a -> b -> c -> d -> value -> IO result) ->
-  Signature
-signatureM4 arg1 arg2 arg3 arg4 _ =
-  (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf result)
-
 documentation :: MemberFunction -> Text
 documentation memberFunction = case memberFunction of
   MemberFunction0 _ docs -> docs
-  MemberFunctionM0 _ docs -> docs
+  MemberFunctionT0 _ docs -> docs
   MemberFunction1 _ _ docs -> docs
-  MemberFunctionM1 _ _ docs -> docs
+  MemberFunctionT1 _ _ docs -> docs
   MemberFunction2 _ _ _ docs -> docs
-  MemberFunctionM2 _ _ _ docs -> docs
+  MemberFunctionT2 _ _ _ docs -> docs
   MemberFunction3 _ _ _ _ docs -> docs
-  MemberFunctionM3 _ _ _ _ docs -> docs
+  MemberFunctionT3 _ _ _ _ docs -> docs
   MemberFunction4 _ _ _ _ _ docs -> docs
-  MemberFunctionM4 _ _ _ _ _ docs -> docs
+  MemberFunctionT4 _ _ _ _ _ docs -> docs

@@ -19,109 +19,109 @@ import OpenSolid.Tolerance qualified as Tolerance
 
 data StaticFunction where
   StaticFunction1 ::
-    (FFI a, FFI b) =>
+    (FFI a, FFI result) =>
     Name ->
-    (a -> IO b) ->
+    (a -> IO result) ->
     Text ->
     StaticFunction
   StaticFunctionM1 ::
-    (FFI a, FFI b) =>
+    (FFI a, FFI result) =>
     Name ->
-    (Tolerance Meters => a -> IO b) ->
+    (Tolerance Meters => a -> IO result) ->
     Text ->
     StaticFunction
   StaticFunction2 ::
-    (FFI a, FFI b, FFI c) =>
+    (FFI a, FFI b, FFI result) =>
     Name ->
     Name ->
-    (a -> b -> IO c) ->
+    (a -> b -> IO result) ->
     Text ->
     StaticFunction
   StaticFunctionM2 ::
-    (FFI a, FFI b, FFI c) =>
+    (FFI a, FFI b, FFI result) =>
     Name ->
     Name ->
-    (Tolerance Meters => a -> b -> IO c) ->
+    (Tolerance Meters => a -> b -> IO result) ->
     Text ->
     StaticFunction
   StaticFunction3 ::
-    (FFI a, FFI b, FFI c, FFI d) =>
+    (FFI a, FFI b, FFI c, FFI result) =>
     Name ->
     Name ->
     Name ->
-    (a -> b -> c -> IO d) ->
+    (a -> b -> c -> IO result) ->
     Text ->
     StaticFunction
   StaticFunctionM3 ::
-    (FFI a, FFI b, FFI c, FFI d) =>
+    (FFI a, FFI b, FFI c, FFI result) =>
     Name ->
     Name ->
     Name ->
-    (Tolerance Meters => a -> b -> c -> IO d) ->
+    (Tolerance Meters => a -> b -> c -> IO result) ->
     Text ->
     StaticFunction
   StaticFunction4 ::
-    (FFI a, FFI b, FFI c, FFI d, FFI e) =>
+    (FFI a, FFI b, FFI c, FFI d, FFI result) =>
     Name ->
     Name ->
     Name ->
     Name ->
-    (a -> b -> c -> d -> IO e) ->
+    (a -> b -> c -> d -> IO result) ->
     Text ->
     StaticFunction
   StaticFunctionM4 ::
-    (FFI a, FFI b, FFI c, FFI d, FFI e) =>
+    (FFI a, FFI b, FFI c, FFI d, FFI result) =>
     Name ->
     Name ->
     Name ->
     Name ->
-    (Tolerance Meters => a -> b -> c -> d -> IO e) ->
+    (Tolerance Meters => a -> b -> c -> d -> IO result) ->
     Text ->
     StaticFunction
   StaticFunction5 ::
-    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI result) =>
     Name ->
     Name ->
     Name ->
     Name ->
     Name ->
-    (a -> b -> c -> d -> e -> IO f) ->
+    (a -> b -> c -> d -> e -> IO result) ->
     Text ->
     StaticFunction
   StaticFunctionM5 ::
-    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI result) =>
     Name ->
     Name ->
     Name ->
     Name ->
     Name ->
-    (Tolerance Meters => a -> b -> c -> d -> e -> IO f) ->
+    (Tolerance Meters => a -> b -> c -> d -> e -> IO result) ->
     Text ->
     StaticFunction
   StaticFunction6 ::
-    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI result) =>
     Name ->
     Name ->
     Name ->
     Name ->
     Name ->
     Name ->
-    (a -> b -> c -> d -> e -> f -> IO g) ->
+    (a -> b -> c -> d -> e -> f -> IO result) ->
     Text ->
     StaticFunction
   StaticFunctionM6 ::
-    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI result) =>
     Name ->
     Name ->
     Name ->
     Name ->
     Name ->
     Name ->
-    (Tolerance Meters => a -> b -> c -> d -> e -> f -> IO g) ->
+    (Tolerance Meters => a -> b -> c -> d -> e -> f -> IO result) ->
     Text ->
     StaticFunction
   StaticFunction10 ::
-    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i, FFI j, FFI k) =>
+    (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i, FFI j, FFI result) =>
     Name ->
     Name ->
     Name ->
@@ -132,7 +132,7 @@ data StaticFunction where
     Name ->
     Name ->
     Name ->
-    (a -> b -> c -> d -> e -> f -> g -> h -> i -> j -> IO k) ->
+    (a -> b -> c -> d -> e -> f -> g -> h -> i -> j -> IO result) ->
     Text ->
     StaticFunction
 
@@ -202,8 +202,6 @@ invoke function = case function of
       (arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) <- FFI.load inputPtr 0
       FFI.invoke (f arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10) outputPtr errorPtr
 
-type Signature = (Maybe ImplicitTolerance, List (Name, FFI.Type, Argument.Kind), FFI.Type)
-
 normalizeSignature ::
   (Maybe ImplicitTolerance, List (Name, FFI.Type, Argument.Kind), FFI.Type) ->
   (Maybe ImplicitTolerance, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
@@ -218,178 +216,74 @@ signature ::
   StaticFunction ->
   (Maybe ImplicitTolerance, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
 signature staticFunction = normalizeSignature $ case staticFunction of
-  StaticFunction1 arg1 f _ -> signature1 arg1 f
-  StaticFunctionM1 arg1 f _ -> signatureM1 arg1 f
-  StaticFunction2 arg1 arg2 f _ -> signature2 arg1 arg2 f
-  StaticFunctionM2 arg1 arg2 f _ -> signatureM2 arg1 arg2 f
-  StaticFunction3 arg1 arg2 arg3 f _ -> signature3 arg1 arg2 arg3 f
-  StaticFunctionM3 arg1 arg2 arg3 f _ -> signatureM3 arg1 arg2 arg3 f
-  StaticFunction4 arg1 arg2 arg3 arg4 f _ -> signature4 arg1 arg2 arg3 arg4 f
-  StaticFunctionM4 arg1 arg2 arg3 arg4 f _ -> signatureM4 arg1 arg2 arg3 arg4 f
-  StaticFunction5 arg1 arg2 arg3 arg4 arg5 f _ -> signature5 arg1 arg2 arg3 arg4 arg5 f
-  StaticFunctionM5 arg1 arg2 arg3 arg4 arg5 f _ -> signatureM5 arg1 arg2 arg3 arg4 arg5 f
-  StaticFunction6 arg1 arg2 arg3 arg4 arg5 arg6 f _ -> signature6 arg1 arg2 arg3 arg4 arg5 arg6 f
-  StaticFunctionM6 arg1 arg2 arg3 arg4 arg5 arg6 f _ -> signatureM6 arg1 arg2 arg3 arg4 arg5 arg6 f
-  StaticFunction10 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 f _ -> signature10 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 f
+  StaticFunction1 @a @result arg1 _ _ ->
+    ( Nothing
+    , [arg a arg1]
+    , FFI.typeOf result
+    )
+  StaticFunctionM1 @a @result arg1 _ _ ->
+    ( Just ImplicitTolerance
+    , [arg a arg1]
+    , FFI.typeOf result
+    )
+  StaticFunction2 @a @b @result arg1 arg2 _ _ ->
+    ( Nothing
+    , [arg a arg1, arg b arg2]
+    , FFI.typeOf result
+    )
+  StaticFunctionM2 @a @b @result arg1 arg2 _ _ ->
+    ( Just ImplicitTolerance
+    , [arg a arg1, arg b arg2]
+    , FFI.typeOf result
+    )
+  StaticFunction3 @a @b @c @result arg1 arg2 arg3 _ _ ->
+    ( Nothing
+    , [arg a arg1, arg b arg2, arg c arg3]
+    , FFI.typeOf result
+    )
+  StaticFunctionM3 @a @b @c @result arg1 arg2 arg3 _ _ ->
+    ( Just ImplicitTolerance
+    , [arg a arg1, arg b arg2, arg c arg3]
+    , FFI.typeOf result
+    )
+  StaticFunction4 @a @b @c @d @result arg1 arg2 arg3 arg4 _ _ ->
+    ( Nothing
+    , [arg a arg1, arg b arg2, arg c arg3, arg d arg4]
+    , FFI.typeOf result
+    )
+  StaticFunctionM4 @a @b @c @d @result arg1 arg2 arg3 arg4 _ _ ->
+    ( Just ImplicitTolerance
+    , [arg a arg1, arg b arg2, arg c arg3, arg d arg4]
+    , FFI.typeOf result
+    )
+  StaticFunction5 @a @b @c @d @e @result arg1 arg2 arg3 arg4 arg5 _ _ ->
+    ( Nothing
+    , [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5]
+    , FFI.typeOf result
+    )
+  StaticFunctionM5 @a @b @c @d @e @result arg1 arg2 arg3 arg4 arg5 _ _ ->
+    ( Just ImplicitTolerance
+    , [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5]
+    , FFI.typeOf result
+    )
+  StaticFunction6 @a @b @c @d @e @f @result arg1 arg2 arg3 arg4 arg5 arg6 _ _ ->
+    ( Nothing
+    , [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5, arg f arg6]
+    , FFI.typeOf result
+    )
+  StaticFunctionM6 @a @b @c @d @e @f @result arg1 arg2 arg3 arg4 arg5 arg6 _ _ ->
+    ( Just ImplicitTolerance
+    , [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5, arg f arg6]
+    , FFI.typeOf result
+    )
+  StaticFunction10 @a @b @c @d @e @f @g @h @i @j @result arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 _ _ ->
+    ( Nothing
+    , [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5, arg f arg6, arg g arg7, arg h arg8, arg i arg9, arg j arg10]
+    , FFI.typeOf result
+    )
 
 arg :: forall t -> FFI t => Name -> (Name, FFI.Type, Argument.Kind)
 arg t name = (name, FFI.typeOf t, Argument.kind t)
-
-signature1 ::
-  forall a b.
-  (FFI a, FFI b) =>
-  Name ->
-  (a -> IO b) ->
-  Signature
-signature1 arg1 _ =
-  (Nothing, [arg a arg1], FFI.typeOf b)
-
-signatureM1 ::
-  forall a b.
-  (FFI a, FFI b) =>
-  Name ->
-  (Tolerance Meters => a -> IO b) ->
-  Signature
-signatureM1 arg1 _ =
-  (Just ImplicitTolerance, [arg a arg1], FFI.typeOf b)
-
-signature2 ::
-  forall a b c.
-  (FFI a, FFI b, FFI c) =>
-  Name ->
-  Name ->
-  (a -> b -> IO c) ->
-  Signature
-signature2 arg1 arg2 _ =
-  (Nothing, [arg a arg1, arg b arg2], FFI.typeOf c)
-
-signatureM2 ::
-  forall a b c.
-  (FFI a, FFI b, FFI c) =>
-  Name ->
-  Name ->
-  (Tolerance Meters => a -> b -> IO c) ->
-  Signature
-signatureM2 arg1 arg2 _ =
-  (Just ImplicitTolerance, [arg a arg1, arg b arg2], FFI.typeOf c)
-
-signature3 ::
-  forall a b c d.
-  (FFI a, FFI b, FFI c, FFI d) =>
-  Name ->
-  Name ->
-  Name ->
-  (a -> b -> c -> IO d) ->
-  Signature
-signature3 arg1 arg2 arg3 _ =
-  (Nothing, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf d)
-
-signatureM3 ::
-  forall a b c d.
-  (FFI a, FFI b, FFI c, FFI d) =>
-  Name ->
-  Name ->
-  Name ->
-  (Tolerance Meters => a -> b -> c -> IO d) ->
-  Signature
-signatureM3 arg1 arg2 arg3 _ =
-  (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3], FFI.typeOf d)
-
-signature4 ::
-  forall a b c d e.
-  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  (a -> b -> c -> d -> IO e) ->
-  Signature
-signature4 arg1 arg2 arg3 arg4 _ =
-  (Nothing, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf e)
-
-signatureM4 ::
-  forall a b c d e.
-  (FFI a, FFI b, FFI c, FFI d, FFI e) =>
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  (Tolerance Meters => a -> b -> c -> d -> IO e) ->
-  Signature
-signatureM4 arg1 arg2 arg3 arg4 _ =
-  (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3, arg d arg4], FFI.typeOf e)
-
-signature5 ::
-  forall a b c d e f.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  (a -> b -> c -> d -> e -> IO f) ->
-  Signature
-signature5 arg1 arg2 arg3 arg4 arg5 _ =
-  (Nothing, [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5], FFI.typeOf f)
-
-signatureM5 ::
-  forall a b c d e f.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f) =>
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  (Tolerance Meters => a -> b -> c -> d -> e -> IO f) ->
-  Signature
-signatureM5 arg1 arg2 arg3 arg4 arg5 _ =
-  (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5], FFI.typeOf f)
-
-signature6 ::
-  forall a b c d e f g.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  (a -> b -> c -> d -> e -> f -> IO g) ->
-  Signature
-signature6 arg1 arg2 arg3 arg4 arg5 arg6 _ =
-  (Nothing, [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5, arg f arg6], FFI.typeOf g)
-
-signatureM6 ::
-  forall a b c d e f g.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g) =>
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  (Tolerance Meters => a -> b -> c -> d -> e -> f -> IO g) ->
-  Signature
-signatureM6 arg1 arg2 arg3 arg4 arg5 arg6 _ =
-  (Just ImplicitTolerance, [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5, arg f arg6], FFI.typeOf g)
-
-signature10 ::
-  forall a b c d e f g h i j k.
-  (FFI a, FFI b, FFI c, FFI d, FFI e, FFI f, FFI g, FFI h, FFI i, FFI j, FFI k) =>
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  Name ->
-  (a -> b -> c -> d -> e -> f -> g -> h -> i -> j -> IO k) ->
-  Signature
-signature10 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 _ =
-  (Nothing, [arg a arg1, arg b arg2, arg c arg3, arg d arg4, arg e arg5, arg f arg6, arg g arg7, arg h arg8, arg i arg9, arg j arg10], FFI.typeOf k)
 
 documentation :: StaticFunction -> Text
 documentation memberFunction = case memberFunction of
