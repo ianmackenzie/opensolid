@@ -74,6 +74,7 @@ module OpenSolid.Curve2D
   , fromUniform
   , atUniform
   , piecewise
+  , offsetBy
   )
 where
 
@@ -781,3 +782,6 @@ piecewiseDerivativeRange tree s1 s2 = case tree of
   PiecewiseDerivativeLeaf segmentLength curve -> do
     let rRange = Interval (s1 / segmentLength) (s2 / segmentLength)
     VectorCurve2D.range rRange curve
+
+offsetBy :: VectorCurve2D units -> Curve2D units -> Curve2D units
+offsetBy = Curve.offsetBy
