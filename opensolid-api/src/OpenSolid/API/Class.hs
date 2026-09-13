@@ -12,19 +12,19 @@ module OpenSolid.API.Class
   , constructor3
   , constructor4
   , factory1
-  , factoryM1
+  , factoryT1
   , factory1R
-  , factoryM1R
+  , factoryT1R
   , factory2
   , factory2R
-  , factoryM2
-  , factoryM2R
+  , factoryT2
+  , factoryT2R
   , factory3
-  , factoryM3
-  , factoryM3R
+  , factoryT3
+  , factoryT3R
   , factory4
-  , factoryM4
-  , factoryM4R
+  , factoryT4
+  , factoryT4R
   , factory5
   , factory6
   , static1
@@ -32,26 +32,26 @@ module OpenSolid.API.Class
   , static1I
   , static2
   , static3
-  , staticM3
+  , staticT3
   , static10
   , property
   , member0
   , member0R
   , member0I
-  , memberM0
-  , memberM0R
-  , memberM0I
+  , memberT0
+  , memberT0R
+  , memberT0I
   , member1
   , member1I
   , member2
   , member2I
-  , memberM2
-  , memberM2R
-  , memberM2I
+  , memberT2
+  , memberT2R
+  , memberT2I
   , member3
   , member3I
-  , memberM3
-  , memberM3I
+  , memberT3
+  , memberT3I
   , member4
   , member4I
   , equalityAndHash
@@ -68,7 +68,7 @@ module OpenSolid.API.Class
   , times
   , divideBy
   , divideByNonzero
-  , divideByNonzeroM
+  , divideByNonzeroT
   , divMod
   , dot
   , cross
@@ -292,14 +292,14 @@ constructor4I arg1 arg2 arg3 arg4 f docs =
 factory1 :: (FFI a, FFI value) => Text -> Text -> (a -> value) -> Text -> Member value
 factory1 = static1
 
-factoryM1 ::
+factoryT1 ::
   (FFI a, FFI value) =>
   Text ->
   Text ->
   (Tolerance Meters => a -> value) ->
   Text ->
   Member value
-factoryM1 = staticM1
+factoryT1 = staticT1
 
 factory1R ::
   (FFI a, FFI value) =>
@@ -310,14 +310,14 @@ factory1R ::
   Member value
 factory1R = static1R
 
-factoryM1R ::
+factoryT1R ::
   (FFI a, FFI value) =>
   Text ->
   Text ->
   (Tolerance Meters => a -> Result x value) ->
   Text ->
   Member value
-factoryM1R = staticM1R
+factoryT1R = staticT1R
 
 factory2 ::
   (FFI a, FFI b, FFI value) =>
@@ -339,7 +339,7 @@ factory2R ::
   Member value
 factory2R = static2R
 
-factoryM2 ::
+factoryT2 ::
   (FFI a, FFI b, FFI value) =>
   Text ->
   Text ->
@@ -347,9 +347,9 @@ factoryM2 ::
   (Tolerance Meters => a -> b -> value) ->
   Text ->
   Member value
-factoryM2 = staticM2
+factoryT2 = staticT2
 
-factoryM2R ::
+factoryT2R ::
   (FFI a, FFI b, FFI value) =>
   Text ->
   Text ->
@@ -357,7 +357,7 @@ factoryM2R ::
   (Tolerance Meters => a -> b -> Result x value) ->
   Text ->
   Member value
-factoryM2R = staticM2R
+factoryT2R = staticT2R
 
 factory3 ::
   (FFI a, FFI b, FFI c, FFI value) =>
@@ -370,7 +370,7 @@ factory3 ::
   Member value
 factory3 = static3
 
-factoryM3 ::
+factoryT3 ::
   (FFI a, FFI b, FFI c, FFI value) =>
   Text ->
   Text ->
@@ -379,9 +379,9 @@ factoryM3 ::
   (Tolerance Meters => a -> b -> c -> value) ->
   Text ->
   Member value
-factoryM3 = staticM3
+factoryT3 = staticT3
 
-factoryM3R ::
+factoryT3R ::
   (FFI a, FFI b, FFI c, FFI value) =>
   Text ->
   Text ->
@@ -390,7 +390,7 @@ factoryM3R ::
   (Tolerance Meters => a -> b -> c -> Result x value) ->
   Text ->
   Member value
-factoryM3R = staticM3R
+factoryT3R = staticT3R
 
 factory4 ::
   (FFI a, FFI b, FFI c, FFI d, FFI value) =>
@@ -404,7 +404,7 @@ factory4 ::
   Member value
 factory4 = static4
 
-factoryM4 ::
+factoryT4 ::
   (FFI a, FFI b, FFI c, FFI d, FFI value) =>
   Text ->
   Text ->
@@ -414,9 +414,9 @@ factoryM4 ::
   (Tolerance Meters => a -> b -> c -> d -> value) ->
   Text ->
   Member value
-factoryM4 = staticM4
+factoryT4 = staticT4
 
-factoryM4R ::
+factoryT4R ::
   (FFI a, FFI b, FFI c, FFI d, FFI value) =>
   Text ->
   Text ->
@@ -426,7 +426,7 @@ factoryM4R ::
   (Tolerance Meters => a -> b -> c -> d -> Result x value) ->
   Text ->
   Member value
-factoryM4R = staticM4R
+factoryT4R = staticT4R
 
 factory5 ::
   (FFI a, FFI b, FFI c, FFI d, FFI e, FFI value) =>
@@ -485,34 +485,34 @@ static1I ::
 static1I name arg1 f docs =
   Static (FFI.name name) (StaticFunction1 (FFI.name arg1) f docs)
 
-staticM1 ::
+staticT1 ::
   (FFI a, FFI result) =>
   Text ->
   Text ->
   (Tolerance Meters => a -> result) ->
   Text ->
   Member value
-staticM1 name arg1 f docs =
-  staticM1I name arg1 (wrap1 f) docs
+staticT1 name arg1 f docs =
+  staticT1I name arg1 (wrap1 f) docs
 
-staticM1R ::
+staticT1R ::
   (FFI a, FFI result) =>
   Text ->
   Text ->
   (Tolerance Meters => a -> Result x result) ->
   Text ->
   Member value
-staticM1R name arg1 f docs =
-  staticM1I name arg1 (wrap1R f) docs
+staticT1R name arg1 f docs =
+  staticT1I name arg1 (wrap1R f) docs
 
-staticM1I ::
+staticT1I ::
   (FFI a, FFI result) =>
   Text ->
   Text ->
   (Tolerance Meters => a -> IO result) ->
   Text ->
   Member value
-staticM1I name arg1 f docs =
+staticT1I name arg1 f docs =
   Static (FFI.name name) (StaticFunctionM1 (FFI.name arg1) f docs)
 
 static2 ::
@@ -548,7 +548,7 @@ static2I ::
 static2I name arg1 arg2 f docs =
   Static (FFI.name name) (StaticFunction2 (FFI.name arg1) (FFI.name arg2) f docs)
 
-staticM2 ::
+staticT2 ::
   (FFI a, FFI b, FFI result) =>
   Text ->
   Text ->
@@ -556,10 +556,10 @@ staticM2 ::
   (Tolerance Meters => a -> b -> result) ->
   Text ->
   Member value
-staticM2 name arg1 arg2 f docs =
+staticT2 name arg1 arg2 f docs =
   Static (FFI.name name) (StaticFunctionM2 (FFI.name arg1) (FFI.name arg2) (wrap2 f) docs)
 
-staticM2R ::
+staticT2R ::
   (FFI a, FFI b, FFI result) =>
   Text ->
   Text ->
@@ -567,10 +567,10 @@ staticM2R ::
   (Tolerance Meters => a -> b -> Result x result) ->
   Text ->
   Member value
-staticM2R name arg1 arg2 f docs =
-  staticM2I name arg1 arg2 (wrap2R f) docs
+staticT2R name arg1 arg2 f docs =
+  staticT2I name arg1 arg2 (wrap2R f) docs
 
-staticM2I ::
+staticT2I ::
   (FFI a, FFI b, FFI result) =>
   Text ->
   Text ->
@@ -578,7 +578,7 @@ staticM2I ::
   (Tolerance Meters => a -> b -> IO result) ->
   Text ->
   Member value
-staticM2I name arg1 arg2 f docs =
+staticT2I name arg1 arg2 f docs =
   Static (FFI.name name) (StaticFunctionM2 (FFI.name arg1) (FFI.name arg2) f docs)
 
 static3 ::
@@ -594,7 +594,7 @@ static3 name arg1 arg2 arg3 f docs =
   Static (FFI.name name) $
     StaticFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (wrap3 f) docs
 
-staticM3 ::
+staticT3 ::
   (FFI a, FFI b, FFI c, FFI result) =>
   Text ->
   Text ->
@@ -603,10 +603,10 @@ staticM3 ::
   (Tolerance Meters => a -> b -> c -> result) ->
   Text ->
   Member value
-staticM3 name arg1 arg2 arg3 f docs =
-  staticM3I name arg1 arg2 arg3 (wrap3 f) docs
+staticT3 name arg1 arg2 arg3 f docs =
+  staticT3I name arg1 arg2 arg3 (wrap3 f) docs
 
-staticM3R ::
+staticT3R ::
   (FFI a, FFI b, FFI c, FFI result) =>
   Text ->
   Text ->
@@ -615,10 +615,10 @@ staticM3R ::
   (Tolerance Meters => a -> b -> c -> Result x result) ->
   Text ->
   Member value
-staticM3R name arg1 arg2 arg3 f docs =
-  staticM3I name arg1 arg2 arg3 (wrap3R f) docs
+staticT3R name arg1 arg2 arg3 f docs =
+  staticT3I name arg1 arg2 arg3 (wrap3R f) docs
 
-staticM3I ::
+staticT3I ::
   (FFI a, FFI b, FFI c, FFI result) =>
   Text ->
   Text ->
@@ -627,7 +627,7 @@ staticM3I ::
   (Tolerance Meters => a -> b -> c -> IO result) ->
   Text ->
   Member value
-staticM3I name arg1 arg2 arg3 f docs =
+staticT3I name arg1 arg2 arg3 f docs =
   Static (FFI.name name) $
     StaticFunctionM3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs
 
@@ -645,7 +645,7 @@ static4 name arg1 arg2 arg3 arg4 f docs =
   Static (FFI.name name) $
     StaticFunction4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) (wrap4 f) docs
 
-staticM4 ::
+staticT4 ::
   (FFI a, FFI b, FFI c, FFI d, FFI result) =>
   Text ->
   Text ->
@@ -655,10 +655,10 @@ staticM4 ::
   (Tolerance Meters => a -> b -> c -> d -> result) ->
   Text ->
   Member value
-staticM4 name arg1 arg2 arg3 arg4 f docs =
-  staticM4I name arg1 arg2 arg3 arg4 (wrap4 f) docs
+staticT4 name arg1 arg2 arg3 arg4 f docs =
+  staticT4I name arg1 arg2 arg3 arg4 (wrap4 f) docs
 
-staticM4R ::
+staticT4R ::
   (FFI a, FFI b, FFI c, FFI d, FFI result) =>
   Text ->
   Text ->
@@ -668,10 +668,10 @@ staticM4R ::
   (Tolerance Meters => a -> b -> c -> d -> Result x result) ->
   Text ->
   Member value
-staticM4R name arg1 arg2 arg3 arg4 f docs =
-  staticM4I name arg1 arg2 arg3 arg4 (wrap4R f) docs
+staticT4R name arg1 arg2 arg3 arg4 f docs =
+  staticT4I name arg1 arg2 arg3 arg4 (wrap4R f) docs
 
-staticM4I ::
+staticT4I ::
   (FFI a, FFI b, FFI c, FFI d, FFI result) =>
   Text ->
   Text ->
@@ -681,7 +681,7 @@ staticM4I ::
   (Tolerance Meters => a -> b -> c -> d -> IO result) ->
   Text ->
   Member value
-staticM4I name arg1 arg2 arg3 arg4 f docs =
+staticT4I name arg1 arg2 arg3 arg4 f docs =
   Static (FFI.name name) $
     StaticFunctionM4 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) (FFI.name arg4) f docs
 
@@ -775,29 +775,29 @@ member0R name f docs = member0I name (wrap1R f) docs
 member0I :: (FFI value, FFI result) => Text -> (value -> IO result) -> Text -> Member value
 member0I name f docs = Member (FFI.name name) (MemberFunction0 f docs)
 
-memberM0 ::
+memberT0 ::
   (FFI value, FFI result) =>
   Text ->
   (Tolerance Meters => value -> result) ->
   Text ->
   Member value
-memberM0 name f docs = memberM0I name (wrap1 f) docs
+memberT0 name f docs = memberT0I name (wrap1 f) docs
 
-memberM0R ::
+memberT0R ::
   (FFI value, FFI result) =>
   Text ->
   (Tolerance Meters => value -> Result x result) ->
   Text ->
   Member value
-memberM0R name f docs = memberM0I name (wrap1R f) docs
+memberT0R name f docs = memberT0I name (wrap1R f) docs
 
-memberM0I ::
+memberT0I ::
   (FFI value, FFI result) =>
   Text ->
   (Tolerance Meters => value -> IO result) ->
   Text ->
   Member value
-memberM0I name f docs = Member (FFI.name name) (MemberFunctionM0 f docs)
+memberT0I name f docs = Member (FFI.name name) (MemberFunctionM0 f docs)
 
 member1 ::
   (FFI a, FFI value, FFI result) =>
@@ -838,7 +838,7 @@ member2I ::
 member2I name arg1 arg2 f docs =
   Member (FFI.name name) (MemberFunction2 (FFI.name arg1) (FFI.name arg2) f docs)
 
-memberM2 ::
+memberT2 ::
   (FFI a, FFI b, FFI value, FFI result) =>
   Text ->
   Text ->
@@ -846,9 +846,9 @@ memberM2 ::
   (Tolerance Meters => a -> b -> value -> result) ->
   Text ->
   Member value
-memberM2 name arg1 arg2 f docs = memberM2I name arg1 arg2 (wrap3 f) docs
+memberT2 name arg1 arg2 f docs = memberT2I name arg1 arg2 (wrap3 f) docs
 
-memberM2R ::
+memberT2R ::
   (FFI a, FFI b, FFI value, FFI result) =>
   Text ->
   Text ->
@@ -856,9 +856,9 @@ memberM2R ::
   (Tolerance Meters => a -> b -> value -> Result x result) ->
   Text ->
   Member value
-memberM2R name arg1 arg2 f docs = memberM2I name arg1 arg2 (wrap3R f) docs
+memberT2R name arg1 arg2 f docs = memberT2I name arg1 arg2 (wrap3R f) docs
 
-memberM2I ::
+memberT2I ::
   (FFI a, FFI b, FFI value, FFI result) =>
   Text ->
   Text ->
@@ -866,7 +866,7 @@ memberM2I ::
   (Tolerance Meters => a -> b -> value -> IO result) ->
   Text ->
   Member value
-memberM2I name arg1 arg2 f docs =
+memberT2I name arg1 arg2 f docs =
   Member (FFI.name name) (MemberFunctionM2 (FFI.name arg1) (FFI.name arg2) f docs)
 
 member3 ::
@@ -892,7 +892,7 @@ member3I ::
 member3I name arg1 arg2 arg3 f docs =
   Member (FFI.name name) (MemberFunction3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs)
 
-memberM3 ::
+memberT3 ::
   (FFI a, FFI b, FFI c, FFI value, FFI result) =>
   Text ->
   Text ->
@@ -901,9 +901,9 @@ memberM3 ::
   (Tolerance Meters => a -> b -> c -> value -> result) ->
   Text ->
   Member value
-memberM3 name arg1 arg2 arg3 f docs = memberM3I name arg1 arg2 arg3 (wrap4 f) docs
+memberT3 name arg1 arg2 arg3 f docs = memberT3I name arg1 arg2 arg3 (wrap4 f) docs
 
-memberM3I ::
+memberT3I ::
   (FFI a, FFI b, FFI c, FFI value, FFI result) =>
   Text ->
   Text ->
@@ -912,7 +912,7 @@ memberM3I ::
   (Tolerance Meters => a -> b -> c -> value -> IO result) ->
   Text ->
   Member value
-memberM3I name arg1 arg2 arg3 f docs =
+memberT3I name arg1 arg2 arg3 f docs =
   Member (FFI.name name) (MemberFunctionM3 (FFI.name arg1) (FFI.name arg2) (FFI.name arg3) f docs)
 
 member4 ::
@@ -1045,12 +1045,12 @@ divideByNonzero nonzero = do
       implementation value rhs = Result.map (value /) (nonzero rhs)
   PostOverload BinaryOperator.Div (PostOperatorOverload (wrap2R implementation))
 
-divideByNonzeroM ::
+divideByNonzeroT ::
   forall rhs value result.
   (Division value (Nonzero rhs) result, FFI value, FFI rhs, FFI result) =>
   (Tolerance Meters => rhs -> Result HasZero (Nonzero rhs)) ->
   Member value
-divideByNonzeroM nonzero = do
+divideByNonzeroT nonzero = do
   let implementation :: Tolerance Meters => value -> rhs -> Result HasZero result
       implementation value rhs = Result.map (value /) (nonzero rhs)
   PostOverload BinaryOperator.Div (PostOperatorOverloadM (wrap2R implementation))

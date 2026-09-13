@@ -169,7 +169,7 @@ length =
     , Class.member0 "In Nanometers" Length.inNanometers $(docs 'Length.inNanometers)
     , Class.member0 "In Inches" Length.inInches $(docs 'Length.inInches)
     , Class.member0 "In Pixels" Length.inPixels $(docs 'Length.inPixels)
-    , Class.memberM0 "Is Zero" (~= Length.zero) "Check if a length is zero, within the current tolerance."
+    , Class.memberT0 "Is Zero" (~= Length.zero) "Check if a length is zero, within the current tolerance."
     , Class.equalityAndHash
     , Class.comparison
     , Class.negation
@@ -195,7 +195,7 @@ length =
     , Class.divideBy @Interval
     , Class.divideBy @LengthInterval
     , Class.divideByNonzero @Curve (unitless Curve1D.nonzero)
-    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero
+    , Class.divideByNonzeroT @LengthCurve Curve1D.nonzero
     , Class.divMod
     ]
 
@@ -236,7 +236,7 @@ area =
     , Class.divideBy @LengthInterval
     , Class.divideBy @AreaInterval
     , Class.divideByNonzero @Curve (unitless Curve1D.nonzero)
-    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero
+    , Class.divideByNonzeroT @LengthCurve Curve1D.nonzero
     , Class.divMod
     ]
 
@@ -560,11 +560,11 @@ displacement2D =
     , Class.property "X Component" Vector2D.xComponent $(docs 'Vector2D.xComponent)
     , Class.property "Y Component" Vector2D.yComponent $(docs 'Vector2D.yComponent)
     , Class.member1 "Component In" "Direction" Vector2D.componentIn $(docs 'Vector2D.componentIn)
-    , Class.memberM0R "Direction" Vector2D.direction $(docs 'Vector2D.direction)
-    , Class.memberM0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
+    , Class.memberT0R "Direction" Vector2D.direction $(docs 'Vector2D.direction)
+    , Class.memberT0 "Normalize" Vector2D.normalize $(docs 'Vector2D.normalize)
     , Class.property "Angle" Vector2D.angle $(docs 'Vector2D.angle)
     , Class.member1 "Angle To" "Other" (flip Vector2D.angleFrom) $(docs 'Vector2D.angleFrom)
-    , Class.memberM0 "Is Zero" (~= Vector2D.zero) "Check if a displacement is zero, within the current tolerance."
+    , Class.memberT0 "Is Zero" (~= Vector2D.zero) "Check if a displacement is zero, within the current tolerance."
     , Class.member1 "Place On" "Plane" (Vector2D.placeOn :: Plane3D -> Displacement2D -> Displacement3D) $(docs 'Vector2D.placeOn)
     , Class.negation
     , Class.numberTimes
@@ -932,8 +932,8 @@ lengthCurve =
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
     , Class.member0 "Squared" Curve1D.squared $(docs 'Curve1D.squared)
     , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
-    , Class.memberM0R "Roots" Curve1D.roots $(docs 'Curve1D.roots)
-    , Class.memberM0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    , Class.memberT0R "Roots" Curve1D.roots $(docs 'Curve1D.roots)
+    , Class.memberT0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negation
     , Class.numberTimes
     , Class.plus @LengthCurve
@@ -947,7 +947,7 @@ lengthCurve =
     , Class.divideBy @Number
     , Class.divideBy @Length
     , Class.divideByNonzero @Curve (unitless Curve1D.nonzero)
-    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero
+    , Class.divideByNonzeroT @LengthCurve Curve1D.nonzero
     ]
 
 type AreaCurve = Curve1D.Curve1D SquareMeters
@@ -970,7 +970,7 @@ areaCurve =
     , Class.times @Number
     , Class.divideByNonzero @Curve (unitless Curve1D.nonzero)
     , Class.divideBy @Number
-    , Class.divideByNonzeroM @LengthCurve Curve1D.nonzero
+    , Class.divideByNonzeroT @LengthCurve Curve1D.nonzero
     , Class.divideBy @Length
     , Class.divideBy @Area
     ]
@@ -1126,8 +1126,8 @@ displacement3D =
     , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
     , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
     , Class.member1 "Component In" "Direction" Vector3D.componentIn $(docs 'Vector3D.componentIn)
-    , Class.memberM0R "Direction" Vector3D.direction $(docs 'Vector3D.direction)
-    , Class.memberM0 "Is Zero" (~= Vector3D.zero) "Check if a displacement is zero, within the current tolerance."
+    , Class.memberT0R "Direction" Vector3D.direction $(docs 'Vector3D.direction)
+    , Class.memberT0 "Is Zero" (~= Vector3D.zero) "Check if a displacement is zero, within the current tolerance."
     , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
     , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> Displacement3D -> Displacement3D) $(docs 'Vector3D.rotateAround)
     , Class.member1 "Mirror In" "Direction" Vector3D.mirrorIn $(docs 'Vector3D.mirrorIn)
@@ -1509,10 +1509,10 @@ curve2D =
     , Class.factory2 "XY" "X Coordinate" "Y Coordinate" Curve2D.xy $(docs 'Curve2D.xy)
     , Class.factory1 "Line" "Line" Curve2D.line $(docs 'Curve2D.line)
     , Class.factory2 "Line From" "Start Point" "End Point" Curve2D.lineFrom $(docs 'Curve2D.lineFrom)
-    , Class.factoryM3 "Arc From" "Start Point" "End Point" "Swept Angle" Curve2D.arcFrom $(docs 'Curve2D.arcFrom)
+    , Class.factoryT3 "Arc From" "Start Point" "End Point" "Swept Angle" Curve2D.arcFrom $(docs 'Curve2D.arcFrom)
     , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2D.polarArc $(docs 'Curve2D.polarArc)
     , Class.factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2D.sweptArc $(docs 'Curve2D.sweptArc)
-    , Class.factoryM4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2D.cornerArc $(docs 'Curve2D.cornerArc)
+    , Class.factoryT4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2D.cornerArc $(docs 'Curve2D.cornerArc)
     , Class.factory1 "Circle" "Circle" Curve2D.circle $(docs 'Curve2D.circle)
     , Class.factory1 "Bezier" "Control Points" Curve2D.bezier $(docs 'Curve2D.bezier)
     , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
@@ -1561,14 +1561,14 @@ type Region2D = Region2D.Region2D Meters
 region2D :: Class
 region2D =
   Class.new @Region2D $(docs ''Region2D.Region2D) $
-    [ Class.factoryM1R "Bounded By" "Curves" Region2D.boundedBy $(docs 'Region2D.boundedBy)
-    , Class.factoryM1R "Rectangle" "Bounding Box" Region2D.rectangle $(docs 'Region2D.rectangle)
-    , Class.factoryM1R "Circle" "Circle" Region2D.circle $(docs 'Region2D.circle)
+    [ Class.factoryT1R "Bounded By" "Curves" Region2D.boundedBy $(docs 'Region2D.boundedBy)
+    , Class.factoryT1R "Rectangle" "Bounding Box" Region2D.rectangle $(docs 'Region2D.rectangle)
+    , Class.factoryT1R "Circle" "Circle" Region2D.circle $(docs 'Region2D.circle)
     , Class.property "Outer Loop" Region2D.outerLoop $(docs 'Region2D.outerLoop)
     , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
     , Class.property "Boundary Curves" (Set2D.toNonEmpty . Region2D.boundaryCurves) $(docs 'Region2D.boundaryCurves)
-    , Class.factoryM1R "Polygon" "Polygon" Region2D.polygon $(docs 'Region2D.polygon)
-    , Class.memberM2R "Fillet" "Points" "Radius" Region2D.fillet $(docs 'Region2D.fillet)
+    , Class.factoryT1R "Polygon" "Polygon" Region2D.polygon $(docs 'Region2D.polygon)
+    , Class.memberT2R "Fillet" "Points" "Radius" Region2D.fillet $(docs 'Region2D.fillet)
     ]
       <> orthonormalTransformations2D Region2D.transformBy
 
@@ -1596,16 +1596,16 @@ body3D = do
         let mesh = Body3D.toSurfaceMesh givenResolution body
         Mitsuba.writeMeshes path [(mesh, #name "")]
   Class.new @Body3D $(docs ''Body3D.Body3D) $
-    [ Class.factoryM4R "Extruded" "Sketch Plane" "Profile" "Start" "End" (Body3D.extruded @Void) $(docs 'Body3D.extruded)
-    , Class.factoryM4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3D.revolved @Void) $(docs 'Body3D.revolved)
-    , Class.factoryM1R "Block" "Bounding Box" Body3D.block $(docs 'Body3D.block)
-    , Class.factoryM2R "Sphere" "Center Point" "Diameter" Body3D.sphere $(docs 'Body3D.sphere)
-    , Class.factoryM3R "Cylinder" "Start Point" "End Point" "Diameter" Body3D.cylinder $(docs 'Body3D.cylinder)
-    , Class.factoryM4R "Cylinder Along" "Axis" "Start" "End" "Diameter" Body3D.cylinderAlong $(docs 'Body3D.cylinderAlong)
+    [ Class.factoryT4R "Extruded" "Sketch Plane" "Profile" "Start" "End" (Body3D.extruded @Void) $(docs 'Body3D.extruded)
+    , Class.factoryT4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3D.revolved @Void) $(docs 'Body3D.revolved)
+    , Class.factoryT1R "Block" "Bounding Box" Body3D.block $(docs 'Body3D.block)
+    , Class.factoryT2R "Sphere" "Center Point" "Diameter" Body3D.sphere $(docs 'Body3D.sphere)
+    , Class.factoryT3R "Cylinder" "Start Point" "End Point" "Diameter" Body3D.cylinder $(docs 'Body3D.cylinder)
+    , Class.factoryT4R "Cylinder Along" "Axis" "Start" "End" "Diameter" Body3D.cylinderAlong $(docs 'Body3D.cylinderAlong)
     , Class.member1 "Place In" "Frame" (Body3D.placeIn :: Frame3D -> Body3D -> Body3D) $(docs 'Body3D.placeIn)
     , Class.member1 "Relative To" "Frame" (Body3D.relativeTo :: Frame3D -> Body3D -> Body3D) $(docs 'Body3D.relativeTo)
-    , Class.memberM3I "Write STL" "Path" "Convention" "Resolution" writeStl "Write a body to a binary STL file, using units of millimeters."
-    , Class.memberM2I "Write Mitsuba" "Path" "Resolution" writeMitsuba "Write a body to Mitsuba 'serialized' file."
+    , Class.memberT3I "Write STL" "Path" "Convention" "Resolution" writeStl "Write a body to a binary STL file, using units of millimeters."
+    , Class.memberT2I "Write Mitsuba" "Path" "Resolution" writeMitsuba "Write a body to Mitsuba 'serialized' file."
     ]
 
 type Resolution = Resolution.Resolution Meters
@@ -1641,8 +1641,8 @@ model3D :: Class
 model3D =
   Class.new @Model3D $(docs ''Model3D.Model3D) $
     [ Class.constant "Nothing" (Model3D.nothing @Void) $(docs 'Model3D.nothing)
-    , Class.factoryM1 "Body" "Body" Model3D.body $(docs 'Model3D.body)
-    , Class.factoryM2 "Body With" "Attributes" "Body" Model3D.bodyWith $(docs 'Model3D.bodyWith)
+    , Class.factoryT1 "Body" "Body" Model3D.body $(docs 'Model3D.body)
+    , Class.factoryT2 "Body With" "Attributes" "Body" Model3D.bodyWith $(docs 'Model3D.bodyWith)
     , Class.factory1 "Group" "Children" Model3D.group $(docs 'Model3D.group)
     , Class.factory2 "Group With" "Attributes" "Children" Model3D.groupWith $(docs 'Model3D.groupWith)
     , Class.member1 "With Name" "Name" Model3D.withName $(docs 'Model3D.withName)
@@ -1713,7 +1713,7 @@ spurGear =
     , Class.property "Module" (SpurGear.module_) $(docs 'SpurGear.module_)
     , Class.property "Pitch Diameter" (SpurGear.pitchDiameter) $(docs 'SpurGear.pitchDiameter)
     , Class.property "Outer Diameter" (SpurGear.outerDiameter) $(docs 'SpurGear.outerDiameter)
-    , Class.memberM0 "Profile" (SpurGear.profile :: SpurGear -> List Curve2D) $(docs 'SpurGear.profile)
+    , Class.memberT0 "Profile" (SpurGear.profile :: SpurGear -> List Curve2D) $(docs 'SpurGear.profile)
     ]
 
 data Step = Step Step.Header (List Step.Entity)
