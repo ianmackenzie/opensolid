@@ -19,6 +19,10 @@ module Tests.Random
   , quadraticSpline2D
   , cubicSpline2D
   , involute2D
+  , line3D
+  , arc3D
+  , quadraticSpline3D
+  , cubicSpline3D
   , rigidTransform2D
   , rigidVectorTransform2D
   , rigidTransform3D
@@ -45,6 +49,8 @@ import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
+import OpenSolid.Curve3D (Curve3D)
+import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Frame2D (Frame2D)
@@ -154,6 +160,19 @@ involute2D = do
   startAngle <- Random.quantity Angle.zero (angleSign * Angle.twoPi)
   endAngle <- Random.quantity Angle.zero (angleSign * Angle.twoPi)
   Random.return (Curve2D.involute centerPoint radialVector startAngle endAngle)
+
+line3D :: Generator (Curve3D space)
+line3D = Tolerance.using Length.defaultTolerance do
+  Random.map2 Curve3D.lineFrom point3D point3D
+
+arc3D :: Generator (Curve3D space)
+arc3D = Random.map2 Curve2D.placeOn plane3D arc2D
+
+quadraticSpline3D :: Generator (Curve3D Meters)
+quadraticSpline3D = Random.map3 Curve3D.quadraticBezier point3D point3D point3D
+
+cubicSpline3D :: Generator (Curve3D Meters)
+cubicSpline3D = Random.map4 Curve3D.cubicBezier point3D point3D point3D point3D
 
 translation2D :: Generator (Transform2D.Rigid Meters)
 translation2D = Random.map Transform2D.translateBy vector2D
