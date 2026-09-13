@@ -16,8 +16,10 @@ data Problem intersection where
     , searchTree :: Tree domain segment
     , resolveTangent :: domain -> segment -> Fuzzy (Maybe tangentTag)
     , resolveCrossing :: domain -> segment -> Fuzzy (Maybe crossingTag)
-    , solveTangent :: Set domain (tangentTag, Tree domain segment) -> List intersection
-    , solveCrossing :: Set domain (crossingTag, Tree domain segment) -> List intersection
+    , solveTangent ::
+        Set domain (Bisection.Subtree tangentTag domain segment) -> List intersection
+    , solveCrossing ::
+        Set domain (Bisection.Subtree crossingTag domain segment) -> List intersection
     } ->
     Problem intersection
 

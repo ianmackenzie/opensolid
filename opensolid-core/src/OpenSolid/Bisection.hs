@@ -1,6 +1,7 @@
 module OpenSolid.Bisection
   ( Domain
   , Tree (Tree)
+  , Subtree (Subtree)
   , subdomain
   , segment
   , children
@@ -20,7 +21,6 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
@@ -47,6 +47,8 @@ data Tree domain segment = Tree
   , children :: ~(NonEmpty (Tree domain segment))
   }
 
+data Subtree tag domain segment = Subtree tag (Tree domain segment)
+
 instance
   ( Units.Coercion domain1 domain2
   , Units.Coercion segment1 segment2
@@ -71,10 +73,10 @@ instance
 instance
   forall domain1 domain2 segment tag.
   domain1 ~ domain2 =>
-  Bounded (tag, Tree domain1 segment) domain2
+  Bounded (Subtree tag domain1 segment) domain2
   where
   {-# INLINE bounds #-}
-  bounds = subdomain . Pair.second
+  bounds (Subtree _ tree) = subdomain tree
 
 pairwise ::
   Tree domain1 segment1 ->
@@ -101,13 +103,13 @@ resolve ::
   Bag domain existing ->
   (domain -> segment -> Fuzzy (Maybe tag)) ->
   Tree domain segment ->
-  Bag domain (tag, Tree domain segment)
+  Bag domain (Subtree tag domain segment)
 resolve existing callback tree =
   if containedIn existing tree.subdomain
     then Bag.empty
     else case callback tree.subdomain tree.segment of
       Resolved Nothing -> Bag.empty
-      Resolved (Just tag) -> Bag.singleton (tag, tree)
+      Resolved (Just tag) -> Bag.singleton (Subtree tag tree)
       Unresolved -> Bag.group (List.map (resolve existing callback) (NonEmpty.toList tree.children))
 
 containedIn :: forall domain existing. Domain domain => Bag domain existing -> domain -> Bool
@@ -117,7 +119,7 @@ touching ::
   forall domain segment existing tag.
   Domain domain =>
   Bag domain existing ->
-  Set domain (tag, Tree domain segment) ->
+  Set domain (Subtree tag domain segment) ->
   Bool
 touching existing set = Bag.full set & Bag.pairwiseAny (unitless (^)) (\_ _ -> True) existing
 
@@ -127,7 +129,7 @@ clusters ::
   Bag domain existing ->
   (domain -> segment -> Fuzzy (Maybe tag)) ->
   Tree domain segment ->
-  List (Set domain (tag, Tree domain segment))
+  List (Set domain (Subtree tag domain segment))
 clusters existing resolveFunction tree = do
   resolve existing resolveFunction tree
     & Bag.clusters (unitless (^)) (\_ _ -> True)
@@ -137,20 +139,22 @@ clusters existing resolveFunction tree = do
 find ::
   forall domain segment tag solution.
   (tag -> domain -> segment -> Fuzzy (Maybe solution)) ->
-  Set domain (tag, Tree domain segment) ->
+  Set domain (Subtree tag domain segment) ->
   Maybe solution
 find callback cluster = findImpl callback (Queue.fromNonEmpty (Set.toNonEmpty cluster))
 
 findImpl ::
   forall domain segment tag solution.
   (tag -> domain -> segment -> Fuzzy (Maybe solution)) ->
-  Queue (tag, Tree domain segment) ->
+  Queue (Subtree tag domain segment) ->
   Maybe solution
 findImpl callback queue = do
-  ((tag, subtree), remaining) <- Queue.pop queue
+  (Subtree tag subtree, remaining) <- Queue.pop queue
   case callback tag subtree.subdomain subtree.segment of
     Resolved Nothing -> findImpl callback remaining
     Resolved (Just solution) -> Just solution
     Unresolved -> do
-      let updatedQueue = remaining & forEach subtree.children \child -> Queue.push (tag, child)
+      let updatedQueue =
+            remaining & forEach subtree.children \child ->
+              Queue.push (Subtree tag child)
       findImpl callback updatedQueue
