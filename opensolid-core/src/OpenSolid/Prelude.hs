@@ -383,8 +383,8 @@ instance
 
 ----- Composition -----
 
-class Composition f g h | f g -> h where
-  (<<) :: f -> g -> h
+class Composition constraint f g h | f g -> h, h -> constraint where
+  (<<) :: constraint => f -> g -> h
 
 infixr 9 <<
 

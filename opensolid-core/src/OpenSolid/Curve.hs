@@ -309,7 +309,7 @@ instance
   where
   givenPoint - curve = constant givenPoint - curve
 
-instance Composition (Curve2D units) (SurfaceFunction1D Unitless) (SurfaceFunction2D units) where
+instance Composition () (Curve2D units) (SurfaceFunction1D Unitless) (SurfaceFunction2D units) where
   f << g = do
     let dfdt = derivative f << g
     let (dtdu, dtdv) = SurfaceFunction1D.partialDerivatives g
@@ -317,7 +317,7 @@ instance Composition (Curve2D units) (SurfaceFunction1D Unitless) (SurfaceFuncti
     let composedPartialDerivatives = (dfdt * dtdu, dfdt * dtdv)
     SurfaceFunction2D.new compiledComposed composedPartialDerivatives
 
-instance Composition (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units) where
+instance Composition () (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units) where
   f << g = do
     let (dfdu, dfdv) = Pair.map (<< g) (SurfaceFunction1D.partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (derivative g)
@@ -327,6 +327,7 @@ instance Composition (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units
 
 instance
   Composition
+    ()
     (VectorSurfaceFunction3D units space)
     (Curve2D Unitless)
     (VectorCurve3D units space)
@@ -338,7 +339,7 @@ instance
     let composedDerivative = dfdu * dudt + dfdv * dvdt
     VectorCurve3D.new compiledComposed composedDerivative
 
-instance Composition (SurfaceFunction3D space) (Curve2D Unitless) (Curve3D space) where
+instance Composition () (SurfaceFunction3D space) (Curve2D Unitless) (Curve3D space) where
   f << g = do
     let (dfdu, dfdv) = Pair.map (<< g) (SurfaceFunction3D.partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (derivative g)
@@ -382,7 +383,7 @@ intersectsPoint givenPoint curve = case nondegenerate curve of
 
 instance
   CurveExists dimension units space =>
-  Composition (Curve dimension units space) (Curve1D Unitless) (Curve dimension units space)
+  Composition () (Curve dimension units space) (Curve1D Unitless) (Curve dimension units space)
   where
   f << g = new (compiled f << Curve1D.compiled g) ((derivative f << g) * Curve1D.derivative g)
 
@@ -410,7 +411,7 @@ instance
   where
   lhs - rhs = constant lhs - rhs
 
-instance Composition (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
+instance Composition () (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
   f << g = do
     let dfdt = derivative f << g
     let (dtdu, dtdv) = SurfaceFunction1D.partialDerivatives g

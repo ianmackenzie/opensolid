@@ -164,6 +164,7 @@ instance
 
 instance
   Composition
+    ()
     (SurfaceFunction3D space)
     (Region2D Unitless)
     (Surface3D space)
@@ -172,6 +173,7 @@ instance
 
 instance
   Composition
+    ()
     (SurfaceFunction3D space)
     (SurfaceFunction2D Unitless)
     (SurfaceFunction3D space)

@@ -96,7 +96,7 @@ instance
   units1 ~ units2 =>
   Subtraction (Point2D units1) (Curve2D units2) (VectorCurve2D units1)
 
-instance Composition (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units)
+instance Composition () (SurfaceFunction1D units) (Curve2D Unitless) (Curve1D units)
 
 instance
   space1 ~ space2 =>

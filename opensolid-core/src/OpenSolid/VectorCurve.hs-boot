@@ -69,6 +69,7 @@ instance
 instance
   VectorCurveExists dimension units space =>
   Composition
+    ()
     (VectorCurve dimension units space)
     (Curve1D Unitless)
     (VectorCurve dimension units space)

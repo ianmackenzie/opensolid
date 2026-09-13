@@ -44,6 +44,7 @@ class
       (SurfaceFunction1D Unitless)
       (VectorSurfaceFunction dimension units space)
   , Composition
+      ()
       (VectorSurfaceFunction dimension units space)
       (SurfaceFunction2D Unitless)
       (VectorSurfaceFunction dimension units space)

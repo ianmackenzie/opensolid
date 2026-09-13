@@ -35,7 +35,7 @@ data SurfaceFunction1D (units :: Type)
 
 type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interval units)
 
-instance Composition (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFunction1D units)
+instance Composition () (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFunction1D units)
 
 instance ApproximateEquality (SurfaceFunction1D units) units
 

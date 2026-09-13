@@ -243,12 +243,12 @@ deriving instance Show (Variable3D input)
 uvPoint :: Vector2D Unitless -> UvPoint
 uvPoint position = Position2D position
 
-instance Composition (Ast1D Number) (Ast1D input) (Ast1D input) where
+instance Composition () (Ast1D Number) (Ast1D input) (Ast1D input) where
   Constant1D outer << _ = Constant1D outer
   Variable1D outer << Variable1D inner = outer << inner
   outer << Constant1D inner = Constant1D (evaluateCurve1D outer inner)
 
-instance Composition (Variable1D Number) (Variable1D input) (Ast1D input) where
+instance Composition () (Variable1D Number) (Variable1D input) (Ast1D input) where
   input << T = Variable1D input
   T << input = Variable1D input
   XComponent arg << input = xComponent (arg << input)
@@ -282,12 +282,12 @@ instance Composition (Variable1D Number) (Variable1D input) (Ast1D input) where
   Dot3D lhs rhs << input = lhs << input `dot` rhs << input
   DotVariableConstant3D lhs rhs << input = lhs << input `dot` rhs
 
-instance Composition (Ast2D Number) (Ast1D input) (Ast2D input) where
+instance Composition () (Ast2D Number) (Ast1D input) (Ast2D input) where
   Constant2D outer << _ = Constant2D outer
   Variable2D outer << Variable1D inner = outer << inner
   outer << Constant1D inner = Constant2D (evaluateVectorCurve2D outer inner)
 
-instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
+instance Composition () (Variable2D Number) (Variable1D input) (Ast2D input) where
   input << T = Variable2D input
   XY x y << input = xy (x << input) (y << input)
   XC x y << input = xy (x << input) (Constant1D y)
@@ -321,12 +321,12 @@ instance Composition (Variable2D Number) (Variable1D input) (Ast2D input) where
       Constant2D (evaluateVectorCurve2D (involute2D n vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable2D (Involute2D n vx vy theta1 theta2 paramVar)
 
-instance Composition (Ast3D Number) (Ast1D input) (Ast3D input) where
+instance Composition () (Ast3D Number) (Ast1D input) (Ast3D input) where
   Constant3D outer << _ = Constant3D outer
   Variable3D outer << Variable1D inner = outer << inner
   outer << Constant1D inner = Constant3D (evaluateVectorCurve3D outer inner)
 
-instance Composition (Variable3D Number) (Variable1D input) (Ast3D input) where
+instance Composition () (Variable3D Number) (Variable1D input) (Ast3D input) where
   input << T = Variable3D input
   Negated3D arg << input = negate (arg << input)
   Sum3D lhs rhs << input = lhs << input + rhs << input
@@ -359,12 +359,12 @@ instance Composition (Variable3D Number) (Variable1D input) (Ast3D input) where
       Constant3D (evaluateVectorCurve3D (involute3D n vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable3D (Involute3D n vx vy theta1 theta2 paramVar)
 
-instance Composition (Ast1D UvPoint) (Ast2D input) (Ast1D input) where
+instance Composition () (Ast1D UvPoint) (Ast2D input) (Ast1D input) where
   Constant1D outer << _ = Constant1D outer
   Variable1D outer << Variable2D inner = outer << inner
   outer << Constant2D parameter = Constant1D (evaluateSurface1D outer (uvPoint parameter))
 
-instance Composition (Variable1D UvPoint) (Variable2D input) (Ast1D input) where
+instance Composition () (Variable1D UvPoint) (Variable2D input) (Ast1D input) where
   input << UV = Variable1D input
   U << input = xComponent (Variable2D input)
   V << input = yComponent (Variable2D input)
@@ -398,12 +398,12 @@ instance Composition (Variable1D UvPoint) (Variable2D input) (Ast1D input) where
   Dot3D lhs rhs << input = lhs << input `dot` rhs << input
   DotVariableConstant3D lhs rhs << input = lhs << input `dot` rhs
 
-instance Composition (Ast2D UvPoint) (Ast2D input) (Ast2D input) where
+instance Composition () (Ast2D UvPoint) (Ast2D input) (Ast2D input) where
   Constant2D outer << _ = Constant2D outer
   Variable2D outer << Variable2D inner = outer << inner
   outer << Constant2D parameter = Constant2D (evaluateVectorSurface2D outer (uvPoint parameter))
 
-instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
+instance Composition () (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
   input << UV = Variable2D input
   UV << input = Variable2D input
   XY x y << input = xy (x << input) (y << input)
@@ -438,12 +438,12 @@ instance Composition (Variable2D UvPoint) (Variable2D input) (Ast2D input) where
       Constant2D (evaluateVectorCurve2D (involute2D n vx vy theta1 theta2) paramVal)
     Variable1D paramVar -> Variable2D (Involute2D n vx vy theta1 theta2 paramVar)
 
-instance Composition (Ast3D UvPoint) (Ast2D input) (Ast3D input) where
+instance Composition () (Ast3D UvPoint) (Ast2D input) (Ast3D input) where
   Constant3D outer << _ = Constant3D outer
   Variable3D outer << Variable2D inner = outer << inner
   outer << Constant2D parameter = Constant3D (evaluateVectorSurface3D outer (uvPoint parameter))
 
-instance Composition (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
+instance Composition () (Variable3D UvPoint) (Variable2D input) (Ast3D input) where
   input << UV = Variable3D input
   Negated3D arg << input = negate (arg << input)
   Sum3D lhs rhs << input = lhs << input + rhs << input

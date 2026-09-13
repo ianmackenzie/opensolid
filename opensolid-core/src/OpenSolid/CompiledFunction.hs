@@ -420,12 +420,14 @@ instance
   ( innerOutputValue ~ outerInputValue
   , innerOutputBounds ~ outerInputBounds
   , Composition
+      ()
       (Expression outerInputValue outerOutputValue)
       (Expression innerInputValue innerOutputValue)
       (Expression innerInputValue outerOutputValue)
   , Expression.Evaluation innerInputValue outerOutputValue innerInputBounds outerOutputBounds
   ) =>
   Composition
+    ()
     (CompiledFunction outerInputValue outerOutputValue outerInputBounds outerOutputBounds)
     (CompiledFunction innerInputValue innerOutputValue innerInputBounds innerOutputBounds)
     (CompiledFunction innerInputValue outerOutputValue innerInputBounds outerOutputBounds)

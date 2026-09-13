@@ -208,6 +208,7 @@ transformBy transform function = do
 
 instance
   Composition
+    ()
     (SurfaceFunction2D units)
     (Curve2D Unitless)
     (Curve2D units)
@@ -219,6 +220,7 @@ instance
 
 instance
   Composition
+    ()
     (SurfaceFunction1D units)
     (SurfaceFunction2D Unitless)
     (SurfaceFunction1D units)
@@ -237,6 +239,7 @@ instance
 
 instance
   Composition
+    ()
     (VectorSurfaceFunction2D units)
     (SurfaceFunction2D Unitless)
     (VectorSurfaceFunction2D units)
@@ -255,6 +258,7 @@ instance
 
 instance
   Composition
+    ()
     (VectorSurfaceFunction3D units space)
     (SurfaceFunction2D Unitless)
     (VectorSurfaceFunction3D units space)

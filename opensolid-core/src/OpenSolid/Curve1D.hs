@@ -325,7 +325,7 @@ instance
   where
   vector ?*? curve = VectorCurve3D.constant vector ?*? curve
 
-instance Composition (Curve1D units) (Curve1D Unitless) (Curve1D units) where
+instance Composition () (Curve1D units) (Curve1D Unitless) (Curve1D units) where
   f << g = new (compiled f << compiled g) ((derivative f << g) * derivative g)
 
 reverse :: Curve1D units -> Curve1D units

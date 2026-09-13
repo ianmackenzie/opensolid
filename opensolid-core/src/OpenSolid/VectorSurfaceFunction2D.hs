@@ -405,6 +405,7 @@ instance
 
 instance
   Composition
+    ()
     (VectorSurfaceFunction2D units)
     (Curve2D Unitless)
     (VectorCurve2D units)

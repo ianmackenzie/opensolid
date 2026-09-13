@@ -40,22 +40,25 @@ instance
     (SurfaceFunction2D units2)
     (VectorSurfaceFunction2D units1)
 
-instance Composition (SurfaceFunction2D units) (Curve2D Unitless) (Curve2D units)
+instance Composition () (SurfaceFunction2D units) (Curve2D Unitless) (Curve2D units)
 
 instance
   Composition
+    ()
     (SurfaceFunction1D units)
     (SurfaceFunction2D Unitless)
     (SurfaceFunction1D units)
 
 instance
   Composition
+    ()
     (VectorSurfaceFunction2D units)
     (SurfaceFunction2D Unitless)
     (VectorSurfaceFunction2D units)
 
 instance
   Composition
+    ()
     (VectorSurfaceFunction3D units space)
     (SurfaceFunction2D Unitless)
     (VectorSurfaceFunction3D units space)

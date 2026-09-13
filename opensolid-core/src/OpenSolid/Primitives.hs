@@ -892,8 +892,9 @@ instance Multiplication (Vector2D units) (VectorTransform2D tag) (Vector2D units
   Vector2D vx vy * VectorTransform2D i j = vx * i + vy * j
 
 instance
-  Composition outer inner composed =>
+  Composition () outer inner composed =>
   Composition
+    ()
     (VectorTransform2D outer)
     (VectorTransform2D inner)
     (VectorTransform2D composed)
@@ -943,8 +944,9 @@ instance
   transform * point = point * transform
 
 instance
-  (Composition outer inner composed, units1 ~ units2) =>
+  (Composition () outer inner composed, units1 ~ units2) =>
   Composition
+    ()
     (Transform2D outer units1)
     (Transform2D inner units2)
     (Transform2D composed units1)
@@ -2055,8 +2057,9 @@ instance
   Vector3D vx vy vz * VectorTransform3D i j k = vx * i + vy * j + vz * k
 
 instance
-  (Composition outer inner composed, space1 ~ space2) =>
+  (Composition () outer inner composed, space1 ~ space2) =>
   Composition
+    ()
     (VectorTransform3D outer space1)
     (VectorTransform3D inner space2)
     (VectorTransform3D composed space1)
@@ -2117,10 +2120,11 @@ instance
   transform * point = point * transform
 
 instance
-  ( Composition outer inner composed
+  ( Composition () outer inner composed
   , space1 ~ space2
   ) =>
   Composition
+    ()
     (Transform3D outer space1)
     (Transform3D inner space2)
     (Transform3D composed space1)

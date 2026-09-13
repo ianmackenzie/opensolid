@@ -1075,6 +1075,7 @@ instance
 
 instance
   Composition
+    ()
     (Expression Number output)
     (Expression Number Number)
     (Expression Number output)
@@ -1089,6 +1090,7 @@ instance
 
 instance
   Composition
+    ()
     (Expression Number output)
     (Expression UvPoint Number)
     (Expression UvPoint output)
@@ -1103,6 +1105,7 @@ instance
 
 instance
   Composition
+    ()
     (Expression UvPoint output)
     (Expression Number UvPoint)
     (Expression Number output)
@@ -1117,6 +1120,7 @@ instance
 
 instance
   Composition
+    ()
     (Expression UvPoint output)
     (Expression UvPoint UvPoint)
     (Expression UvPoint output)

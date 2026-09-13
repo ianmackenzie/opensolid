@@ -878,6 +878,7 @@ instance
 instance
   VectorCurveExists dimension units space =>
   Composition
+    ()
     (VectorCurve dimension units space)
     (Curve1D Unitless)
     (VectorCurve dimension units space)
@@ -889,6 +890,7 @@ instance
 
 instance
   Composition
+    ()
     (VectorCurve2D units)
     (SurfaceFunction1D Unitless)
     (VectorSurfaceFunction2D units)
@@ -902,6 +904,7 @@ instance
 
 instance
   Composition
+    ()
     (VectorCurve3D units space)
     (SurfaceFunction1D Unitless)
     (VectorSurfaceFunction3D units space)

@@ -37,7 +37,7 @@ type role Curve1D nominal
 type Curve1D :: Type -> Type
 data Curve1D units
 
-instance Composition (Curve1D units) (Curve1D Unitless) (Curve1D units)
+instance Composition () (Curve1D units) (Curve1D Unitless) (Curve1D units)
 
 type Compiled units = CompiledFunction Number (Quantity units) (Interval Unitless) (Interval units)
 
