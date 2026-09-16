@@ -125,13 +125,12 @@ findInteriorIntersections ::
 findInteriorIntersections
   endpointIntersections
   (Curve.Solver resolveTangent solveTangent)
-  (Curve.Solver resolveCrossing solveCrossing) =
+  (Curve.Solver resolveCrossing solveCrossing) = do
+    let boundarySubdomains predicate = Bag.pack (List.filter predicate endpointIntersections)
     Intersection.solveInterior $
       Intersection.Problem
-        { boundaryTangentSubdomains =
-            Bag.pack (List.filter IntersectionPoint.isTangent endpointIntersections)
-        , boundaryCrossingSubdomains =
-            Bag.pack (List.filter IntersectionPoint.isCrossing endpointIntersections)
+        { boundaryTangentSubdomains = boundarySubdomains IntersectionPoint.isTangent
+        , boundaryCrossingSubdomains = boundarySubdomains IntersectionPoint.isCrossing
         , searchTree = bisectionTree
         , resolveTangent = resolveTangent
         , solveTangent = List.maybe . Bisection.find (solveTangent curve1 curve2)
