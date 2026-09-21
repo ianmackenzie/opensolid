@@ -243,7 +243,7 @@ instance Space.Coercion (Curve3D space1) (Curve3D space2) where
       , startPoint = Space.coerce curve.startPoint
       , endPoint = Space.coerce curve.endPoint
       , bounds = Space.coerce curve.bounds
-      , bisectionTree = Space.coerce curve.bisectionTree
+      , bisectionTree = Nondegenerate.map (Bisection.map Space.coerce) curve.bisectionTree
       , arcLengthParameterization = curve.arcLengthParameterization
       }
 

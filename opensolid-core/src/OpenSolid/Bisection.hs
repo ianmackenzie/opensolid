@@ -13,6 +13,8 @@ module OpenSolid.Bisection
   )
 where
 
+import Data.Coerce (Coercible)
+import Data.Coerce qualified
 import OpenSolid.Bag (Bag)
 import OpenSolid.Bag qualified as Bag
 import OpenSolid.Bounded (Bounded)
@@ -63,15 +65,10 @@ instance
       }
 
 instance
-  (domain1 ~ domain2, Space.Coercion segment1 segment2) =>
+  (domain1 ~ domain2, Space.Coercion segment1 segment2, Coercible segment1 segment2) =>
   Space.Coercion (Tree domain1 segment1) (Tree domain2 segment2)
   where
-  coerce tree =
-    Tree
-      { subdomain = tree.subdomain
-      , segment = Space.coerce tree.segment
-      , children = NonEmpty.map Space.coerce tree.children
-      }
+  coerce = Data.Coerce.coerce
 
 instance
   forall domain1 domain2 segment.
