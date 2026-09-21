@@ -11,13 +11,12 @@ module OpenSolid.SurfaceFunction3D.Segment
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionBounds3D qualified as DirectionBounds3D
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude
 import OpenSolid.Space qualified as Space
-import OpenSolid.Triplet qualified as Triplet
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 
 data Segment space = Segment
@@ -34,17 +33,8 @@ data Segment space = Segment
   }
 
 instance Space.Coercion (Segment space1) (Segment space2) where
-  coerce segment =
-    Segment
-      { range = Space.coerce segment.range
-      , partialDerivativeRanges =
-          Pair.map Space.coerce segment.partialDerivativeRanges
-      , secondPartialDerivativeRanges =
-          Triplet.map Space.coerce segment.secondPartialDerivativeRanges
-      , normalDirectionRange = Space.coerce segment.normalDirectionRange
-      , isDegenerate = segment.isDegenerate
-      , isMonotonic = segment.isMonotonic
-      }
+  {-# INLINE coerce #-}
+  coerce = Data.Coerce.coerce
 
 range :: Segment space -> Bounds3D space
 range = (.range)
