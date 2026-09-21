@@ -55,9 +55,7 @@ instance
   , Units.Coercion (Point dimension1 units1 space1) (Point dimension2 units2 space2)
   , Units.Coercion (Bounds dimension1 units1 space1) (Bounds dimension2 units2 space2)
   ) =>
-  Units.Coercion
-    (Segment dimension1 units1 space1)
-    (Segment dimension2 units2 space2)
+  Units.Coercion (Segment dimension1 units1 space1) (Segment dimension2 units2 space2)
   where
   coerce segment =
     Segment
