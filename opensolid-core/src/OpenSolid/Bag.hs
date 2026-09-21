@@ -54,11 +54,10 @@ instance Set.Bounds b => Prelude.Semigroup (Bag b a) where
   Full set1 <> Full set2 = Full (set1 <> set2)
 
 instance
-  (Units.Coercion b1 b2, Units.Coercion a1 a2) =>
+  (Units.Coercion b1 b2, Units.Coercion a1 a2, Coercible b1 b2, Coercible a1 a2) =>
   Units.Coercion (Bag b1 a1) (Bag b2 a2)
   where
-  coerce Empty = Empty
-  coerce (Full set) = Full (Units.coerce set)
+  coerce = Data.Coerce.coerce
 
 instance
   (Space.Coercion b1 b2, Space.Coercion a1 a2, Coercible a1 a2, Coercible b1 b2) =>

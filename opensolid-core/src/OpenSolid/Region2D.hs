@@ -114,8 +114,8 @@ instance Units.Coercion (Region2D units1) (Region2D units2) where
   coerce region =
     Region2D
       { outerBoundary = Units.coerce region.outerBoundary
-      , innerBoundaries = Units.coerce region.innerBoundaries
-      , boundaries = Units.coerce region.boundaries
+      , innerBoundaries = Bag2D.map Units.coerce region.innerBoundaries
+      , boundaries = Set2D.map Units.coerce region.boundaries
       }
 
 instance Intersects (Point2D units) (Region2D units) units where

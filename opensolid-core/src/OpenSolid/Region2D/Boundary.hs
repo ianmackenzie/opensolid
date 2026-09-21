@@ -48,7 +48,7 @@ instance Units (Boundary units) units
 instance Units.Coercion (Boundary units1) (Boundary units2) where
   coerce boundary =
     Boundary
-      { curves = Units.coerce boundary.curves
+      { curves = Set2D.map Units.coerce boundary.curves
       , tree = Units.coerce boundary.tree
       }
 

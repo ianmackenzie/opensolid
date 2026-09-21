@@ -87,20 +87,10 @@ instance Bounds b => Prelude.Semigroup (Set b a) where
   (<>) = node2
 
 instance
-  (Units.Coercion b1 b2, Units.Coercion a1 a2) =>
+  (Units.Coercion b1 b2, Units.Coercion a1 a2, Coercible b1 b2, Coercible a1 a2) =>
   Units.Coercion (Set b1 a1) (Set b2 a2)
   where
-  coerce Leaf{leafBounds, leafItem} =
-    Leaf
-      { leafBounds = Units.coerce leafBounds
-      , leafItem = Units.coerce leafItem
-      }
-  coerce Node{nodeBounds, nodeSize, children} =
-    Node
-      { nodeBounds = Units.coerce nodeBounds
-      , nodeSize
-      , children = NonEmpty.map Units.coerce children
-      }
+  coerce = Data.Coerce.coerce
 
 instance
   (Space.Coercion b1 b2, Space.Coercion a1 a2, Coercible b1 b2, Coercible a1 a2) =>
