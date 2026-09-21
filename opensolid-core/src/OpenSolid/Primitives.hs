@@ -923,6 +923,7 @@ instance
   tag1 ~ tag2 =>
   Units.Coercion (Transform2D tag1 units1) (Transform2D tag2 units2)
   where
+  {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
 
 instance Multiplication (Transform2D tag translationUnits) (Vector2D units) (Vector2D units) where
@@ -996,6 +997,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (Vector3D units1 space1) (Vector3D units2 space2)
   where
+  {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
 
 instance ApproximateEquality (Vector3D units space) units where
@@ -1405,6 +1407,7 @@ instance
   space1 ~ space2 =>
   Units.Coercion (VectorBounds3D units1 space1) (VectorBounds3D units2 space2)
   where
+  {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
 
 instance
