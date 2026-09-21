@@ -50,14 +50,12 @@ data Tree domain segment = Tree
 data Subtree tag domain segment = Subtree tag (Tree domain segment)
 
 instance
-  ( Units.Coercion domain1 domain2
-  , Units.Coercion segment1 segment2
-  ) =>
+  (domain1 ~ domain2, Units.Coercion segment1 segment2) =>
   Units.Coercion (Tree domain1 segment1) (Tree domain2 segment2)
   where
   coerce tree =
     Tree
-      { subdomain = Units.coerce tree.subdomain
+      { subdomain = tree.subdomain
       , segment = Units.coerce tree.segment
       , children = NonEmpty.map Units.coerce tree.children
       }
