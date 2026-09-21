@@ -66,6 +66,7 @@ import OpenSolid.SurfaceFunction1D.Subproblem (CornerValues (..), Subproblem (..
 import OpenSolid.SurfaceFunction1D.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceFunction1D.Zeros (Zeros (..))
+import OpenSolid.Triplet qualified as Triplet
 import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
@@ -393,17 +394,15 @@ secondPartialDerivativesAt ::
   UvPoint ->
   SurfaceFunction1D units ->
   (Quantity units, Quantity units, Quantity units)
-secondPartialDerivativesAt uvPoint function = do
-  let (fuu, fuv, fvv) = secondPartialDerivatives function
-  (valueAt uvPoint fuu, valueAt uvPoint fuv, valueAt uvPoint fvv)
+secondPartialDerivativesAt uvPoint function =
+  Triplet.map (valueAt uvPoint) (secondPartialDerivatives function)
 
 secondPartialDerivativeRanges ::
   UvBounds ->
   SurfaceFunction1D units ->
   (Interval units, Interval units, Interval units)
-secondPartialDerivativeRanges uvRange function = do
-  let (fuu, fuv, fvv) = secondPartialDerivatives function
-  (range uvRange fuu, range uvRange fuv, range uvRange fvv)
+secondPartialDerivativeRanges uvRange function =
+  Triplet.map (range uvRange) (secondPartialDerivatives function)
 
 derivativeIn :: Direction2D -> SurfaceFunction1D units -> SurfaceFunction1D units
 derivativeIn (Direction2D du dv) function = do

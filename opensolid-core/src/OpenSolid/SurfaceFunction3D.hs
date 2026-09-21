@@ -62,6 +62,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
+import OpenSolid.Triplet qualified as Triplet
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvPoint (UvPoint)
@@ -251,23 +252,15 @@ secondPartialDerivativesAt ::
   UvPoint ->
   SurfaceFunction3D space ->
   (Vector3D Meters space, Vector3D Meters space, Vector3D Meters space)
-secondPartialDerivativesAt uvPoint function = do
-  let (fuu, fuv, fvv) = secondPartialDerivatives function
-  let fuuValue = VectorSurfaceFunction3D.valueAt uvPoint fuu
-  let fuvValue = VectorSurfaceFunction3D.valueAt uvPoint fuv
-  let fvvValue = VectorSurfaceFunction3D.valueAt uvPoint fvv
-  (fuuValue, fuvValue, fvvValue)
+secondPartialDerivativesAt uvPoint function =
+  Triplet.map (VectorSurfaceFunction3D.valueAt uvPoint) (secondPartialDerivatives function)
 
 secondPartialDerivativeRanges ::
   UvBounds ->
   SurfaceFunction3D space ->
   (VectorBounds3D Meters space, VectorBounds3D Meters space, VectorBounds3D Meters space)
-secondPartialDerivativeRanges uvRange function = do
-  let (fuu, fuv, fvv) = secondPartialDerivatives function
-  let fuuRange = VectorSurfaceFunction3D.range uvRange fuu
-  let fuvRange = VectorSurfaceFunction3D.range uvRange fuv
-  let fvvRange = VectorSurfaceFunction3D.range uvRange fvv
-  (fuuRange, fuvRange, fvvRange)
+secondPartialDerivativeRanges uvRange function =
+  Triplet.map (VectorSurfaceFunction3D.range uvRange) (secondPartialDerivatives function)
 
 {-# INLINE compiled #-}
 compiled :: SurfaceFunction3D space -> Compiled space

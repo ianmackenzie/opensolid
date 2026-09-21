@@ -245,6 +245,7 @@ library
     OpenSolid.Transform3D
     OpenSolid.Triangle2D
     OpenSolid.Triangle3D
+    OpenSolid.Triplet
     OpenSolid.Unboxed.Math
     OpenSolid.Units
     OpenSolid.UvBounds

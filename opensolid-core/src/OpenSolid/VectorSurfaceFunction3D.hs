@@ -50,6 +50,7 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
+import OpenSolid.Triplet qualified as Triplet
 import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
@@ -548,17 +549,15 @@ secondPartialDerivativesAt ::
   UvPoint ->
   VectorSurfaceFunction3D units space ->
   (Vector3D units space, Vector3D units space, Vector3D units space)
-secondPartialDerivativesAt uvPoint function = do
-  let (fuu, fuv, fvv) = secondPartialDerivatives function
-  (valueAt uvPoint fuu, valueAt uvPoint fuv, valueAt uvPoint fvv)
+secondPartialDerivativesAt uvPoint function =
+  Triplet.map (valueAt uvPoint) (secondPartialDerivatives function)
 
 secondPartialDerivativeRanges ::
   UvBounds ->
   VectorSurfaceFunction3D units space ->
   (VectorBounds3D units space, VectorBounds3D units space, VectorBounds3D units space)
-secondPartialDerivativeRanges uvRange function = do
-  let (fuu, fuv, fvv) = secondPartialDerivatives function
-  (range uvRange fuu, range uvRange fuv, range uvRange fvv)
+secondPartialDerivativeRanges uvRange function =
+  Triplet.map (range uvRange) (secondPartialDerivatives function)
 
 placeIn ::
   Frame3D global local ->
