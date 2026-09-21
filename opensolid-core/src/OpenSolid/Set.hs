@@ -48,6 +48,8 @@ module OpenSolid.Set
   )
 where
 
+import Data.Coerce (Coercible)
+import Data.Coerce qualified
 import Data.Foldable1 qualified
 import Data.Graph qualified as Graph
 import Data.List.NonEmpty qualified
@@ -101,20 +103,10 @@ instance
       }
 
 instance
-  (Space.Coercion b1 b2, Space.Coercion a1 a2) =>
+  (Space.Coercion b1 b2, Space.Coercion a1 a2, Coercible b1 b2, Coercible a1 a2) =>
   Space.Coercion (Set b1 a1) (Set b2 a2)
   where
-  coerce Leaf{leafBounds, leafItem} =
-    Leaf
-      { leafBounds = Space.coerce leafBounds
-      , leafItem = Space.coerce leafItem
-      }
-  coerce Node{nodeBounds, nodeSize, children} =
-    Node
-      { nodeBounds = Space.coerce nodeBounds
-      , nodeSize
-      , children = NonEmpty.map Space.coerce children
-      }
+  coerce = Data.Coerce.coerce
 
 instance Indexed (Set b a) Int a where
   set !! index =

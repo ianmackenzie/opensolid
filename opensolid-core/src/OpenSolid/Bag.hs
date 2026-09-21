@@ -33,6 +33,8 @@ module OpenSolid.Bag
   )
 where
 
+import Data.Coerce (Coercible)
+import Data.Coerce qualified
 import OpenSolid.Bounded (Bounded)
 import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.List qualified as List
@@ -59,11 +61,10 @@ instance
   coerce (Full set) = Full (Units.coerce set)
 
 instance
-  (Space.Coercion b1 b2, Space.Coercion a1 a2) =>
+  (Space.Coercion b1 b2, Space.Coercion a1 a2, Coercible a1 a2, Coercible b1 b2) =>
   Space.Coercion (Bag b1 a1) (Bag b2 a2)
   where
-  coerce Empty = Empty
-  coerce (Full set) = Full (Space.coerce set)
+  coerce = Data.Coerce.coerce
 
 instance Indexed (Bag b a) Int a where
   Empty !! index = throw IndexOutOfBounds{index, size = 0}

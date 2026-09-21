@@ -88,9 +88,9 @@ instance Space.Coercion (Surface3D space1) (Surface3D space2) where
     Surface3D
       { function = Space.coerce surface.function
       , domain = surface.domain
-      , outerBoundary = Space.coerce surface.outerBoundary
-      , innerBoundaries = Space.coerce surface.innerBoundaries
-      , boundaries = Space.coerce surface.boundaries
+      , outerBoundary = Set3D.map Space.coerce surface.outerBoundary
+      , innerBoundaries = Bag3D.map (Set3D.map Space.coerce) surface.innerBoundaries
+      , boundaries = Set3D.map (Set3D.map Space.coerce) surface.boundaries
       }
 
 instance space1 ~ space2 => Bounded (Surface3D space1) (Bounds3D space2) where

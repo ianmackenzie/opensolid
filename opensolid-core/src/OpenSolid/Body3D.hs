@@ -112,7 +112,7 @@ instance FFI (Body3D Void) where
 instance Space.Coercion (Body3D space1) (Body3D space2) where
   coerce body =
     Body3D
-      { surfaces = Space.coerce body.surfaces
+      { surfaces = Set3D.map Space.coerce body.surfaces
       , seams = body.seams
       }
 
