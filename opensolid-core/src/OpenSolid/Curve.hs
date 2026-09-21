@@ -230,7 +230,8 @@ instance Units.Coercion (Curve2D units1) (Curve2D units2) where
       , startPoint = Units.coerce curve.startPoint
       , endPoint = Units.coerce curve.endPoint
       , bounds = Units.coerce curve.bounds
-      , bisectionTree = Units.coerce curve.bisectionTree
+      , bisectionTree =
+          Nondegenerate.map (Bisection.map Units.coerce) curve.bisectionTree
       , arcLengthParameterization =
           Nondegenerate.map (Pair.mapFirst Units.coerce) curve.arcLengthParameterization
       }
