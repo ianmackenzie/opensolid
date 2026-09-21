@@ -22,6 +22,7 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
+import OpenSolid.Space qualified as Space
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -50,6 +51,21 @@ instance
   coerce (Concrete expr) = Concrete (Units.coerce expr)
   coerce (Abstract valueImpl rangeImpl) =
     Abstract (Units.coerce . valueImpl) (Units.coerce . rangeImpl)
+
+instance
+  ( Space.Coercion (Expression inputValue outputValue1) (Expression inputValue outputValue2)
+  , Expression.Evaluation inputValue outputValue1 inputBounds outputBounds1
+  , Expression.Evaluation inputValue outputValue2 inputBounds outputBounds2
+  , Space.Coercion outputValue1 outputValue2
+  , Space.Coercion outputBounds1 outputBounds2
+  ) =>
+  Space.Coercion
+    (CompiledFunction inputValue outputValue1 inputBounds outputBounds1)
+    (CompiledFunction inputValue outputValue2 inputBounds outputBounds2)
+  where
+  coerce (Concrete expr) = Concrete (Space.coerce expr)
+  coerce (Abstract valueImpl rangeImpl) =
+    Abstract (Space.coerce . valueImpl) (Space.coerce . rangeImpl)
 
 instance
   ( Expression.Evaluation inputValue outputValue inputBounds outputBounds

@@ -12,9 +12,11 @@ module OpenSolid.DirectionBounds3D
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
+import OpenSolid.Space qualified as Space
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
@@ -30,6 +32,10 @@ instance
   Units.Coercion (DirectionBounds3D space1) (DirectionBounds3D space2)
   where
   coerce = id
+
+instance Space.Coercion (DirectionBounds3D space1) (DirectionBounds3D space2) where
+  {-# INLINE coerce #-}
+  coerce = Data.Coerce.coerce
 
 instance Negation (DirectionBounds3D space) where
   negate (UnitBounds3D vectorBounds) = UnitBounds3D (negate vectorBounds)

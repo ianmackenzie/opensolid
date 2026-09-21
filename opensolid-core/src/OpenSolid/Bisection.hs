@@ -26,6 +26,7 @@ import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
+import OpenSolid.Space qualified as Space
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 
@@ -58,6 +59,17 @@ instance
       { subdomain = tree.subdomain
       , segment = Units.coerce tree.segment
       , children = NonEmpty.map Units.coerce tree.children
+      }
+
+instance
+  (domain1 ~ domain2, Space.Coercion segment1 segment2) =>
+  Space.Coercion (Tree domain1 segment1) (Tree domain2 segment2)
+  where
+  coerce tree =
+    Tree
+      { subdomain = tree.subdomain
+      , segment = Space.coerce tree.segment
+      , children = NonEmpty.map Space.coerce tree.children
       }
 
 instance

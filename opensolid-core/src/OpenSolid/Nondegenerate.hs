@@ -12,6 +12,7 @@ where
 
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
+import OpenSolid.Space qualified as Space
 import OpenSolid.Units qualified as Units
 
 newtype Nondegenerate a = Nondegenerate a deriving (Show)
@@ -37,6 +38,9 @@ data Field value = Field ~value deriving (Eq, Ord, Show)
 
 instance Units.Coercion a b => Units.Coercion (Field a) (Field b) where
   coerce (Field value) = Field (Units.coerce value)
+
+instance Space.Coercion a b => Space.Coercion (Field a) (Field b) where
+  coerce (Field value) = Field (Space.coerce value)
 
 field :: (Nondegenerate a -> b) -> a -> Field b
 field function object = Field (function (Nondegenerate object))

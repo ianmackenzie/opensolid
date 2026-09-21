@@ -20,6 +20,7 @@ import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Prelude
+import OpenSolid.Space qualified as Space
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfacePoint3D (SurfacePoint3D)
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
@@ -31,6 +32,13 @@ data SurfaceCurve3D space = SurfaceCurve3D
   { uvCurve :: UvCurve
   , curve :: Curve3D space
   }
+
+instance Space.Coercion (SurfaceCurve3D space1) (SurfaceCurve3D space2) where
+  coerce surfaceCurve =
+    SurfaceCurve3D
+      { uvCurve = surfaceCurve.uvCurve
+      , curve = Space.coerce surfaceCurve.curve
+      }
 
 instance space1 ~ space2 => Bounded (SurfaceCurve3D space1) (Bounds3D space2) where
   {-# INLINE bounds #-}

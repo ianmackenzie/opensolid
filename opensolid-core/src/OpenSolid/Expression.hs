@@ -65,6 +65,7 @@ import OpenSolid.Primitives
   , VectorBounds3D
   )
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Space qualified as Space
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform3D (Transform3D)
@@ -213,6 +214,28 @@ instance
   where
   coerce (VectorCurve3D ast functions) = VectorCurve3D ast functions
   coerce (VectorSurface3D ast functions) = VectorSurface3D ast functions
+
+-------------
+--- SPACE ---
+-------------
+
+instance
+  (input1 ~ input2, units1 ~ units2) =>
+  Space.Coercion
+    (Expression input1 (Vector3D units1 space1))
+    (Expression input2 (Vector3D units2 space2))
+  where
+  coerce (VectorCurve3D ast functions) = VectorCurve3D ast functions
+  coerce (VectorSurface3D ast functions) = VectorSurface3D ast functions
+
+instance
+  input1 ~ input2 =>
+  Space.Coercion
+    (Expression input1 (Point3D space1))
+    (Expression input2 (Point3D space2))
+  where
+  coerce (Curve3D ast functions) = Curve3D ast functions
+  coerce (Surface3D ast functions) = Surface3D ast functions
 
 ----------------
 --- NEGATION ---

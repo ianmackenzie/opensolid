@@ -355,10 +355,13 @@ instance PointExists 3 Meters space where
 class
   ( VectorExists dimension units space
   , VectorBoundsExists dimension Unitless space
+  , VectorBoundsExists dimension units Void
   , DirectionBoundsExists dimension space
   , Units (VectorBounds dimension units space) units
   , Coercible (VectorBounds dimension units space) (VectorBounds dimension Unitless space)
   , Coercible (VectorBounds dimension Unitless space) (VectorBounds dimension units space)
+  , Coercible (VectorBounds dimension units space) (VectorBounds dimension units Void)
+  , Coercible (VectorBounds dimension units Void) (VectorBounds dimension units space)
   , Show (VectorBounds dimension units space)
   , Negation (VectorBounds dimension units space)
   , Addition

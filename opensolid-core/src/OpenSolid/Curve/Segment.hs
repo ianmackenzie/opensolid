@@ -27,6 +27,7 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
+import OpenSolid.Space qualified as Space
 import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
@@ -63,6 +64,17 @@ instance
       , derivativeRange = VectorBounds.coerce segment.derivativeRange
       , secondDerivativeRange = VectorBounds.coerce segment.secondDerivativeRange
       , tangentDirectionRange = segment.tangentDirectionRange
+      , curvatureVectorRange_ = VectorBounds.coerce segment.curvatureVectorRange_
+      , isDegenerate = segment.isDegenerate
+      }
+
+instance Space.Coercion (Segment 3 Meters space1) (Segment 3 Meters space2) where
+  coerce segment =
+    Segment
+      { range = Space.coerce segment.range
+      , derivativeRange = VectorBounds.coerce segment.derivativeRange
+      , secondDerivativeRange = VectorBounds.coerce segment.secondDerivativeRange
+      , tangentDirectionRange = Space.coerce segment.tangentDirectionRange
       , curvatureVectorRange_ = VectorBounds.coerce segment.curvatureVectorRange_
       , isDegenerate = segment.isDegenerate
       }

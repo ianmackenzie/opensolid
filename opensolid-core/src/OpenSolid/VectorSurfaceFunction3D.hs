@@ -48,6 +48,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.PartialDerivatives qualified as PartialDerivatives
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Space qualified as Space
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Triplet qualified as Triplet
@@ -94,6 +95,21 @@ instance
       , maxSampledRightMagnitude = Units.coerce function.maxSampledRightMagnitude
       , maxSampledBottomMagnitude = Units.coerce function.maxSampledBottomMagnitude
       , maxSampledTopMagnitude = Units.coerce function.maxSampledTopMagnitude
+      }
+
+instance
+  units1 ~ units2 =>
+  Space.Coercion (VectorSurfaceFunction3D units1 space1) (VectorSurfaceFunction3D units2 space2)
+  where
+  coerce function =
+    VectorSurfaceFunction3D
+      { compiled = Space.coerce function.compiled
+      , partialDerivatives = Pair.map Space.coerce function.partialDerivatives
+      , maxSampledInteriorMagnitude = function.maxSampledInteriorMagnitude
+      , maxSampledLeftMagnitude = function.maxSampledLeftMagnitude
+      , maxSampledRightMagnitude = function.maxSampledRightMagnitude
+      , maxSampledBottomMagnitude = function.maxSampledBottomMagnitude
+      , maxSampledTopMagnitude = function.maxSampledTopMagnitude
       }
 
 instance Negation (VectorSurfaceFunction3D units space) where

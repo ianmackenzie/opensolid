@@ -15,12 +15,16 @@ module OpenSolid.Mesh
   )
 where
 
+import Data.Coerce (Coercible)
+import Data.Coerce qualified
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
+import OpenSolid.Space qualified as Space
+import OpenSolid.Units qualified as Units
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 
 data Mesh vertex = Mesh
@@ -28,6 +32,18 @@ data Mesh vertex = Mesh
   , faceIndices :: List (Int, Int, Int)
   }
   deriving (Eq, Show)
+
+instance
+  (Units.Coercion vertex1 vertex2, Coercible vertex1 vertex2) =>
+  Units.Coercion (Mesh vertex1) (Mesh vertex2)
+  where
+  coerce = Data.Coerce.coerce
+
+instance
+  (Space.Coercion vertex1 vertex2, Coercible vertex1 vertex2) =>
+  Space.Coercion (Mesh vertex1) (Mesh vertex2)
+  where
+  coerce = Data.Coerce.coerce
 
 indexed :: Array vertex -> List (Int, Int, Int) -> Mesh vertex
 indexed = Mesh

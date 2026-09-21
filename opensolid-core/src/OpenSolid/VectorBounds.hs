@@ -123,7 +123,7 @@ unerase = coerce
 
 {-# INLINE coerce #-}
 coerce ::
-  (VectorBoundsExists dimension units1 space, VectorBoundsExists dimension units2 space) =>
-  VectorBounds dimension units1 space ->
-  VectorBounds dimension units2 space
+  (VectorBoundsExists dimension units1 space1, VectorBoundsExists dimension units2 space2) =>
+  VectorBounds dimension units1 space1 ->
+  VectorBounds dimension units2 space2
 coerce = Data.Coerce.coerce

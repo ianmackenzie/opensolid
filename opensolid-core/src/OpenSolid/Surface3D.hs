@@ -59,6 +59,7 @@ import OpenSolid.Result qualified as Result
 import OpenSolid.Set qualified as Set
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
+import OpenSolid.Space qualified as Space
 import {-# SOURCE #-} OpenSolid.Surface3D.Nondegenerate qualified as Surface3D.Nondegenerate
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
@@ -81,6 +82,16 @@ data Surface3D space = Surface3D
   , innerBoundaries :: ~(Bag3D space (Boundary space))
   , boundaries :: ~(Set3D space (Boundary space))
   }
+
+instance Space.Coercion (Surface3D space1) (Surface3D space2) where
+  coerce surface =
+    Surface3D
+      { function = Space.coerce surface.function
+      , domain = surface.domain
+      , outerBoundary = Space.coerce surface.outerBoundary
+      , innerBoundaries = Space.coerce surface.innerBoundaries
+      , boundaries = Space.coerce surface.boundaries
+      }
 
 instance space1 ~ space2 => Bounded (Surface3D space1) (Bounds3D space2) where
   {-# INLINE bounds #-}

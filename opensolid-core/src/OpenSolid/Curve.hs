@@ -129,6 +129,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Show qualified as Show
+import OpenSolid.Space qualified as Space
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
@@ -232,6 +233,18 @@ instance Units.Coercion (Curve2D units1) (Curve2D units2) where
       , bisectionTree = Units.coerce curve.bisectionTree
       , arcLengthParameterization =
           Nondegenerate.map (Pair.mapFirst Units.coerce) curve.arcLengthParameterization
+      }
+
+instance Space.Coercion (Curve3D space1) (Curve3D space2) where
+  coerce curve =
+    Curve
+      { compiled = Space.coerce curve.compiled
+      , derivative = Space.coerce curve.derivative
+      , startPoint = Space.coerce curve.startPoint
+      , endPoint = Space.coerce curve.endPoint
+      , bounds = Space.coerce curve.bounds
+      , bisectionTree = Space.coerce curve.bisectionTree
+      , arcLengthParameterization = curve.arcLengthParameterization
       }
 
 instance FFI (Curve2D Meters) where

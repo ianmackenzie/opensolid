@@ -212,6 +212,7 @@ library
     OpenSolid.Sign
     OpenSolid.Solve1D
     OpenSolid.Solve2D
+    OpenSolid.Space
     OpenSolid.Step
     OpenSolid.Step.EnumValue
     OpenSolid.Step.Header
