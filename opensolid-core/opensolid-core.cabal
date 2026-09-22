@@ -155,10 +155,8 @@ library
     OpenSolid.Fuzzy
     OpenSolid.Gltf
     OpenSolid.HasZero
-    OpenSolid.HigherOrderZero
     OpenSolid.IO
     OpenSolid.IO.Parallel
-    OpenSolid.IndexOutOfBounds
     OpenSolid.Int
     OpenSolid.Intersection
     OpenSolid.Interval

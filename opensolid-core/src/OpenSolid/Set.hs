@@ -58,7 +58,6 @@ import {-# SOURCE #-} OpenSolid.Bag (Bag)
 import {-# SOURCE #-} OpenSolid.Bag qualified as Bag
 import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
-import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -102,7 +101,7 @@ instance Indexed (Set b a) Int a where
   set !! index =
     case get index set of
       Just item -> item
-      Nothing -> throw IndexOutOfBounds{index = index, size = size set}
+      Nothing -> error "Index out of bounds"
 
 instance
   ( Intersects b c boundsUnits

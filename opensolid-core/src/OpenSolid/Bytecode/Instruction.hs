@@ -101,23 +101,15 @@ data Instruction
 maxValues :: Int
 maxValues = 65536
 
-newtype TooManyVariables = TooManyVariables Int deriving (Show)
-
-deriving anyclass instance Exception TooManyVariables
-
-newtype TooManyConstants = TooManyConstants Int deriving (Show)
-
-deriving anyclass instance Exception TooManyConstants
-
 encodeVariableIndex :: VariableIndex -> Builder
 encodeVariableIndex (VariableIndex index)
   | index < maxValues = Encode.int index
-  | otherwise = throw (TooManyVariables (index + 1))
+  | otherwise = error "Too many variables"
 
 encodeConstantIndex :: ConstantIndex -> Builder
 encodeConstantIndex (ConstantIndex index)
   | index < maxValues = Encode.int index
-  | otherwise = throw (TooManyConstants (index + 1))
+  | otherwise = error "Too many constants"
 
 encode :: Instruction -> VariableIndex -> Builder
 encode instruction outputIndex =

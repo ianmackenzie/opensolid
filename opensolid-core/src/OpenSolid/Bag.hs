@@ -36,7 +36,6 @@ where
 import Data.Coerce (Coercible)
 import Data.Coerce qualified
 import OpenSolid.Bounded (Bounded)
-import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
@@ -66,7 +65,7 @@ instance
   coerce = Data.Coerce.coerce
 
 instance Indexed (Bag b a) Int a where
-  Empty !! index = throw IndexOutOfBounds{index, size = 0}
+  Empty !! _ = error "Bag is empty"
   Full set !! index = set !! index
 
 instance

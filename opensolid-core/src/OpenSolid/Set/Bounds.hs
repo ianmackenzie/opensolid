@@ -3,7 +3,6 @@ module OpenSolid.Set.Bounds (Bounds (..)) where
 import Data.Proxy (Proxy (Proxy))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D qualified as Bounds3D
-import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Pair qualified as Pair
@@ -20,11 +19,14 @@ class Bounds bounds where
   sortValue :: Int -> bounds -> Number
   aggregateOf :: (a -> bounds) -> NonEmpty a -> bounds
 
+indexOutOfBounds :: Text
+indexOutOfBounds = "Index out of bounds"
+
 instance Bounds (Interval units) where
   dimension _ = 1
   sortValue index interval = case index of
     0 -> intervalMidpoint interval
-    _ -> throw IndexOutOfBounds{index, size = 1}
+    _ -> error indexOutOfBounds
   aggregateOf = Interval.aggregateOf
 
 instance Bounds (Bounds2D units) where
@@ -32,7 +34,7 @@ instance Bounds (Bounds2D units) where
   sortValue index (Bounds2D x y) = case index of
     0 -> intervalMidpoint x
     1 -> intervalMidpoint y
-    _ -> throw IndexOutOfBounds{index, size = 2}
+    _ -> error indexOutOfBounds
   aggregateOf = Bounds2D.aggregateOf
 
 instance Bounds (Bounds3D space) where
@@ -41,7 +43,7 @@ instance Bounds (Bounds3D space) where
     0 -> intervalMidpoint x
     1 -> intervalMidpoint y
     2 -> intervalMidpoint z
-    _ -> throw IndexOutOfBounds{index, size = 3}
+    _ -> error indexOutOfBounds
   aggregateOf = Bounds3D.aggregateOf
 
 instance (Bounds bounds1, Bounds bounds2) => Bounds (bounds1, bounds2) where
@@ -49,13 +51,12 @@ instance (Bounds bounds1, Bounds bounds2) => Bounds (bounds1, bounds2) where
   sortValue = do
     let dimension1 = dimension @bounds1 Proxy
     let dimension2 = dimension @bounds2 Proxy
-    let outOfBounds index = throw IndexOutOfBounds{index, size = dimension1 + dimension2}
     \index (bounds1, bounds2) ->
       if
-        | index < 0 -> outOfBounds index
+        | index < 0 -> error indexOutOfBounds
         | index < dimension1 -> sortValue index bounds1
         | let index2 = index - dimension1, index2 < dimension2 -> sortValue index2 bounds2
-        | otherwise -> outOfBounds index
+        | otherwise -> error indexOutOfBounds
   aggregateOf getBounds nonEmpty =
     ( aggregateOf (Pair.first . getBounds) nonEmpty
     , aggregateOf (Pair.second . getBounds) nonEmpty

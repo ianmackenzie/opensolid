@@ -75,7 +75,7 @@ checkRefinement stepsWithoutProgress estimate = case estimate of
     if
       | Interval.width (bounds refinedEstimate) < Interval.width initialBounds -> refinedEstimate
       | stepsWithoutProgress < 10 -> checkRefinement (stepsWithoutProgress + 1) refinedEstimate
-      | otherwise -> throw RefinementStalled
+      | otherwise -> error "Estimate refinement stalled"
 
 satisfy :: (Interval units -> Bool) -> Estimate units -> Interval units
 satisfy predicate estimate = do

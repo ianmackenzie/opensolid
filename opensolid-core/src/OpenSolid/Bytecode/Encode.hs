@@ -1,6 +1,5 @@
 module OpenSolid.Bytecode.Encode (word, int, number) where
 
-import Control.Exception qualified
 import Data.ByteString.Builder qualified as Builder
 import Data.Word (Word16)
 import GHC.ByteOrder qualified
@@ -13,16 +12,10 @@ word = case GHC.ByteOrder.targetByteOrder of
   GHC.ByteOrder.LittleEndian -> Builder.word16LE
   GHC.ByteOrder.BigEndian -> Builder.word16BE
 
-newtype OutOfRange = OutOfRange Int deriving (Show)
-
-instance Exception OutOfRange where
-  displayException (OutOfRange value) =
-    Text.unpack ("Bytecode only supports integers in 0-65535 range, got " <> Text.int value)
-
 int :: Int -> Builder
 int value
   | value >= 0 && value < 65536 = word (fromIntegral value)
-  | otherwise = throw (OutOfRange value)
+  | otherwise = error ("Bytecode only supports integers in 0-65535 range, got " <> Text.int value)
 
 double :: Double -> Builder
 double = case GHC.ByteOrder.targetByteOrder of

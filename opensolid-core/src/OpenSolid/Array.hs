@@ -19,7 +19,6 @@ module OpenSolid.Array
 where
 
 import Data.Array qualified
-import OpenSolid.IndexOutOfBounds (IndexOutOfBounds (..))
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
@@ -37,7 +36,7 @@ instance Indexed (Array a) Int a where
   {-# INLINE (!!) #-}
   array !! index
     | index >= 0 && index < length array = unwrap array Data.Array.! index
-    | otherwise = throw IndexOutOfBounds{index = index, size = length array}
+    | otherwise = error "Index out of bounds"
 
 {-# INLINE unwrap #-}
 unwrap :: Array a -> Data.Array.Array Int a

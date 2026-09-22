@@ -43,7 +43,6 @@ import OpenSolid.Domain2D (Domain2D (Domain2D))
 import OpenSolid.Domain2D qualified as Domain2D
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Fuzzy qualified as Fuzzy
-import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -533,7 +532,7 @@ zeros function
         Ok solutions -> do
           let partialZeros = PartialZeros.empty & forEach solutions addSolution
           Ok (PartialZeros.finalize function dvdu dudv partialZeros)
-        Err Solve2D.InfiniteRecursion -> throw HigherOrderZero
+        Err Solve2D.InfiniteRecursion -> error "Higher order zero detected"
 
 addSolution :: Solution units -> PartialZeros units -> PartialZeros units
 addSolution solution partialZeros = case solution of

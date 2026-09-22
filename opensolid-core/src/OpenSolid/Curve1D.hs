@@ -64,7 +64,6 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.HasZero (HasZero (HasZero))
-import OpenSolid.HigherOrderZero (HigherOrderZero (HigherOrderZero))
 import OpenSolid.Int qualified as Int
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
@@ -583,7 +582,7 @@ roots curve
       let cache = Solve1D.init derivativeRangeStream
       case Solve1D.search (findRoots derivatives) cache of
         Ok foundRoots -> Ok (List.sortBy Root.location foundRoots)
-        Err Solve1D.InfiniteRecursion -> throw HigherOrderZero
+        Err Solve1D.InfiniteRecursion -> error "Higher order zero detected"
 
 findRoots ::
   Tolerance units =>

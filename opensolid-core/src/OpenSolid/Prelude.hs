@@ -54,7 +54,6 @@ module OpenSolid.Prelude
   , ifThenElse
   , assert
   , error
-  , throw
   , data TODO
   , recursive
   , forEach
@@ -62,7 +61,7 @@ module OpenSolid.Prelude
   )
 where
 
-import Control.Exception (Exception, assert, throw)
+import Control.Exception (Exception, assert)
 import Data.Coerce
 import Data.Function ((&))
 import Data.Function qualified
