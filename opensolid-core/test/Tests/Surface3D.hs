@@ -136,7 +136,7 @@ translationalSurfaceCorrectValue :: Test
 translationalSurfaceCorrectValue = Test.check 100 "translationalSurfaceCorrectValue" do
   baseCurve <- Test.generate Random.cubicSpline3D
   translationCurve <- Test.generate randomVectorCubicSpline
-  surface <- Surface3D.translational baseCurve translationCurve ?? fail
+  surface <- Surface3D.sweptBy translationCurve baseCurve ?? fail
   uvPoint <- Test.generate UvPoint.random
   let UvPoint u v = uvPoint
   let basePoint = Curve3D.pointAt u baseCurve
@@ -151,5 +151,5 @@ translationalSurfaceDerivativeConsistency :: Test
 translationalSurfaceDerivativeConsistency = Test.check 100 "translationalSurfaceDerivativeConsistency" do
   baseCurve <- Test.generate Random.cubicSpline3D
   translationCurve <- Test.generate randomVectorCubicSpline
-  surface <- Surface3D.translational baseCurve translationCurve ?? fail
+  surface <- Surface3D.sweptBy translationCurve baseCurve ?? fail
   Tests.SurfaceFunction3D.partialDerivativesAreConsistent (Surface3D.function surface)

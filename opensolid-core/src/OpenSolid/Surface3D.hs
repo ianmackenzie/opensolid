@@ -32,7 +32,7 @@ module OpenSolid.Surface3D
   , parametric
   , on
   , extruded
-  , translational
+  , sweptBy
   , ruled
   , revolved
   , bounds
@@ -412,14 +412,14 @@ extruded ::
   Curve3D space ->
   Vector3D Meters space ->
   Result IsDegenerate (Surface3D space)
-extruded curve displacement = translational curve (displacement * Curve1D.t)
+extruded curve displacement = sweptBy (displacement * Curve1D.t) curve
 
-translational ::
+sweptBy ::
   Tolerance Meters =>
-  Curve3D space ->
   VectorCurve3D Meters space ->
+  Curve3D space ->
   Result IsDegenerate (Surface3D space)
-translational baseCurve translationCurve = do
+sweptBy translationCurve baseCurve = do
   let baseFunction = baseCurve << SurfaceFunction1D.u
   let translationFunction = translationCurve << SurfaceFunction1D.v
   let translationalFunction = baseFunction + translationFunction

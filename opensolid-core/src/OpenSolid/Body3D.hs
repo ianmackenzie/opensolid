@@ -5,7 +5,7 @@ module OpenSolid.Body3D
   , cylinder
   , cylinderAlong
   , extruded
-  , translational
+  , sweptBy
   , revolved
   , boundedBy
   , toPointMesh
@@ -204,27 +204,27 @@ extruded sketchPlane profile d1 d2 = do
   let normal = Plane3D.normalDirection sketchPlane
   let v1 = d1 * normal
   let v2 = d2 * normal
-  translational sketchPlane profile (VectorCurve3D.interpolateFrom v1 v2)
+  sweptBy (VectorCurve3D.interpolateFrom v1 v2) sketchPlane profile
 
-translational ::
+sweptBy ::
   Tolerance Meters =>
+  VectorCurve3D Meters space ->
   Plane3D space ->
   Region2D Meters ->
-  VectorCurve3D Meters space ->
   Result BoundedBy.Error (Body3D space)
-translational sketchPlane profile givenDisplacement = do
+sweptBy givenDisplacementCurve sketchPlane profile = do
   -- Fix displacement curve so that extrusion is upwards from plane
-  let startDerivative = VectorCurve3D.startDerivative givenDisplacement
-  let displacement =
-        case Quantity.sign (startDerivative `dot` Plane3D.normalDirection sketchPlane) of
-          Positive -> givenDisplacement
-          Negative -> VectorCurve3D.reverse givenDisplacement
-  let startPlane = Plane3D.translateBy (VectorCurve3D.startValue displacement) sketchPlane
-  let endPlane = Plane3D.translateBy (VectorCurve3D.endValue displacement) sketchPlane
+  let givenStartDerivative = VectorCurve3D.startDerivative givenDisplacementCurve
+  let displacementCurve =
+        case Quantity.sign (givenStartDerivative `dot` Plane3D.normalDirection sketchPlane) of
+          Positive -> givenDisplacementCurve
+          Negative -> VectorCurve3D.reverse givenDisplacementCurve
+  let startPlane = Plane3D.translateBy (VectorCurve3D.startValue displacementCurve) sketchPlane
+  let endPlane = Plane3D.translateBy (VectorCurve3D.endValue displacementCurve) sketchPlane
   startCap <- Surface3D.on startPlane profile & Result.map Surface3D.flip ?? Err BoundedBy.EmptyBody
   endCap <- Surface3D.on endPlane profile ?? Err BoundedBy.EmptyBody
   let profileCurves = Set2D.toList (Region2D.boundaryCurves profile)
-  let sideSurface curve = Surface3D.translational (Curve2D.placeOn sketchPlane curve) displacement
+  let sideSurface curve = Surface3D.sweptBy displacementCurve (Curve2D.placeOn sketchPlane curve)
   sideSurfaces <- Result.collect sideSurface profileCurves ?? Err BoundedBy.EmptyBody
   boundedBy (startCap : endCap : sideSurfaces)
 
