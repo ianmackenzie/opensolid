@@ -87,12 +87,9 @@ matchingCurves ::
   Bool
 matchingCurves curve1 curve2 =
   case Curve.intersections curve1 curve2 of
-    Err Curve.Intersections.DegenerateCoincident{} -> True
-    Err Curve.Intersections.DegenerateFirstOnSecond{} -> False
-    Err Curve.Intersections.DegenerateSecondOnFirst{} -> False
-    Ok Nothing -> False
-    Ok (Just Curve.Intersections.IntersectionPoints{}) -> False
-    Ok (Just (Curve.Intersections.OverlappingSegments sign segments intersectionPoints)) ->
+    Nothing -> False
+    Just Curve.Intersections.IntersectionPoints{} -> False
+    Just (Curve.Intersections.OverlappingSegments sign segments intersectionPoints) ->
       sign == Positive
         && segments == NonEmpty.one (Interval.unit, Interval.unit)
         && List.isEmpty intersectionPoints

@@ -120,7 +120,6 @@ library
     OpenSolid.Curve
     OpenSolid.Curve.IntersectionPoint
     OpenSolid.Curve.Intersections
-    OpenSolid.Curve.Nondegenerate
     OpenSolid.Curve.Nonzero
     OpenSolid.Curve.Segment
     OpenSolid.Curve1D
@@ -224,7 +223,6 @@ library
     OpenSolid.Surface3D.OverlappingSegment
     OpenSolid.Surface3D.Segment
     OpenSolid.SurfaceCurve3D
-    OpenSolid.SurfaceCurve3D.Nondegenerate
     OpenSolid.SurfaceFunction1D
     OpenSolid.SurfaceFunction1D.Nonzero
     OpenSolid.SurfaceFunction1D.Zeros
@@ -261,7 +259,6 @@ library
     OpenSolid.VectorBounds3D
     OpenSolid.VectorCurve
     OpenSolid.VectorCurve.Direction
-    OpenSolid.VectorCurve.Nondegenerate
     OpenSolid.VectorCurve.Nonzero
     OpenSolid.VectorCurve2D
     OpenSolid.VectorCurve3D
@@ -287,7 +284,6 @@ library
     OpenSolid.CDT
     OpenSolid.Curve.CrossingSolver
     OpenSolid.Curve.CurvatureVector
-    OpenSolid.Curve.Nondegenerate.Intersections
     OpenSolid.Curve.TangentSolver
     OpenSolid.Curve.TangentSolver2D
     OpenSolid.Curve.TangentSolver3D

@@ -144,7 +144,7 @@ sphere ("centerPoint" ::: centerPoint) ("diameter" ::: diameter)
   | otherwise = do
       let panic = error "Constructing sphere from non-zero diameter should not fail"
       let r = 0.5 * diameter
-      let arc = Curve2D.arcFrom (Point2D.y r) (Point2D.y -r) -Angle.pi
+      let arc = Curve2D.arcFrom (Point2D.y r) (Point2D.y -r) -Angle.pi !! panic
       let plane = World3D.forwardPlane centerPoint
       revolvedSurface <- Surface3D.revolved plane arc Axis2D.y Angle.twoPi ?? panic
       boundedBy [revolvedSurface] ?? panic
@@ -313,17 +313,18 @@ registerSeam ::
 registerSeam halfEdgeSet halfEdge accumulated =
   case accumulated & HashMap.lookup halfEdge.id of
     Just _ -> Ok accumulated -- We've already registered this seam from the other side
-    Nothing -> do
-      let curve = HalfEdge.curve halfEdge
-      if Curve3D.isPoint curve
-        then Ok (accumulated & HashMap.insert halfEdge.id Nothing) -- Degenerate half-edge has no mating half-edge
-        else case HalfEdge.findMatingHalfEdges halfEdgeSet halfEdge of
-          Bag3D.Empty -> Err BoundedBy.BoundaryHasGaps -- No mating half-edge found
-          Bag3D.Full (Set3D.Leaf _ matingHalfEdge) -> Ok do
-            accumulated
-              & HashMap.insert halfEdge.id (Just matingHalfEdge.id)
-              & HashMap.insert matingHalfEdge.id (Just halfEdge.id)
-          Bag3D.Full Set3D.Node{} -> Err BoundedBy.BoundaryIntersectsItself -- More than one mating half-edge found
+    Nothing ->
+      case HalfEdge.surfaceCurve halfEdge of
+        SurfaceCurve3D.Pole _ ->
+          Ok (accumulated & HashMap.insert halfEdge.id Nothing) -- Pole half-edge has no mating half-edge
+        SurfaceCurve3D.Edge _ ->
+          case HalfEdge.findMatingHalfEdges halfEdgeSet halfEdge of
+            Bag3D.Empty -> Err BoundedBy.BoundaryHasGaps -- No mating half-edge found
+            Bag3D.Full (Set3D.Leaf _ matingHalfEdge) -> Ok do
+              accumulated
+                & HashMap.insert halfEdge.id (Just matingHalfEdge.id)
+                & HashMap.insert matingHalfEdge.id (Just halfEdge.id)
+            Bag3D.Full Set3D.Node{} -> Err BoundedBy.BoundaryIntersectsItself -- More than one mating half-edge found
 
 ----- MESHING -----
 
@@ -432,6 +433,10 @@ buildSurfaceSegmentSet resolution surface uvRange p11 p21 p12 p22 = do
       let set22 = buildSurfaceSegmentSet resolution surface uvRange22 pCenter p2Mid pMid2 p22
       Set2D.node (NonEmpty.four set11 set21 set12 set22)
 
+unsafeGetCurve :: SurfaceCurve3D space -> Curve3D space
+unsafeGetCurve (SurfaceCurve3D.Edge (Surface3D.Edge _ curve)) = curve
+unsafeGetCurve (SurfaceCurve3D.Pole _) = error "Mating surface curve should be a valid edge"
+
 buildLeadingEdgeVerticesMap ::
   Tolerance Meters =>
   Resolution Meters ->
@@ -449,9 +454,7 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
         forEachWithIndex boundary \curveIndex surfaceCurve accumulated -> do
           let curveId = CurveId curveIndex
           let halfEdgeId = HalfEdge.Id{surfaceId, boundaryId, curveId}
-          let curve = SurfaceCurve3D.curve surfaceCurve
           let uvCurve = SurfaceCurve3D.uvCurve surfaceCurve
-          let uniformParameterization = Curve3D.uniformParameterization curve
           case body.seams @ halfEdgeId of
             Nothing -> do
               -- Degenerate half-edge not mated to any adjacent half-edge
@@ -467,9 +470,11 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
               -- and only generate vertices when we encounter that side.
               if halfEdgeId < matingHalfEdgeId
                 then do
+                  let curve = unsafeGetCurve surfaceCurve
+                  let uniformParameterization = Curve3D.uniformParameterization curve
                   let matingSurfaceCurve = body @ matingHalfEdgeId
                   let matingSurfaceSegments = surfaceSegmentsMap @ matingHalfEdgeId.surfaceId
-                  let matingCurve = SurfaceCurve3D.curve matingSurfaceCurve
+                  let matingCurve = unsafeGetCurve matingSurfaceCurve
                   let matingUniformParameterization = Curve3D.uniformParameterization matingCurve
                   let matingUvCurve = SurfaceCurve3D.uvCurve matingSurfaceCurve
                   let edgePredicate =

@@ -10,6 +10,7 @@ where
 
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve2D (Curve2D)
+import {-# SOURCE #-} OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D, Point2D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
@@ -41,7 +42,12 @@ instance
     (SurfaceFunction2D units2)
     (VectorSurfaceFunction2D units1)
 
-instance Composition (Tolerance units) (SurfaceFunction2D units) UvCurve (Curve2D units)
+instance
+  Composition
+    (Tolerance units)
+    (SurfaceFunction2D units)
+    UvCurve
+    (Result (Curve2D.IsDegenerate units) (Curve2D units))
 
 instance
   Composition

@@ -24,7 +24,6 @@ import OpenSolid.DirectionBounds (DirectionBounds, DirectionBoundsExists)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point (Point)
 import OpenSolid.Prelude
 import OpenSolid.Space qualified as Space
@@ -147,11 +146,10 @@ new ::
       (VectorBounds dimension units space)
       (Bounds dimension units space)
   ) =>
-  Nondegenerate (Curve dimension units space) ->
+  Curve dimension units space ->
   Interval Unitless ->
   Segment dimension units space
-new nondegenerateCurve tRange = do
-  let Nondegenerate givenCurve = nondegenerateCurve
+new givenCurve tRange = do
   let Interval t1 t2 = tRange
   let p1 = Curve.pointAt t1 givenCurve
   let p2 = Curve.pointAt t2 givenCurve

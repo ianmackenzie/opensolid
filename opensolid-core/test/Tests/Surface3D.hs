@@ -5,7 +5,6 @@ import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Length qualified as Length
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
@@ -30,7 +29,9 @@ spherePatch :: Tolerance Meters => Generator (Surface3D space)
 spherePatch = do
   sketchPlane <- Random.plane3D
   let radius = Length.centimeters 10.0
-  let profile = Curve2D.arcFrom (Point2D.x radius) (Point2D.y radius) Angle.quarterTurn
+  let profile =
+        Curve2D.arcFrom (Point2D.x radius) (Point2D.y radius) Angle.quarterTurn
+          !! error "Sphere profile should never be degenerate"
   let surface =
         Surface3D.revolved sketchPlane profile Axis2D.y Angle.quarterTurn
           !! error "Sphere patch should never be degenerate"
@@ -63,8 +64,8 @@ findPole = Test.check 100 "findPole" do
   let point = SurfaceFunction3D.pointAt (UvPoint 1.0 0.0) function
   let solutions = Surface3D.findPoint point surface
   case solutions of
-    [SurfacePoint3D.Pole (Nondegenerate poleCurve) _] -> do
-      let expectedPoleCurve = UvCurve.lineFrom (UvPoint 1.0 0.0) (UvPoint 1.0 1.0)
+    [SurfacePoint3D.Pole (Surface3D.Pole poleCurve _)] -> do
+      expectedPoleCurve <- UvCurve.lineFrom (UvPoint 1.0 0.0) (UvPoint 1.0 1.0) ?? fail
       Test.expect (poleCurve ~~ expectedPoleCurve)
     _ ->
       Test.fail "Expected a single solution"

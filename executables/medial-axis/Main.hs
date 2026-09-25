@@ -36,24 +36,26 @@ main = Tolerance.using Length.micrometer do
 
 testSplineAndArc :: Tolerance Meters => IO ()
 testSplineAndArc = do
-  let spline =
-        Curve2D.cubicBezier
-          (Point2D.centimeters 0.0 10.0)
-          (Point2D.centimeters 5.0 6.0)
-          (Point2D.centimeters 10.0 9.0)
-          (Point2D.centimeters 15.0 7.0)
-  let arc = Curve2D.arcFrom (Point2D.centimeters 15.0 0.0) Point2D.origin (Angle.degrees 20.0)
+  spline <-
+    Curve2D.cubicBezier
+      (Point2D.centimeters 0.0 10.0)
+      (Point2D.centimeters 5.0 6.0)
+      (Point2D.centimeters 10.0 9.0)
+      (Point2D.centimeters 15.0 7.0)
+      ?? fail
+  arc <- Curve2D.arcFrom (Point2D.centimeters 15.0 0.0) Point2D.origin (Angle.degrees 20.0) ?? fail
   testCurveMedialAxis "testSplineAndArc" spline arc
 
 testSplineAndLine :: Tolerance Meters => IO ()
 testSplineAndLine = do
-  let spline =
-        Curve2D.cubicBezier
-          (Point2D.centimeters 15.0 15.0)
-          (Point2D.centimeters 10.0 10.0)
-          (Point2D.centimeters 10.0 10.0)
-          (Point2D.centimeters 5.0 15.0)
-  let line = Curve2D.lineFrom Point2D.origin (Point2D.centimeters 20.0 0.0)
+  spline <-
+    Curve2D.cubicBezier
+      (Point2D.centimeters 15.0 15.0)
+      (Point2D.centimeters 10.0 10.0)
+      (Point2D.centimeters 10.0 10.0)
+      (Point2D.centimeters 5.0 15.0)
+      ?? fail
+  line <- Curve2D.lineFrom Point2D.origin (Point2D.centimeters 20.0 0.0) ?? fail
   testCurveMedialAxis "testSplineAndLine" spline line
 
 testCurveMedialAxis :: Tolerance Meters => Text -> Curve2D Meters -> Curve2D Meters -> IO ()

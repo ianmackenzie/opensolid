@@ -1,5 +1,6 @@
 module Utils (showMostComplexCurve) where
 
+import OpenSolid.Bag3D qualified as Bag3D
 import OpenSolid.Body3D (Body3D)
 import OpenSolid.Body3D qualified as Body3D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
@@ -10,30 +11,24 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
-import OpenSolid.Set3D qualified as Set3D
 import OpenSolid.Surface3D qualified as Surface3D
-import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
-import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
 import OpenSolid.Text qualified as Text
 
-allSurfaceCurves :: Body3D space -> NonEmpty (SurfaceCurve3D space)
-allSurfaceCurves body =
-  Body3D.surfaces body
-    & Set3D.combine Surface3D.boundaries
-    & Set3D.flatten
-    & Set3D.toNonEmpty
+allEdges :: Tolerance Meters => Body3D space -> List (Surface3D.Edge space)
+allEdges body =
+  Bag3D.full (Body3D.surfaces body)
+    & Bag3D.combine Surface3D.edges
+    & Bag3D.toList
 
 numLines :: Text -> Int
 numLines text = List.length (Text.lines text)
 
-showMostComplexCurve :: Body3D space -> IO ()
+showMostComplexCurve :: Tolerance Meters => Body3D space -> IO ()
 showMostComplexCurve body = do
-  let surfaceCurves = allSurfaceCurves body
-  let getExpression surfaceCurve =
-        SurfaceCurve3D.curve surfaceCurve
-          & Curve3D.compiled
-          & CompiledFunction.expression
-  expressions <- Result.collect getExpression surfaceCurves ?? fail
-  let strings = NonEmpty.map Expression.debug expressions
-  let longestString = NonEmpty.maximumBy numLines strings
-  IO.printLine longestString
+  let getExpression (Surface3D.Edge _ curve) = CompiledFunction.expression (Curve3D.compiled curve)
+  expressions <- Result.collect getExpression (allEdges body) ?? fail
+  case List.map Expression.debug expressions of
+    [] -> IO.fail "No edges found"
+    NonEmpty representations -> do
+      let longestRepresentation = NonEmpty.maximumBy numLines representations
+      IO.printLine longestRepresentation

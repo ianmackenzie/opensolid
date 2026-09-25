@@ -14,11 +14,9 @@ import OpenSolid.Curve (Curve, CurveExists)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
-import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import OpenSolid.Interval (Interval)
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
-import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units qualified as Units
@@ -27,12 +25,12 @@ import OpenSolid.UvPoint (data UvPoint)
 
 lengthScale ::
   CurveExists dimension units space =>
-  Nondegenerate (Curve dimension units space) ->
-  Nondegenerate (Curve dimension units space) ->
+  Curve dimension units space ->
+  Curve dimension units space ->
   Quantity units
 lengthScale curveA curveB = do
-  let scaleA = Bounds.diameter (Curve.Nondegenerate.bounds curveA)
-  let scaleB = Bounds.diameter (Curve.Nondegenerate.bounds curveB)
+  let scaleA = Bounds.diameter (Curve.bounds curveA)
+  let scaleB = Bounds.diameter (Curve.bounds curveB)
   Quantity.sqrt_ (scaleA ?*? scaleB)
 
 areDistinctOrCrossing ::
@@ -55,8 +53,8 @@ secondDerivativeRange dxdt dydt d2xdt2 d2ydt2 = Units.simplify do
 
 solve ::
   (CurveExists dimension units space, Tolerance units) =>
-  Nondegenerate (Curve dimension units space) ->
-  Nondegenerate (Curve dimension units space) ->
+  Curve dimension units space ->
+  Curve dimension units space ->
   Interval Unitless ->
   Interval Unitless ->
   NewtonRaphson.Surface.Function 2 units Void ->
@@ -64,7 +62,7 @@ solve ::
 solve curveA curveB tRangeA tRangeB function = do
   UvPoint tA tB <- NewtonRaphson.Surface.solveIn (UvBounds tRangeA tRangeB) function
   let solution = (tA, tB)
-  case Curve.Nondegenerate.continuityAt solution (curveA, curveB) of
+  case Curve.continuityAt solution (curveA, curveB) of
     Nothing -> Unresolved
     Just continuity -> case continuity of
       Continuity.Crossing -> Unresolved

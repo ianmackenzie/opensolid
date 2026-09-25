@@ -6,10 +6,9 @@ import OpenSolid.Bag qualified as Bag
 import OpenSolid.Bag3D (Bag3D)
 import OpenSolid.Bag3D qualified as Bag3D
 import OpenSolid.Bisection qualified as Bisection
-import OpenSolid.Curve.Nondegenerate qualified as Curve.Nondegenerate
+import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
-import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
@@ -17,11 +16,10 @@ import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.Surface3D.Segment qualified as Segment
-import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
-import OpenSolid.SurfaceCurve3D.Nondegenerate qualified as SurfaceCurve3D.Nondegenerate
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfacePoint3D (SurfacePoint3D)
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
+import OpenSolid.UvCurve qualified as UvCurve
 import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
@@ -74,12 +72,10 @@ findPoint point surface = do
 findInteriorEdgePoints ::
   Tolerance Meters =>
   Point3D space ->
-  Nondegenerate (SurfaceCurve3D space) ->
+  Surface3D.Edge space ->
   Bag3D space (SurfacePoint3D space)
-findInteriorEdgePoints point edge = do
-  let curve = SurfaceCurve3D.Nondegenerate.curve edge
-  let uvCurve = SurfaceCurve3D.Nondegenerate.uvCurve edge
-  let tValues = Curve.Nondegenerate.findPoint point curve
+findInteriorEdgePoints point (Surface3D.Edge uvCurve curve) = do
+  let tValues = Curve3D.findPoint point curve
   let innerTValues = List.filter (not . Parameter.isEndpoint) tValues
-  let toPoint tValue = SurfacePoint3D.Point (Curve.Nondegenerate.pointAt tValue uvCurve) point
+  let toPoint tValue = SurfacePoint3D.Point (UvCurve.pointAt tValue uvCurve) point
   Bag3D.pack (List.map toPoint innerTValues)

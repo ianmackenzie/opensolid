@@ -66,7 +66,10 @@ any additional curves you want
 and then construct a profile region from the combined set of curves
 that you can then extrude to form a gear body.
 -}
-profile :: Tolerance Meters => SpurGear -> List (Curve2D Meters)
+profile ::
+  Tolerance Meters =>
+  SpurGear ->
+  Result (Curve2D.IsDegenerate Meters) (List (Curve2D Meters))
 profile gear = do
   -- Dimensions
   let n = numTeeth gear
@@ -84,25 +87,26 @@ profile gear = do
         | otherwise = Angle.zero
   let theta2 = Angle.radians (Number.sqrt (Number.squared (ra / rb) - 1.0))
   let involuteRightRadialVector = Vector2D.polar rb (Angle.halfPi - alpha)
-  let involuteRight = Curve2D.involute Point2D.origin involuteRightRadialVector theta1 theta2
+  involuteRight <- Curve2D.involute Point2D.origin involuteRightRadialVector theta1 theta2
   let involuteLeft = involuteRight & Curve2D.mirrorAcross Axis2D.y & Curve2D.reverse
-  let tip = Curve2D.lineFrom (Curve2D.endPoint involuteRight) (Curve2D.startPoint involuteLeft)
+  tip <- Curve2D.lineFrom (Curve2D.endPoint involuteRight) (Curve2D.startPoint involuteLeft)
   let angularSpacing = Angle.twoPi / Number.fromInt n
   let nextToothStart =
         Point2D.rotateAround Point2D.origin angularSpacing (Curve2D.startPoint involuteRight)
   let leftEnd = Curve2D.endPoint involuteLeft
-  let connector
-        | rd > rb = Curve2D.lineFrom leftEnd nextToothStart
-        | otherwise = do
-            let angularWidth = 2.0 * Angle.asin (0.5 * Point2D.distanceFrom leftEnd nextToothStart / rb)
-            Curve2D.arcFrom leftEnd nextToothStart -(Angle.pi - angularWidth)
+  connector <-
+    if rd > rb
+      then Curve2D.lineFrom leftEnd nextToothStart
+      else do
+        let angularWidth = 2.0 * Angle.asin (0.5 * Point2D.distanceFrom leftEnd nextToothStart / rb)
+        Curve2D.arcFrom leftEnd nextToothStart -(Angle.pi - angularWidth)
   let toothProfileCurves = [involuteRight, tip, involuteLeft, connector]
 
   -- Overall profile
   let rotatedProfileCurves i = do
         let angle = Number.fromInt i * angularSpacing
         List.map (Curve2D.rotateAround Point2D.origin angle) toothProfileCurves
-  List.combine rotatedProfileCurves [0 .. n - 1]
+  Ok (List.combine rotatedProfileCurves [0 .. n - 1])
 
 bounds :: SpurGear -> Bounds2D Meters
 bounds gear = Circle2D.bounds (Circle2D.withDiameter (outerDiameter gear) Point2D.origin)

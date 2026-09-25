@@ -3,6 +3,7 @@ module OpenSolid.UvCurve
   , IsDegenerate
   , data IsDegenerate
   , new
+  , unsafe
   , startPoint
   , endPoint
   , pointAt
@@ -11,7 +12,6 @@ module OpenSolid.UvCurve
   , lineFrom
   , arcFrom
   , cornerArc
-  , nondegenerate
   , intersections
   )
 where
@@ -19,10 +19,8 @@ where
 import OpenSolid.Angle (Angle)
 import OpenSolid.Curve (UvCurve)
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.Intersections qualified as Curve.Intersections
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D)
-import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Prelude
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
@@ -35,8 +33,11 @@ type IsDegenerate = Curve.IsDegenerate 2 Unitless Void
 pattern IsDegenerate :: UvPoint -> IsDegenerate
 pattern IsDegenerate point = Curve.IsDegenerate point
 
-new :: Curve2D.Compiled Unitless -> VectorCurve2D Unitless -> UvCurve
+new :: Curve2D.Compiled Unitless -> VectorCurve2D Unitless -> Result IsDegenerate UvCurve
 new = unitless Curve2D.new
+
+unsafe :: Curve2D.Compiled Unitless -> VectorCurve2D Unitless -> UvCurve
+unsafe = unitless Curve2D.unsafe
 
 startPoint :: UvCurve -> UvPoint
 startPoint = Curve2D.startPoint
@@ -54,7 +55,7 @@ bounds :: UvCurve -> UvBounds
 bounds = Curve2D.bounds
 
 -- | Create a line between two points.
-lineFrom :: UvPoint -> UvPoint -> UvCurve
+lineFrom :: UvPoint -> UvPoint -> Result IsDegenerate UvCurve
 lineFrom = unitless Curve2D.lineFrom
 
 {-| Create an arc from the given start point to the given end point, with the given swept angle.
@@ -64,7 +65,7 @@ and a negative swept angle means it turns clockwise (turns to the right).
 For example, an arc with a swept angle of positive 90 degrees
 is quarter circle that turns to the left.
 -}
-arcFrom :: UvPoint -> UvPoint -> Angle -> UvCurve
+arcFrom :: UvPoint -> UvPoint -> Angle -> Result IsDegenerate UvCurve
 arcFrom = unitless Curve2D.arcFrom
 
 -- | Create an arc for rounding off the corner between two straight lines.
@@ -73,14 +74,8 @@ cornerArc ::
   "incoming" ::: Direction2D ->
   "outgoing" ::: Direction2D ->
   "radius" ::: Number ->
-  UvCurve
+  Result IsDegenerate UvCurve
 cornerArc = unitless Curve2D.cornerArc
 
-nondegenerate :: UvCurve -> Result IsDegenerate (Nondegenerate UvCurve)
-nondegenerate = unitless Curve.nondegenerate
-
-intersections ::
-  UvCurve ->
-  UvCurve ->
-  Result (Curve.Intersections.Error 2 Unitless Void) (Maybe Curve.Intersections)
+intersections :: UvCurve -> UvCurve -> Maybe Curve.Intersections
 intersections = unitless Curve2D.intersections

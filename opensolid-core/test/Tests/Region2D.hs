@@ -17,6 +17,7 @@ import OpenSolid.Quantity (zero)
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Region2D.BoundedBy qualified as Region2D.BoundedBy
+import OpenSolid.Result qualified as Result
 import Test (Test)
 import Test qualified
 
@@ -43,10 +44,10 @@ squareArea = Test.verify "squareArea" do
   let p2 = Point2D width zero
   let p3 = Point2D width width
   let p4 = Point2D zero width
-  let line1 = Curve2D.lineFrom p1 p2
-  let line2 = Curve2D.lineFrom p2 p3
-  let line3 = Curve2D.lineFrom p4 p3
-  let line4 = Curve2D.lineFrom p4 p1
+  line1 <- Curve2D.lineFrom p1 p2 ?? fail
+  line2 <- Curve2D.lineFrom p2 p3 ?? fail
+  line3 <- Curve2D.lineFrom p4 p3 ?? fail
+  line4 <- Curve2D.lineFrom p4 p1 ?? fail
   region <- Region2D.boundedBy [line1, line3, line2, line4] ?? fail
   Test.expect (areaIsApproximately (width * width) region)
 
@@ -56,9 +57,9 @@ quarterCircleArea = Test.verify "quarterCircleArea" do
   let p1 = Point2D.origin
   let p2 = Point2D radius zero
   let p3 = Point2D zero radius
-  let line1 = Curve2D.lineFrom p1 p2
-  let line2 = Curve2D.lineFrom p1 p3
-  let arc = Curve2D.arcFrom p2 p3 Angle.quarterTurn
+  line1 <- Curve2D.lineFrom p1 p2 ?? fail
+  line2 <- Curve2D.lineFrom p1 p3 ?? fail
+  arc <- Curve2D.arcFrom p2 p3 Angle.quarterTurn ?? fail
   region <- Region2D.boundedBy [line1, line2, arc] ?? fail
   let expectedArea = 0.25 * Number.pi * radius * radius
   Test.expect (areaIsApproximately expectedArea region)
@@ -70,14 +71,14 @@ squareWithHoleArea = Test.verify "squareWithHoleArea" do
   let p2 = Point2D width zero
   let p3 = Point2D width width
   let p4 = Point2D zero width
-  let line1 = Curve2D.lineFrom p1 p2
-  let line2 = Curve2D.lineFrom p2 p3
-  let line3 = Curve2D.lineFrom p4 p3
-  let line4 = Curve2D.lineFrom p4 p1
+  line1 <- Curve2D.lineFrom p1 p2 ?? fail
+  line2 <- Curve2D.lineFrom p2 p3 ?? fail
+  line3 <- Curve2D.lineFrom p4 p3 ?? fail
+  line4 <- Curve2D.lineFrom p4 p1 ?? fail
   let centerPoint = Point2D (0.5 * width) (0.5 * width)
   let holeDiameter = 0.5 * width
   let holeRadius = 0.5 * holeDiameter
-  let hole = Curve2D.circle (Circle2D.withDiameter holeDiameter centerPoint)
+  hole <- Curve2D.circle (Circle2D.withDiameter holeDiameter centerPoint) ?? fail
   region <- Region2D.boundedBy [line1, line3, line2, line4, hole] ?? fail
   let expectedArea = width * width - Number.pi * holeRadius * holeRadius
   Test.expect (areaIsApproximately expectedArea region)
@@ -89,9 +90,9 @@ incompleteSquare = Test.verify "incompleteSquare" do
   let p2 = Point2D width zero
   let p3 = Point2D width width
   let p4 = Point2D zero width
-  let line1 = Curve2D.lineFrom p1 p2
-  let line2 = Curve2D.lineFrom p2 p3
-  let line3 = Curve2D.lineFrom p4 p3
+  line1 <- Curve2D.lineFrom p1 p2 ?? fail
+  line2 <- Curve2D.lineFrom p2 p3 ?? fail
+  line3 <- Curve2D.lineFrom p4 p3 ?? fail
   case Region2D.boundedBy [line1, line2, line3] of
     Ok _ -> Test.fail "Expected region construction to fail on incomplete boundary"
     Err err -> Test.expect (err == Region2D.BoundedBy.BoundaryHasGaps)
@@ -103,20 +104,22 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" do
   let p2 = Point2D width zero
   let p3 = Point2D width width
   let p4 = Point2D zero width
-  let line1 = Curve2D.lineFrom p1 p2
-  let line2 = Curve2D.lineFrom p2 p3
-  let line3 = Curve2D.lineFrom p4 p3
-  let line4 = Curve2D.lineFrom p4 p1
+  line1 <- Curve2D.lineFrom p1 p2 ?? fail
+  line2 <- Curve2D.lineFrom p2 p3 ?? fail
+  line3 <- Curve2D.lineFrom p4 p3 ?? fail
+  line4 <- Curve2D.lineFrom p4 p1 ?? fail
   let centerPoint = Point2D (0.5 * width) (0.5 * width)
-  let hole = Curve2D.circle (Circle2D.withDiameter width centerPoint)
+  hole <- Curve2D.circle (Circle2D.withDiameter width centerPoint) ?? fail
   case Region2D.boundedBy [line1, line2, line3, line4, hole] of
     Ok _ -> Test.fail "Expected non-manifold region construction to fail"
     Err err -> Test.expect (err == Region2D.BoundedBy.BoundaryIntersectsItself)
 
 twoCircles :: Test
 twoCircles = Test.verify "twoCircles" do
-  let circle1 = Curve2D.circle (Circle2D.withDiameter (Length.meters 2.0) (Point2D.meters -2.0 0.0))
-  let circle2 = Curve2D.circle (Circle2D.withDiameter (Length.meters 1.0) (Point2D.meters 1.0 0.0))
+  circle1 <-
+    Curve2D.circle (Circle2D.withDiameter (Length.meters 2.0) (Point2D.meters -2.0 0.0)) ?? fail
+  circle2 <-
+    Curve2D.circle (Circle2D.withDiameter (Length.meters 1.0) (Point2D.meters 1.0 0.0)) ?? fail
   case Region2D.boundedBy [circle1, circle2] of
     Ok _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
     Err err -> Test.expect (err == Region2D.BoundedBy.MultipleDisjointRegions)
@@ -126,7 +129,9 @@ pointContainment = Test.verify "pointContainment" do
   let d = Length.centimeters 10.0
   let r = Length.centimeters 2.5
   let point i j = Point2D (i * d) (j * d)
-  let circle i j = [Curve2D.circle (Circle2D.withRadius r (point i j))]
+  let circle i j = do
+        curve <- Curve2D.circle (Circle2D.withRadius r (point i j))
+        Ok [curve]
   let square i j = do
         let cx = i * d
         let cy = j * d
@@ -134,11 +139,11 @@ pointContainment = Test.verify "pointContainment" do
         let p2 = Point2D (cx + r) (cy - r)
         let p3 = Point2D (cx + r) (cy + r)
         let p4 = Point2D (cx - r) (cy + r)
-        let line12 = Curve2D.lineFrom p1 p2
-        let line23 = Curve2D.lineFrom p2 p3
-        let line34 = Curve2D.lineFrom p3 p4
-        let line41 = Curve2D.lineFrom p4 p1
-        [line12, line23, line34, line41]
+        line12 <- Curve2D.lineFrom p1 p2
+        line23 <- Curve2D.lineFrom p2 p3
+        line34 <- Curve2D.lineFrom p3 p4
+        line41 <- Curve2D.lineFrom p4 p1
+        Ok [line12, line23, line34, line41]
   let outerLoopPoints =
         [ point 0.0 0.0
         , point 3.0 0.0
@@ -149,15 +154,13 @@ pointContainment = Test.verify "pointContainment" do
         , point 1.0 2.0
         , point 0.0 2.0
         ]
-  let boundaryCurves =
-        List.concat
-          [ List.loop Curve2D.lineFrom outerLoopPoints
-          , square 0.5 1.5
-          , circle 0.5 0.5
-          , square 1.5 0.5
-          , circle 2.5 0.5
-          , square 2.5 1.5
-          ]
+  outerLoop <- Result.sequence (List.loop Curve2D.lineFrom outerLoopPoints) ?? fail
+  hole1 <- square 0.5 1.5 ?? fail
+  hole2 <- circle 0.5 0.5 ?? fail
+  hole3 <- square 1.5 0.5 ?? fail
+  hole4 <- circle 2.5 0.5 ?? fail
+  hole5 <- square 2.5 1.5 ?? fail
+  let boundaryCurves = List.concat [outerLoop, hole1, hole2, hole3, hole4, hole5]
   region <- Region2D.boundedBy boundaryCurves ?? fail
   let expectInside givenPoint = Test.expect (givenPoint ^ region)
   let expectOutside givenPoint = Test.expect (not (givenPoint ^ region))

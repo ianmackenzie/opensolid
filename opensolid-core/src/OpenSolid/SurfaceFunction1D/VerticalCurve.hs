@@ -130,4 +130,4 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
   recursive \self -> do
     let dvdt = Curve1D.constant (vEnd - vStart)
     let dudt = dvdt * dudv << self
-    UvCurve.new (CompiledFunction.abstract value range) (VectorCurve2D.xy dudt dvdt)
+    UvCurve.unsafe (CompiledFunction.abstract value range) (VectorCurve2D.xy dudt dvdt)

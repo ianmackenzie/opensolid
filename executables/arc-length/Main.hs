@@ -35,7 +35,8 @@ testCurve label curve = Tolerance.using (Length.meters 1e-12) do
 
 testLineLength :: IO ()
 testLineLength = Tolerance.using (Length.meters 1e-6) do
-  testCurve "Line" (Curve2D.lineFrom Point2D.origin (Point2D.centimeters 30.0 40.0))
+  line <- Curve2D.lineFrom Point2D.origin (Point2D.centimeters 30.0 40.0) ?? fail
+  testCurve "Line" line
 
 testQuadraticSplineLength :: IO ()
 testQuadraticSplineLength =
@@ -43,7 +44,7 @@ testQuadraticSplineLength =
     let p1 = Point2D.origin
     let p2 = Point2D.centimeters 20.0 30.0
     let p3 = Point2D.centimeters 40.0 0.0
-    let spline = Curve2D.quadraticBezier p1 p2 p3
+    spline <- Curve2D.quadraticBezier p1 p2 p3 ?? fail
     testCurve "Quadratic spline" spline
     IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
 
@@ -69,7 +70,7 @@ testCubicSplineParameterization = Tolerance.using Length.defaultTolerance do
   let p2 = Point2D.centimeters 7.0 8.0
   let p3 = Point2D.centimeters 16.0 15.0
   let p4 = Point2D.centimeters 25.0 5.0
-  let spline = Curve2D.cubicBezier p1 p2 p3 p4
+  spline <- Curve2D.cubicBezier p1 p2 p3 p4 ?? fail
   let reversedSpline = Curve2D.reverse spline
   let length = Curve2D.length spline
   IO.printLine ("Cubic spline: " <> formatLength length)

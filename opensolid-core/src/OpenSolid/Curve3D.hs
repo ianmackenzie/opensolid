@@ -6,6 +6,7 @@ module OpenSolid.Curve3D
   , data IsDegenerate
   , IntersectionPointWithSurface
   , new
+  , unsafe
   , on
   , line
   , lineFrom
@@ -51,7 +52,6 @@ import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve3D)
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve.Intersections qualified as Curve.Intersections
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve3D.IntersectionPointWithSurface (IntersectionPointWithSurface)
 import OpenSolid.Expression qualified as Expression
@@ -82,16 +82,27 @@ type IsDegenerate space = Curve.IsDegenerate 3 Meters space
 pattern IsDegenerate :: Point3D space -> IsDegenerate space
 pattern IsDegenerate point = Curve.IsDegenerate point
 
-new :: Tolerance Meters => Compiled space -> VectorCurve3D Meters space -> Curve3D space
+new ::
+  Tolerance Meters =>
+  Compiled space ->
+  VectorCurve3D Meters space ->
+  Result (IsDegenerate space) (Curve3D space)
 new = Curve.new
+
+unsafe :: Tolerance Meters => Compiled space -> VectorCurve3D Meters space -> Curve3D space
+unsafe = Curve.unsafe
 
 on :: Plane3D space -> Curve2D Meters -> Curve3D space
 on = Curve.placeOn
 
-line :: Tolerance Meters => Line3D space -> Curve3D space
+line :: Tolerance Meters => Line3D space -> Result (IsDegenerate space) (Curve3D space)
 line = Curve.line
 
-lineFrom :: Tolerance Meters => Point3D space -> Point3D space -> Curve3D space
+lineFrom ::
+  Tolerance Meters =>
+  Point3D space ->
+  Point3D space ->
+  Result (IsDegenerate space) (Curve3D space)
 lineFrom = Curve.lineFrom
 
 {-| Construct a Bezier curve from its control points. For example,
@@ -100,7 +111,10 @@ lineFrom = Curve.lineFrom
 
 will return a cubic Bezier curve with the given four control points.
 -}
-bezier :: Tolerance Meters => NonEmpty (Point3D space) -> Curve3D space
+bezier ::
+  Tolerance Meters =>
+  NonEmpty (Point3D space) ->
+  Result (IsDegenerate space) (Curve3D space)
 bezier = Curve.bezier
 
 -- | Construct a quadratic Bezier curve from the given control points.
@@ -109,7 +123,7 @@ quadraticBezier ::
   Point3D space ->
   Point3D space ->
   Point3D space ->
-  Curve3D space
+  Result (IsDegenerate space) (Curve3D space)
 quadraticBezier = Curve.quadraticBezier
 
 -- | Construct a cubic Bezier curve from the given control points.
@@ -119,7 +133,7 @@ cubicBezier ::
   Point3D space ->
   Point3D space ->
   Point3D space ->
-  Curve3D space
+  Result (IsDegenerate space) (Curve3D space)
 cubicBezier = Curve.cubicBezier
 
 {-| Construct a Bezier curve with the given start point, start derivatives, end point and end
@@ -145,7 +159,7 @@ hermite ::
   List (Vector3D Meters space) ->
   Point3D space ->
   List (Vector3D Meters space) ->
-  Curve3D space
+  Result (IsDegenerate space) (Curve3D space)
 hermite = Curve.hermite
 
 {-# INLINE derivative #-}
@@ -214,19 +228,19 @@ bounds = Curve.bounds
 reverse :: Curve3D space -> Curve3D space
 reverse = Curve.reverse
 
-arcLengthParameterization :: Tolerance Meters => Curve3D space -> (Length, Number -> Number)
+arcLengthParameterization :: Curve3D space -> (Length, Number -> Number)
 arcLengthParameterization = Curve.arcLengthParameterization
 
-length :: Tolerance Meters => Curve3D space -> Length
+length :: Curve3D space -> Length
 length = Curve.length
 
-uniformParameterization :: Tolerance Meters => Curve3D space -> Number -> Number
+uniformParameterization :: Curve3D space -> Number -> Number
 uniformParameterization = Curve.uniformParameterization
 
-fromUniform :: Tolerance Meters => Number -> Curve3D space -> Number
+fromUniform :: Number -> Curve3D space -> Number
 fromUniform = Curve.fromUniform
 
-atUniform :: Tolerance Meters => Number -> Curve3D space -> Point3D space
+atUniform :: Number -> Curve3D space -> Point3D space
 atUniform = Curve.atUniform
 
 transformBy ::
@@ -238,27 +252,18 @@ transformBy = Curve.transformBy
 
 placeIn :: Frame3D global local -> Curve3D local -> Curve3D global
 placeIn frame curve = do
-  let compiledPlaced =
+  let transformCompiled =
         CompiledFunction.map
           (Expression.placeIn frame)
           (Point3D.placeIn frame)
           (Bounds3D.placeIn frame)
-          (compiled curve)
-  Curve.unsafe compiledPlaced (VectorCurve3D.placeIn frame (derivative curve))
+  Curve.orthonormalTransform transformCompiled (VectorCurve3D.placeIn frame) curve
 
 relativeTo :: Frame3D global local -> Curve3D global -> Curve3D local
 relativeTo frame curve = placeIn (Frame3D.inverse frame) curve
 
-findPoint ::
-  Tolerance Meters =>
-  Point3D space ->
-  Curve3D space ->
-  Result Curve.IsDegenerateAndCoincidentWithPoint (List Number)
+findPoint :: Tolerance Meters => Point3D space -> Curve3D space -> List Number
 findPoint = Curve.findPoint
 
-intersections ::
-  Tolerance Meters =>
-  Curve3D space ->
-  Curve3D space ->
-  Result (Curve.Intersections.Error 3 Meters space) (Maybe Curve.Intersections)
+intersections :: Tolerance Meters => Curve3D space -> Curve3D space -> Maybe Curve.Intersections
 intersections = Curve.intersections

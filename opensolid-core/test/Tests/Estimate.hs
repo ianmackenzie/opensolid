@@ -74,12 +74,13 @@ resolvesTo value estimate
 
 area :: Test
 area = Test.verify "area" do
-  let curve =
-        Curve2D.polarArc
-          (#centerPoint Point2D.origin)
-          (#radius Length.meter)
-          (#startAngle Angle.pi)
-          (#endAngle Angle.zero)
+  curve <-
+    Curve2D.polarArc
+      (#centerPoint Point2D.origin)
+      (#radius Length.meter)
+      (#startAngle Angle.pi)
+      (#endAngle Angle.zero)
+      ?? fail
   let dAdt = Curve2D.yCoordinate curve * VectorCurve2D.xComponent (Curve2D.derivative curve)
   let areaEstimate = Curve1D.integrate dAdt
   let expectedArea = Area.squareMeters Number.halfPi

@@ -5,7 +5,6 @@ module OpenSolid.Body3D.HalfEdge
   , bounds
   , uvBounds
   , surfaceCurve
-  , curve
   , uvCurve
   , findMatingHalfEdges
   )
@@ -18,13 +17,13 @@ import OpenSolid.Body3D.Ids (BoundaryId, CurveId, SurfaceId)
 import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds3D (Bounds3D)
-import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude hiding (id)
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
+import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
 import OpenSolid.UvBounds (UvBounds)
@@ -63,9 +62,6 @@ bounds = SurfaceCurve3D.bounds . surfaceCurve
 uvBounds :: HalfEdge space -> UvBounds
 uvBounds = SurfaceCurve3D.uvBounds . surfaceCurve
 
-curve :: HalfEdge space -> Curve3D space
-curve = SurfaceCurve3D.curve . surfaceCurve
-
 uvCurve :: HalfEdge space -> UvCurve
 uvCurve = SurfaceCurve3D.uvCurve . surfaceCurve
 
@@ -80,10 +76,15 @@ findMatingHalfEdges halfEdgeSet halfEdge = do
 
 isMateOf :: Tolerance Meters => HalfEdge space -> HalfEdge space -> Bool
 isMateOf halfEdge1 halfEdge2 =
-  halfEdge1.id /= halfEdge2.id && matingCurves (curve halfEdge1) (curve halfEdge2)
+  id halfEdge1 /= id halfEdge2
+    && matingCurves (surfaceCurve halfEdge1) (surfaceCurve halfEdge2)
 
-matingCurves :: Tolerance Meters => Curve3D space -> Curve3D space -> Bool
-matingCurves curve1 curve2 =
+matingCurves :: Tolerance Meters => SurfaceCurve3D space -> SurfaceCurve3D space -> Bool
+matingCurves SurfaceCurve3D.Pole{} _ = False
+matingCurves _ SurfaceCurve3D.Pole{} = False
+matingCurves (SurfaceCurve3D.Edge edge1) (SurfaceCurve3D.Edge edge2) = do
+  let Surface3D.Edge _ curve1 = edge1
+  let Surface3D.Edge _ curve2 = edge2
   Curve3D.length curve1 ~= Curve3D.length curve2 && do
     Parameter.samples & NonEmpty.all \r1 -> do
       let r2 = 1.0 - r1

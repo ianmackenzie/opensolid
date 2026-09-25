@@ -180,7 +180,7 @@ testPlaneTorusIntersection :: Tolerance Meters => IO ()
 testPlaneTorusIntersection = do
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
-  let crossSection = Curve2D.circle (Circle2D.withRadius minorRadius (Point2D.x majorRadius))
+  crossSection <- Curve2D.circle (Circle2D.withRadius minorRadius (Point2D.x majorRadius)) ?? fail
   surface <- Surface3D.revolved World3D.frontPlane crossSection Axis2D.y Angle.twoPi ?? fail
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3D.xy (Angle.degrees 45), Direction3D.z
@@ -278,29 +278,28 @@ drawBezier ::
   Point2D Unitless ->
   List (Point2D Unitless) ->
   Point2D Unitless ->
-  Svg
+  Result Text Svg
 drawBezier color startPoint innerControlPoints endPoint = do
   let drawingStartPoint = Point2D.convert toDrawing startPoint
   let drawingEndPoint = Point2D.convert toDrawing endPoint
   let drawingInnerControlPoints = List.map (Point2D.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints <> [drawingEndPoint])
-  let curve = Curve2D.bezier drawingControlPoints
+  curve <- Curve2D.bezier drawingControlPoints ?? fail
   let drawCurveRange tRange = drawBounds (Curve2D.range tRange curve)
   let controlPointDiameter = Length.millimeters 10.0
   let drawControlPoint point = Svg.circle (Circle2D.withDiameter controlPointDiameter point)
   let resolution = Resolution.maxError Length.millimeter
-  Svg.groupWith
-    [ Svg.strokeColor color
-    , Svg.strokeWidth (Length.millimeters 1.0)
-    ]
-    [ Svg.groupWith [Svg.opacity 0.3] $
-        [ Svg.polyline (Polyline2D drawingControlPoints)
-        , Svg.combineWith [Svg.fillColor color] drawControlPoint $
-            NonEmpty.toList drawingControlPoints
-        , Svg.combine drawCurveRange (Parameter.intervals 10)
-        ]
-    , Svg.curve resolution curve
-    ]
+  Ok $
+    Svg.groupWith
+      [Svg.strokeColor color, Svg.strokeWidth (Length.millimeters 1.0)]
+      [ Svg.groupWith [Svg.opacity 0.3] $
+          [ Svg.polyline (Polyline2D drawingControlPoints)
+          , Svg.combineWith [Svg.fillColor color] drawControlPoint $
+              NonEmpty.toList drawingControlPoints
+          , Svg.combine drawCurveRange (Parameter.intervals 10)
+          ]
+      , Svg.curve resolution curve
+      ]
 
 testBezierSegment :: Tolerance Meters => IO ()
 testBezierSegment = do
@@ -312,7 +311,7 @@ testBezierSegment = do
   let p6 = Point2D 10.0 10.0
   let coordinateBounds = Interval.convert toDrawing (Interval -1.0 11.0)
   let drawingBounds = Bounds2D coordinateBounds coordinateBounds
-  let curveEntity = drawBezier Color.blue p1 [p2, p3, p4, p5] p6
+  curveEntity <- drawBezier Color.blue p1 [p2, p3, p4, p5] p6 ?? fail
   Svg.write "executables/sandbox/test-bezier-segment.svg" (Svg.viewBox drawingBounds) curveEntity
 
 testHermiteBezier :: IO ()
@@ -321,7 +320,7 @@ testHermiteBezier = Tolerance.using Length.defaultTolerance do
   let startDerivatives = [Vector2D.centimeters 10.0 10.0]
   let endDerivatives = [Vector2D.centimeters 0.0 -10.0, Vector2D.zero]
   let endPoint = Point2D.centimeters 10.0 0.0
-  let curve = Curve2D.hermite startPoint startDerivatives endPoint endDerivatives
+  curve <- Curve2D.hermite startPoint startDerivatives endPoint endDerivatives ?? fail
   let curveAttributes =
         [ Svg.strokeColor Color.blue
         , Svg.strokeWidth (Length.millimeters 1.0)

@@ -26,15 +26,12 @@ main = Tolerance.using Length.defaultTolerance do
   let p2 = Point2D outerRadius thickness
   let p3 = Point2D (innerRadius + thickness) width
   let p4 = Point2D innerRadius width
-  profile <-
-    Region2D.boundedBy
-      [ Curve2D.lineFrom p0 p1
-      , Curve2D.lineFrom p1 p2
-      , Curve2D.arcFrom p2 p3 -Angle.quarterTurn
-      , Curve2D.lineFrom p3 p4
-      , Curve2D.lineFrom p4 p0
-      ]
-      ?? fail
+  line01 <- Curve2D.lineFrom p0 p1 ?? fail
+  line12 <- Curve2D.lineFrom p1 p2 ?? fail
+  arc23 <- Curve2D.arcFrom p2 p3 -Angle.quarterTurn ?? fail
+  line34 <- Curve2D.lineFrom p3 p4 ?? fail
+  line40 <- Curve2D.lineFrom p4 p0 ?? fail
+  profile <- Region2D.boundedBy [line01, line12, arc23, line34, line40] ?? fail
   body <- Body3D.revolved World3D.rightPlane profile Axis2D.y (Angle.degrees 270.0) ?? fail
   let resolution = Resolution.maxError (Length.millimeters 0.2)
   let mesh = Body3D.toPointMesh resolution body

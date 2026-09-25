@@ -26,8 +26,8 @@ gearBody numTeeth = do
   let gearModule = Length.millimeters 1.0
   let holeDiameter = Length.millimeters 8.0
   let spurGear = SpurGear.metric (#numTeeth numTeeth) (#module gearModule)
-  let outerProfile = SpurGear.profile spurGear
-  let hole = Curve2D.circle (Circle2D.withDiameter holeDiameter Point2D.origin)
+  outerProfile <- SpurGear.profile spurGear ?? fail
+  hole <- Curve2D.circle (Circle2D.withDiameter holeDiameter Point2D.origin) ?? fail
   profile <- Region2D.boundedBy (hole : outerProfile) ?? fail
   let width = Length.millimeters 8.0
   Body3D.extruded World3D.frontPlane profile (-0.5 * width) (0.5 * width) ?? fail

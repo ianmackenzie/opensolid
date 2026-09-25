@@ -75,7 +75,6 @@ import OpenSolid.Primitives
   )
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Vector2D (Vector2D, data Vector2D)
@@ -133,12 +132,18 @@ bounds3D = Random.map3 Bounds3D lengthInterval lengthInterval lengthInterval
 vectorBounds2D :: Generator (VectorBounds2D Meters)
 vectorBounds2D = Random.map2 VectorBounds2D lengthInterval lengthInterval
 
-line2D :: Generator (Curve2D Meters)
-line2D = Tolerance.using Length.defaultTolerance do
-  Random.map2 Curve2D.lineFrom point2D point2D
+retry :: Generator (Result x a) -> Generator a
+retry fallibleGenerator = do
+  result <- fallibleGenerator
+  case result of
+    Ok value -> Random.return value
+    Err _ -> retry fallibleGenerator
 
-arc2D :: Generator (Curve2D Meters)
-arc2D = Tolerance.using Length.defaultTolerance do
+line2D :: Tolerance Meters => Generator (Curve2D Meters)
+line2D = retry (Random.map2 Curve2D.lineFrom point2D point2D)
+
+arc2D :: Tolerance Meters => Generator (Curve2D Meters)
+arc2D = retry do
   startPoint <- point2D
   endPoint <- point2D
   angleSign <- Random.sign
@@ -147,13 +152,13 @@ arc2D = Tolerance.using Length.defaultTolerance do
   Random.return (Curve2D.arcFrom startPoint endPoint sweptAngle)
 
 quadraticSpline2D :: Tolerance Meters => Generator (Curve2D Meters)
-quadraticSpline2D = Random.map3 Curve2D.quadraticBezier point2D point2D point2D
+quadraticSpline2D = retry (Random.map3 Curve2D.quadraticBezier point2D point2D point2D)
 
 cubicSpline2D :: Tolerance Meters => Generator (Curve2D Meters)
-cubicSpline2D = Random.map4 Curve2D.cubicBezier point2D point2D point2D point2D
+cubicSpline2D = retry (Random.map4 Curve2D.cubicBezier point2D point2D point2D point2D)
 
 involute2D :: Tolerance Meters => Generator (Curve2D Meters)
-involute2D = do
+involute2D = retry do
   centerPoint <- point2D
   radialVector <- vector2D
   angleSign <- Random.sign
@@ -161,18 +166,17 @@ involute2D = do
   endAngle <- Random.quantity Angle.zero (angleSign * Angle.twoPi)
   Random.return (Curve2D.involute centerPoint radialVector startAngle endAngle)
 
-line3D :: Generator (Curve3D space)
-line3D = Tolerance.using Length.defaultTolerance do
-  Random.map2 Curve3D.lineFrom point3D point3D
+line3D :: Tolerance Meters => Generator (Curve3D space)
+line3D = retry (Random.map2 Curve3D.lineFrom point3D point3D)
 
-arc3D :: Generator (Curve3D space)
+arc3D :: Tolerance Meters => Generator (Curve3D space)
 arc3D = Random.map2 Curve2D.placeOn plane3D arc2D
 
 quadraticSpline3D :: Tolerance Meters => Generator (Curve3D Meters)
-quadraticSpline3D = Random.map3 Curve3D.quadraticBezier point3D point3D point3D
+quadraticSpline3D = retry (Random.map3 Curve3D.quadraticBezier point3D point3D point3D)
 
 cubicSpline3D :: Tolerance Meters => Generator (Curve3D Meters)
-cubicSpline3D = Random.map4 Curve3D.cubicBezier point3D point3D point3D point3D
+cubicSpline3D = retry (Random.map4 Curve3D.cubicBezier point3D point3D point3D point3D)
 
 translation2D :: Generator (Transform2D.Rigid Meters)
 translation2D = Random.map Transform2D.translateBy vector2D

@@ -1,5 +1,7 @@
 module OpenSolid.Surface3D
   ( Surface3D
+  , Pole (Pole)
+  , Edge (Edge)
   , IsDegenerate (IsDegenerate)
   , Boundary
   , function
@@ -42,6 +44,7 @@ module OpenSolid.Surface3D
   )
 where
 
+import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Bag qualified as Bag
@@ -52,6 +55,7 @@ import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
+import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
@@ -68,7 +72,6 @@ import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
@@ -96,6 +99,7 @@ import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
 import OpenSolid.UvBounds qualified as UvBounds
+import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvCurve qualified as UvCurve
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
@@ -120,6 +124,10 @@ data Surface3D space = Surface3D
   , bisectionTree :: ~(BisectionTree space)
   }
 
+data Pole space = Pole UvCurve (Point3D space) deriving (Show)
+
+data Edge space = Edge UvCurve (Curve3D space) deriving (Show)
+
 data IsDegenerate = IsDegenerate deriving (Eq, Show, Err)
 
 type BisectionTree space = Bisection.Tree UvBounds (Segment space)
@@ -138,9 +146,31 @@ instance Space.Coercion (Surface3D space1) (Surface3D space2) where
       , bisectionTree = Space.coerce surface.bisectionTree
       }
 
+instance Space.Coercion (Pole space1) (Pole space2) where
+  coerce = Data.Coerce.coerce
+
+instance Space.Coercion (Edge space1) (Edge space2) where
+  coerce (Edge uvCurve curve) = Edge uvCurve (Space.coerce curve)
+
 instance space1 ~ space2 => Bounded (Surface3D space1) (Bounds3D space2) where
   {-# INLINE bounds #-}
   bounds = bounds
+
+instance space1 ~ space2 => Bounded (Pole space1) (Bounds3D space2) where
+  {-# INLINE bounds #-}
+  bounds (Pole _ point) = Bounds3D.constant point
+
+instance space1 ~ space2 => Bounded (Edge space1) (Bounds3D space2) where
+  {-# INLINE bounds #-}
+  bounds (Edge _ curve) = Curve3D.bounds curve
+
+instance Bounded (Pole space) UvBounds where
+  {-# INLINE bounds #-}
+  bounds (Pole uvCurve _) = UvCurve.bounds uvCurve
+
+instance Bounded (Edge space) UvBounds where
+  {-# INLINE bounds #-}
+  bounds (Edge uvCurve _) = UvCurve.bounds uvCurve
 
 type Boundary space = Set3D space (SurfaceCurve3D space)
 
@@ -189,25 +219,26 @@ boundaryLoops surface = outerLoop surface :| innerLoops surface
 vertices :: Tolerance Meters => Surface3D space -> Bag3D space (SurfacePoint3D space)
 vertices surface = do
   let surfaceCurves = Set3D.flatten (boundaries surface)
-  let toPole surfaceCurve = case SurfaceCurve3D.nondegenerate surfaceCurve of
-        Ok{} -> Nothing
-        Err (SurfaceCurve3D.IsDegenerate surfacePoint) -> case surfacePoint of
-          SurfacePoint3D.Point{} -> Nothing
-          SurfacePoint3D.Pole{} -> Just surfacePoint
+  let toPole surfaceCurve = case surfaceCurve of
+        SurfaceCurve3D.Edge _ -> Nothing
+        SurfaceCurve3D.Pole pole ->
+          Just (SurfacePoint3D.Pole pole)
   let poles = Set3D.filterMapItems toPole surfaceCurves
-  let startPoint surfaceCurve = do
-        let uvPoint = UvCurve.startPoint (SurfaceCurve3D.uvCurve surfaceCurve)
-        let point = Curve3D.startPoint (SurfaceCurve3D.curve surfaceCurve)
-        SurfacePoint3D.Point uvPoint point
-  let startPoints = Set3D.map startPoint surfaceCurves
+  let edgeStart surfaceCurve = case surfaceCurve of
+        SurfaceCurve3D.Pole _ -> Nothing
+        SurfaceCurve3D.Edge (Edge uvCurve curve) ->
+          Just (SurfacePoint3D.Point (UvCurve.startPoint uvCurve) (Curve3D.startPoint curve))
+  let edgeStartPoints = Set3D.filterMapItems edgeStart surfaceCurves
   let nonPole surfacePoint = not (surfacePoint ^ poles)
-  let nonPoles = Set3D.filterItems nonPole startPoints
+  let nonPoles = Bag3D.filterItems nonPole edgeStartPoints
   poles <> nonPoles
 
-edges :: Tolerance Meters => Surface3D space -> Bag3D space (Nondegenerate (SurfaceCurve3D space))
+edges :: Tolerance Meters => Surface3D space -> Bag3D space (Edge space)
 edges surface = do
   let surfaceCurves = Set3D.flatten (boundaries surface)
-  let toEdge surfaceCurve = SurfaceCurve3D.nondegenerate surfaceCurve ?? Nothing
+  let toEdge surfaceCurve = case surfaceCurve of
+        SurfaceCurve3D.Edge edge -> Just edge
+        SurfaceCurve3D.Pole _ -> Nothing
   Set3D.filterMapItems toEdge surfaceCurves
 
 bisectionTree :: Surface3D space -> BisectionTree space

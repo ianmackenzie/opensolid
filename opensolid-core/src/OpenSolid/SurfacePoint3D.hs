@@ -9,18 +9,17 @@ import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
+import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvBounds qualified as UvBounds
-import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvCurve qualified as UvCurve
 import OpenSolid.UvPoint (UvPoint)
 
 data SurfacePoint3D space
   = Point UvPoint (Point3D space)
-  | Pole (Nondegenerate UvCurve) (Point3D space)
+  | Pole (Surface3D.Pole space)
   deriving (Show)
 
 instance space1 ~ space2 => Bounded (SurfacePoint3D space1) (Bounds3D space2) where
@@ -46,8 +45,8 @@ instance space1 ~ space2 => Intersects (Bounds3D space1) (SurfacePoint3D space2)
 
 point :: SurfacePoint3D space -> Point3D space
 point (Point _ p) = p
-point (Pole _ p) = p
+point (Pole (Surface3D.Pole _ p)) = p
 
 uvBounds :: SurfacePoint3D space -> UvBounds
 uvBounds (Point uvPoint _) = UvBounds.constant uvPoint
-uvBounds (Pole (Nondegenerate uvCurve) _) = UvCurve.bounds uvCurve
+uvBounds (Pole (Surface3D.Pole uvCurve _)) = UvCurve.bounds uvCurve

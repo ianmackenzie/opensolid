@@ -61,6 +61,6 @@ offsetRightwardBy ::
   Result (IsDegenerate (Point2D Meters)) (Edge2D)
 offsetRightwardBy distance = offsetLeftwardBy -distance
 
-toCurve :: Tolerance Meters => Edge2D -> Curve2D Meters
-toCurve (Line line) = Curve2D.line line
-toCurve (Arc arc) = Curve2D.arc arc
+toCurve :: Tolerance Meters => Edge2D -> Result Text (Curve2D Meters)
+toCurve (Line line) = Curve2D.line line ?? fail
+toCurve (Arc arc) = Curve2D.arc arc ?? fail

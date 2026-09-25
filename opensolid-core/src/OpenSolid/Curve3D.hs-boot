@@ -1,6 +1,7 @@
 module OpenSolid.Curve3D
   ( Curve3D
   , Compiled
+  , IsDegenerate
   , new
   , on
   , derivative
@@ -22,7 +23,13 @@ import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 
 type Compiled space = Curve.Compiled 3 Meters space
 
-new :: Tolerance Meters => Compiled space -> VectorCurve3D Meters space -> Curve3D space
+type IsDegenerate space = Curve.IsDegenerate 3 Meters space
+
+new ::
+  Tolerance Meters =>
+  Compiled space ->
+  VectorCurve3D Meters space ->
+  Result (IsDegenerate space) (Curve3D space)
 on :: Plane3D space -> Curve2D Meters -> Curve3D space
 derivative :: Curve3D space -> VectorCurve3D Meters space
 pointAt :: Number -> Curve3D space -> Point3D space

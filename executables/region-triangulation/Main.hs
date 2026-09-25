@@ -27,16 +27,13 @@ main = Tolerance.using Length.defaultTolerance do
   let p3 = Point2D (width - cornerRadius) height
   let p4 = Point2D.y height
   let holeCenter = Point2D (width - cornerRadius) (height - cornerRadius)
-  region <-
-    Region2D.boundedBy
-      [ Curve2D.lineFrom p0 p1
-      , Curve2D.lineFrom p1 p2
-      , Curve2D.arcFrom p2 p3 Angle.quarterTurn
-      , Curve2D.lineFrom p3 p4
-      , Curve2D.lineFrom p4 p0
-      , Curve2D.circle (Circle2D.withDiameter holeDiameter holeCenter)
-      ]
-      ?? fail
+  line01 <- Curve2D.lineFrom p0 p1 ?? fail
+  line12 <- Curve2D.lineFrom p1 p2 ?? fail
+  arc23 <- Curve2D.arcFrom p2 p3 Angle.quarterTurn ?? fail
+  line34 <- Curve2D.lineFrom p3 p4 ?? fail
+  line40 <- Curve2D.lineFrom p4 p0 ?? fail
+  hole <- Curve2D.circle (Circle2D.withDiameter holeDiameter holeCenter) ?? fail
+  region <- Region2D.boundedBy [line01, line12, arc23, line34, line40, hole] ?? fail
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   Svg.write "executables/region-triangulation/region.svg" (Svg.padding Length.centimeter) do
     Svg.regionWith [Svg.blackStroke, Svg.fillColor Color.lightGrey] resolution region

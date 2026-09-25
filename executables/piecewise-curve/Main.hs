@@ -3,7 +3,6 @@ module Main (main) where
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D qualified as Curve2D
-import OpenSolid.IO qualified as IO
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nonzero (Nonzero (Nonzero))
@@ -31,8 +30,7 @@ main = Tolerance.using Length.defaultTolerance do
   let radius = Length.centimeters 10.0
   let arc v1 v2 v3 = do
         let radialUnitVector = VectorCurve2D.quadraticBezier v1 v2 v3 / weightCurve
-        let curve = Curve2D.displacedFrom Point2D.origin (radius * radialUnitVector)
-        IO.succeed curve
+        Curve2D.displacedFrom Point2D.origin (radius * radialUnitVector) ?? fail
   arc1 <- arc vE vNE vN
   arc2 <- arc vN vNW vW
   arc3 <- arc vW vSW vS

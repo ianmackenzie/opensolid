@@ -45,7 +45,6 @@ import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as Curve.IntersectionPoint
-import OpenSolid.Curve.Intersections qualified as Curve.Intersections
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
@@ -64,7 +63,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nonzero qualified as Nonzero
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D (Point2D))
@@ -162,18 +160,15 @@ rectangle (Bounds2D xBounds yBounds) =
   if Interval.width xBounds ~= Quantity.zero || Interval.width yBounds ~= Quantity.zero
     then Err EmptyRegion
     else Ok do
+      let panic = error "Constructing region from non-empty rectangle should not fail"
       let Interval x1 x2 = xBounds
       let Interval y1 y2 = yBounds
       let p11 = Point2D x1 y1
       let p12 = Point2D x1 y2
       let p21 = Point2D x2 y1
       let p22 = Point2D x2 y2
-      let edges =
-            NonEmpty.four
-              (Curve2D.lineFrom p11 p21)
-              (Curve2D.lineFrom p21 p22)
-              (Curve2D.lineFrom p22 p12)
-              (Curve2D.lineFrom p12 p11)
+      let edge start end = Curve2D.lineFrom start end !! panic
+      let edges = NonEmpty.four (edge p11 p21) (edge p21 p22) (edge p22 p12) (edge p12 p11)
       unsafe (Boundary.unsafe edges) Bag2D.empty
 
 -- | Create a region from the given circle.
@@ -182,13 +177,14 @@ circle givenCircle =
   if Circle2D.diameter givenCircle ~= Quantity.zero
     then Err EmptyRegion
     else do
-      let edges = NonEmpty.one (Curve2D.circle givenCircle)
+      let panic = error "Constructing region from non-empty circle should not fail"
+      let edges = NonEmpty.one (Curve2D.circle givenCircle !! panic)
       Ok (unsafe (Boundary.unsafe edges) Bag2D.empty)
 
 -- | Create a region from the given polygon.
 polygon :: Tolerance units => Polygon2D units -> Result BoundedBy.Error (Region2D units)
 polygon givenPolygon = do
-  let toCurve (Line2D p1 p2) = if p1 ~= p2 then Nothing else Just (Curve2D.lineFrom p1 p2)
+  let toCurve (Line2D p1 p2) = Curve2D.lineFrom p1 p2 ?? Nothing
   boundedBy (NonEmpty.filterMap toCurve (Polygon2D.edges givenPolygon))
 
 {-| Fillet a region at the given corner points, with the given radius.
@@ -234,22 +230,22 @@ addFillet radius point curves = do
     [] -> couldNotFindPointToFillet
     List.One _ -> couldNotFindPointToFillet
     List.ThreeOrMore -> couldNotFindPointToFillet
-    List.Two firstCandidate secondCandidate -> do
-      firstCurve <- Curve.nonzero firstCandidate ?? fail
-      secondCurve <- Curve.nonzero secondCandidate ?? fail
-      let firstEndDirection = Curve2D.Nonzero.tangentDirectionAt 1.0 firstCurve
-      let secondStartDirection = Curve2D.Nonzero.tangentDirectionAt 0.0 secondCurve
+    List.Two firstCurve secondCurve -> do
+      firstNonzero <- Curve.nonzero firstCurve ?? fail
+      secondNonzero <- Curve.nonzero secondCurve ?? fail
+      let firstEndDirection = Curve2D.tangentDirectionAt 1.0 firstCurve
+      let secondStartDirection = Curve2D.tangentDirectionAt 0.0 secondCurve
       let cornerAngle = Direction2D.angleFrom firstEndDirection secondStartDirection
-      let offset = Quantity.sign cornerAngle * Quantity.abs radius
-      let firstOffsetCurve = Curve2D.Nonzero.offsetLeftwardBy offset firstCurve
-      let secondOffsetCurve = Curve2D.Nonzero.offsetLeftwardBy offset secondCurve
+      let offsetDistance = Quantity.sign cornerAngle * Quantity.abs radius
+      let offsetCurve curve =
+            Curve2D.Nonzero.offsetLeftwardBy offsetDistance curve
+              ?? couldNotSolveForFilletLocation
+      firstOffsetCurve <- offsetCurve firstNonzero
+      secondOffsetCurve <- offsetCurve secondNonzero
       case Curve2D.intersections firstOffsetCurve secondOffsetCurve of
-        Err Curve.Intersections.DegenerateCoincident{} -> couldNotSolveForFilletLocation
-        Err Curve.Intersections.DegenerateFirstOnSecond{} -> couldNotSolveForFilletLocation
-        Err Curve.Intersections.DegenerateSecondOnFirst{} -> couldNotSolveForFilletLocation
-        Ok Nothing -> couldNotSolveForFilletLocation
-        Ok (Just Curve.OverlappingSegments{}) -> couldNotSolveForFilletLocation
-        Ok (Just (Curve.IntersectionPoints intersectionPoints)) -> do
+        Nothing -> couldNotSolveForFilletLocation
+        Just Curve.OverlappingSegments{} -> couldNotSolveForFilletLocation
+        Just (Curve.IntersectionPoints intersectionPoints) -> do
           let intersection1 =
                 intersectionPoints
                   & NonEmpty.maximumBy Curve.IntersectionPoint.firstParameterValue
@@ -263,14 +259,14 @@ addFillet radius point curves = do
             else do
               let (t1, t2) = intersection1
               let centerPoint = Curve2D.pointAt t1 firstOffsetCurve
-              let startPoint = Curve2D.Nonzero.pointAt t1 firstCurve
+              let startPoint = Curve2D.pointAt t1 firstCurve
               let sweptAngle =
                     Direction2D.angleFrom
-                      (Curve2D.Nonzero.tangentDirectionAt t1 firstCurve)
-                      (Curve2D.Nonzero.tangentDirectionAt t2 secondCurve)
-              let filletArc = Curve2D.sweptArc centerPoint startPoint sweptAngle
-              let trimmedFirstCurve = Nonzero.unwrap firstCurve << Curve1D.interpolateFrom 0.0 t1
-              let trimmedSecondCurve = Nonzero.unwrap secondCurve << Curve1D.interpolateFrom t2 1.0
+                      (Curve2D.tangentDirectionAt t1 firstCurve)
+                      (Curve2D.tangentDirectionAt t2 secondCurve)
+              filletArc <- Curve2D.sweptArc centerPoint startPoint sweptAngle ?? fail
+              trimmedFirstCurve <- firstCurve << Curve1D.interpolateFrom 0.0 t1 ?? fail
+              trimmedSecondCurve <- secondCurve << Curve1D.interpolateFrom t2 1.0 ?? fail
               Ok (filletArc : trimmedFirstCurve : trimmedSecondCurve : otherCurves)
 
 curveIncidence :: Tolerance units => Point2D units -> Curve2D units -> (Curve2D units, Maybe Number)
@@ -309,18 +305,12 @@ checkCurvesForInnerIntersection ::
   Result BoundedBy.Error ()
 checkCurvesForInnerIntersection curve1 curve2 =
   case Curve2D.intersections curve1 curve2 of
-    -- We can ignore cases where either curve is actually a point,
-    -- since we'll still find any inner intersections
-    -- when we check with the *neighbours* of those degenerate curves
-    Err Curve.Intersections.DegenerateCoincident{} -> Ok ()
-    Err Curve.Intersections.DegenerateFirstOnSecond{} -> Ok ()
-    Err Curve.Intersections.DegenerateSecondOnFirst{} -> Ok ()
     -- Any overlap between boundary curves is bad
-    Ok (Just Curve.OverlappingSegments{}) -> Err BoundedBy.BoundaryIntersectsItself
+    Just Curve.OverlappingSegments{} -> Err BoundedBy.BoundaryIntersectsItself
     -- If there are no intersections at all then we're good!
-    Ok Nothing -> Ok ()
+    Nothing -> Ok ()
     -- Otherwise, make sure curves only intersect (meet) at endpoints
-    Ok (Just (Curve.IntersectionPoints intersectionPoints)) ->
+    Just (Curve.IntersectionPoints intersectionPoints) ->
       if NonEmpty.all isEndpointIntersection intersectionPoints
         then Ok ()
         else Err BoundedBy.BoundaryIntersectsItself
