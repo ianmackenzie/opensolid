@@ -119,7 +119,6 @@ import OpenSolid.Resolution (Resolution)
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction1D.Zeros qualified as SurfaceFunction1D.Zeros
-import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
@@ -617,7 +616,7 @@ medialAxis curve1 curve2 = do
         let radius :: SurfaceFunction1D units = Units.coerce do
               (d `dot_` d) ?/? Nonzero (2.0 * (tangentVector1 << SurfaceFunction1D.u) `cross` d)
         let offset1 = radius * normal1 << SurfaceFunction1D.u
-        let curve = curve1 << SurfaceFunction1D.u & SurfaceFunction2D.displaceBy offset1
+        let curve = curve1 << SurfaceFunction1D.u + offset1
         let toSegment solutionCurve =
               MedialAxis.Segment
                 { t1 = xCoordinate solutionCurve

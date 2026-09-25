@@ -371,8 +371,7 @@ on plane region = do
   let p0 = Point2D.placeOn plane centerPoint
   let vx = regionSize * Plane3D.xDirection plane
   let vy = regionSize * Plane3D.yDirection plane
-  let displacementFunction = SurfaceFunction1D.u * vx + SurfaceFunction1D.v * vy
-  let planeFunction = SurfaceFunction3D.displacedFrom p0 displacementFunction
+  let planeFunction = p0 + SurfaceFunction1D.u * vx + SurfaceFunction1D.v * vy
   parametric planeFunction normalizedRegion
 
 extruded ::
@@ -390,7 +389,7 @@ translational ::
 translational baseCurve translationCurve = do
   let baseFunction = baseCurve << SurfaceFunction1D.u
   let translationFunction = translationCurve << SurfaceFunction1D.v
-  let translationalFunction = baseFunction & SurfaceFunction3D.displaceBy translationFunction
+  let translationalFunction = baseFunction + translationFunction
   parametric translationalFunction UvRegion.unitSquare
 
 ruled ::
@@ -402,7 +401,7 @@ ruled bottom top = do
   let bottomFunction = bottom << SurfaceFunction1D.u
   let topFunction = top << SurfaceFunction1D.u
   let displacementFunction = SurfaceFunction1D.v * (topFunction - bottomFunction)
-  let ruledFunction = bottomFunction & SurfaceFunction3D.displaceBy displacementFunction
+  let ruledFunction = bottomFunction + displacementFunction
   parametric ruledFunction UvRegion.unitSquare
 
 revolved ::
@@ -420,11 +419,11 @@ revolved plane curve axis angle = do
   let radius = xCoordinate << SurfaceFunction1D.u
   let height = yCoordinate << SurfaceFunction1D.u
   let theta = angle * SurfaceFunction1D.v
-  let displacementFunction =
-        radius * SurfaceFunction1D.cos theta * Frame3D.rightwardDirection frame3D
+  let surfaceFunction =
+        frame3D.originPoint
+          + radius * SurfaceFunction1D.cos theta * Frame3D.rightwardDirection frame3D
           + radius * SurfaceFunction1D.sin theta * Frame3D.forwardDirection frame3D
           + height * Frame3D.upwardDirection frame3D
-  let surfaceFunction = SurfaceFunction3D.displacedFrom frame3D.originPoint displacementFunction
   parametric surfaceFunction UvRegion.unitSquare
 
 bounds :: Surface3D space -> Bounds3D space

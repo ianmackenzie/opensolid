@@ -2,7 +2,7 @@ module OpenSolid.SurfaceFunction3D
   ( SurfaceFunction3D
   , Compiled
   , new
-  , displacedFrom
+  , constant
   , pointAt
   , pointOn
   , range
@@ -17,7 +17,6 @@ module OpenSolid.SurfaceFunction3D
   , placeIn
   , relativeTo
   , transformBy
-  , displaceBy
   , flip
   )
 where
@@ -74,6 +73,48 @@ instance Space.Coercion (SurfaceFunction3D space1) (SurfaceFunction3D space2) wh
 
 instance
   space1 ~ space2 =>
+  Addition
+    (SurfaceFunction3D space1)
+    (VectorSurfaceFunction3D Meters space2)
+    (SurfaceFunction3D space1)
+  where
+  f + g =
+    new
+      (compiled f + VectorSurfaceFunction3D.compiled g)
+      (Pair.map2 (+) (partialDerivatives f) (VectorSurfaceFunction3D.partialDerivatives g))
+
+instance
+  space1 ~ space2 =>
+  Addition
+    (SurfaceFunction3D space1)
+    (Vector3D Meters space2)
+    (SurfaceFunction3D space1)
+  where
+  f + v = f + VectorSurfaceFunction3D.constant v
+
+instance
+  space1 ~ space2 =>
+  Subtraction
+    (SurfaceFunction3D space1)
+    (VectorSurfaceFunction3D Meters space2)
+    (SurfaceFunction3D space1)
+  where
+  f - g =
+    new
+      (compiled f - VectorSurfaceFunction3D.compiled g)
+      (Pair.map2 (-) (partialDerivatives f) (VectorSurfaceFunction3D.partialDerivatives g))
+
+instance
+  space1 ~ space2 =>
+  Subtraction
+    (SurfaceFunction3D space1)
+    (Vector3D Meters space2)
+    (SurfaceFunction3D space1)
+  where
+  f - v = f - VectorSurfaceFunction3D.constant v
+
+instance
+  space1 ~ space2 =>
   Subtraction
     (SurfaceFunction3D space1)
     (SurfaceFunction3D space2)
@@ -91,10 +132,7 @@ instance
     (Point3D space2)
     (VectorSurfaceFunction3D Meters space1)
   where
-  function - point =
-    VectorSurfaceFunction3D.new
-      (compiled function - CompiledFunction.constant point)
-      (partialDerivatives function)
+  function - point = function - constant point
 
 instance
   space1 ~ space2 =>
@@ -103,10 +141,7 @@ instance
     (SurfaceFunction3D space2)
     (VectorSurfaceFunction3D Meters space1)
   where
-  point - function =
-    VectorSurfaceFunction3D.new
-      (CompiledFunction.constant point - compiled function)
-      (Pair.map negate (partialDerivatives function))
+  point - function = constant point - function
 
 instance
   Composition
@@ -151,11 +186,11 @@ new givenCompiled givenPartialDerivatives =
           givenPartialDerivatives
     }
 
-displacedFrom :: Point3D space -> VectorSurfaceFunction3D Meters space -> SurfaceFunction3D space
-displacedFrom point displacementFunction =
+constant :: Point3D space -> SurfaceFunction3D space
+constant value =
   new
-    (CompiledFunction.constant point + VectorSurfaceFunction3D.compiled displacementFunction)
-    (VectorSurfaceFunction3D.partialDerivatives displacementFunction)
+    (CompiledFunction.constant value)
+    (VectorSurfaceFunction3D.zero, VectorSurfaceFunction3D.zero)
 
 {-# INLINE pointAt #-}
 pointAt :: UvPoint -> SurfaceFunction3D space -> Point3D space
@@ -262,20 +297,6 @@ placeIn frame function = do
 
 relativeTo :: Frame3D global local -> SurfaceFunction3D global -> SurfaceFunction3D local
 relativeTo frame = placeIn (Frame3D.inverse frame)
-
-displaceBy ::
-  VectorSurfaceFunction3D Meters space ->
-  SurfaceFunction3D space ->
-  SurfaceFunction3D space
-displaceBy displacementFunction surfaceFunction = do
-  let compiledOffset =
-        compiled surfaceFunction + VectorSurfaceFunction3D.compiled displacementFunction
-  let compiledPartialDerivatives =
-        Pair.map2
-          (+)
-          (partialDerivatives surfaceFunction)
-          (VectorSurfaceFunction3D.partialDerivatives displacementFunction)
-  new compiledOffset compiledPartialDerivatives
 
 flip :: SurfaceFunction3D space -> SurfaceFunction3D space
 flip function =

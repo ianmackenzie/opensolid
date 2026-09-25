@@ -10,7 +10,6 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.World3D qualified as World3D
@@ -25,11 +24,11 @@ main = Tolerance.using Length.defaultTolerance do
         Curve1D.interpolateFrom (Angle.degrees 45.0) (Angle.degrees 315.0) << SurfaceFunction1D.u
   let phi = Angle.twoPi * SurfaceFunction1D.v
   let r = majorRadius + minorRadius * SurfaceFunction1D.cos phi
-  let displacementFunction =
-        r * SurfaceFunction1D.cos theta * World3D.rightwardDirection
+  let surfaceFunction =
+        World3D.originPoint
+          + r * SurfaceFunction1D.cos theta * World3D.rightwardDirection
           + r * SurfaceFunction1D.sin theta * World3D.forwardDirection
           + minorRadius * SurfaceFunction1D.sin phi * World3D.upwardDirection
-  let surfaceFunction = SurfaceFunction3D.displacedFrom World3D.originPoint displacementFunction
   surface <- Surface3D.parametric surfaceFunction UvRegion.unitSquare ?? fail
   body <- Body3D.boundedBy [surface] ?? fail
   let resolution = Resolution.maxSize (Length.centimeters 20.0)

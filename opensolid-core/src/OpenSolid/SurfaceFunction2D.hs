@@ -3,7 +3,6 @@ module OpenSolid.SurfaceFunction2D
   , Compiled
   , new
   , constant
-  , displacedFrom
   , uv
   , xy
   , pointAt
@@ -16,7 +15,6 @@ module OpenSolid.SurfaceFunction2D
   , yCoordinate
   , coordinates
   , transformBy
-  , displaceBy
   )
 where
 
@@ -67,6 +65,27 @@ instance Units.Coercion (SurfaceFunction2D units1) (SurfaceFunction2D units2) wh
       { compiled = Units.coerce function.compiled
       , partialDerivatives = Pair.map Units.coerce function.partialDerivatives
       }
+
+instance
+  units1 ~ units2 =>
+  Addition
+    (SurfaceFunction2D units1)
+    (VectorSurfaceFunction2D units2)
+    (SurfaceFunction2D units1)
+  where
+  f + g =
+    new
+      (compiled f + VectorSurfaceFunction2D.compiled g)
+      (Pair.map2 (+) (partialDerivatives f) (VectorSurfaceFunction2D.partialDerivatives g))
+
+instance
+  units1 ~ units2 =>
+  Addition
+    (SurfaceFunction2D units1)
+    (Vector2D units2)
+    (SurfaceFunction2D units1)
+  where
+  f + v = f + VectorSurfaceFunction2D.constant v
 
 instance
   units1 ~ units2 =>
@@ -135,9 +154,6 @@ new givenCompiled givenPartialDerivatives = do
 constant :: Point2D units -> SurfaceFunction2D units
 constant value =
   new (CompiledFunction.constant value) (VectorSurfaceFunction2D.zero, VectorSurfaceFunction2D.zero)
-
-displacedFrom :: Point2D units -> VectorSurfaceFunction2D units -> SurfaceFunction2D units
-displacedFrom point displacementFunction = constant point & displaceBy displacementFunction
 
 uv :: SurfaceFunction2D Unitless
 uv = xy SurfaceFunction1D.u SurfaceFunction1D.v
@@ -288,14 +304,3 @@ yCoordinate function = do
 
 coordinates :: SurfaceFunction2D units -> (SurfaceFunction1D units, SurfaceFunction1D units)
 coordinates function = (xCoordinate function, yCoordinate function)
-
-displaceBy :: VectorSurfaceFunction2D units -> SurfaceFunction2D units -> SurfaceFunction2D units
-displaceBy displacementFunction surfaceFunction = do
-  let compiledOffset =
-        compiled surfaceFunction + VectorSurfaceFunction2D.compiled displacementFunction
-  let compiledPartialDerivatives =
-        Pair.map2
-          (+)
-          (partialDerivatives surfaceFunction)
-          (VectorSurfaceFunction2D.partialDerivatives displacementFunction)
-  new compiledOffset compiledPartialDerivatives
