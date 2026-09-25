@@ -5,6 +5,7 @@ module OpenSolid.UvRegion
   , rectangle
   , circle
   , flip
+  , flipAxis
   , classify
   , classifyBounds
   )
@@ -58,7 +59,10 @@ circle :: Circle2D Unitless -> Result Region2D.EmptyRegion UvRegion
 circle = unitless Region2D.circle
 
 flip :: UvRegion -> UvRegion
-flip = Region2D.mirrorAcross (Axis2D (UvPoint.bottom 0.5) Direction2D.y)
+flip = Region2D.mirrorAcross flipAxis
+
+flipAxis :: Axis2D Unitless
+flipAxis = Axis2D (UvPoint.bottom 0.5) Direction2D.y
 
 classify :: UvPoint -> UvRegion -> Region2D.Classification
 classify = unitless Region2D.classify
