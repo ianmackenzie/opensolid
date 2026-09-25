@@ -5,6 +5,7 @@ module OpenSolid.Result
   , map2
   , orFail
   , collect
+  , sequence
   , forEach
   , foldl
   , foldr
@@ -34,6 +35,9 @@ orFail (Err err) = Prelude.fail (Prelude.show err)
 
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
 collect = Prelude.mapM
+
+sequence :: Traversable list => list (Result x a) -> Result x (list a)
+sequence = Prelude.sequence
 
 foldl :: Foldable list => (b -> a -> Result x b) -> b -> list a -> Result x b
 foldl = Data.Foldable.foldlM
