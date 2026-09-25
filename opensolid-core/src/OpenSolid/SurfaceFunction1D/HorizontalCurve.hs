@@ -11,7 +11,6 @@ import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve1D qualified as Curve1D
-import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D (Direction2D))
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
@@ -29,6 +28,7 @@ import OpenSolid.SurfaceFunction1D.ImplicitCurveRange qualified as ImplicitCurve
 import OpenSolid.SurfaceFunction1D.Internal qualified as Internal
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvCurve (UvCurve)
+import {-# SOURCE #-} OpenSolid.UvCurve qualified as UvCurve
 import OpenSolid.UvPoint (data UvPoint)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
@@ -130,4 +130,4 @@ horizontalCurve f dvdu uStart uEnd boxes monotonicity boundingAxes = do
   recursive \self -> do
     let dudt = Curve1D.constant (uEnd - uStart)
     let dvdt = dudt * dvdu << self
-    Curve2D.new (CompiledFunction.abstract value range) (VectorCurve2D.xy dudt dvdt)
+    UvCurve.new (CompiledFunction.abstract value range) (VectorCurve2D.xy dudt dvdt)

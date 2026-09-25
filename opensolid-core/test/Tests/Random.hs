@@ -146,13 +146,13 @@ arc2D = Tolerance.using Length.defaultTolerance do
   let sweptAngle = angleSign * angleMagnitude
   Random.return (Curve2D.arcFrom startPoint endPoint sweptAngle)
 
-quadraticSpline2D :: Generator (Curve2D Meters)
+quadraticSpline2D :: Tolerance Meters => Generator (Curve2D Meters)
 quadraticSpline2D = Random.map3 Curve2D.quadraticBezier point2D point2D point2D
 
-cubicSpline2D :: Generator (Curve2D Meters)
+cubicSpline2D :: Tolerance Meters => Generator (Curve2D Meters)
 cubicSpline2D = Random.map4 Curve2D.cubicBezier point2D point2D point2D point2D
 
-involute2D :: Generator (Curve2D Meters)
+involute2D :: Tolerance Meters => Generator (Curve2D Meters)
 involute2D = do
   centerPoint <- point2D
   radialVector <- vector2D
@@ -168,10 +168,10 @@ line3D = Tolerance.using Length.defaultTolerance do
 arc3D :: Generator (Curve3D space)
 arc3D = Random.map2 Curve2D.placeOn plane3D arc2D
 
-quadraticSpline3D :: Generator (Curve3D Meters)
+quadraticSpline3D :: Tolerance Meters => Generator (Curve3D Meters)
 quadraticSpline3D = Random.map3 Curve3D.quadraticBezier point3D point3D point3D
 
-cubicSpline3D :: Generator (Curve3D Meters)
+cubicSpline3D :: Tolerance Meters => Generator (Curve3D Meters)
 cubicSpline3D = Random.map4 Curve3D.cubicBezier point3D point3D point3D point3D
 
 translation2D :: Generator (Transform2D.Rigid Meters)

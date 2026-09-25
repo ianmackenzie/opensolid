@@ -1505,16 +1505,16 @@ type Curve2D = Curve2D.Curve2D Meters
 curve2D :: Class
 curve2D =
   Class.new @Curve2D $(docs ''Curve2D.Curve2D) $
-    [ Class.factory2 "XY" "X Coordinate" "Y Coordinate" Curve2D.xy $(docs 'Curve2D.xy)
-    , Class.factory1 "Line" "Line" Curve2D.line $(docs 'Curve2D.line)
-    , Class.factory2 "Line From" "Start Point" "End Point" Curve2D.lineFrom $(docs 'Curve2D.lineFrom)
+    [ Class.factoryT2 "XY" "X Coordinate" "Y Coordinate" Curve2D.xy $(docs 'Curve2D.xy)
+    , Class.factoryT1 "Line" "Line" Curve2D.line $(docs 'Curve2D.line)
+    , Class.factoryT2 "Line From" "Start Point" "End Point" Curve2D.lineFrom $(docs 'Curve2D.lineFrom)
     , Class.factoryT3 "Arc From" "Start Point" "End Point" "Swept Angle" Curve2D.arcFrom $(docs 'Curve2D.arcFrom)
-    , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2D.polarArc $(docs 'Curve2D.polarArc)
-    , Class.factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2D.sweptArc $(docs 'Curve2D.sweptArc)
+    , Class.factoryT4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2D.polarArc $(docs 'Curve2D.polarArc)
+    , Class.factoryT3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2D.sweptArc $(docs 'Curve2D.sweptArc)
     , Class.factoryT4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2D.cornerArc $(docs 'Curve2D.cornerArc)
-    , Class.factory1 "Circle" "Circle" Curve2D.circle $(docs 'Curve2D.circle)
-    , Class.factory1 "Bezier" "Control Points" Curve2D.bezier $(docs 'Curve2D.bezier)
-    , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
+    , Class.factoryT1 "Circle" "Circle" Curve2D.circle $(docs 'Curve2D.circle)
+    , Class.factoryT1 "Bezier" "Control Points" Curve2D.bezier $(docs 'Curve2D.bezier)
+    , Class.factoryT4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
     , Class.property "Start Point" (Curve2D.startPoint) "The start point of the curve."
     , Class.property "End Point" (Curve2D.endPoint) "The end point of the curve."
     , Class.member1 "Point" "Parameter Value" Curve2D.pointAt $(docs 'Curve2D.pointAt)
@@ -1532,16 +1532,16 @@ type UvCurve = UvCurve.UvCurve
 uvCurve :: Class
 uvCurve =
   Class.new @UvCurve "A curve in UV parameter space." $
-    [ Class.factory2 "UV" "U Coordinate" "V Coordinate" Curve2D.xy $(docs 'Curve2D.xy)
-    , Class.factory1 "Line" "Line" Curve2D.line $(docs 'Curve2D.line)
+    [ Class.factory2 "UV" "U Coordinate" "V Coordinate" (unitless Curve2D.xy) $(docs 'Curve2D.xy)
+    , Class.factory1 "Line" "Line" (unitless Curve2D.line) $(docs 'Curve2D.line)
     , Class.factory2 "Line From" "Start Point" "End Point" UvCurve.lineFrom $(docs 'UvCurve.lineFrom)
     , Class.factory3 "Arc From" "Start Point" "End Point" "Swept Angle" UvCurve.arcFrom $(docs 'UvCurve.arcFrom)
-    , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2D.polarArc $(docs 'Curve2D.polarArc)
-    , Class.factory1 "Circle" "Circle" Curve2D.circle $(docs 'Curve2D.circle)
-    , Class.factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2D.sweptArc $(docs 'Curve2D.sweptArc)
+    , Class.factory4 "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" (unitless Curve2D.polarArc) $(docs 'Curve2D.polarArc)
+    , Class.factory1 "Circle" "Circle" (unitless Curve2D.circle) $(docs 'Curve2D.circle)
+    , Class.factory3 "Swept Arc" "Center Point" "Start Point" "Swept Angle" (unitless Curve2D.sweptArc) $(docs 'Curve2D.sweptArc)
     , Class.factory4 "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" UvCurve.cornerArc $(docs 'UvCurve.cornerArc)
-    , Class.factory1 "Bezier" "Control Points" Curve2D.bezier $(docs 'Curve2D.bezier)
-    , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
+    , Class.factory1 "Bezier" "Control Points" (unitless Curve2D.bezier) $(docs 'Curve2D.bezier)
+    , Class.factory4 "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" (unitless Curve2D.hermite) $(docs 'Curve2D.hermite)
     , Class.property "Start Point" (Curve2D.startPoint) "The start point of the curve."
     , Class.property "End Point" (Curve2D.endPoint) "The end point of the curve."
     , Class.member1 "Point" "Parameter Value" Curve2D.pointAt $(docs 'Curve2D.pointAt)

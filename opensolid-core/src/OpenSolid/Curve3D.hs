@@ -73,16 +73,16 @@ type Compiled space = Curve.Compiled 3 Meters space
 
 type Segment space = Curve.Segment 3 Meters space
 
-new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
+new :: Tolerance Meters => Compiled space -> VectorCurve3D Meters space -> Curve3D space
 new = Curve.new
 
 on :: Plane3D space -> Curve2D Meters -> Curve3D space
 on = Curve.placeOn
 
-line :: Line3D space -> Curve3D space
+line :: Tolerance Meters => Line3D space -> Curve3D space
 line = Curve.line
 
-lineFrom :: Point3D space -> Point3D space -> Curve3D space
+lineFrom :: Tolerance Meters => Point3D space -> Point3D space -> Curve3D space
 lineFrom = Curve.lineFrom
 
 {-| Construct a Bezier curve from its control points. For example,
@@ -91,15 +91,26 @@ lineFrom = Curve.lineFrom
 
 will return a cubic Bezier curve with the given four control points.
 -}
-bezier :: NonEmpty (Point3D space) -> Curve3D space
+bezier :: Tolerance Meters => NonEmpty (Point3D space) -> Curve3D space
 bezier = Curve.bezier
 
 -- | Construct a quadratic Bezier curve from the given control points.
-quadraticBezier :: Point3D space -> Point3D space -> Point3D space -> Curve3D space
+quadraticBezier ::
+  Tolerance Meters =>
+  Point3D space ->
+  Point3D space ->
+  Point3D space ->
+  Curve3D space
 quadraticBezier = Curve.quadraticBezier
 
 -- | Construct a cubic Bezier curve from the given control points.
-cubicBezier :: Point3D space -> Point3D space -> Point3D space -> Point3D space -> Curve3D space
+cubicBezier ::
+  Tolerance Meters =>
+  Point3D space ->
+  Point3D space ->
+  Point3D space ->
+  Point3D space ->
+  Curve3D space
 cubicBezier = Curve.cubicBezier
 
 {-| Construct a Bezier curve with the given start point, start derivatives, end point and end
@@ -120,6 +131,7 @@ In general, the degree of the resulting spline will be equal to 1 plus the total
 derivatives given.
 -}
 hermite ::
+  Tolerance Meters =>
   Point3D space ->
   List (Vector3D Meters space) ->
   Point3D space ->
@@ -223,7 +235,7 @@ placeIn frame curve = do
           (Point3D.placeIn frame)
           (Bounds3D.placeIn frame)
           (compiled curve)
-  new compiledPlaced (VectorCurve3D.placeIn frame (derivative curve))
+  Curve.unsafe compiledPlaced (VectorCurve3D.placeIn frame (derivative curve))
 
 relativeTo :: Frame3D global local -> Curve3D global -> Curve3D local
 relativeTo frame curve = placeIn (Frame3D.inverse frame) curve

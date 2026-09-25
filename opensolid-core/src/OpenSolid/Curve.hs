@@ -13,6 +13,7 @@ module OpenSolid.Curve
   , HasDegeneracy (HasDegeneracy)
   , IsDegenerateAndCoincidentWithPoint (IsDegenerateAndCoincidentWithPoint)
   , new
+  , unsafe
   , displacedFrom
   , line
   , lineFrom
@@ -136,6 +137,7 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.Text qualified as Text
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform (Transform, TransformExists)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform.Tag qualified as Transform.Tag
@@ -322,7 +324,7 @@ instance
     let composedDerivative = dfdu * dudt + dfdv * dvdt
     VectorCurve3D.new compiledComposed composedDerivative
 
-instance Composition () (SurfaceFunction3D space) UvCurve (Curve3D space) where
+instance Composition (Tolerance Meters) (SurfaceFunction3D space) UvCurve (Curve3D space) where
   f << g = do
     let (dfdu, dfdv) = Pair.map (<< g) (SurfaceFunction3D.partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (derivative g)
@@ -366,7 +368,7 @@ intersectsPoint givenPoint curve = case nondegenerate curve of
 
 instance
   CurveExists dimension units space =>
-  Composition () (Curve dimension units space) (Curve1D Unitless) (Curve dimension units space)
+  Composition (Tolerance units) (Curve dimension units space) (Curve1D Unitless) (Curve dimension units space)
   where
   f << g = new (compiled f << Curve1D.compiled g) ((derivative f << g) * Curve1D.derivative g)
 
@@ -472,11 +474,18 @@ instance CurveExists 3 Meters space where
   tangentSolver = Curve.TangentSolver3D.solver
 
 new ::
+  (CurveExists dimension units space, Tolerance units) =>
+  Compiled dimension units space ->
+  VectorCurve dimension units space ->
+  Curve dimension units space
+new givenCompiled givenDerivative = unsafe givenCompiled givenDerivative
+
+unsafe ::
   CurveExists dimension units space =>
   Compiled dimension units space ->
   VectorCurve dimension units space ->
   Curve dimension units space
-new givenCompiled givenDerivative =
+unsafe givenCompiled givenDerivative =
   recursive \curve ->
     Curve
       { compiled = givenCompiled
@@ -500,7 +509,7 @@ buildArcLengthParameterization (Nondegenerate curve) = do
   ArcLength.parameterization dsdt d2sdt2
 
 displacedFrom ::
-  CurveExists dimension units space =>
+  (CurveExists dimension units space, Tolerance units) =>
   Point dimension units space ->
   VectorCurve dimension units space ->
   Curve dimension units space
@@ -510,20 +519,20 @@ displacedFrom point displacementCurve =
     (VectorCurve.derivative displacementCurve)
 
 line ::
-  CurveExists dimension units space =>
+  (CurveExists dimension units space, Tolerance units) =>
   Line dimension units space ->
   Curve dimension units space
 line (Line p1 p2) = lineFrom p1 p2
 
 lineFrom ::
-  CurveExists dimension units space =>
+  (CurveExists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Point dimension units space ->
   Curve dimension units space
 lineFrom p1 p2 = bezier (NonEmpty.two p1 p2)
 
 bezier ::
-  CurveExists dimension units space =>
+  (CurveExists dimension units space, Tolerance units) =>
   NonEmpty (Point dimension units space) ->
   Curve dimension units space
 bezier controlPoints = do
@@ -532,7 +541,7 @@ bezier controlPoints = do
   new compiledBezier bezierDerivative
 
 quadraticBezier ::
-  CurveExists dimension units space =>
+  (CurveExists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Point dimension units space ->
   Point dimension units space ->
@@ -540,7 +549,7 @@ quadraticBezier ::
 quadraticBezier p1 p2 p3 = bezier (NonEmpty.three p1 p2 p3)
 
 cubicBezier ::
-  CurveExists dimension units space =>
+  (CurveExists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Point dimension units space ->
   Point dimension units space ->
@@ -549,7 +558,7 @@ cubicBezier ::
 cubicBezier p1 p2 p3 p4 = bezier (NonEmpty.four p1 p2 p3 p4)
 
 hermite ::
-  CurveExists dimension units space =>
+  (CurveExists dimension units space, Tolerance units) =>
   Point dimension units space ->
   List (Vector dimension units space) ->
   Point dimension units space ->
@@ -730,17 +739,18 @@ desingularizeStart ::
   Vector dimension units space ->
   Curve dimension units space ->
   (Curve dimension units space, Curve dimension units space)
-desingularizeStart givenStartPoint givenStartDerivative curve = do
-  let tInner = affixWidth
-  let prefix =
-        hermite
-          givenStartPoint
-          [affixWidth * givenStartDerivative]
-          (pointAt tInner curve)
-          [ affixWidth * derivativeAt tInner curve
-          , affixWidth * affixWidth * secondDerivativeAt tInner curve
-          ]
-  (prefix, curve << Curve1D.interpolateFrom tInner 1.0)
+desingularizeStart givenStartPoint givenStartDerivative curve =
+  Tolerance.using Quantity.zero do
+    let tInner = affixWidth
+    let prefix =
+          hermite
+            givenStartPoint
+            [affixWidth * givenStartDerivative]
+            (pointAt tInner curve)
+            [ affixWidth * derivativeAt tInner curve
+            , affixWidth * affixWidth * secondDerivativeAt tInner curve
+            ]
+    (prefix, curve << Curve1D.interpolateFrom tInner 1.0)
 
 desingularizeEnd ::
   CurveExists dimension units space =>
@@ -748,17 +758,18 @@ desingularizeEnd ::
   Point dimension units space ->
   Vector dimension units space ->
   (Curve dimension units space, Curve dimension units space)
-desingularizeEnd curve givenEndPoint givenEndDerivative = do
-  let tInner = 1.0 - affixWidth
-  let suffix =
-        hermite
-          (pointAt tInner curve)
-          [ affixWidth * derivativeAt tInner curve
-          , affixWidth * affixWidth * secondDerivativeAt tInner curve
-          ]
-          givenEndPoint
-          [affixWidth * givenEndDerivative]
-  (curve << Curve1D.interpolateFrom 0.0 tInner, suffix)
+desingularizeEnd curve givenEndPoint givenEndDerivative =
+  Tolerance.using Quantity.zero do
+    let tInner = 1.0 - affixWidth
+    let suffix =
+          hermite
+            (pointAt tInner curve)
+            [ affixWidth * derivativeAt tInner curve
+            , affixWidth * affixWidth * secondDerivativeAt tInner curve
+            ]
+            givenEndPoint
+            [affixWidth * givenEndDerivative]
+    (curve << Curve1D.interpolateFrom 0.0 tInner, suffix)
 
 findPoint ::
   (CurveExists dimension units space, Tolerance units) =>
@@ -962,6 +973,7 @@ placeOn plane curve =
 
 displaceBy ::
   ( CurveExists dimension1 units1 space1
+  , Tolerance units1
   , dimension1 ~ dimension2
   , space1 ~ space2
   , units1 ~ units2

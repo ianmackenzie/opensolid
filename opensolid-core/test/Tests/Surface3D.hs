@@ -15,6 +15,7 @@ import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
+import OpenSolid.UvCurve qualified as UvCurve
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -64,7 +65,7 @@ findPole = Test.check 100 "findPole" do
   let solutions = Surface3D.findPoint point surface
   case solutions of
     [SurfacePoint3D.Pole (Nondegenerate poleCurve) _] -> do
-      let expectedPoleCurve = Curve2D.lineFrom (UvPoint 1.0 0.0) (UvPoint 1.0 1.0)
+      let expectedPoleCurve = UvCurve.lineFrom (UvPoint 1.0 0.0) (UvPoint 1.0 1.0)
       Test.expect (poleCurve ~~ expectedPoleCurve)
     _ ->
       Test.fail "Expected a single solution"

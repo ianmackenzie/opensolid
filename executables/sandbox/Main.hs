@@ -316,7 +316,7 @@ testBezierSegment = do
   Svg.write "executables/sandbox/test-bezier-segment.svg" (Svg.viewBox drawingBounds) curveEntity
 
 testHermiteBezier :: IO ()
-testHermiteBezier = do
+testHermiteBezier = Tolerance.using Length.defaultTolerance do
   let startPoint = Point2D.origin @Meters
   let startDerivatives = [Vector2D.centimeters 10.0 10.0]
   let endDerivatives = [Vector2D.centimeters 0.0 -10.0, Vector2D.zero]

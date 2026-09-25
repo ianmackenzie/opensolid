@@ -38,13 +38,14 @@ testLineLength = Tolerance.using (Length.meters 1e-6) do
   testCurve "Line" (Curve2D.lineFrom Point2D.origin (Point2D.centimeters 30.0 40.0))
 
 testQuadraticSplineLength :: IO ()
-testQuadraticSplineLength = do
-  let p1 = Point2D.origin
-  let p2 = Point2D.centimeters 20.0 30.0
-  let p3 = Point2D.centimeters 40.0 0.0
-  let spline = Curve2D.quadraticBezier p1 p2 p3
-  testCurve "Quadratic spline" spline
-  IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
+testQuadraticSplineLength =
+  Tolerance.using Length.defaultTolerance do
+    let p1 = Point2D.origin
+    let p2 = Point2D.centimeters 20.0 30.0
+    let p3 = Point2D.centimeters 40.0 0.0
+    let spline = Curve2D.quadraticBezier p1 p2 p3
+    testCurve "Quadratic spline" spline
+    IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
 
 analyticalLength :: Point2D Meters -> Point2D Meters -> Point2D Meters -> Length
 analyticalLength (Point2D x0 y0) (Point2D x1 y1) (Point2D x2 y2) = do

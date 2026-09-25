@@ -212,7 +212,7 @@ transformBy transform function = do
         VectorSurfaceFunction2D.transformBy (Transform2D.vectorTransform transform)
   new compiledTransformed (Pair.map transformDerivative function.partialDerivatives)
 
-instance Composition () (SurfaceFunction2D units) UvCurve (Curve2D units) where
+instance Composition (Tolerance units) (SurfaceFunction2D units) UvCurve (Curve2D units) where
   f << g = do
     let (dfdu, dfdv) = Pair.map (<< g) (partialDerivatives f)
     let (dudt, dvdt) = VectorCurve2D.components (Curve2D.derivative g)

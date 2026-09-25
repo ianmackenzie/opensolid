@@ -41,7 +41,7 @@ instance
     (SurfaceFunction2D units2)
     (VectorSurfaceFunction2D units1)
 
-instance Composition () (SurfaceFunction2D units) UvCurve (Curve2D units)
+instance Composition (Tolerance units) (SurfaceFunction2D units) UvCurve (Curve2D units)
 
 instance
   Composition

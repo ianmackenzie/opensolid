@@ -76,6 +76,7 @@ import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
+import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Region2D.Boundary qualified as Region2D.Boundary
@@ -93,6 +94,7 @@ import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfacePoint3D (SurfacePoint3D)
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D))
+import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvCurve qualified as UvCurve
@@ -319,6 +321,7 @@ divergence surfaceFunction uvPoint = do
   Vector3D.divergence duValue dvValue
 
 buildBoundaries ::
+  Tolerance Meters =>
   SurfaceFunction3D space ->
   UvRegion ->
   (Boundary space, Bag3D space (Boundary space))
@@ -436,7 +439,12 @@ flip :: Surface3D space -> Surface3D space
 flip surface = recursive \flippedSurface -> do
   let flippedFunction = SurfaceFunction3D.flip surface.function
   let flippedDomain = UvRegion.flip surface.domain
-  let (flippedOuterBoundary, flippedInnerBoundaries) = buildBoundaries flippedFunction flippedDomain
+  let (flippedOuterBoundary, flippedInnerBoundaries) =
+        -- TODO figure out a nicer approach here?
+        -- In general buildBoundaries *should* take a tolerance and return a Result
+        -- (and therefore ensure that all boundary curves are nondegenerate),
+        -- but here we know that it should always succeed
+        Tolerance.using Quantity.zero (buildBoundaries flippedFunction flippedDomain)
   Surface3D
     { function = flippedFunction
     , domain = flippedDomain

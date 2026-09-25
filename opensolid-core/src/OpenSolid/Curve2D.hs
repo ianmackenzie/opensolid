@@ -136,11 +136,11 @@ type Compiled units = Curve.Compiled 2 units Void
 
 type Segment units = Curve.Segment 2 units Void
 
-new :: Compiled units -> VectorCurve2D units -> Curve2D units
+new :: Tolerance units => Compiled units -> VectorCurve2D units -> Curve2D units
 new = Curve.new
 
 -- | Create a curve from its X and Y coordinate curves.
-xy :: Curve1D units -> Curve1D units -> Curve2D units
+xy :: Tolerance units => Curve1D units -> Curve1D units -> Curve2D units
 xy x y = do
   let compiledX = Curve1D.compiled x
   let compiledY = Curve1D.compiled y
@@ -148,18 +148,18 @@ xy x y = do
   let xyDerivative = VectorCurve2D.xy (Curve1D.derivative x) (Curve1D.derivative y)
   new compiledXY xyDerivative
 
-displacedFrom :: Point2D units -> VectorCurve2D units -> Curve2D units
+displacedFrom :: Tolerance units => Point2D units -> VectorCurve2D units -> Curve2D units
 displacedFrom = Curve.displacedFrom
 
 -- | Convert a line to a curve.
-line :: Line2D units -> Curve2D units
+line :: Tolerance units => Line2D units -> Curve2D units
 line = Curve.line
 
 -- | Create a line between two points.
-lineFrom :: Point2D units -> Point2D units -> Curve2D units
+lineFrom :: Tolerance units => Point2D units -> Point2D units -> Curve2D units
 lineFrom = Curve.lineFrom
 
-arc :: Arc2D units -> Curve2D units
+arc :: Tolerance units => Arc2D units -> Curve2D units
 arc givenArc =
   polarArc
     (#centerPoint (Arc2D.centerPoint givenArc))
@@ -196,6 +196,7 @@ arcFrom givenStartPoint givenEndPoint sweptAngle =
 
 -- | Create an arc with the given center point, radius, start angle and end angle.
 polarArc ::
+  Tolerance units =>
   ("centerPoint" ::: Point2D units) ->
   ("radius" ::: Quantity units) ->
   ("startAngle" ::: Angle) ->
@@ -212,7 +213,7 @@ polarArc
 
 The start point will be swept around the center point by the given angle.
 -}
-sweptArc :: Point2D units -> Point2D units -> Angle -> Curve2D units
+sweptArc :: Tolerance units => Point2D units -> Point2D units -> Angle -> Curve2D units
 sweptArc centerPoint givenStartPoint sweptAngle = do
   let radius = Point2D.distanceFrom centerPoint givenStartPoint
   let startAngle = Point2D.angleFrom centerPoint givenStartPoint
@@ -286,6 +287,7 @@ radiusArc givenRadius givenStartPoint givenEndPoint whichArc =
       lineFrom givenStartPoint givenEndPoint
 
 ellipticalArc ::
+  Tolerance units =>
   Frame2D units ->
   Quantity units ->
   Quantity units ->
@@ -299,6 +301,7 @@ ellipticalArc axes xRadius yRadius startAngle endAngle = do
   customArc centerPoint xVector yVector startAngle endAngle
 
 customArc ::
+  Tolerance units =>
   Point2D units ->
   Vector2D units ->
   Vector2D units ->
@@ -308,7 +311,7 @@ customArc ::
 customArc p0 v1 v2 a b = displacedFrom p0 (VectorCurve2D.arc v1 v2 a b)
 
 -- | Create a curve from the given circle.
-circle :: Circle2D units -> Curve2D units
+circle :: Tolerance units => Circle2D units -> Curve2D units
 circle givenCircle =
   polarArc
     (#centerPoint (Circle2D.centerPoint givenCircle))
@@ -320,7 +323,7 @@ circle givenCircle =
 The first radius given will be the radius along the X axis,
 and the second radius will be the radius along the Y axis.
 -}
-ellipse :: Frame2D units -> Quantity units -> Quantity units -> Curve2D units
+ellipse :: Tolerance units => Frame2D units -> Quantity units -> Quantity units -> Curve2D units
 ellipse axes xRadius yRadius = ellipticalArc axes xRadius yRadius Angle.zero Angle.twoPi
 
 {-| Construct a Bezier curve from its control points.
@@ -331,11 +334,12 @@ For example,
 
 will return a cubic Bezier curve with the given four control points.
 -}
-bezier :: NonEmpty (Point2D units) -> Curve2D units
+bezier :: Tolerance units => NonEmpty (Point2D units) -> Curve2D units
 bezier = Curve.bezier
 
 -- | Construct a quadratic Bezier curve from the given control points.
 quadraticBezier ::
+  Tolerance units =>
   Point2D units ->
   Point2D units ->
   Point2D units ->
@@ -344,6 +348,7 @@ quadraticBezier = Curve.quadraticBezier
 
 -- | Construct a cubic Bezier curve from the given control points.
 cubicBezier ::
+  Tolerance units =>
   Point2D units ->
   Point2D units ->
   Point2D units ->
@@ -370,6 +375,7 @@ In general, the degree of the resulting spline will be equal to 1 plus the total
 derivatives given.
 -}
 hermite ::
+  Tolerance units =>
   Point2D units ->
   List (Vector2D units) ->
   Point2D units ->
@@ -377,7 +383,7 @@ hermite ::
   Curve2D units
 hermite = Curve.hermite
 
-involute :: Point2D units -> Vector2D units -> Angle -> Angle -> Curve2D units
+involute :: Tolerance units => Point2D units -> Vector2D units -> Angle -> Angle -> Curve2D units
 involute centerPoint radialVector startAngle endAngle =
   displacedFrom centerPoint $
     involuteVector 0 radialVector (Vector2D.rotateLeft radialVector) startAngle endAngle
@@ -541,7 +547,7 @@ placeIn frame curve = do
           (Point2D.placeIn frame)
           (Bounds2D.placeIn frame)
           (compiled curve)
-  new compiledPlaced (VectorCurve2D.placeIn frame (derivative curve))
+  Curve.unsafe compiledPlaced (VectorCurve2D.placeIn frame (derivative curve))
 
 relativeTo :: Frame2D units -> Curve2D units -> Curve2D units
 relativeTo frame = placeIn (Frame2D.inverse frame)
@@ -777,5 +783,5 @@ piecewiseDerivativeRange tree s1 s2 = case tree of
     let rRange = Interval (s1 / segmentLength) (s2 / segmentLength)
     VectorCurve2D.range rRange curve
 
-displaceBy :: VectorCurve2D units -> Curve2D units -> Curve2D units
+displaceBy :: Tolerance units => VectorCurve2D units -> Curve2D units -> Curve2D units
 displaceBy = Curve.displaceBy

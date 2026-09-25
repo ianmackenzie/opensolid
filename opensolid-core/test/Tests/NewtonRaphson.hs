@@ -42,7 +42,7 @@ quadratic1D =
   curve1D "Quadratic" (Curve1D.squared Curve1D.t - 2.0) 1.0 (Number.sqrt 2.0)
 
 arc2D :: Test
-arc2D = do
+arc2D = unitless do
   let arc =
         Curve2D.polarArc
           (#centerPoint Point2D.origin)

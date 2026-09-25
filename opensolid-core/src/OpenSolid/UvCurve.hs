@@ -1,5 +1,6 @@
 module OpenSolid.UvCurve
   ( UvCurve
+  , new
   , startPoint
   , endPoint
   , pointAt
@@ -24,6 +25,10 @@ import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Prelude
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.VectorCurve2D (VectorCurve2D)
+
+new :: Curve2D.Compiled Unitless -> VectorCurve2D Unitless -> UvCurve
+new = unitless Curve2D.new
 
 startPoint :: UvCurve -> UvPoint
 startPoint = Curve2D.startPoint
@@ -42,7 +47,7 @@ bounds = Curve2D.bounds
 
 -- | Create a line between two points.
 lineFrom :: UvPoint -> UvPoint -> UvCurve
-lineFrom = Curve2D.lineFrom
+lineFrom = unitless Curve2D.lineFrom
 
 {-| Create an arc from the given start point to the given end point, with the given swept angle.
 

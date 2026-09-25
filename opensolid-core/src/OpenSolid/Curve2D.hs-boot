@@ -32,7 +32,7 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 
 type Compiled units = Curve.Compiled 2 units Void
 
-new :: Compiled units -> VectorCurve2D units -> Curve2D units
+new :: Tolerance units => Compiled units -> VectorCurve2D units -> Curve2D units
 startPoint :: Curve2D units -> Point2D units
 endPoint :: Curve2D units -> Point2D units
 pointAt :: Number -> Curve2D units -> Point2D units
@@ -42,9 +42,10 @@ bounds :: Curve2D units -> Bounds2D units
 compiled :: Curve2D units -> Compiled units
 derivative :: Curve2D units -> VectorCurve2D units
 reverse :: Curve2D units -> Curve2D units
-xy :: Curve1D units -> Curve1D units -> Curve2D units
-lineFrom :: Point2D units -> Point2D units -> Curve2D units
+xy :: Tolerance units => Curve1D units -> Curve1D units -> Curve2D units
+lineFrom :: Tolerance units => Point2D units -> Point2D units -> Curve2D units
 hermite ::
+  Tolerance units =>
   Point2D units ->
   List (Vector2D units) ->
   Point2D units ->
