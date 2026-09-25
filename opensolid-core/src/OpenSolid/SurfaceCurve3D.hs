@@ -5,6 +5,8 @@ module OpenSolid.SurfaceCurve3D
   , uvCurve
   , bounds
   , uvBounds
+  , placeIn
+  , relativeTo
   , nondegenerate
   )
 where
@@ -17,6 +19,7 @@ import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
+import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Prelude
@@ -81,6 +84,20 @@ bounds = Curve3D.bounds . curve
 
 uvBounds :: SurfaceCurve3D space -> UvBounds
 uvBounds = Curve2D.bounds . uvCurve
+
+placeIn :: Frame3D global local -> SurfaceCurve3D local -> SurfaceCurve3D global
+placeIn frame surfaceCurve =
+  SurfaceCurve3D
+    { uvCurve = surfaceCurve.uvCurve
+    , curve = Curve3D.placeIn frame surfaceCurve.curve
+    }
+
+relativeTo :: Frame3D global local -> SurfaceCurve3D global -> SurfaceCurve3D local
+relativeTo frame surfaceCurve =
+  SurfaceCurve3D
+    { uvCurve = surfaceCurve.uvCurve
+    , curve = Curve3D.relativeTo frame surfaceCurve.curve
+    }
 
 nondegenerate ::
   Tolerance Meters =>
