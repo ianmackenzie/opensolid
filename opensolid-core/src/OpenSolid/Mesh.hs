@@ -17,6 +17,7 @@ where
 
 import Data.Coerce (Coercible)
 import Data.Coerce qualified
+import Data.Foldable qualified
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
 import OpenSolid.Int qualified as Int
@@ -78,8 +79,8 @@ concat meshes = do
   let combinedFaceIndices = List.concat (offsetFaceIndices 0 arrayLengths faceIndexLists)
   Mesh combinedVertices combinedFaceIndices
 
-combine :: (a -> Mesh b) -> List a -> Mesh b
-combine toMesh values = concat (List.map toMesh values)
+combine :: Foldable list => (a -> Mesh b) -> list a -> Mesh b
+combine toMesh values = concat (List.map toMesh (Data.Foldable.toList values))
 
 offsetFaceIndices :: Int -> List Int -> List (List (Int, Int, Int)) -> List (List (Int, Int, Int))
 offsetFaceIndices _ [] _ = []

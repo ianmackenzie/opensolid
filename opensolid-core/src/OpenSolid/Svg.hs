@@ -45,6 +45,7 @@ module OpenSolid.Svg
   )
 where
 
+import Data.Foldable qualified
 import OpenSolid.Axis2D (Axis2D (Axis2D))
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
@@ -220,12 +221,12 @@ groupWith attributes children =
 group :: List Svg -> Svg
 group = groupWith []
 
-combine :: (a -> Svg) -> List a -> Svg
+combine :: Foldable list => (a -> Svg) -> list a -> Svg
 combine = combineWith []
 
-combineWith :: List Attribute -> (a -> Svg) -> List a -> Svg
+combineWith :: Foldable list => List Attribute -> (a -> Svg) -> list a -> Svg
 combineWith attributes function list =
-  groupWith attributes (List.map function list)
+  groupWith attributes (List.map function (Data.Foldable.toList list))
 
 -- | Draw a line with the given attributes.
 lineWith :: List Attribute -> Line2D Meters -> Svg
