@@ -1,7 +1,5 @@
 module OpenSolid.Region2D.Boundary
   ( Boundary
-  , PointClassification (InteriorPoint, ExteriorPoint, IncidentPoint)
-  , BoundsClassification (InteriorBounds, ExteriorBounds)
   , unsafe
   , bounds
   , curves
@@ -27,6 +25,7 @@ import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import {-# SOURCE #-} OpenSolid.Region2D (BoundsClassification (..), PointClassification (..))
 import OpenSolid.Region2D.BoundaryTree (BoundaryTree)
 import OpenSolid.Region2D.BoundaryTree qualified as Region2D.BoundaryTree
 import OpenSolid.Set2D (Set2D)
@@ -63,17 +62,6 @@ instance units1 ~ units2 => Intersects (Point2D units1) (Boundary units2) units1
 
 instance units1 ~ units2 => Intersects (Boundary units2) (Point2D units1) units1 where
   boundary ^ point = point ^ boundary
-
-data PointClassification
-  = InteriorPoint
-  | ExteriorPoint
-  | IncidentPoint
-  deriving (Eq, Show)
-
-data BoundsClassification
-  = InteriorBounds
-  | ExteriorBounds
-  deriving (Eq, Show)
 
 unsafe :: NonEmpty (Curve2D units) -> Boundary units
 unsafe givenCurves = build (Set2D.linear givenCurves)
@@ -123,7 +111,7 @@ isInterior sweptAngle
 
 classifyPoint :: Tolerance units => Point2D units -> Boundary units -> PointClassification
 classifyPoint point boundary
-  | point ^ boundary = IncidentPoint
+  | point ^ boundary = BoundaryPoint
   | otherwise = do
       let sweptAngle = Region2D.BoundaryTree.pointSweptAngle point boundary.tree
       if isInterior sweptAngle then InteriorPoint else ExteriorPoint

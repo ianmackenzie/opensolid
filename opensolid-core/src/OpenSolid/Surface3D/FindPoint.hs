@@ -45,17 +45,18 @@ findPoint point surface = do
         (# displacement, duValue, dvValue #)
   -- Find interior solutions
   let isDistant segment = not (point ^ Segment.range segment)
-  let isExterior uvRange = UvRegion.classifyBounds uvRange domain == Resolved Region2D.Outside
+  let isDefinitelyExterior uvRange =
+        UvRegion.classifyBounds uvRange domain == Resolved Region2D.ExteriorBounds
   let resolvedUniqueness uvRange segment
-        | isDistant segment || isExterior uvRange = Resolved Nothing
+        | isDistant segment || isDefinitelyExterior uvRange = Resolved Nothing
         | Segment.isMonotonic segment = Resolved (Just UniqueSolution)
         | Segment.isDegenerate segment = Resolved (Just UniqueSolution)
         | otherwise = Unresolved
   let isSolution uvPoint = Surface3D.pointAt uvPoint surface ~= point
-  let isInterior uvPoint = UvRegion.classify uvPoint domain == Region2D.Inside
+  let isInterior uvPoint = UvRegion.classifyPoint uvPoint domain == Region2D.InteriorPoint
   let isInteriorSolution uvPoint = isSolution uvPoint && isInterior uvPoint
   let resolvedSolution UniqueSolution uvRange segment
-        | isDistant segment || isExterior uvRange = Resolved Nothing
+        | isDistant segment || isDefinitelyExterior uvRange = Resolved Nothing
         | Resolved uvPoint <- NewtonRaphson.Surface.solveIn uvRange evaluateNewtonRaphson =
             Resolved $
               if isInteriorSolution uvPoint
