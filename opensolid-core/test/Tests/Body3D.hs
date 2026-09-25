@@ -44,7 +44,7 @@ fractionalError :: Quantity units -> Quantity units -> Number
 fractionalError actual expected = Quantity.abs (actual - expected) / expected
 
 sphereMeshing :: Test
-sphereMeshing = Test.verify "Sphere meshing" do
+sphereMeshing = Test.verify "sphereMeshing" do
   let diameter = Length.centimeters 10.0
   let resolution = Resolution.maxError (0.01 * diameter)
   sphere <- Body3D.sphere (#centerPoint World3D.originPoint) (#diameter diameter) ?? fail
@@ -68,7 +68,7 @@ sphereMeshing = Test.verify "Sphere meshing" do
     ]
 
 revolvedNormals :: Test
-revolvedNormals = Test.verify "Revolved normals" do
+revolvedNormals = Test.verify "revolvedNormals" do
   let axes = [Axis2D.y, -Axis2D.y]
   let angle = Angle.degrees 45.0
   let sweptAngles = [angle, -angle]
