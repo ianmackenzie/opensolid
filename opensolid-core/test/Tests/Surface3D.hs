@@ -32,9 +32,8 @@ spherePatch = do
   let radius = Length.centimeters 10.0
   let profile = Curve2D.arcFrom (Point2D.x radius) (Point2D.y radius) Angle.quarterTurn
   let surface =
-        case Surface3D.revolved sketchPlane profile Axis2D.y Angle.quarterTurn of
-          Ok revolvedSurface -> revolvedSurface
-          Err Surface3D.IsDegenerate -> error "Sphere patch should never be degenerate"
+        Surface3D.revolved sketchPlane profile Axis2D.y Angle.quarterTurn
+          !! error "Sphere patch should never be degenerate"
   Random.return surface
 
 isOnPole :: UvPoint -> Bool

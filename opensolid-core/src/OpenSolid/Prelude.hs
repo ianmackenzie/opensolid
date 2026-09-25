@@ -11,6 +11,7 @@ module OpenSolid.Prelude
   , fail
   , catch
   , (??)
+  , (!!)
   , Exception
   , Void
   , data NonEmpty
@@ -472,6 +473,12 @@ fail = Prelude.fail (Data.Text.unpack (Err.message ?err))
 
 catch :: (x -> OnError x a) -> OnError x a
 catch callback = callback ?err
+
+(!!) :: Result x a -> a -> a
+Ok value !! _ = value
+Err _ !! fallback = fallback
+
+infixl 0 !!
 
 ----- Quantity -----
 
