@@ -540,7 +540,7 @@ areaIntegral_ referencePoint curve = do
 
 boundaryIsInside :: Tolerance units => Boundary units -> Boundary units -> Bool
 boundaryIsInside outer inner = do
-  let testPoint = Curve2D.startPoint (Boundary.curves inner !! 0)
+  let testPoint = Curve2D.startPoint (Boundary.curves inner @ 0)
   case Boundary.classifyPoint testPoint outer of
     Boundary.InteriorPoint -> True
     Boundary.ExteriorPoint -> False
@@ -552,7 +552,7 @@ bounds region = Boundary.bounds region.outerBoundary
 
 area :: Units.Squared units1 units2 => Region2D units1 -> Estimate units2
 area region = do
-  let referencePoint = Curve2D.startPoint (outerBoundary region !! 0)
+  let referencePoint = Curve2D.startPoint (outerBoundary region @ 0)
   boundaryCurves region
     & Set2D.toNonEmptyOf (areaIntegral referencePoint)
     & Estimate.sum

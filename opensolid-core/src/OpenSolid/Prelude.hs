@@ -37,7 +37,7 @@ module OpenSolid.Prelude
   , unitless
   , angular
   , ApproximateEquality ((~=))
-  , Indexed ((!!))
+  , Indexed ((@))
   , Intersects ((^))
   , Quantity (Quantity, Q#)
   , Unitless
@@ -594,25 +594,25 @@ instance DivMod (Quantity units) where
 ----- Indexed -----
 
 class Indexed container index item | container index -> item where
-  (!!) :: container -> index -> item
+  (@) :: container -> index -> item
 
-infixl 9 !!
+infixl 9 @
 
 instance Indexed (List item) Int item where
-  {-# INLINE (!!) #-}
-  (!!) = (Prelude.!!)
+  {-# INLINE (@) #-}
+  (@) = (Prelude.!!)
 
 instance Indexed (NonEmpty item) Int item where
-  {-# INLINE (!!) #-}
-  (!!) = (Data.List.NonEmpty.!!)
+  {-# INLINE (@) #-}
+  (@) = (Data.List.NonEmpty.!!)
 
 instance Ord key => Indexed (Map key value) key value where
-  {-# INLINE (!!) #-}
-  (!!) = (Data.Map.Strict.!)
+  {-# INLINE (@) #-}
+  (@) = (Data.Map.Strict.!)
 
 instance Hashable key => Indexed (HashMap key value) key value where
-  {-# INLINE (!!) #-}
-  (!!) = (Data.HashMap.Strict.!)
+  {-# INLINE (@) #-}
+  (@) = (Data.HashMap.Strict.!)
 
 ----- Intersection -----
 

@@ -98,7 +98,7 @@ instance
   coerce = Data.Coerce.coerce
 
 instance Indexed (Set b a) Int a where
-  set !! index =
+  set @ index =
     case get index set of
       Just item -> item
       Nothing -> error "Index out of bounds"
@@ -591,4 +591,4 @@ clusters boundsPredicate itemPredicate set = do
     [] -> error "Should have at least one cluster (since sets cannot be empty)"
 
 buildCluster :: Bounds b => Set b a -> Graph.Tree Int -> NonEmpty a
-buildCluster set tree = NonEmpty.map (set !!) (Data.Foldable1.toNonEmpty tree)
+buildCluster set tree = NonEmpty.map (set @) (Data.Foldable1.toNonEmpty tree)

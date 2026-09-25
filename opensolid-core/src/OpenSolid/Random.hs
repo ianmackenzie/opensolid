@@ -126,7 +126,7 @@ merge :: NonEmpty (Generator a) -> Generator a
 merge generators = do
   let n = Data.List.NonEmpty.length generators
   index <- int 0 (n - 1)
-  generators !! index
+  generators @ index
 
 retry :: Generator (Maybe a) -> Generator a
 retry fallibleGenerator = do

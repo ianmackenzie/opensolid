@@ -22,7 +22,7 @@ functionArray = case API.functions of
   NonEmpty nonEmpty -> Array.fromNonEmpty (NonEmpty.map API.Function.invoke nonEmpty)
 
 invoke :: Int -> FFI.Function
-invoke functionIndex = (functionArray !! functionIndex)
+invoke functionIndex = (functionArray @ functionIndex)
 
 generateExports :: TH.Q (List TH.Dec)
 generateExports =

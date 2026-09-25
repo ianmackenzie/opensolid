@@ -33,8 +33,8 @@ deriving instance Functor Array
 deriving instance Traversable Array
 
 instance Indexed (Array a) Int a where
-  {-# INLINE (!!) #-}
-  array !! index
+  {-# INLINE (@) #-}
+  array @ index
     | index >= 0 && index < length array = unwrap array Data.Array.! index
     | otherwise = error "Index out of bounds"
 
@@ -71,15 +71,15 @@ map = Prelude.fmap
 map2 :: (a -> b -> c) -> Array a -> Array b -> Array c
 map2 f array1 array2 = do
   let n = min (length array1) (length array2)
-  initialize n $ \i -> f (array1 !! i) (array2 !! i)
+  initialize n $ \i -> f (array1 @ i) (array2 @ i)
 
 map3 :: (a -> b -> c -> d) -> Array a -> Array b -> Array c -> Array d
 map3 f array1 array2 array3 = do
   let n = length array1 `min` length array2 `min` length array3
-  initialize n $ \i -> f (array1 !! i) (array2 !! i) (array3 !! i)
+  initialize n $ \i -> f (array1 @ i) (array2 @ i) (array3 @ i)
 
 mapWithIndex :: (Int -> a -> b) -> Array a -> Array b
-mapWithIndex f array = initialize (length array) $ \i -> f i (array !! i)
+mapWithIndex f array = initialize (length array) $ \i -> f i (array @ i)
 
 reverse :: Array a -> Array a
 reverse array = do

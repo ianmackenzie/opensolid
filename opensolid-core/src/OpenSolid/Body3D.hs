@@ -95,10 +95,10 @@ data Body3D space = Body3D
   }
 
 instance Indexed (Body3D space) SurfaceId (Surface3D space) where
-  body !! surfaceId = body.surfaces !! surfaceId
+  body @ surfaceId = body.surfaces @ surfaceId
 
 instance Indexed (Body3D space) HalfEdge.Id (SurfaceCurve3D space) where
-  body !! HalfEdge.Id{surfaceId, boundaryId, curveId} = body !! surfaceId !! boundaryId !! curveId
+  body @ HalfEdge.Id{surfaceId, boundaryId, curveId} = body @ surfaceId @ boundaryId @ curveId
 
 instance FFI (Body3D Void) where
   representation = FFI.classRepresentation "Body3D"
@@ -442,7 +442,7 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
   HashMap.empty & do
     forEachWithIndex (surfaces body) \surfaceIndex surface -> do
       let surfaceId = SurfaceId surfaceIndex
-      let surfaceSegments = surfaceSegmentsMap !! surfaceId
+      let surfaceSegments = surfaceSegmentsMap @ surfaceId
       let surfaceBoundaries = Surface3D.boundaries surface
       forEachWithIndex surfaceBoundaries \boundaryIndex boundary -> do
         let boundaryId = BoundaryId boundaryIndex
@@ -452,7 +452,7 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
           let curve = SurfaceCurve3D.curve surfaceCurve
           let uvCurve = SurfaceCurve3D.uvCurve surfaceCurve
           let uniformParameterization = Curve3D.uniformParameterization curve
-          case body.seams !! halfEdgeId of
+          case body.seams @ halfEdgeId of
             Nothing -> do
               -- Degenerate half-edge not mated to any adjacent half-edge
               let edgePredicate = degenerateEdgeLinearizationPredicate uvCurve surfaceSegments
@@ -467,8 +467,8 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
               -- and only generate vertices when we encounter that side.
               if halfEdgeId < matingHalfEdgeId
                 then do
-                  let matingSurfaceCurve = body !! matingHalfEdgeId
-                  let matingSurfaceSegments = surfaceSegmentsMap !! matingHalfEdgeId.surfaceId
+                  let matingSurfaceCurve = body @ matingHalfEdgeId
+                  let matingSurfaceSegments = surfaceSegmentsMap @ matingHalfEdgeId.surfaceId
                   let matingCurve = SurfaceCurve3D.curve matingSurfaceCurve
                   let matingUniformParameterization = Curve3D.uniformParameterization matingCurve
                   let matingUvCurve = SurfaceCurve3D.uvCurve matingSurfaceCurve
@@ -573,7 +573,7 @@ surfaceMesh surfaceSegmentsMap leadingEdgeVerticesMap toVertex surfaceIndex surf
           & Set3D.toNonEmptyWithIndex (toPolygon leadingEdgeVerticesMap surfaceId)
   let boundarySegments = NonEmpty.combine Polygon2D.edges boundaryPolygons
   let boundarySegmentSet = Set2D.build boundarySegments
-  let surfaceSegments = surfaceSegmentsMap !! surfaceId
+  let surfaceSegments = surfaceSegmentsMap @ surfaceId
   let steinerPoints =
         if Set2D.size surfaceSegments == 1
           -- If the surface is sufficiently linear to be approximated by a single segment,
@@ -606,7 +606,7 @@ getLeadingEdgeVertices ::
   NonEmpty UvPoint
 getLeadingEdgeVertices leadingEdgeVerticesMap surfaceId boundaryId curveIndex _ = do
   let halfEdgeId = HalfEdge.Id{surfaceId, boundaryId, curveId = CurveId curveIndex}
-  leadingEdgeVerticesMap !! halfEdgeId
+  leadingEdgeVerticesMap @ halfEdgeId
 
 steinerPoint :: Set2D Unitless (Line2D Unitless) -> UvBounds -> Maybe UvPoint
 steinerPoint boundarySegmentSet uvRange = do
