@@ -1,20 +1,10 @@
-Allow SurfaceFunction3D to be degenerate, enforce that Surface3D is nondegenerate?
-- remove VectorSurfaceFunction3D.Nondegenerate and most related machinery
-- general pattern: *Function can be zero/degenerate, but curves and surfaces can't
+Add 'spatial' helper to Test module
+- use that instead of magically supplying length tolerance in 'check'
+- more flexible/explicit
 
 Move Array and Color into OpenSolid.Prelude?
 
 Add Sketch3D type? Basically just Plane3D + Region2D
-
-"translational" -> "sweptBy"? (as opposed to "sweptAlong"...)
-
-Enforce nondegenerate curves/surfaces
-- rename 'new' to 'unsafe', add 'new' that enforces nondegenerateness
-- remove use of Nondegenerate vector curves (inline L'Hopital logic for tangent directions into Curve)
-
-Move PointClassification and BoundsClassification into Region, rename 'classify' to 'classifyPoint'?
-- more explicit, more type safe
-- rename IncidentPoint to BoundaryPoint so it makes sense in both modules (Region2D and Boundary)
 
 Add 'r', 'w' and 'wv' down to C++ bytecode level
 
@@ -24,8 +14,7 @@ Have 'erase' functions also erase space to Void?
 
 Rename Text.[int,number] -> Text.[fromInt,fromNumber]?
 
-Add support for 'Nondegenerate Surface3D'
-- then refactor Body3D to store a set of 'Nondegenerate Surface3D'
+Rename Curve.Nonzero to Curve.Regular
 
 Implement Surface3D.findPoint
 
@@ -167,10 +156,6 @@ Add Region2D.unsafe?
 
 Add a few functions like Surface3D.asPlane :: Surface3D space -> Maybe (Plane3D space local)
 - useful for feature detection etc.
-
-Move directionBounds, tangentDirectionBounds, normalDirectionBounds into Nondegenerate modules?
-- *can* be evaluated for degenerate geometries but it's not very meaningful to do so
-- allowing evaluation for degenerate geometries makes it easier to cache in Segment types though...
 
 Refactor bisection search to throw during *search*, not during domain *construction*?
 - more useful stack traces, not just traced back to Domain.unitInterval
@@ -336,3 +321,5 @@ Turn C++ hull2, hull3 etc. functions into just overloads of a 'hull' function
 Split bytecode.h/bytecode.cpp into a few more files
 -> e.g. helper functions for Bezier/Hermite evaluation
 -> allow calling non-bytecode-specific functions from Haskell without having to use 'bytecode.h'...
+
+Have 'concat' functions take Foldable arguments instead of List ones?
