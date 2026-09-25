@@ -4,7 +4,6 @@ module OpenSolid.Curve3D
   , Segment
   , IntersectionPointWithSurface
   , new
-  , constant
   , on
   , line
   , lineFrom
@@ -76,9 +75,6 @@ type Segment space = Curve.Segment 3 Meters space
 
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 new = Curve.new
-
-constant :: Point3D space -> Curve3D space
-constant = Curve.constant
 
 on :: Plane3D space -> Curve2D Meters -> Curve3D space
 on = Curve.placeOn

@@ -1,7 +1,6 @@
 module OpenSolid.Curve3D
   ( Curve3D
   , Compiled
-  , constant
   , new
   , on
   , derivative
@@ -23,7 +22,6 @@ import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 
 type Compiled space = Curve.Compiled 3 Meters space
 
-constant :: Point3D space -> Curve3D space
 new :: Compiled space -> VectorCurve3D Meters space -> Curve3D space
 on :: Plane3D space -> Curve2D Meters -> Curve3D space
 derivative :: Curve3D space -> VectorCurve3D Meters space

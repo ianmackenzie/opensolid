@@ -6,7 +6,6 @@ module OpenSolid.Curve
   , CurveExists
   , Solver
   , Compiled
-  , constant
   , pointAt
   , pointOn
   , range
@@ -85,10 +84,6 @@ instance
   space1 ~ space2 =>
   Subtraction (Point3D space1) (Curve3D space2) (VectorCurve3D Meters space1)
 
-constant ::
-  CurveExists dimension units space =>
-  Point dimension units space ->
-  Curve dimension units space
 pointAt ::
   Number ->
   Curve dimension units space ->

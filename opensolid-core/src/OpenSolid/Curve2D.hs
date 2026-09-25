@@ -3,7 +3,6 @@ module OpenSolid.Curve2D
   , Compiled
   , Segment
   , new
-  , constant
   , displacedFrom
   , xy
   , line
@@ -139,10 +138,6 @@ type Segment units = Curve.Segment 2 units Void
 
 new :: Compiled units -> VectorCurve2D units -> Curve2D units
 new = Curve.new
-
--- | Create a degenerate curve that is actually just a single point.
-constant :: Point2D units -> Curve2D units
-constant = Curve.constant
 
 -- | Create a curve from its X and Y coordinate curves.
 xy :: Curve1D units -> Curve1D units -> Curve2D units

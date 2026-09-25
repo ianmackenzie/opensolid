@@ -1,7 +1,6 @@
 module OpenSolid.Curve2D
   ( Curve2D
   , Compiled
-  , constant
   , new
   , startPoint
   , endPoint
@@ -33,7 +32,6 @@ import {-# SOURCE #-} OpenSolid.VectorCurve2D (VectorCurve2D)
 
 type Compiled units = Curve.Compiled 2 units Void
 
-constant :: Point2D units -> Curve2D units
 new :: Compiled units -> VectorCurve2D units -> Curve2D units
 startPoint :: Curve2D units -> Point2D units
 endPoint :: Curve2D units -> Point2D units

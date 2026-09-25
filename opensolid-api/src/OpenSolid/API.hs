@@ -1505,8 +1505,7 @@ type Curve2D = Curve2D.Curve2D Meters
 curve2D :: Class
 curve2D =
   Class.new @Curve2D $(docs ''Curve2D.Curve2D) $
-    [ Class.factory1 "Constant" "Point" Curve2D.constant $(docs 'Curve2D.constant)
-    , Class.factory2 "XY" "X Coordinate" "Y Coordinate" Curve2D.xy $(docs 'Curve2D.xy)
+    [ Class.factory2 "XY" "X Coordinate" "Y Coordinate" Curve2D.xy $(docs 'Curve2D.xy)
     , Class.factory1 "Line" "Line" Curve2D.line $(docs 'Curve2D.line)
     , Class.factory2 "Line From" "Start Point" "End Point" Curve2D.lineFrom $(docs 'Curve2D.lineFrom)
     , Class.factoryT3 "Arc From" "Start Point" "End Point" "Swept Angle" Curve2D.arcFrom $(docs 'Curve2D.arcFrom)
@@ -1533,8 +1532,7 @@ type UvCurve = UvCurve.UvCurve
 uvCurve :: Class
 uvCurve =
   Class.new @UvCurve "A curve in UV parameter space." $
-    [ Class.factory1 "Constant" "Point" Curve2D.constant $(docs 'Curve2D.constant)
-    , Class.factory2 "UV" "U Coordinate" "V Coordinate" Curve2D.xy $(docs 'Curve2D.xy)
+    [ Class.factory2 "UV" "U Coordinate" "V Coordinate" Curve2D.xy $(docs 'Curve2D.xy)
     , Class.factory1 "Line" "Line" Curve2D.line $(docs 'Curve2D.line)
     , Class.factory2 "Line From" "Start Point" "End Point" UvCurve.lineFrom $(docs 'UvCurve.lineFrom)
     , Class.factory3 "Arc From" "Start Point" "End Point" "Swept Angle" UvCurve.arcFrom $(docs 'UvCurve.arcFrom)

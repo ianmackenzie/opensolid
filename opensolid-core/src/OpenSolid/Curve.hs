@@ -13,7 +13,6 @@ module OpenSolid.Curve
   , HasDegeneracy (HasDegeneracy)
   , IsDegenerateAndCoincidentWithPoint (IsDegenerateAndCoincidentWithPoint)
   , new
-  , constant
   , displacedFrom
   , line
   , lineFrom
@@ -279,13 +278,19 @@ instance
   units1 ~ units2 =>
   Subtraction (Curve2D units1) (Point2D units2) (VectorCurve2D units1)
   where
-  curve - givenPoint = curve - constant givenPoint
+  curve - givenPoint =
+    VectorCurve.new
+      (compiled curve - CompiledFunction.constant givenPoint)
+      (derivative curve)
 
 instance
   units1 ~ units2 =>
   Subtraction (Point2D units1) (Curve2D units2) (VectorCurve2D units1)
   where
-  givenPoint - curve = constant givenPoint - curve
+  givenPoint - curve =
+    VectorCurve.new
+      (CompiledFunction.constant givenPoint - compiled curve)
+      (negate (derivative curve))
 
 instance Composition () (Curve2D units) (SurfaceFunction1D Unitless) (SurfaceFunction2D units) where
   f << g = do
@@ -369,13 +374,19 @@ instance
   space1 ~ space2 =>
   Subtraction (Curve3D space1) (Point3D space2) (VectorCurve3D Meters space1)
   where
-  lhs - rhs = lhs - constant rhs
+  curve - givenPoint =
+    VectorCurve.new
+      (compiled curve - CompiledFunction.constant givenPoint)
+      (derivative curve)
 
 instance
   space1 ~ space2 =>
   Subtraction (Point3D space1) (Curve3D space2) (VectorCurve3D Meters space1)
   where
-  lhs - rhs = constant lhs - rhs
+  givenPoint - curve =
+    VectorCurve.new
+      (CompiledFunction.constant givenPoint - compiled curve)
+      (negate (derivative curve))
 
 instance Composition () (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
   f << g = do
@@ -488,17 +499,15 @@ buildArcLengthParameterization (Nondegenerate curve) = do
   let d2sdt2 tValue = secondDerivativeAt tValue curve `dot` tangentDirection tValue
   ArcLength.parameterization dsdt d2sdt2
 
-constant ::
-  CurveExists dimension units space =>
-  Point dimension units space -> Curve dimension units space
-constant givenPoint = new (CompiledFunction.constant givenPoint) VectorCurve.zero
-
 displacedFrom ::
   CurveExists dimension units space =>
   Point dimension units space ->
   VectorCurve dimension units space ->
   Curve dimension units space
-displacedFrom point displacementCurve = constant point & displaceBy displacementCurve
+displacedFrom point displacementCurve =
+  new
+    (CompiledFunction.constant point + VectorCurve.compiled displacementCurve)
+    (VectorCurve.derivative displacementCurve)
 
 line ::
   CurveExists dimension units space =>
