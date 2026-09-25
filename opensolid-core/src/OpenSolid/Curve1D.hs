@@ -71,7 +71,6 @@ import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
@@ -445,11 +444,6 @@ instance
   Division (Quantity units1) (Nonzero (Curve1D units2)) (Curve1D units3)
   where
   lhs / rhs = constant lhs / rhs
-
-instance Units (Nondegenerate (Curve1D units)) units
-
-instance Units.Coercion (Nondegenerate (Curve1D units1)) (Nondegenerate (Curve1D units2)) where
-  coerce (Nondegenerate curve) = Nondegenerate (Units.coerce curve)
 
 instance Units (Nonzero (Curve1D units)) units
 

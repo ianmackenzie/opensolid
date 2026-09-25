@@ -20,7 +20,6 @@ import GHC.TypeLits (Natural)
 import OpenSolid.CompiledFunction (CompiledFunction)
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Interval (Interval)
-import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Prelude
 import OpenSolid.Units (Units)
@@ -52,19 +51,6 @@ instance Units.Coercion (VectorCurve2D units1) (VectorCurve2D units2)
 instance
   space1 ~ space2 =>
   Units.Coercion (VectorCurve3D units1 space1) (VectorCurve3D units2 space2)
-
-instance Units (Nondegenerate (VectorCurve dimension units space)) units
-
-instance
-  Units.Coercion
-    (Nondegenerate (VectorCurve2D units1))
-    (Nondegenerate (VectorCurve2D units2))
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion
-    (Nondegenerate (VectorCurve3D units1 space1))
-    (Nondegenerate (VectorCurve3D units2 space2))
 
 instance
   VectorCurveExists dimension units space =>

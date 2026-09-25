@@ -34,7 +34,6 @@ module OpenSolid.VectorCurve
   , secondDerivativeRange
   , squaredMagnitude_
   , squaredMagnitude
-  , nondegenerate
   , reverse
   , transformBy
   , zeros
@@ -66,7 +65,6 @@ import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.List qualified as List
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
@@ -239,23 +237,6 @@ instance
       , maxSampledMagnitude = Units.coerce curve.maxSampledMagnitude
       }
 
-instance Units (Nondegenerate (VectorCurve dimension units space)) units
-
-instance
-  Units.Coercion
-    (Nondegenerate (VectorCurve2D units1))
-    (Nondegenerate (VectorCurve2D units2))
-  where
-  coerce (Nondegenerate curve) = Nondegenerate (Units.coerce curve)
-
-instance
-  space1 ~ space2 =>
-  Units.Coercion
-    (Nondegenerate (VectorCurve3D units1 space1))
-    (Nondegenerate (VectorCurve3D units2 space2))
-  where
-  coerce (Nondegenerate curve) = Nondegenerate (Units.coerce curve)
-
 instance Units (Nonzero (VectorCurve dimension units space)) units
 
 instance
@@ -285,14 +266,6 @@ instance
       , endValue = Space.coerce curve.endValue
       , maxSampledMagnitude = curve.maxSampledMagnitude
       }
-
-instance
-  units1 ~ units2 =>
-  Space.Coercion
-    (Nondegenerate (VectorCurve3D units1 space1))
-    (Nondegenerate (VectorCurve3D units2 space2))
-  where
-  coerce (Nondegenerate curve) = Nondegenerate (Space.coerce curve)
 
 instance
   units1 ~ units2 =>
@@ -1035,12 +1008,6 @@ arc vx vy theta1 theta2 = do
 {-# INLINE compiled #-}
 compiled :: VectorCurve dimension units space -> Compiled dimension units space
 compiled = (.compiled)
-
-nondegenerate ::
-  (VectorCurveExists dimension units space, Tolerance units) =>
-  VectorCurve dimension units space ->
-  Result IsZero (Nondegenerate (VectorCurve dimension units space))
-nondegenerate curve = if isZero curve then Err IsZero else Ok (Nondegenerate curve)
 
 {-# INLINE derivative #-}
 derivative ::

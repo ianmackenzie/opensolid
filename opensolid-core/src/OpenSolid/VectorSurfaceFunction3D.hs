@@ -9,7 +9,6 @@ module OpenSolid.VectorSurfaceFunction3D
   , degenerateRight
   , degenerateBottom
   , degenerateTop
-  , nondegenerate
   , zero
   , constant
   , valueAt
@@ -40,10 +39,8 @@ import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval (Interval))
-import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.PartialDerivatives qualified as PartialDerivatives
 import OpenSolid.Point3D (Point3D)
@@ -519,12 +516,6 @@ degenerateBottom function = function.maxSampledBottomMagnitude ~= Quantity.zero
 
 degenerateTop :: Tolerance units => VectorSurfaceFunction3D units space -> Bool
 degenerateTop function = function.maxSampledTopMagnitude ~= Quantity.zero
-
-nondegenerate ::
-  Tolerance units =>
-  VectorSurfaceFunction3D units space ->
-  Result IsZero (Nondegenerate (VectorSurfaceFunction3D units space))
-nondegenerate function = if isZero function then Err IsZero else Ok (Nondegenerate function)
 
 zero :: VectorSurfaceFunction3D units space
 zero = constant Vector3D.zero

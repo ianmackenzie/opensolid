@@ -1,7 +1,6 @@
 module OpenSolid.VectorCurve3D
   ( VectorCurve3D
   , Compiled
-  , Nondegenerate
   , new
   , on
   , compiled
@@ -9,7 +8,6 @@ module OpenSolid.VectorCurve3D
   , hasDegenerateStart
   , hasDegenerateEnd
   , derivative
-  , nondegenerate
   , startValue
   , endValue
   , valueAt
@@ -48,7 +46,6 @@ import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.IsZero (IsZero)
-import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
@@ -73,12 +70,6 @@ compiled = VectorCurve.compiled
 {-# INLINE derivative #-}
 derivative :: VectorCurve3D units space -> VectorCurve3D units space
 derivative = VectorCurve.derivative
-
-nondegenerate ::
-  Tolerance units =>
-  VectorCurve3D units space ->
-  Result IsZero (Nondegenerate (VectorCurve3D units space))
-nondegenerate = VectorCurve.nondegenerate
 
 isZero :: Tolerance units => VectorCurve3D units space -> Bool
 isZero = VectorCurve.isZero

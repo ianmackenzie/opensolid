@@ -26,7 +26,6 @@ import OpenSolid.Curve1D.Root (Root)
 import OpenSolid.FFI (FFI)
 import OpenSolid.Interval (Interval)
 import OpenSolid.IsZero (IsZero)
-import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Nonzero (Nonzero)
 import OpenSolid.Prelude
 import OpenSolid.Units (Units)
@@ -50,10 +49,6 @@ instance Units.Coercion (Curve1D units1) (Curve1D units2)
 instance Units (Nonzero (Curve1D units)) units
 
 instance Units.Coercion (Nonzero (Curve1D units1)) (Nonzero (Curve1D units2))
-
-instance Units (Nondegenerate (Curve1D units)) units
-
-instance Units.Coercion (Nondegenerate (Curve1D units1)) (Nondegenerate (Curve1D units2))
 
 instance ApproximateEquality (Curve1D units) units
 

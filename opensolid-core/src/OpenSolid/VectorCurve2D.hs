@@ -3,11 +3,9 @@
 module OpenSolid.VectorCurve2D
   ( VectorCurve2D
   , Compiled
-  , Nondegenerate
   , new
   , compiled
   , derivative
-  , nondegenerate
   , startValue
   , endValue
   , valueAt
@@ -60,7 +58,6 @@ import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval)
 import OpenSolid.IsZero (IsZero)
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
-import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
@@ -84,12 +81,6 @@ compiled = VectorCurve.compiled
 {-# INLINE derivative #-}
 derivative :: VectorCurve2D units -> VectorCurve2D units
 derivative = VectorCurve.derivative
-
-nondegenerate ::
-  Tolerance units =>
-  VectorCurve2D units ->
-  Result IsZero (Nondegenerate (VectorCurve2D units))
-nondegenerate = VectorCurve.nondegenerate
 
 transformBy :: VectorTransform2D tag -> VectorCurve2D units -> VectorCurve2D units
 transformBy transform curve = do

@@ -46,7 +46,6 @@ import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
@@ -471,15 +470,6 @@ instance
     (SurfaceFunction1D units3)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
-
-instance Units (Nondegenerate (SurfaceFunction1D units)) units
-
-instance
-  Units.Coercion
-    (Nondegenerate (SurfaceFunction1D units1))
-    (Nondegenerate (SurfaceFunction1D units2))
-  where
-  coerce (Nondegenerate function) = Nondegenerate (Units.coerce function)
 
 squared :: Units.Squared units1 units2 => SurfaceFunction1D units1 -> SurfaceFunction1D units2
 squared function = Units.specialize (squared_ function)
