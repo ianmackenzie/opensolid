@@ -35,7 +35,6 @@ module OpenSolid.VectorCurve
   , squaredMagnitude_
   , squaredMagnitude
   , nondegenerate
-  , quotient_
   , reverse
   , transformBy
   , zeros
@@ -58,7 +57,6 @@ import OpenSolid.Direction (Direction)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DirectionBounds (DirectionBoundsExists)
-import OpenSolid.DivisionByZero (DivisionByZero (DivisionByZero))
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
@@ -1172,21 +1170,6 @@ isDegenerateAt ::
 isDegenerateAt tValue curve = do
   let degeneracyTolerance = Tolerance.unitless * curve.maxSampledMagnitude
   Tolerance.using degeneracyTolerance (valueAt tValue curve ~= Vector.zero)
-
-quotient_ ::
-  ( VectorCurveExists dimension units1 space
-  , Division_
-      (VectorCurve dimension units1 space)
-      (Nondegenerate (Curve1D units2))
-      (VectorCurve dimension (units1 ?/? units2) space)
-  , Tolerance units2
-  ) =>
-  VectorCurve dimension units1 space ->
-  Curve1D units2 ->
-  Result DivisionByZero (VectorCurve dimension (units1 ?/? units2) space)
-quotient_ lhs rhs
-  | rhs ~= Curve1D.zero = Err DivisionByZero
-  | otherwise = Ok (lhs ?/? Nondegenerate rhs)
 
 reverse ::
   VectorCurveExists dimension units space =>
