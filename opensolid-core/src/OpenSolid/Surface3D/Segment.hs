@@ -1,4 +1,4 @@
-module OpenSolid.SurfaceFunction3D.Segment
+module OpenSolid.Surface3D.Segment
   ( Segment (..)
   , range
   , partialDerivativeRanges

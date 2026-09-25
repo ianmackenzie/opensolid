@@ -1,10 +1,7 @@
 module OpenSolid.SurfaceFunction3D
   ( SurfaceFunction3D
   , Compiled
-  , Segment
-  , BisectionTree
   , new
-  , unsafe
   , displacedFrom
   , pointAt
   , pointOn
@@ -16,12 +13,6 @@ module OpenSolid.SurfaceFunction3D
   , secondPartialDerivatives
   , secondPartialDerivativesAt
   , secondPartialDerivativeRanges
-  , degenerateLeft
-  , degenerateRight
-  , degenerateBottom
-  , degenerateTop
-  , nondegenerate
-  , bisectionTree
   , normalDirectionRange
   , placeIn
   , relativeTo
@@ -31,7 +22,6 @@ module OpenSolid.SurfaceFunction3D
   )
 where
 
-import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction (CompiledFunction)
@@ -40,13 +30,6 @@ import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
-import OpenSolid.Interval qualified as Interval
-import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
-import OpenSolid.Length (Length)
-import OpenSolid.Length qualified as Length
-import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
-import OpenSolid.Nondegenerate qualified as Nondegenerate
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.PartialDerivatives qualified as PartialDerivatives
 import OpenSolid.Point3D (Point3D)
@@ -58,19 +41,13 @@ import {-# SOURCE #-} OpenSolid.Surface3D (Surface3D)
 import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
 import OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
-import {-# SOURCE #-} OpenSolid.SurfaceFunction3D.Nondegenerate qualified as SurfaceFunction3D.Nondegenerate
-import OpenSolid.SurfaceFunction3D.Segment (Segment)
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Triplet qualified as Triplet
-import OpenSolid.UvBounds (UvBounds, data UvBounds)
-import OpenSolid.UvBounds qualified as UvBounds
+import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.Vector3D (Vector3D)
-import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
@@ -83,30 +60,16 @@ data SurfaceFunction3D space = SurfaceFunction3D
       ( VectorSurfaceFunction3D Meters space
       , VectorSurfaceFunction3D Meters space
       )
-  , maxSampledInteriorDivergence :: ~Length
-  , degenerateLeft :: ~Bool
-  , degenerateRight :: ~Bool
-  , degenerateBottom :: ~Bool
-  , degenerateTop :: ~Bool
-  , bisectionTree :: Nondegenerate.Field (BisectionTree space)
   }
 
 type Compiled space =
   CompiledFunction UvPoint (Point3D space) UvBounds (Bounds3D space)
-
-type BisectionTree space = Bisection.Tree UvBounds (Segment space)
 
 instance Space.Coercion (SurfaceFunction3D space1) (SurfaceFunction3D space2) where
   coerce function =
     SurfaceFunction3D
       { compiled = Space.coerce function.compiled
       , partialDerivatives = Pair.map Space.coerce function.partialDerivatives
-      , maxSampledInteriorDivergence = function.maxSampledInteriorDivergence
-      , degenerateLeft = function.degenerateLeft
-      , degenerateRight = function.degenerateRight
-      , degenerateBottom = function.degenerateBottom
-      , degenerateTop = function.degenerateTop
-      , bisectionTree = Space.coerce function.bisectionTree
       }
 
 instance
@@ -147,19 +110,19 @@ instance
 
 instance
   Composition
-    ()
+    (Tolerance Meters)
     (SurfaceFunction3D space)
     (Region2D Unitless)
-    (Surface3D space)
+    (Result Surface3D.IsDegenerate (Surface3D space))
   where
   function << domain = Surface3D.parametric function domain
 
 instance
   Composition
-    (Tolerance Meters)
+    ()
     (SurfaceFunction3D space)
     (SurfaceFunction2D Unitless)
-    (Result (IsDegenerate ()) (SurfaceFunction3D space))
+    (SurfaceFunction3D space)
   where
   f << g = do
     let (dfdx, dfdy) = Pair.map (<< g) (partialDerivatives f)
@@ -174,68 +137,25 @@ instance
     new compiledComposed composedPartialDerivatives
 
 new ::
-  Tolerance Meters =>
-  Compiled space ->
-  (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space) ->
-  Result (IsDegenerate ()) (SurfaceFunction3D space)
-new givenCompiled givenPartialDerivatives = do
-  let candidate = unsafe givenCompiled givenPartialDerivatives
-  if candidate.maxSampledInteriorDivergence ~= Length.zero
-    then Err (IsDegenerate ())
-    else Ok candidate
-
-unsafe ::
   Compiled space ->
   (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space) ->
   SurfaceFunction3D space
-unsafe givenCompiled givenPartialDerivatives = do
-  let mergedPartialDerivatives =
+new givenCompiled givenPartialDerivatives =
+  SurfaceFunction3D
+    { compiled = givenCompiled
+    , partialDerivatives =
         PartialDerivatives.merge
           VectorSurfaceFunction3D.new
           VectorSurfaceFunction3D.compiled
           VectorSurfaceFunction3D.partialDerivatives
           givenPartialDerivatives
-  recursive \result -> do
-    let maxSampledInteriorDivergence =
-          NonEmpty.maximumOf (divergence result) UvPoint.interiorSamples
-    let degeneracyTolerance = Tolerance.unitless * maxSampledInteriorDivergence
-    let degenerateEdge samplePoints = do
-          let maxSampledDivergence = NonEmpty.maximumOf (divergence result) samplePoints
-          Tolerance.using degeneracyTolerance (maxSampledDivergence ~= Length.zero)
-    SurfaceFunction3D
-      { compiled = givenCompiled
-      , partialDerivatives = mergedPartialDerivatives
-      , maxSampledInteriorDivergence
-      , degenerateLeft = degenerateEdge UvPoint.leftSamples
-      , degenerateRight = degenerateEdge UvPoint.rightSamples
-      , degenerateBottom = degenerateEdge UvPoint.bottomSamples
-      , degenerateTop = degenerateEdge UvPoint.topSamples
-      , bisectionTree = Nondegenerate.field (buildBisectionTree UvBounds.unitSquare) result
-      }
-
-buildBisectionTree :: UvBounds -> Nondegenerate (SurfaceFunction3D space) -> BisectionTree space
-buildBisectionTree uvRange function = do
-  let segment = SurfaceFunction3D.Nondegenerate.segment uvRange function
-  let UvBounds uRange vRange = uvRange
-  let (uLeft, uRight) = Interval.bisect uRange
-  let (vBottom, vTop) = Interval.bisect vRange
-  let bottomLeft = buildBisectionTree (UvBounds uLeft vBottom) function
-  let bottomRight = buildBisectionTree (UvBounds uRight vBottom) function
-  let topLeft = buildBisectionTree (UvBounds uLeft vTop) function
-  let topRight = buildBisectionTree (UvBounds uRight vTop) function
-  let children = NonEmpty.four bottomLeft bottomRight topLeft topRight
-  Bisection.Tree uvRange segment children
+    }
 
 displacedFrom :: Point3D space -> VectorSurfaceFunction3D Meters space -> SurfaceFunction3D space
 displacedFrom point displacementFunction =
-  unsafe
+  new
     (CompiledFunction.constant point + VectorSurfaceFunction3D.compiled displacementFunction)
     (VectorSurfaceFunction3D.partialDerivatives displacementFunction)
-
-divergence :: SurfaceFunction3D space -> UvPoint -> Length
-divergence function uvPoint = do
-  let (duValue, dvValue) = partialDerivativesAt uvPoint function
-  Vector3D.divergence duValue dvValue
 
 {-# INLINE pointAt #-}
 pointAt :: UvPoint -> SurfaceFunction3D space -> Point3D space
@@ -299,30 +219,6 @@ secondPartialDerivatives function = do
   let (_, fvv) = VectorSurfaceFunction3D.partialDerivatives fv
   (fuu, fuv, fvv)
 
-degenerateLeft :: SurfaceFunction3D space -> Bool
-degenerateLeft = (.degenerateLeft)
-
-degenerateRight :: SurfaceFunction3D space -> Bool
-degenerateRight = (.degenerateRight)
-
-degenerateBottom :: SurfaceFunction3D space -> Bool
-degenerateBottom = (.degenerateBottom)
-
-degenerateTop :: SurfaceFunction3D space -> Bool
-degenerateTop = (.degenerateTop)
-
-nondegenerate ::
-  Tolerance Meters =>
-  SurfaceFunction3D space ->
-  Result (IsDegenerate ()) (Nondegenerate (SurfaceFunction3D space))
-nondegenerate function =
-  if function.maxSampledInteriorDivergence ~= Length.zero
-    then Err (IsDegenerate ())
-    else Ok (Nondegenerate function)
-
-bisectionTree :: Nondegenerate (SurfaceFunction3D space) -> BisectionTree space
-bisectionTree = Nondegenerate.get (.bisectionTree)
-
 normalDirectionRange ::
   Tolerance Meters =>
   UvBounds ->
@@ -350,7 +246,7 @@ transformBy transform function = do
         VectorSurfaceFunction3D.transformBy (Transform3D.vectorTransform transform)
   let transformedDerivatives =
         Pair.map transformDerivative (partialDerivatives function)
-  unsafe compiledTransformed transformedDerivatives
+  new compiledTransformed transformedDerivatives
 
 placeIn :: Frame3D global local -> SurfaceFunction3D local -> SurfaceFunction3D global
 placeIn frame function = do
@@ -362,7 +258,7 @@ placeIn frame function = do
           function.compiled
   let placedPartialDerivatives =
         Pair.map (VectorSurfaceFunction3D.placeIn frame) (partialDerivatives function)
-  unsafe compiledPlaced placedPartialDerivatives
+  new compiledPlaced placedPartialDerivatives
 
 relativeTo :: Frame3D global local -> SurfaceFunction3D global -> SurfaceFunction3D local
 relativeTo frame = placeIn (Frame3D.inverse frame)
@@ -379,18 +275,11 @@ displaceBy displacementFunction surfaceFunction = do
           (+)
           (partialDerivatives surfaceFunction)
           (VectorSurfaceFunction3D.partialDerivatives displacementFunction)
-  unsafe compiledOffset compiledPartialDerivatives
+  new compiledOffset compiledPartialDerivatives
 
 flip :: SurfaceFunction3D space -> SurfaceFunction3D space
 flip function =
-  recursive \result ->
-    SurfaceFunction3D
-      { compiled = function.compiled << CompiledFunction.wv
-      , partialDerivatives = Pair.mapFirst negate function.partialDerivatives
-      , maxSampledInteriorDivergence = function.maxSampledInteriorDivergence
-      , degenerateLeft = function.degenerateRight
-      , degenerateRight = function.degenerateLeft
-      , degenerateBottom = function.degenerateBottom
-      , degenerateTop = function.degenerateTop
-      , bisectionTree = Nondegenerate.field (buildBisectionTree UvBounds.unitSquare) result
-      }
+  SurfaceFunction3D
+    { compiled = function.compiled << CompiledFunction.wv
+    , partialDerivatives = Pair.mapFirst negate function.partialDerivatives
+    }

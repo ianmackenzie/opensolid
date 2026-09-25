@@ -221,8 +221,8 @@ library
     OpenSolid.Surface2D
     OpenSolid.Surface3D
     OpenSolid.Surface3D.Intersections
-    OpenSolid.Surface3D.Nondegenerate
     OpenSolid.Surface3D.OverlappingSegment
+    OpenSolid.Surface3D.Segment
     OpenSolid.SurfaceCurve3D
     OpenSolid.SurfaceCurve3D.Nondegenerate
     OpenSolid.SurfaceFunction1D
@@ -230,8 +230,6 @@ library
     OpenSolid.SurfaceFunction1D.Zeros
     OpenSolid.SurfaceFunction2D
     OpenSolid.SurfaceFunction3D
-    OpenSolid.SurfaceFunction3D.Nondegenerate
-    OpenSolid.SurfaceFunction3D.Segment
     OpenSolid.SurfacePoint3D
     OpenSolid.SurfaceVertex3D
     OpenSolid.Svg
@@ -272,7 +270,6 @@ library
     OpenSolid.VectorSurfaceFunction
     OpenSolid.VectorSurfaceFunction2D
     OpenSolid.VectorSurfaceFunction3D
-    OpenSolid.VectorSurfaceFunction3D.Nondegenerate
     OpenSolid.VectorTransform
     OpenSolid.VectorTransform2D
     OpenSolid.VectorTransform3D
@@ -304,7 +301,7 @@ library
     OpenSolid.Step.Encode
     OpenSolid.Step.Entities
     OpenSolid.Step.Types
-    OpenSolid.Surface3D.Nondegenerate.FindPoint
+    OpenSolid.Surface3D.FindPoint
     OpenSolid.SurfaceFunction1D.HorizontalCurve
     OpenSolid.SurfaceFunction1D.ImplicitCurveRange
     OpenSolid.SurfaceFunction1D.Internal

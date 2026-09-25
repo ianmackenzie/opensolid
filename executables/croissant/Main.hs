@@ -30,7 +30,7 @@ main = Tolerance.using Length.defaultTolerance do
           + r * SurfaceFunction1D.sin theta * World3D.forwardDirection
           + minorRadius * SurfaceFunction1D.sin phi * World3D.upwardDirection
   let surfaceFunction = SurfaceFunction3D.displacedFrom World3D.originPoint displacementFunction
-  let surface = Surface3D.parametric surfaceFunction UvRegion.unitSquare
+  surface <- Surface3D.parametric surfaceFunction UvRegion.unitSquare ?? fail
   body <- Body3D.boundedBy [surface] ?? fail
   let resolution = Resolution.maxSize (Length.centimeters 20.0)
   let mesh = Body3D.toPointMesh resolution body

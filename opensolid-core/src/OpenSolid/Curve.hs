@@ -377,6 +377,14 @@ instance
   where
   lhs - rhs = constant lhs - rhs
 
+instance Composition () (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
+  f << g = do
+    let dfdt = derivative f << g
+    let (dtdu, dtdv) = SurfaceFunction1D.partialDerivatives g
+    let compiledComposed = compiled f << SurfaceFunction1D.compiled g
+    let composedPartialDerivatives = (dfdt * dtdu, dfdt * dtdv)
+    SurfaceFunction3D.new compiledComposed composedPartialDerivatives
+
 data Solver dimension units space where
   Solver ::
     { resolve ::

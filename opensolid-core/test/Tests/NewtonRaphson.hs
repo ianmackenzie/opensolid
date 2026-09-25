@@ -70,7 +70,7 @@ pointOnSphere3D = Test.verify "Point on sphere" do
           (#radius radius)
           (#startAngle Angle.zero)
           (#endAngle Angle.halfPi)
-  let surface = Surface3D.revolved World3D.rightPlane profileCurve Axis2D.y Angle.twoPi
+  surface <- Surface3D.revolved World3D.rightPlane profileCurve Axis2D.y Angle.twoPi ?? fail
   let point =
         Point2D.polar radius (Angle.degrees 45.0)
           & Point2D.placeOn World3D.rightPlane

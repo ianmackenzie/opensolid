@@ -30,7 +30,10 @@ spherePatch = do
   sketchPlane <- Random.plane3D
   let radius = Length.centimeters 10.0
   let profile = Curve2D.arcFrom (Point2D.x radius) (Point2D.y radius) Angle.quarterTurn
-  let surface = Surface3D.revolved sketchPlane profile Axis2D.y Angle.quarterTurn
+  let surface =
+        case Surface3D.revolved sketchPlane profile Axis2D.y Angle.quarterTurn of
+          Ok revolvedSurface -> revolvedSurface
+          Err Surface3D.IsDegenerate -> error "Sphere patch should never be degenerate"
   Random.return surface
 
 isOnPole :: UvPoint -> Bool
@@ -58,7 +61,7 @@ findPole = Test.check 100 "findPole" do
   surface <- Test.generate spherePatch
   let function = Surface3D.function surface
   let point = SurfaceFunction3D.pointAt (UvPoint 1.0 0.0) function
-  solutions <- Surface3D.findPoint point surface ?? fail
+  let solutions = Surface3D.findPoint point surface
   case solutions of
     [SurfacePoint3D.Pole (Nondegenerate poleCurve) _] -> do
       let expectedPoleCurve = Curve2D.lineFrom (UvPoint 1.0 0.0) (UvPoint 1.0 1.0)
@@ -73,7 +76,7 @@ findInteriorPoint = Test.check 100 "findInterior" do
   let function = Surface3D.function surface
   uvPoint <- Test.generate nonPoleUvPoint
   let point = SurfaceFunction3D.pointAt uvPoint function
-  solutions <- Surface3D.findPoint point surface ?? fail
+  let solutions = Surface3D.findPoint point surface
   case solutions of
     [SurfacePoint3D.Point solution _] ->
       Test.expect (solution ~~ uvPoint)

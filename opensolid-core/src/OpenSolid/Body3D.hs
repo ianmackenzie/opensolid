@@ -46,7 +46,6 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
@@ -56,7 +55,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.Mesh (Mesh)
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Number qualified as Number
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
@@ -81,10 +79,7 @@ import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
-import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
-import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
-import OpenSolid.SurfaceFunction3D.Nondegenerate qualified as SurfaceFunction3D.Nondegenerate
-import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D))
+import OpenSolid.SurfaceVertex3D (SurfaceVertex3D)
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
@@ -147,12 +142,12 @@ sphere ::
 sphere ("centerPoint" ::: centerPoint) ("diameter" ::: diameter)
   | diameter ~= Length.zero = Err EmptyBody
   | otherwise = do
+      let panic = error "Constructing sphere from non-zero diameter should not fail"
       let r = 0.5 * diameter
       let arc = Curve2D.arcFrom (Point2D.y r) (Point2D.y -r) -Angle.pi
       let plane = World3D.forwardPlane centerPoint
-      case boundedBy [Surface3D.revolved plane arc Axis2D.y Angle.twoPi] of
-        Ok body -> Ok body
-        Err _ -> error "Constructing sphere from non-zero diameter should not fail"
+      revolvedSurface <- Surface3D.revolved plane arc Axis2D.y Angle.twoPi ?? panic
+      boundedBy [revolvedSurface] ?? panic
 
 {-| Create a cylindrical body from a start point, end point and diameter.
 
@@ -226,13 +221,11 @@ translational sketchPlane profile givenDisplacement = do
           Negative -> VectorCurve3D.reverse givenDisplacement
   let startPlane = Plane3D.translateBy (VectorCurve3D.startValue displacement) sketchPlane
   let endPlane = Plane3D.translateBy (VectorCurve3D.endValue displacement) sketchPlane
-  let startCap = Surface3D.flip (Surface3D.on startPlane profile)
-  let endCap = Surface3D.on endPlane profile
+  startCap <- Result.map Surface3D.flip (Surface3D.on startPlane profile) ?? Err BoundedBy.EmptyBody
+  endCap <- Surface3D.on endPlane profile ?? Err BoundedBy.EmptyBody
   let profileCurves = Set2D.toList (Region2D.boundaryCurves profile)
-  let sideSurface curve =
-        Surface3D.translational (Curve2D.placeOn sketchPlane curve) displacement
-          ?? catch \IsDegenerate{} -> Err BoundedBy.EmptyBody
-  sideSurfaces <- Result.collect sideSurface profileCurves
+  let sideSurface curve = Surface3D.translational (Curve2D.placeOn sketchPlane curve) displacement
+  sideSurfaces <- Result.collect sideSurface profileCurves ?? Err BoundedBy.EmptyBody
   boundedBy (startCap : endCap : sideSurfaces)
 
 {-| Create a revolved body from a sketch plane and profile.
@@ -270,8 +263,8 @@ revolved sketchPlane profile givenAxis givenSweptAngle = do
           Positive -> (sketchPlane, rotatedPlane)
           Negative -> (rotatedPlane, sketchPlane)
   let sweptAngle = Quantity.abs givenSweptAngle
-  let startCap = Surface3D.flip (Surface3D.on startPlane profile)
-  let endCap = Surface3D.on endPlane profile
+  startCap <- Result.map Surface3D.flip (Surface3D.on startPlane profile) ?? Err BoundedBy.EmptyBody
+  endCap <- Surface3D.on endPlane profile ?? Err BoundedBy.EmptyBody
   let isFullRevolution = angular (sweptAngle ~= Angle.twoPi)
   let endSurfaces = if isFullRevolution then [] else [startCap, endCap]
   -- A 2D axis such that the profile is to the *left* of the axis
@@ -279,7 +272,7 @@ revolved sketchPlane profile givenAxis givenSweptAngle = do
   -- in turn meaning that the side surfaces have the correct normal orientation)
   let axis2D = profileSign * givenAxis
   let sideSurface profileCurve = Surface3D.revolved startPlane profileCurve axis2D sweptAngle
-  let sideSurfaces = List.map sideSurface offAxisCurves
+  sideSurfaces <- Result.collect sideSurface offAxisCurves ?? Err BoundedBy.EmptyBody
   boundedBy (endSurfaces <> sideSurfaces)
 
 {-| Create a body bounded by the given surfaces.
@@ -335,25 +328,19 @@ registerSeam halfEdgeSet halfEdge accumulated =
 ----- MESHING -----
 
 toPointMesh :: Tolerance Meters => Resolution Meters -> Body3D space -> Mesh (Point3D space)
-toPointMesh resolution body =
-  body & toMesh resolution \function uvPoint ->
-    SurfaceFunction3D.Nondegenerate.pointAt uvPoint function
+toPointMesh resolution body = toMesh resolution Surface3D.pointOn body
 
 toSurfaceMesh ::
   Tolerance Meters =>
   Resolution Meters ->
   Body3D space ->
   Mesh (SurfaceVertex3D space)
-toSurfaceMesh resolution body =
-  body & toMesh resolution \function uvPoint ->
-    SurfaceVertex3D
-      (SurfaceFunction3D.Nondegenerate.pointAt uvPoint function)
-      (SurfaceFunction3D.Nondegenerate.normalDirectionAt uvPoint function)
+toSurfaceMesh resolution body = toMesh resolution Surface3D.vertexOn body
 
 toMesh ::
   Tolerance Meters =>
   Resolution Meters ->
-  (Nondegenerate (SurfaceFunction3D space) -> UvPoint -> vertex) ->
+  (Surface3D space -> UvPoint -> vertex) ->
   Body3D space ->
   Mesh vertex
 toMesh resolution toVertex body = do
@@ -373,28 +360,25 @@ surfaceSegmentsEntry ::
 surfaceSegmentsEntry resolution surfaceIndex surface = do
   let uvBounds = Region2D.bounds (Surface3D.domain surface)
   let Bounds2D (Interval u1 u2) (Interval v1 v2) = uvBounds
-  let surfaceSegmentSet =
-        case SurfaceFunction3D.nondegenerate (Surface3D.function surface) of
-          Ok function -> do
-            let p11 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u1 v1) function
-            let p21 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u2 v1) function
-            let p12 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u1 v2) function
-            let p22 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u2 v2) function
-            buildSurfaceSegmentSet resolution function uvBounds p11 p21 p12 p22
-          Err (IsDegenerate ()) -> Set2D.leaf uvBounds
+  let surfaceSegmentSet = do
+        let p11 = Surface3D.pointAt (UvPoint u1 v1) surface
+        let p21 = Surface3D.pointAt (UvPoint u2 v1) surface
+        let p12 = Surface3D.pointAt (UvPoint u1 v2) surface
+        let p22 = Surface3D.pointAt (UvPoint u2 v2) surface
+        buildSurfaceSegmentSet resolution surface uvBounds p11 p21 p12 p22
   (SurfaceId surfaceIndex, surfaceSegmentSet)
 
 buildSurfaceSegmentSet ::
   Tolerance Meters =>
   Resolution Meters ->
-  Nondegenerate (SurfaceFunction3D space) ->
+  Surface3D space ->
   UvBounds ->
   Point3D space ->
   Point3D space ->
   Point3D space ->
   Point3D space ->
   Set2D Unitless UvBounds
-buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
+buildSurfaceSegmentSet resolution surface uvRange p11 p21 p12 p22 = do
   let d1 = p21 - p12
   let d2 = p22 - p11
   let size = max (Vector3D.magnitude d1) (Vector3D.magnitude d2)
@@ -402,8 +386,8 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
   let uMid = Interval.midpoint uRange
   let vMid = Interval.midpoint vRange
   let uvCenter = UvPoint uMid vMid
-  let pCenter = SurfaceFunction3D.Nondegenerate.pointAt uvCenter function
-  let nCenter = SurfaceFunction3D.Nondegenerate.normalDirectionAt uvCenter function
+  let pCenter = Surface3D.pointAt uvCenter surface
+  let nCenter = Surface3D.normalDirectionAt uvCenter surface
   let pointError point = Quantity.abs ((point - pCenter) `dot` nCenter)
   let maxCornerError = pointError p11 `max` pointError p12 `max` pointError p21 `max` pointError p22
   let uWidth = Interval.width uRange
@@ -414,7 +398,7 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
   let uInterior2 = uMid + uOffset
   let vInterior1 = vMid - vOffset
   let vInterior2 = vMid + vOffset
-  let interiorError uvPoint = pointError (SurfaceFunction3D.Nondegenerate.pointAt uvPoint function)
+  let interiorError uvPoint = pointError (Surface3D.pointAt uvPoint surface)
   let interiorError11 = interiorError (UvPoint uInterior1 vInterior1)
   let interiorError21 = interiorError (UvPoint uInterior2 vInterior1)
   let interiorError12 = interiorError (UvPoint uInterior1 vInterior2)
@@ -430,10 +414,10 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
     else do
       let Interval u1 u2 = uRange
       let Interval v1 v2 = vRange
-      let pMid1 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint uMid v1) function
-      let pMid2 = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint uMid v2) function
-      let p1Mid = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u1 vMid) function
-      let p2Mid = SurfaceFunction3D.Nondegenerate.pointAt (UvPoint u2 vMid) function
+      let pMid1 = Surface3D.pointAt (UvPoint uMid v1) surface
+      let pMid2 = Surface3D.pointAt (UvPoint uMid v2) surface
+      let p1Mid = Surface3D.pointAt (UvPoint u1 vMid) surface
+      let p2Mid = Surface3D.pointAt (UvPoint u2 vMid) surface
       let uRange1 = Interval u1 uMid
       let uRange2 = Interval uMid u2
       let vRange1 = Interval v1 vMid
@@ -442,10 +426,10 @@ buildSurfaceSegmentSet resolution function uvRange p11 p21 p12 p22 = do
       let uvRange21 = UvBounds uRange2 vRange1
       let uvRange12 = UvBounds uRange1 vRange2
       let uvRange22 = UvBounds uRange2 vRange2
-      let set11 = buildSurfaceSegmentSet resolution function uvRange11 p11 pMid1 p1Mid pCenter
-      let set21 = buildSurfaceSegmentSet resolution function uvRange21 pMid1 p21 pCenter p2Mid
-      let set12 = buildSurfaceSegmentSet resolution function uvRange12 p1Mid pCenter p12 pMid2
-      let set22 = buildSurfaceSegmentSet resolution function uvRange22 pCenter p2Mid pMid2 p22
+      let set11 = buildSurfaceSegmentSet resolution surface uvRange11 p11 pMid1 p1Mid pCenter
+      let set21 = buildSurfaceSegmentSet resolution surface uvRange21 pMid1 p21 pCenter p2Mid
+      let set12 = buildSurfaceSegmentSet resolution surface uvRange12 p1Mid pCenter p12 pMid2
+      let set22 = buildSurfaceSegmentSet resolution surface uvRange22 pCenter p2Mid pMid2 p22
       Set2D.node (NonEmpty.four set11 set21 set12 set22)
 
 buildLeadingEdgeVerticesMap ::
@@ -578,30 +562,27 @@ surfaceMesh ::
   Tolerance Meters =>
   HashMap SurfaceId (Set2D Unitless UvBounds) ->
   HashMap HalfEdge.Id (NonEmpty UvPoint) ->
-  (Nondegenerate (SurfaceFunction3D space) -> UvPoint -> vertex) ->
+  (Surface3D space -> UvPoint -> vertex) ->
   Int ->
   Surface3D space ->
   Mesh vertex
-surfaceMesh surfaceSegmentsMap leadingEdgeVerticesMap toVertex surfaceIndex surface =
-  case SurfaceFunction3D.nondegenerate (Surface3D.function surface) of
-    Err (IsDegenerate ()) -> Mesh.empty
-    Ok nondegenerateSurfaceFunction -> do
-      let surfaceId = SurfaceId surfaceIndex
-      let boundaryPolygons =
-            Surface3D.boundaries surface
-              & Set3D.toNonEmptyWithIndex (toPolygon leadingEdgeVerticesMap surfaceId)
-      let boundarySegments = NonEmpty.combine Polygon2D.edges boundaryPolygons
-      let boundarySegmentSet = Set2D.build boundarySegments
-      let surfaceSegments = surfaceSegmentsMap !! surfaceId
-      let steinerPoints =
-            if Set2D.size surfaceSegments == 1
-              -- If the surface is sufficiently linear to be approximated by a single segment,
-              -- then we don't need any interior points at all (can just use the boundary points)
-              then []
-              else Set2D.toList surfaceSegments & List.filterMap (steinerPoint boundarySegmentSet)
-      let boundaryVertexLoops = NonEmpty.map Polygon2D.vertices boundaryPolygons
-      let uvPointMesh = CDT.unsafe boundaryVertexLoops steinerPoints
-      Mesh.map (toVertex nondegenerateSurfaceFunction) uvPointMesh
+surfaceMesh surfaceSegmentsMap leadingEdgeVerticesMap toVertex surfaceIndex surface = do
+  let surfaceId = SurfaceId surfaceIndex
+  let boundaryPolygons =
+        Surface3D.boundaries surface
+          & Set3D.toNonEmptyWithIndex (toPolygon leadingEdgeVerticesMap surfaceId)
+  let boundarySegments = NonEmpty.combine Polygon2D.edges boundaryPolygons
+  let boundarySegmentSet = Set2D.build boundarySegments
+  let surfaceSegments = surfaceSegmentsMap !! surfaceId
+  let steinerPoints =
+        if Set2D.size surfaceSegments == 1
+          -- If the surface is sufficiently linear to be approximated by a single segment,
+          -- then we don't need any interior points at all (can just use the boundary points)
+          then []
+          else Set2D.toList surfaceSegments & List.filterMap (steinerPoint boundarySegmentSet)
+  let boundaryVertexLoops = NonEmpty.map Polygon2D.vertices boundaryPolygons
+  let uvPointMesh = CDT.unsafe boundaryVertexLoops steinerPoints
+  Mesh.map (toVertex surface) uvPointMesh
 
 toPolygon ::
   HashMap HalfEdge.Id (NonEmpty UvPoint) ->
