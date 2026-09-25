@@ -216,7 +216,6 @@ library
     OpenSolid.Stl
     OpenSolid.Stream
     OpenSolid.Surface1D
-    OpenSolid.Surface2D
     OpenSolid.Surface3D
     OpenSolid.Surface3D.Intersections
     OpenSolid.Surface3D.OverlappingSegment
