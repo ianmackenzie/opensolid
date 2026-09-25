@@ -113,9 +113,7 @@ search ::
   Callback cached solution ->
   Cache cached ->
   Result InfiniteRecursion (List solution)
-search callback cache =
-  Result.map Pair.first $
-    process callback (Queue.singleton cache) [] []
+search callback cache = process callback (Queue.singleton cache) [] [] & Result.map Pair.first
 
 process ::
   Callback cached solution ->

@@ -221,7 +221,7 @@ translational sketchPlane profile givenDisplacement = do
           Negative -> VectorCurve3D.reverse givenDisplacement
   let startPlane = Plane3D.translateBy (VectorCurve3D.startValue displacement) sketchPlane
   let endPlane = Plane3D.translateBy (VectorCurve3D.endValue displacement) sketchPlane
-  startCap <- Result.map Surface3D.flip (Surface3D.on startPlane profile) ?? Err BoundedBy.EmptyBody
+  startCap <- Surface3D.on startPlane profile & Result.map Surface3D.flip ?? Err BoundedBy.EmptyBody
   endCap <- Surface3D.on endPlane profile ?? Err BoundedBy.EmptyBody
   let profileCurves = Set2D.toList (Region2D.boundaryCurves profile)
   let sideSurface curve = Surface3D.translational (Curve2D.placeOn sketchPlane curve) displacement
@@ -263,7 +263,7 @@ revolved sketchPlane profile givenAxis givenSweptAngle = do
           Positive -> (sketchPlane, rotatedPlane)
           Negative -> (rotatedPlane, sketchPlane)
   let sweptAngle = Quantity.abs givenSweptAngle
-  startCap <- Result.map Surface3D.flip (Surface3D.on startPlane profile) ?? Err BoundedBy.EmptyBody
+  startCap <- Surface3D.on startPlane profile & Result.map Surface3D.flip ?? Err BoundedBy.EmptyBody
   endCap <- Surface3D.on endPlane profile ?? Err BoundedBy.EmptyBody
   let isFullRevolution = angular (sweptAngle ~= Angle.twoPi)
   let endSurfaces = if isFullRevolution then [] else [startCap, endCap]

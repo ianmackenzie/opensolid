@@ -62,8 +62,8 @@ type Callback context solution =
 
 search :: Callback context solution -> context -> Result InfiniteRecursion (List solution)
 search callback initialContext =
-  Result.map Pair.first $
-    process callback (Queue.singleton (Domain2D.unit, initialContext, Quadrant)) [] []
+  process callback (Queue.singleton (Domain2D.unit, initialContext, Quadrant)) [] []
+    & Result.map Pair.first
 
 process ::
   Callback context solution ->
