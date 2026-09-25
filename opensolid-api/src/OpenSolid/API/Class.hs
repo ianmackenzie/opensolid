@@ -20,9 +20,11 @@ module OpenSolid.API.Class
   , factoryT2
   , factoryT2R
   , factory3
+  , factory3R
   , factoryT3
   , factoryT3R
   , factory4
+  , factory4R
   , factoryT4
   , factoryT4R
   , factory5
@@ -32,9 +34,11 @@ module OpenSolid.API.Class
   , static1I
   , static2
   , static3
+  , static3R
   , static3I
   , staticT3
   , static4
+  , static4R
   , static4I
   , static5
   , static5I
@@ -379,6 +383,17 @@ factory3 ::
   Member value
 factory3 = static3
 
+factory3R ::
+  (FFI a, FFI b, FFI c, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> Result x value) ->
+  Text ->
+  Member value
+factory3R = static3R
+
 factoryT3 ::
   (FFI a, FFI b, FFI c, FFI value) =>
   Text ->
@@ -412,6 +427,18 @@ factory4 ::
   Text ->
   Member value
 factory4 = static4
+
+factory4R ::
+  (FFI a, FFI b, FFI c, FFI d, FFI value) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> Result x value) ->
+  Text ->
+  Member value
+factory4R = static4R
 
 factoryT4 ::
   (FFI a, FFI b, FFI c, FFI d, FFI value) =>
@@ -602,6 +629,18 @@ static3 ::
 static3 name arg1 arg2 arg3 f docs =
   static3I name arg1 arg2 arg3 (wrap3 f) docs
 
+static3R ::
+  (FFI a, FFI b, FFI c, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> Result x result) ->
+  Text ->
+  Member value
+static3R name arg1 arg2 arg3 f docs =
+  static3I name arg1 arg2 arg3 (wrap3R f) docs
+
 static3I ::
   (FFI a, FFI b, FFI c, FFI result) =>
   Text ->
@@ -664,6 +703,19 @@ static4 ::
   Member value
 static4 name arg1 arg2 arg3 arg4 f docs =
   static4I name arg1 arg2 arg3 arg4 (wrap4 f) docs
+
+static4R ::
+  (FFI a, FFI b, FFI c, FFI d, FFI result) =>
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  (a -> b -> c -> d -> Result x result) ->
+  Text ->
+  Member value
+static4R name arg1 arg2 arg3 arg4 f docs =
+  static4I name arg1 arg2 arg3 arg4 (wrap4R f) docs
 
 static4I ::
   (FFI a, FFI b, FFI c, FFI d, FFI result) =>
