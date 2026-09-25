@@ -2,6 +2,8 @@ module OpenSolid.Curve2D
   ( Curve2D
   , Compiled
   , Segment
+  , IsDegenerate
+  , data IsDegenerate
   , new
   , displacedFrom
   , xy
@@ -135,6 +137,13 @@ import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 type Compiled units = Curve.Compiled 2 units Void
 
 type Segment units = Curve.Segment 2 units Void
+
+type IsDegenerate units = Curve.IsDegenerate 2 units Void
+
+{-# COMPLETE IsDegenerate #-}
+
+pattern IsDegenerate :: Point2D units -> IsDegenerate units
+pattern IsDegenerate point = Curve.IsDegenerate point
 
 new :: Tolerance units => Compiled units -> VectorCurve2D units -> Curve2D units
 new = Curve.new

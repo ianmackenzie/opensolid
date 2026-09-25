@@ -1,5 +1,6 @@
 module OpenSolid.SurfaceCurve3D
   ( SurfaceCurve3D
+  , IsDegenerate (IsDegenerate)
   , new
   , curve
   , uvCurve
@@ -20,7 +21,6 @@ import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Frame3D (Frame3D)
-import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Nondegenerate (Nondegenerate (Nondegenerate))
 import OpenSolid.Prelude
 import OpenSolid.Space qualified as Space
@@ -35,6 +35,8 @@ data SurfaceCurve3D space = SurfaceCurve3D
   { uvCurve :: UvCurve
   , curve :: Curve3D space
   }
+
+data IsDegenerate space = IsDegenerate (SurfacePoint3D space) deriving (Show, Err)
 
 instance Space.Coercion (SurfaceCurve3D space1) (SurfaceCurve3D space2) where
   coerce surfaceCurve =
@@ -108,16 +110,16 @@ relativeTo frame surfaceCurve =
 nondegenerate ::
   Tolerance Meters =>
   SurfaceCurve3D space ->
-  Result (IsDegenerate (SurfacePoint3D space)) (Nondegenerate (SurfaceCurve3D space))
+  Result (IsDegenerate space) (Nondegenerate (SurfaceCurve3D space))
 nondegenerate surfaceCurve =
   case Curve.nondegenerate (curve surfaceCurve) of
     -- Assume that if 3D curve is nondegenerate, UV curve must be too
     Ok Nondegenerate{} -> Ok (Nondegenerate surfaceCurve)
     -- 3D curve is degenerate: check UV curve
-    Err (IsDegenerate point) ->
+    Err (Curve3D.IsDegenerate point) ->
       Err . IsDegenerate $
         case UvCurve.nondegenerate (uvCurve surfaceCurve) of
           Ok nondegenerateUvCurve ->
             SurfacePoint3D.Pole nondegenerateUvCurve point
-          Err (IsDegenerate uvPoint) ->
+          Err (UvCurve.IsDegenerate uvPoint) ->
             SurfacePoint3D.Point uvPoint point

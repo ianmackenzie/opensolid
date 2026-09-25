@@ -2,6 +2,8 @@ module OpenSolid.Curve3D
   ( Curve3D
   , Compiled
   , Segment
+  , IsDegenerate
+  , data IsDegenerate
   , IntersectionPointWithSurface
   , new
   , on
@@ -72,6 +74,13 @@ import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 type Compiled space = Curve.Compiled 3 Meters space
 
 type Segment space = Curve.Segment 3 Meters space
+
+type IsDegenerate space = Curve.IsDegenerate 3 Meters space
+
+{-# COMPLETE IsDegenerate #-}
+
+pattern IsDegenerate :: Point3D space -> IsDegenerate space
+pattern IsDegenerate point = Curve.IsDegenerate point
 
 new :: Tolerance Meters => Compiled space -> VectorCurve3D Meters space -> Curve3D space
 new = Curve.new

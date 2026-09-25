@@ -1,5 +1,7 @@
 module OpenSolid.UvCurve
   ( UvCurve
+  , IsDegenerate
+  , data IsDegenerate
   , new
   , startPoint
   , endPoint
@@ -20,12 +22,18 @@ import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Intersections qualified as Curve.Intersections
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D)
-import OpenSolid.IsDegenerate (IsDegenerate)
 import OpenSolid.Nondegenerate (Nondegenerate)
 import OpenSolid.Prelude
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.VectorCurve2D (VectorCurve2D)
+
+type IsDegenerate = Curve.IsDegenerate 2 Unitless Void
+
+{-# COMPLETE IsDegenerate #-}
+
+pattern IsDegenerate :: UvPoint -> IsDegenerate
+pattern IsDegenerate point = Curve.IsDegenerate point
 
 new :: Curve2D.Compiled Unitless -> VectorCurve2D Unitless -> UvCurve
 new = unitless Curve2D.new
@@ -68,7 +76,7 @@ cornerArc ::
   UvCurve
 cornerArc = unitless Curve2D.cornerArc
 
-nondegenerate :: UvCurve -> Result (IsDegenerate UvPoint) (Nondegenerate UvCurve)
+nondegenerate :: UvCurve -> Result IsDegenerate (Nondegenerate UvCurve)
 nondegenerate = unitless Curve.nondegenerate
 
 intersections ::

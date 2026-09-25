@@ -10,6 +10,7 @@ module OpenSolid.Curve
   , Compiled
   , Segment
   , BisectionTree
+  , IsDegenerate (IsDegenerate)
   , HasDegeneracy (HasDegeneracy)
   , IsDegenerateAndCoincidentWithPoint (IsDegenerateAndCoincidentWithPoint)
   , new
@@ -104,7 +105,6 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.Line (Line (Line))
 import OpenSolid.Line qualified as Line
 import OpenSolid.List qualified as List
@@ -202,6 +202,15 @@ type Compiled dimension units space =
     (Point dimension units space)
     (Interval Unitless)
     (Bounds dimension units space)
+
+data IsDegenerate dimension units space
+  = IsDegenerate (Point dimension units space)
+
+deriving instance PointExists dimension units space => Eq (IsDegenerate dimension units space)
+
+deriving instance PointExists dimension units space => Show (IsDegenerate dimension units space)
+
+deriving instance PointExists dimension units space => Err (IsDegenerate dimension units space)
 
 data HasDegeneracy = HasDegeneracy deriving (Eq, Show, Err)
 
@@ -638,7 +647,7 @@ isOnAxis axis curve = NonEmpty.all (^ axis) (testPoints curve)
 nondegenerate ::
   (CurveExists dimension units space, Tolerance units) =>
   Curve dimension units space ->
-  Result (IsDegenerate (Point dimension units space)) (Nondegenerate (Curve dimension units space))
+  Result (IsDegenerate dimension units space) (Nondegenerate (Curve dimension units space))
 nondegenerate curve =
   if VectorCurve.isZero (derivative curve)
     then Err (IsDegenerate (startPoint curve))

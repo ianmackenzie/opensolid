@@ -65,7 +65,6 @@ import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.IsDegenerate qualified as IsDegenerate
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -192,7 +191,7 @@ vertices surface = do
   let surfaceCurves = Set3D.flatten (boundaries surface)
   let toPole surfaceCurve = case SurfaceCurve3D.nondegenerate surfaceCurve of
         Ok{} -> Nothing
-        Err (IsDegenerate.IsDegenerate surfacePoint) -> case surfacePoint of
+        Err (SurfaceCurve3D.IsDegenerate surfacePoint) -> case surfacePoint of
           SurfacePoint3D.Point{} -> Nothing
           SurfacePoint3D.Pole{} -> Just surfacePoint
   let poles = Set3D.filterMapItems toPole surfaceCurves

@@ -3,6 +3,7 @@ module OpenSolid.Curve
   , Curve2D
   , UvCurve
   , Curve3D
+  , IsDegenerate
   , CurveExists
   , Solver
   , Compiled
@@ -45,6 +46,10 @@ type Curve2D units = Curve 2 units Void
 type UvCurve = Curve 2 Unitless Void
 
 type Curve3D space = Curve 3 Meters space
+
+type role IsDegenerate nominal nominal nominal
+
+data IsDegenerate (dimension :: Natural) (units :: Type) (space :: Type)
 
 class CurveExists (dimension :: Natural) (units :: Type) (space :: Type)
 
