@@ -274,8 +274,8 @@ subsegment curve tRange = do
           segmentTangentDirectionRange
   let segmentCurvatureVectorRange_ =
         segmentCurvatureMagnitudeRange_ * segmentCurvatureDirectionRange
-  let isDegenerateStart = t2 <= Degeneracy.tStart && hasDegenerateStart curve
-  let isDegenerateEnd = t1 >= Degeneracy.tEnd && hasDegenerateEnd curve
+  let isDegenerateStart = t2 <= Degeneracy.startValue && hasDegenerateStart curve
+  let isDegenerateEnd = t1 >= Degeneracy.endValue && hasDegenerateEnd curve
   Segment
     { range = segmentRange
     , derivativeRange = segmentDerivativeRange

@@ -378,10 +378,10 @@ buildBisectionTree uvRange surface = do
 segment :: UvBounds -> Surface3D space -> Segment space
 segment uvRange surface = do
   let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvRange
-  let isDegenerateLeft = uHigh <= Degeneracy.tStart && degenerateLeft surface
-  let isDegenerateRight = uLow >= Degeneracy.tEnd && degenerateRight surface
-  let isDegenerateBottom = vHigh <= Degeneracy.tStart && degenerateBottom surface
-  let isDegenerateTop = vLow >= Degeneracy.tEnd && degenerateTop surface
+  let isDegenerateLeft = uHigh <= Degeneracy.startValue && degenerateLeft surface
+  let isDegenerateRight = uLow >= Degeneracy.endValue && degenerateRight surface
+  let isDegenerateBottom = vHigh <= Degeneracy.startValue && degenerateBottom surface
+  let isDegenerateTop = vLow >= Degeneracy.endValue && degenerateTop surface
   let derivativeRanges = partialDerivativeRanges uvRange surface
   let (duRange, dvRange) = derivativeRanges
   Segment
