@@ -49,7 +49,6 @@ import OpenSolid.Curve.IntersectionPoint qualified as Curve.IntersectionPoint
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
-import OpenSolid.Curve2D.Nonzero qualified as Curve2D.Nonzero
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Estimate (Estimate)
@@ -243,15 +242,12 @@ addFillet radius point curves = do
     List.One _ -> couldNotFindPointToFillet
     List.ThreeOrMore -> couldNotFindPointToFillet
     List.Two firstCurve secondCurve -> do
-      firstNonzero <- try do Curve.nonzero firstCurve
-      secondNonzero <- try do Curve.nonzero secondCurve
       let firstEndDirection = Curve2D.tangentDirectionAt 1.0 firstCurve
       let secondStartDirection = Curve2D.tangentDirectionAt 0.0 secondCurve
       let cornerAngle = Direction2D.angleFrom firstEndDirection secondStartDirection
       let offsetDistance = Quantity.sign cornerAngle * Quantity.abs radius
-      let offsetCurve curve = try do Curve2D.Nonzero.offsetLeftwardBy offsetDistance curve
-      firstOffsetCurve <- offsetCurve firstNonzero
-      secondOffsetCurve <- offsetCurve secondNonzero
+      firstOffsetCurve <- Curve2D.offsetLeftwardBy offsetDistance firstCurve
+      secondOffsetCurve <- Curve2D.offsetLeftwardBy offsetDistance secondCurve
       case Curve2D.intersections firstOffsetCurve secondOffsetCurve of
         Nothing -> couldNotSolveForFilletLocation
         Just Curve.OverlappingSegments{} -> couldNotSolveForFilletLocation

@@ -76,6 +76,8 @@ module OpenSolid.Curve2D
   , translateAlong
   , rotateAround
   , mirrorAcross
+  , offsetLeftwardBy
+  , offsetRightwardBy
   , convert
   , unconvert
   , toPolyline
@@ -121,6 +123,7 @@ import OpenSolid.Line2D (Line2D)
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Nonzero (Nonzero (Nonzero))
+import OpenSolid.Nonzero qualified as Nonzero
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
 import OpenSolid.Plane3D (Plane3D)
@@ -705,6 +708,25 @@ rotateAround = Transform2D.rotateAroundImpl transformBy
 -- | Mirror across the given axis.
 mirrorAcross :: Axis2D units -> Curve2D units -> Curve2D units
 mirrorAcross = Transform2D.mirrorAcrossImpl transformBy
+
+offsetLeftwardBy ::
+  Tolerance units =>
+  Quantity units ->
+  Curve2D units ->
+  Result Text (Curve2D units)
+offsetLeftwardBy offset curve = do
+  nonzeroCurve <- try do Curve.nonzero curve
+  let nonzeroDerivative = Curve.Nonzero.derivative nonzeroCurve
+  let tangentCurve = VectorCurve.Nonzero.normalize nonzeroDerivative
+  let offsetCurve = VectorCurve2D.rotateBy Angle.quarterTurn (offset * Nonzero.unwrap tangentCurve)
+  try do displaceBy offsetCurve curve
+
+offsetRightwardBy ::
+  Tolerance units =>
+  Quantity units ->
+  Curve2D units ->
+  Result Text (Curve2D units)
+offsetRightwardBy distance = offsetLeftwardBy -distance
 
 convert :: Quantity (units2 ?/? units1) -> Curve2D units1 -> Curve2D units2
 convert = Curve.convert
