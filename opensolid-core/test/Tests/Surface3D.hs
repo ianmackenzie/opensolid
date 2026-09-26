@@ -84,8 +84,7 @@ findInteriorPoint = Test.check 100 "findInterior" do
 
 ruledSurface :: Test
 ruledSurface =
-  Test.group
-    "ruledSurface"
+  Test.group "ruledSurface" $
     [ ruledSurfaceCorrectValue
     , ruledSurfaceDerivativeConsistency
     ]
@@ -114,8 +113,7 @@ ruledSurfaceDerivativeConsistency = Test.check 100 "ruledSurfaceDerivativeConsis
 
 translationalSurface :: Test
 translationalSurface =
-  Test.group
-    "translationalSurface"
+  Test.group "translationalSurface" $
     [ translationalSurfaceCorrectValue
     , translationalSurfaceDerivativeConsistency
     ]
