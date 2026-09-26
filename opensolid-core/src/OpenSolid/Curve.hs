@@ -47,7 +47,6 @@ module OpenSolid.Curve
   , curvatureRange_
   , curvatureVectorRange_
   , reverse
-  , isPoint
   , hasDegenerateStart
   , hasDegenerateEnd
   , isOnAxis
@@ -664,13 +663,6 @@ secondDerivative ::
   Curve dimension units space ->
   VectorCurve dimension units space
 secondDerivative = VectorCurve.derivative . derivative
-
-{-# INLINE isPoint #-}
-isPoint ::
-  (CurveExists dimension units space, Tolerance units) =>
-  Curve dimension units space ->
-  Bool
-isPoint curve = VectorCurve.isZero (derivative curve)
 
 pointAt :: Number -> Curve dimension units space -> Point dimension units space
 pointAt 0.0 curve = startPoint curve

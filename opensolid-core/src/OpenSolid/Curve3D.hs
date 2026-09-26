@@ -31,7 +31,6 @@ module OpenSolid.Curve3D
   , curvatureVectorAt
   , curvatureRange
   , curvatureVectorRange
-  , isPoint
   , startPoint
   , endPoint
   , endpoints
@@ -248,9 +247,6 @@ curvatureVectorRange ::
   VectorBounds3D InverseMeters space
 curvatureVectorRange tRange curve =
   Units.specialize (Curve.curvatureVectorRange_ tRange curve)
-
-isPoint :: Tolerance Meters => Curve3D space -> Bool
-isPoint = Curve.isPoint
 
 startPoint :: Curve3D space -> Point3D space
 startPoint = Curve.startPoint

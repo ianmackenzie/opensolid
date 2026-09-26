@@ -62,7 +62,6 @@ module OpenSolid.Curve2D
   , distanceAlong
   , distanceLeftOf
   , distanceRightOf
-  , isPoint
   , isOnAxis
   , xCoordinate
   , yCoordinate
@@ -616,9 +615,6 @@ distanceLeftOf (Axis2D p0 d) curve = (curve - p0) `dot` Direction2D.rotateLeft d
 
 distanceRightOf :: Axis2D units -> Curve2D units -> Curve1D units
 distanceRightOf (Axis2D p0 d) curve = (curve - p0) `dot` Direction2D.rotateRight d
-
-isPoint :: Tolerance units => Curve2D units -> Bool
-isPoint = Curve.isPoint
 
 {-| Check if the given curve curve is collinear with (lies on) the given axis.
 
