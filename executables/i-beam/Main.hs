@@ -14,11 +14,10 @@ import OpenSolid.Polygon2D (Polygon2D (Polygon2D))
 import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
-main = Tolerance.using Length.defaultTolerance do
+main = spatial do
   let length = Length.centimeters 30.0
   let width = Length.centimeters 10.0
   let height = Length.centimeters 15.0

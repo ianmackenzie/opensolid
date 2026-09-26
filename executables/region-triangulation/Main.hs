@@ -12,11 +12,10 @@ import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Svg qualified as Svg
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Triangle2D (Triangle2D (Triangle2D))
 
 main :: IO ()
-main = Tolerance.using Length.defaultTolerance do
+main = spatial do
   let width = Length.centimeters 18.0
   let height = Length.centimeters 12.0
   let cornerRadius = Length.centimeters 5.0

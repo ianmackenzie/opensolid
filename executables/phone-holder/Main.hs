@@ -21,7 +21,6 @@ import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.Step qualified as Step
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3D qualified as World3D
 import Path2D qualified
 import Path3D qualified
@@ -48,7 +47,7 @@ advancedFaceEntity loop surface =
     ]
 
 main :: IO ()
-main = Tolerance.using Length.defaultTolerance do
+main = spatial do
   let rLarge = Length.centimeters 1.0
   let rSmall = Length.centimeters 0.5
   let thickness = Length.millimeters 3.0

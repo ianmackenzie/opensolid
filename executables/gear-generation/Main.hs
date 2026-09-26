@@ -18,7 +18,6 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.SpurGear qualified as SpurGear
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3D qualified as World3D
 
 gearBody :: Tolerance Meters => Int -> Result Text (Body3D space)
@@ -33,7 +32,7 @@ gearBody numTeeth = do
   Body3D.extruded World3D.frontPlane profile (-0.5 * width) (0.5 * width) ?? fail
 
 main :: IO ()
-main = Tolerance.using Length.defaultTolerance do
+main = spatial do
   let resolution = Resolution.maxError (Length.millimeters 0.01)
   let writeGlb numTeeth = do
         timer <- Timer.start

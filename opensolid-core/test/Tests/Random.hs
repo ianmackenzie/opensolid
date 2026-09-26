@@ -139,44 +139,44 @@ retry fallibleGenerator = do
     Ok value -> Random.return value
     Err _ -> retry fallibleGenerator
 
-line2D :: Tolerance Meters => Generator (Curve2D Meters)
-line2D = retry (Random.map2 Curve2D.lineFrom point2D point2D)
+line2D :: Generator (Curve2D Meters)
+line2D = retry (Random.map2 (spatial Curve2D.lineFrom) point2D point2D)
 
-arc2D :: Tolerance Meters => Generator (Curve2D Meters)
+arc2D :: Generator (Curve2D Meters)
 arc2D = retry do
   startPoint <- point2D
   endPoint <- point2D
   angleSign <- Random.sign
   angleMagnitude <- Random.quantity (Angle.degrees 5.0) (Angle.degrees 355.0)
   let sweptAngle = angleSign * angleMagnitude
-  Random.return (Curve2D.arcFrom startPoint endPoint sweptAngle)
+  Random.return (spatial Curve2D.arcFrom startPoint endPoint sweptAngle)
 
-quadraticSpline2D :: Tolerance Meters => Generator (Curve2D Meters)
-quadraticSpline2D = retry (Random.map3 Curve2D.quadraticBezier point2D point2D point2D)
+quadraticSpline2D :: Generator (Curve2D Meters)
+quadraticSpline2D = retry (Random.map3 (spatial Curve2D.quadraticBezier) point2D point2D point2D)
 
-cubicSpline2D :: Tolerance Meters => Generator (Curve2D Meters)
-cubicSpline2D = retry (Random.map4 Curve2D.cubicBezier point2D point2D point2D point2D)
+cubicSpline2D :: Generator (Curve2D Meters)
+cubicSpline2D = retry (Random.map4 (spatial Curve2D.cubicBezier) point2D point2D point2D point2D)
 
-involute2D :: Tolerance Meters => Generator (Curve2D Meters)
+involute2D :: Generator (Curve2D Meters)
 involute2D = retry do
   centerPoint <- point2D
   radialVector <- vector2D
   angleSign <- Random.sign
   startAngle <- Random.quantity Angle.zero (angleSign * Angle.twoPi)
   endAngle <- Random.quantity Angle.zero (angleSign * Angle.twoPi)
-  Random.return (Curve2D.involute centerPoint radialVector startAngle endAngle)
+  Random.return (spatial Curve2D.involute centerPoint radialVector startAngle endAngle)
 
-line3D :: Tolerance Meters => Generator (Curve3D space)
-line3D = retry (Random.map2 Curve3D.lineFrom point3D point3D)
+line3D :: Generator (Curve3D space)
+line3D = retry (Random.map2 (spatial Curve3D.lineFrom) point3D point3D)
 
-arc3D :: Tolerance Meters => Generator (Curve3D space)
+arc3D :: Generator (Curve3D space)
 arc3D = Random.map2 Curve2D.placeOn plane3D arc2D
 
-quadraticSpline3D :: Tolerance Meters => Generator (Curve3D Meters)
-quadraticSpline3D = retry (Random.map3 Curve3D.quadraticBezier point3D point3D point3D)
+quadraticSpline3D :: Generator (Curve3D Meters)
+quadraticSpline3D = retry (Random.map3 (spatial Curve3D.quadraticBezier) point3D point3D point3D)
 
-cubicSpline3D :: Tolerance Meters => Generator (Curve3D Meters)
-cubicSpline3D = retry (Random.map4 Curve3D.cubicBezier point3D point3D point3D point3D)
+cubicSpline3D :: Generator (Curve3D Meters)
+cubicSpline3D = retry (Random.map4 (spatial Curve3D.cubicBezier) point3D point3D point3D point3D)
 
 translation2D :: Generator (Transform2D.Rigid Meters)
 translation2D = Random.map Transform2D.translateBy vector2D

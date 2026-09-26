@@ -37,6 +37,7 @@ module OpenSolid.Prelude
   , Tolerance
   , unitless
   , angular
+  , spatial
   , ApproximateEquality ((~=))
   , Indexed ((@))
   , Intersects ((^))
@@ -301,6 +302,10 @@ unitless expression = let ?tolerance = 1e-9 in expression
 {-# INLINE angular #-}
 angular :: (Tolerance Radians => a) -> a
 angular expression = let ?tolerance = Quantity 1e-9 in expression
+
+{-# INLINE spatial #-}
+spatial :: (Tolerance Meters => a) -> a
+spatial expression = let ?tolerance = Quantity 1e-9 in expression
 
 ----- Approximate equality -----
 

@@ -14,11 +14,10 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Text qualified as Text
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
-main = Tolerance.using Length.defaultTolerance do
+main = spatial do
   let axes = [Axis2D.y, -Axis2D.y]
   let sweptAngles = [Angle.degrees 45.0, Angle.degrees -45.0]
   let interval = Interval (Length.centimeters 5.0) (Length.centimeters 10.0)

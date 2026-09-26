@@ -22,14 +22,12 @@ import Control.Exception (SomeException)
 import Control.Exception qualified
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.IO qualified as IO
-import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude hiding (fail)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
-import OpenSolid.Tolerance qualified as Tolerance
 import System.Console.ANSI qualified as AnsiTerminal
 import System.Environment
 import System.Exit qualified
@@ -91,8 +89,7 @@ verify :: Text -> (Tolerance Meters => Expectation) -> Test
 verify = check 1
 
 check :: Int -> Text -> (Tolerance Meters => Expectation) -> Test
-check count label expectation =
-  Check count label (Tolerance.using Length.defaultTolerance expectation)
+check count label expectation = Check count label (spatial expectation)
 
 group :: Text -> List Test -> Test
 group = Group

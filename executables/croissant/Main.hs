@@ -10,12 +10,11 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
-main = Tolerance.using Length.defaultTolerance do
+main = spatial do
   let majorRadius = Length.meter
   let k = Length.meters 2.0
   let minorRadius =

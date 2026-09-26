@@ -10,12 +10,10 @@ import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Curve3D.IntersectionPointWithSurface qualified as Curve3D.IntersectionPointWithSurface
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
-import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
 
@@ -23,9 +21,6 @@ class Matching a where
   (~~) :: a -> a -> Bool
 
 infix 4 ~~
-
-spatial :: (Tolerance Meters => a) -> a
-spatial = Tolerance.using Length.defaultTolerance
 
 instance (Matching a, Matching b) => Matching (a, b) where
   (a1, b1) ~~ (a2, b2) = a1 ~~ a2 && b1 ~~ b2

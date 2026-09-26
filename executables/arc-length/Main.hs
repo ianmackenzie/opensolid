@@ -22,7 +22,6 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
-import OpenSolid.Tolerance qualified as Tolerance
 
 formatLength :: Length -> Text
 formatLength length =
@@ -34,19 +33,18 @@ testCurve label curve = do
   IO.printLine (label <> ": " <> formatLength length)
 
 testLineLength :: IO ()
-testLineLength = Tolerance.using (Length.meters 1e-6) do
+testLineLength = spatial do
   line <- Curve2D.lineFrom Point2D.origin (Point2D.centimeters 30.0 40.0) ?? fail
   testCurve "Line" line
 
 testQuadraticSplineLength :: IO ()
-testQuadraticSplineLength =
-  Tolerance.using Length.defaultTolerance do
-    let p1 = Point2D.origin
-    let p2 = Point2D.centimeters 20.0 30.0
-    let p3 = Point2D.centimeters 40.0 0.0
-    spline <- Curve2D.quadraticBezier p1 p2 p3 ?? fail
-    testCurve "Quadratic spline" spline
-    IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
+testQuadraticSplineLength = spatial do
+  let p1 = Point2D.origin
+  let p2 = Point2D.centimeters 20.0 30.0
+  let p3 = Point2D.centimeters 40.0 0.0
+  spline <- Curve2D.quadraticBezier p1 p2 p3 ?? fail
+  testCurve "Quadratic spline" spline
+  IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
 
 analyticalLength :: Point2D Meters -> Point2D Meters -> Point2D Meters -> Length
 analyticalLength (Point2D x0 y0) (Point2D x1 y1) (Point2D x2 y2) = do
@@ -65,7 +63,7 @@ analyticalLength (Point2D x0 y0) (Point2D x1 y1) (Point2D x2 y2) = do
   (a_32 * s_abc + a_2 * b * (s_abc - c_2) + (4.0 * c * a - b * b) * Number.log ((2.0 * a_2 + ba + s_abc) / (ba + c_2))) / (4.0 * a_32)
 
 testCubicSplineParameterization :: IO ()
-testCubicSplineParameterization = Tolerance.using Length.defaultTolerance do
+testCubicSplineParameterization = spatial do
   let p1 = Point2D.centimeters 5.0 5.0
   let p2 = Point2D.centimeters 7.0 8.0
   let p3 = Point2D.centimeters 16.0 15.0

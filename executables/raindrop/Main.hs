@@ -13,12 +13,11 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
-main = Tolerance.using Length.defaultTolerance do
+main = spatial do
   let p1 = Point2D.meters 0.0 -2.0
   let p2 = Point2D.meters 1.0 0.0
   let v2 = Vector2D.meters 0.0 2.0

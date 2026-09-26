@@ -34,7 +34,7 @@ import Test qualified
 import Tests.Matching ((~~))
 import Tests.Random qualified as Random
 
-curveGenerators :: Tolerance Meters => List (Text, Generator (Curve2D Meters))
+curveGenerators :: List (Text, Generator (Curve2D Meters))
 curveGenerators =
   [ ("Line2D", Random.line2D)
   , ("Arc2D", Random.arc2D)
@@ -43,7 +43,7 @@ curveGenerators =
   , ("Involute2D", Random.involute2D)
   ]
 
-tests :: Tolerance Meters => List Test
+tests :: List Test
 tests =
   [ findPoint
   , findOwnPoint
@@ -313,7 +313,7 @@ secondDerivativeConsistency randomCurve = Test.check 100 "secondDerivativeConsis
   t <- Test.generate Parameter.random
   secondDerivativeIsConsistent curve t
 
-derivativeConsistency :: Tolerance Meters => Test
+derivativeConsistency :: Test
 derivativeConsistency =
   Test.group "derivativeConsistency" $
     curveGenerators & List.map
@@ -323,7 +323,7 @@ derivativeConsistency =
           , secondDerivativeConsistency generator
           ]
 
-reversalConsistency :: Tolerance Meters => Test
+reversalConsistency :: Test
 reversalConsistency =
   Test.group "reversalConsistency" $
     curveGenerators & List.map

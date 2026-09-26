@@ -108,15 +108,15 @@ testTransformation = do
   let rotatedPoints = List.map rotationFunction originalPoints
   log "Rotated points" rotatedPoints
 
-offsetPoint :: Tolerance Meters => Point2D Meters -> Point2D Meters -> Length -> Point2D Meters
-offsetPoint startPoint endPoint distance =
+offsetPoint :: Point2D Meters -> Point2D Meters -> Length -> Point2D Meters
+offsetPoint startPoint endPoint distance = spatial do
   case Direction2D.from startPoint endPoint of
     Err Direction2D.PointsAreCoincident -> startPoint
     Ok direction -> do
       let displacement = distance * Direction2D.perpendicularTo direction
       Point2D.midpoint startPoint endPoint + displacement
 
-testCustomFunction :: Tolerance Meters => IO ()
+testCustomFunction :: IO ()
 testCustomFunction = do
   let point = offsetPoint (Point2D.meters 1.0 0.0) (Point2D.meters 3.0 0.0) (Length.meters 1.0)
   log "Offset point" point
@@ -128,13 +128,13 @@ testListOperations = do
   log "Successive deltas" deltas
   log "Successive intervals" intervals
 
-getCrossProduct :: Tolerance Meters => Result Text Number
-getCrossProduct = do
+getCrossProduct :: Result Text Number
+getCrossProduct = spatial do
   vectorDirection <- Vector2D.direction (Vector2D.meters 2.0 3.0) ?? fail
   lineDirection <- Direction2D.from Point2D.origin Point2D.origin ?? fail
   Ok (vectorDirection `cross` lineDirection)
 
-testTry :: Tolerance Meters => IO ()
+testTry :: IO ()
 testTry =
   IO.onError IO.printLine do
     crossProduct <- getCrossProduct ?? fail
@@ -176,8 +176,8 @@ testNonEmpty = do
   testEmptyCheck []
   testEmptyCheck [2, 3, 1]
 
-testPlaneTorusIntersection :: Tolerance Meters => IO ()
-testPlaneTorusIntersection = do
+testPlaneTorusIntersection :: IO ()
+testPlaneTorusIntersection = spatial do
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
   crossSection <- Curve2D.circle (Circle2D.withRadius minorRadius (Point2D.x majorRadius)) ?? fail
@@ -273,7 +273,6 @@ testIOParallel = do
   log "Square roots" squareRoots
 
 drawBezier ::
-  Tolerance Meters =>
   Color ->
   Point2D Unitless ->
   List (Point2D Unitless) ->
@@ -284,7 +283,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawingEndPoint = Point2D.convert toDrawing endPoint
   let drawingInnerControlPoints = List.map (Point2D.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints <> [drawingEndPoint])
-  curve <- Curve2D.bezier drawingControlPoints ?? fail
+  curve <- spatial (Curve2D.bezier drawingControlPoints) ?? fail
   let drawCurveRange tRange = drawBounds (Curve2D.range tRange curve)
   let controlPointDiameter = Length.millimeters 10.0
   let drawControlPoint point = Svg.circle (Circle2D.withDiameter controlPointDiameter point)
@@ -301,7 +300,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
       , Svg.curve resolution curve
       ]
 
-testBezierSegment :: Tolerance Meters => IO ()
+testBezierSegment :: IO ()
 testBezierSegment = do
   let p1 = Point2D.origin
   let p2 = Point2D 0.0 5.0
@@ -315,7 +314,7 @@ testBezierSegment = do
   Svg.write "executables/sandbox/test-bezier-segment.svg" (Svg.viewBox drawingBounds) curveEntity
 
 testHermiteBezier :: IO ()
-testHermiteBezier = Tolerance.using Length.defaultTolerance do
+testHermiteBezier = spatial do
   let startPoint = Point2D.origin
   let startDerivatives = [Vector2D.centimeters 10.0 10.0]
   let endDerivatives = [Vector2D.centimeters 0.0 -10.0, Vector2D.zero]
@@ -392,7 +391,7 @@ testCurve2dExpression = do
   log "Evaluated 2D curve" (Expression.value curve 3.0)
 
 main :: IO ()
-main = Tolerance.using Length.defaultTolerance do
+main = do
   testScalarArithmetic
   testVectorArithmetic
   testIntervalArithmetic

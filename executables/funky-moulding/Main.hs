@@ -12,11 +12,10 @@ import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Stl qualified as Stl
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
-main = Tolerance.using Length.defaultTolerance do
+main = spatial do
   let innerRadius = Length.centimeters 10.0
   let width = Length.centimeters 3.0
   let outerRadius = innerRadius + width

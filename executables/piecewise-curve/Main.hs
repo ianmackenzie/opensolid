@@ -12,12 +12,11 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Svg qualified as Svg
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 main :: IO ()
-main = Tolerance.using Length.defaultTolerance do
+main = spatial do
   let weightCurve = Nonzero (Curve1D.quadraticSpline 1.0 (1.0 / Number.sqrt 2.0) 1.0)
   let vE = Vector2D 1.0 0.0
   let vNE = Vector2D 1.0 1.0 / Number.sqrt 2.0
