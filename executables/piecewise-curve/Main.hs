@@ -27,9 +27,9 @@ main = spatial do
   let vS = Vector2D 0.0 -1.0
   let vSE = Vector2D 1.0 -1.0 / Number.sqrt 2.0
   let radius = Length.centimeters 10.0
-  let arc v1 v2 v3 = do
+  let arc v1 v2 v3 = try do
         let radialUnitVector = VectorCurve2D.quadraticBezier v1 v2 v3 / weightCurve
-        Curve2D.displacedFrom Point2D.origin (radius * radialUnitVector) ?? fail
+        Curve2D.displacedFrom Point2D.origin (radius * radialUnitVector)
   arc1 <- arc vE vNE vN
   arc2 <- arc vN vNW vW
   arc3 <- arc vW vSW vS

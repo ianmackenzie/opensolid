@@ -212,8 +212,8 @@ fillet ::
   Result Text (Region2D units)
 fillet points ("radius" ::: radius) region = do
   let initialCurves = Set2D.toList (boundaryCurves region)
-  filletedCurves <- initialCurves & Result.forEach points (addFillet radius) ?? fail
-  boundedBy filletedCurves ?? fail
+  filletedCurves <- try do initialCurves & Result.forEach points (addFillet radius)
+  try do boundedBy filletedCurves
 
 addFillet ::
   Tolerance units =>
@@ -241,8 +241,8 @@ addFillet radius point curves = do
     List.One _ -> couldNotFindPointToFillet
     List.ThreeOrMore -> couldNotFindPointToFillet
     List.Two firstCurve secondCurve -> do
-      firstNonzero <- Curve.nonzero firstCurve ?? fail
-      secondNonzero <- Curve.nonzero secondCurve ?? fail
+      firstNonzero <- try do Curve.nonzero firstCurve
+      secondNonzero <- try do Curve.nonzero secondCurve
       let firstEndDirection = Curve2D.tangentDirectionAt 1.0 firstCurve
       let secondStartDirection = Curve2D.tangentDirectionAt 0.0 secondCurve
       let cornerAngle = Direction2D.angleFrom firstEndDirection secondStartDirection
@@ -274,9 +274,9 @@ addFillet radius point curves = do
                     Direction2D.angleFrom
                       (Curve2D.tangentDirectionAt t1 firstCurve)
                       (Curve2D.tangentDirectionAt t2 secondCurve)
-              filletArc <- Curve2D.sweptArc centerPoint startPoint sweptAngle ?? fail
-              trimmedFirstCurve <- firstCurve << Curve1D.interpolateFrom 0.0 t1 ?? fail
-              trimmedSecondCurve <- secondCurve << Curve1D.interpolateFrom t2 1.0 ?? fail
+              filletArc <- try do Curve2D.sweptArc centerPoint startPoint sweptAngle
+              trimmedFirstCurve <- try do firstCurve << Curve1D.interpolateFrom 0.0 t1
+              trimmedSecondCurve <- try do secondCurve << Curve1D.interpolateFrom t2 1.0
               Ok (filletArc : trimmedFirstCurve : trimmedSecondCurve : otherCurves)
 
 curveIncidence :: Tolerance units => Point2D units -> Curve2D units -> (Curve2D units, Maybe Number)

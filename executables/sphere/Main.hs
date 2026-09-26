@@ -10,6 +10,6 @@ import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
 main = spatial do
-  body <- Body3D.sphere (#centerPoint World3D.originPoint) (#diameter (Length.centimeters 10.0)) ?? fail
+  body <- try do Body3D.sphere (#centerPoint World3D.originPoint) (#diameter (Length.centimeters 10.0))
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   Stl.writeText "executables/sphere/mesh.stl" Convention3D.yUp Length.inMillimeters (Body3D.toPointMesh resolution body)

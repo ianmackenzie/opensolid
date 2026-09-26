@@ -63,14 +63,13 @@ simpleSurface2D = Test.verify "Simple 2D surface" do
 pointOnSphere3D :: Test
 pointOnSphere3D = Test.verify "Point on sphere" do
   let radius = Length.meters 1.0
-  profileCurve <-
+  profileCurve <- try do
     Curve2D.polarArc
       (#centerPoint Point2D.origin)
       (#radius radius)
       (#startAngle Angle.zero)
       (#endAngle Angle.halfPi)
-      ?? fail
-  surface <- Surface3D.revolved World3D.rightPlane profileCurve Axis2D.y Angle.twoPi ?? fail
+  surface <- try do Surface3D.revolved World3D.rightPlane profileCurve Axis2D.y Angle.twoPi
   let point =
         Point2D.polar radius (Angle.degrees 45.0)
           & Point2D.placeOn World3D.rightPlane

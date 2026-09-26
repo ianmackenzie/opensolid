@@ -74,19 +74,18 @@ resolvesTo value estimate
 
 area :: Test
 area = Test.verify "area" do
-  curve <-
+  curve <- try do
     Curve2D.polarArc
       (#centerPoint Point2D.origin)
       (#radius Length.meter)
       (#startAngle Angle.pi)
       (#endAngle Angle.zero)
-      ?? fail
   let dAdt = Curve2D.yCoordinate curve * VectorCurve2D.xComponent (Curve2D.derivative curve)
   let areaEstimate = Curve1D.integrate dAdt
   let expectedArea = Area.squareMeters Number.halfPi
   areaIsCorrect <-
     Tolerance.using (Area.squareMeters 1e-4) do
-      resolvesTo expectedArea areaEstimate ?? fail
+      try do resolvesTo expectedArea areaEstimate
   Test.expect areaIsCorrect
 
 minimumBy :: Test

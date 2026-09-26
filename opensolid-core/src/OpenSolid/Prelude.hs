@@ -10,6 +10,7 @@ module OpenSolid.Prelude
   , OnError
   , fail
   , catch
+  , try
   , (??)
   , (!!)
   , Exception
@@ -478,6 +479,10 @@ fail = Prelude.fail (Data.Text.unpack (Err.message ?err))
 
 catch :: (x -> OnError x a) -> OnError x a
 catch callback = callback ?err
+
+try :: MonadFail m => Result x a -> m a
+try (Ok value) = Prelude.return value
+try (Err err) = Prelude.fail (Data.Text.unpack (Err.message err))
 
 (!!) :: Result x a -> a -> a
 Ok value !! _ = value

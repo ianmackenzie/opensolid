@@ -65,7 +65,7 @@ findPole = Test.check 100 "findPole" do
   let solutions = Surface3D.findPoint point surface
   case solutions of
     [SurfacePoint3D.Pole (Surface3D.Pole poleCurve _)] -> do
-      expectedPoleCurve <- UvCurve.lineFrom (UvPoint 1.0 0.0) (UvPoint 1.0 1.0) ?? fail
+      expectedPoleCurve <- try do UvCurve.lineFrom (UvPoint 1.0 0.0) (UvPoint 1.0 1.0)
       Test.expect (poleCurve ~~ expectedPoleCurve)
     _ ->
       Test.fail "Expected a single solution"
@@ -93,7 +93,7 @@ ruledSurfaceCorrectValue :: Test
 ruledSurfaceCorrectValue = Test.check 100 "ruledSurfaceCorrectValue" do
   curve1 <- Test.generate Random.cubicSpline3D
   curve2 <- Test.generate Random.cubicSpline3D
-  surface <- Surface3D.ruled curve1 curve2 ?? fail
+  surface <- try do Surface3D.ruled curve1 curve2
   uvPoint <- Test.generate UvPoint.random
   let UvPoint u v = uvPoint
   let p1 = Curve3D.pointAt u curve1
@@ -108,7 +108,7 @@ ruledSurfaceDerivativeConsistency :: Test
 ruledSurfaceDerivativeConsistency = Test.check 100 "ruledSurfaceDerivativeConsistency" do
   curve1 <- Test.generate Random.cubicSpline3D
   curve2 <- Test.generate Random.cubicSpline3D
-  surface <- Surface3D.ruled curve1 curve2 ?? fail
+  surface <- try do Surface3D.ruled curve1 curve2
   Tests.SurfaceFunction3D.partialDerivativesAreConsistent (Surface3D.function surface)
 
 translationalSurface :: Test
@@ -131,7 +131,7 @@ translationalSurfaceCorrectValue :: Test
 translationalSurfaceCorrectValue = Test.check 100 "translationalSurfaceCorrectValue" do
   baseCurve <- Test.generate Random.cubicSpline3D
   translationCurve <- Test.generate randomVectorCubicSpline
-  surface <- Surface3D.sweptBy translationCurve baseCurve ?? fail
+  surface <- try do Surface3D.sweptBy translationCurve baseCurve
   uvPoint <- Test.generate UvPoint.random
   let UvPoint u v = uvPoint
   let basePoint = Curve3D.pointAt u baseCurve
@@ -146,5 +146,5 @@ translationalSurfaceDerivativeConsistency :: Test
 translationalSurfaceDerivativeConsistency = Test.check 100 "translationalSurfaceDerivativeConsistency" do
   baseCurve <- Test.generate Random.cubicSpline3D
   translationCurve <- Test.generate randomVectorCubicSpline
-  surface <- Surface3D.sweptBy translationCurve baseCurve ?? fail
+  surface <- try do Surface3D.sweptBy translationCurve baseCurve
   Tests.SurfaceFunction3D.partialDerivativesAreConsistent (Surface3D.function surface)

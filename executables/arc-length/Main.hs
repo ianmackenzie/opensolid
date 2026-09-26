@@ -34,7 +34,7 @@ testCurve label curve = do
 
 testLineLength :: IO ()
 testLineLength = spatial do
-  line <- Curve2D.lineFrom Point2D.origin (Point2D.centimeters 30.0 40.0) ?? fail
+  line <- try do Curve2D.lineFrom Point2D.origin (Point2D.centimeters 30.0 40.0)
   testCurve "Line" line
 
 testQuadraticSplineLength :: IO ()
@@ -42,7 +42,7 @@ testQuadraticSplineLength = spatial do
   let p1 = Point2D.origin
   let p2 = Point2D.centimeters 20.0 30.0
   let p3 = Point2D.centimeters 40.0 0.0
-  spline <- Curve2D.quadraticBezier p1 p2 p3 ?? fail
+  spline <- try do Curve2D.quadraticBezier p1 p2 p3
   testCurve "Quadratic spline" spline
   IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
 
@@ -68,7 +68,7 @@ testCubicSplineParameterization = spatial do
   let p2 = Point2D.centimeters 7.0 8.0
   let p3 = Point2D.centimeters 16.0 15.0
   let p4 = Point2D.centimeters 25.0 5.0
-  spline <- Curve2D.cubicBezier p1 p2 p3 p4 ?? fail
+  spline <- try do Curve2D.cubicBezier p1 p2 p3 p4
   let reversedSpline = Curve2D.reverse spline
   let length = Curve2D.length spline
   IO.printLine ("Cubic spline: " <> formatLength length)

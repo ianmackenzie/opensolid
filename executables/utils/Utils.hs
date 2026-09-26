@@ -26,7 +26,7 @@ numLines text = List.length (Text.lines text)
 showMostComplexCurve :: Tolerance Meters => Body3D space -> IO ()
 showMostComplexCurve body = do
   let getExpression (Surface3D.Edge _ curve) = CompiledFunction.expression (Curve3D.compiled curve)
-  expressions <- Result.collect getExpression (allEdges body) ?? fail
+  expressions <- try do Result.collect getExpression (allEdges body)
   case List.map Expression.debug expressions of
     [] -> IO.fail "No edges found"
     NonEmpty representations -> do

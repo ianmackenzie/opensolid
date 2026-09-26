@@ -19,10 +19,10 @@ main = spatial do
   let p2 = Point2D.centimeters 20.0 0.0
   let p3 = Point2D.centimeters 20.0 10.0
   let p4 = Point2D.centimeters 0.0 10.0
-  spline <- Curve2D.cubicBezier p1 p2 p3 p4 ?? fail
-  line <- Curve2D.lineFrom p4 p1 ?? fail
-  profile <- Region2D.boundedBy [spline, line] ?? fail
-  body <- Body3D.revolved World3D.rightPlane profile Axis2D.y Angle.twoPi ?? fail
+  spline <- try do Curve2D.cubicBezier p1 p2 p3 p4
+  line <- try do Curve2D.lineFrom p4 p1
+  profile <- try do Region2D.boundedBy [spline, line]
+  body <- try do Body3D.revolved World3D.rightPlane profile Axis2D.y Angle.twoPi
   let model = Model3D.body body
   let resolution = Resolution.maxError (Length.millimeters 0.05)
   Gltf.writeBinary "executables/oblate-spheroid/mesh.glb" model resolution

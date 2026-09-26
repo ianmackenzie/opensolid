@@ -58,15 +58,13 @@ equalOverlapSegmentLists actualSegments expectedSegments =
 
 curveOverlap1 :: Test
 curveOverlap1 = Test.verify "curveOverlap1" do
-  arc1 <-
+  arc1 <- try do
     Curve2D.arcFrom (Point2D.meters 1.0 0.0) (Point2D.meters -1.0 0.0) Angle.halfTurn
       & Result.map (Curve3D.on World3D.topPlane)
-      ?? fail
-  arc2 <-
+  arc2 <- try do
     Curve2D.arcFrom (Point2D.meters 0.0 -1.0) (Point2D.meters 0.0 1.0) Angle.halfTurn
       & Result.map (Curve3D.on World3D.topPlane)
-      ?? fail
-  (sign, actualSegments) <- overlappingSegments arc1 arc2 ?? fail
+  (sign, actualSegments) <- try do overlappingSegments arc1 arc2
   let expectedSegments = NonEmpty.one (Interval 0.0 0.5, Interval 0.5 1.0)
   Test.all
     [ Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
@@ -75,23 +73,21 @@ curveOverlap1 = Test.verify "curveOverlap1" do
 
 curveOverlap2 :: Test
 curveOverlap2 = Test.verify "curveOverlap2" do
-  arc1 <-
+  arc1 <- try do
     Curve2D.polarArc
       (#centerPoint Point2D.origin)
       (#radius Length.meter)
       (#startAngle Angle.zero)
       (#endAngle -Angle.pi)
       & Result.map (Curve3D.on World3D.topPlane)
-      ?? fail
-  arc2 <-
+  arc2 <- try do
     Curve2D.polarArc
       (#centerPoint Point2D.origin)
       (#radius Length.meter)
       (#startAngle (Angle.degrees -45.0))
       (#endAngle (Angle.degrees 225.0))
       & Result.map (Curve3D.on World3D.topPlane)
-      ?? fail
-  (sign, segments) <- overlappingSegments arc1 arc2 ?? fail
+  (sign, segments) <- try do overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
           (Interval 0.0 (1 / 4), Interval 0.0 (1 / 6))
@@ -103,14 +99,12 @@ curveOverlap2 = Test.verify "curveOverlap2" do
 
 crossingIntersection :: Test
 crossingIntersection = Test.verify "crossingIntersection" do
-  arc1 <-
+  arc1 <- try do
     Curve2D.arcFrom Point2D.origin (Point2D.meters 0.0 1.0) Angle.halfTurn
       & Result.map (Curve3D.on World3D.topPlane)
-      ?? fail
-  arc2 <-
+  arc2 <- try do
     Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
       & Result.map (Curve3D.on World3D.topPlane)
-      ?? fail
   let intersections = Curve3D.intersections arc1 arc2
   let expectedIntersectionPoints =
         NonEmpty.two
@@ -127,22 +121,20 @@ crossingIntersection = Test.verify "crossingIntersection" do
 
 tangentIntersection :: Test
 tangentIntersection = Test.verify "tangentIntersection" do
-  arc1 <-
+  arc1 <- try do
     Curve2D.polarArc
       (#centerPoint Point2D.origin)
       (#radius Length.meter)
       (#startAngle Angle.zero)
       (#endAngle Angle.pi)
       & Result.map (Curve3D.on World3D.topPlane)
-      ?? fail
-  arc2 <-
+  arc2 <- try do
     Curve2D.polarArc
       (#centerPoint (Point2D.meters 0.0 1.5))
       (#radius (Length.meters 0.5))
       (#startAngle -Angle.pi)
       (#endAngle Angle.zero)
       & Result.map (Curve3D.on World3D.topPlane)
-      ?? fail
   let intersections = Curve3D.intersections arc1 arc2
   let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent Negative (0.5, 0.5))
   case intersections of

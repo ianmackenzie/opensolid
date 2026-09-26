@@ -65,7 +65,7 @@ findPoint = Test.verify "findPoint" do
   let p1 = Point2D.meters 0.0 0.0
   let p2 = Point2D.meters 1.0 2.0
   let p3 = Point2D.meters 2.0 0.0
-  testSpline <- Curve2D.quadraticBezier p1 p2 p3 ?? fail
+  testSpline <- try do Curve2D.quadraticBezier p1 p2 p3
   let startParameterValues = Curve2D.findPoint Point2D.origin testSpline
   let endParameterValues = Curve2D.findPoint (Point2D.meters 2.0 0.0) testSpline
   let midParameterValues = Curve2D.findPoint (Point2D.meters 1.0 1.0) testSpline
@@ -87,7 +87,7 @@ findOwnPoint = Test.check 500 "findOwnPoint" do
   let p1 = Point2D.meters 0.0 0.0
   let p2 = Point2D.meters 1.0 2.0
   let p3 = Point2D.meters 2.0 0.0
-  testSpline <- Curve2D.quadraticBezier p1 p2 p3 ?? fail
+  testSpline <- try do Curve2D.quadraticBezier p1 p2 p3
   t <- Test.generate Parameter.random
   let p = Curve2D.pointAt t testSpline
   let solutions = Curve2D.findPoint p testSpline
@@ -129,9 +129,9 @@ equalOverlapSegmentLists actualSegments expectedSegments =
 
 curveOverlap1 :: Test
 curveOverlap1 = Test.verify "curveOverlap1" do
-  arc1 <- Curve2D.arcFrom (Point2D.meters 1.0 0.0) (Point2D.meters -1.0 0.0) Angle.halfTurn ?? fail
-  arc2 <- Curve2D.arcFrom (Point2D.meters 0.0 -1.0) (Point2D.meters 0.0 1.0) Angle.halfTurn ?? fail
-  (sign, actualSegments, points) <- overlappingSegments arc1 arc2 ?? fail
+  arc1 <- try do Curve2D.arcFrom (Point2D.meters 1.0 0.0) (Point2D.meters -1.0 0.0) Angle.halfTurn
+  arc2 <- try do Curve2D.arcFrom (Point2D.meters 0.0 -1.0) (Point2D.meters 0.0 1.0) Angle.halfTurn
+  (sign, actualSegments, points) <- try do overlappingSegments arc1 arc2
   let expectedSegments = NonEmpty.one (Interval 0.0 0.5, Interval 0.5 1.0)
   Test.all
     [ Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
@@ -141,21 +141,19 @@ curveOverlap1 = Test.verify "curveOverlap1" do
 
 curveOverlap2 :: Test
 curveOverlap2 = Test.verify "curveOverlap2" do
-  arc1 <-
+  arc1 <- try do
     Curve2D.polarArc
       (#centerPoint Point2D.origin)
       (#radius Length.meter)
       (#startAngle Angle.zero)
       (#endAngle -Angle.pi)
-      ?? fail
-  arc2 <-
+  arc2 <- try do
     Curve2D.polarArc
       (#centerPoint Point2D.origin)
       (#radius Length.meter)
       (#startAngle (Angle.degrees -45.0))
       (#endAngle (Angle.degrees 225.0))
-      ?? fail
-  (sign, segments, points) <- overlappingSegments arc1 arc2 ?? fail
+  (sign, segments, points) <- try do overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
           (Interval 0.0 (1 / 4), Interval 0.0 (1 / 6))
@@ -168,21 +166,19 @@ curveOverlap2 = Test.verify "curveOverlap2" do
 
 overlapAndJoin :: Test
 overlapAndJoin = Test.verify "overlapAndJoin" do
-  arc1 <-
+  arc1 <- try do
     Curve2D.polarArc
       (#centerPoint Point2D.origin)
       (#radius Length.meter)
       (#startAngle Angle.zero)
       (#endAngle -Angle.pi)
-      ?? fail
-  arc2 <-
+  arc2 <- try do
     Curve2D.polarArc
       (#centerPoint Point2D.origin)
       (#radius Length.meter)
       (#startAngle (Angle.degrees -45.0))
       (#endAngle Angle.pi)
-      ?? fail
-  (sign, segments, points) <- overlappingSegments arc1 arc2 ?? fail
+  (sign, segments, points) <- try do overlappingSegments arc1 arc2
   let expectedSegments = NonEmpty.one (Interval 0.0 (1 / 4), Interval 0.0 (1 / 5))
   let expectedPoints = [IntersectionPoint.indistinguishable Negative (1.0, 1.0)]
   Test.all
@@ -197,8 +193,8 @@ overlapAndJoin = Test.verify "overlapAndJoin" do
 
 crossingIntersection :: Test
 crossingIntersection = Test.verify "crossingIntersection" do
-  arc1 <- Curve2D.arcFrom Point2D.origin (Point2D.meters 0.0 1.0) Angle.halfTurn ?? fail
-  arc2 <- Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn ?? fail
+  arc1 <- try do Curve2D.arcFrom Point2D.origin (Point2D.meters 0.0 1.0) Angle.halfTurn
+  arc2 <- try do Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
   let intersections = Curve2D.intersections arc1 arc2
   let expectedIntersectionPoints =
         NonEmpty.two
@@ -215,20 +211,18 @@ crossingIntersection = Test.verify "crossingIntersection" do
 
 tangentIntersection :: Test
 tangentIntersection = Test.verify "tangentIntersection" do
-  arc1 <-
+  arc1 <- try do
     Curve2D.polarArc
       (#centerPoint Point2D.origin)
       (#radius Length.meter)
       (#startAngle Angle.zero)
       (#endAngle Angle.pi)
-      ?? fail
-  arc2 <-
+  arc2 <- try do
     Curve2D.polarArc
       (#centerPoint (Point2D.meters 0.0 1.5))
       (#radius (Length.meters 0.5))
       (#startAngle -Angle.pi)
       (#endAngle Angle.zero)
-      ?? fail
   let intersections = Curve2D.intersections arc1 arc2
   let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent Negative (0.5, 0.5))
   case intersections of
@@ -245,7 +239,7 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" do
   p0 <- Test.generate Random.point2D
   p1 <- Test.generate Random.point2D
   p2 <- Test.generate Random.point2D
-  curve <- Curve2D.cubicBezier p0 p0 p1 p2 ?? fail
+  curve <- try do Curve2D.cubicBezier p0 p0 p1 p2
   let decreasingTValues = [2.0 ** Number.fromInt -n | n <- [8 .. 16]]
   let tangentDirectionAt tValue = Curve.tangentDirectionAt tValue curve
   let startTangent = tangentDirectionAt 0.0
@@ -259,7 +253,7 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" do
   p0 <- Test.generate Random.point2D
   p1 <- Test.generate Random.point2D
   p2 <- Test.generate Random.point2D
-  curve <- Curve2D.cubicBezier p0 p1 p2 p2 ?? fail
+  curve <- try do Curve2D.cubicBezier p0 p1 p2 p2
   let increasingTValues = [1.0 - 2.0 ** Number.fromInt -n | n <- [8 .. 16]]
   let tangentDirectionAt tValue = Curve.tangentDirectionAt tValue curve
   let endTangent = tangentDirectionAt 1.0
@@ -352,7 +346,7 @@ arcConstruction = do
         let sweptAngle = Angle.degrees (Number.fromInt numDegrees)
         let expectedPoint = Point2D.meters expectedX expectedY
         Test.verify label do
-          arc <- Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 1.0) sweptAngle ?? fail
+          arc <- try do Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 1.0) sweptAngle
           Test.expect (Curve2D.pointAt 0.5 arc ~= expectedPoint)
   let invSqrt2 = 1.0 / Number.sqrt 2.0
   Test.group "from" $
@@ -386,7 +380,7 @@ g2 = Test.check 100 "G2 continuity" do
   p2 <- Test.generate Random.point2D
   p3 <- Test.generate Random.point2D
   p4 <- Test.generate Random.point2D
-  spline <- Curve2D.cubicBezier p1 p2 p3 p4 ?? fail
+  spline <- try do Curve2D.cubicBezier p1 p2 p3 p4
   t <- Test.generate Parameter.random
   let point = Curve2D.pointAt t spline
   let tangentDirection = Curve.tangentDirectionAt t spline
@@ -394,7 +388,7 @@ g2 = Test.check 100 "G2 continuity" do
   let signedRadius = 1.0 / (tangentDirection `cross` curvatureVector)
   let normalDirection = Direction2D.rotateLeft tangentDirection
   let arcCenter = point + signedRadius * normalDirection
-  arc <- Curve2D.sweptArc arcCenter point (Quantity.sign signedRadius * Angle.degrees 30.0) ?? fail
+  arc <- try do Curve2D.sweptArc arcCenter point (Quantity.sign signedRadius * Angle.degrees 30.0)
   let continuity = Curve.continuityAt (t, 0.0) (spline, arc)
   Test.expect (continuity == Just (Continuity.Indistinguishable Positive))
     & Test.output "continuity" continuity

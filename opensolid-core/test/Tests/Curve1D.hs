@@ -20,7 +20,7 @@ crossingRoots = Test.verify "crossingRoots" $ unitless do
   let x = 3.0 * Curve1D.t
   let y = (x - 1.0) * (x - 1.0) * (x - 1.0) - (x - 1.0)
   let expectedRoots = [Root 0.0 0 Positive, Root (1 / 3) 0 Negative, Root (2 / 3) 0 Positive]
-  roots <- Curve1D.roots y ?? fail
+  roots <- try do Curve1D.roots y
   Test.expect (roots ~~ expectedRoots)
     & Test.output "roots" roots
     & Test.output "expectedRoots" expectedRoots
@@ -30,7 +30,7 @@ tangentRoots = Test.verify "tangentRoots" $ unitless do
   let theta = Angle.twoPi * Curve1D.t
   let expression = Curve1D.squared (Curve1D.sin theta)
   let expectedRoots = [Root t 1 Positive | t <- [0.0, 0.5, 1.0]]
-  roots <- Curve1D.roots expression ?? fail
+  roots <- try do Curve1D.roots expression
   Test.expect (roots ~~ expectedRoots)
     & Test.output "roots" roots
     & Test.output "expectedRoots" expectedRoots

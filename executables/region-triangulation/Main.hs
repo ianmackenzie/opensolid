@@ -26,13 +26,13 @@ main = spatial do
   let p3 = Point2D (width - cornerRadius) height
   let p4 = Point2D.y height
   let holeCenter = Point2D (width - cornerRadius) (height - cornerRadius)
-  line01 <- Curve2D.lineFrom p0 p1 ?? fail
-  line12 <- Curve2D.lineFrom p1 p2 ?? fail
-  arc23 <- Curve2D.arcFrom p2 p3 Angle.quarterTurn ?? fail
-  line34 <- Curve2D.lineFrom p3 p4 ?? fail
-  line40 <- Curve2D.lineFrom p4 p0 ?? fail
-  hole <- Curve2D.circle (Circle2D.withDiameter holeDiameter holeCenter) ?? fail
-  region <- Region2D.boundedBy [line01, line12, arc23, line34, line40, hole] ?? fail
+  line01 <- try do Curve2D.lineFrom p0 p1
+  line12 <- try do Curve2D.lineFrom p1 p2
+  arc23 <- try do Curve2D.arcFrom p2 p3 Angle.quarterTurn
+  line34 <- try do Curve2D.lineFrom p3 p4
+  line40 <- try do Curve2D.lineFrom p4 p0
+  hole <- try do Curve2D.circle (Circle2D.withDiameter holeDiameter holeCenter)
+  region <- try do Region2D.boundedBy [line01, line12, arc23, line34, line40, hole]
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   Svg.write "executables/region-triangulation/region.svg" (Svg.padding Length.centimeter) do
     Svg.regionWith [Svg.blackStroke, Svg.fillColor Color.lightGrey] resolution region

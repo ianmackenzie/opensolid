@@ -130,14 +130,14 @@ testListOperations = do
 
 getCrossProduct :: Result Text Number
 getCrossProduct = spatial do
-  vectorDirection <- Vector2D.direction (Vector2D.meters 2.0 3.0) ?? fail
-  lineDirection <- Direction2D.from Point2D.origin Point2D.origin ?? fail
+  vectorDirection <- try do Vector2D.direction (Vector2D.meters 2.0 3.0)
+  lineDirection <- try do Direction2D.from Point2D.origin Point2D.origin
   Ok (vectorDirection `cross` lineDirection)
 
 testTry :: IO ()
 testTry =
   IO.onError IO.printLine do
-    crossProduct <- getCrossProduct ?? fail
+    crossProduct <- try getCrossProduct
     log "Got cross product" crossProduct
 
 testIOIteration :: IO ()
@@ -145,7 +145,7 @@ testIOIteration = IO.forEach [1 .. 3] (log "Looping")
 
 doublingIO :: Text -> IO Int
 doublingIO input = do
-  value <- Int.parse input ?? fail
+  value <- try do Int.parse input
   let doubled = 2 * value
   IO.succeed doubled
 
@@ -180,13 +180,13 @@ testPlaneTorusIntersection :: IO ()
 testPlaneTorusIntersection = spatial do
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
-  crossSection <- Curve2D.circle (Circle2D.withRadius minorRadius (Point2D.x majorRadius)) ?? fail
-  surface <- Surface3D.revolved World3D.frontPlane crossSection Axis2D.y Angle.twoPi ?? fail
+  crossSection <- try do Curve2D.circle (Circle2D.withRadius minorRadius (Point2D.x majorRadius))
+  surface <- try do Surface3D.revolved World3D.frontPlane crossSection Axis2D.y Angle.twoPi
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3D.xy (Angle.degrees 45), Direction3D.z
   let planeNormal = Direction3D.polar World3D.frontPlane (alpha + Angle.halfPi)
   let f = planeNormal `dot` (Surface3D.function surface - World3D.originPoint)
-  zeros <- SurfaceFunction1D.zeros f ?? fail
+  zeros <- try do SurfaceFunction1D.zeros f
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
   log "  Crossing curves" (List.length zeros.crossingCurves)
@@ -197,7 +197,7 @@ testPlaneParaboloidIntersection = unitless do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
   let f = SurfaceFunction1D.squared u + SurfaceFunction1D.squared v - 0.5
-  zeros <- SurfaceFunction1D.zeros f ?? fail
+  zeros <- try do SurfaceFunction1D.zeros f
   drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
   log "  Crossing curves" (List.length zeros.crossingCurves)
@@ -283,7 +283,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawingEndPoint = Point2D.convert toDrawing endPoint
   let drawingInnerControlPoints = List.map (Point2D.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints <> [drawingEndPoint])
-  curve <- spatial (Curve2D.bezier drawingControlPoints) ?? fail
+  curve <- try do spatial (Curve2D.bezier drawingControlPoints)
   let drawCurveRange tRange = drawBounds (Curve2D.range tRange curve)
   let controlPointDiameter = Length.millimeters 10.0
   let drawControlPoint point = Svg.circle (Circle2D.withDiameter controlPointDiameter point)
@@ -310,7 +310,7 @@ testBezierSegment = do
   let p6 = Point2D 10.0 10.0
   let coordinateBounds = Interval.convert toDrawing (Interval -1.0 11.0)
   let drawingBounds = Bounds2D coordinateBounds coordinateBounds
-  curveEntity <- drawBezier Color.blue p1 [p2, p3, p4, p5] p6 ?? fail
+  curveEntity <- try do drawBezier Color.blue p1 [p2, p3, p4, p5] p6
   Svg.write "executables/sandbox/test-bezier-segment.svg" (Svg.viewBox drawingBounds) curveEntity
 
 testHermiteBezier :: IO ()
@@ -319,7 +319,7 @@ testHermiteBezier = spatial do
   let startDerivatives = [Vector2D.centimeters 10.0 10.0]
   let endDerivatives = [Vector2D.centimeters 0.0 -10.0, Vector2D.zero]
   let endPoint = Point2D.centimeters 10.0 0.0
-  curve <- Curve2D.hermite startPoint startDerivatives endPoint endDerivatives ?? fail
+  curve <- try do Curve2D.hermite startPoint startDerivatives endPoint endDerivatives
   let curveAttributes =
         [ Svg.strokeColor Color.blue
         , Svg.strokeWidth (Length.millimeters 1.0)
@@ -351,10 +351,10 @@ textSum t1 t2 = do
 testTextSum :: IO ()
 testTextSum = do
   IO.onError IO.printLine do
-    sum <- textSum "5" "abc" ?? fail
+    sum <- try do textSum "5" "abc"
     log "sum" sum
   IO.onError IO.printLine do
-    sum <- textSum "2" "3" ?? fail
+    sum <- try do textSum "2" "3"
     log "sum" sum
 
 testNewtonRaphson2D :: IO ()

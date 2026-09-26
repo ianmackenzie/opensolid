@@ -47,7 +47,7 @@ sphereMeshing :: Test
 sphereMeshing = Test.verify "sphereMeshing" do
   let diameter = Length.centimeters 10.0
   let resolution = Resolution.maxError (0.01 * diameter)
-  sphere <- Body3D.sphere (#centerPoint World3D.originPoint) (#diameter diameter) ?? fail
+  sphere <- try do Body3D.sphere (#centerPoint World3D.originPoint) (#diameter diameter)
   let mesh = Body3D.toPointMesh resolution sphere
   let approximateArea = meshArea mesh
   let approximateVolume = meshVolume mesh
@@ -75,17 +75,16 @@ revolvedNormals = Test.verify "revolvedNormals" do
   let r1 = Length.centimeters 5.0
   let r2 = Length.centimeters 10.0
   let interval = Interval r1 r2
-  leftRegion <- Region2D.rectangle (Bounds2D -interval interval) ?? fail
-  rightRegion <- Region2D.rectangle (Bounds2D interval interval) ?? fail
+  leftRegion <- try do Region2D.rectangle (Bounds2D -interval interval)
+  rightRegion <- try do Region2D.rectangle (Bounds2D interval interval)
   let profiles = [leftRegion, rightRegion]
-  bodies <-
+  bodies <- try do
     Result.sequence
       [ Body3D.revolved World3D.frontPlane profile axis sweptAngle
       | profile <- profiles
       , axis <- axes
       , sweptAngle <- sweptAngles
       ]
-      ?? fail
   let resolution = Resolution.maxError (0.01 * r1)
   let exactVolume =
         (r2 - r1) * 0.5 * Angle.inRadians angle * (Quantity.squared r2 - Quantity.squared r1)

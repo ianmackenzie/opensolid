@@ -28,8 +28,8 @@ main = spatial do
           + r * SurfaceFunction1D.cos theta * World3D.rightwardDirection
           + r * SurfaceFunction1D.sin theta * World3D.forwardDirection
           + minorRadius * SurfaceFunction1D.sin phi * World3D.upwardDirection
-  surface <- Surface3D.parametric surfaceFunction UvRegion.unitSquare ?? fail
-  body <- Body3D.boundedBy [surface] ?? fail
+  surface <- try do Surface3D.parametric surfaceFunction UvRegion.unitSquare
+  body <- try do Body3D.boundedBy [surface]
   let resolution = Resolution.maxSize (Length.centimeters 20.0)
   let mesh = Body3D.toPointMesh resolution body
   Stl.writeBinary "executables/croissant/mesh.stl" Convention3D.yUp Length.inMillimeters mesh

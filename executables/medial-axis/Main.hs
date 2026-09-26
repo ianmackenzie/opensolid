@@ -36,32 +36,30 @@ main = Tolerance.using Length.micrometer do
 
 testSplineAndArc :: Tolerance Meters => IO ()
 testSplineAndArc = do
-  spline <-
+  spline <- try do
     Curve2D.cubicBezier
       (Point2D.centimeters 0.0 10.0)
       (Point2D.centimeters 5.0 6.0)
       (Point2D.centimeters 10.0 9.0)
       (Point2D.centimeters 15.0 7.0)
-      ?? fail
-  arc <- Curve2D.arcFrom (Point2D.centimeters 15.0 0.0) Point2D.origin (Angle.degrees 20.0) ?? fail
+  arc <- try do Curve2D.arcFrom (Point2D.centimeters 15.0 0.0) Point2D.origin (Angle.degrees 20.0)
   testCurveMedialAxis "testSplineAndArc" spline arc
 
 testSplineAndLine :: Tolerance Meters => IO ()
 testSplineAndLine = do
-  spline <-
+  spline <- try do
     Curve2D.cubicBezier
       (Point2D.centimeters 15.0 15.0)
       (Point2D.centimeters 10.0 10.0)
       (Point2D.centimeters 10.0 10.0)
       (Point2D.centimeters 5.0 15.0)
-      ?? fail
-  line <- Curve2D.lineFrom Point2D.origin (Point2D.centimeters 20.0 0.0) ?? fail
+  line <- try do Curve2D.lineFrom Point2D.origin (Point2D.centimeters 20.0 0.0)
   testCurveMedialAxis "testSplineAndLine" spline line
 
 testCurveMedialAxis :: Tolerance Meters => Text -> Curve2D Meters -> Curve2D Meters -> IO ()
 testCurveMedialAxis label curve1 curve2 = do
   timer <- Timer.start
-  segments <- Curve2D.medialAxis curve1 curve2 ?? fail
+  segments <- try do Curve2D.medialAxis curve1 curve2
   let drawTangentCircles (segment :: Curve2D.MedialAxis.Segment Meters) = do
         let drawTangentCircle r = do
               let t = Curve2D.fromUniform r segment.curve

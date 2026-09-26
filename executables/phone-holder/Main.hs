@@ -54,7 +54,7 @@ main = spatial do
   let width = Length.centimeters 5.0
 
   let baseLine = Line2D Point2D.origin (Point2D.centimeters 5.0 0.0)
-  profilePath <-
+  profilePath <- try do
     Ok (NonEmpty.one (Edge2D.Line baseLine))
       & Result.andThen (Path2D.addArc rLarge (Angle.degrees 100.0))
       & Result.andThen (Path2D.addLine (Length.centimeters 5.0))
@@ -64,9 +64,8 @@ main = spatial do
       & Result.andThen (Path2D.addLine (Length.centimeters 1.0))
       & Result.andThen (Path2D.addArc rSmall (Angle.degrees -90.0))
       & Result.andThen (Path2D.addLine (Length.centimeters 1.0))
-      ?? fail
 
-  profile2D <- Path2D.thickenLeftwardBy thickness profilePath ?? fail
+  profile2D <- try do Path2D.thickenLeftwardBy thickness profilePath
 
   let midPlane = World3D.rightPlane
   let rightPlane = midPlane & Plane3D.offsetBy (0.5 * width)
@@ -103,7 +102,7 @@ main = spatial do
         let loop = NonEmpty.four leftEdge endEdge rightEdge startEdge
         Ok (advancedFaceEntity loop surface)
 
-  extrudedFaces <- Result.collect extrudedFace (NonEmpty.loop (,) profile2D) ?? fail
+  extrudedFaces <- try do Result.collect extrudedFace (NonEmpty.loop (,) profile2D)
   let allFaces = extrudedFaces & NonEmpty.push leftFace & NonEmpty.push rightFace
   let closedShell =
         Step.entity "CLOSED_SHELL" $

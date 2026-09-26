@@ -209,19 +209,19 @@ wrap10 function a b c d e f g h i j =
   IO.succeed (function a b c d e f g h i j)
 
 wrap1R :: (a -> Result x result) -> a -> IO result
-wrap1R function a = function a ?? fail
+wrap1R function a = try do function a
 
 wrap2R :: (a -> b -> Result x result) -> a -> b -> IO result
-wrap2R function a b = function a b ?? fail
+wrap2R function a b = try do function a b
 
 wrap3R :: (a -> b -> c -> Result x result) -> a -> b -> c -> IO result
-wrap3R function a b c = function a b c ?? fail
+wrap3R function a b c = try do function a b c
 
 wrap4R :: (a -> b -> c -> d -> Result x result) -> a -> b -> c -> d -> IO result
-wrap4R function a b c d = function a b c d ?? fail
+wrap4R function a b c d = try do function a b c d
 
 -- wrap5R :: (a -> b -> c -> d -> e -> Result x result) -> a -> b -> c -> d -> e -> IO result
--- wrap5R function a b c d e = function a b c d e ?? fail
+-- wrap5R function a b c d e = try do function a b c d e
 
 static :: Text -> Text -> List (Member Void) -> Class
 static className givenDocumentation members =
