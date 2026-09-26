@@ -148,7 +148,9 @@ class
   , Multiplication Number (Vector dimension units space) (Vector dimension units space)
   , Multiplication (Vector dimension units space) Number (Vector dimension units space)
   , Multiplication (Quantity units) (Vector dimension Unitless space) (Vector dimension units space)
+  , Multiplication (Quantity units) (Direction dimension space) (Vector dimension units space)
   , Multiplication (Vector dimension Unitless space) (Quantity units) (Vector dimension units space)
+  , Multiplication (Direction dimension space) (Quantity units) (Vector dimension units space)
   , Division (Vector dimension units space) Number (Vector dimension units space)
   , Division (Vector dimension units space) (Quantity units) (Vector dimension Unitless space)
   , DotMultiplication
@@ -403,7 +405,15 @@ class
       (VectorBounds dimension Unitless space)
       (VectorBounds dimension units space)
   , Multiplication
+      (Interval units)
+      (DirectionBounds dimension space)
+      (VectorBounds dimension units space)
+  , Multiplication
       (VectorBounds dimension Unitless space)
+      (Interval units)
+      (VectorBounds dimension units space)
+  , Multiplication
+      (DirectionBounds dimension space)
       (Interval units)
       (VectorBounds dimension units space)
   , Division (VectorBounds dimension units space) (Interval Unitless) (VectorBounds dimension units space)
@@ -427,6 +437,10 @@ class
   , DotMultiplication
       (VectorBounds dimension units space)
       (VectorBounds dimension Unitless space)
+      (Interval units)
+  , DotMultiplication
+      (VectorBounds dimension units space)
+      (DirectionBounds dimension space)
       (Interval units)
   , DotMultiplication
       (VectorBounds dimension Unitless space)
