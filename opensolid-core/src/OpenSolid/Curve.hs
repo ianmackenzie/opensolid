@@ -47,6 +47,7 @@ module OpenSolid.Curve
   , curvatureRange_
   , curvatureVectorRange_
   , reverse
+  , section
   , hasDegenerateStart
   , hasDegenerateEnd
   , isOnAxis
@@ -904,6 +905,14 @@ reverse curve =
       , arcLengthParameterization =
           Pair.mapSecond (\f r -> 1.0 - f (1.0 - r)) curve.arcLengthParameterization
       }
+
+section ::
+  (CurveExists dimension units space, Tolerance units) =>
+  Interval Unitless ->
+  Curve dimension units space ->
+  Result (IsDegenerate dimension units space) (Curve dimension units space)
+section (Interval tStart tEnd) curve =
+  curve << Curve1D.interpolateFrom tStart tEnd
 
 distanceAlong ::
   CurveExists dimension units space =>

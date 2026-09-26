@@ -39,6 +39,7 @@ module OpenSolid.Curve3D
   , range
   , bounds
   , reverse
+  , section
   , arcLengthParameterization
   , length
   , uniformParameterization
@@ -271,6 +272,13 @@ bounds = Curve.bounds
 
 reverse :: Curve3D space -> Curve3D space
 reverse = Curve.reverse
+
+section ::
+  Tolerance Meters =>
+  Interval Unitless ->
+  Curve3D space ->
+  Result (IsDegenerate space) (Curve3D space)
+section = Curve.section
 
 arcLengthParameterization :: Curve3D space -> (Length, Number -> Number)
 arcLengthParameterization = Curve.arcLengthParameterization

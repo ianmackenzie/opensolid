@@ -56,6 +56,7 @@ module OpenSolid.Curve2D
   , derivative
   , secondDerivative
   , reverse
+  , section
   , bounds
   , intersections
   , findPoint
@@ -592,6 +593,13 @@ range = Curve.range
 -- | Reverse a curve, so that the start point is the end point and vice versa.
 reverse :: Curve2D units -> Curve2D units
 reverse = Curve.reverse
+
+section ::
+  Tolerance units =>
+  Interval Unitless ->
+  Curve2D units ->
+  Result (IsDegenerate units) (Curve2D units)
+section = Curve.section
 
 bounds :: Curve2D units -> Bounds2D units
 bounds = Curve.bounds
