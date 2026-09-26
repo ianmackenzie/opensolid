@@ -82,8 +82,8 @@ attempt io = onError (succeed . Err) (map Ok io)
 mapError :: (Text -> Text) -> IO a -> IO a
 mapError function = onError (function >> fail)
 
-bracket :: IO a -> (a -> IO b) -> (a -> IO c) -> IO c
-bracket = Control.Exception.bracket
+bracket :: (IO a, a -> IO b) -> (a -> IO c) -> IO c
+bracket (setup, teardown) action = Control.Exception.bracket setup teardown action
 
 printLine :: Text -> IO ()
 printLine = Data.Text.IO.Utf8.putStrLn

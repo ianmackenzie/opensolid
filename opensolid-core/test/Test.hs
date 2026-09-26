@@ -105,7 +105,7 @@ withTextColor color io = do
   let setColorSGR = AnsiTerminal.SetColor AnsiTerminal.Foreground AnsiTerminal.Vivid color
   let setColor = AnsiTerminal.setSGR [setColorSGR]
   let resetColor = AnsiTerminal.setSGR [AnsiTerminal.Reset]
-  IO.bracket setColor (const resetColor) (const io)
+  IO.bracket (setColor, const resetColor) (const io)
 
 run :: List Test -> IO ()
 run tests = do
