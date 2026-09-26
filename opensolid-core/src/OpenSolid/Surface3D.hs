@@ -4,6 +4,7 @@ module OpenSolid.Surface3D
   , Edge (Edge)
   , IsDegenerate (IsDegenerate)
   , Boundary
+  , Segment
   , function
   , domain
   , degenerateLeft
