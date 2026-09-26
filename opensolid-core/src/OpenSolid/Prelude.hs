@@ -652,7 +652,7 @@ instance Show Sign where
 
 instance Units Sign Unitless
 
-instance ApproximateEquality Sign () where (~=) = (==)
+instance ApproximateEquality Sign Unitless where (~=) = (==)
 
 {-# COMPLETE Sign #-}
 
