@@ -194,7 +194,10 @@ circle givenCircle =
 -- | Create a region from the given polygon.
 polygon :: Tolerance units => Polygon2D units -> Result BoundedBy.Error (Region2D units)
 polygon givenPolygon = do
-  let toCurve (Line2D p1 p2) = Curve2D.lineFrom p1 p2 !? Nothing
+  let toCurve (Line2D p1 p2) =
+        case Curve2D.lineFrom p1 p2 of
+          Ok curve -> Just curve
+          Err Curve2D.IsDegenerate{} -> Nothing
   boundedBy (NonEmpty.filterMap toCurve (Polygon2D.edges givenPolygon))
 
 {-| Fillet a region at the given corner points, with the given radius.
