@@ -119,9 +119,7 @@ haveCrossingTangents segment1 segment2 =
     (tangentDirectionRange segment2)
 
 haveDistinctCurvatures ::
-  ( CurveExists dimension units space
-  , VectorBoundsExists dimension (Unitless ?/? units) space
-  ) =>
+  VectorBoundsExists dimension (Unitless ?/? units) space =>
   Segment dimension units space ->
   Segment dimension units space ->
   Bool
