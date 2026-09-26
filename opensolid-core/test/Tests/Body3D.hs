@@ -79,7 +79,7 @@ revolvedNormals = Test.verify "revolvedNormals" do
   rightRegion <- Region2D.rectangle (Bounds2D interval interval) ?? fail
   let profiles = [leftRegion, rightRegion]
   bodies <-
-    Result.all
+    Result.sequence
       [ Body3D.revolved World3D.frontPlane profile axis sweptAngle
       | profile <- profiles
       , axis <- axes

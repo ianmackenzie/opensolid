@@ -9,7 +9,6 @@ module OpenSolid.Result
   , forEach
   , foldl
   , foldr
-  , all
   )
 where
 
@@ -47,6 +46,3 @@ foldr = Data.Foldable.foldrM
 
 forEach :: Foldable list => list a -> (a -> b -> Result x b) -> b -> Result x b
 forEach list function init = foldl (Prelude.flip function) init list
-
-all :: Traversable list => list (Result x a) -> Result x (list a)
-all = Prelude.sequence
