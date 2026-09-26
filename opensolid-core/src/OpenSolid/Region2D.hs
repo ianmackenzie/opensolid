@@ -250,9 +250,7 @@ addFillet radius point curves = do
       let secondStartDirection = Curve2D.tangentDirectionAt 0.0 secondCurve
       let cornerAngle = Direction2D.angleFrom firstEndDirection secondStartDirection
       let offsetDistance = Quantity.sign cornerAngle * Quantity.abs radius
-      let offsetCurve curve =
-            Curve2D.Nonzero.offsetLeftwardBy offsetDistance curve
-              !! couldNotSolveForFilletLocation
+      let offsetCurve curve = try do Curve2D.Nonzero.offsetLeftwardBy offsetDistance curve
       firstOffsetCurve <- offsetCurve firstNonzero
       secondOffsetCurve <- offsetCurve secondNonzero
       case Curve2D.intersections firstOffsetCurve secondOffsetCurve of
