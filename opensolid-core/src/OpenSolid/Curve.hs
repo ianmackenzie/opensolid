@@ -934,16 +934,14 @@ desingularizeStart givenStartPoint givenStartDerivative curve =
   Tolerance.using Quantity.zero do
     let panic = error "Desingularization should never produce degenerate curve"
     let tInner = affixWidth
-    let prefix =
-          hermite
-            givenStartPoint
-            [affixWidth * givenStartDerivative]
-            (pointAt tInner curve)
-            [ affixWidth * derivativeAt tInner curve
-            , affixWidth * affixWidth * secondDerivativeAt tInner curve
-            ]
-            !! panic
-    let suffix = curve << Curve1D.interpolateFrom tInner 1.0 !! panic
+    let prefixStart = givenStartPoint
+    let prefixStartDerivatives = [affixWidth * givenStartDerivative]
+    let prefixEnd = pointAt tInner curve
+    let prefixEndFirstDerivative = affixWidth * derivativeAt tInner curve
+    let prefixEndSecondDerivative = affixWidth * affixWidth * secondDerivativeAt tInner curve
+    let prefixEndDerivatives = [prefixEndFirstDerivative, prefixEndSecondDerivative]
+    let prefix = hermite prefixStart prefixStartDerivatives prefixEnd prefixEndDerivatives !! panic
+    let suffix = section (Interval tInner 1.0) curve !! panic
     (prefix, suffix)
 
 desingularizeEnd ::
@@ -956,16 +954,14 @@ desingularizeEnd curve givenEndPoint givenEndDerivative =
   Tolerance.using Quantity.zero do
     let panic = error "Desingularization should never produce degenerate curve"
     let tInner = 1.0 - affixWidth
-    let prefix = curve << Curve1D.interpolateFrom 0.0 tInner !! panic
-    let suffix =
-          hermite
-            (pointAt tInner curve)
-            [ affixWidth * derivativeAt tInner curve
-            , affixWidth * affixWidth * secondDerivativeAt tInner curve
-            ]
-            givenEndPoint
-            [affixWidth * givenEndDerivative]
-            !! panic
+    let prefix = section (Interval 0.0 tInner) curve !! panic
+    let suffixStart = pointAt tInner curve
+    let suffixStartFirstDerivative = affixWidth * derivativeAt tInner curve
+    let suffixStartSecondDerivative = affixWidth * affixWidth * secondDerivativeAt tInner curve
+    let suffixStartDerivatives = [suffixStartFirstDerivative, suffixStartSecondDerivative]
+    let suffixEnd = givenEndPoint
+    let suffixEndDerivatives = [affixWidth * givenEndDerivative]
+    let suffix = hermite suffixStart suffixStartDerivatives suffixEnd suffixEndDerivatives !! panic
     (prefix, suffix)
 
 data Monotonic = Monotonic deriving (Eq)
