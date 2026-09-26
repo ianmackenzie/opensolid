@@ -1,6 +1,8 @@
-Add 'spatial' helper to Test module
-- use that instead of magically supplying length tolerance in 'check'
-- more flexible/explicit
+Implement Surface3D.findPoint
+
+Implement Curve3D-Surface3D intersection
+
+Implement Surface3D-Surface3D intersection...
 
 Move Array and Color into OpenSolid.Prelude?
 
@@ -13,14 +15,6 @@ Restrict Units.Coercion for Curve.Segment to 2D and remove most constraints?
 Have 'erase' functions also erase space to Void?
 
 Rename Text.[int,number] -> Text.[fromInt,fromNumber]?
-
-Rename Curve.Nonzero to Curve.Regular
-
-Implement Surface3D.findPoint
-
-Implement Curve3D-Surface3D intersection
-
-Implement Surface3D-Surface3D intersection...
 
 Restrict medial axis to Meters only
 
