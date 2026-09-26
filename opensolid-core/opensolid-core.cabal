@@ -256,7 +256,6 @@ library
     OpenSolid.VectorBounds2D
     OpenSolid.VectorBounds3D
     OpenSolid.VectorCurve
-    OpenSolid.VectorCurve.Direction
     OpenSolid.VectorCurve.Nonzero
     OpenSolid.VectorCurve2D
     OpenSolid.VectorCurve3D
@@ -281,7 +280,6 @@ library
     OpenSolid.Bytecode.Instruction
     OpenSolid.CDT
     OpenSolid.Curve.CrossingSolver
-    OpenSolid.Curve.CurvatureVector
     OpenSolid.Curve.TangentSolver
     OpenSolid.Curve.TangentSolver2D
     OpenSolid.Curve.TangentSolver3D

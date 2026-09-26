@@ -36,6 +36,14 @@ module OpenSolid.Curve2D
   , secondDerivativeRange
   , tangentDirectionAt
   , tangentDirectionRange
+  , curvatureAt_
+  , curvatureAt
+  , curvatureVectorAt_
+  , curvatureVectorAt
+  , curvatureRange_
+  , curvatureRange
+  , curvatureVectorRange_
+  , curvatureVectorRange
   , desingularizeStart
   , desingularizeEnd
   , pointAt
@@ -111,8 +119,10 @@ import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.List qualified as List
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Number qualified as Number
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
@@ -482,6 +492,64 @@ tangentDirectionAt = Curve.tangentDirectionAt
 
 tangentDirectionRange :: Interval Unitless -> Curve2D units -> DirectionBounds2D
 tangentDirectionRange = Curve.tangentDirectionRange
+
+curvatureAt_ ::
+  Tolerance units =>
+  Number ->
+  Curve2D units ->
+  Maybe (Quantity (Unitless ?/? units), Direction2D)
+curvatureAt_ = Curve.curvatureAt_
+
+curvatureAt ::
+  (Tolerance units, Units.Inverse units inverseUnits) =>
+  Number ->
+  Curve2D units ->
+  Maybe (Quantity inverseUnits, Direction2D)
+curvatureAt tValue curve =
+  Maybe.map (Pair.mapFirst Units.specialize) (curvatureAt_ tValue curve)
+
+curvatureVectorAt_ ::
+  Tolerance units =>
+  Number ->
+  Curve2D units ->
+  Vector2D (Unitless ?/? units)
+curvatureVectorAt_ = Curve.curvatureVectorAt_
+
+curvatureVectorAt ::
+  (Tolerance units, Units.Inverse units inverseUnits) =>
+  Number ->
+  Curve2D units ->
+  Vector2D inverseUnits
+curvatureVectorAt tValue curve =
+  Units.specialize (curvatureVectorAt_ tValue curve)
+
+curvatureRange_ ::
+  Interval Unitless ->
+  Curve2D units ->
+  (Interval (Unitless ?/? units), DirectionBounds2D)
+curvatureRange_ = Curve.curvatureRange_
+
+curvatureRange ::
+  Units.Inverse units inverseUnits =>
+  Interval Unitless ->
+  Curve2D units ->
+  (Interval inverseUnits, DirectionBounds2D)
+curvatureRange tRange curve =
+  Pair.mapFirst Units.specialize (curvatureRange_ tRange curve)
+
+curvatureVectorRange_ ::
+  Interval Unitless ->
+  Curve2D units ->
+  VectorBounds2D (Unitless ?/? units)
+curvatureVectorRange_ = Curve.curvatureVectorRange_
+
+curvatureVectorRange ::
+  Units.Inverse units inverseUnits =>
+  Interval Unitless ->
+  Curve2D units ->
+  VectorBounds2D inverseUnits
+curvatureVectorRange tRange curve =
+  Units.specialize (curvatureVectorRange_ tRange curve)
 
 desingularizeStart ::
   Point2D units ->

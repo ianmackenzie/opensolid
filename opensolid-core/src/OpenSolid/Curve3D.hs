@@ -25,6 +25,12 @@ module OpenSolid.Curve3D
   , endSecondDerivative
   , secondDerivativeAt
   , secondDerivativeRange
+  , tangentDirectionAt
+  , tangentDirectionRange
+  , curvatureAt
+  , curvatureVectorAt
+  , curvatureRange
+  , curvatureVectorRange
   , isPoint
   , startPoint
   , endPoint
@@ -54,18 +60,24 @@ import OpenSolid.Curve (Curve3D)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve3D.IntersectionPointWithSurface (IntersectionPointWithSurface)
+import OpenSolid.Direction3D (Direction3D)
+import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.Length (Length)
 import OpenSolid.Line3D (Line3D)
+import OpenSolid.Maybe qualified as Maybe
+import OpenSolid.Pair qualified as Pair
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
+import OpenSolid.Units (InverseMeters)
+import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -200,6 +212,42 @@ secondDerivativeAt = Curve.secondDerivativeAt
 {-# INLINE secondDerivativeRange #-}
 secondDerivativeRange :: Interval Unitless -> Curve3D space -> VectorBounds3D Meters space
 secondDerivativeRange = Curve.secondDerivativeRange
+
+tangentDirectionAt :: Number -> Curve3D space -> Direction3D space
+tangentDirectionAt = Curve.tangentDirectionAt
+
+tangentDirectionRange :: Interval Unitless -> Curve3D space -> DirectionBounds3D space
+tangentDirectionRange = Curve.tangentDirectionRange
+
+curvatureAt ::
+  Tolerance Meters =>
+  Number ->
+  Curve3D space ->
+  Maybe (Quantity InverseMeters, Direction3D space)
+curvatureAt tValue curve =
+  Maybe.map (Pair.mapFirst Units.specialize) (Curve.curvatureAt_ tValue curve)
+
+curvatureVectorAt ::
+  Tolerance Meters =>
+  Number ->
+  Curve3D space ->
+  Vector3D InverseMeters space
+curvatureVectorAt tValue curve =
+  Units.specialize (Curve.curvatureVectorAt_ tValue curve)
+
+curvatureRange ::
+  Interval Unitless ->
+  Curve3D space ->
+  (Interval InverseMeters, DirectionBounds3D space)
+curvatureRange tRange curve =
+  Pair.mapFirst Units.specialize (Curve.curvatureRange_ tRange curve)
+
+curvatureVectorRange ::
+  Interval Unitless ->
+  Curve3D space ->
+  VectorBounds3D InverseMeters space
+curvatureVectorRange tRange curve =
+  Units.specialize (Curve.curvatureVectorRange_ tRange curve)
 
 isPoint :: Tolerance Meters => Curve3D space -> Bool
 isPoint = Curve.isPoint

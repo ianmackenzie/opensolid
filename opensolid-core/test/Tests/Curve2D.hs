@@ -11,7 +11,6 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Continuity qualified as Continuity
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as IntersectionPoint
-import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D qualified as Direction2D
@@ -388,11 +387,10 @@ g2 = Test.check 100 "G2 continuity" do
   p3 <- Test.generate Random.point2D
   p4 <- Test.generate Random.point2D
   spline <- Curve2D.cubicBezier p1 p2 p3 p4 ?? fail
-  nonzeroSpline <- Curve.nonzero spline ?? fail
   t <- Test.generate Parameter.random
   let point = Curve2D.pointAt t spline
   let tangentDirection = Curve.tangentDirectionAt t spline
-  let curvatureVector = Curve.Nonzero.curvatureVectorAt t nonzeroSpline
+  let curvatureVector = Curve2D.curvatureVectorAt t spline
   let signedRadius = 1.0 / (tangentDirection `cross` curvatureVector)
   let normalDirection = Direction2D.rotateLeft tangentDirection
   let arcCenter = point + signedRadius * normalDirection

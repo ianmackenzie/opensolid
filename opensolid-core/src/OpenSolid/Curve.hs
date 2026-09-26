@@ -42,6 +42,10 @@ module OpenSolid.Curve
   , secondDerivativeRange
   , tangentDirectionAt
   , tangentDirectionRange
+  , curvatureAt_
+  , curvatureVectorAt_
+  , curvatureRange_
+  , curvatureVectorRange_
   , reverse
   , isPoint
   , hasDegenerateStart
@@ -93,16 +97,16 @@ import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Continuity (Continuity)
 import OpenSolid.Continuity qualified as Continuity
 import {-# SOURCE #-} OpenSolid.Curve.CrossingSolver qualified as Curve.CrossingSolver
-import OpenSolid.Curve.CurvatureVector qualified as Curve.CurvatureVector
 import OpenSolid.Curve.IntersectionPoint (IntersectionPoint)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections (Intersections)
 import {-# SOURCE #-} OpenSolid.Curve.Intersections qualified as Curve.Intersections
-import OpenSolid.Curve.Segment (Segment)
+import OpenSolid.Curve.Segment (Segment (..))
 import OpenSolid.Curve.Segment qualified as Curve.Segment
 import {-# SOURCE #-} OpenSolid.Curve.TangentSolver2D qualified as Curve.TangentSolver2D
 import {-# SOURCE #-} OpenSolid.Curve.TangentSolver3D qualified as Curve.TangentSolver3D
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
+import OpenSolid.Degeneracy qualified as Degeneracy
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
 import OpenSolid.DirectionBounds (DirectionBounds, DirectionBoundsExists)
@@ -113,6 +117,7 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
+import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Line (Line (Line))
 import OpenSolid.Line qualified as Line
 import OpenSolid.List qualified as List
@@ -239,7 +244,47 @@ buildBisectionTree tRange curve = do
   let (tLeft, tRight) = Interval.bisect tRange
   let left = buildBisectionTree tLeft curve
   let right = buildBisectionTree tRight curve
-  Bisection.Tree tRange (Curve.Segment.new curve tRange) (NonEmpty.two left right)
+  Bisection.Tree tRange (subsegment curve tRange) (NonEmpty.two left right)
+
+subsegment ::
+  CurveExists dimension units space =>
+  Curve dimension units space ->
+  Interval Unitless ->
+  Segment dimension units space
+subsegment curve tRange = do
+  let Interval t1 t2 = tRange
+  let p1 = pointAt t1 curve
+  let p2 = pointAt t2 curve
+  let segmentRange0 = range tRange curve
+  let segmentDerivativeRange = derivativeRange tRange curve
+  let segmentSecondDerivativeRange = secondDerivativeRange tRange curve
+  let halfDisplacementRange = 0.5 * Interval.width tRange * segmentDerivativeRange
+  let leftRange = Bounds.aggregate2 (Bounds.constant p1) (p1 + halfDisplacementRange)
+  let rightRange = Bounds.aggregate2 (Bounds.constant p2) (p2 - halfDisplacementRange)
+  let segmentRange1 = Bounds.aggregate2 leftRange rightRange
+  let segmentRange =
+        case Bounds.intersection segmentRange0 segmentRange1 of
+          Just intersection -> intersection
+          Nothing -> error "Curve bounds and derivative bounds are inconsistent"
+  let segmentTangentDirectionRange =
+        tangentDirectionRangeImpl tRange curve segmentDerivativeRange segmentSecondDerivativeRange
+  let (segmentCurvatureMagnitudeRange_, segmentCurvatureDirectionRange) =
+        curvatureRangeImpl_
+          segmentDerivativeRange
+          segmentSecondDerivativeRange
+          segmentTangentDirectionRange
+  let segmentCurvatureVectorRange_ =
+        segmentCurvatureMagnitudeRange_ * segmentCurvatureDirectionRange
+  let isDegenerateStart = t2 <= Degeneracy.tStart && hasDegenerateStart curve
+  let isDegenerateEnd = t1 >= Degeneracy.tEnd && hasDegenerateEnd curve
+  Segment
+    { range = segmentRange
+    , derivativeRange = segmentDerivativeRange
+    , secondDerivativeRange = segmentSecondDerivativeRange
+    , tangentDirectionRange = segmentTangentDirectionRange
+    , curvatureVectorRange_ = segmentCurvatureVectorRange_
+    , isDegenerate = isDegenerateStart || isDegenerateEnd
+    }
 
 instance Units.Coercion (Curve2D units1) (Curve2D units2) where
   coerce curve =
@@ -658,13 +703,9 @@ tangentDirectionAt ::
   Curve dimension units space ->
   Direction dimension space
 tangentDirectionAt tValue curve = do
-  let derivativeValue = derivativeAt tValue curve
+  let firstDerivativeValue = derivativeAt tValue curve
   let secondDerivativeValue = secondDerivativeAt tValue curve
-  Vector.Nonzero.direction . Nonzero $
-    if
-      | tValue == 0.0 && hasDegenerateStart curve -> secondDerivativeValue
-      | tValue == 1.0 && hasDegenerateEnd curve -> -secondDerivativeValue
-      | otherwise -> derivativeValue
+  tangentDirectionImpl tValue curve firstDerivativeValue secondDerivativeValue
 
 tangentDirectionRange ::
   CurveExists dimension units space =>
@@ -672,14 +713,109 @@ tangentDirectionRange ::
   Curve dimension units space ->
   DirectionBounds dimension space
 tangentDirectionRange tRange curve = do
-  let Interval tLow tHigh = tRange
   let derivativeRange_ = derivativeRange tRange curve
   let secondDerivativeRange_ = secondDerivativeRange tRange curve
+  tangentDirectionRangeImpl tRange curve derivativeRange_ secondDerivativeRange_
+
+tangentDirectionImpl ::
+  CurveExists dimension units space =>
+  Number ->
+  Curve dimension units space ->
+  Vector dimension units space ->
+  Vector dimension units space ->
+  Direction dimension space
+tangentDirectionImpl tValue curve firstDerivativeValue secondDerivativeValue =
+  Vector.Nonzero.direction . Nonzero $
+    if
+      | tValue == 0.0 && hasDegenerateStart curve -> secondDerivativeValue
+      | tValue == 1.0 && hasDegenerateEnd curve -> -secondDerivativeValue
+      | otherwise -> firstDerivativeValue
+
+tangentDirectionRangeImpl ::
+  CurveExists dimension units space =>
+  Interval Unitless ->
+  Curve dimension units space ->
+  VectorBounds dimension units space ->
+  VectorBounds dimension units space ->
+  DirectionBounds dimension space
+tangentDirectionRangeImpl tRange curve firstDerivativeRange_ secondDerivativeRange_ =
   VectorBounds.direction $
     if
-      | tLow == 0.0 && hasDegenerateStart curve -> secondDerivativeRange_
-      | tHigh == 1.0 && hasDegenerateEnd curve -> -secondDerivativeRange_
-      | otherwise -> derivativeRange_
+      | Interval.lower tRange == 0.0 && hasDegenerateStart curve -> secondDerivativeRange_
+      | Interval.upper tRange == 1.0 && hasDegenerateEnd curve -> -secondDerivativeRange_
+      | otherwise -> firstDerivativeRange_
+
+curvatureAt_ ::
+  (CurveExists dimension units space, Tolerance units) =>
+  Number ->
+  Curve dimension units space ->
+  Maybe (Quantity (Unitless ?/? units), Direction dimension space)
+curvatureAt_ tValue curve = do
+  let f' = derivativeAt tValue curve
+  let f'' = secondDerivativeAt tValue curve
+  let tangent = tangentDirectionImpl tValue curve f' f''
+  curvatureImpl_ tValue curve f' f'' tangent
+
+curvatureVectorAt_ ::
+  (CurveExists dimension units space, Tolerance units) =>
+  Number ->
+  Curve dimension units space ->
+  Vector dimension (Unitless ?/? units) space
+curvatureVectorAt_ tValue curve =
+  case curvatureAt_ tValue curve of
+    Nothing -> Vector.zero
+    Just (curvatureMagnitude_, curvatureDirection) -> curvatureMagnitude_ * curvatureDirection
+
+curvatureRange_ ::
+  CurveExists dimension units space =>
+  Interval Unitless ->
+  Curve dimension units space ->
+  (Interval (Unitless ?/? units), DirectionBounds dimension space)
+curvatureRange_ tRange curve = do
+  let f' = derivativeRange tRange curve
+  let f'' = secondDerivativeRange tRange curve
+  let tangent = tangentDirectionRangeImpl tRange curve f' f''
+  curvatureRangeImpl_ f' f'' tangent
+
+curvatureVectorRange_ ::
+  CurveExists dimension units space =>
+  Interval Unitless ->
+  Curve dimension units space ->
+  VectorBounds dimension (Unitless ?/? units) space
+curvatureVectorRange_ tRange curve = do
+  let (curvatureMagnitudeRange_, curvatureDirectionRange) = curvatureRange_ tRange curve
+  curvatureMagnitudeRange_ * curvatureDirectionRange
+
+curvatureImpl_ ::
+  (CurveExists dimension units space, Tolerance units) =>
+  Number ->
+  Curve dimension units space ->
+  Vector dimension units space ->
+  Vector dimension units space ->
+  Direction dimension space ->
+  Maybe (Quantity (Unitless ?/? units), Direction dimension space)
+curvatureImpl_ tValue curve f' f'' tangent =
+  case Vector.magnitudeAndDirection (f'' - Vector.projectionIn tangent f'') of
+    Err IsZero -> Nothing
+    Ok (numerator, curvatureDirection) -> do
+      let curvatureMagnitude =
+            if isDegenerateAt tValue curve
+              then Quantity.infinity
+              else Units.simplify (numerator ?/? Vector.squaredMagnitude_ f')
+      Just (curvatureMagnitude, curvatureDirection)
+
+curvatureRangeImpl_ ::
+  CurveExists dimension units space =>
+  VectorBounds dimension units space ->
+  VectorBounds dimension units space ->
+  DirectionBounds dimension space ->
+  (Interval (Unitless ?/? units), DirectionBounds dimension space)
+curvatureRangeImpl_ f' f'' tangent = do
+  let f''Perpendicular = f'' - tangent * (f'' `dot` tangent)
+  let curvatureDirection = VectorBounds.direction f''Perpendicular
+  let curvatureMagnitude = Units.simplify do
+        VectorBounds.magnitude f''Perpendicular ?/? VectorBounds.squaredMagnitude_ f'
+  (curvatureMagnitude, curvatureDirection)
 
 bisectionTree :: Curve dimension units space -> BisectionTree dimension units space
 bisectionTree = (.bisectionTree)
@@ -877,8 +1013,12 @@ continuityAt ::
   Maybe Continuity
 continuityAt (t1, t2) (curve1, curve2)
   | pointAt t1 curve1 ~= pointAt t2 curve2 = do
-      let tangent1 = tangentDirectionAt t1 curve1
-      let tangent2 = tangentDirectionAt t2 curve2
+      let firstDerivative1 = derivativeAt t1 curve1
+      let firstDerivative2 = derivativeAt t2 curve2
+      let secondDerivative1 = secondDerivativeAt t1 curve1
+      let secondDerivative2 = secondDerivativeAt t2 curve2
+      let tangent1 = tangentDirectionImpl t1 curve1 firstDerivative1 secondDerivative1
+      let tangent2 = tangentDirectionImpl t2 curve2 firstDerivative2 secondDerivative2
       if Direction.areIndependent tangent1 tangent2
         then Just Continuity.Crossing
         else do
@@ -886,21 +1026,31 @@ continuityAt (t1, t2) (curve1, curve2)
           if isDegenerateAt t1 curve1 || isDegenerateAt t2 curve2
             then Just (Continuity.Indistinguishable alignment)
             else do
-              let firstDerivative1 = derivativeAt t1 curve1
-              let firstDerivative2 = derivativeAt t2 curve2
-              let secondDerivative1 = secondDerivativeAt t1 curve1
-              let secondDerivative2 = secondDerivativeAt t2 curve2
-              let l1 = Vector.magnitude firstDerivative1
-              let l2 = Vector.magnitude firstDerivative2
-              let l = Quantity.erase (min l1 l2)
-              let k1_ = Curve.CurvatureVector.value_ firstDerivative1 secondDerivative1
-              let k2_ = Curve.CurvatureVector.value_ firstDerivative2 secondDerivative2
-              let k = Vector.erase (k1_ - k2_)
-              let curvatureError = Vector.unerase @units (k * l * l / 2.0)
-              if curvatureError ~= Vector.zero
+              let scale1 = Vector.magnitude firstDerivative1
+              let scale2 = Vector.magnitude firstDerivative2
+              let maybeCurvature1_ =
+                    curvatureImpl_ t1 curve1 firstDerivative1 secondDerivative1 tangent1
+              let maybeCurvature2_ =
+                    curvatureImpl_ t2 curve2 firstDerivative2 secondDerivative2 tangent2
+              if matchingCurvatures (min scale1 scale2) maybeCurvature1_ maybeCurvature2_
                 then Just (Continuity.Indistinguishable alignment)
                 else Just (Continuity.Tangent alignment)
   | otherwise = Nothing
+
+matchingCurvatures ::
+  (CurveExists dimension units space, Tolerance units) =>
+  Quantity units ->
+  Maybe (Quantity (Unitless ?/? units), Direction dimension space) ->
+  Maybe (Quantity (Unitless ?/? units), Direction dimension space) ->
+  Bool
+matchingCurvatures _ Nothing Nothing = True
+matchingCurvatures _ Nothing (Just _) = False
+matchingCurvatures _ (Just _) Nothing = False
+matchingCurvatures scale (Just (magnitude1, direction1)) (Just (magnitude2, direction2)) =
+  unitless (direction1 ~= direction2) && do
+    let relativeCurvature = Quantity.abs (magnitude1 - magnitude2)
+    let curvatureError = Units.simplify (relativeCurvature ?*? scale ?*? scale)
+    curvatureError ~= Quantity.zero
 
 intersections ::
   ( CurveExists dimension units space
