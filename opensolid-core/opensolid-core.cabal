@@ -196,7 +196,6 @@ library
     OpenSolid.Random
     OpenSolid.Region2D
     OpenSolid.Region2D.Boundary
-    OpenSolid.Region2D.BoundedBy
     OpenSolid.Resolution
     OpenSolid.Result
     OpenSolid.Set

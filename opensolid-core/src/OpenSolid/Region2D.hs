@@ -74,7 +74,6 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2D.Boundary (Boundary)
 import OpenSolid.Region2D.Boundary qualified as Boundary
-import OpenSolid.Region2D.BoundedBy qualified as BoundedBy
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Result qualified as Result
 import OpenSolid.Set2D (Set2D)
@@ -152,7 +151,7 @@ and can form multiple separate loops if the region has holes.
 However, the curves must not overlap or intersect (other than at endpoints)
 and there must not be any gaps between them.
 -}
-boundedBy :: Tolerance units => List (Curve2D units) -> Result BoundedBy.Error (Region2D units)
+boundedBy :: Tolerance units => List (Curve2D units) -> Result Text (Region2D units)
 boundedBy curves = do
   checkForInnerIntersection curves
   loops <- connect curves
@@ -192,7 +191,7 @@ circle givenCircle =
       Ok (unsafe (Boundary.unsafe edges) Bag2D.empty)
 
 -- | Create a region from the given polygon.
-polygon :: Tolerance units => Polygon2D units -> Result BoundedBy.Error (Region2D units)
+polygon :: Tolerance units => Polygon2D units -> Result Text (Region2D units)
 polygon givenPolygon = do
   let toCurve (Line2D p1 p2) =
         case Curve2D.lineFrom p1 p2 of
@@ -293,7 +292,7 @@ nonIncidentCurve :: (Curve2D units, Maybe Number) -> Maybe (Curve2D units)
 nonIncidentCurve (curve, Nothing) = Just curve
 nonIncidentCurve (_, Just _) = Nothing
 
-checkForInnerIntersection :: Tolerance units => List (Curve2D units) -> Result BoundedBy.Error ()
+checkForInnerIntersection :: Tolerance units => List (Curve2D units) -> Result Text ()
 checkForInnerIntersection [] = Ok ()
 checkForInnerIntersection (first : rest) = do
   checkCurveForInnerIntersection first rest
@@ -303,7 +302,7 @@ checkCurveForInnerIntersection ::
   Tolerance units =>
   Curve2D units ->
   List (Curve2D units) ->
-  Result BoundedBy.Error ()
+  Result Text ()
 checkCurveForInnerIntersection _ [] = Ok ()
 checkCurveForInnerIntersection curve (first : rest) = do
   checkCurvesForInnerIntersection curve first
@@ -313,25 +312,25 @@ checkCurvesForInnerIntersection ::
   Tolerance units =>
   Curve2D units ->
   Curve2D units ->
-  Result BoundedBy.Error ()
+  Result Text ()
 checkCurvesForInnerIntersection curve1 curve2 =
   case Curve2D.intersections curve1 curve2 of
     -- Any overlap between boundary curves is bad
-    Just Curve.OverlappingSegments{} -> Err BoundedBy.BoundaryIntersectsItself
+    Just Curve.OverlappingSegments{} -> Err "Boundary curves overlap each other"
     -- If there are no intersections at all then we're good!
     Nothing -> Ok ()
     -- Otherwise, make sure curves only intersect (meet) at endpoints
     Just (Curve.IntersectionPoints intersectionPoints) ->
       if NonEmpty.all isEndpointIntersection intersectionPoints
         then Ok ()
-        else Err BoundedBy.BoundaryIntersectsItself
+        else Err "Boundary curves intersect each other"
 
 isEndpointIntersection :: Curve.IntersectionPoint -> Bool
 isEndpointIntersection intersectionPoint = do
   let (t1, t2) = Curve.IntersectionPoint.parameterValues intersectionPoint
   Parameter.isEndpoint t1 && Parameter.isEndpoint t2
 
-connect :: Tolerance units => List (Curve2D units) -> Result BoundedBy.Error (List (Loop units))
+connect :: Tolerance units => List (Curve2D units) -> Result Text (List (Loop units))
 connect [] = Ok []
 connect (first : rest) = do
   (loop, remainingCurves) <- buildLoop (startLoop first) rest
@@ -345,7 +344,7 @@ buildLoop ::
   Tolerance units =>
   PartialLoop units ->
   List (Curve2D units) ->
-  Result BoundedBy.Error (Loop units, List (Curve2D units))
+  Result Text (Loop units, List (Curve2D units))
 buildLoop partialLoop@(PartialLoop currentStart currentCurves loopEnd) remainingCurves
   | currentStart ~= loopEnd = Ok (currentCurves, remainingCurves)
   | otherwise = do
@@ -356,15 +355,15 @@ extendPartialLoop ::
   Tolerance units =>
   PartialLoop units ->
   List (Curve2D units) ->
-  Result BoundedBy.Error (PartialLoop units, List (Curve2D units))
+  Result Text (PartialLoop units, List (Curve2D units))
 extendPartialLoop (PartialLoop currentStart currentCurves loopEnd) curves =
   case List.partition (hasEndpoint currentStart) curves of
-    ([], _) -> Err BoundedBy.BoundaryHasGaps
+    ([], _) -> Err "Region boundary has gaps"
     (List.One curve, remaining) -> do
       let newCurve = if Curve2D.endPoint curve ~= currentStart then curve else Curve2D.reverse curve
       let updatedCurves = NonEmpty.push newCurve currentCurves
       Ok (PartialLoop (Curve2D.startPoint newCurve) updatedCurves loopEnd, remaining)
-    (List.TwoOrMore, _) -> Err BoundedBy.BoundaryIntersectsItself
+    (List.TwoOrMore, _) -> Err "Region boundary is non-manifold"
 
 hasEndpoint :: Tolerance units => Point2D units -> Curve2D units -> Bool
 hasEndpoint point curve = point ~= Curve2D.startPoint curve || point ~= Curve2D.endPoint curve
@@ -503,8 +502,8 @@ classifyInnerBounds givenBounds candidateInnerBoundaries = case candidateInnerBo
       ExteriorBounds -> classifyInnerBounds givenBounds rest -- Bounding box is outside this hole, so check the rest
   [] -> Resolved InteriorBounds -- Bounding box is not inside any hole, so is inside the region
 
-classifyLoops :: Tolerance units => List (Loop units) -> Result BoundedBy.Error (Region2D units)
-classifyLoops [] = Err BoundedBy.EmptyRegion
+classifyLoops :: Tolerance units => List (Loop units) -> Result Text (Region2D units)
+classifyLoops [] = Err "No region boundary curves given"
 classifyLoops (NonEmpty loops) = do
   let (largestLoop, smallerLoops) = pickLargestLoop loops
   let outerBoundaryCandidate = Boundary.unsafe (fixSign Positive largestLoop)
@@ -513,7 +512,7 @@ classifyLoops (NonEmpty loops) = do
     then do
       let innerBoundaryBag = Bag2D.pack innerBoundaryCandidates
       Ok (unsafe outerBoundaryCandidate innerBoundaryBag)
-    else Err BoundedBy.MultipleDisjointRegions
+    else Err "Given boundaries form multiple disjoint regions"
 
 fixSign :: Tolerance units => Sign -> Loop units -> Loop units
 fixSign desiredSign loop =

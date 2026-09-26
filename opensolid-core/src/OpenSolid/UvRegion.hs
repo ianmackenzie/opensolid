@@ -18,7 +18,6 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
-import OpenSolid.Region2D.BoundedBy qualified as Region2D.BoundedBy
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvBounds qualified as UvBounds
@@ -43,7 +42,7 @@ and can form multiple separate loops if the region has holes.
 However, the curves must not overlap or intersect (other than at endpoints)
 and there must not be any gaps between them.
 -}
-boundedBy :: List UvCurve -> Result Region2D.BoundedBy.Error UvRegion
+boundedBy :: List UvCurve -> Result Text UvRegion
 boundedBy = unitless Region2D.boundedBy
 
 {-| Create a rectangular region.
