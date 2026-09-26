@@ -303,7 +303,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
 
 testBezierSegment :: Tolerance Meters => IO ()
 testBezierSegment = do
-  let p1 = Point2D.origin @Unitless
+  let p1 = Point2D.origin
   let p2 = Point2D 0.0 5.0
   let p3 = Point2D 2.5 10.0
   let p4 = Point2D 5.0 0.0
@@ -316,7 +316,7 @@ testBezierSegment = do
 
 testHermiteBezier :: IO ()
 testHermiteBezier = Tolerance.using Length.defaultTolerance do
-  let startPoint = Point2D.origin @Meters
+  let startPoint = Point2D.origin
   let startDerivatives = [Vector2D.centimeters 10.0 10.0]
   let endDerivatives = [Vector2D.centimeters 0.0 -10.0, Vector2D.zero]
   let endPoint = Point2D.centimeters 10.0 0.0
