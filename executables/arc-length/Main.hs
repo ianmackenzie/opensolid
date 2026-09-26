@@ -29,7 +29,7 @@ formatLength length =
   Text.number (Length.inMeters length) <> "m"
 
 testCurve :: Text -> Curve2D Meters -> IO ()
-testCurve label curve = Tolerance.using (Length.meters 1e-12) do
+testCurve label curve = do
   let length = Curve2D.length curve
   IO.printLine (label <> ": " <> formatLength length)
 
