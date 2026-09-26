@@ -155,6 +155,11 @@ instance
     (((units ?*? units) ?/? (units ?*? units ?*? units)) ?*? (units ?*? units))
     units
 
+instance
+  Simplification
+    (((Unitless ?/? units) ?*? units) ?*? units)
+    units
+
 data Radians deriving (Eq, Show)
 
 data Meters deriving (Eq, Show)
