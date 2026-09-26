@@ -79,11 +79,8 @@ findInteriorPoint = Test.check 100 "findInterior" do
   let point = SurfaceFunction3D.pointAt uvPoint function
   let solutions = Surface3D.findPoint point surface
   case solutions of
-    [SurfacePoint3D.Point solution _] ->
-      Test.expect (solution ~~ uvPoint)
-    _ ->
-      Test.fail "Expected a single solution"
-        & Test.output "solutions" solutions
+    [SurfacePoint3D.Point solution _] -> Test.expect (solution ~~ uvPoint)
+    _ -> Test.fail "Expected a single solution" & Test.output "solutions" solutions
 
 ruledSurface :: Test
 ruledSurface =
