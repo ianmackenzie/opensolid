@@ -32,7 +32,7 @@ import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding (fail, forEach, forEachWithIndex)
+import OpenSolid.Prelude hiding (forEach, forEachWithIndex)
 import OpenSolid.Prelude qualified
 import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text

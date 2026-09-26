@@ -24,7 +24,7 @@ import OpenSolid.Duration qualified as Duration
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude hiding (fail)
+import OpenSolid.Prelude
 import OpenSolid.Random qualified as Random
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
