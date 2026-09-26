@@ -25,7 +25,6 @@ import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Axis3D (Axis3D (Axis3D))
 import OpenSolid.Axis3D qualified as Axis3D
 import OpenSolid.Bag3D qualified as Bag3D
-import OpenSolid.Body3D.BoundedBy qualified as BoundedBy
 import OpenSolid.Body3D.HalfEdge (HalfEdge (..))
 import OpenSolid.Body3D.HalfEdge qualified as HalfEdge
 import OpenSolid.Body3D.Ids (BoundaryId (BoundaryId), CurveId (CurveId), SurfaceId (SurfaceId))
@@ -199,7 +198,7 @@ extruded ::
   Region2D Meters ->
   Length ->
   Length ->
-  Result BoundedBy.Error (Body3D space)
+  Result Text (Body3D space)
 extruded sketchPlane profile d1 d2 = do
   let normal = Plane3D.normalDirection sketchPlane
   let v1 = d1 * normal
@@ -211,7 +210,7 @@ sweptBy ::
   VectorCurve3D Meters space ->
   Plane3D space ->
   Region2D Meters ->
-  Result BoundedBy.Error (Body3D space)
+  Result Text (Body3D space)
 sweptBy givenDisplacementCurve sketchPlane profile = do
   -- Fix displacement curve so that extrusion is upwards from plane
   let givenStartDerivative = VectorCurve3D.startDerivative givenDisplacementCurve
@@ -221,11 +220,11 @@ sweptBy givenDisplacementCurve sketchPlane profile = do
           Negative -> VectorCurve3D.reverse givenDisplacementCurve
   let startPlane = Plane3D.translateBy (VectorCurve3D.startValue displacementCurve) sketchPlane
   let endPlane = Plane3D.translateBy (VectorCurve3D.endValue displacementCurve) sketchPlane
-  startCap <- Surface3D.on startPlane profile & Result.map Surface3D.flip !! Err BoundedBy.EmptyBody
-  endCap <- Surface3D.on endPlane profile !! Err BoundedBy.EmptyBody
+  startCap <- try do Surface3D.on startPlane profile & Result.map Surface3D.flip
+  endCap <- try do Surface3D.on endPlane profile
   let profileCurves = Set2D.toList (Region2D.boundaryCurves profile)
   let sideSurface curve = Surface3D.sweptBy displacementCurve (Curve2D.placeOn sketchPlane curve)
-  sideSurfaces <- Result.collect sideSurface profileCurves !! Err BoundedBy.EmptyBody
+  sideSurfaces <- try do Result.collect sideSurface profileCurves
   boundedBy (startCap : endCap : sideSurfaces)
 
 {-| Create a revolved body from a sketch plane and profile.
@@ -242,7 +241,7 @@ revolved ::
   Region2D Meters ->
   Axis2D Meters ->
   Angle ->
-  Result BoundedBy.Error (Body3D space)
+  Result Text (Body3D space)
 revolved sketchPlane profile givenAxis givenSweptAngle = do
   let profileCurves = Set2D.toNonEmpty (Region2D.boundaryCurves profile)
   let offAxisCurves = NonEmpty.filter (not . Curve2D.isOnAxis givenAxis) profileCurves
@@ -251,11 +250,11 @@ revolved sketchPlane profile givenAxis givenSweptAngle = do
   -- or to the right ('negative')
   profileSign <-
     case Result.collect Curve1D.sign signedDistanceCurves of
-      Err Curve1D.CrossesZero -> Err BoundedBy.BoundaryIntersectsItself
+      Err Curve1D.CrossesZero -> Err "Boundary intersects itself"
       Ok curveSigns
         | List.all (== Positive) curveSigns -> Ok Positive
         | List.all (== Negative) curveSigns -> Ok Negative
-        | otherwise -> Err BoundedBy.BoundaryIntersectsItself
+        | otherwise -> Err "Boundary intersects itself"
   let planeRotationAxis = Axis2D.placeOn sketchPlane givenAxis
   let rotatedPlane = Plane3D.rotateAround planeRotationAxis givenSweptAngle sketchPlane
   let (startPlane, endPlane) =
@@ -263,8 +262,8 @@ revolved sketchPlane profile givenAxis givenSweptAngle = do
           Positive -> (sketchPlane, rotatedPlane)
           Negative -> (rotatedPlane, sketchPlane)
   let sweptAngle = Quantity.abs givenSweptAngle
-  startCap <- Surface3D.on startPlane profile & Result.map Surface3D.flip !! Err BoundedBy.EmptyBody
-  endCap <- Surface3D.on endPlane profile !! Err BoundedBy.EmptyBody
+  startCap <- try do Surface3D.on startPlane profile & Result.map Surface3D.flip
+  endCap <- try do Surface3D.on endPlane profile
   let isFullRevolution = angular (sweptAngle ~= Angle.twoPi)
   let endSurfaces = if isFullRevolution then [] else [startCap, endCap]
   -- A 2D axis such that the profile is to the *left* of the axis
@@ -272,7 +271,7 @@ revolved sketchPlane profile givenAxis givenSweptAngle = do
   -- in turn meaning that the side surfaces have the correct normal orientation)
   let axis2D = profileSign * givenAxis
   let sideSurface profileCurve = Surface3D.revolved startPlane profileCurve axis2D sweptAngle
-  sideSurfaces <- Result.collect sideSurface offAxisCurves !! Err BoundedBy.EmptyBody
+  sideSurfaces <- try do Result.collect sideSurface offAxisCurves
   boundedBy (endSurfaces <> sideSurfaces)
 
 {-| Create a body bounded by the given surfaces.
@@ -280,8 +279,8 @@ The surfaces do not have to have consistent orientation,
 but currently the *first* surface must have the correct orientation
 since all others will be flipped if necessary to match it.
 -}
-boundedBy :: Tolerance Meters => List (Surface3D space) -> Result BoundedBy.Error (Body3D space)
-boundedBy [] = Err BoundedBy.EmptyBody
+boundedBy :: Tolerance Meters => List (Surface3D space) -> Result Text (Body3D space)
+boundedBy [] = Err "No boundary surfaces given"
 boundedBy (NonEmpty givenSurfaces) = do
   let surfaceSet = Set3D.build givenSurfaces
   let halfEdgeSet = buildHalfEdgeSet surfaceSet
@@ -309,7 +308,7 @@ registerSeam ::
   Set3D space (HalfEdge space) ->
   HalfEdge space ->
   HashMap HalfEdge.Id (Maybe HalfEdge.Id) ->
-  Result BoundedBy.Error (HashMap HalfEdge.Id (Maybe HalfEdge.Id))
+  Result Text (HashMap HalfEdge.Id (Maybe HalfEdge.Id))
 registerSeam halfEdgeSet halfEdge accumulated =
   case accumulated & HashMap.lookup halfEdge.id of
     Just _ -> Ok accumulated -- We've already registered this seam from the other side
@@ -319,12 +318,12 @@ registerSeam halfEdgeSet halfEdge accumulated =
           Ok (accumulated & HashMap.insert halfEdge.id Nothing) -- Pole half-edge has no mating half-edge
         SurfaceCurve3D.Edge _ ->
           case HalfEdge.findMatingHalfEdges halfEdgeSet halfEdge of
-            Bag3D.Empty -> Err BoundedBy.BoundaryHasGaps -- No mating half-edge found
+            Bag3D.Empty -> Err "Gaps exist between boundary surfaces"
             Bag3D.Full (Set3D.Leaf _ matingHalfEdge) -> Ok do
               accumulated
                 & HashMap.insert halfEdge.id (Just matingHalfEdge.id)
                 & HashMap.insert matingHalfEdge.id (Just halfEdge.id)
-            Bag3D.Full Set3D.Node{} -> Err BoundedBy.BoundaryIntersectsItself -- More than one mating half-edge found
+            Bag3D.Full Set3D.Node{} -> Err "Body is non-manifold" -- More than one mating half-edge found
 
 ----- MESHING -----
 
