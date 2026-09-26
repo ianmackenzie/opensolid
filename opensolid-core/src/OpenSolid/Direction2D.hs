@@ -14,7 +14,6 @@ module OpenSolid.Direction2D
   , degrees
   , radians
   , angleFrom
-  , areEqual
   , areParallel
   , areIndependent
   , arePerpendicular
@@ -152,14 +151,11 @@ second, and will always be between -180 and +180 degrees.
 angleFrom :: Direction2D -> Direction2D -> Angle
 angleFrom (Unit2D v1) (Unit2D v2) = Vector2D.angleFrom v1 v2
 
-areEqual :: Direction2D -> Direction2D -> Bool
-areEqual (Unit2D v1) (Unit2D v2) = unitless (v1 ~= v2)
-
 arePerpendicular :: Direction2D -> Direction2D -> Bool
 arePerpendicular d1 d2 = unitless (d1 `dot` d2 ~= 0.0)
 
 areParallel :: Direction2D -> Direction2D -> Bool
-areParallel d1 d2 = areEqual d1 d2 || areEqual d1 -d2
+areParallel d1 d2 = unitless (d1 ~= d2 || d1 ~= -d2)
 
 areIndependent :: Direction2D -> Direction2D -> Bool
 areIndependent d1 d2 = not (areParallel d1 d2)

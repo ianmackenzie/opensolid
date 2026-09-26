@@ -257,6 +257,9 @@ instance Show Direction2D where
 instance FFI Direction2D where
   representation = FFI.classRepresentation "Direction2D"
 
+instance ApproximateEquality Direction2D Unitless where
+  Unit2D v1 ~= Unit2D v2 = v1 ~= v2
+
 instance Negation Direction2D where
   {-# INLINE negate #-}
   negate (Unit2D v) = Unit2D (negate v)
@@ -1210,6 +1213,9 @@ instance FFI (Direction3D Void) where
 instance Space.Coercion (Direction3D space1) (Direction3D space2) where
   {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
+
+instance ApproximateEquality (Direction3D space) Unitless where
+  Unit3D v1 ~= Unit3D v2 = v1 ~= v2
 
 instance Negation (Direction3D space) where
   negate (Unit3D vector) = Unit3D (negate vector)

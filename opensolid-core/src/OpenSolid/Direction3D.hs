@@ -22,7 +22,6 @@ module OpenSolid.Direction3D
   , zUpComponents
   , yUpComponents
   , angleFrom
-  , areEqual
   , areParallel
   , areIndependent
   , arePerpendicular
@@ -163,11 +162,8 @@ The result will always be between 0 and 180 degrees.
 angleFrom :: Direction3D space -> Direction3D space -> Angle
 angleFrom d1 d2 = Angle.atan2 (Vector3D.magnitude (d1 `cross` d2)) (d1 `dot` d2)
 
-areEqual :: Direction3D space -> Direction3D space -> Bool
-areEqual (Unit3D v1) (Unit3D v2) = unitless (v1 ~= v2)
-
 areParallel :: Direction3D space -> Direction3D space -> Bool
-areParallel d1 d2 = areEqual d1 d2 || areEqual d1 -d2
+areParallel d1 d2 = unitless (d1 ~= d2 || d1 ~= -d2)
 
 areIndependent :: Direction3D space -> Direction3D space -> Bool
 areIndependent d1 d2 = not (areParallel d1 d2)
