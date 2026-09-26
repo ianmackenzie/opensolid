@@ -7,9 +7,12 @@ module OpenSolid.Prelude
   , Fuzzy (Resolved, Unresolved)
   , Err
   , Result (Ok, Err)
-  , OnError
   , try
+  , (?)
+  , (!)
   , (??)
+  , (?!)
+  , (!?)
   , (!!)
   , Exception
   , Void
@@ -464,23 +467,53 @@ instance MonadFail (Result Text) where
   {-# INLINE fail #-}
   fail message = Err (Data.Text.pack message)
 
-type OnError x a = (Err x, ?err :: x) => a
+----- Fallback functions -----
 
-(??) :: Monad m => Result x a -> OnError x (m a) -> m a
-Ok value ?? _ = Prelude.return value
-Err err ?? fallback = let ?err = err in fallback
+{-# INLINE (??) #-}
+(??) :: Maybe a -> Maybe a -> Maybe a
+Just value ?? _ = Just value
+Nothing ?? fallback = fallback
 
 infixl 0 ??
+
+{-# INLINE (?!) #-}
+(?!) :: Maybe a -> Result x a -> Result x a
+Just value ?! _ = Ok value
+Nothing ?! fallback = fallback
+
+infixl 0 ?!
+
+{-# INLINE (!?) #-}
+(!?) :: Result x a -> Maybe a -> Maybe a
+Ok value !? _ = Just value
+Err _ !? fallback = fallback
+
+infixl 0 !?
+
+{-# INLINE (!!) #-}
+(!!) :: Result x a -> Result y a -> Result y a
+Ok value !! _ = Ok value
+Err _ !! fallback = fallback
+
+infixl 0 !!
+
+{-# INLINE (?) #-}
+(?) :: Maybe a -> a -> a
+Just value ? _ = value
+Nothing ? fallback = fallback
+
+infixl 0 ?
+
+{-# INLINE (!) #-}
+(!) :: Result x a -> a -> a
+Ok value ! _ = value
+Err _ ! fallback = fallback
+
+infixl 0 !
 
 try :: MonadFail m => Result x a -> m a
 try (Ok value) = Prelude.return value
 try (Err err) = Prelude.fail (Data.Text.unpack (Err.message err))
-
-(!!) :: Result x a -> a -> a
-Ok value !! _ = value
-Err _ !! fallback = fallback
-
-infixl 0 !!
 
 ----- Quantity -----
 

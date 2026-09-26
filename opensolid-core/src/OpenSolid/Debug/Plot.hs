@@ -57,5 +57,5 @@ curveWith :: List Svg.Attribute -> Curve1D Unitless -> Svg
 curveWith attributes givenCurve = do
   let curve2D =
         unitless (Curve2D.xy Curve1D.t givenCurve)
-          !! error "Curve should not be degenerate, by construction"
+          ! error "Curve should not be degenerate, by construction"
   Svg.curveWith attributes resolution (Curve2D.convert scale curve2D)

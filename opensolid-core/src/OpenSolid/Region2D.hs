@@ -177,7 +177,7 @@ rectangle (Bounds2D xBounds yBounds) =
       let p12 = Point2D x1 y2
       let p21 = Point2D x2 y1
       let p22 = Point2D x2 y2
-      let edge start end = Curve2D.lineFrom start end !! panic
+      let edge start end = Curve2D.lineFrom start end ! panic
       let edges = NonEmpty.four (edge p11 p21) (edge p21 p22) (edge p22 p12) (edge p12 p11)
       unsafe (Boundary.unsafe edges) Bag2D.empty
 
@@ -188,13 +188,13 @@ circle givenCircle =
     then Err EmptyRegion
     else do
       let panic = error "Constructing region from non-empty circle should not fail"
-      let edges = NonEmpty.one (Curve2D.circle givenCircle !! panic)
+      let edges = NonEmpty.one (Curve2D.circle givenCircle ! panic)
       Ok (unsafe (Boundary.unsafe edges) Bag2D.empty)
 
 -- | Create a region from the given polygon.
 polygon :: Tolerance units => Polygon2D units -> Result BoundedBy.Error (Region2D units)
 polygon givenPolygon = do
-  let toCurve (Line2D p1 p2) = Curve2D.lineFrom p1 p2 ?? Nothing
+  let toCurve (Line2D p1 p2) = Curve2D.lineFrom p1 p2 !? Nothing
   boundedBy (NonEmpty.filterMap toCurve (Polygon2D.edges givenPolygon))
 
 {-| Fillet a region at the given corner points, with the given radius.
@@ -249,7 +249,7 @@ addFillet radius point curves = do
       let offsetDistance = Quantity.sign cornerAngle * Quantity.abs radius
       let offsetCurve curve =
             Curve2D.Nonzero.offsetLeftwardBy offsetDistance curve
-              ?? couldNotSolveForFilletLocation
+              !! couldNotSolveForFilletLocation
       firstOffsetCurve <- offsetCurve firstNonzero
       secondOffsetCurve <- offsetCurve secondNonzero
       case Curve2D.intersections firstOffsetCurve secondOffsetCurve of

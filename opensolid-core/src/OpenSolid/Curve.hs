@@ -941,8 +941,8 @@ desingularizeStart givenStartPoint givenStartDerivative curve =
             [ affixWidth * derivativeAt tInner curve
             , affixWidth * affixWidth * secondDerivativeAt tInner curve
             ]
-            !! panic
-    let suffix = curve << Curve1D.interpolateFrom tInner 1.0 !! panic
+            ! panic
+    let suffix = curve << Curve1D.interpolateFrom tInner 1.0 ! panic
     (prefix, suffix)
 
 desingularizeEnd ::
@@ -955,7 +955,7 @@ desingularizeEnd curve givenEndPoint givenEndDerivative =
   Tolerance.using Quantity.zero do
     let panic = error "Desingularization should never produce degenerate curve"
     let tInner = 1.0 - affixWidth
-    let prefix = curve << Curve1D.interpolateFrom 0.0 tInner !! panic
+    let prefix = curve << Curve1D.interpolateFrom 0.0 tInner ! panic
     let suffix =
           hermite
             (pointAt tInner curve)
@@ -964,7 +964,7 @@ desingularizeEnd curve givenEndPoint givenEndDerivative =
             ]
             givenEndPoint
             [affixWidth * givenEndDerivative]
-            !! panic
+            ! panic
     (prefix, suffix)
 
 data Monotonic = Monotonic deriving (Eq)
