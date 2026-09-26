@@ -69,23 +69,24 @@ instance Indexed (Bag b a) Int a where
   Full set @ index = set @ index
 
 instance
-  ( Intersects b c boundsUnits
-  , Intersects a c itemUnits
-  , boundsUnits ~ itemUnits
+  ( Intersects c b units1
+  , Intersects c a units2
+  , units1 ~ units2
   ) =>
-  Intersects c (Bag b a) boundsUnits
+  Intersects c (Bag b a) units1
   where
   _ ^ Empty = False
   value ^ Full set = value ^ set
 
 instance
-  ( Intersects b c boundsUnits
-  , Intersects a c itemUnits
-  , boundsUnits ~ itemUnits
+  ( Intersects b c units1
+  , Intersects a c units2
+  , units1 ~ units2
   ) =>
-  Intersects (Bag b a) c boundsUnits
+  Intersects (Bag b a) c units1
   where
-  bag ^ value = value ^ bag
+  Empty ^ _ = False
+  Full set ^ value = set ^ value
 
 empty :: Bag b a
 empty = Empty

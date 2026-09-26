@@ -104,22 +104,22 @@ instance Indexed (Set b a) Int a where
       Nothing -> error "Index out of bounds"
 
 instance
-  ( Intersects b c boundsUnits
-  , Intersects a c itemUnits
-  , boundsUnits ~ itemUnits
+  ( Intersects b c units1
+  , Intersects a c units2
+  , units1 ~ units2
   ) =>
-  Intersects (Set b a) c boundsUnits
+  Intersects (Set b a) c units1
   where
   set ^ value = set & any (^ value) (^ value)
 
 instance
-  ( Intersects b c boundsUnits
-  , Intersects a c itemUnits
-  , boundsUnits ~ itemUnits
+  ( Intersects c b units1
+  , Intersects c a units2
+  , units1 ~ units2
   ) =>
-  Intersects c (Set b a) boundsUnits
+  Intersects c (Set b a) units1
   where
-  value ^ set = set ^ value
+  value ^ set = set & any (value ^) (value ^)
 
 get :: Int -> Set b a -> Maybe a
 get index set = case set of
