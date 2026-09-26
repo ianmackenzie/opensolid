@@ -43,6 +43,7 @@ module OpenSolid.Set
   , pairwiseAnyBounds
   , pairwiseAnyItems
   , clusters
+  , uniqueItems
   , foldr
   , foldl
   )
@@ -592,3 +593,16 @@ clusters boundsPredicate itemPredicate set = do
 
 buildCluster :: Bounds b => Set b a -> Graph.Tree Int -> NonEmpty a
 buildCluster set tree = NonEmpty.map (set @) (Data.Foldable1.toNonEmpty tree)
+
+uniqueItems ::
+  ( Bounds b
+  , ApproximateEquality a units
+  , Intersects b b units
+  , Tolerance units
+  , Bounded a b
+  ) =>
+  Set b a ->
+  NonEmpty a
+uniqueItems set = do
+  let equalItemClusters = clusters (^) (~=) set
+  NonEmpty.map NonEmpty.first equalItemClusters

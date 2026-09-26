@@ -32,6 +32,7 @@ module OpenSolid.Bag2D
   , pairwiseAnyBounds
   , pairwiseAnyItems
   , clusters
+  , uniqueItems
   )
 where
 
@@ -171,3 +172,12 @@ clusters ::
   Bag2D units item ->
   List (NonEmpty item)
 clusters = Bag.clusters
+
+uniqueItems ::
+  ( ApproximateEquality item units
+  , Bounded item (Bounds2D units)
+  , Tolerance units
+  ) =>
+  Bag2D units item ->
+  List item
+uniqueItems = Bag.uniqueItems

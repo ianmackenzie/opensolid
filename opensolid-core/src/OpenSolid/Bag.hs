@@ -30,6 +30,7 @@ module OpenSolid.Bag
   , pairwiseAnyBounds
   , pairwiseAnyItems
   , clusters
+  , uniqueItems
   )
 where
 
@@ -223,3 +224,15 @@ clusters :: Set.Bounds b => (b -> b -> Bool) -> (a -> a -> Bool) -> Bag b a -> L
 clusters _ _ Empty = []
 clusters boundsPredicate itemPredicate (Full set) =
   NonEmpty.toList (Set.clusters boundsPredicate itemPredicate set)
+
+uniqueItems ::
+  ( Set.Bounds b
+  , ApproximateEquality a units
+  , Intersects b b units
+  , Tolerance units
+  , Bounded a b
+  ) =>
+  Bag b a ->
+  List a
+uniqueItems Empty = []
+uniqueItems (Full set) = NonEmpty.toList (Set.uniqueItems set)

@@ -32,6 +32,7 @@ module OpenSolid.Bag3D
   , pairwiseAnyBounds
   , pairwiseAnyItems
   , clusters
+  , uniqueItems
   )
 where
 
@@ -171,3 +172,12 @@ clusters ::
   Bag3D space item ->
   List (NonEmpty item)
 clusters = Bag.clusters
+
+uniqueItems ::
+  ( ApproximateEquality item Meters
+  , Bounded item (Bounds3D space)
+  , Tolerance Meters
+  ) =>
+  Bag3D space item ->
+  List item
+uniqueItems = Bag.uniqueItems

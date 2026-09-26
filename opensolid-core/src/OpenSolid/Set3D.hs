@@ -44,6 +44,7 @@ module OpenSolid.Set3D
   , pairwiseAnyBounds
   , pairwiseAnyItems
   , clusters
+  , uniqueItems
   )
 where
 
@@ -259,3 +260,12 @@ clusters ::
   Set3D space item ->
   NonEmpty (NonEmpty item)
 clusters = Set.clusters
+
+uniqueItems ::
+  ( ApproximateEquality item Meters
+  , Bounded item (Bounds3D space)
+  , Tolerance Meters
+  ) =>
+  Set3D space item ->
+  NonEmpty item
+uniqueItems = Set.uniqueItems
