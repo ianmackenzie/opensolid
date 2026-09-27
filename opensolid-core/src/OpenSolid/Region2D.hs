@@ -177,7 +177,7 @@ rectangle (Bounds2D xBounds yBounds) =
       let p12 = Point2D x1 y2
       let p21 = Point2D x2 y1
       let p22 = Point2D x2 y2
-      let edge start end = Curve2D.lineFrom start end ! panic
+      let edge start end = Curve2D.lineFrom start end !! panic
       let edges = NonEmpty.four (edge p11 p21) (edge p21 p22) (edge p22 p12) (edge p12 p11)
       unsafe (Boundary.unsafe edges) Bag2D.empty
 
@@ -188,7 +188,7 @@ circle givenCircle =
     then Err EmptyRegion
     else do
       let panic = error "Constructing region from non-empty circle should not fail"
-      let edges = NonEmpty.one (Curve2D.circle givenCircle ! panic)
+      let edges = NonEmpty.one (Curve2D.circle givenCircle !! panic)
       Ok (unsafe (Boundary.unsafe edges) Bag2D.empty)
 
 -- | Create a region from the given polygon.
