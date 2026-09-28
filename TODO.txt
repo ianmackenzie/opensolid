@@ -4,6 +4,8 @@ Implement Curve3D-Surface3D intersection
 
 Implement Surface3D-Surface3D intersection...
 
+Move piecewise curve construction into generic Curve module
+
 Move Array and Color into OpenSolid.Prelude?
 
 Add Sketch3D type? Basically just Plane3D + Region2D
@@ -106,13 +108,6 @@ in favour of e.g. Point2D and UvPoint being *separate* types?
     - Vector2D has a units type and interoperates with Point2D;
       UvVector has no units type and only interoperates with UvPoint
 
-Optimize curves to reuse arc lengths and uniform parameterizations where possible
-- can simply reuse as is for rigid transformations and coordinate conversions
-- can scale arc length (by absolute value of uniform scale) for uniform transformations, and reuse uniform parameterization
-
-Add support for simple enums to target languages
-- no payloads, at least for now
-
 Implement Intersects for:
 - Axis2D/Bounds2D
 - Axis3D/Bounds3D
@@ -123,6 +118,7 @@ Rework Region2D sign-fixing to use overall signed rotation angle instead of sign
 
 Reconsider adding functions that just mirror constructors?
 - sometimes most convenient/consistent to just use qualified functions for everything...
+- Interval.from
 - Point2D.xy, Vector2D.xy, Bounds2D.xy, VectorBounds2D.xy, Line#D.from
 - Point3D.xyz, Vector3D.xyz, Bounds3D.xyz, VectorBounds3D.xyz that take Convention3D arguments
 - Axis#D.through (and rename Plane3D.fromPointAndNormal to Plane3D.through)
@@ -149,6 +145,9 @@ Add Region2D.unsafe?
 - take correct, preconstructed loops directly
 
 Add a few functions like Surface3D.asPlane :: Surface3D space -> Maybe (Plane3D space local)
+- Curve2D.asLine, Curve2D.asArc, Curve2D.asCircle etc.
+- could also have Curve2D.Line, Curve2D.Arc, Curve2D.LineFrom, Curve2D.ArcFrom patterns
+  - should even be able to map those to Python patterns!
 - useful for feature detection etc.
 
 Refactor bisection search to throw during *search*, not during domain *construction*?
@@ -157,10 +156,6 @@ Refactor bisection search to throw during *search*, not during domain *construct
   so that that function can check if the original bounds are atomic
 - maybe go back to the list of children being a Result or 'Maybe NonEmpty'?
 - or have an Atomic or Leaf constructor for Domain...
-
-Move remaining generic functionality from Curve#D modules into Curve module
-- g2? (rework to use tangent direction and curvature vector)
-- rework curvature functions to use curvature vector
 
 Tighten vector bounds normalization
 - add C++ code callable via primop that computes normalized vector bounds
@@ -182,10 +177,6 @@ Add ParameterRange module and move 'includes' and 'isInterior' functions there
 
 Deduplicate code from Tests.Curve2D and Tests.Curve3D into Tests.Curve?
 
-Rename OpenSolid.Search to OpenSolid.Bisection?
-- rename 'exclusive' to just 'search'
-- add 'find' that just attempts to find a *single* solution
-
 Get rid of fields other than internally in modules
 
 Add 3D types to check_operators script
@@ -193,34 +184,29 @@ Add 3D types to check_operators script
 Rule for properties/fields in target languages: O(1) and guaranteed to succeed?
 
 Refactor Polygon2D.edges to filter out (approximately) zero-length edges?
+- consistent with Surface3D.Edge type!
 - useful for removing duplicate last edge if last vertex is equal to first vertex
 - often have polygons in UV space though...maybe just use *exact* equality?
   - or UvPolygon.edges uses default 1e-9 tolerance
 
-Refactor curve construction from line segments?
-- maybe also rename Curve2D.arc to Curve2D.arcFrom, add Arc2D type?
-  - then move:
-    - Curve2D.polarArc to Arc2D.polar
-    - Curve2D.sweptArc to Arc2D.swept
-    - Curve2D.cornerArc to Arc2D.corner
-      - or Curve2D.fillet, since it can produce a line
-      - or just remove it, since we have Region2D.fillet which is more flexible/powerful
-      - or change Curve2D.fillet to act on two arbitrary curves?
-    - Curve2D.radiusArc to Arc2D.withRadius or Arc2D.svg
-      - replace WhichArc type with named #small argument plus Sign argument?
-        - WhichArc seems nice, perhaps renamed to Arc2D.Which...
-    - keep Curve2D.arcFrom without equivalent in Arc2D,
-      since that can actually result in a line instead
-- could then add Curve2D.asLine, Curve2D.asArc, Curve2D.asCircle etc.
-- could also have Curve2D.Line, Curve2D.Arc, Curve2D.LineFrom, Curve2D.ArcFrom patterns
-  - should even be able to map those to Python patterns!
-- do for Curve3D too...add Line3D etc.
+Move arc construction functions to Arc2D module:
+- Curve2D.polarArc to Arc2D.polar
+- Curve2D.sweptArc to Arc2D.swept
+- Curve2D.cornerArc to Arc2D.corner
+  - or Curve2D.fillet, since it can produce a line
+  - or just remove it, since we have Region2D.fillet which is more flexible/powerful
+  - or change Curve2D.fillet to act on two arbitrary curves?
+- Curve2D.radiusArc to Arc2D.withRadius or Arc2D.svg
+  - replace WhichArc type with named #small argument plus Sign argument?
+    - WhichArc seems nice, perhaps renamed to Arc2D.Which...
+- keep Curve2D.arcFrom without equivalent in Arc2D,
+  since that can actually result in a line instead
 
 Add Bezier#D etc. types/modules?
 - more complex to try to provide Curve#D.asBezier though...unless perhaps user has to pass desired degree
   (e.g. 'Curve2D.asBezier 3' to attempt to convert to a cubic Bezier curve)
 
-Switch SurfaceFunction zero finding to use new Search module
+Switch SurfaceFunction zero finding to use new Bisection module
 - will need to implement solution curve trimming/merging
 
 Update Region2D.fillet to actually use Set2D for lookup instead of just converting to a list
@@ -240,13 +226,10 @@ Use CBOR for FFI calls from target languages
 - much less room for segfaults, weird data corruption etc. - can't accidentally treat int as double or whatever
 - means that exact same format can be used in client-server way over WebSockets, HTTP, sockets, standard in/out streams etc.
 - can use Haskell 'serialise' library which seems nice and well supported
+  - or just 'cborg', since it's probably better to use the low-level encode/decoder API directly anyways
 - can then get rid of generate-def-file executable since .def file can be static!
-
-Add UvDebug module
-
-Add Debug2D module
-
-Add Debug3D module
+- or actually just use JSON...JSON-RPC everywhere!
+  - json-syntax for serialization?
 
 Add batch evaluation functions?
 - most important for target languages to avoid many FFI calls
