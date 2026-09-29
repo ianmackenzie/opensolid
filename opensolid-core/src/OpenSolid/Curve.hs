@@ -443,7 +443,10 @@ instance
     (Curve1D Unitless)
     (Result (IsDegenerate dimension units space) (Curve dimension units space))
   where
-  f << g = new (compiled f << Curve1D.compiled g) ((derivative f << g) * Curve1D.derivative g)
+  f << g =
+    new
+      (compiled f << Curve1D.compiled g)
+      ((derivative f << g) * Curve1D.derivative g)
 
 instance
   space1 ~ space2 =>
