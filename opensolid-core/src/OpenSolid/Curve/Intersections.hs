@@ -14,7 +14,6 @@ import OpenSolid.Intersection qualified as Intersection
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.List qualified as List
 import OpenSolid.Maybe qualified as Maybe
-import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 
@@ -49,10 +48,7 @@ bisectionTree :: Problem dimension units space => BisectionTree dimension units 
 bisectionTree = ?bisectionTree
 
 intersections ::
-  ( CurveExists dimension units space
-  , NewtonRaphson.Surface.Solver dimension units space
-  , Tolerance units
-  ) =>
+  (CurveExists dimension units space, Tolerance units) =>
   Curve dimension units space ->
   Curve dimension units space ->
   Maybe Intersections
