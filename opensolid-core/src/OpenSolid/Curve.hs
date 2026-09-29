@@ -345,18 +345,18 @@ instance
   units1 ~ units2 =>
   Subtraction (Curve2D units1) (Point2D units2) (VectorCurve2D units1)
   where
-  curve - givenPoint =
+  curve - point =
     VectorCurve.new
-      (compiled curve - CompiledFunction.constant givenPoint)
+      (compiled curve - CompiledFunction.constant point)
       (derivative curve)
 
 instance
   units1 ~ units2 =>
   Subtraction (Point2D units1) (Curve2D units2) (VectorCurve2D units1)
   where
-  givenPoint - curve =
+  point - curve =
     VectorCurve.new
-      (CompiledFunction.constant givenPoint - compiled curve)
+      (CompiledFunction.constant point - compiled curve)
       (negate (derivative curve))
 
 instance Composition () (Curve2D units) (SurfaceFunction1D Unitless) (SurfaceFunction2D units) where
@@ -407,7 +407,7 @@ instance
   units1 ~ units2 =>
   Intersects (Curve2D units1) (Point2D units2) units1
   where
-  curve ^ givenPoint = givenPoint ^ curve
+  curve ^ point = point ^ curve
 
 instance
   units1 ~ units2 =>
@@ -419,7 +419,7 @@ instance
   space1 ~ space2 =>
   Intersects (Curve3D space1) (Point3D space2) Meters
   where
-  curve ^ givenPoint = givenPoint ^ curve
+  curve ^ point = point ^ curve
 
 instance
   space1 ~ space2 =>
@@ -432,8 +432,8 @@ intersectsPoint ::
   Point dimension units space ->
   Curve dimension units space ->
   Bool
-intersectsPoint givenPoint curve =
-  not (List.isEmpty (findPoint givenPoint curve))
+intersectsPoint point curve =
+  not (List.isEmpty (findPoint point curve))
 
 instance
   CurveExists dimension units space =>
@@ -449,18 +449,18 @@ instance
   space1 ~ space2 =>
   Subtraction (Curve3D space1) (Point3D space2) (VectorCurve3D Meters space1)
   where
-  curve - givenPoint =
+  curve - point =
     VectorCurve.new
-      (compiled curve - CompiledFunction.constant givenPoint)
+      (compiled curve - CompiledFunction.constant point)
       (derivative curve)
 
 instance
   space1 ~ space2 =>
   Subtraction (Point3D space1) (Curve3D space2) (VectorCurve3D Meters space1)
   where
-  givenPoint - curve =
+  point - curve =
     VectorCurve.new
-      (CompiledFunction.constant givenPoint - compiled curve)
+      (CompiledFunction.constant point - compiled curve)
       (negate (derivative curve))
 
 instance Composition () (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
