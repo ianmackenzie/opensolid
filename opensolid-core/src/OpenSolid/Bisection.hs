@@ -7,6 +7,7 @@ module OpenSolid.Bisection
   , children
   , map
   , pairwise
+  , resolve
   , clusters
   , find
   , touching
