@@ -5,6 +5,8 @@ import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Length qualified as Length
+import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
@@ -37,12 +39,6 @@ spherePatch = do
           !! error "Sphere patch should never be degenerate"
   Random.return surface
 
-isOnPole :: UvPoint -> Bool
-isOnPole (UvPoint u _) = unitless (u ~= 1.0)
-
-nonPoleUvPoint :: Generator UvPoint
-nonPoleUvPoint = UvPoint.random & Random.filter (not . isOnPole)
-
 tests :: List Test
 tests =
   [ findPoint
@@ -54,33 +50,47 @@ findPoint :: Test
 findPoint =
   Test.group "findPoint" $
     [ findPole
+    , findVertex
+    , findEdgePoint
     , findInteriorPoint
     ]
 
 findPole :: Test
 findPole = Test.check 100 "findPole" do
   surface <- Test.generate spherePatch
-  let function = Surface3D.function surface
-  let point = SurfaceFunction3D.pointAt (UvPoint 1.0 0.0) function
+  let point = Surface3D.pointAt (UvPoint 1.0 0.0) surface
   let solutions = Surface3D.findPoint point surface
   case solutions of
     [SurfacePoint3D.Pole (Surface3D.Pole poleCurve _)] -> do
       expectedPoleCurve <- try do UvCurve.lineFrom (UvPoint 1.0 0.0) (UvPoint 1.0 1.0)
       Test.expect (poleCurve ~~ expectedPoleCurve)
-    _ ->
-      Test.fail "Expected a single solution"
-        & Test.output "solutions" solutions
+    _ -> Test.fail "Expected a single solution pole" & Test.output "solutions" solutions
 
-findInteriorPoint :: Test
-findInteriorPoint = Test.check 100 "findInterior" do
+findNonPole :: Text -> Generator UvPoint -> Test
+findNonPole label uvPointGenerator = Test.check 100 label do
   surface <- Test.generate spherePatch
-  let function = Surface3D.function surface
-  uvPoint <- Test.generate nonPoleUvPoint
-  let point = SurfaceFunction3D.pointAt uvPoint function
+  uvPoint <- Test.generate uvPointGenerator
+  let point = Surface3D.pointAt uvPoint surface
   let solutions = Surface3D.findPoint point surface
   case solutions of
     [SurfacePoint3D.Point solution _] -> Test.expect (solution ~~ uvPoint)
-    _ -> Test.fail "Expected a single solution" & Test.output "solutions" solutions
+    _ -> Test.fail "Expected a single solution point" & Test.output "solutions" solutions
+
+findVertex :: Test
+findVertex = findNonPole "findVertex" do
+  vValue <- Random.oneOf (NonEmpty.two 0.0 1.0)
+  Random.return (UvPoint 0.0 vValue)
+
+findEdgePoint :: Test
+findEdgePoint = findNonPole "findEdgePoint" do
+  Random.merge $
+    NonEmpty.three -- Points along the three non-pole edges
+      (Random.map UvPoint.left Parameter.random)
+      (Random.map UvPoint.bottom Parameter.random)
+      (Random.map UvPoint.top Parameter.random)
+
+findInteriorPoint :: Test
+findInteriorPoint = findNonPole "findInterior" UvPoint.random
 
 ruledSurface :: Test
 ruledSurface =
