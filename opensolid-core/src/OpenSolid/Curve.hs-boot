@@ -134,5 +134,5 @@ secondDerivativeRange ::
   Interval Unitless ->
   Curve dimension units space ->
   VectorBounds dimension units space
-hasDegenerateStart :: CurveExists dimension units space => Curve dimension units space -> Bool
-hasDegenerateEnd :: CurveExists dimension units space => Curve dimension units space -> Bool
+hasDegenerateStart :: Curve dimension units space -> Bool
+hasDegenerateEnd :: Curve dimension units space -> Bool

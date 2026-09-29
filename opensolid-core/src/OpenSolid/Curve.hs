@@ -813,10 +813,10 @@ curvatureRangeImpl_ f' f'' tangent = do
 bisectionTree :: Curve dimension units space -> BisectionTree dimension units space
 bisectionTree = (.bisectionTree)
 
-hasDegenerateStart :: CurveExists dimension units space => Curve dimension units space -> Bool
+hasDegenerateStart :: Curve dimension units space -> Bool
 hasDegenerateStart = (.hasDegenerateStart)
 
-hasDegenerateEnd :: CurveExists dimension units space => Curve dimension units space -> Bool
+hasDegenerateEnd :: Curve dimension units space -> Bool
 hasDegenerateEnd = (.hasDegenerateEnd)
 
 isOnAxis ::
@@ -993,11 +993,7 @@ findPoint givenPoint givenCurve = do
   let interiorSolutions = List.filterMap (Bisection.find resolvedSolution) clusters
   List.sort (endpointSolutions <> interiorSolutions)
 
-isDegenerateAt ::
-  (CurveExists dimension units space, Tolerance units) =>
-  Number ->
-  Curve dimension units space ->
-  Bool
+isDegenerateAt :: Number -> Curve dimension units space -> Bool
 isDegenerateAt 0.0 curve = hasDegenerateStart curve
 isDegenerateAt 1.0 curve = hasDegenerateEnd curve
 isDegenerateAt _ _ = False -- Assume no interior degeneracies
