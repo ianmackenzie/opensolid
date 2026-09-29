@@ -175,6 +175,14 @@ instance Bounded (Edge space) UvBounds where
   {-# INLINE bounds #-}
   bounds (Edge uvCurve _) = UvCurve.bounds uvCurve
 
+instance Intersects (Pole space) (Point3D space) Meters where
+  {-# INLINE (^) #-}
+  Pole _ polePoint ^ point = polePoint ~= point
+
+instance Intersects (Point3D space) (Pole space) Meters where
+  {-# INLINE (^) #-}
+  point ^ pole = pole ^ point
+
 type Boundary space = Set3D space (SurfaceCurve3D space)
 
 {-# INLINE function #-}
