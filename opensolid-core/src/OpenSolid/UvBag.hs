@@ -3,6 +3,7 @@ module OpenSolid.UvBag
   , empty
   , pack
   , toList
+  , toListOf
   , uniqueItems
   )
 where
@@ -23,6 +24,9 @@ pack = Bag.pack
 
 toList :: UvBag item -> List item
 toList = Bag.toList
+
+toListOf :: (a -> b) -> UvBag a -> List b
+toListOf = Bag.toListOf
 
 uniqueItems :: ApproximateEquality item Unitless => UvBag item -> List item
 uniqueItems = unitless Bag.uniqueItems

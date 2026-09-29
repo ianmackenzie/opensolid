@@ -153,22 +153,15 @@ clusters existing resolveFunction tree = do
 find ::
   forall domain segment tag solution.
   (tag -> domain -> segment -> Fuzzy (Maybe solution)) ->
-  Set domain (Subtree tag domain segment) ->
-  Maybe solution
-find callback cluster = findImpl callback (Queue.fromNonEmpty (Set.toNonEmpty cluster))
-
-findImpl ::
-  forall domain segment tag solution.
-  (tag -> domain -> segment -> Fuzzy (Maybe solution)) ->
   Queue (Subtree tag domain segment) ->
   Maybe solution
-findImpl callback queue = do
+find callback queue = do
   (Subtree tag subtree, remaining) <- Queue.pop queue
   case callback tag subtree.subdomain subtree.segment of
-    Resolved Nothing -> findImpl callback remaining
+    Resolved Nothing -> find callback remaining
     Resolved (Just solution) -> Just solution
     Unresolved -> do
       let updatedQueue =
             remaining & forEach subtree.children \child ->
               Queue.push (Subtree tag child)
-      findImpl callback updatedQueue
+      find callback updatedQueue

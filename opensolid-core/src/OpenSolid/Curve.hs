@@ -114,7 +114,6 @@ import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.IsZero (IsZero (IsZero))
@@ -137,6 +136,7 @@ import OpenSolid.Point3D (Point3D)
 import OpenSolid.Polyline (Polyline (Polyline))
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Queue qualified as Queue
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Show qualified as Show
@@ -964,7 +964,7 @@ desingularizeEnd curve givenEndPoint givenEndDerivative =
     let suffix = hermite suffixStart suffixStartDerivatives suffixEnd suffixEndDerivatives !! panic
     (prefix, suffix)
 
-data Monotonic = Monotonic deriving (Eq)
+data UniqueSolution = UniqueSolution deriving (Eq)
 
 findPoint ::
   (CurveExists dimension units space, Tolerance units) =>
@@ -972,26 +972,34 @@ findPoint ::
   Curve dimension units space ->
   List Number
 findPoint givenPoint givenCurve = do
-  let endpointSolutions = [t | t <- [0.0, 1.0], pointAt t givenCurve ~= givenPoint]
-  let endpointSolutionSet = Bag.pack endpointSolutions
+  let endpointSolutions = [tValue | tValue <- [0.0, 1.0], pointAt tValue givenCurve ~= givenPoint]
+  case endpointSolutions of
+    List.OneOrMore -> endpointSolutions
+    [] -> List.maybe (findInteriorPoint givenPoint givenCurve)
+
+findInteriorPoint ::
+  (CurveExists dimension units space, Tolerance units) =>
+  Point dimension units space ->
+  Curve dimension units space ->
+  Maybe Number
+findInteriorPoint givenPoint givenCurve = do
   let isDistant segment = not (givenPoint ^ Curve.Segment.range segment)
-  let resolvedMonotonicity _ segment
+  let resolvedUniqueness _ segment
         | isDistant segment = Resolved Nothing
-        | Curve.Segment.isMonotonic segment = Resolved (Just Monotonic)
-        | Curve.Segment.isDegenerate segment = Resolved (Just Monotonic)
+        | Curve.Segment.isMonotonic segment = Resolved (Just UniqueSolution)
+        | Curve.Segment.isDegenerate segment = Resolved (Just UniqueSolution)
         | otherwise = Unresolved
-  let evaluate tValue =
-        (# pointAt tValue givenCurve - givenPoint, derivativeAt tValue givenCurve #)
-  let validateSolution tValue =
-        if pointAt tValue givenCurve ~= givenPoint then Just tValue else Nothing
-  let resolvedSolution Monotonic tRange segment
+  let candidates = Bisection.resolve Bag.empty resolvedUniqueness (bisectionTree givenCurve)
+  let f tValue = pointAt tValue givenCurve - givenPoint
+  let f' tValue = derivativeAt tValue givenCurve
+  let evaluate tValue = (# f tValue, f' tValue #)
+  let isSolution tValue = pointAt tValue givenCurve ~= givenPoint
+  let resolvedSolution UniqueSolution tRange segment
         | isDistant segment = Resolved Nothing
-        | otherwise = Fuzzy.map validateSolution (NewtonRaphson.Curve.solveIn tRange evaluate)
-  let clusters =
-        bisectionTree givenCurve
-          & Bisection.clusters endpointSolutionSet resolvedMonotonicity
-  let interiorSolutions = List.filterMap (Bisection.find resolvedSolution) clusters
-  List.sort (endpointSolutions <> interiorSolutions)
+        | otherwise = do
+            tValue <- NewtonRaphson.Curve.solveIn tRange evaluate
+            Resolved (if isSolution tValue then Just tValue else Nothing)
+  Bisection.find resolvedSolution (Queue.fromBag candidates)
 
 isDegenerateAt :: Number -> Curve dimension units space -> Bool
 isDegenerateAt 0.0 curve = hasDegenerateStart curve

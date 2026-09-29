@@ -6,7 +6,8 @@ import OpenSolid.Bisection (Tree)
 import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
-import OpenSolid.Set (Set)
+import OpenSolid.Queue (Queue)
+import OpenSolid.Queue qualified as Queue
 
 data Problem intersection where
   Problem ::
@@ -16,10 +17,8 @@ data Problem intersection where
     , searchTree :: Tree domain segment
     , resolveTangent :: domain -> segment -> Fuzzy (Maybe tangentTag)
     , resolveCrossing :: domain -> segment -> Fuzzy (Maybe crossingTag)
-    , solveTangent ::
-        Set domain (Bisection.Subtree tangentTag domain segment) -> List intersection
-    , solveCrossing ::
-        Set domain (Bisection.Subtree crossingTag domain segment) -> List intersection
+    , solveTangent :: Queue (Bisection.Subtree tangentTag domain segment) -> List intersection
+    , solveCrossing :: Queue (Bisection.Subtree crossingTag domain segment) -> List intersection
     } ->
     Problem intersection
 
@@ -37,10 +36,10 @@ solveInterior
     let allTangentClusters = Bisection.clusters Bag.empty resolveTangent searchTree
     let candidateTangentClusters =
           allTangentClusters & List.filter (not . Bisection.touching boundaryTangentSubdomains)
-    let tangentIntersections = List.combine solveTangent candidateTangentClusters
+    let tangentIntersections = List.combine (solveTangent . Queue.fromSet) candidateTangentClusters
     let tangentExclusions = Bag.aggregate (List.map Bag.full allTangentClusters)
     let allCrossingClusters = Bisection.clusters tangentExclusions resolveCrossing searchTree
     let candidateCrossingClusters =
           allCrossingClusters & List.filter (not . Bisection.touching boundaryCrossingSubdomains)
-    let crossingIntersections = List.combine solveCrossing candidateCrossingClusters
+    let crossingIntersections = List.combine (solveCrossing . Queue.fromSet) candidateCrossingClusters
     List.concat [tangentIntersections, crossingIntersections]

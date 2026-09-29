@@ -17,7 +17,7 @@ module OpenSolid.Surface3D
   , innerLoops
   , boundaries
   , boundaryLoops
-  , vertices
+  , poles
   , edges
   , bisectionTree
   , pointAt
@@ -95,7 +95,6 @@ import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfacePoint3D (SurfacePoint3D)
-import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
@@ -183,6 +182,12 @@ instance Intersects (Point3D space) (Pole space) Meters where
   {-# INLINE (^) #-}
   point ^ pole = pole ^ point
 
+instance Intersects UvPoint (Pole space) Unitless where
+  uvPoint ^ Pole uvCurve _ = uvPoint ^ uvCurve
+
+instance Intersects (Pole space) UvPoint Unitless where
+  pole ^ point = point ^ pole
+
 type Boundary space = Set3D space (SurfaceCurve3D space)
 
 {-# INLINE function #-}
@@ -227,22 +232,13 @@ boundaries surface = Set3D.extend (Set3D.leaf (outerBoundary surface)) (innerBou
 boundaryLoops :: Surface3D space -> NonEmpty (NonEmpty (SurfaceCurve3D space))
 boundaryLoops surface = outerLoop surface :| innerLoops surface
 
-vertices :: Tolerance Meters => Surface3D space -> Bag3D space (SurfacePoint3D space)
-vertices surface = do
+poles :: Tolerance Meters => Surface3D space -> Bag3D space (Pole space)
+poles surface = do
   let surfaceCurves = Set3D.flatten (boundaries surface)
   let toPole surfaceCurve = case surfaceCurve of
         SurfaceCurve3D.Edge _ -> Nothing
-        SurfaceCurve3D.Pole pole ->
-          Just (SurfacePoint3D.Pole pole)
-  let poles = Set3D.filterMapItems toPole surfaceCurves
-  let edgeStart surfaceCurve = case surfaceCurve of
-        SurfaceCurve3D.Pole _ -> Nothing
-        SurfaceCurve3D.Edge (Edge uvCurve curve) ->
-          Just (SurfacePoint3D.Point (UvCurve.startPoint uvCurve) (Curve3D.startPoint curve))
-  let edgeStartPoints = Set3D.filterMapItems edgeStart surfaceCurves
-  let nonPole surfacePoint = not (surfacePoint ^ poles)
-  let nonPoles = Bag3D.filterItems nonPole edgeStartPoints
-  poles <> nonPoles
+        SurfaceCurve3D.Pole pole -> Just pole
+  Set3D.filterMapItems toPole surfaceCurves
 
 edges :: Tolerance Meters => Surface3D space -> Bag3D space (Edge space)
 edges surface = do
