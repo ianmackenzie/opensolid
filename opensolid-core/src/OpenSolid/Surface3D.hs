@@ -148,9 +148,11 @@ instance Space.Coercion (Surface3D space1) (Surface3D space2) where
       }
 
 instance Space.Coercion (Pole space1) (Pole space2) where
+  {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
 
 instance Space.Coercion (Edge space1) (Edge space2) where
+  {-# INLINE coerce #-}
   coerce (Edge uvCurve curve) = Edge uvCurve (Space.coerce curve)
 
 instance space1 ~ space2 => Bounded (Surface3D space1) (Bounds3D space2) where
