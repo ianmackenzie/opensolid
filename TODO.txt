@@ -4,6 +4,15 @@ Implement Curve3D-Surface3D intersection
 
 Implement Surface3D-Surface3D intersection...
 
+Add UvError, Error2D and 'Error3D space' types?
+- hold a UvDrawing, Drawing2D and 'Model3D space' respectively
+- also an error message with call stack
+
+Allow generic Failure-returning functions to return anything that's a MonadCatch instance?
+- so allow direct use in either IO or 'Result Failure' do-blocks
+- global 'fail' and 'succeed' functions
+  - maybe back to '?? fail' for casting Result to generic MonadCatch...
+
 Move piecewise curve construction into generic Curve module
 
 Move Array and Color into OpenSolid.Prelude?
