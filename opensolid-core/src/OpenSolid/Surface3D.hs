@@ -183,6 +183,17 @@ instance Intersects (Point3D space) (Pole space) Meters where
   point ^ pole = pole ^ point
 
 instance Intersects UvPoint (Pole space) Unitless where
+  -- Note that in general "point intersects curve" can be relatively expensive
+  -- (since it calls Curve.findPoint internally),
+  -- but in this case there are a couple mitigating factors:
+  --
+  --   * The UV curve of a pole should always be a vertical or horizontal line
+  --     (along U or V equal to 0 or 1),
+  --     so its bounding box should be tight
+  --     and therefore able to reject any non-intersecting points
+  --   * If a UV point intersects the UV curve bounding box,
+  --     it will generally be an *endpoint* of the UV curve,
+  --     which will then cause an early fast return from Curve.findPoint
   uvPoint ^ Pole uvCurve _ = uvPoint ^ uvCurve
 
 instance Intersects (Pole space) UvPoint Unitless where
