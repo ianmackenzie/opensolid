@@ -974,29 +974,38 @@ findPoint ::
   Point dimension units space ->
   Curve dimension units space ->
   List Number
-findPoint givenPoint givenCurve = do
-  let endpointSolutions = [tValue | tValue <- [0.0, 1.0], pointAt tValue givenCurve ~= givenPoint]
-  case endpointSolutions of
-    List.OneOrMore -> endpointSolutions
-    [] -> List.maybe (findInteriorPoint givenPoint givenCurve)
+findPoint point curve
+  | not (point ^ bounds curve) = []
+  | otherwise =
+      case findEndpointSolutions point curve of
+        NonEmpty endpointSolutions -> NonEmpty.toList endpointSolutions
+        [] -> List.maybe (findInteriorSolution point curve)
 
-findInteriorPoint ::
+findEndpointSolutions ::
+  (CurveExists dimension units space, Tolerance units) =>
+  Point dimension units space ->
+  Curve dimension units space ->
+  List Number
+findEndpointSolutions point curve =
+  [tValue | tValue <- [0.0, 1.0], pointAt tValue curve ~= point]
+
+findInteriorSolution ::
   (CurveExists dimension units space, Tolerance units) =>
   Point dimension units space ->
   Curve dimension units space ->
   Maybe Number
-findInteriorPoint givenPoint givenCurve = do
-  let isDistant segment = not (givenPoint ^ Curve.Segment.range segment)
+findInteriorSolution point curve = do
+  let isDistant segment = not (point ^ Curve.Segment.range segment)
   let resolvedUniqueness _ segment
         | isDistant segment = Resolved Nothing
         | Curve.Segment.isMonotonic segment = Resolved (Just UniqueSolution)
         | Curve.Segment.isDegenerate segment = Resolved (Just UniqueSolution)
         | otherwise = Unresolved
-  let candidates = Bisection.resolve Bag.empty resolvedUniqueness (bisectionTree givenCurve)
-  let f tValue = pointAt tValue givenCurve - givenPoint
-  let f' tValue = derivativeAt tValue givenCurve
+  let candidates = Bisection.resolve Bag.empty resolvedUniqueness (bisectionTree curve)
+  let f tValue = pointAt tValue curve - point
+  let f' tValue = derivativeAt tValue curve
   let evaluate tValue = (# f tValue, f' tValue #)
-  let isSolution tValue = pointAt tValue givenCurve ~= givenPoint
+  let isSolution tValue = pointAt tValue curve ~= point
   let resolvedSolution UniqueSolution tRange segment
         | isDistant segment = Resolved Nothing
         | otherwise = do

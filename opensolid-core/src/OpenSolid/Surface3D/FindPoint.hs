@@ -27,17 +27,13 @@ import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
-data UniqueSolution = UniqueSolution deriving (Eq)
-
-findPoint ::
-  Tolerance Meters =>
-  Point3D space ->
-  Surface3D space ->
-  List (SurfacePoint3D space)
-findPoint point surface =
-  case findBoundarySolutions point surface of
-    NonEmpty boundarySolutions -> NonEmpty.toList boundarySolutions
-    [] -> List.maybe (findInteriorPoint point surface)
+findPoint :: Tolerance Meters => Point3D space -> Surface3D space -> List (SurfacePoint3D space)
+findPoint point surface
+  | not (point ^ Surface3D.bounds surface) = []
+  | otherwise =
+      case findBoundarySolutions point surface of
+        NonEmpty boundarySolutions -> NonEmpty.toList boundarySolutions
+        [] -> List.maybe (findInteriorSolution point surface)
 
 findBoundarySolutions ::
   Tolerance Meters =>
@@ -52,30 +48,32 @@ findBoundarySolutions point surface = do
   let edgeSolutions =
         Surface3D.edges surface -- Get all surface edges
           & Bag3D.filterBounds (^ point) -- Filter out ones that definitely don't touch the given point
-          & List.combine (findEdgePoints poleSolutions point) -- Try to find the given point on each edge
+          & List.combine (findEdgeSolutions poleSolutions point) -- Try to find the given point on each edge
           & UvBag.pack -- Pack into a bag to find duplicates efficiently
           & UvBag.uniqueItems -- Filter out duplicate solutions
   let toSurfacePoint uvPoint = SurfacePoint3D.Point uvPoint point
   UvBag.toListOf SurfacePoint3D.Pole poleSolutions <> List.map toSurfacePoint edgeSolutions
 
-findEdgePoints ::
+findEdgeSolutions ::
   Tolerance Meters =>
   UvBag (Surface3D.Pole space) ->
   Point3D space ->
   Surface3D.Edge space ->
   List UvPoint
-findEdgePoints poleSolutions point (Surface3D.Edge uvCurve curve) =
+findEdgeSolutions poleSolutions point (Surface3D.Edge uvCurve curve) =
   Curve3D.findPoint point curve
     & List.filterMap \tValue -> do
       let uvPoint = UvCurve.pointAt tValue uvCurve
       if unitless (uvPoint ^ poleSolutions) then Nothing else Just uvPoint
 
-findInteriorPoint ::
+data UniqueSolution = UniqueSolution deriving (Eq)
+
+findInteriorSolution ::
   Tolerance Meters =>
   Point3D space ->
   Surface3D space ->
   Maybe (SurfacePoint3D space)
-findInteriorPoint point surface = do
+findInteriorSolution point surface = do
   let (du, dv) = SurfaceFunction3D.partialDerivatives (Surface3D.function surface)
   let evaluateNewtonRaphson uvPoint = do
         let displacement = Surface3D.pointAt uvPoint surface - point
