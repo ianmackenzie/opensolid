@@ -32,6 +32,8 @@ module OpenSolid.Bag
   , pairwiseAnyItems
   , clusters
   , uniqueItems
+  , foldl
+  , foldr
   )
 where
 
@@ -48,6 +50,10 @@ import OpenSolid.Units qualified as Units
 import Prelude qualified
 
 data Bag b a = Empty | Full (Set b a) deriving (Show)
+
+instance Foldable (Bag b) where
+  foldl = foldl
+  foldr = foldr
 
 instance Set.Bounds b => Prelude.Semigroup (Bag b a) where
   Empty <> bag = bag
@@ -240,3 +246,11 @@ uniqueItems ::
   List a
 uniqueItems Empty = []
 uniqueItems (Full set) = NonEmpty.toList (Set.uniqueItems set)
+
+foldl :: (acc -> a -> acc) -> acc -> Bag b a -> acc
+foldl _ acc Empty = acc
+foldl function acc (Full set) = Set.foldl function acc set
+
+foldr :: (a -> acc -> acc) -> acc -> Bag b a -> acc
+foldr _ acc Empty = acc
+foldr function acc (Full set) = Set.foldr function acc set
