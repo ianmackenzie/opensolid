@@ -14,6 +14,7 @@ module OpenSolid.Bag
   , toListOf
   , flatten
   , map
+  , project
   , combine
   , filter
   , filterBounds
@@ -143,6 +144,10 @@ flatten = combine id
 map :: (Bounded a2 b2, Set.Bounds b2) => (a1 -> a2) -> Bag b1 a1 -> Bag b2 a2
 map _ Empty = Empty
 map function (Full set) = Full (Set.map function set)
+
+project :: (Set.Bounds b2, Bounded a b2) => Bag b1 a -> Bag b2 a
+project Empty = Empty
+project (Full set) = Full (Set.project set)
 
 combine :: Set.Bounds b2 => (a1 -> Bag b2 a2) -> Bag b1 a1 -> Bag b2 a2
 combine _ Empty = Empty

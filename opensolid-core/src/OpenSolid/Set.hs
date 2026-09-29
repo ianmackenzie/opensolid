@@ -13,6 +13,7 @@ module OpenSolid.Set
   , map
   , mapWithIndex
   , reverseMap
+  , project
   , combine
   , combineWithIndex
   , toNonEmpty
@@ -228,6 +229,9 @@ extend set1 (Bag.Full set2) = node2 set1 set2
 
 map :: (Bounded a2 b2, Bounds b2) => (a1 -> a2) -> Set b1 a1 -> Set b2 a2
 map function set = mapWithIndex (const function) set
+
+project :: (Bounds b2, Bounded a b2) => Set b1 a -> Set b2 a
+project = map id
 
 mapWithIndex :: (Bounded a2 b2, Bounds b2) => (Int -> a1 -> a2) -> Set b1 a1 -> Set b2 a2
 mapWithIndex function = combineWithIndex \index item -> leaf (function index item)
