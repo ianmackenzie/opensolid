@@ -684,7 +684,11 @@ point2D =
 uvPoint :: Class
 uvPoint =
   Class.new @UvPoint $(docs ''UvPoint.UvPoint) $
-    [ Class.constant "Origin" UvPoint.origin $(docs 'UvPoint.origin)
+    [ Class.constant "Bottom Left" UvPoint.bottomLeft $(docs 'UvPoint.bottomLeft)
+    , Class.constant "Bottom Right" UvPoint.bottomRight $(docs 'UvPoint.bottomRight)
+    , Class.constant "Top Left" UvPoint.topLeft $(docs 'UvPoint.topLeft)
+    , Class.constant "Top Right" UvPoint.topRight $(docs 'UvPoint.topRight)
+    , Class.constant "Center" UvPoint.center $(docs 'UvPoint.center)
     , Class.constructor2 "U Coordinate" "V Coordinate" Point2D.Point2D $(docs 'UvPoint.UvPoint)
     , Class.property "Coordinates" UvPoint.coordinates $(docs 'UvPoint.coordinates)
     , Class.property "U Coordinate" UvPoint.uCoordinate $(docs 'UvPoint.uCoordinate)

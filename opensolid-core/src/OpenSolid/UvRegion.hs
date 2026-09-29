@@ -61,7 +61,7 @@ flip :: UvRegion -> UvRegion
 flip = Region2D.mirrorAcross flipAxis
 
 flipAxis :: Axis2D Unitless
-flipAxis = Axis2D (UvPoint.bottom 0.5) Direction2D.y
+flipAxis = Axis2D UvPoint.center Direction2D.y
 
 classifyPoint :: UvPoint -> UvRegion -> Region2D.PointClassification
 classifyPoint = unitless Region2D.classifyPoint

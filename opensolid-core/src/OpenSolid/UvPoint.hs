@@ -1,7 +1,11 @@
 module OpenSolid.UvPoint
   ( UvPoint
   , data UvPoint
-  , origin
+  , bottomLeft
+  , bottomRight
+  , topLeft
+  , topRight
+  , center
   , left
   , right
   , bottom
@@ -37,8 +41,24 @@ pattern UvPoint :: Number -> Number -> UvPoint
 pattern UvPoint u v = Point2D u v
 
 -- | The point (0, 0) in UV space.
-origin :: UvPoint
-origin = Point2D.origin
+bottomLeft :: UvPoint
+bottomLeft = UvPoint 0.0 0.0
+
+-- | The point (1, 0) in UV space.
+bottomRight :: UvPoint
+bottomRight = UvPoint 1.0 0.0
+
+-- | The point (0, 0) in UV space.
+topLeft :: UvPoint
+topLeft = UvPoint 0.0 1.0
+
+-- | The point (1, 1) in UV space.
+topRight :: UvPoint
+topRight = UvPoint 1.0 1.0
+
+-- | The point (0.5, 0.5) in UV space.
+center :: UvPoint
+center = UvPoint 0.5 0.5
 
 left :: Number -> UvPoint
 left vValue = UvPoint 0.0 vValue
