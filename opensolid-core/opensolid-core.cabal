@@ -238,6 +238,7 @@ library
     OpenSolid.Triplet
     OpenSolid.Unboxed.Math
     OpenSolid.Units
+    OpenSolid.UvBag
     OpenSolid.UvBounds
     OpenSolid.UvCurve
     OpenSolid.UvEdge
