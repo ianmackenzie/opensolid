@@ -4,6 +4,8 @@ module OpenSolid.Queue
   , singleton
   , fromList
   , fromNonEmpty
+  , fromBag
+  , fromSet
   , isEmpty
   , length
   , push
@@ -12,9 +14,13 @@ module OpenSolid.Queue
   )
 where
 
+import OpenSolid.Bag (Bag)
+import OpenSolid.Bag qualified as Bag
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
+import OpenSolid.Set (Set)
+import OpenSolid.Set qualified as Set
 
 data Queue a = Queue Int (List a) (List a) deriving (Eq, Show)
 
@@ -29,6 +35,12 @@ fromList values = Queue (List.length values) values []
 
 fromNonEmpty :: NonEmpty a -> Queue a
 fromNonEmpty = fromList . NonEmpty.toList
+
+fromBag :: Bag b a -> Queue a
+fromBag = fromList . Bag.toList
+
+fromSet :: Set b a -> Queue a
+fromSet = fromList . Set.toList
 
 isEmpty :: Queue a -> Bool
 isEmpty queue = length queue == 0
