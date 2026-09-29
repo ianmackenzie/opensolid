@@ -262,10 +262,7 @@ clusters ::
 clusters = Set.clusters
 
 uniqueItems ::
-  ( ApproximateEquality item Meters
-  , Bounded item (Bounds3D space)
-  , Tolerance Meters
-  ) =>
+  (ApproximateEquality item Meters, Tolerance Meters) =>
   Set3D space item ->
   NonEmpty item
 uniqueItems = Set.uniqueItems

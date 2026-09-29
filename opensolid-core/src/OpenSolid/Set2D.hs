@@ -262,10 +262,7 @@ clusters ::
 clusters = Set.clusters
 
 uniqueItems ::
-  ( ApproximateEquality item units
-  , Bounded item (Bounds2D units)
-  , Tolerance units
-  ) =>
+  (ApproximateEquality item units, Tolerance units) =>
   Set2D units item ->
   NonEmpty item
 uniqueItems = Set.uniqueItems

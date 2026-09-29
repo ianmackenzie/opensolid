@@ -603,7 +603,6 @@ uniqueItems ::
   , ApproximateEquality a units
   , Intersects b b units
   , Tolerance units
-  , Bounded a b
   ) =>
   Set b a ->
   NonEmpty a

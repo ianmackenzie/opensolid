@@ -235,7 +235,6 @@ uniqueItems ::
   , ApproximateEquality a units
   , Intersects b b units
   , Tolerance units
-  , Bounded a b
   ) =>
   Bag b a ->
   List a

@@ -173,11 +173,5 @@ clusters ::
   List (NonEmpty item)
 clusters = Bag.clusters
 
-uniqueItems ::
-  ( ApproximateEquality item Meters
-  , Bounded item (Bounds3D space)
-  , Tolerance Meters
-  ) =>
-  Bag3D space item ->
-  List item
+uniqueItems :: (ApproximateEquality item Meters, Tolerance Meters) => Bag3D space item -> List item
 uniqueItems = Bag.uniqueItems
