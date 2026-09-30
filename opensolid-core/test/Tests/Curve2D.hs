@@ -110,24 +110,6 @@ overlappingSegments curve1 curve2 =
       Err "Should have found some overlapping segments, got intersection points instead"
     Nothing -> Err "Should have found some overlapping segments"
 
-equalParameterRanges :: Interval Unitless -> Interval Unitless -> Bool
-equalParameterRanges (Interval actualLow actualHigh) (Interval expectedLow expectedHigh) =
-  Tolerance.using 1e-12 (actualLow ~= expectedLow && actualHigh ~= expectedHigh)
-
-equalOverlapSegments ::
-  ((Interval Unitless, Interval Unitless), (Interval Unitless, Interval Unitless)) ->
-  Bool
-equalOverlapSegments ((actual1, actual2), (expected1, expected2)) =
-  equalParameterRanges actual1 expected1 && equalParameterRanges actual2 expected2
-
-equalOverlapSegmentLists ::
-  NonEmpty (Interval Unitless, Interval Unitless) ->
-  NonEmpty (Interval Unitless, Interval Unitless) ->
-  Bool
-equalOverlapSegmentLists actualSegments expectedSegments =
-  NonEmpty.length actualSegments == NonEmpty.length expectedSegments
-    && NonEmpty.all equalOverlapSegments (NonEmpty.zip2 actualSegments expectedSegments)
-
 curveOverlap1 :: Test
 curveOverlap1 = Test.verify "curveOverlap1" Try.do
   arc1 <- Curve2D.arcFrom (Point2D.meters 1.0 0.0) (Point2D.meters -1.0 0.0) Angle.halfTurn
@@ -135,7 +117,7 @@ curveOverlap1 = Test.verify "curveOverlap1" Try.do
   (sign, actualSegments, points) <- overlappingSegments arc1 arc2
   let expectedSegments = NonEmpty.one (Interval 0.0 0.5, Interval 0.5 1.0)
   Test.all
-    [ Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
+    [ Test.expect (actualSegments ~~ expectedSegments)
     , Test.expect (sign == Positive)
     , Test.expect (List.isEmpty points)
     ]
@@ -162,7 +144,7 @@ curveOverlap2 = Test.verify "curveOverlap2" Try.do
           (Interval 0.0 (1 / 4), Interval 0.0 (1 / 6))
           (Interval (3 / 4) 1.0, Interval (5 / 6) 1.0)
   Test.all
-    [ Test.expect (equalOverlapSegmentLists segments expectedSegments)
+    [ Test.expect (segments ~~ expectedSegments)
     , Test.expect (sign == Negative)
     , Test.expect (List.isEmpty points)
     ]
@@ -187,7 +169,7 @@ overlapAndJoin = Test.verify "overlapAndJoin" Try.do
   let expectedSegments = NonEmpty.one (Interval 0.0 (1 / 4), Interval 0.0 (1 / 5))
   let expectedPoints = [IntersectionPoint.indistinguishable Negative (1.0, 1.0)]
   Test.all
-    [ Test.expect (equalOverlapSegmentLists segments expectedSegments)
+    [ Test.expect (segments ~~ expectedSegments)
         & Test.output "segments" segments
         & Test.output "expectedSegments" expectedSegments
     , Test.expect (sign == Negative)
