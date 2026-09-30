@@ -9,16 +9,12 @@ module OpenSolid.VectorCurve3D
   , derivative
   , startValue
   , endValue
-  , valueAt
-  , valueOf
   , range
   , startDerivative
   , endDerivative
-  , derivativeAt
   , derivativeRange
   , startSecondDerivative
   , endSecondDerivative
-  , secondDerivativeAt
   , secondDerivativeRange
   , zero
   , constant
@@ -130,14 +126,6 @@ startValue = VectorCurve.startValue
 endValue :: VectorCurve3D units space -> Vector3D units space
 endValue = VectorCurve.endValue
 
-{-# INLINE valueAt #-}
-valueAt :: Number -> VectorCurve3D units space -> Vector3D units space
-valueAt = VectorCurve.valueAt
-
-{-# INLINE valueOf #-}
-valueOf :: VectorCurve3D units space -> Number -> Vector3D units space
-valueOf = VectorCurve.valueOf
-
 {-# INLINE range #-}
 range :: Interval Unitless -> VectorCurve3D units space -> VectorBounds3D units space
 range = VectorCurve.range
@@ -148,10 +136,6 @@ startDerivative = VectorCurve.startDerivative
 endDerivative :: VectorCurve3D space units -> Vector3D space units
 endDerivative = VectorCurve.endDerivative
 
-{-# INLINE derivativeAt #-}
-derivativeAt :: Number -> VectorCurve3D units space -> Vector3D units space
-derivativeAt = VectorCurve.derivativeAt
-
 {-# INLINE derivativeRange #-}
 derivativeRange :: Interval Unitless -> VectorCurve3D units space -> VectorBounds3D units space
 derivativeRange = VectorCurve.derivativeRange
@@ -161,10 +145,6 @@ startSecondDerivative = VectorCurve.startSecondDerivative
 
 endSecondDerivative :: VectorCurve3D space units -> Vector3D space units
 endSecondDerivative = VectorCurve.endSecondDerivative
-
-{-# INLINE secondDerivativeAt #-}
-secondDerivativeAt :: Number -> VectorCurve3D units space -> Vector3D units space
-secondDerivativeAt = VectorCurve.secondDerivativeAt
 
 {-# INLINE secondDerivativeRange #-}
 secondDerivativeRange ::

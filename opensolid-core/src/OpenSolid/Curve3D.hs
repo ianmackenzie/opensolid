@@ -18,11 +18,9 @@ module OpenSolid.Curve3D
   , secondDerivative
   , startDerivative
   , endDerivative
-  , derivativeAt
   , derivativeRange
   , startSecondDerivative
   , endSecondDerivative
-  , secondDerivativeAt
   , secondDerivativeRange
   , tangentDirectionAt
   , tangentDirectionRange
@@ -183,10 +181,6 @@ startDerivative = Curve.startDerivative
 endDerivative :: Curve3D space -> Vector3D Meters space
 endDerivative = Curve.endDerivative
 
-{-# INLINE derivativeAt #-}
-derivativeAt :: Number -> Curve3D space -> Vector3D Meters space
-derivativeAt = Curve.derivativeAt
-
 {-# INLINE derivativeRange #-}
 derivativeRange :: Interval Unitless -> Curve3D space -> VectorBounds3D Meters space
 derivativeRange = Curve.derivativeRange
@@ -196,10 +190,6 @@ startSecondDerivative = Curve.startSecondDerivative
 
 endSecondDerivative :: Curve3D space -> Vector3D Meters space
 endSecondDerivative = Curve.endSecondDerivative
-
-{-# INLINE secondDerivativeAt #-}
-secondDerivativeAt :: Number -> Curve3D space -> Vector3D Meters space
-secondDerivativeAt = Curve.secondDerivativeAt
 
 {-# INLINE secondDerivativeRange #-}
 secondDerivativeRange :: Interval Unitless -> Curve3D space -> VectorBounds3D Meters space

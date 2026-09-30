@@ -11,10 +11,8 @@ module OpenSolid.Curve
   , startPoint
   , endPoint
   , derivative
-  , derivativeAt
   , derivativeRange
   , secondDerivative
-  , secondDerivativeAt
   , secondDerivativeRange
   , hasDegenerateStart
   , hasDegenerateEnd
@@ -31,7 +29,6 @@ import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
-import OpenSolid.Vector (Vector)
 import OpenSolid.VectorBounds (VectorBounds)
 import {-# SOURCE #-} OpenSolid.VectorCurve (VectorCurve, VectorCurve2D, VectorCurve3D)
 
@@ -104,11 +101,6 @@ endPoint ::
 derivative ::
   Curve dimension units space ->
   VectorCurve dimension units space
-derivativeAt ::
-  CurveExists dimension units space =>
-  Number ->
-  Curve dimension units space ->
-  Vector dimension units space
 derivativeRange ::
   CurveExists dimension units space =>
   Interval Unitless ->
@@ -118,11 +110,6 @@ secondDerivative ::
   CurveExists dimension units space =>
   Curve dimension units space ->
   VectorCurve dimension units space
-secondDerivativeAt ::
-  CurveExists dimension units space =>
-  Number ->
-  Curve dimension units space ->
-  Vector dimension units space
 secondDerivativeRange ::
   CurveExists dimension units space =>
   Interval Unitless ->

@@ -32,11 +32,9 @@ module OpenSolid.Curve
   , secondDerivative
   , startDerivative
   , endDerivative
-  , derivativeAt
   , derivativeRange
   , startSecondDerivative
   , endSecondDerivative
-  , secondDerivativeAt
   , secondDerivativeRange
   , tangentDirectionAt
   , tangentDirectionRange
@@ -568,7 +566,7 @@ new ::
   VectorCurve dimension units space ->
   Result (IsDegenerate dimension units space) (Curve dimension units space)
 new givenCompiled givenDerivative = do
-  let derivativeMagnitude tValue = Vector.magnitude (VectorCurve.valueAt tValue givenDerivative)
+  let derivativeMagnitude tValue = Vector.magnitude (givenDerivative @ tValue)
   let maxDerivativeMagnitude = NonEmpty.maximumOf derivativeMagnitude Parameter.samples
   if maxDerivativeMagnitude ~= Quantity.zero
     then Err (IsDegenerate (CompiledFunction.value 0.0 givenCompiled))
@@ -598,8 +596,8 @@ buildArcLengthParameterization ::
   Curve dimension units space ->
   (Quantity units, Number -> Number)
 buildArcLengthParameterization curve = do
-  let dsdt tValue = Vector.magnitude (derivativeAt tValue curve)
-  let d2sdt2 tValue = secondDerivativeAt tValue curve `dot` tangentDirectionAt tValue curve
+  let dsdt tValue = Vector.magnitude (derivative curve @ tValue)
+  let d2sdt2 tValue = secondDerivative curve @ tValue `dot` tangentDirectionAt tValue curve
   ArcLength.parameterization dsdt d2sdt2
 
 displacedFrom ::
@@ -703,10 +701,8 @@ tangentDirectionAt ::
   Number ->
   Curve dimension units space ->
   Direction dimension space
-tangentDirectionAt tValue curve = do
-  let firstDerivativeValue = derivativeAt tValue curve
-  let secondDerivativeValue = secondDerivativeAt tValue curve
-  tangentDirectionImpl tValue curve firstDerivativeValue secondDerivativeValue
+tangentDirectionAt tValue curve =
+  tangentDirectionImpl tValue curve (derivative curve @ tValue) (secondDerivative curve @ tValue)
 
 tangentDirectionRange ::
   CurveExists dimension units space =>
@@ -752,8 +748,8 @@ curvatureAt_ ::
   Curve dimension units space ->
   Maybe (Quantity (Unitless ?/? units), Direction dimension space)
 curvatureAt_ tValue curve = do
-  let f' = derivativeAt tValue curve
-  let f'' = secondDerivativeAt tValue curve
+  let f' = derivative curve @ tValue
+  let f'' = secondDerivative curve @ tValue
   let tangent = tangentDirectionImpl tValue curve f' f''
   curvatureImpl_ tValue curve f' f'' tangent
 
@@ -855,13 +851,6 @@ endDerivative ::
   Vector dimension units space
 endDerivative curve = VectorCurve.endValue (derivative curve)
 
-derivativeAt ::
-  CurveExists dimension units space =>
-  Number ->
-  Curve dimension units space ->
-  Vector dimension units space
-derivativeAt tValue curve = VectorCurve.valueAt tValue (derivative curve)
-
 derivativeRange ::
   CurveExists dimension units space =>
   Interval Unitless ->
@@ -880,13 +869,6 @@ endSecondDerivative ::
   Curve dimension units space ->
   Vector dimension units space
 endSecondDerivative curve = VectorCurve.endValue (secondDerivative curve)
-
-secondDerivativeAt ::
-  CurveExists dimension units space =>
-  Number ->
-  Curve dimension units space ->
-  Vector dimension units space
-secondDerivativeAt tValue curve = VectorCurve.valueAt tValue (secondDerivative curve)
 
 secondDerivativeRange ::
   CurveExists dimension units space =>
@@ -945,8 +927,8 @@ desingularizeStart givenStartPoint givenStartDerivative curve =
     let prefixStart = givenStartPoint
     let prefixStartDerivatives = [affixWidth * givenStartDerivative]
     let prefixEnd = curve @ tInner
-    let prefixEndFirstDerivative = affixWidth * derivativeAt tInner curve
-    let prefixEndSecondDerivative = affixWidth * affixWidth * secondDerivativeAt tInner curve
+    let prefixEndFirstDerivative = affixWidth * derivative curve @ tInner
+    let prefixEndSecondDerivative = affixWidth * affixWidth * secondDerivative curve @ tInner
     let prefixEndDerivatives = [prefixEndFirstDerivative, prefixEndSecondDerivative]
     let prefix = hermite prefixStart prefixStartDerivatives prefixEnd prefixEndDerivatives !! panic
     let suffix = section (Interval tInner 1.0) curve !! panic
@@ -964,8 +946,8 @@ desingularizeEnd curve givenEndPoint givenEndDerivative =
     let tInner = 1.0 - affixWidth
     let prefix = section (Interval 0.0 tInner) curve !! panic
     let suffixStart = curve @ tInner
-    let suffixStartFirstDerivative = affixWidth * derivativeAt tInner curve
-    let suffixStartSecondDerivative = affixWidth * affixWidth * secondDerivativeAt tInner curve
+    let suffixStartFirstDerivative = affixWidth * derivative curve @ tInner
+    let suffixStartSecondDerivative = affixWidth * affixWidth * secondDerivative curve @ tInner
     let suffixStartDerivatives = [suffixStartFirstDerivative, suffixStartSecondDerivative]
     let suffixEnd = givenEndPoint
     let suffixEndDerivatives = [affixWidth * givenEndDerivative]
@@ -1001,7 +983,7 @@ findInteriorSolution point curve = do
         | otherwise = Unresolved
   let candidates = Bisection.resolve Bag.empty resolvedUniqueness (bisectionTree curve)
   let f tValue = curve @ tValue - point
-  let f' tValue = derivativeAt tValue curve
+  let f' tValue = derivative curve @ tValue
   let evaluate tValue = (# f tValue, f' tValue #)
   let isSolution tValue = curve @ tValue ~= point
   let resolvedSolution UniqueSolution tRange segment
@@ -1024,10 +1006,10 @@ continuityAt ::
   Maybe Continuity
 continuityAt (t1, t2) (curve1, curve2)
   | curve1 @ t1 ~= curve2 @ t2 = do
-      let firstDerivative1 = derivativeAt t1 curve1
-      let firstDerivative2 = derivativeAt t2 curve2
-      let secondDerivative1 = secondDerivativeAt t1 curve1
-      let secondDerivative2 = secondDerivativeAt t2 curve2
+      let firstDerivative1 = derivative curve1 @ t1
+      let firstDerivative2 = derivative curve2 @ t2
+      let secondDerivative1 = secondDerivative curve1 @ t1
+      let secondDerivative2 = secondDerivative curve2 @ t2
       let tangent1 = tangentDirectionImpl t1 curve1 firstDerivative1 secondDerivative1
       let tangent2 = tangentDirectionImpl t2 curve2 firstDerivative2 secondDerivative2
       if Direction.areIndependent tangent1 tangent2

@@ -18,19 +18,15 @@ module OpenSolid.VectorCurve
   , arc
   , startValue
   , endValue
-  , valueAt
-  , valueOf
   , range
   , compiled
   , derivative
   , secondDerivative
   , startDerivative
   , endDerivative
-  , derivativeAt
   , derivativeRange
   , startSecondDerivative
   , endSecondDerivative
-  , secondDerivativeAt
   , secondDerivativeRange
   , squaredMagnitude_
   , squaredMagnitude
@@ -119,6 +115,8 @@ class
   , VectorCurveExists dimension Unitless space
   , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
   , Units.Coercion (VectorCurve dimension Unitless space) (VectorCurve dimension units space)
+  , At (VectorCurve dimension units space) Number (Vector dimension units space)
+  , At (Nonzero (VectorCurve dimension units space)) Number (Nonzero (Vector dimension units space))
   , Expression.Constant Number (Vector dimension units space)
   , Expression.Evaluation
       Number
@@ -276,13 +274,37 @@ instance
   where
   coerce (Nonzero curve) = Nonzero (Space.coerce curve)
 
+instance At (VectorCurve2D units) Number (Vector2D units) where
+  {-# INLINE (@) #-}
+  (@) = evaluate
+
+instance At (VectorCurve3D units space) Number (Vector3D units space) where
+  {-# INLINE (@) #-}
+  (@) = evaluate
+
+instance At (Nonzero (VectorCurve2D units)) Number (Nonzero (Vector2D units)) where
+  {-# INLINE (@) #-}
+  Nonzero curve @ tValue = Nonzero (curve @ tValue)
+
+instance At (Nonzero (VectorCurve3D units space)) Number (Nonzero (Vector3D units space)) where
+  {-# INLINE (@) #-}
+  Nonzero curve @ tValue = Nonzero (curve @ tValue)
+
+{-# INLINE evaluate #-}
+evaluate ::
+  VectorCurveExists dimension units space =>
+  VectorCurve dimension units space ->
+  Number ->
+  Vector dimension units space
+evaluate curve 0.0 = startValue curve
+evaluate curve 1.0 = endValue curve
+evaluate curve tValue = CompiledFunction.value tValue (compiled curve)
+
 instance
   VectorCurveExists dimension units space =>
   ApproximateEquality (VectorCurve dimension units space) units
   where
-  curve1 ~= curve2 = do
-    let equalValuesAt t = valueAt t curve1 ~= valueAt t curve2
-    NonEmpty.all equalValuesAt Parameter.samples
+  curve1 ~= curve2 = NonEmpty.all (\t -> curve1 @ t ~= curve2 @ t) Parameter.samples
 
 instance
   units1 ~ units2 =>
@@ -1038,24 +1060,6 @@ startValue = (.startValue)
 endValue :: VectorCurve dimension units space -> Vector dimension units space
 endValue = (.endValue)
 
-{-# INLINE valueAt #-}
-valueAt ::
-  VectorCurveExists dimension units space =>
-  Number ->
-  VectorCurve dimension units space ->
-  Vector dimension units space
-valueAt 0.0 curve = startValue curve
-valueAt 1.0 curve = endValue curve
-valueAt tValue curve = CompiledFunction.value tValue (compiled curve)
-
-{-# INLINE valueOf #-}
-valueOf ::
-  VectorCurveExists dimension units space =>
-  VectorCurve dimension units space ->
-  Number ->
-  Vector dimension units space
-valueOf curve tValue = valueAt tValue curve
-
 {-# INLINE range #-}
 range ::
   VectorCurveExists dimension units space =>
@@ -1076,14 +1080,6 @@ endDerivative ::
   Vector dimension units space
 endDerivative curve = endValue (derivative curve)
 
-{-# INLINE derivativeAt #-}
-derivativeAt ::
-  VectorCurveExists dimension units space =>
-  Number ->
-  VectorCurve dimension units space ->
-  Vector dimension units space
-derivativeAt tValue curve = valueAt tValue (derivative curve)
-
 {-# INLINE derivativeRange #-}
 derivativeRange ::
   VectorCurveExists dimension units space =>
@@ -1103,14 +1099,6 @@ endSecondDerivative ::
   VectorCurve dimension units space ->
   Vector dimension units space
 endSecondDerivative curve = endValue (secondDerivative curve)
-
-{-# INLINE secondDerivativeAt #-}
-secondDerivativeAt ::
-  VectorCurveExists dimension units space =>
-  Number ->
-  VectorCurve dimension units space ->
-  Vector dimension units space
-secondDerivativeAt tValue curve = valueAt tValue (secondDerivative curve)
 
 {-# INLINE secondDerivativeRange #-}
 secondDerivativeRange ::
@@ -1141,9 +1129,8 @@ isDegenerateAt ::
   Number ->
   VectorCurve dimension units space ->
   Bool
-isDegenerateAt tValue curve = do
-  let degeneracyTolerance = Tolerance.unitless * curve.maxSampledMagnitude
-  Tolerance.using degeneracyTolerance (valueAt tValue curve ~= Vector.zero)
+isDegenerateAt tValue curve =
+  Tolerance.using (Tolerance.unitless * curve.maxSampledMagnitude) (curve @ tValue ~= Vector.zero)
 
 reverse ::
   VectorCurveExists dimension units space =>

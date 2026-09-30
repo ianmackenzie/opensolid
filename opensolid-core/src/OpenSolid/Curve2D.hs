@@ -29,11 +29,9 @@ module OpenSolid.Curve2D
   , involute
   , startDerivative
   , endDerivative
-  , derivativeAt
   , derivativeRange
   , startSecondDerivative
   , endSecondDerivative
-  , secondDerivativeAt
   , secondDerivativeRange
   , tangentDirectionAt
   , tangentDirectionRange
@@ -472,10 +470,6 @@ startDerivative = Curve.startDerivative
 endDerivative :: Curve2D units -> Vector2D units
 endDerivative = Curve.endDerivative
 
-{-# INLINE derivativeAt #-}
-derivativeAt :: Number -> Curve2D units -> Vector2D units
-derivativeAt = Curve.derivativeAt
-
 {-# INLINE derivativeRange #-}
 derivativeRange :: Interval Unitless -> Curve2D units -> VectorBounds2D units
 derivativeRange = Curve.derivativeRange
@@ -485,10 +479,6 @@ startSecondDerivative = Curve.startSecondDerivative
 
 endSecondDerivative :: Curve2D units -> Vector2D units
 endSecondDerivative = Curve.endSecondDerivative
-
-{-# INLINE secondDerivativeAt #-}
-secondDerivativeAt :: Number -> Curve2D units -> Vector2D units
-secondDerivativeAt = Curve.secondDerivativeAt
 
 {-# INLINE secondDerivativeRange #-}
 secondDerivativeRange :: Interval Unitless -> Curve2D units -> VectorBounds2D units
@@ -905,7 +895,7 @@ piecewiseDerivativeValue tree s = case tree of
     | s < leftLength -> piecewiseDerivativeValue leftTree s
     | otherwise -> piecewiseDerivativeValue rightTree (s - leftLength)
   PiecewiseDerivativeLeaf segmentLength curve ->
-    VectorCurve2D.valueAt (s / segmentLength) curve
+    curve @ (s / segmentLength)
 
 piecewiseDerivativeRange ::
   PiecewiseDerivativeTree units space ->

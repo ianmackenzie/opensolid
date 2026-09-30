@@ -45,8 +45,8 @@ solve curveA curveB Crossing (tRangeA, tRangeB) (segmentA, segmentB) =
             let pointA = curveA @ tA
             let pointB = curveB @ tB
             let displacement = pointB - pointA
-            let derivativeA = negate (Curve.derivativeAt tA curveA)
-            let derivativeB = Curve.derivativeAt tB curveB
+            let derivativeA = negate (Curve.derivative curveA @ tA)
+            let derivativeB = Curve.derivative curveB @ tB
             (# displacement, derivativeA, derivativeB #)
       UvPoint tA tB <- NewtonRaphson.Surface.solveIn (UvBounds tRangeA tRangeB) evaluate
       let solution = (tA, tB)

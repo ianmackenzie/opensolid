@@ -147,9 +147,7 @@ translationalSurfaceCorrectValue =
     surface <- Surface3D.sweptBy translationCurve baseCurve
     uvPoint <- Test.generate UvPoint.random
     let UvPoint u v = uvPoint
-    let basePoint = baseCurve @ u
-    let translationVector = VectorCurve3D.valueAt v translationCurve
-    let expectedPoint = basePoint + translationVector
+    let expectedPoint = baseCurve @ u + translationCurve @ v
     let actualPoint = SurfaceFunction3D.pointAt uvPoint (Surface3D.function surface)
     Test.expect (actualPoint ~~ expectedPoint)
       & Test.output "expectedPoint" expectedPoint

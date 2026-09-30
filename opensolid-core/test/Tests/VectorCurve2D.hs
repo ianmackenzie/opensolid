@@ -18,10 +18,10 @@ derivativeConsistency ::
 derivativeConsistency givenTolerance curve = do
   tValue <- Test.generate Parameter.random
   let dt :: Number = 1e-6
-  let v1 = VectorCurve2D.valueAt (tValue - dt) curve
-  let v2 = VectorCurve2D.valueAt (tValue + dt) curve
+  let v1 = curve @ (tValue - dt)
+  let v2 = curve @ (tValue + dt)
   let numericalFirstDerivative = (v2 - v1) / (2.0 * dt)
-  let analyticFirstDerivative = VectorCurve2D.derivativeAt tValue curve
+  let analyticFirstDerivative = VectorCurve2D.derivative curve @ tValue
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
       & Test.output "numericalFirstDerivative" numericalFirstDerivative
@@ -34,7 +34,7 @@ rangeConsistency ::
 rangeConsistency vectorCurve = do
   tRange <- Test.generate (Interval.random Parameter.random)
   tValue <- Test.generate (Random.map (Interval.interpolate tRange) Parameter.random)
-  let vectorCurveValue = VectorCurve2D.valueAt tValue vectorCurve
+  let vectorCurveValue = vectorCurve @ tValue
   let vectorCurveRange = VectorCurve2D.range tRange vectorCurve
   Test.expect (vectorCurveValue ^ vectorCurveRange)
     & Test.output "tValue" tValue

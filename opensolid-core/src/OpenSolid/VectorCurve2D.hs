@@ -8,16 +8,12 @@ module OpenSolid.VectorCurve2D
   , derivative
   , startValue
   , endValue
-  , valueAt
-  , valueOf
   , range
   , startDerivative
   , endDerivative
-  , derivativeAt
   , derivativeRange
   , startSecondDerivative
   , endSecondDerivative
-  , secondDerivativeAt
   , secondDerivativeRange
   , xComponent
   , yComponent
@@ -147,18 +143,6 @@ startValue = VectorCurve.startValue
 endValue :: VectorCurve2D units -> Vector2D units
 endValue = VectorCurve.endValue
 
-{-| Evaluate a curve at a given parameter value.
-
-The parameter value should be between 0 and 1.
--}
-{-# INLINE valueAt #-}
-valueAt :: Number -> VectorCurve2D units -> Vector2D units
-valueAt = VectorCurve.valueAt
-
-{-# INLINE valueOf #-}
-valueOf :: VectorCurve2D units -> Number -> Vector2D units
-valueOf = VectorCurve.valueOf
-
 {-# INLINE range #-}
 range :: Interval Unitless -> VectorCurve2D units -> VectorBounds2D units
 range = VectorCurve.range
@@ -169,10 +153,6 @@ startDerivative = VectorCurve.startDerivative
 endDerivative :: VectorCurve2D units -> Vector2D units
 endDerivative = VectorCurve.endDerivative
 
-{-# INLINE derivativeAt #-}
-derivativeAt :: Number -> VectorCurve2D units -> Vector2D units
-derivativeAt = VectorCurve.derivativeAt
-
 {-# INLINE derivativeRange #-}
 derivativeRange :: Interval Unitless -> VectorCurve2D units -> VectorBounds2D units
 derivativeRange = VectorCurve.derivativeRange
@@ -182,10 +162,6 @@ startSecondDerivative = VectorCurve.startSecondDerivative
 
 endSecondDerivative :: VectorCurve2D units -> Vector2D units
 endSecondDerivative = VectorCurve.endSecondDerivative
-
-{-# INLINE secondDerivativeAt #-}
-secondDerivativeAt :: Number -> VectorCurve2D units -> Vector2D units
-secondDerivativeAt = VectorCurve.secondDerivativeAt
 
 {-# INLINE secondDerivativeRange #-}
 secondDerivativeRange :: Interval Unitless -> VectorCurve2D units -> VectorBounds2D units
@@ -258,5 +234,5 @@ unconvert factor curve = Units.simplify (curve ?/? factor)
 
 newtonRaphson :: VectorCurve2D units -> Number -> Fuzzy Number
 newtonRaphson curve t1 = do
-  let evaluate tValue = (# valueAt tValue curve, derivativeAt tValue curve #)
+  let evaluate tValue = (# curve @ tValue, derivative curve @ tValue #)
   NewtonRaphson.Curve.solveFrom t1 evaluate
