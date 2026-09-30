@@ -28,4 +28,8 @@ instance Space.Coercion (Edge space1) (Edge space2)
 
 data IsDegenerate
 
-parametric :: Tolerance Meters => SurfaceFunction3D space -> UvRegion -> Result IsDegenerate (Surface3D space)
+parametric ::
+  Tolerance Meters =>
+  SurfaceFunction3D space ->
+  UvRegion ->
+  Result IsDegenerate (Surface3D space)
