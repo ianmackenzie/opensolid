@@ -225,6 +225,12 @@ data IsDegenerateAndCoincidentWithPoint
   = IsDegenerateAndCoincidentWithPoint
   deriving (Eq, Show, Err)
 
+-- | An abstract representation of the parameter value of some curve.
+newtype ParameterValue = ParameterValue (Uniform -> Number)
+
+instance FFI ParameterValue where
+  representation = FFI.classRepresentation "ParameterValue"
+
 type BisectionTree dimension units space =
   Bisection.Tree (Interval Unitless) (Segment dimension units space)
 
@@ -479,8 +485,6 @@ instance At (Curve2D units) (Interval Unitless) (Bounds2D units) where
 
 instance At (Curve3D space) (Interval Unitless) (Bounds3D space) where
   curve @ tRange = CompiledFunction.range tRange (compiled curve)
-
-newtype ParameterValue = ParameterValue (Uniform -> Number)
 
 instance At ParameterValue Uniform Number where
   ParameterValue uniformParameterization @ rValue = uniformParameterization rValue

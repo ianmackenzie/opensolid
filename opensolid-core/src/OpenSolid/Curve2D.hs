@@ -747,6 +747,11 @@ medialAxis curve1 curve2 = do
 length :: Curve2D units -> Quantity units
 length = Curve.length
 
+{-| Get an abstract value representing the parameter value of this curve.
+
+The main thing you can do with this value is query it for
+the original curve parameter value corresponding to a given uniform parameter value.
+-}
 parameterValue :: Curve2D units -> ParameterValue
 parameterValue = Curve.parameterValue
 

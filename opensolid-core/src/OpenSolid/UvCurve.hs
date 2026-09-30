@@ -1,5 +1,6 @@
 module OpenSolid.UvCurve
   ( UvCurve
+  , ParameterValue
   , IsDegenerate
   , data IsDegenerate
   , new
@@ -11,11 +12,12 @@ module OpenSolid.UvCurve
   , arcFrom
   , cornerArc
   , intersections
+  , parameterValue
   )
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Curve (UvCurve)
+import OpenSolid.Curve (ParameterValue, UvCurve)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D)
@@ -71,3 +73,11 @@ cornerArc = unitless Curve2D.cornerArc
 
 intersections :: UvCurve -> UvCurve -> Maybe Curve.Intersections
 intersections = unitless Curve2D.intersections
+
+{-| Get an abstract value representing the parameter value of this curve.
+
+The main thing you can do with this value is query it for
+the original curve parameter value corresponding to a given uniform parameter value.
+-}
+parameterValue :: UvCurve -> ParameterValue
+parameterValue = Curve.parameterValue

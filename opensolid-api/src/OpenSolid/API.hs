@@ -19,6 +19,7 @@ import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Convention3D (Convention3D)
 import OpenSolid.Convention3D qualified as Convention3D
+import OpenSolid.Curve (ParameterValue)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Root qualified as Curve1D.Root
 import OpenSolid.Curve2D qualified as Curve2D
@@ -62,6 +63,7 @@ import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Triangle2D qualified as Triangle2D
+import OpenSolid.Uniform (Uniform (Uniform))
 import OpenSolid.Units (SquareMeters)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvCurve qualified as UvCurve
@@ -126,6 +128,7 @@ classes =
   , parameter
   , vectorCurve2D
   , displacementCurve2D
+  , parameterValue
   , curve2D
   , uvCurve
   , region2D
@@ -1505,6 +1508,16 @@ affineTransformations3D transformBy =
   Class.member2 "Scale Along" "Axis" "Scale" (Transform3D.scaleAlongImpl transformBy) "Scale (stretch) along the given axis by the given scaling factor."
     : uniformTransformations3D transformBy
 
+parameterValue :: Class
+parameterValue =
+  Class.new @ParameterValue $(docs ''ParameterValue) $
+    [ Class.member1
+        "At Uniform"
+        "Parameter Value"
+        (\rValue givenParameterValue -> givenParameterValue @ Uniform rValue)
+        "Get the original curve parameter value at a given uniform parameter value."
+    ]
+
 type Curve2D = Curve2D.Curve2D Meters
 
 curve2D :: Class
@@ -1526,6 +1539,7 @@ curve2D =
     , Class.property "Derivative" Curve2D.derivative "The derivative of the curve."
     , Class.atParameterValue
     , Class.atUniformParameterValue
+    , Class.property "Parameter Value" Curve2D.parameterValue $(docs 'Curve2D.parameterValue)
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "X Coordinate" (Curve2D.xCoordinate) $(docs 'Curve2D.xCoordinate)
     , Class.property "Y Coordinate" (Curve2D.yCoordinate) $(docs 'Curve2D.yCoordinate)
@@ -1555,6 +1569,7 @@ uvCurve =
     , Class.property "Derivative" Curve2D.derivative "The derivative of the curve."
     , Class.atParameterValue
     , Class.atUniformParameterValue
+    , Class.property "Parameter Value" UvCurve.parameterValue $(docs 'UvCurve.parameterValue)
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "U Coordinate" (Curve2D.xCoordinate) "Get the U coordinate of a UV curve as a scalar curve."
     , Class.property "V Coordinate" (Curve2D.yCoordinate) "Get the V coordinate of a UV curve as a scalar curve."

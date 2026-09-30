@@ -243,6 +243,11 @@ section = Curve.section
 length :: Curve3D space -> Length
 length = Curve.length
 
+{-| Get an abstract value representing the parameter value of this curve.
+
+The main thing you can do with this value is query it for
+the original curve parameter value corresponding to a given uniform parameter value.
+-}
 parameterValue :: Curve3D space -> ParameterValue
 parameterValue = Curve.parameterValue
 
