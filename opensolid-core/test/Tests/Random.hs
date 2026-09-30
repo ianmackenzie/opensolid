@@ -125,8 +125,8 @@ frame3D :: Generator (Frame3D global local)
 frame3D =
   Random.map2
     Frame3D.with
-    (Random.map ("originPoint" :::) point3D)
-    (Random.map ("orientation" :::) Orientation3D.random)
+    (Random.named "originPoint" point3D)
+    (Random.named "orientation" Orientation3D.random)
 
 bounds2D :: Generator (Bounds2D Meters)
 bounds2D = Random.map2 Bounds2D lengthInterval lengthInterval

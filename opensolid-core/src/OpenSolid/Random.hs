@@ -9,6 +9,7 @@ module OpenSolid.Random
   , quantity
   , bool
   , sign
+  , named
   , map
   , map2
   , map3
@@ -84,6 +85,9 @@ bool = Generator System.Random.uniform
 
 sign :: Generator Sign
 sign = Generator System.Random.uniform
+
+named :: forall name -> Generator a -> Generator (name ::: a)
+named name generator = map (name :::) generator
 
 generate :: Generator a -> IO a
 generate generator =
