@@ -1,5 +1,8 @@
 module OpenSolid.PbrMaterial
-  ( PbrMaterial (baseColor, roughness, metallic)
+  ( PbrMaterial
+  , baseColor
+  , roughness
+  , metallic
   , metal
   , aluminum
   , iron
@@ -31,6 +34,15 @@ data PbrMaterial = PbrMaterial
 
 instance FFI PbrMaterial where
   representation = FFI.classRepresentation "PbrMaterial"
+
+baseColor :: PbrMaterial -> Color
+baseColor material = material.baseColor
+
+roughness :: PbrMaterial -> Number
+roughness material = material.roughness
+
+metallic :: PbrMaterial -> Number
+metallic material = material.metallic
 
 -- | Create a metallic material with the given color and roughness.
 metal :: ("baseColor" ::: Color, "roughness" ::: Number) -> PbrMaterial

@@ -270,13 +270,13 @@ meshByteLength mesh = mesh.indicesByteLength + mesh.verticesByteLength
 
 encodeMaterial :: PbrMaterial -> Json
 encodeMaterial material = do
-  let (r, g, b) = Color.toRgb1 material.baseColor
+  let (r, g, b) = Color.toRgb1 (PbrMaterial.baseColor material)
   Json.object
     [ Json.field "pbrMetallicRoughness" do
         Json.object
           [ Json.field "baseColorFactor" $ Json.listOf Json.number [r, g, b, 1.0]
-          , Json.field "metallicFactor" $ Json.number material.metallic
-          , Json.field "roughnessFactor" $ Json.number material.roughness
+          , Json.field "metallicFactor" $ Json.number (PbrMaterial.metallic material)
+          , Json.field "roughnessFactor" $ Json.number (PbrMaterial.roughness material)
           ]
     ]
 

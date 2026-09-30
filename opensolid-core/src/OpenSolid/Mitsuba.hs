@@ -295,13 +295,13 @@ shapeNode fileName index properties = do
 
 bsdfNode :: PbrMaterial -> Number -> XmlNode
 bsdfNode material opacity = do
-  let (r, g, b) = Color.toRgb1 material.baseColor
+  let (r, g, b) = Color.toRgb1 (PbrMaterial.baseColor material)
   let rgbString = Text.join "," (List.map Text.number [r, g, b])
   let principledNode =
         XmlNode "bsdf" [("type", "principled")] $
           [ typedNode "rgb" "base_color" rgbString
-          , floatNode "metallic" material.metallic
-          , floatNode "roughness" material.roughness
+          , floatNode "metallic" (PbrMaterial.metallic material)
+          , floatNode "roughness" (PbrMaterial.roughness material)
           ]
   if opacity == 1.0
     then principledNode
