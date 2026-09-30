@@ -18,15 +18,17 @@ import OpenSolid.Bounds qualified as Bounds
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Line (Line (Line))
-import OpenSolid.Line qualified as Line
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point (Point, PointExists)
+import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 
 -- | A non-empty list of points joined by lines.
-newtype Polyline dimension units space
-  = Polyline (NonEmpty (Point dimension units space))
+data Polyline dimension units space = Polyline
+  { vertices :: NonEmpty (Point dimension units space)
+  , length :: ~(Quantity units)
+  }
 
 instance FFI (Polyline 2 Meters Void) where
   representation = FFI.classRepresentation "Polyline2D"
@@ -35,12 +37,18 @@ instance FFI (Polyline 2 Unitless Void) where
   representation = FFI.classRepresentation "UvPolyline"
 
 -- | Construct a polyline from its vertices.
-fromVertices :: NonEmpty (Point dimension units space) -> Polyline dimension units space
-fromVertices = Polyline
+fromVertices ::
+  PointExists dimension units space =>
+  NonEmpty (Point dimension units space) -> Polyline dimension units space
+fromVertices givenVertices =
+  Polyline
+    { vertices = givenVertices
+    , length = Quantity.sum (NonEmpty.successive Point.distanceFrom givenVertices)
+    }
 
 -- | Get the vertices of a polyline.
 vertices :: Polyline dimension units space -> NonEmpty (Point dimension units space)
-vertices (Polyline vertices_) = vertices_
+vertices = (.vertices)
 
 -- | Get the number of vertices in a polyline.
 numVertices :: Polyline dimension units space -> Int
@@ -66,7 +74,7 @@ segments polyline = NonEmpty.successive Line (vertices polyline)
 
 -- | Get the total length of a polyline (the sum of the lengths of its segments).
 length :: PointExists dimension units space => Polyline dimension units space -> Quantity units
-length polyline = Quantity.sumOf Line.length (segments polyline)
+length = (.length)
 
 bounds ::
   BoundsExists dimension units space =>
@@ -75,7 +83,8 @@ bounds ::
 bounds polyline = Bounds.hull (vertices polyline)
 
 map ::
+  PointExists dimension units2 space2 =>
   (Point dimension units1 space1 -> Point dimension units2 space2) ->
   Polyline dimension units1 space1 ->
   Polyline dimension units2 space2
-map function polyline = Polyline (NonEmpty.map function (vertices polyline))
+map function polyline = fromVertices (NonEmpty.map function (vertices polyline))
