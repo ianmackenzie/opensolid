@@ -50,7 +50,11 @@ type role Vector2D phantom
 
 type Vector2D :: Type -> Type
 data Vector2D units = V2D# Double# Double#
-  deriving (Eq, Ord)
+
+instance Eq (Vector2D units) where
+  {-# INLINE (==) #-}
+  V2D# x1# y1# == V2D# x2# y2# =
+    B# (x1# ==# x2# &&# y1# ==# y2#)
 
 -- | Construct a vector from its X and Y components.
 {-# INLINE Vector2D #-}
@@ -255,8 +259,7 @@ instance On (Plane3D space) (Vector2D units) (Vector3D units space) where
 
 This is effectively a type-safe unit vector.
 -}
-newtype Direction2D = Unit2D (Vector2D Unitless)
-  deriving (Eq, Ord)
+newtype Direction2D = Unit2D (Vector2D Unitless) deriving (Eq)
 
 {-# COMPLETE Direction2D #-}
 
@@ -345,8 +348,6 @@ pattern Point2D px py <- Position2D (Vector2D px py)
 
 deriving instance Eq (Point2D units)
 
-deriving instance Ord (Point2D units)
-
 instance Show (Point2D units) where
   showsPrec precedence (Point2D px py) =
     Show.constructor2 precedence "Point2D" px py
@@ -426,7 +427,7 @@ type VectorBounds2D :: Type -> Type
 data VectorBounds2D units
   = -- | Construct a vector bounding box from its X and Y coordinate bounds.
     VectorBounds2D (Interval units) (Interval units)
-  deriving (Eq, Show)
+  deriving (Show)
 
 instance Units (VectorBounds2D units) units
 
@@ -745,7 +746,7 @@ instance On (Plane3D space) (VectorBounds2D units) (VectorBounds3D units space) 
 
 type role Bounds2D phantom
 
-newtype Bounds2D units = PositionBounds2D (VectorBounds2D units) deriving (Eq)
+newtype Bounds2D units = PositionBounds2D (VectorBounds2D units)
 
 {-# COMPLETE Bounds2D #-}
 
@@ -964,8 +965,6 @@ data VectorTransform2D tag = VectorTransform2D (Vector2D Unitless) (Vector2D Uni
 
 deriving instance Eq (VectorTransform2D tag)
 
-deriving instance Ord (VectorTransform2D tag)
-
 deriving instance Show (VectorTransform2D tag)
 
 instance Multiplication (VectorTransform2D tag) (Vector2D units) (Vector2D units) where
@@ -995,8 +994,6 @@ type Transform2D :: Type -> Type -> Type
 data Transform2D tag units = Transform2D (Point2D units) (VectorTransform2D tag)
 
 deriving instance Eq (Transform2D tag units)
-
-deriving instance Ord (Transform2D tag units)
 
 deriving instance Show (Transform2D tag units)
 
@@ -1046,7 +1043,11 @@ type role Vector3D phantom phantom
 
 type Vector3D :: Type -> Type -> Type
 data Vector3D units space = V3D# Double# Double# Double#
-  deriving (Eq, Ord)
+
+instance Eq (Vector3D units space) where
+  {-# INLINE (==) #-}
+  V3D# x1# y1# z1# == V3D# x2# y2# z2# =
+    B# (x1# ==# x2# &&# y1# ==# y2# &&# z1# ==# z2#)
 
 -- | Construct a vector from its X and Y components.
 {-# INLINE Vector3D #-}
@@ -1274,7 +1275,7 @@ type role Direction3D phantom
 This is effectively a type-safe unit vector.
 -}
 newtype Direction3D space = Unit3D (Vector3D Unitless space)
-  deriving (Eq, Ord)
+  deriving (Eq)
 
 {-# COMPLETE Direction3D #-}
 
@@ -1401,8 +1402,6 @@ pattern Point3D px py pz <- Position3D (Vector3D px py pz)
 
 deriving instance Eq (Point3D space)
 
-deriving instance Ord (Point3D space)
-
 instance Show (Point3D space) where
   showsPrec precedence (Point3D px py pz) =
     Show.constructor3 precedence "Point3D" px py pz
@@ -1485,7 +1484,6 @@ type role VectorBounds3D phantom phantom
 
 type VectorBounds3D :: Type -> Type -> Type
 data VectorBounds3D units space = VB3D# Double# Double# Double# Double# Double# Double#
-  deriving (Eq)
 
 instance
   units1 ~ units2 =>
@@ -1928,7 +1926,6 @@ type role Bounds3D phantom
 -- | A bounding box in 3D.
 newtype Bounds3D space
   = PositionBounds3D (VectorBounds3D Meters space)
-  deriving (Eq)
 
 {-# COMPLETE Bounds3D #-}
 
@@ -2175,8 +2172,6 @@ data VectorTransform3D tag space
 
 deriving instance Eq (VectorTransform3D tag space)
 
-deriving instance Ord (VectorTransform3D tag space)
-
 deriving instance Show (VectorTransform3D tag space)
 
 instance
@@ -2226,8 +2221,6 @@ type Transform3D :: Type -> Type -> Type
 data Transform3D tag space = Transform3D (Point3D space) (VectorTransform3D tag space)
 
 deriving instance Eq (Transform3D tag space)
-
-deriving instance Ord (Transform3D tag space)
 
 deriving instance Show (Transform3D tag space)
 

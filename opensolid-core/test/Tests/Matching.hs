@@ -162,5 +162,5 @@ matchingCurves curve1 curve2 =
     Just (Curve.Intersections.IntersectionPoints {}) -> False
     Just (Curve.Intersections.OverlappingSegments sign segments intersectionPoints) ->
       sign == Positive
-        && segments == NonEmpty.one (Interval.unit, Interval.unit)
+        && segments ~~ NonEmpty.one (Interval.unit, Interval.unit)
         && List.isEmpty intersectionPoints

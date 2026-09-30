@@ -90,11 +90,6 @@ type Interval :: Type -> Type
 -- | A range of possible values, with a lower bound and upper bound.
 data Interval units = Ordered# Double# Double#
 
-instance Eq (Interval units) where
-  {-# INLINE (==) #-}
-  Ordered# low1# high1# == Ordered# low2# high2# =
-    B# (low1# ==# low2# &&# high1# ==# high2#)
-
 instance Show (Interval units) where
   showsPrec precedence (Interval low high) =
     Show.constructor2 precedence "Interval" low high
