@@ -18,10 +18,10 @@ import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
-import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Space qualified as Space
 import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
+import OpenSolid.Surface3D.Pole qualified as Surface3D.Pole
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.UvBounds (UvBounds)
@@ -75,16 +75,16 @@ new ::
 new givenFunction givenUvCurve =
   case givenFunction << givenUvCurve of
     Ok curve -> Edge_ givenFunction (Surface3D.Edge givenUvCurve curve)
-    Err (Curve3D.IsDegenerate point) -> Pole_ givenFunction (Surface3D.Pole givenUvCurve point)
+    Err (Curve3D.IsDegenerate point) -> Pole_ givenFunction (Surface3D.Pole.new givenUvCurve point)
 
 uvCurve :: SurfaceCurve3D space -> UvCurve
 uvCurve surfaceCurve = case surfaceCurve of
-  Pole (Surface3D.Pole poleUvCurve _) -> poleUvCurve
+  Pole pole -> Surface3D.Pole.uvCurve pole
   Edge (Surface3D.Edge edgeUvCurve _) -> edgeUvCurve
 
 bounds :: SurfaceCurve3D space -> Bounds3D space
 bounds surfaceCurve = case surfaceCurve of
-  Pole (Surface3D.Pole _ point) -> Bounds3D.constant point
+  Pole pole -> Bounds3D.constant (Surface3D.Pole.point pole)
   Edge (Surface3D.Edge _ curve) -> Curve3D.bounds curve
 
 uvBounds :: SurfaceCurve3D space -> UvBounds
@@ -92,10 +92,10 @@ uvBounds = UvCurve.bounds . uvCurve
 
 placeIn :: Frame3D global local -> SurfaceCurve3D local -> SurfaceCurve3D global
 placeIn frame surfaceCurve = case surfaceCurve of
-  Pole_ function (Surface3D.Pole poleUvCurve point) ->
+  Pole_ function pole ->
     Pole_
       { function = SurfaceFunction3D.placeIn frame function
-      , pole = Surface3D.Pole poleUvCurve (Point3D.placeIn frame point)
+      , pole = Surface3D.Pole.placeIn frame pole
       }
   Edge_ function (Surface3D.Edge edgeUvCurve curve) ->
     Edge_

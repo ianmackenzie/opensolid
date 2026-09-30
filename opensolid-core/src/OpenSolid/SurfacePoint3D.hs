@@ -12,6 +12,7 @@ import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
+import OpenSolid.Surface3D.Pole qualified as Surface3D.Pole
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvCurve qualified as UvCurve
@@ -45,8 +46,8 @@ instance space1 ~ space2 => Intersects (Bounds3D space1) (SurfacePoint3D space2)
 
 point :: SurfacePoint3D space -> Point3D space
 point (Point _ p) = p
-point (Pole (Surface3D.Pole _ p)) = p
+point (Pole pole) = Surface3D.Pole.point pole
 
 uvBounds :: SurfacePoint3D space -> UvBounds
 uvBounds (Point uvPoint _) = UvBounds.constant uvPoint
-uvBounds (Pole (Surface3D.Pole uvCurve _)) = UvCurve.bounds uvCurve
+uvBounds (Pole pole) = UvCurve.bounds (Surface3D.Pole.uvCurve pole)

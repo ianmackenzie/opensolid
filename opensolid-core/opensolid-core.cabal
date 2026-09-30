@@ -218,6 +218,7 @@ library
     OpenSolid.Surface3D
     OpenSolid.Surface3D.Intersections
     OpenSolid.Surface3D.OverlappingSegment
+    OpenSolid.Surface3D.Pole
     OpenSolid.Surface3D.Segment
     OpenSolid.SurfaceCurve3D
     OpenSolid.SurfaceFunction1D

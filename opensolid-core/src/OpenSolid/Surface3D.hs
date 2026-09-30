@@ -1,7 +1,7 @@
 module OpenSolid.Surface3D
   ( Surface3D
-  , Pole (Pole)
-  , Edge (Edge)
+  , Pole
+  , Edge (..)
   , IsDegenerate (IsDegenerate)
   , Boundary
   , Segment
@@ -45,7 +45,6 @@ module OpenSolid.Surface3D
   )
 where
 
-import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Bag qualified as Bag
@@ -56,7 +55,6 @@ import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Bounds3D (Bounds3D)
-import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
@@ -88,6 +86,7 @@ import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
 import OpenSolid.Space qualified as Space
 import {-# SOURCE #-} OpenSolid.Surface3D.FindPoint qualified as Surface3D.FindPoint
+import OpenSolid.Surface3D.Pole (Pole)
 import OpenSolid.Surface3D.Segment (Segment (..))
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
@@ -124,8 +123,6 @@ data Surface3D space = Surface3D
   , bisectionTree :: ~(BisectionTree space)
   }
 
-data Pole space = Pole UvCurve (Point3D space) deriving (Show)
-
 data Edge space = Edge UvCurve (Curve3D space) deriving (Show)
 
 data IsDegenerate = IsDegenerate deriving (Eq, Show, Err)
@@ -146,10 +143,6 @@ instance Space.Coercion (Surface3D space1) (Surface3D space2) where
       , bisectionTree = Space.coerce surface.bisectionTree
       }
 
-instance Space.Coercion (Pole space1) (Pole space2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
-
 instance Space.Coercion (Edge space1) (Edge space2) where
   {-# INLINE coerce #-}
   coerce (Edge uvCurve curve) = Edge uvCurve (Space.coerce curve)
@@ -158,46 +151,13 @@ instance space1 ~ space2 => Bounded (Surface3D space1) (Bounds3D space2) where
   {-# INLINE bounds #-}
   bounds = bounds
 
-instance space1 ~ space2 => Bounded (Pole space1) (Bounds3D space2) where
-  {-# INLINE bounds #-}
-  bounds (Pole _ point) = Bounds3D.constant point
-
 instance space1 ~ space2 => Bounded (Edge space1) (Bounds3D space2) where
   {-# INLINE bounds #-}
   bounds (Edge _ curve) = Curve3D.bounds curve
 
-instance Bounded (Pole space) UvBounds where
-  {-# INLINE bounds #-}
-  bounds (Pole uvCurve _) = UvCurve.bounds uvCurve
-
 instance Bounded (Edge space) UvBounds where
   {-# INLINE bounds #-}
   bounds (Edge uvCurve _) = UvCurve.bounds uvCurve
-
-instance Intersects (Pole space) (Point3D space) Meters where
-  {-# INLINE (^) #-}
-  Pole _ polePoint ^ point = polePoint ~= point
-
-instance Intersects (Point3D space) (Pole space) Meters where
-  {-# INLINE (^) #-}
-  point ^ pole = pole ^ point
-
-instance Intersects UvPoint (Pole space) Unitless where
-  -- Note that in general "point intersects curve" can be relatively expensive
-  -- (since it calls Curve.findPoint internally),
-  -- but in this case there are a couple mitigating factors:
-  --
-  --   * The UV curve of a pole should always be a vertical or horizontal line
-  --     (along U or V equal to 0 or 1),
-  --     so its bounding box should be tight
-  --     and therefore able to reject any non-intersecting points
-  --   * If a UV point intersects the UV curve bounding box,
-  --     it will generally be an *endpoint* of the UV curve,
-  --     which will then cause an early fast return from Curve.findPoint
-  uvPoint ^ Pole uvCurve _ = uvPoint ^ uvCurve
-
-instance Intersects (Pole space) UvPoint Unitless where
-  pole ^ point = point ^ pole
 
 type Boundary space = Set3D space (SurfaceCurve3D space)
 

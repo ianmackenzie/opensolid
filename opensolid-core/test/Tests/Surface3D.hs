@@ -14,6 +14,7 @@ import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
+import OpenSolid.Surface3D.Pole qualified as Surface3D.Pole
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
 import OpenSolid.UvCurve qualified as UvCurve
@@ -61,9 +62,9 @@ findPole = Test.check 100 "findPole" do
   let point = Surface3D.pointAt (UvPoint 1.0 0.0) surface
   let solutions = Surface3D.findPoint point surface
   case solutions of
-    [SurfacePoint3D.Pole (Surface3D.Pole poleCurve _)] -> do
-      expectedPoleCurve <- try do UvCurve.lineFrom (UvPoint 1.0 0.0) (UvPoint 1.0 1.0)
-      Test.expect (poleCurve ~~ expectedPoleCurve)
+    [SurfacePoint3D.Pole pole] -> do
+      expectedUvCurve <- try do UvCurve.lineFrom (UvPoint 1.0 0.0) (UvPoint 1.0 1.0)
+      Test.expect (Surface3D.Pole.uvCurve pole ~~ expectedUvCurve)
     _ -> Test.fail "Expected a single solution pole" & Test.output "solutions" solutions
 
 findNonPole :: Text -> Generator UvPoint -> Test
