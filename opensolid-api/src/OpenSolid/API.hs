@@ -797,7 +797,7 @@ type Polyline2D = Polyline2D.Polyline2D Meters
 polyline2D :: Class
 polyline2D =
   Class.new @Polyline2D $(docs ''Polyline2D.Polyline2D) $
-    [ Class.constructor1 "Vertices" Polyline2D.Polyline2D $(docs 'Polyline2D.Polyline2D)
+    [ Class.factory1 "From Vertices" "Vertices" Polyline2D.fromVertices $(docs 'Polyline2D.fromVertices)
     , Class.property "Vertices" Polyline2D.vertices $(docs 'Polyline2D.vertices)
     , Class.property "Num Vertices" Polyline2D.numVertices $(docs 'Polyline2D.numVertices)
     , Class.property "Start Point" Polyline2D.startPoint $(docs 'Polyline2D.startPoint)
@@ -811,7 +811,7 @@ type UvPolyline = Polyline2D.Polyline2D Unitless
 uvPolyline :: Class
 uvPolyline =
   Class.new @UvPolyline $(docs ''Polyline2D.Polyline2D) $
-    [ Class.constructor1 "Vertices" Polyline2D.Polyline2D $(docs 'Polyline2D.Polyline2D)
+    [ Class.factory1 "From Vertices" "Vertices" Polyline2D.fromVertices $(docs 'Polyline2D.fromVertices)
     , Class.property "Vertices" Polyline2D.vertices $(docs 'Polyline2D.vertices)
     , Class.property "Num Vertices" Polyline2D.numVertices $(docs 'Polyline2D.numVertices)
     , Class.property "Start Point" Polyline2D.startPoint $(docs 'Polyline2D.startPoint)

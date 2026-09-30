@@ -28,7 +28,6 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Polygon2D (Polygon2D (Polygon2D))
-import OpenSolid.Polyline2D (data Polyline2D)
 import OpenSolid.Polyline2D qualified as Polyline2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -298,7 +297,7 @@ drawBezier color startPoint innerControlPoints endPoint = Try.do
       Svg.group
         [ Svg.with [Svg.opacity 0.3] do
             Svg.group
-              [ Svg.polyline (Polyline2D drawingControlPoints)
+              [ Svg.polyline (Polyline2D.fromVertices drawingControlPoints)
               , Svg.with [Svg.fillColor color] do Svg.combine drawControlPoint drawingControlPoints
               , Svg.combine drawCurveRange (Parameter.intervals 10)
               ]

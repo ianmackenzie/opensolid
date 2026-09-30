@@ -128,7 +128,8 @@ import OpenSolid.Point qualified as Point
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
-import OpenSolid.Polyline (Polyline (Polyline))
+import OpenSolid.Polyline (Polyline)
+import OpenSolid.Polyline qualified as Polyline
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Queue qualified as Queue
@@ -1072,7 +1073,7 @@ toPolyline ::
   Resolution units ->
   Curve dimension units space ->
   Polyline dimension units space
-toPolyline resolution curve = Polyline (curve @ linearize resolution curve)
+toPolyline resolution curve = Polyline.fromVertices (curve @ linearize resolution curve)
 
 linearize ::
   CurveExists dimension units space =>

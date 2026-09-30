@@ -1,5 +1,6 @@
 module OpenSolid.Polyline
-  ( Polyline (Polyline)
+  ( Polyline
+  , fromVertices
   , vertices
   , numVertices
   , startPoint
@@ -25,14 +26,17 @@ import OpenSolid.Quantity qualified as Quantity
 
 -- | A non-empty list of points joined by lines.
 newtype Polyline dimension units space
-  = -- | Construct a polyline from its vertices.
-    Polyline (NonEmpty (Point dimension units space))
+  = Polyline (NonEmpty (Point dimension units space))
 
 instance FFI (Polyline 2 Meters Void) where
   representation = FFI.classRepresentation "Polyline2D"
 
 instance FFI (Polyline 2 Unitless Void) where
   representation = FFI.classRepresentation "UvPolyline"
+
+-- | Construct a polyline from its vertices.
+fromVertices :: NonEmpty (Point dimension units space) -> Polyline dimension units space
+fromVertices = Polyline
 
 -- | Get the vertices of a polyline.
 vertices :: Polyline dimension units space -> NonEmpty (Point dimension units space)

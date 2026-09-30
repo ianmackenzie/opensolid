@@ -14,7 +14,7 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Polyline2D (data Polyline2D)
+import OpenSolid.Polyline2D qualified as Polyline2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution qualified as Resolution
@@ -110,7 +110,7 @@ drawParameterization fileName parameterization = do
   let size = Length.centimeters 10.0
   let point tValue = Point2D (size * tValue) (size * parameterization tValue)
   let points :: NonEmpty (Point2D Meters) = NonEmpty.map point tValues
-  let polyline = Polyline2D points
+  let polyline = Polyline2D.fromVertices points
   Svg.write fileName (Svg.padding Length.centimeter) (Svg.polyline polyline)
 
 main :: IO ()

@@ -1,6 +1,6 @@
 module OpenSolid.Polyline2D
   ( Polyline2D
-  , data Polyline2D
+  , fromVertices
   , vertices
   , numVertices
   , startPoint
@@ -16,7 +16,7 @@ where
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.Point2D (Point2D)
-import OpenSolid.Polyline (Polyline (Polyline))
+import OpenSolid.Polyline (Polyline)
 import OpenSolid.Polyline qualified as Polyline
 import OpenSolid.Prelude
 
@@ -24,8 +24,8 @@ import OpenSolid.Prelude
 type Polyline2D units = Polyline 2 units Void
 
 -- | Construct a polyline from its vertices.
-pattern Polyline2D :: NonEmpty (Point2D units) -> Polyline2D units
-pattern Polyline2D vertices_ = Polyline vertices_
+fromVertices :: NonEmpty (Point2D units) -> Polyline2D units
+fromVertices = Polyline.fromVertices
 
 -- | Get the vertices of a polyline.
 vertices :: Polyline2D units -> NonEmpty (Point2D units)
