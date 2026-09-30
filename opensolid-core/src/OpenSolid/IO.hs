@@ -80,7 +80,7 @@ attempt :: IO a -> IO (Result Text a)
 attempt io = onError (succeed . Err) (map Ok io)
 
 mapError :: (Text -> Text) -> IO a -> IO a
-mapError function = onError (function >> fail)
+mapError function = onError (fail . function)
 
 bracket :: (IO a, a -> IO b) -> (a -> IO c) -> IO c
 bracket (setup, teardown) action = Control.Exception.bracket setup teardown action

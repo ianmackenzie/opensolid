@@ -133,7 +133,7 @@ run tests = do
 reportError :: Text -> List Text -> IO (Int, Int)
 reportError context messages = do
   withTextColor errorColor (IO.printLine (context <> " failed:"))
-  IO.forEach messages (Text.indent "   " >> IO.printLine)
+  IO.forEach messages (IO.printLine . Text.indent "   ")
   IO.succeed (0, 1)
 
 runImpl :: List Text -> Text -> Test -> IO (Int, Int)
