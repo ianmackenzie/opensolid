@@ -6,9 +6,9 @@ This package contains its official Python bindings. The bindings (and OpenSolid 
 under active development, but you're welcome to try them out!
 
 The package contains a single ``opensolid`` module containing a variety of classes representing
-geometric values and quantities, such as ``Length``, ``Angle``, ``Point2D``, and ``Direction2d``.
+geometric values and quantities, such as ``Length``, ``Angle``, ``Point2D``, and ``Direction2D``.
 Each class and function has a brief docstring, but here's a brief sampling of some of the
-operations you can do::
+operations you can do:
 
     >>> from opensolid import *
 
@@ -39,50 +39,35 @@ operations you can do::
     >>> p1.distance_to(p2)
     Length.meters(0.5385164807134505)
 
+    # Construct a 2D displacement (vector with length units)
+    # from its components in meters
+    >>> d = Displacement2D.meters(1, 2)
+
+    # Get the direction of that displacement
+    >>> d.direction()
+    Direction2D(0.4472135954999579,0.8944271909999159)
+
     # Build up a parametric curve (expression);
-    # 'UnitlessCurve1D.t' is the curve parameter, which
-    # ranges from 0 to 1, so here x will range
-    # from 0 to 5.
-    >>> x = 5 * UnitlessCurve1D.t
+    # 'Curve.t' is the curve parameter, which ranges from 0 to 1,
+    # so here x will range from 0 to 5.
+    >>> x = 5 * Curve.t
     >>> y = x.squared() - 5 * x + 1
 
     # Evaluate the curve at t=0.5
-    >>> y.value(0.5)
+    # (curves can be 'called' like functions)
+    >>> y(0.5)
     -5.25
 
-    # Find the values of t for which y=0. For this, we need
-    # to set up a tolerance value. (A tolerance is needed
-    # for cases where e.g. the curve decreases to a tiny
-    # value like 1e-9 before increasing again; should that
-    # be considered a solution or not? Similarly, if the
-    # curve decreases to -1e9 and then increases again,
-    # should that be considered two zeros or just one? See
-    # the documentation of Curve.zeros for more info.)
-    >>> with Tolerance(1e-6):
-    ...     # Get the location of each zero, i.e. the
-    ...     # value of t (not x!) for which y is zero
-    ...     roots = [zero.location for zero in y.zeros()]
-    >>> roots
+    # Find the values of t for which y=0
+    >>> root_locations = [root.location for root in y.find_roots()]
+    >>> root_locations
     [0.041742430504416, 0.9582575694955838]
 
     # Find the values of x at which y is zero,
     # by evaluating x at those roots
-    >>> [x.value(t) for t in roots]
+    >>> [x(t) for t in root_locations]
     [0.20871215252208, 4.7912878474779195]
 
     # Check that y is in fact zero at those roots
-    >>> [y.value(root) for root in roots]
+    >>> [y(t) for t in root_locations]
     [0.0, 0.0]
-
-    # Construct a vector (with length units)
-    # from its components in meters
-    >>> d = Vector2D.meters(1, 2)
-
-    # To get the direction of a vector, we also need to
-    # define a tolerance (any vector with magnitude
-    # smaller than this value will be considered 'zero'
-    # and therefore have no direction, so attempting to
-    # get its direction will raise an exception).
-    >>> with Tolerance(Length.nanometers(1)):
-    ...     d.direction()
-    Direction2D(0.4472135954999579,0.8944271909999159)
