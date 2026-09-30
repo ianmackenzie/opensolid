@@ -31,11 +31,11 @@ coerce = Data.Coerce.coerce
 
 -- | Get the origin point of an axis.
 originPoint :: Axis3D space -> Point3D space
-originPoint (Axis3D p0 _) = p0
+originPoint = (.originPoint)
 
 -- | Get the direction of an axis.
 direction :: Axis3D space -> Direction3D space
-direction (Axis3D _ d) = d
+direction = (.direction)
 
 through :: Point3D space -> Direction3D space -> Axis3D space
 through = Axis3D
