@@ -1,12 +1,76 @@
+Give Surface3D.Edge its own module
+Add Surface3D.Point (Pinpoint?)
+Have Surface3D.[Point,Edge,Pole] all hold a reference back to their Surface3D
+Refactor SurfacePoint3D to store a Surface3D.Point in the Point case (rename to Pinpoint)
+Add SurfacePoint3D.normalDirection function, returning Nothing if it's a true cusp / sharp pole
+
+Replace fallible Composition instances with ofCurve, ofSurface functions?
+- or even 'Surface3D.curve' which returns a SurfaceCurve3D?
+- search for regex 'Composition\n\s+\(Tolerance' to find instances
+  - most are curves - replace with named 'compose' function?
+  - the one that's just an alias for Surface3D.parametric can probably just be removed...
+
+Extend Codec type to support both JSON and CBOR?
+- implement Serialisation with main logic
+- then can implement both Aeson and cborg classes with one-line implementations using codec
+  - maybe even using some funky 'deriving via (Serializable MyType)' or similar magic?
+
+Replace 'new' functions with 'with' functions taking named arguments?
+
+Add At instances to Expression and CompiledFunction?
+
+Split API module into several modules to reduce compile times
+- even one per exposed class?
+
+Add to Surface3D.Segment:
+- dzdxRange etc.
+- d2zdx2Range etc.
+- or compute on-the-fly in e.g. tangent solver code, like with curves?
+  - should be _relatively_ uncommon to compute
+
+Add VectorCurve2D.rotateLeft/rotateRight, down to bytecode?
+
 Implement Surface3D.findPoint
 
 Implement Curve3D-Surface3D intersection
 
 Implement Surface3D-Surface3D intersection...
 
+Merge Model3D and Gltf
+- single Model3D module, but has glTF structure (hierarchy of named nodes, with additional JSON props)
+
+Have Svg require resolution at export time instead of for individual curves?
+
+Rename Svg back to Drawing2D?
+- symmetric with Model3D
+- SVG is main/only output target, but semantics can be different
+  - gradients can behave sanely
+  - can have additional attributes like "arrow head width" or "dot size" that don't map to SVG attributes
+    - better: 'Svg.arrowhead {length = ..., width = ...}' attribute?
+
+Add Aeson-based JSON encoding/decoding?
+- 'shape' types: always encode/decode as StablePtr?
+- or have Value type which is a wrapper over serializable types *plus* a generic ID:
+  - have IO-based operations that convert a given value to a Value
+    - either create a StablePtr, or perhaps e.g. store in an explicit
+- maybe have serializable types *directly* implement Aeson-based encoding/decoding,
+  have special 'data Remote = Remote { type_ :: Text, id :: Word64 }' or similar type
+  that can *itself* be serialized/deserialized as JSON
+- have a Sendable or similar class like
+
+  class Sendable a where
+    send :: (a -> Word64) -> a -> JSON
+    receive :: (Word64 -> Result Text a) -> JSON -> Result Text a
+
+  where 'send' and 'receive' take callback functions to optionall convert to/from an opaque ID
+
+Try Fourmolu 'if-style: hanging'
+
 Add UvError, Error2D and 'Error3D space' types?
 - hold a UvDrawing, Drawing2D and 'Model3D space' respectively
 - also an error message with call stack
+
+Refactor Err types to have explicit Show instances with human-readable messages
 
 Allow generic Failure-returning functions to return anything that's a MonadCatch instance?
 - so allow direct use in either IO or 'Result Failure' do-blocks
@@ -18,6 +82,7 @@ Move piecewise curve construction into generic Curve module
 Move Array and Color into OpenSolid.Prelude?
 
 Add Sketch3D type? Basically just Plane3D + Region2D
+- but doesn't extend well, extruding/revolving surfaces use a similar concept but with a Curve2D...
 
 Add 'r', 'w' and 'wv' down to C++ bytecode level
 
@@ -25,7 +90,7 @@ Restrict Units.Coercion for Curve.Segment to 2D and remove most constraints?
 
 Have 'erase' functions also erase space to Void?
 
-Rename Text.[int,number] -> Text.[fromInt,fromNumber]?
+Rename Text.[int,number,symbol] -> Text.[fromInt,fromNumber,fromSymbol]
 
 Restrict medial axis to Meters only
 
@@ -41,9 +106,12 @@ Add arc length parameterization of non-vanishing curves
 Have Set.pairwise* functions return *Set* values?
 - add plain Set.pairwise as well
 - probably need to add NonEmpty.pairs...
+- maybe *just* have Set.pairwise?
+  - would then definitely want to switch to lazy children in set nodes...
 
 Add Set.filterCombine?
 - hopefully allow removal of Set.Bounds constraint from Bag.combine...
+- or implement Bag.combine independently of Set.combine...
 
 Turn off StrictData?
 - most important cases will be handled anyways by using unboxed Double# fields
