@@ -7,7 +7,7 @@ module OpenSolid.Prelude
   , Fuzzy (Resolved, Unresolved)
   , Err
   , Result (Ok, Err)
-  , (!!)
+  , (??)
   , Exception
   , Void
   , data NonEmpty
@@ -460,12 +460,12 @@ instance MonadFail (Result Text) where
   {-# INLINE fail #-}
   fail message = Err (fromString message)
 
-{-# INLINE (!!) #-}
-(!!) :: Result x a -> a -> a
-Ok value !! _ = value
-Err _ !! fallback = fallback
+{-# INLINE (??) #-}
+(??) :: Result x a -> a -> a
+Ok value ?? _ = value
+Err _ ?? fallback = fallback
 
-infixl 0 !!
+infixl 0 ??
 
 ----- Quantity -----
 

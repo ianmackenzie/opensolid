@@ -49,7 +49,7 @@ arc2D = unitless do
           , startAngle = Angle.zero
           , endAngle = Angle.pi
           }
-          !! error "Arc should not be degenerate"
+          ?? error "Arc should not be degenerate"
   let point = Point2D (Number.sqrt 2.0 / 2.0) (Number.sqrt 2.0 / 2.0)
   curve2D "Arc" (arc - point) 0.5 0.25
 

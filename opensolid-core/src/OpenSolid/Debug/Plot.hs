@@ -55,5 +55,5 @@ yAxis y1 y2 = do
 curve :: Curve1D Unitless -> Svg
 curve givenCurve = do
   let panic = error "Curve should not be degenerate, by construction"
-  let curve2D = unitless (Curve2D.xy Curve1D.t givenCurve) !! panic
+  let curve2D = unitless (Curve2D.xy Curve1D.t givenCurve) ?? panic
   Svg.curve resolution (Curve2D.convert scale curve2D)
