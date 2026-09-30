@@ -243,10 +243,10 @@ arcFrom givenStartPoint givenEndPoint sweptAngle =
 -- | Create an arc with the given center point, radius, start angle and end angle.
 polarArc ::
   Tolerance units =>
-  ("centerPoint" ::: Point2D units) ->
-  ("radius" ::: Quantity units) ->
-  ("startAngle" ::: Angle) ->
-  ("endAngle" ::: Angle) ->
+  "centerPoint" ::: Point2D units ->
+  "radius" ::: Quantity units ->
+  "startAngle" ::: Angle ->
+  "endAngle" ::: Angle ->
   Result (IsDegenerate units) (Curve2D units)
 polarArc
   ("centerPoint" ::: centerPoint)

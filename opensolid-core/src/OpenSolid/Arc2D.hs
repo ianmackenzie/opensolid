@@ -54,10 +54,10 @@ instance units ~ Meters => On (Plane3D space) (Arc2D units) (Arc3D space) where
       }
 
 with ::
-  ("centerPoint" ::: Point2D units) ->
-  ("radius" ::: Quantity units) ->
-  ("startAngle" ::: Angle) ->
-  ("endAngle" ::: Angle) ->
+  "centerPoint" ::: Point2D units ->
+  "radius" ::: Quantity units ->
+  "startAngle" ::: Angle ->
+  "endAngle" ::: Angle ->
   Arc2D units
 with
   ("centerPoint" ::: givenCenterPoint)

@@ -141,16 +141,16 @@ builder givenHeader entities = do
     "AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }" (more commonly known as AP214).
 -}
 header ::
-  ("description" ::: List Text) ->
-  ("implementationLevel" ::: Text) ->
-  ("fileName" ::: Text) ->
-  ("timestamp" ::: Text) ->
-  ("author" ::: List Text) ->
-  ("organization" ::: List Text) ->
-  ("preprocessorVersion" ::: Text) ->
-  ("originatingSystem" ::: Text) ->
-  ("authorization" ::: Text) ->
-  ("schemaIdentifiers" ::: List Text) ->
+  "description" ::: List Text ->
+  "implementationLevel" ::: Text ->
+  "fileName" ::: Text ->
+  "timestamp" ::: Text ->
+  "author" ::: List Text ->
+  "organization" ::: List Text ->
+  "preprocessorVersion" ::: Text ->
+  "originatingSystem" ::: Text ->
+  "authorization" ::: Text ->
+  "schemaIdentifiers" ::: List Text ->
   Header
 header
   ("description" ::: givenDescription)
