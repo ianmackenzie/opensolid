@@ -7,14 +7,11 @@ module Edge2D
   , reverse
   , offsetLeftwardBy
   , offsetRightwardBy
-  , toCurve
   )
 where
 
 import OpenSolid.Arc2D (Arc2D)
 import OpenSolid.Arc2D qualified as Arc2D
-import OpenSolid.Curve2D (Curve2D)
-import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.IsDegenerate (IsDegenerate)
 import OpenSolid.Length (Length)
@@ -60,7 +57,3 @@ offsetRightwardBy ::
   Edge2D ->
   Result (IsDegenerate (Point2D Meters)) (Edge2D)
 offsetRightwardBy distance = offsetLeftwardBy -distance
-
-toCurve :: Tolerance Meters => Edge2D -> Result Text (Curve2D Meters)
-toCurve (Line line) = try do Curve2D.line line
-toCurve (Arc arc) = try do Curve2D.arc arc
