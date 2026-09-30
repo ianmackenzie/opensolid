@@ -1231,45 +1231,47 @@ init givenName givenDocumentation =
     }
 
 buildClass :: List (Member value) -> Class -> Class
-buildClass members built = do
+buildClass [] built = built
+buildClass (first : rest) built = built & addMember first & buildClass rest
+
+addMember :: Member value -> Class -> Class
+addMember member built = do
   let Class {..} = built
-  case members of
-    [] -> built
-    first : rest -> buildClass rest $ case first of
-      Const name_ value ->
-        Class {constants = built.constants <> [(name_, value)], ..}
-      Constructor constructor_ ->
-        Class {constructor = Just constructor_, ..}
-      Static name_ staticFunction ->
-        Class {staticFunctions = built.staticFunctions <> [(name_, staticFunction)], ..}
-      Prop name_ prop ->
-        Class {properties = built.properties <> [(name_, prop)], ..}
-      Member name_ memberFunction ->
-        Class {memberFunctions = built.memberFunctions <> [(name_, memberFunction)], ..}
-      EqualityAndHash functionPair ->
-        Class {equalityAndHashFunctions = Just functionPair, ..}
-      Comparison comparisonFunction_ ->
-        Class {comparisonFunction = Just comparisonFunction_, ..}
-      Negate negationFunction_ ->
-        Class {negationFunction = Just negationFunction_, ..}
-      Abs absFunction_ ->
-        Class {absFunction = Just absFunction_, ..}
-      DivMod @units -> do
-        let divOperator :: Quantity units -> Quantity units -> Int = (//)
-        let modOperator :: Quantity units -> Quantity units -> Quantity units = (%)
-        Class
-          { postOperators =
-              built.postOperators
-                & addPostOverload BinaryOperator.FloorDiv (PostOperatorOverload (wrap2 divOperator))
-                & addPostOverload BinaryOperator.Mod (PostOperatorOverload (wrap2 modOperator))
-          , ..
-          }
-      PreOverload operatorId overload ->
-        Class {preOperators = addPreOverload operatorId overload built.preOperators, ..}
-      PostOverload operatorId overload ->
-        Class {postOperators = addPostOverload operatorId overload built.postOperators, ..}
-      Nested nestedDocstring nestedMembers ->
-        Class {nestedClasses = built.nestedClasses <> [new nestedDocstring nestedMembers], ..}
+  case member of
+    Const name_ value ->
+      Class {constants = built.constants <> [(name_, value)], ..}
+    Constructor constructor_ ->
+      Class {constructor = Just constructor_, ..}
+    Static name_ staticFunction ->
+      Class {staticFunctions = built.staticFunctions <> [(name_, staticFunction)], ..}
+    Prop name_ prop ->
+      Class {properties = built.properties <> [(name_, prop)], ..}
+    Member name_ memberFunction ->
+      Class {memberFunctions = built.memberFunctions <> [(name_, memberFunction)], ..}
+    EqualityAndHash functionPair ->
+      Class {equalityAndHashFunctions = Just functionPair, ..}
+    Comparison comparisonFunction_ ->
+      Class {comparisonFunction = Just comparisonFunction_, ..}
+    Negate negationFunction_ ->
+      Class {negationFunction = Just negationFunction_, ..}
+    Abs absFunction_ ->
+      Class {absFunction = Just absFunction_, ..}
+    DivMod @units -> do
+      let divOperator :: Quantity units -> Quantity units -> Int = (//)
+      let modOperator :: Quantity units -> Quantity units -> Quantity units = (%)
+      Class
+        { postOperators =
+            built.postOperators
+              & addPostOverload BinaryOperator.FloorDiv (PostOperatorOverload (wrap2 divOperator))
+              & addPostOverload BinaryOperator.Mod (PostOperatorOverload (wrap2 modOperator))
+        , ..
+        }
+    PreOverload operatorId overload ->
+      Class {preOperators = addPreOverload operatorId overload built.preOperators, ..}
+    PostOverload operatorId overload ->
+      Class {postOperators = addPostOverload operatorId overload built.postOperators, ..}
+    Nested nestedDocstring nestedMembers ->
+      Class {nestedClasses = built.nestedClasses <> [new nestedDocstring nestedMembers], ..}
 
 ----- FUNCTION COLLECTION -----
 
