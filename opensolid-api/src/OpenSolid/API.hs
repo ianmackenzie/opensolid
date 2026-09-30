@@ -825,7 +825,7 @@ type Polygon2D = Polygon2D.Polygon2D Meters
 polygon2D :: Class
 polygon2D =
   Class.new @Polygon2D $(docs ''Polygon2D.Polygon2D) $
-    [ Class.constructor1 "Vertices" Polygon2D.Polygon2D $(docs 'Polygon2D.Polygon2D)
+    [ Class.factory1 "From Vertices" "Vertices" Polygon2D.fromVertices $(docs 'Polygon2D.fromVertices)
     , Class.factory2R "Inscribed" "Num Sides" "Circle" Polygon2D.inscribed $(docs 'Polygon2D.inscribed)
     , Class.factory2R "Circumscribed" "Num Sides" "Circle" Polygon2D.circumscribed $(docs 'Polygon2D.circumscribed)
     , Class.factory2R "Hexagon" "Center Point" "Height" Polygon2D.hexagon $(docs 'Polygon2D.hexagon)
@@ -839,7 +839,7 @@ type UvPolygon = Polygon2D.Polygon2D Unitless
 uvPolygon :: Class
 uvPolygon =
   Class.new @UvPolygon $(docs ''Polygon2D.Polygon2D) $
-    [ Class.constructor1 "Vertices" Polygon2D.Polygon2D $(docs 'Polygon2D.Polygon2D)
+    [ Class.factory1 "From Vertices" "Vertices" Polygon2D.fromVertices $(docs 'Polygon2D.fromVertices)
     , Class.factory2R "Inscribed" "Num Sides" "Circle" Polygon2D.inscribed $(docs 'Polygon2D.inscribed)
     , Class.factory2R "Circumscribed" "Num Sides" "Circle" Polygon2D.circumscribed $(docs 'Polygon2D.circumscribed)
     , Class.factory2R "Hexagon" "Center Point" "Height" Polygon2D.hexagon $(docs 'Polygon2D.hexagon)

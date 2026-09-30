@@ -1,6 +1,7 @@
 module OpenSolid.Polygon2D
-  ( Polygon2D (Polygon2D)
+  ( Polygon2D
   , IsEmpty (IsEmpty)
+  , fromVertices
   , inscribed
   , circumscribed
   , hexagon
@@ -36,12 +37,7 @@ import OpenSolid.Units qualified as Units
 The last point will be joined back to the first.
 -}
 newtype Polygon2D units
-  = {-| Construct a polygon from its boundary vertices.
-
-    These should generally be in counterclockwise order
-    (clockwise order will be interpreted as a 'negative' polygon or hole).
-    -}
-    Polygon2D {vertices :: NonEmpty (Point2D units)}
+  = Polygon2D {vertices :: NonEmpty (Point2D units)}
 
 instance FFI (Polygon2D Meters) where
   representation = FFI.classRepresentation "Polygon2D"
@@ -50,6 +46,14 @@ instance FFI (Polygon2D Unitless) where
   representation = FFI.classRepresentation "UvPolygon"
 
 data IsEmpty = IsEmpty deriving (Eq, Show, Err)
+
+{-| Construct a polygon from its boundary vertices.
+
+   These should generally be in counterclockwise order
+   (clockwise order will be interpreted as a 'negative' polygon or hole).
+-}
+fromVertices :: NonEmpty (Point2D units) -> Polygon2D units
+fromVertices = Polygon2D
 
 {-| Create a regular polygon with the given number of vertices/sides.
 

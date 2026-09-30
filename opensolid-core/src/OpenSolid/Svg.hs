@@ -61,7 +61,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2D (Point2D, data Point2D)
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Polygon2D (Polygon2D (Polygon2D))
+import OpenSolid.Polygon2D (Polygon2D)
 import OpenSolid.Polygon2D qualified as Polygon2D
 import OpenSolid.Polyline2D (Polyline2D)
 import OpenSolid.Polyline2D qualified as Polyline2D
@@ -267,7 +267,7 @@ polygon givenPolygon = do
 triangle :: Triangle2D Meters -> Svg
 triangle (Triangle2D p1 p2 p3) = do
   let vertices = NonEmpty.three p1 p2 p3
-  polygon (Polygon2D vertices)
+  polygon (Polygon2D.fromVertices vertices)
 
 -- | Draw a bounding box.
 bounds :: Bounds2D Meters -> Svg
@@ -308,7 +308,7 @@ region resolution givenRegion = do
 loopPolygon :: Resolution Meters -> NonEmpty (Curve2D Meters) -> Polygon2D Meters
 loopPolygon resolution loop = do
   let curvePoints = NonEmpty.rest . Polyline2D.vertices . Curve2D.toPolyline resolution
-  Polygon2D $
+  Polygon2D.fromVertices $
     case List.combine curvePoints loop of
       NonEmpty vertices -> vertices
       [] -> NonEmpty.one (Curve2D.startPoint (NonEmpty.first loop)) -- Shouldn't happen for a valid region

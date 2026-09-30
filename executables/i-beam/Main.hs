@@ -10,7 +10,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point2D (data Point2D)
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Polygon2D (Polygon2D (Polygon2D))
+import OpenSolid.Polygon2D qualified as Polygon2D
 import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
@@ -38,7 +38,7 @@ main = spatial Try.do
         , webTopRight & Point2D.mirrorAcross Axis2D.x
         , webTopRight & Point2D.mirrorAcross Axis2D.y & Point2D.mirrorAcross Axis2D.x
         ]
-  baseProfile <- Region2D.polygon (Polygon2D allPoints)
+  baseProfile <- Region2D.polygon (Polygon2D.fromVertices allPoints)
   profile <- Region2D.fillet {points = filletPoints, radius = filletRadius} baseProfile
   body <- Body3D.extruded World3D.frontPlane profile (-0.5 * length) (0.5 * length)
   let material = PbrMaterial.metal {baseColor = Color.rgb1 0.913 0.921 0.925, roughness = 0.3}

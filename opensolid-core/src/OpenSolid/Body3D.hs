@@ -59,7 +59,7 @@ import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
-import OpenSolid.Polygon2D (Polygon2D (Polygon2D))
+import OpenSolid.Polygon2D (Polygon2D)
 import OpenSolid.Polygon2D qualified as Polygon2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -601,7 +601,7 @@ toPolygon ::
   Surface3D.Boundary space ->
   Polygon2D Unitless
 toPolygon leadingEdgeVerticesMap surfaceId boundaryIndex boundary =
-  Polygon2D $
+  Polygon2D.fromVertices $
     NonEmpty.concat $
       Set3D.toNonEmptyWithIndex
         (getLeadingEdgeVertices leadingEdgeVerticesMap surfaceId (BoundaryId boundaryIndex))
