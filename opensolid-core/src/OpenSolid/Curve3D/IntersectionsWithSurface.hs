@@ -17,7 +17,7 @@ import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.UvBounds (UvBounds)
 
 data Intersections space
-  = IntersectionPoints (NonEmpty IntersectionPointWithSurface)
+  = IntersectionPoints (NonEmpty (IntersectionPointWithSurface space))
   | OverlappingSegments (NonEmpty (SegmentOverlappingWithSurface space))
 
 type Problem space =

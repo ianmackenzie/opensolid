@@ -14,6 +14,10 @@ import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
+import OpenSolid.Surface3D qualified as Surface3D
+import OpenSolid.Surface3D.Pole qualified as Surface3D.Pole
+import OpenSolid.SurfacePoint3D (SurfacePoint3D)
+import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
 
@@ -63,11 +67,29 @@ instance Matching Curve.IntersectionPoint where
     let secondParameterValues = Curve.IntersectionPoint.parameterValues second
     firstContinuity == secondContinuity && firstParameterValues ~~ secondParameterValues
 
-instance Matching Curve3D.IntersectionPointWithSurface where
+instance Matching (Surface3D.Pole space) where
   first ~~ second =
-    first.kind == second.kind
-      && first.t ~~ second.t
-      && first.uv ~~ second.uv
+    Surface3D.Pole.uvCurve first ~~ Surface3D.Pole.uvCurve second
+      && Surface3D.Pole.point first ~~ Surface3D.Pole.point second
+
+instance Matching (SurfacePoint3D space) where
+  SurfacePoint3D.Pole {} ~~ SurfacePoint3D.Point {} = False
+  SurfacePoint3D.Point {} ~~ SurfacePoint3D.Pole {} = False
+  SurfacePoint3D.Pole pole1 ~~ SurfacePoint3D.Pole pole2 = pole1 ~~ pole2
+  SurfacePoint3D.Point uvPoint1 point1 ~~ SurfacePoint3D.Point uvPoint2 point2 =
+    uvPoint1 ~~ uvPoint2 && point1 ~~ point2
+
+instance Matching (Curve3D.IntersectionPointWithSurface space) where
+  first ~~ second = do
+    let firstKind = Curve3D.IntersectionPointWithSurface.kind first
+    let secondKind = Curve3D.IntersectionPointWithSurface.kind second
+    let firstParameterValue = Curve3D.IntersectionPointWithSurface.parameterValue first
+    let secondParameterValue = Curve3D.IntersectionPointWithSurface.parameterValue second
+    let firstSurfacePoint = Curve3D.IntersectionPointWithSurface.surfacePoint first
+    let secondSurfacePoint = Curve3D.IntersectionPointWithSurface.surfacePoint second
+    firstKind == secondKind
+      && firstParameterValue ~~ secondParameterValue
+      && firstSurfacePoint ~~ secondSurfacePoint
 
 instance Matching UvPoint where
   (~~) = unitless (~=)

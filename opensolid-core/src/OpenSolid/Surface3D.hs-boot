@@ -7,7 +7,7 @@ module OpenSolid.Surface3D
   )
 where
 
-import OpenSolid.Curve3D (Curve3D)
+import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Prelude
 import OpenSolid.Space qualified as Space
 import OpenSolid.Surface3D.Pole (Pole)
