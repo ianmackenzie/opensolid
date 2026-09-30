@@ -141,79 +141,8 @@ jobs:
           name: ${{ github.job }}-wheel
           path: opensolid-python/lib/wheelhouse/*.whl
 
-  macos-x86:
-    runs-on: macos-14-large
-    env:
-      MACOSX_DEPLOYMENT_TARGET: "11.0"
-      _PYTHON_HOST_PLATFORM: macosx-11.0-x86_64
-      ARCHFLAGS: -arch x86_64
-    steps:
-      - name: Clone repository
-        uses: actions/checkout@v7
-      - name: Set up GHCup cache
-        uses: actions/cache@v6
-        with:
-          path: ~/.ghcup
-          key: ${{ github.job }}-ghcup
-      - name: Set up Cabal cache
-        uses: actions/cache@v6
-        with:
-          path: |
-            ~/.cabal/packages
-            ~/.cabal/store
-            dist-newstyle
-            opensolid-core/.hie
-          key: ${{ github.job }}-cabal-${{ hashFiles('cabal.project') }}-${{ hashFiles('**/*.cabal') }}
-      - name: Update GHCup cached metadata
-        env:
-          BOOTSTRAP_HASKELL_NONINTERACTIVE: "1"
-          BOOTSTRAP_HASKELL_MINIMAL: "1"
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
-          source ~/.ghcup/env
-          ghcup --metadata-caching 0 --metadata-fetching-mode Strict prefetch metadata
-          ghcup list
-      - name: Install Haskell tooling
-        uses: haskell-actions/setup@v2
-        with:
-          ghc-version: 9.14.1
-          cabal-version: 3.16.1.0
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.14"
-      - name: Install Python tooling
-        run: |
-          pipx install uv==0.7.13
-      - name: Update Cabal index
-        run: |
-          cabal update
-      - name: Build opensolid-core library
-        run: |
-          cabal build opensolid-core
-      - name: Run tests
-        run: |
-          cabal test opensolid-core
-      - name: Build Python bindings
-        run: |
-          scripts/generate-python-bindings
-      - name: Run test Python script
-        run: |
-          cd opensolid-python/lib
-          uv run check.py
-      - name: Build and fix wheel
-        run: |
-          cd opensolid-python/lib
-          uv build --wheel
-          uvx --from delocate@0.12.0 delocate-wheel --require-archs x86_64 -w wheelhouse dist/*.whl
-      - name: Save wheel as artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ github.job }}-wheel
-          path: opensolid-python/lib/wheelhouse/*.whl
-
-  macos-arm64:
-    runs-on: macos-14
+  macos:
+    runs-on: macos-15
     env:
       MACOSX_DEPLOYMENT_TARGET: "11.0"
       _PYTHON_HOST_PLATFORM: macosx-11.0-arm64
@@ -295,8 +224,7 @@ jobs:
     needs:
       - windows
       - linux
-      - macos-x86
-      - macos-arm64
+      - macos
     steps:
       - name: Download wheels
         uses: actions/download-artifact@v4
