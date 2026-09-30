@@ -5,6 +5,7 @@ module OpenSolid.Text
   , int
   , number
   , char
+  , symbol
   , show
   , isEmpty
   , length
@@ -32,8 +33,10 @@ module OpenSolid.Text
 where
 
 import Data.Char qualified
+import Data.Proxy (Proxy (Proxy))
 import Data.Text qualified
 import Data.Text.Encoding qualified
+import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude hiding (show)
@@ -53,6 +56,9 @@ number (Number x) = show x
 
 char :: Char -> Text
 char c = Data.Text.pack [c]
+
+symbol :: forall (name :: Symbol) -> KnownSymbol name => Text
+symbol name = fromString (symbolVal @name Proxy)
 
 show :: Show a => a -> Text
 show value = Data.Text.pack (Prelude.show value)
