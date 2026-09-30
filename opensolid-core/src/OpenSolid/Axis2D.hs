@@ -39,11 +39,11 @@ import OpenSolid.Vector2D (Vector2D)
 
 -- | Get the origin point of an axis.
 originPoint :: Axis2D units -> Point2D units
-originPoint = (.originPoint)
+originPoint axis = axis.originPoint
 
 -- | Get the direction of an axis.
 direction :: Axis2D units -> Direction2D
-direction = (.direction)
+direction axis = axis.direction
 
 leftwardDirection :: Axis2D units -> Direction2D
 leftwardDirection axis = Direction2D.rotateLeft (direction axis)
