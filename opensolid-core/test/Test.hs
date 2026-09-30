@@ -73,7 +73,7 @@ instance Monad Generator where
       Failed errors -> Random.return (Failed errors)
 
 instance MonadFail Generator where
-  fail message = Generator (Random.return (Failed [fromString message]))
+  fail message = fail (fromString message)
 
 instance Try.Bind Generator Generator where
   (>>=) = (>>=)
