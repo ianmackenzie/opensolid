@@ -244,6 +244,7 @@ library
     OpenSolid.Try
     OpenSolid.Unboxed.Math
     OpenSolid.Units
+    OpenSolid.Unwrap
     OpenSolid.UvBag
     OpenSolid.UvBounds
     OpenSolid.UvCurve

@@ -943,8 +943,8 @@ desingularizeStart givenStartPoint givenStartDerivative curve =
     let prefixEndFirstDerivative = affixWidth * derivativeAt tInner curve
     let prefixEndSecondDerivative = affixWidth * affixWidth * secondDerivativeAt tInner curve
     let prefixEndDerivatives = [prefixEndFirstDerivative, prefixEndSecondDerivative]
-    let prefix = hermite prefixStart prefixStartDerivatives prefixEnd prefixEndDerivatives ?? panic
-    let suffix = section (Interval tInner 1.0) curve ?? panic
+    let prefix = hermite prefixStart prefixStartDerivatives prefixEnd prefixEndDerivatives !! panic
+    let suffix = section (Interval tInner 1.0) curve !! panic
     (prefix, suffix)
 
 desingularizeEnd ::
@@ -957,14 +957,14 @@ desingularizeEnd curve givenEndPoint givenEndDerivative =
   Tolerance.using Quantity.zero do
     let panic = error "Desingularization should never produce degenerate curve"
     let tInner = 1.0 - affixWidth
-    let prefix = section (Interval 0.0 tInner) curve ?? panic
+    let prefix = section (Interval 0.0 tInner) curve !! panic
     let suffixStart = pointAt tInner curve
     let suffixStartFirstDerivative = affixWidth * derivativeAt tInner curve
     let suffixStartSecondDerivative = affixWidth * affixWidth * secondDerivativeAt tInner curve
     let suffixStartDerivatives = [suffixStartFirstDerivative, suffixStartSecondDerivative]
     let suffixEnd = givenEndPoint
     let suffixEndDerivatives = [affixWidth * givenEndDerivative]
-    let suffix = hermite suffixStart suffixStartDerivatives suffixEnd suffixEndDerivatives ?? panic
+    let suffix = hermite suffixStart suffixStartDerivatives suffixEnd suffixEndDerivatives !! panic
     (prefix, suffix)
 
 data UniqueSolution = UniqueSolution deriving (Eq)

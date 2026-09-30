@@ -7,11 +7,9 @@ module OpenSolid.Maybe
   , sequence
   , isJust
   , isNothing
-  , orFail
   )
 where
 
-import OpenSolid.Monad qualified as Monad
 import OpenSolid.Prelude
 import Prelude qualified
 
@@ -42,7 +40,3 @@ isJust Nothing = False
 isNothing :: Maybe a -> Bool
 isNothing Nothing = True
 isNothing (Just _) = False
-
-orFail :: MonadFail m => Text -> Maybe a -> m a
-orFail _ (Just value) = Monad.return value
-orFail message Nothing = Monad.fail message

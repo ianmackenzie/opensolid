@@ -73,8 +73,8 @@ instance
   coerce = Data.Coerce.coerce
 
 instance Indexed (Bag b a) Int a where
-  Empty !! _ = error "Bag is empty"
-  Full set !! index = set !! index
+  Empty ! _ = error "Bag is empty"
+  Full set ! index = set ! index
 
 instance
   ( Intersects c b units1

@@ -5,7 +5,6 @@ import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D qualified as Curve2D
-import OpenSolid.Fuzzy qualified as Fuzzy
 import OpenSolid.Length qualified as Length
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D (Point2D))
@@ -49,7 +48,7 @@ arc2D = unitless do
           , startAngle = Angle.zero
           , endAngle = Angle.pi
           }
-          ?? error "Arc should not be degenerate"
+          !! error "Arc should not be degenerate"
   let point = Point2D (Number.sqrt 2.0 / 2.0) (Number.sqrt 2.0 / 2.0)
   curve2D "Arc" (arc - point) 0.5 0.25
 
@@ -83,7 +82,7 @@ pointOnSphere3D = Test.verify "Point on sphere" Try.do
 curve1D :: Text -> Curve1D Unitless -> Number -> Number -> Test
 curve1D name curve t0 tExpected =
   Test.verify name do
-    tSolution <- Curve1D.newtonRaphson curve t0 & Fuzzy.orFail "Expected a solution"
+    tSolution <- Curve1D.newtonRaphson curve t0 ?? Test.fail "Expected a solution"
     Test.expect (unitless (tSolution ~= tExpected))
       & Test.output "Expected solution" tExpected
       & Test.output "Actual solution" tSolution
@@ -91,7 +90,7 @@ curve1D name curve t0 tExpected =
 curve2D :: Text -> VectorCurve2D Unitless -> Number -> Number -> Test
 curve2D name curve t0 tExpected =
   Test.verify name do
-    tSolution <- VectorCurve2D.newtonRaphson curve t0 & Fuzzy.orFail "Expected a solution"
+    tSolution <- VectorCurve2D.newtonRaphson curve t0 ?? Test.fail "Expected a solution"
     Test.expect (unitless (tSolution ~= tExpected))
       & Test.output "Expected solution" tExpected
       & Test.output "Actual solution" tSolution
@@ -102,7 +101,7 @@ surface2D ::
   UvPoint ->
   Test.Expectation
 surface2D surface uv0 uvExpected = do
-  uvSolution <- VectorSurfaceFunction2D.newtonRaphson surface uv0 & Fuzzy.orFail "Expected a solution"
+  uvSolution <- VectorSurfaceFunction2D.newtonRaphson surface uv0 ?? Test.fail "Expected a solution"
   Test.expect (unitless (uvSolution ~= uvExpected))
     & Test.output "Expected solution" uvExpected
     & Test.output "Actual solution" uvSolution
@@ -114,7 +113,7 @@ surface3D ::
   UvPoint ->
   Test.Expectation
 surface3D surface uv0 uvExpected = do
-  uvSolution <- VectorSurfaceFunction3D.newtonRaphson surface uv0 & Fuzzy.orFail "Expected a solution"
+  uvSolution <- VectorSurfaceFunction3D.newtonRaphson surface uv0 ?? Test.fail "Expected a solution"
   Test.expect (unitless (uvSolution ~= uvExpected))
     & Test.output "Expected solution" uvExpected
     & Test.output "Actual solution" uvSolution

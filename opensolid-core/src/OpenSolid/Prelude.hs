@@ -7,13 +7,15 @@ module OpenSolid.Prelude
   , Fuzzy (Resolved, Unresolved)
   , Err
   , Result (Ok, Err)
+  , Unwrap
+  , (!!)
   , (??)
   , Exception
   , Void
   , data NonEmpty
   , type (:::) ((:::))
   , setField
-  , (!)
+  , (<!)
   , (&)
   , Negation (negate)
   , Addition ((+))
@@ -37,7 +39,7 @@ module OpenSolid.Prelude
   , angular
   , spatial
   , ApproximateEquality ((~=))
-  , Indexed ((!!))
+  , Indexed ((!))
   , Intersects ((^))
   , Quantity (Quantity, Q#)
   , Unitless
@@ -89,6 +91,7 @@ import OpenSolid.Err (Err)
 import OpenSolid.Show qualified as Show
 import OpenSolid.Units (Meters, Radians, Unitless, Units, type (?*?), type (?/?))
 import OpenSolid.Units qualified as Units
+import OpenSolid.Unwrap (Unwrap (unwrap))
 import System.Random.Stateful qualified
 import Prelude
   ( Applicative
@@ -136,11 +139,11 @@ import Prelude qualified
 
 ----- Pipe operators -----
 
-{-# INLINE (!) #-}
-(!) :: (a -> b) -> Result x a -> Result x b
-(!) = Prelude.fmap
+{-# INLINE (<!) #-}
+(<!) :: (a -> b) -> Result x a -> Result x b
+(<!) = Prelude.fmap
 
-infixr 0 !
+infixr 0 <!
 
 ----- Arithmetic -----
 
@@ -460,12 +463,35 @@ instance MonadFail (Result Text) where
   {-# INLINE fail #-}
   fail message = Err (fromString message)
 
+----- Unwrap ----
+
+instance Unwrap (Result x) where
+  {-# INLINE unwrap #-}
+  unwrap (Ok value) = Just value
+  unwrap (Err _) = Nothing
+
+instance Unwrap Fuzzy where
+  {-# INLINE unwrap #-}
+  unwrap (Resolved value) = Just value
+  unwrap Unresolved = Nothing
+
 {-# INLINE (??) #-}
-(??) :: Result x a -> a -> a
-Ok value ?? _ = value
-Err _ ?? fallback = fallback
+(??) :: (Unwrap m1, Monad m2) => m1 a -> m2 a -> m2 a
+first ?? second =
+  case unwrap first of
+    Just value -> Prelude.return value
+    Nothing -> second
 
 infixl 0 ??
+
+{-# INLINE (!!) #-}
+(!!) :: Unwrap m => m a -> a -> a
+wrapper !! fallback =
+  case unwrap wrapper of
+    Just value -> value
+    Nothing -> fallback
+
+infixl 0 !!
 
 ----- Quantity -----
 
@@ -588,25 +614,25 @@ instance DivMod (Quantity units) where
 ----- Indexed -----
 
 class Indexed container index item | container index -> item where
-  (!!) :: container -> index -> item
+  (!) :: container -> index -> item
 
-infixl 9 !!
+infixl 9 !
 
 instance Indexed (List item) Int item where
-  {-# INLINE (!!) #-}
-  (!!) = (Prelude.!!)
+  {-# INLINE (!) #-}
+  (!) = (Prelude.!!)
 
 instance Indexed (NonEmpty item) Int item where
-  {-# INLINE (!!) #-}
-  (!!) = (Data.List.NonEmpty.!!)
+  {-# INLINE (!) #-}
+  (!) = (Data.List.NonEmpty.!!)
 
 instance Ord key => Indexed (Map key value) key value where
-  {-# INLINE (!!) #-}
-  (!!) = (Data.Map.Strict.!)
+  {-# INLINE (!) #-}
+  (!) = (Data.Map.Strict.!)
 
 instance Hashable key => Indexed (HashMap key value) key value where
-  {-# INLINE (!!) #-}
-  (!!) = (Data.HashMap.Strict.!)
+  {-# INLINE (!) #-}
+  (!) = (Data.HashMap.Strict.!)
 
 ----- Intersection -----
 

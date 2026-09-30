@@ -177,7 +177,7 @@ rectangle (Bounds2D xBounds yBounds) =
       let p12 = Point2D x1 y2
       let p21 = Point2D x2 y1
       let p22 = Point2D x2 y2
-      let edge start end = Curve2D.lineFrom start end ?? panic
+      let edge start end = Curve2D.lineFrom start end !! panic
       let edges = NonEmpty.four (edge p11 p21) (edge p21 p22) (edge p22 p12) (edge p12 p11)
       unsafe (Boundary.unsafe edges) Bag2D.empty
 
@@ -188,7 +188,7 @@ circle givenCircle =
     then Err EmptyRegion
     else do
       let panic = error "Constructing region from non-empty circle should not fail"
-      let edges = NonEmpty.one (Curve2D.circle givenCircle ?? panic)
+      let edges = NonEmpty.one (Curve2D.circle givenCircle !! panic)
       Ok (unsafe (Boundary.unsafe edges) Bag2D.empty)
 
 -- | Create a circular region with the given center point and diameter.
@@ -551,7 +551,7 @@ areaIntegral_ referencePoint curve = do
 
 boundaryIsInside :: Tolerance units => Boundary units -> Boundary units -> Bool
 boundaryIsInside outer inner = do
-  let testPoint = Curve2D.startPoint (Boundary.curves inner !! 0)
+  let testPoint = Curve2D.startPoint (Boundary.curves inner ! 0)
   case Boundary.classifyPoint testPoint outer of
     InteriorPoint -> True
     ExteriorPoint -> False
@@ -563,7 +563,7 @@ bounds region = Boundary.bounds region.outerBoundary
 
 area :: Units.Squared units1 units2 => Region2D units1 -> Estimate units2
 area region = do
-  let referencePoint = Curve2D.startPoint (outerBoundary region !! 0)
+  let referencePoint = Curve2D.startPoint (outerBoundary region ! 0)
   boundaryCurves region
     & Set2D.toNonEmptyOf (areaIntegral referencePoint)
     & Estimate.sum

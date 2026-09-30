@@ -59,10 +59,10 @@ equalOverlapSegmentLists actualSegments expectedSegments =
 curveOverlap1 :: Test
 curveOverlap1 = Test.verify "curveOverlap1" Try.do
   arc1 <-
-    Curve3D.on World3D.topPlane !
+    Curve3D.on World3D.topPlane <!
       Curve2D.arcFrom (Point2D.meters 1.0 0.0) (Point2D.meters -1.0 0.0) Angle.halfTurn
   arc2 <-
-    Curve3D.on World3D.topPlane !
+    Curve3D.on World3D.topPlane <!
       Curve2D.arcFrom (Point2D.meters 0.0 -1.0) (Point2D.meters 0.0 1.0) Angle.halfTurn
   (sign, actualSegments) <- overlappingSegments arc1 arc2
   let expectedSegments = NonEmpty.one (Interval 0.0 0.5, Interval 0.5 1.0)
@@ -74,7 +74,7 @@ curveOverlap1 = Test.verify "curveOverlap1" Try.do
 curveOverlap2 :: Test
 curveOverlap2 = Test.verify "curveOverlap2" Try.do
   arc1 <-
-    Curve3D.on World3D.topPlane !
+    Curve3D.on World3D.topPlane <!
       Curve2D.polarArc
         { centerPoint = Point2D.origin
         , radius = Length.meter
@@ -82,7 +82,7 @@ curveOverlap2 = Test.verify "curveOverlap2" Try.do
         , endAngle = -Angle.pi
         }
   arc2 <-
-    Curve3D.on World3D.topPlane !
+    Curve3D.on World3D.topPlane <!
       Curve2D.polarArc
         { centerPoint = Point2D.origin
         , radius = Length.meter
@@ -102,10 +102,10 @@ curveOverlap2 = Test.verify "curveOverlap2" Try.do
 crossingIntersection :: Test
 crossingIntersection = Test.verify "crossingIntersection" Try.do
   arc1 <-
-    Curve3D.on World3D.topPlane !
+    Curve3D.on World3D.topPlane <!
       Curve2D.arcFrom Point2D.origin (Point2D.meters 0.0 1.0) Angle.halfTurn
   arc2 <-
-    Curve3D.on World3D.topPlane !
+    Curve3D.on World3D.topPlane <!
       Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
   let intersections = Curve3D.intersections arc1 arc2
   let expectedIntersectionPoints =
@@ -124,7 +124,7 @@ crossingIntersection = Test.verify "crossingIntersection" Try.do
 tangentIntersection :: Test
 tangentIntersection = Test.verify "tangentIntersection" Try.do
   arc1 <-
-    Curve3D.on World3D.topPlane !
+    Curve3D.on World3D.topPlane <!
       Curve2D.polarArc
         { centerPoint = Point2D.origin
         , radius = Length.meter
@@ -132,7 +132,7 @@ tangentIntersection = Test.verify "tangentIntersection" Try.do
         , endAngle = Angle.pi
         }
   arc2 <-
-    Curve3D.on World3D.topPlane !
+    Curve3D.on World3D.topPlane <!
       Curve2D.polarArc
         { centerPoint = Point2D.meters 0.0 1.5
         , radius = Length.meters 0.5

@@ -9,7 +9,6 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
-import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
@@ -107,7 +106,7 @@ testCubicSplineParameterization = spatial Try.do
 
 drawParameterization :: Text -> (Number -> Number) -> IO ()
 drawParameterization fileName parameterization = do
-  tValues <- Parameter.steps 100 & NonEmpty.fromList & Maybe.orFail "Should not be empty"
+  let tValues = NonEmpty.fromList (Parameter.steps 100) !! error "Should not be empty"
   let size = Length.centimeters 10.0
   let point tValue = Point2D (size * tValue) (size * parameterization tValue)
   let points :: NonEmpty (Point2D Meters) = NonEmpty.map point tValues

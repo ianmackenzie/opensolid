@@ -198,7 +198,7 @@ fuzzImpl context n seed expectation = case n of
 pass :: Expectation
 pass = Generator (Random.return (Succeeded ()))
 
-fail :: Text -> Expectation
+fail :: Text -> Generator a
 fail message = Generator (Random.return (Failed [message]))
 
 expect :: Bool -> Expectation
