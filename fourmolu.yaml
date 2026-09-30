@@ -23,7 +23,7 @@ fixities:
   - "infixl 0 ??"
   - "infixr 0 !"
   - "infix 4 ~=, ^, ==#, >#, <#, >=#, <=#, ~~"
-  - "infixl 6 +, -, +#, -#, +/-"
+  - "infixl 6 +, -, +#, -#"
   - "infixl 7 *, /, ?*?, ?/?, *#, /#, //, %, `dot`, `cross`, `dot_`, `cross_`"
   - "infixr 8 **"
   - "infixr 9 <<"
