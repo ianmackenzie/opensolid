@@ -119,19 +119,19 @@ sweptAround givenCenterPoint givenStartPoint givenSweptAngle = do
 reverse :: Arc2D units -> Arc2D units
 reverse arc =
   Arc2D
-    { centerPoint = arc.centerPoint
-    , radius = arc.radius
-    , startAngle = arc.endAngle
-    , endAngle = arc.startAngle
+    { centerPoint = centerPoint arc
+    , radius = radius arc
+    , startAngle = endAngle arc
+    , endAngle = startAngle arc
     }
 
 offsetLeftwardBy :: Quantity units -> Arc2D units -> Arc2D units
 offsetLeftwardBy distance arc =
   Arc2D
-    { centerPoint = arc.centerPoint
-    , radius = arc.radius - Quantity.sign (sweptAngle arc) * distance
-    , startAngle = arc.startAngle
-    , endAngle = arc.endAngle
+    { centerPoint = centerPoint arc
+    , radius = radius arc - Quantity.sign (sweptAngle arc) * distance
+    , startAngle = startAngle arc
+    , endAngle = endAngle arc
     }
 
 offsetRightwardBy :: Quantity units -> Arc2D units -> Arc2D units
