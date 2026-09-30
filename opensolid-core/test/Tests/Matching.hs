@@ -1,5 +1,9 @@
 module Tests.Matching (Matching, (~~)) where
 
+import OpenSolid.Bag (Bag)
+import OpenSolid.Bag qualified as Bag
+import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
+import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Curve (Curve, CurveExists)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as Curve.IntersectionPoint
@@ -8,18 +12,27 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Root qualified as Curve1D.Root
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Curve3D.IntersectionPointWithSurface qualified as Curve3D.IntersectionPointWithSurface
+import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
+import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Bounds3D (Bounds3D))
+import OpenSolid.Set (Set)
+import OpenSolid.Set qualified as Set
+import OpenSolid.Set2D (Set2D)
+import OpenSolid.Set3D (Set3D)
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.Surface3D.Pole qualified as Surface3D.Pole
 import OpenSolid.SurfacePoint3D (SurfacePoint3D)
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
+import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
+import OpenSolid.UvSet (UvSet)
 
 class Matching a where
   (~~) :: a -> a -> Bool
@@ -50,8 +63,49 @@ instance Matching Number where
 instance Matching Length where
   (~~) = spatial (~=)
 
+instance Matching (Point2D Meters) where
+  (~~) = spatial (~=)
+
 instance Matching (Point3D space) where
   (~~) = spatial (~=)
+
+instance Matching (Quantity units) => Matching (Interval units) where
+  Interval low1 high1 ~~ Interval low2 high2 = low1 ~~ low2 && high1 ~~ high2
+
+instance Matching (Quantity units) => Matching (Bounds2D units) where
+  Bounds2D x1 y1 ~~ Bounds2D x2 y2 = x1 ~~ x2 && y1 ~~ y2
+
+instance Matching (Bounds3D space) where
+  Bounds3D x1 y1 z1 ~~ Bounds3D x2 y2 z2 = x1 ~~ x2 && y1 ~~ y2 && z1 ~~ z2
+
+instance
+  (Matching a, Intersects a (Bounds2D Meters) Meters) =>
+  Matching (Set2D Meters a)
+  where
+  (~~) = spatial matchingSets
+
+instance
+  (Matching a, Intersects a UvBounds Unitless) =>
+  Matching (UvSet a)
+  where
+  (~~) = unitless matchingSets
+
+instance
+  (Matching a, Intersects a (Bounds3D space) Meters) =>
+  Matching (Set3D space a)
+  where
+  (~~) = spatial matchingSets
+
+matchingSets :: (Tolerance units, Matching a, Intersects a b units) => Set b a -> Set b a -> Bool
+matchingSets set1 set2 = do
+  let hasMatchIn set item = Set.any (item ^) (item ~~) set
+  Set.allItems (hasMatchIn set2) set1 && Set.allItems (hasMatchIn set1) set2
+
+instance Matching (Set b a) => Matching (Bag b a) where
+  Bag.Empty ~~ Bag.Empty = True
+  Bag.Empty ~~ Bag.Full _ = False
+  Bag.Full _ ~~ Bag.Empty = False
+  Bag.Full set1 ~~ Bag.Full set2 = set1 ~~ set2
 
 instance Matching Curve1D.Root where
   root1 ~~ root2 =
