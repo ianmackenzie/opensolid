@@ -46,10 +46,10 @@ instance Estimate.Interface DummyEstimate Meters where
 
 dummyEstimate :: Generator (Length, Estimate Meters)
 dummyEstimate = do
-  bounds <- Interval.random Random.length
-  t <- Parameter.random
-  let value = Interval.interpolate bounds t
-  Random.return (value, Estimate.new (DummyEstimate value bounds))
+  interval <- Interval.random Random.length
+  tValue <- Parameter.random
+  let value = Interval.interpolate interval tValue
+  Random.return (value, Estimate.new (DummyEstimate value interval))
 
 duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))
 duplicatedDummyEstimates = do

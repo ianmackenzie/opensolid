@@ -18,8 +18,8 @@ quantityIntervalDivision :: Test
 quantityIntervalDivision = Test.check 1000 "quantityIntervalDivision" do
   x <- Test.generate Random.length
   interval <- Test.generate (Interval.random Random.length)
-  t <- Test.generate Parameter.random
-  let y = Interval.interpolate interval t
+  tValue <- Test.generate Parameter.random
+  let y = Interval.interpolate interval tValue
   let quotient = x / y
   let intervalQuotient = x / interval
   Test.expect (Interval.member quotient intervalQuotient)
@@ -32,8 +32,8 @@ quantityIntervalDivision = Test.check 1000 "quantityIntervalDivision" do
 intervalQuantityDivision :: Test
 intervalQuantityDivision = Test.check 1000 "intervalQuantityDivision" do
   interval <- Test.generate (Interval.random Random.length)
-  t <- Test.generate Parameter.random
-  let x = Interval.interpolate interval t
+  tValue <- Test.generate Parameter.random
+  let x = Interval.interpolate interval tValue
   y <- Test.generate Random.length
   let quotient = x / y
   let intervalQuotient = interval / y
