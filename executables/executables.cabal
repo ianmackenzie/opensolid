@@ -29,9 +29,6 @@ common config
     -Wmissing-export-lists
     -Wmissing-home-modules
     -Wsafe
-    -threaded
-    -rtsopts
-    -with-rtsopts=-N
     -Wno-pattern-namespace-specifier
 
   default-extensions:
@@ -46,36 +43,22 @@ common config
     TypeApplications
 
 library
-  default-language: GHC2024
-  ghc-options:
-    -Wall
-    -Werror
-    -Wcompat
-    -Widentities
-    -Wmissing-signatures
-    -Wmissing-exported-signatures
-    -Wmissing-export-lists
-    -Wmissing-home-modules
-    -Wsafe
-
-  default-extensions:
-    BlockArguments
-    LexicalNegation
-    OverloadedLabels
-    OverloadedRecordDot
-    OverloadedStrings
-    PatternSynonyms
-    RebindableSyntax
-    TypeApplications
-
+  import: config
   exposed-modules:
     Utils
 
   hs-source-dirs: utils
   build-depends: opensolid-core
 
-executable sandbox
+common executable-config
   import: config
+  ghc-options:
+    -threaded
+    -rtsopts
+    -with-rtsopts=-N
+
+executable sandbox
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: sandbox
   build-depends:
@@ -87,7 +70,7 @@ executable sandbox
     text,
 
 executable test-server
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: test-server
   build-depends:
@@ -99,7 +82,7 @@ executable test-server
     random,
 
 executable arc-length
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: arc-length
   build-depends:
@@ -108,7 +91,7 @@ executable arc-length
     text,
 
 executable piecewise-curve
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: piecewise-curve
   build-depends:
@@ -116,7 +99,7 @@ executable piecewise-curve
     opensolid-core,
 
 executable medial-axis
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: medial-axis
   build-depends:
@@ -126,7 +109,7 @@ executable medial-axis
     time,
 
 executable region-triangulation
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: region-triangulation
   build-depends:
@@ -134,7 +117,7 @@ executable region-triangulation
     opensolid-core,
 
 executable body3d-meshing
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: body3d-meshing
   build-depends:
@@ -142,7 +125,7 @@ executable body3d-meshing
     opensolid-core,
 
 executable raindrop
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: raindrop
   build-depends:
@@ -150,7 +133,7 @@ executable raindrop
     opensolid-core,
 
 executable croissant
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: croissant
   build-depends:
@@ -158,7 +141,7 @@ executable croissant
     opensolid-core,
 
 executable funky-moulding
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: funky-moulding
   build-depends:
@@ -166,7 +149,7 @@ executable funky-moulding
     opensolid-core,
 
 executable i-beam
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: i-beam
   build-depends:
@@ -174,7 +157,7 @@ executable i-beam
     opensolid-core,
 
 executable expression-evaluation
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: expression-evaluation
   build-depends:
@@ -182,7 +165,7 @@ executable expression-evaluation
     opensolid-core,
 
 executable gear-generation
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: gear-generation
   build-depends:
@@ -191,7 +174,7 @@ executable gear-generation
     opensolid-core,
 
 executable oblate-spheroid
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: oblate-spheroid
   build-depends:
@@ -199,7 +182,7 @@ executable oblate-spheroid
     opensolid-core,
 
 executable simple-step-file
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: simple-step-file
   build-depends:
@@ -207,7 +190,7 @@ executable simple-step-file
     opensolid-core,
 
 executable phone-holder
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: phone-holder
   other-modules:
@@ -221,7 +204,7 @@ executable phone-holder
     opensolid-core,
 
 executable sphere
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: sphere
   build-depends:
@@ -229,7 +212,7 @@ executable sphere
     opensolid-core,
 
 executable revolved-normals
-  import: config
+  import: executable-config
   main-is: Main.hs
   hs-source-dirs: revolved-normals
   build-depends:
