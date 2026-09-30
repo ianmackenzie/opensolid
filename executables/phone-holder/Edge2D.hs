@@ -10,6 +10,8 @@ module Edge2D
   )
 where
 
+import Edge3D (Edge3D)
+import Edge3D qualified
 import OpenSolid.Arc2D (Arc2D)
 import OpenSolid.Arc2D qualified as Arc2D
 import OpenSolid.Direction2D (Direction2D)
@@ -17,11 +19,16 @@ import OpenSolid.IsDegenerate (IsDegenerate)
 import OpenSolid.Length (Length)
 import OpenSolid.Line2D (Line2D)
 import OpenSolid.Line2D qualified as Line2D
+import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 
 data Edge2D = Line (Line2D Meters) | Arc (Arc2D Meters)
+
+instance On (Plane3D space) Edge2D (Edge3D space) where
+  on plane (Line line2D) = Edge3D.line (on plane line2D)
+  on plane (Arc arc2D) = Edge3D.arc (on plane arc2D)
 
 startPoint :: Edge2D -> Point2D Meters
 startPoint (Line line) = Line2D.startPoint line

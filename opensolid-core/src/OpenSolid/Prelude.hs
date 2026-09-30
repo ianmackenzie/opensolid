@@ -15,7 +15,6 @@ module OpenSolid.Prelude
   , data NonEmpty
   , type (:::) ((:::))
   , setField
-  , (<!)
   , (&)
   , Negation (negate)
   , Addition ((+))
@@ -39,7 +38,8 @@ module OpenSolid.Prelude
   , angular
   , spatial
   , ApproximateEquality ((~=))
-  , Indexed ((!))
+  , At ((@))
+  , On (on)
   , Intersects ((^))
   , Quantity (Quantity, Q#)
   , Unitless
@@ -136,14 +136,6 @@ import Prelude
   , type (~)
   )
 import Prelude qualified
-
------ Pipe operators -----
-
-{-# INLINE (<!) #-}
-(<!) :: (a -> b) -> Result x a -> Result x b
-(<!) = Prelude.fmap
-
-infixr 0 <!
 
 ----- Arithmetic -----
 
@@ -611,28 +603,51 @@ instance DivMod (Quantity units) where
   {-# INLINE (%) #-}
   Quantity_ x % Quantity_ y = Quantity_ (x % y)
 
------ Indexed -----
+----- At -----
 
-class Indexed container index item | container index -> item where
-  (!) :: container -> index -> item
+class At datum location result | datum location -> result where
+  (@) :: datum -> location -> result
 
-infixl 9 !
+infixl 9 @
 
-instance Indexed (List item) Int item where
-  {-# INLINE (!) #-}
-  (!) = (Prelude.!!)
+instance At (List item) Int item where
+  {-# INLINE (@) #-}
+  (@) = (Prelude.!!)
 
-instance Indexed (NonEmpty item) Int item where
-  {-# INLINE (!) #-}
-  (!) = (Data.List.NonEmpty.!!)
+instance At (NonEmpty item) Int item where
+  {-# INLINE (@) #-}
+  (@) = (Data.List.NonEmpty.!!)
 
-instance Ord key => Indexed (Map key value) key value where
-  {-# INLINE (!) #-}
-  (!) = (Data.Map.Strict.!)
+instance (Ord key1, key1 ~ key2) => At (Map key1 value) key2 value where
+  {-# INLINE (@) #-}
+  (@) = (Data.Map.Strict.!)
 
-instance Hashable key => Indexed (HashMap key value) key value where
-  {-# INLINE (!) #-}
-  (!) = (Data.HashMap.Strict.!)
+instance (Hashable key1, key1 ~ key2) => At (HashMap key1 value) key2 value where
+  {-# INLINE (@) #-}
+  (@) = (Data.HashMap.Strict.!)
+
+instance At datum location result => At datum (List location) (List result) where
+  (@) = Prelude.fmap . (@)
+
+instance At datum location result => At datum (NonEmpty location) (NonEmpty result) where
+  (@) = Prelude.fmap . (@)
+
+----- On -----
+
+class On datum geometry result | datum geometry -> result where
+  on :: datum -> geometry -> result
+
+instance On datum geometry result => On datum (Maybe geometry) (Maybe result) where
+  on = Prelude.fmap . on
+
+instance On datum geometry result => On datum (Result x geometry) (Result x result) where
+  on = Prelude.fmap . on
+
+instance On datum geometry result => On datum (List geometry) (List result) where
+  on = Prelude.fmap . on
+
+instance On datum geometry result => On datum (NonEmpty geometry) (NonEmpty result) where
+  on = Prelude.fmap . on
 
 ----- Intersection -----
 

@@ -60,7 +60,7 @@ The polygon will be oriented such that its bottom-most edge is horizontal.
 inscribed :: Int -> Circle2D units -> Result IsEmpty (Polygon2D units)
 inscribed n circle
   | n >= 3 = case Quantity.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n of
-      NonEmpty vertexAngles -> Ok (Polygon2D (NonEmpty.map (Circle2D.point circle) vertexAngles))
+      NonEmpty vertexAngles -> Ok (Polygon2D (NonEmpty.map (circle @) vertexAngles))
       [] -> error "Should have at least three vertex angles"
   | otherwise = Err IsEmpty
 

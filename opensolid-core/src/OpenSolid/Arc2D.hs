@@ -20,10 +20,14 @@ where
 
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Arc3D (Arc3D)
+import OpenSolid.Arc3D qualified as Arc3D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
+import OpenSolid.Plane3D (Plane3D)
+import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
@@ -38,6 +42,16 @@ data Arc2D units = Arc2D
   , endAngle :: Angle
   }
   deriving (Show)
+
+instance units ~ Meters => On (Plane3D space) (Arc2D units) (Arc3D space) where
+  on plane arc = do
+    let originPoint = on plane (centerPoint arc)
+    Arc3D.with
+      { plane = Plane3D.moveTo originPoint plane
+      , radius = radius arc
+      , startAngle = startAngle arc
+      , endAngle = endAngle arc
+      }
 
 with ::
   ("centerPoint" ::: Point2D units) ->

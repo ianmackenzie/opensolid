@@ -31,7 +31,7 @@ module OpenSolid.Surface3D
   , vertexAt
   , vertexOn
   , parametric
-  , on
+  , planar
   , extruded
   , sweptBy
   , ruled
@@ -370,8 +370,12 @@ segment uvRange surface = do
     , isMonotonic = VectorBounds3D.areIndependent duRange dvRange
     }
 
-on :: Tolerance Meters => Plane3D space -> Region2D Meters -> Result IsDegenerate (Surface3D space)
-on plane region = do
+planar ::
+  Tolerance Meters =>
+  Plane3D space ->
+  Region2D Meters ->
+  Result IsDegenerate (Surface3D space)
+planar plane region = do
   let regionBounds = Region2D.bounds region
   let (width, height) = Bounds2D.dimensions regionBounds
   let centerPoint = Bounds2D.centerPoint regionBounds

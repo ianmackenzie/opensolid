@@ -65,7 +65,7 @@ empty :: Mesh vertex
 empty = Mesh Array.empty []
 
 faceVertices :: Mesh vertex -> List (vertex, vertex, vertex)
-faceVertices (Mesh vs fs) = fs & List.map \(i, j, k) -> (vs ! i, vs ! j, vs ! k)
+faceVertices (Mesh vs fs) = fs & List.map \(i, j, k) -> (vs @ i, vs @ j, vs @ k)
 
 map :: (a -> b) -> Mesh a -> Mesh b
 map f (Mesh vs fs) = Mesh (Array.map f vs) fs

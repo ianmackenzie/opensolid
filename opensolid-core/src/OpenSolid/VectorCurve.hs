@@ -67,6 +67,7 @@ import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Parameter qualified as Parameter
+import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Space qualified as Space
@@ -930,6 +931,12 @@ instance
     (VectorCurve3D units3 space)
   where
   lhs / rhs = Units.specialize (lhs ?/? rhs)
+
+instance On (Plane3D space) (VectorCurve2D units) (VectorCurve3D units space) where
+  on plane vectorCurve2D = do
+    let compiledPlanar = on plane (compiled vectorCurve2D)
+    let planarDerivative = on plane (derivative vectorCurve2D)
+    new compiledPlanar planarDerivative
 
 instance VectorCurveExists 2 units Void
 

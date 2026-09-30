@@ -170,7 +170,7 @@ line3D :: Generator (Curve3D space)
 line3D = retry (Random.map2 (spatial Curve3D.lineFrom) point3D point3D)
 
 arc3D :: Generator (Curve3D space)
-arc3D = Random.map2 Curve2D.placeOn plane3D arc2D
+arc3D = Random.map2 on plane3D arc2D
 
 quadraticSpline3D :: Generator (Curve3D Meters)
 quadraticSpline3D = retry (Random.map3 (spatial Curve3D.quadraticBezier) point3D point3D point3D)

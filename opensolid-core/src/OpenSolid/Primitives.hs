@@ -31,9 +31,10 @@ import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Interval (Interval (I#))
+import OpenSolid.Interval (Interval (I#, Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
+import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Show qualified as Show
@@ -235,6 +236,19 @@ instance CrossMultiplication Direction2D (Vector2D units) (Quantity units) where
   {-# INLINE cross #-}
   Unit2D v1 `cross` v2 = v1 `cross` v2
 
+instance On (PlaneOrientation3D space) (Vector2D units) (Vector3D units space) where
+  on (PlaneOrientation3D i j _) (Vector2D vX vY) = do
+    let Direction3D iR iF iU = i
+    let Direction3D jR jF jU = j
+    let vR = vX * iR + vY * jR
+    let vF = vX * iF + vY * jF
+    let vU = vX * iU + vY * jU
+    Vector3D vR vF vU
+
+instance On (Plane3D space) (Vector2D units) (Vector3D units space) where
+  {-# INLINE on #-}
+  on (Plane3D _ orientation) vector = on orientation vector
+
 ----- Direction2D -----
 
 {-| A direction in 2D.
@@ -299,6 +313,14 @@ instance DotMultiplication Direction2D Direction2D Number where
 instance CrossMultiplication Direction2D Direction2D Number where
   {-# INLINE cross #-}
   Unit2D v1 `cross` Unit2D v2 = v1 `cross` v2
+
+instance On (PlaneOrientation3D space) Direction2D (Direction3D space) where
+  {-# INLINE on #-}
+  on orientation (Unit2D vector) = Unit3D (on orientation vector)
+
+instance On (Plane3D space) Direction2D (Direction3D space) where
+  {-# INLINE on #-}
+  on plane (Unit2D vector) = Unit3D (on plane vector)
 
 ----- Orientation2D -----
 
@@ -383,6 +405,18 @@ instance
 instance ApproximateEquality (Point2D units) units where
   {-# INLINE (~=) #-}
   Position2D p1 ~= Position2D p2 = p1 ~= p2
+
+instance units ~ Meters => On (Plane3D space) (Point2D units) (Point3D space) where
+  on plane point = do
+    let Plane3D originPoint (PlaneOrientation3D i j _) = plane
+    let Point2D pX pY = point
+    let Point3D oR oF oU = originPoint
+    let Direction3D iR iF iU = i
+    let Direction3D jR jF jU = j
+    Point3D
+      (oR + pX * iR + pY * jR)
+      (oF + pX * iF + pY * jF)
+      (oU + pX * iU + pY * jU)
 
 ----- VectorBounds2D -----
 
@@ -685,6 +719,28 @@ instance
   {-# INLINE cross_ #-}
   VectorBounds2D x1 y1 `cross_` VectorBounds2D x2 y2 = x1 ?*? y2 - y1 ?*? x2
 
+instance On (PlaneOrientation3D space) (VectorBounds2D units) (VectorBounds3D units space) where
+  on orientation vectorBounds = do
+    let PlaneOrientation3D i j _ = orientation
+    let VectorBounds2D bX bY = vectorBounds
+    let cX = Interval.midpoint bX
+    let cY = Interval.midpoint bY
+    let rX = 0.5 * Interval.width bX
+    let rY = 0.5 * Interval.width bY
+    let Direction3D iR iF iU = i
+    let Direction3D jR jF jU = j
+    let Vector3D cR cF cU = on orientation (Vector2D cX cY)
+    let rR = rX * Number.abs iR + rY * Number.abs jR
+    let rF = rX * Number.abs iF + rY * Number.abs jF
+    let rU = rX * Number.abs iU + rY * Number.abs jU
+    let bR = Interval (cR - rR) (cR + rR)
+    let bF = Interval (cF - rF) (cF + rF)
+    let bU = Interval (cU - rU) (cU + rU)
+    VectorBounds3D bR bF bU
+
+instance On (Plane3D space) (VectorBounds2D units) (VectorBounds3D units space) where
+  on (Plane3D _ orientation) vectorBounds = on orientation vectorBounds
+
 ----- Bounds2D -----
 
 type role Bounds2D phantom
@@ -802,6 +858,24 @@ instance
   where
   {-# INLINE (^) #-}
   PositionBounds2D pb1 ^ PositionBounds2D pb2 = pb1 ^ pb2
+
+instance units ~ Meters => On (Plane3D space) (Bounds2D units) (Bounds3D space) where
+  on plane (Bounds2D x y) = do
+    let Plane3D _ (PlaneOrientation3D i j _) = plane
+    let Direction3D ix iy iz = i
+    let Direction3D jx jy jz = j
+    let xMid = Interval.midpoint x
+    let yMid = Interval.midpoint y
+    let xWidth = Interval.width x
+    let yWidth = Interval.width y
+    let Point3D x0 y0 z0 = on plane (Point2D xMid yMid)
+    let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
+    let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
+    let rz = 0.5 * xWidth * Number.abs iz + 0.5 * yWidth * Number.abs jz
+    let bx = Interval (x0 - rx) (x0 + rx)
+    let by = Interval (y0 - ry) (y0 + ry)
+    let bz = Interval (z0 - rz) (z0 + rz)
+    Bounds3D bx by bz
 
 ----- Axis2D -----
 

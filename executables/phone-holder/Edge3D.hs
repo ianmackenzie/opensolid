@@ -4,7 +4,6 @@ module Edge3D
   , arc
   , startPoint
   , endPoint
-  , on
   , reverse
   , transformBy
   , mirrorAcross
@@ -12,8 +11,6 @@ module Edge3D
   )
 where
 
-import Edge2D (Edge2D)
-import Edge2D qualified
 import OpenSolid.Ap242.EdgeCurve qualified as Ap242.EdgeCurve
 import OpenSolid.Arc3D (Arc3D)
 import OpenSolid.Arc3D qualified as Arc3D
@@ -46,10 +43,6 @@ endPoint (Line Positive l) = Line3D.endPoint l
 endPoint (Line Negative l) = Line3D.startPoint l
 endPoint (Arc Positive a) = Arc3D.endPoint a
 endPoint (Arc Negative a) = Arc3D.startPoint a
-
-on :: Plane3D space -> Edge2D -> Edge3D space
-on plane (Edge2D.Line line2D) = line (Line3D.on plane line2D)
-on plane (Edge2D.Arc arc2D) = arc (Arc3D.on plane arc2D)
 
 reverse :: Edge3D space -> Edge3D space
 reverse (Line sign l) = Line -sign l

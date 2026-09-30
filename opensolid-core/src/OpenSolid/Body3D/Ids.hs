@@ -22,11 +22,11 @@ newtype CurveId = CurveId Int
   deriving (Eq, Ord, Show)
   deriving newtype (Hashable)
 
-instance Indexed (Set3D space (Surface3D space)) SurfaceId (Surface3D space) where
-  surfaces ! SurfaceId index = surfaces ! index
+instance At (Set3D space (Surface3D space)) SurfaceId (Surface3D space) where
+  surfaces @ SurfaceId index = surfaces @ index
 
-instance Indexed (Surface3D space) BoundaryId (Surface3D.Boundary space) where
-  surface ! BoundaryId index = Surface3D.boundaries surface ! index
+instance At (Surface3D space) BoundaryId (Surface3D.Boundary space) where
+  surface @ BoundaryId index = Surface3D.boundaries surface @ index
 
-instance Indexed (Surface3D.Boundary space) CurveId (SurfaceCurve3D space) where
-  boundary ! CurveId index = boundary ! index
+instance At (Surface3D.Boundary space) CurveId (SurfaceCurve3D space) where
+  boundary @ CurveId index = boundary @ index

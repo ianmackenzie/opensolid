@@ -70,7 +70,6 @@ module OpenSolid.Curve2D
   , coordinates
   , placeIn
   , relativeTo
-  , placeOn
   , transformBy
   , translateBy
   , translateIn
@@ -111,7 +110,6 @@ import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D.MedialAxis qualified as MedialAxis
-import {-# SOURCE #-} OpenSolid.Curve3D (Curve3D)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.DirectionBounds2D (DirectionBounds2D)
@@ -127,7 +125,6 @@ import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Nonzero qualified as Nonzero
 import OpenSolid.Number qualified as Number
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Polyline2D (Polyline2D)
@@ -688,9 +685,6 @@ placeIn frame curve = do
 relativeTo :: Frame2D units -> Curve2D units -> Curve2D units
 relativeTo frame = placeIn (Frame2D.inverse frame)
 
-placeOn :: Plane3D space -> Curve2D Meters -> Curve3D space
-placeOn = Curve.placeOn
-
 transformBy ::
   Transform.Tag.IsOrthonormal tag =>
   Transform2D tag units ->
@@ -820,7 +814,7 @@ buildPiecewiseTree ::
   (Quantity units, PiecewiseTree units space)
 buildPiecewiseTree segmentArray begin end = case end - begin of
   1 -> do
-    let segment = segmentArray ! begin
+    let segment = segmentArray @ begin
     let segmentLength = length segment
     (segmentLength, PiecewiseLeaf segmentLength segment)
   n -> assert (n >= 2) do

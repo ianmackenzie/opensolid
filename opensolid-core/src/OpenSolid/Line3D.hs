@@ -1,7 +1,6 @@
 module OpenSolid.Line3D
   ( Line3D
   , data Line3D
-  , on
   , startPoint
   , endPoint
   , endpoints
@@ -25,9 +24,8 @@ import OpenSolid.Axis3D (Axis3D)
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Length (Length)
-import OpenSolid.Line (Line (Line))
+import OpenSolid.Line (Line (Line), Line3D)
 import OpenSolid.Line qualified as Line
-import OpenSolid.Line2D (Line2D, data Line2D)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
@@ -36,19 +34,12 @@ import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Vector3D (Vector3D)
 
--- | A line in 3D, with a start point and end point.
-type Line3D space =
-  Line 3 Meters space
-
 -- | Construct a line from its start and end points.
 {-# INLINE Line3D #-}
 pattern Line3D :: Point3D space -> Point3D space -> Line3D space
 pattern Line3D p1 p2 = Line p1 p2
 
 {-# COMPLETE Line3D #-}
-
-on :: Plane3D space -> Line2D Meters -> Line3D space
-on plane (Line2D p1 p2) = Line3D (Point3D.on plane p1) (Point3D.on plane p2)
 
 -- | Get the start point of a line.
 {-# INLINE startPoint #-}

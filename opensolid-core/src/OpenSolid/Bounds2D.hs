@@ -40,7 +40,6 @@ module OpenSolid.Bounds2D
   , interpolate
   , placeIn
   , relativeTo
-  , placeOn
   , transformBy
   , distanceAlong
   , convert
@@ -63,16 +62,10 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Bounds2D (Bounds2D, PositionBounds2D)
-  , Bounds3D (Bounds3D)
-  , Direction3D (Direction3D)
-  , Plane3D (Plane3D)
-  , PlaneOrientation3D (PlaneOrientation3D)
   , Point2D (Position2D)
-  , Point3D (Point3D)
   , VectorTransform2D (VectorTransform2D)
   )
 import OpenSolid.Transform2D (Transform2D)
@@ -276,24 +269,6 @@ relativeTo frame (Bounds2D x y) = do
   let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs iy
   let ry = 0.5 * xWidth * Number.abs jx + 0.5 * yWidth * Number.abs jy
   Bounds2D (Interval (x0 - rx) (x0 + rx)) (Interval (y0 - ry) (y0 + ry))
-
-placeOn :: Plane3D space -> Bounds2D Meters -> Bounds3D space
-placeOn plane (Bounds2D x y) = do
-  let Plane3D _ (PlaneOrientation3D i j _) = plane
-  let Direction3D ix iy iz = i
-  let Direction3D jx jy jz = j
-  let xMid = Interval.midpoint x
-  let yMid = Interval.midpoint y
-  let xWidth = Interval.width x
-  let yWidth = Interval.width y
-  let Point3D x0 y0 z0 = Point3D.on plane (Point2D xMid yMid)
-  let rx = 0.5 * xWidth * Number.abs ix + 0.5 * yWidth * Number.abs jx
-  let ry = 0.5 * xWidth * Number.abs iy + 0.5 * yWidth * Number.abs jy
-  let rz = 0.5 * xWidth * Number.abs iz + 0.5 * yWidth * Number.abs jz
-  let bx = Interval (x0 - rx) (x0 + rx)
-  let by = Interval (y0 - ry) (y0 + ry)
-  let bz = Interval (z0 - rz) (z0 + rz)
-  Bounds3D bx by bz
 
 transformBy :: Transform2D tag units -> Bounds2D units -> Bounds2D units
 transformBy transform (Bounds2D x y) = do

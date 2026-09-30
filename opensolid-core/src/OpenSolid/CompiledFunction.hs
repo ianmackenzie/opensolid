@@ -309,6 +309,21 @@ instance
   where
   cross = map2 cross cross cross
 
+instance
+  ( inputValue1 ~ inputValue2
+  , inputBounds1 ~ inputBounds2
+  , On datum outputValue1 outputValue2
+  , On datum outputBounds1 outputBounds2
+  , On datum (Expression inputValue1 outputValue1) (Expression inputValue2 outputValue2)
+  , Expression.Evaluation inputValue2 outputValue2 inputBounds2 outputBounds2
+  ) =>
+  On
+    datum
+    (CompiledFunction inputValue1 outputValue1 inputBounds1 outputBounds1)
+    (CompiledFunction inputValue2 outputValue2 inputBounds2 outputBounds2)
+  where
+  on datum = map (on datum) (on datum) (on datum)
+
 concrete ::
   Expression.Evaluation inputValue outputValue inputBounds outputBounds =>
   Expression inputValue outputValue ->

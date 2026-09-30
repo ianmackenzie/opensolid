@@ -9,7 +9,6 @@ import OpenSolid.Ap242.Surface qualified as Ap242.Surface
 import OpenSolid.Arc2D qualified as Arc2D
 import OpenSolid.Axis3D (Axis3D (Axis3D))
 import OpenSolid.Direction2D qualified as Direction2D
-import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Length qualified as Length
 import OpenSolid.Line2D (data Line2D)
 import OpenSolid.Line2D qualified as Line2D
@@ -17,7 +16,6 @@ import OpenSolid.Line3D (data Line3D)
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.Step qualified as Step
@@ -70,9 +68,9 @@ main = spatial Try.do
 
   let midPlane = World3D.rightPlane
   let rightPlane = midPlane & Plane3D.offsetBy (0.5 * width)
-  let rightProfile = Path3D.on rightPlane profile2D
+  let rightProfile = on rightPlane profile2D
   let leftPlane = rightPlane & Plane3D.mirrorAcross midPlane
-  let leftProfile = Path3D.on leftPlane profile2D & Path3D.reverse
+  let leftProfile = Path3D.reverse (on leftPlane profile2D)
   let rightSurface = Ap242.Surface.plane3D rightPlane
   let leftSurface = Ap242.Surface.plane3D (Plane3D.flip leftPlane)
   let leftFace = advancedFaceEntity leftProfile leftSurface
@@ -81,25 +79,25 @@ main = spatial Try.do
   let extrudedSurface edge2D = case edge2D of
         Edge2D.Line line2D -> do
           lineDirection <- Line2D.direction line2D
-          let normalDirection = Direction3D.on midPlane (Direction2D.rotateRight lineDirection)
-          let originPoint = Point3D.on midPlane (Line2D.startPoint line2D)
+          let normalDirection = on midPlane (Direction2D.rotateRight lineDirection)
+          let originPoint = on midPlane (Line2D.startPoint line2D)
           let plane = Plane3D.fromPointAndNormal originPoint normalDirection
           Ok (Ap242.Surface.plane3D plane)
         Edge2D.Arc arc2D -> do
-          let originPoint = Point3D.on midPlane (Arc2D.centerPoint arc2D)
+          let originPoint = on midPlane (Arc2D.centerPoint arc2D)
           let cylinderAxis = Axis3D originPoint (Plane3D.normalDirection midPlane)
           Ok (Ap242.Surface.cylinder3D {axis = cylinderAxis, radius = Arc2D.radius arc2D})
 
   let extrudedFace (edge, nextEdge) = do
         surface <- extrudedSurface edge
-        let leftEdge = Edge3D.on leftPlane edge
-        let rightEdge = Edge3D.on rightPlane edge & Edge3D.reverse
+        let leftEdge = on leftPlane edge
+        let rightEdge = Edge3D.reverse (on rightPlane edge)
         let startPoint = Edge2D.startPoint edge
         let endPoint = Edge2D.startPoint nextEdge
-        let startLine = Line3D (Point3D.on rightPlane startPoint) (Point3D.on leftPlane startPoint)
-        let endLine = Line3D (Point3D.on rightPlane endPoint) (Point3D.on leftPlane endPoint)
+        let startLine = Line3D (on rightPlane startPoint) (on leftPlane startPoint)
+        let endLine = Line3D (on rightPlane endPoint) (on leftPlane endPoint)
         let startEdge = Edge3D.line startLine
-        let endEdge = Edge3D.line endLine & Edge3D.reverse
+        let endEdge = Edge3D.reverse (Edge3D.line endLine)
         let loop = NonEmpty.four leftEdge endEdge rightEdge startEdge
         Ok (advancedFaceEntity loop surface)
 

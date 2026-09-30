@@ -29,7 +29,6 @@ module OpenSolid.Bounds3D
   , intersection
   , diameter
   , interpolate
-  , on
   , placeIn
   , relativeTo
   , projectInto
@@ -40,7 +39,6 @@ where
 
 import Data.Coerce qualified
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
-import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Convention3D (Convention3D)
 import OpenSolid.Convention3D qualified as Convention3D
 import OpenSolid.Frame3D (Frame3D)
@@ -177,23 +175,6 @@ diameter (Bounds3D x y z) = Quantity.hypot3 (Interval.width x) (Interval.width y
 
 interpolate :: Bounds3D space -> Number -> Number -> Number -> Point3D space
 interpolate (PositionBounds3D pb) u v w = Position3D (VectorBounds3D.interpolate pb u v w)
-
-on :: Plane3D space -> Bounds2D Meters -> Bounds3D space
-on plane bounds2D = do
-  let Bounds2D bX bY = bounds2D
-  let rX = 0.5 * Interval.width bX
-  let rY = 0.5 * Interval.width bY
-  let Plane3D _ (PlaneOrientation3D i j _) = plane
-  let Direction3D iR iF iU = i
-  let Direction3D jR jF jU = j
-  let Point3D cR cF cU = Point3D.on plane (Bounds2D.centerPoint bounds2D)
-  let rR = rX * Number.abs iR + rY * Number.abs jR
-  let rF = rX * Number.abs iF + rY * Number.abs jF
-  let rU = rX * Number.abs iU + rY * Number.abs jU
-  let bR = Interval (cR - rR) (cR + rR)
-  let bF = Interval (cF - rF) (cF + rF)
-  let bU = Interval (cU - rU) (cU + rU)
-  Bounds3D bR bF bU
 
 placeIn :: Frame3D global local -> Bounds3D local -> Bounds3D global
 placeIn frame (Bounds3D pR pF pU) = do

@@ -781,7 +781,6 @@ circle2D =
     , Class.property "Center Point" Circle2D.centerPoint $(docs 'Circle2D.centerPoint)
     , Class.property "Diameter" Circle2D.diameter $(docs 'Circle2D.diameter)
     , Class.property "Radius" Circle2D.radius $(docs 'Circle2D.radius)
-    , Class.member1 "Point" "Angle" (flip Circle2D.point) $(docs 'Circle2D.point)
     ]
 
 type UvCircle = Circle2D.Circle2D Unitless
@@ -793,7 +792,6 @@ uvCircle =
     , Class.property "Center Point" Circle2D.centerPoint $(docs 'Circle2D.centerPoint)
     , Class.property "Diameter" Circle2D.diameter $(docs 'Circle2D.diameter)
     , Class.property "Radius" Circle2D.radius $(docs 'Circle2D.radius)
-    , Class.member1 "Point" "Angle" (flip Circle2D.point) $(docs 'Circle2D.point)
     ]
 
 type Polyline2D = Polyline2D.Polyline2D Meters

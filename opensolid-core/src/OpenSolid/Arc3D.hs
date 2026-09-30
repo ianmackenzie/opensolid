@@ -1,6 +1,6 @@
 module OpenSolid.Arc3D
   ( Arc3D
-  , on
+  , with
   , plane
   , centerPoint
   , radius
@@ -21,25 +21,23 @@ module OpenSolid.Arc3D
 where
 
 import OpenSolid.Angle (Angle)
-import OpenSolid.Arc2D (Arc2D)
-import OpenSolid.Arc2D qualified as Arc2D
 import OpenSolid.Axis3D (Axis3D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Circle3D (Circle3D)
-import OpenSolid.Circle3D qualified as Circle3D
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Length (Length)
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
-import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Vector3D (Vector3D)
+
+type role Arc3D nominal
 
 data Arc3D space = Arc3D
   { plane :: Plane3D space
@@ -48,14 +46,23 @@ data Arc3D space = Arc3D
   , endAngle :: Angle
   }
 
-on :: Plane3D space -> Arc2D Meters -> Arc3D space
-on givenPlane givenArc = do
-  let originPoint = Point3D.on givenPlane (Arc2D.centerPoint givenArc)
-  Arc3D
-    (Plane3D.moveTo originPoint givenPlane)
-    (Arc2D.radius givenArc)
-    (Arc2D.startAngle givenArc)
-    (Arc2D.endAngle givenArc)
+with ::
+  "plane" ::: Plane3D space ->
+  "radius" ::: Length ->
+  "startAngle" ::: Angle ->
+  "endAngle" ::: Angle ->
+  Arc3D space
+with
+  ("plane" ::: givenPlane)
+  ("radius" ::: givenRadius)
+  ("startAngle" ::: givenStartAngle)
+  ("endAngle" ::: givenEndAngle) =
+    Arc3D
+      { plane = givenPlane
+      , radius = givenRadius
+      , startAngle = givenStartAngle
+      , endAngle = givenEndAngle
+      }
 
 plane :: Arc3D space -> Plane3D space
 plane = (.plane)
@@ -75,18 +82,20 @@ endAngle = (.endAngle)
 sweptAngle :: Arc3D space -> Angle
 sweptAngle arc = endAngle arc - startAngle arc
 
-point :: Arc3D space -> Number -> Point3D space
-point (Arc3D p r a b) t = Point3D.on p (Point2D.polar r (Quantity.interpolateFrom a b t))
+instance At (Arc3D space) Number (Point3D space) where
+  arc @ t = do
+    let angle = Quantity.interpolateFrom (startAngle arc) (endAngle arc) t
+    on (plane arc) (Point2D.polar (radius arc) angle)
 
 startPoint :: Arc3D space -> Point3D space
-startPoint arc = point arc 0.0
+startPoint arc = arc @ 0.0
 
 endPoint :: Arc3D space -> Point3D space
-endPoint arc = point arc 1.0
+endPoint arc = arc @ 1.0
 
 toCircle :: Arc3D space -> Circle3D space
 toCircle arc =
-  Circle3D.on (plane arc) $
+  on (plane arc) do
     Circle2D.with {centerPoint = Point2D.origin, diameter = 2.0 * radius arc}
 
 reverse :: Arc3D space -> Arc3D space

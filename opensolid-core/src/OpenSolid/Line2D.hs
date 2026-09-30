@@ -28,7 +28,7 @@ import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Direction2D (Direction2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.IsDegenerate (IsDegenerate)
-import OpenSolid.Line (Line (Line))
+import OpenSolid.Line (Line (Line), Line2D)
 import OpenSolid.Line qualified as Line
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
@@ -36,9 +36,6 @@ import OpenSolid.Prelude
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Vector2D (Vector2D)
-
--- | A line in 2D, with a start point and end point.
-type Line2D units = Line 2 units Void
 
 -- | Construct a line from its start and end points.
 {-# INLINE Line2D #-}

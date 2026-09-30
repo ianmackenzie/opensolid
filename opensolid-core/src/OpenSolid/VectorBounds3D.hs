@@ -40,7 +40,6 @@ module OpenSolid.VectorBounds3D
   , overlap
   , intersection
   , interpolate
-  , on
   , relativeTo
   , placeIn
   , transformBy
@@ -64,11 +63,7 @@ import OpenSolid.Primitives
   ( Axis3D
   , Direction3D (Direction3D)
   , Frame3D
-  , Plane3D (Plane3D)
-  , PlaneOrientation3D (PlaneOrientation3D)
-  , Vector2D (Vector2D)
   , Vector3D (Vector3D)
-  , VectorBounds2D (VectorBounds2D)
   , VectorBounds3D (VB3D#, VectorBounds3D)
   , VectorTransform3D (VectorTransform3D)
   )
@@ -386,25 +381,6 @@ interpolate ::
   Vector3D units space
 interpolate (VectorBounds3D x y z) u v w =
   Vector3D (Interval.interpolate x u) (Interval.interpolate y v) (Interval.interpolate z w)
-
-on :: Plane3D space -> VectorBounds2D units -> VectorBounds3D units space
-on plane bounds2D = do
-  let VectorBounds2D bX bY = bounds2D
-  let cX = Interval.midpoint bX
-  let cY = Interval.midpoint bY
-  let rX = 0.5 * Interval.width bX
-  let rY = 0.5 * Interval.width bY
-  let Plane3D _ (PlaneOrientation3D i j _) = plane
-  let Direction3D iR iF iU = i
-  let Direction3D jR jF jU = j
-  let Vector3D cR cF cU = Vector3D.on plane (Vector2D cX cY)
-  let rR = rX * Number.abs iR + rY * Number.abs jR
-  let rF = rX * Number.abs iF + rY * Number.abs jF
-  let rU = rX * Number.abs iU + rY * Number.abs jU
-  let bR = Interval (cR - rR) (cR + rR)
-  let bF = Interval (cF - rF) (cF + rF)
-  let bU = Interval (cU - rU) (cU + rU)
-  VectorBounds3D bR bF bU
 
 placeIn :: Frame3D global local -> VectorBounds3D units local -> VectorBounds3D units global
 placeIn frame (VectorBounds3D vR vF vU) = do

@@ -10,7 +10,6 @@ module OpenSolid.Direction3D
   , backward
   , rightward
   , leftward
-  , on
   , polar
   , perpendicularDirection
   , forwardComponent
@@ -40,7 +39,6 @@ import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Convention3D (Convention3D)
-import OpenSolid.Direction2D (Direction2D (Direction2D))
 import OpenSolid.Number qualified as Number
 import {-# SOURCE #-} OpenSolid.Orientation3D qualified as Orientation3D
 import OpenSolid.Prelude
@@ -98,9 +96,6 @@ rightward = Orientation3D.rightwardDirection
 
 leftward :: Orientation3D space -> Direction3D space
 leftward = Orientation3D.leftwardDirection
-
-on :: Plane3D space -> Direction2D -> Direction3D space
-on (Plane3D _ (PlaneOrientation3D i j _)) (Direction2D x y) = Unit3D (x * i + y * j)
 
 polar :: Plane3D space -> Angle -> Direction3D space
 polar (Plane3D _ (PlaneOrientation3D i j _)) angle =

@@ -74,7 +74,6 @@ module OpenSolid.Curve
   , transformBy
   , orthonormalTransform
   , convert
-  , placeOn
   , displaceBy
   )
 where
@@ -402,6 +401,9 @@ instance
     let compiledComposed = SurfaceFunction3D.compiled f << compiled g
     let composedDerivative = dfdu * dudt + dfdv * dvdt
     new compiledComposed composedDerivative
+
+instance units ~ Meters => On (Plane3D space) (Curve2D units) (Curve3D space) where
+  on plane = orthonormalTransform (on plane) (on plane)
 
 instance
   units1 ~ units2 =>
@@ -1224,16 +1226,6 @@ convert factor curve =
       , arcLengthParameterization =
           Pair.mapFirst (Quantity.convert factor) curve.arcLengthParameterization
       }
-
-placeOn :: Plane3D space -> Curve2D Meters -> Curve3D space
-placeOn plane = do
-  let transformCompiled =
-        CompiledFunction.map
-          (Expression.placeOn plane)
-          (Point2D.placeOn plane)
-          (Bounds2D.placeOn plane)
-  let transformDerivative = VectorCurve3D.on plane
-  orthonormalTransform transformCompiled transformDerivative
 
 displaceBy ::
   ( CurveExists dimension1 units1 space1

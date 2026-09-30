@@ -7,7 +7,6 @@ module OpenSolid.Vector3D
   , erase
   , unerase
   , unit
-  , on
   , xyz
   , zUp
   , yUp
@@ -57,7 +56,7 @@ import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3D
-  , Direction3D (Direction3D, Unit3D)
+  , Direction3D (Unit3D)
   , Frame3D (Frame3D)
   , Orientation3D (Orientation3D)
   , Plane3D (Plane3D)
@@ -91,16 +90,6 @@ unerase = coerce
 {-# INLINE unit #-}
 unit :: Direction3D space -> Vector3D Unitless space
 unit (Unit3D vector) = vector
-
--- | Construct a 3D vector on the given plane, given a 2D vector within the plane.
-on :: Plane3D space -> Vector2D units -> Vector3D units space
-on (Plane3D _ (PlaneOrientation3D i j _)) (Vector2D vX vY) = do
-  let Direction3D iR iF iU = i
-  let Direction3D jR jF jU = j
-  let vR = vX * iR + vY * jR
-  let vF = vX * iF + vY * jF
-  let vU = vX * iU + vY * jU
-  Vector3D vR vF vU
 
 -- | Construct a vector from its XYZ components, given the coordinate convention to use.
 xyz :: Convention3D -> (Quantity units, Quantity units, Quantity units) -> Vector3D units space

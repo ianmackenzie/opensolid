@@ -7,7 +7,6 @@ module OpenSolid.Curve3D
   , IntersectionPointWithSurface
   , new
   , unsafe
-  , on
   , line
   , lineFrom
   , bezier
@@ -58,7 +57,6 @@ import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
 import OpenSolid.Curve (Curve3D)
 import OpenSolid.Curve qualified as Curve
-import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve3D.IntersectionPointWithSurface (IntersectionPointWithSurface)
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
@@ -70,7 +68,6 @@ import OpenSolid.Length (Length)
 import OpenSolid.Line3D (Line3D)
 import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.Pair qualified as Pair
-import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
@@ -103,9 +100,6 @@ new = Curve.new
 
 unsafe :: Tolerance Meters => Compiled space -> VectorCurve3D Meters space -> Curve3D space
 unsafe = Curve.unsafe
-
-on :: Plane3D space -> Curve2D Meters -> Curve3D space
-on = Curve.placeOn
 
 line :: Tolerance Meters => Line3D space -> Result (IsDegenerate space) (Curve3D space)
 line = Curve.line

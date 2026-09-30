@@ -2,7 +2,6 @@ module OpenSolid.VectorCurve3D
   ( VectorCurve3D
   , Compiled
   , new
-  , on
   , compiled
   , isZero
   , hasDegenerateStart
@@ -46,19 +45,14 @@ import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.IsZero (IsZero)
-import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
-import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve (VectorCurve3D)
 import OpenSolid.VectorCurve qualified as VectorCurve
-import OpenSolid.VectorCurve2D (VectorCurve2D)
-import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import OpenSolid.VectorTransform3D (VectorTransform3D)
 
 type Compiled units space = VectorCurve.Compiled 3 units space
@@ -98,17 +92,6 @@ zero = VectorCurve.zero
 
 constant :: Vector3D units space -> VectorCurve3D units space
 constant = VectorCurve.constant
-
-on :: Plane3D space -> VectorCurve2D units -> VectorCurve3D units space
-on plane vectorCurve2D = do
-  let compiledPlanar =
-        CompiledFunction.map
-          (Expression.placeOn plane)
-          (Vector2D.placeOn plane)
-          (VectorBounds2D.placeOn plane)
-          (VectorCurve2D.compiled vectorCurve2D)
-  let planarDerivative = on plane (VectorCurve2D.derivative vectorCurve2D)
-  new compiledPlanar planarDerivative
 
 interpolateFrom :: Vector3D units space -> Vector3D units space -> VectorCurve3D units space
 interpolateFrom = VectorCurve.interpolateFrom

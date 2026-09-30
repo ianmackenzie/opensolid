@@ -1,5 +1,7 @@
 module OpenSolid.Line
   ( Line (Line)
+  , Line2D
+  , Line3D
   , startPoint
   , endPoint
   , endpoints
@@ -22,6 +24,7 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.IsDegenerate (IsDegenerate (IsDegenerate))
 import OpenSolid.IsZero (IsZero (IsZero))
+import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Point (Point, PointExists)
 import OpenSolid.Point qualified as Point
 import OpenSolid.Prelude
@@ -31,6 +34,13 @@ import OpenSolid.Vector qualified as Vector
 
 data Line dimension units space
   = Line (Point dimension units space) (Point dimension units space)
+
+-- | A line in 2D, with a start point and end point.
+type Line2D units = Line 2 units Void
+
+-- | A line in 3D, with a start point and end point.
+type Line3D space =
+  Line 3 Meters space
 
 instance units1 ~ units2 => Bounded (Line 2 units1 Void) (Bounds2D units2) where
   {-# INLINE bounds #-}
@@ -45,6 +55,9 @@ instance FFI (Line 2 Meters Void) where
 
 instance FFI (Line 2 Unitless Void) where
   representation = FFI.classRepresentation "UvLine"
+
+instance units ~ Meters => On (Plane3D space) (Line2D units) (Line3D space) where
+  on plane (Line p1 p2) = Line (on plane p1) (on plane p2)
 
 -- | Get the start point of a line.
 {-# INLINE startPoint #-}

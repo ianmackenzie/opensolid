@@ -7,7 +7,6 @@ module OpenSolid.Point3D
   , zUpCoordinates#
   , yUpCoordinates
   , yUpCoordinates#
-  , on
   , along
   , coerce
   , erase
@@ -95,17 +94,6 @@ along (Axis3D originPoint direction) distance = do
     (oR + dR * distance)
     (oF + dF * distance)
     (oU + dU * distance)
-
--- | Construct a point on the given plane, at the given position within the plane.
-on :: Plane3D space -> Point2D Meters -> Point3D space
-on (Plane3D originPoint (PlaneOrientation3D i j _)) (Point2D pX pY) = do
-  let Point3D oR oF oU = originPoint
-  let Direction3D iR iF iU = i
-  let Direction3D jR jF jU = j
-  Point3D
-    (oR + pX * iR + pY * jR)
-    (oF + pX * iF + pY * jF)
-    (oU + pX * iU + pY * jU)
 
 {-# INLINE coerce #-}
 coerce :: Point3D space1 -> Point3D space2

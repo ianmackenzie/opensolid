@@ -1089,7 +1089,7 @@ placePoint2DOn :: Plane3D space -> Ast2D input -> Ast3D input
 placePoint2DOn plane ast = case ast of
   Constant2D val -> do
     let point = Position2D (Vector2D.unerase val)
-    let Position3D placed = Point3D.on (Plane3D.erase plane) point
+    let Position3D placed = on (Plane3D.erase plane) point
     Constant3D (Vector3D.erase placed)
   Variable2D var -> Variable3D (PlacePoint2D (Plane3D.erase plane) var)
 

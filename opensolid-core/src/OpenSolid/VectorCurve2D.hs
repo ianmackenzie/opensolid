@@ -39,7 +39,6 @@ module OpenSolid.VectorCurve2D
   , zeros
   , placeIn
   , relativeTo
-  , placeOn
   , transformBy
   , rotateBy
   , convert
@@ -58,7 +57,6 @@ import OpenSolid.Frame2D qualified as Frame2D
 import OpenSolid.Interval (Interval)
 import OpenSolid.IsZero (IsZero)
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
-import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D (Vector2D))
@@ -67,8 +65,6 @@ import OpenSolid.VectorBounds2D (VectorBounds2D (VectorBounds2D))
 import OpenSolid.VectorBounds2D qualified as VectorBounds2D
 import OpenSolid.VectorCurve (VectorCurve2D)
 import OpenSolid.VectorCurve qualified as VectorCurve
-import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
-import {-# SOURCE #-} OpenSolid.VectorCurve3D qualified as VectorCurve3D
 import OpenSolid.VectorTransform2D (VectorTransform2D)
 import OpenSolid.VectorTransform2D qualified as VectorTransform2D
 
@@ -253,9 +249,6 @@ placeIn frame curve = do
 
 relativeTo :: Frame2D frameUnits -> VectorCurve2D units -> VectorCurve2D units
 relativeTo frame = placeIn (Frame2D.inverse frame)
-
-placeOn :: Plane3D space -> VectorCurve2D units -> VectorCurve3D units space
-placeOn plane curve = VectorCurve3D.on plane curve
 
 convert :: Quantity (units2 ?/? units1) -> VectorCurve2D units1 -> VectorCurve2D units2
 convert factor curve = Units.simplify (curve ?*? factor)
