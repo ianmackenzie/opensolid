@@ -127,6 +127,7 @@ import OpenSolid.Pair qualified as Pair
 import OpenSolid.Prelude hiding (cross, dot)
 import OpenSolid.Prelude qualified
 import OpenSolid.Result qualified as Result
+import OpenSolid.Try qualified as Try
 
 data Class where
   Class ::
@@ -209,19 +210,24 @@ wrap10 function a b c d e f g h i j =
   IO.succeed (function a b c d e f g h i j)
 
 wrap1R :: (a -> Result x result) -> a -> IO result
-wrap1R function a = try do function a
+wrap1R function a = Try.do
+  result <- function a
+  IO.succeed result
 
 wrap2R :: (a -> b -> Result x result) -> a -> b -> IO result
-wrap2R function a b = try do function a b
+wrap2R function a b = Try.do
+  result <- function a b
+  IO.succeed result
 
 wrap3R :: (a -> b -> c -> Result x result) -> a -> b -> c -> IO result
-wrap3R function a b c = try do function a b c
+wrap3R function a b c = Try.do
+  result <- function a b c
+  IO.succeed result
 
 wrap4R :: (a -> b -> c -> d -> Result x result) -> a -> b -> c -> d -> IO result
-wrap4R function a b c d = try do function a b c d
-
--- wrap5R :: (a -> b -> c -> d -> e -> Result x result) -> a -> b -> c -> d -> e -> IO result
--- wrap5R function a b c d e = try do function a b c d e
+wrap4R function a b c d = Try.do
+  result <- function a b c d
+  IO.succeed result
 
 static :: Text -> Text -> List (Member Void) -> Class
 static className givenDocumentation members =

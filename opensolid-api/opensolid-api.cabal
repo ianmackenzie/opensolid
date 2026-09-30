@@ -59,6 +59,7 @@ library
     OverloadedRecordUpdate
     OverloadedStrings
     PatternSynonyms
+    QualifiedDo
     RebindableSyntax
     RecordWildCards
     RequiredTypeArguments
