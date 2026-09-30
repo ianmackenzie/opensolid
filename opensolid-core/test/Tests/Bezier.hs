@@ -7,7 +7,7 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude
 import OpenSolid.Random qualified as Random
 import OpenSolid.Unboxed.Math
-import Test (Test)
+import Test (Test, (~~))
 import Test qualified
 import Tests.Random qualified as Random
 
@@ -29,7 +29,7 @@ cubicHermite = Test.check 100 "cubicHermite" do
   let actual = NonEmpty.four p1 p2 p3 p4
   let expected =
         Bezier.hermite startPoint [startFirstDerivative] endPoint [endFirstDerivative]
-  Test.expect (actual ~= expected) & Test.log {actual, expected}
+  Test.expect (actual ~~ expected) & Test.log {actual, expected}
 
 quinticHermite :: Test
 quinticHermite = Test.check 100 "quinticHermite" do
@@ -54,7 +54,7 @@ quinticHermite = Test.check 100 "quinticHermite" do
           [startFirstDerivative, startSecondDerivative]
           endPoint
           [endFirstDerivative, endSecondDerivative]
-  Test.expect (actual ~= expected) & Test.log {actual, expected}
+  Test.expect (actual ~~ expected) & Test.log {actual, expected}
 
 unboxedQuinticHermiteEvaluation :: Test
 unboxedQuinticHermiteEvaluation = Test.check 100 "unboxedQuinticHermiteEvaluation" do
@@ -83,4 +83,4 @@ unboxedQuinticHermiteEvaluation = Test.check 100 "unboxedQuinticHermiteEvaluatio
   let !(Q# t#) = t
   let actual = Q# (quinticBezier# p1# p2# p3# p4# p5# p6# t#)
   let expected = curve @ t
-  Test.expect (unitless (actual ~= expected)) & Test.log {actual, expected}
+  Test.expect (unitless (actual ~~ expected)) & Test.log {actual, expected}

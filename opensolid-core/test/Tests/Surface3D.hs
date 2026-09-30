@@ -20,9 +20,8 @@ import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.VectorCurve3D (VectorCurve3D)
 import OpenSolid.VectorCurve3D qualified as VectorCurve3D
-import Test (Test)
+import Test (Test, (~~))
 import Test qualified
-import Tests.Matching ((~~))
 import Tests.Random qualified as Random
 import Tests.SurfaceFunction3D qualified
 

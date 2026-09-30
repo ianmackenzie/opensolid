@@ -29,9 +29,8 @@ import OpenSolid.Random qualified as Random
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Try qualified as Try
-import Test (Expectation, Test)
+import Test (Expectation, Test, (~~))
 import Test qualified
-import Tests.Matching ((~~))
 import Tests.Random qualified as Random
 
 curveGenerators :: List (Text, Generator (Curve2D Meters))
@@ -300,7 +299,7 @@ reversalConsistency =
           curve <- Test.generate randomCurve
           let reversedCurve = Curve2D.reverse curve
           t <- Test.generate Parameter.random
-          Test.expect (curve @ t ~= reversedCurve @ (1.0 - t))
+          Test.expect (curve @ t ~~ reversedCurve @ (1.0 - t))
 
 rangeConsistency :: (Tolerance units, Show (Quantity units)) => Curve2D units -> Expectation
 rangeConsistency curve = do
@@ -318,7 +317,7 @@ arcConstruction = do
         let expectedPoint = Point2D.meters expectedX expectedY
         Test.verify label Try.do
           arc <- Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 1.0) sweptAngle
-          Test.expect (arc @ 0.5 ~= expectedPoint)
+          Test.expect (arc @ 0.5 ~~ expectedPoint)
   let invSqrt2 = 1.0 / Number.sqrt 2.0
   Test.group "from" $
     [ testArcMidpoint 90 (invSqrt2, 1.0 - invSqrt2)
@@ -339,10 +338,10 @@ arcTransformation = Test.check 100 "arc transformation" do
   let transformOfEnd = Point2D.transformBy transform (Curve2D.endPoint initialArc)
   let transformOfPoint = Point2D.transformBy transform (initialArc @ t)
   Test.all
-    [ Test.expect (startOfTransformed ~= transformOfStart)
+    [ Test.expect (startOfTransformed ~~ transformOfStart)
         & Test.log {startOfTransformed, transformOfStart}
-    , Test.expect (Curve2D.endPoint transformedArc ~= transformOfEnd)
-    , Test.expect (pointOnTransformed ~= transformOfPoint)
+    , Test.expect (Curve2D.endPoint transformedArc ~~ transformOfEnd)
+    , Test.expect (pointOnTransformed ~~ transformOfPoint)
     ]
 
 g2 :: Test

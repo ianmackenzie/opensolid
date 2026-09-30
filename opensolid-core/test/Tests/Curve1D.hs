@@ -5,9 +5,8 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Root (Root (Root))
 import OpenSolid.Prelude
 import OpenSolid.Try qualified as Try
-import Test (Test)
+import Test (Test, (~~))
 import Test qualified
-import Tests.Matching ((~~))
 
 tests :: List Test
 tests =
@@ -33,14 +32,14 @@ tangentRoots = Test.verify "tangentRoots" $ unitless Try.do
   Test.expect (roots ~~ expectedRoots) & Test.log {roots, expectedRoots}
 
 approximateEquality :: Test
-approximateEquality = Test.verify "approximateEquality" $ unitless do
+approximateEquality = Test.verify "approximateEquality" $ do
   let theta = Angle.twoPi * Curve1D.t
   let sinTheta = Curve1D.sin theta
   let cosTheta = Curve1D.cos theta
   let sumOfSquares = Curve1D.squared sinTheta + Curve1D.squared cosTheta
   Test.all
-    [ Test.expect (not $ sinTheta ~= cosTheta)
-    , Test.expect (sinTheta ~= Curve1D.cos (Angle.degrees 90.0 - theta))
-    , Test.expect (sumOfSquares ~= Curve1D.constant 1.0)
-    , Test.expect (not $ sumOfSquares ~= Curve1D.constant 2.0)
+    [ Test.expect (not $ sinTheta ~~ cosTheta)
+    , Test.expect (sinTheta ~~ Curve1D.cos (Angle.degrees 90.0 - theta))
+    , Test.expect (sumOfSquares ~~ Curve1D.constant 1.0)
+    , Test.expect (not $ sumOfSquares ~~ Curve1D.constant 2.0)
     ]

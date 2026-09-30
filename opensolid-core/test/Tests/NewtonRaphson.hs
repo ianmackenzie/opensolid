@@ -22,7 +22,7 @@ import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 import OpenSolid.World3D qualified as World3D
-import Test (Test)
+import Test (Test, (~~))
 import Test qualified
 
 data Space
@@ -83,13 +83,13 @@ curve1D :: Text -> Curve1D Unitless -> Number -> Number -> Test
 curve1D name curve t0 tExpected =
   Test.verify name do
     tSolution <- Curve1D.newtonRaphson curve t0 ?? Test.fail "Expected a solution"
-    Test.expect (unitless (tSolution ~= tExpected)) & Test.log {tExpected, tSolution}
+    Test.expect (unitless (tSolution ~~ tExpected)) & Test.log {tExpected, tSolution}
 
 curve2D :: Text -> VectorCurve2D Unitless -> Number -> Number -> Test
 curve2D name curve t0 tExpected =
   Test.verify name do
     tSolution <- VectorCurve2D.newtonRaphson curve t0 ?? Test.fail "Expected a solution"
-    Test.expect (unitless (tSolution ~= tExpected)) & Test.log {tExpected, tSolution}
+    Test.expect (unitless (tSolution ~~ tExpected)) & Test.log {tExpected, tSolution}
 
 surface2D ::
   VectorSurfaceFunction2D Unitless ->
@@ -98,7 +98,7 @@ surface2D ::
   Test.Expectation
 surface2D surface uv0 uvExpected = do
   uvSolution <- VectorSurfaceFunction2D.newtonRaphson surface uv0 ?? Test.fail "Expected a solution"
-  Test.expect (unitless (uvSolution ~= uvExpected)) & Test.log {uvExpected, uvSolution}
+  Test.expect (unitless (uvSolution ~~ uvExpected)) & Test.log {uvExpected, uvSolution}
 
 surface3D ::
   Tolerance Meters =>
@@ -108,4 +108,4 @@ surface3D ::
   Test.Expectation
 surface3D surface uv0 uvExpected = do
   uvSolution <- VectorSurfaceFunction3D.newtonRaphson surface uv0 ?? Test.fail "Expected a solution"
-  Test.expect (unitless (uvSolution ~= uvExpected)) & Test.log {uvExpected, uvSolution}
+  Test.expect (unitless (uvSolution ~~ uvExpected)) & Test.log {uvExpected, uvSolution}

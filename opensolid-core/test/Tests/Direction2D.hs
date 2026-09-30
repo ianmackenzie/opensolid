@@ -3,8 +3,7 @@ module Tests.Direction2D (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Prelude
-import OpenSolid.Tolerance qualified as Tolerance
-import Test (Test)
+import Test (Test, (~~))
 import Test qualified
 
 tests :: List Test
@@ -20,8 +19,7 @@ angleFrom = do
           let endDirection = Direction2D.degrees endDegrees
           let computedAngle = Direction2D.angleFrom startDirection endDirection
           let expectedAngle = Angle.degrees expectedDegrees
-          Tolerance.using (Angle.radians 1e-12) do
-            Test.expect (computedAngle ~= expectedAngle)
+          Test.expect (computedAngle ~~ expectedAngle)
   Test.group "angleFrom" $
     [ testCase 10.0 30.0 20.0
     , testCase 10.0 350.0 -20.0

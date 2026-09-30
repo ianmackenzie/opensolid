@@ -1,7 +1,7 @@
 module Tests.DivMod (tests) where
 
 import OpenSolid.Prelude
-import Test (Test)
+import Test (Test, (~~))
 import Test qualified
 
 tests :: List Test
@@ -36,6 +36,6 @@ numberDiv =
 numberMod :: Test
 numberMod =
   Test.group "Number %" $
-    [ Test.verify "1.7 % 0.5" (Test.expect (unitless (1.7 % 0.5 ~= 0.2)))
-    , Test.verify "-1.7 % 0.5" (Test.expect (unitless (-1.7 % 0.5 ~= 0.3)))
+    [ Test.verify "1.7 % 0.5" (Test.expect (unitless (1.7 % 0.5 ~~ 0.2)))
+    , Test.verify "-1.7 % 0.5" (Test.expect (unitless (-1.7 % 0.5 ~~ 0.3)))
     ]
