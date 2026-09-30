@@ -73,7 +73,8 @@ testCurveMedialAxis label curve1 curve2 = do
   let drawSegment segment = drawCurve segment.curve
   let drawingBounds =
         Bounds2D.hull2 (Point2D.centimeters -10.0 -10.0) (Point2D.centimeters 30.0 20.0)
-  Svg.write ("executables/medial-axis/" <> label <> ".svg") (Svg.viewBox drawingBounds) $
+  let drawingFileName = "executables/medial-axis/" <> label <> ".svg"
+  Svg.write drawingFileName (Svg.viewBox drawingBounds) $
     Svg.group
       [ Svg.combine drawTangentCircles segments
       , Svg.combine drawSegment segments
