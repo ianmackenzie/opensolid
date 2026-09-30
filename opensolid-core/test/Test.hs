@@ -14,6 +14,7 @@ module Test
   , output
   , pass
   , fail
+  , (~~)
   )
 where
 
@@ -32,6 +33,7 @@ import OpenSolid.Try qualified as Try
 import System.Console.ANSI qualified as AnsiTerminal
 import System.Environment
 import System.Exit qualified
+import Tests.Matching ((~~))
 import Text.Printf qualified
 import Prelude qualified
 
