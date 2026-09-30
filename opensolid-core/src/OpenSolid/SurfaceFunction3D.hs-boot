@@ -3,7 +3,6 @@ module OpenSolid.SurfaceFunction3D
   , Compiled
   , new
   , constant
-  , range
   , compiled
   , partialDerivatives
   , transformBy
@@ -29,6 +28,8 @@ type Compiled space =
 
 instance At (SurfaceFunction3D space) UvPoint (Point3D space)
 
+instance At (SurfaceFunction3D space) UvBounds (Bounds3D space)
+
 instance
   space1 ~ space2 =>
   Addition
@@ -48,7 +49,6 @@ new ::
   (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space) ->
   SurfaceFunction3D space
 constant :: Point3D space -> SurfaceFunction3D space
-range :: UvBounds -> SurfaceFunction3D space -> Bounds3D space
 compiled :: SurfaceFunction3D space -> Compiled space
 partialDerivatives ::
   SurfaceFunction3D space ->

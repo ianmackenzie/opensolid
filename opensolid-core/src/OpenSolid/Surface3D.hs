@@ -161,6 +161,10 @@ instance At (Surface3D space) UvPoint (Point3D space) where
   {-# INLINE (@) #-}
   surface @ uvPoint = function surface @ uvPoint
 
+instance At (Surface3D space) UvBounds (Bounds3D space) where
+  {-# INLINE (@) #-}
+  surface @ uvRange = function surface @ uvRange
+
 {-# INLINE function #-}
 function :: Surface3D space -> SurfaceFunction3D space
 function = (.function)
@@ -234,10 +238,6 @@ edges surface = do
 
 bisectionTree :: Surface3D space -> BisectionTree space
 bisectionTree = (.bisectionTree)
-
-{-# INLINE range #-}
-range :: UvBounds -> Surface3D space -> Bounds3D space
-range uvRange surface = SurfaceFunction3D.range uvRange (function surface)
 
 normalDirectionAt :: UvPoint -> Surface3D space -> Direction3D space
 normalDirectionAt uvPoint surface = do
@@ -338,7 +338,7 @@ segment uvRange surface = do
   let derivativeRanges = partialDerivatives surface @ uvRange
   let (duRange, dvRange) = derivativeRanges
   Segment
-    { range = range uvRange surface
+    { range = surface @ uvRange
     , partialDerivativeRanges = derivativeRanges
     , secondPartialDerivativeRanges = secondPartialDerivatives surface @ uvRange
     , normalDirectionRange = normalDirectionRange uvRange surface
@@ -418,7 +418,7 @@ revolved plane curve axis angle = do
   parametric surfaceFunction UvRegion.unitSquare
 
 bounds :: Surface3D space -> Bounds3D space
-bounds surface = SurfaceFunction3D.range (Region2D.bounds surface.domain) surface.function
+bounds surface = surface @ Region2D.bounds (domain surface)
 
 boundaryCurves :: Surface3D space -> Set3D space (SurfaceCurve3D space)
 boundaryCurves = Set3D.flatten . boundaries
