@@ -99,8 +99,8 @@ solve curveA curveB orientation (tRangeA, tRangeB) (segmentA, segmentB) = do
     else do
       let scale = TangentSolver.lengthScale curveA curveB
       let evaluate (UvPoint tA tB) = do
-            let Point3D xA yA zA = Curve.pointAt tA curveA
-            let Point3D xB yB zB = Curve.pointAt tB curveB
+            let Point3D xA yA zA = curveA @ tA
+            let Point3D xB yB zB = curveB @ tB
             let Vector3D x'A y'A z'A = Curve.derivativeAt tA curveA
             let Vector3D x'B y'B z'B = Curve.derivativeAt tB curveB
             let Vector3D x''A y''A z''A = Curve.secondDerivativeAt tA curveA

@@ -90,7 +90,7 @@ findOwnPoint = Test.check 500 "findOwnPoint" Try.do
   let p3 = Point2D.meters 2.0 0.0
   testSpline <- Curve2D.quadraticBezier p1 p2 p3
   t <- Test.generate Parameter.random
-  let p = Curve2D.pointAt t testSpline
+  let p = testSpline @ t
   let solutions = Curve2D.findPoint p testSpline
   Tolerance.using 1e-12 do
     Test.expect (solutions ~= [t])
@@ -280,8 +280,8 @@ firstDerivativeIsConsistentWithin ::
   Expectation
 firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let dt :: Number = 1e-6
-  let p1 = Curve2D.pointAt (tValue - dt) curve
-  let p2 = Curve2D.pointAt (tValue + dt) curve
+  let p1 = curve @ (tValue - dt)
+  let p2 = curve @ (tValue + dt)
   let numericalFirstDerivative = (p2 - p1) / (2.0 * dt)
   let analyticFirstDerivative = Curve2D.derivativeAt tValue curve
   Tolerance.using givenTolerance do
@@ -332,13 +332,13 @@ reversalConsistency =
           curve <- Test.generate randomCurve
           let reversedCurve = Curve2D.reverse curve
           t <- Test.generate Parameter.random
-          Test.expect (Curve2D.pointAt t curve ~= Curve2D.pointAt (1.0 - t) reversedCurve)
+          Test.expect (curve @ t ~= reversedCurve @ (1.0 - t))
 
 rangeConsistency :: (Tolerance units, Show (Quantity units)) => Curve2D units -> Expectation
 rangeConsistency curve = do
   tRange <- Test.generate (Interval.random Parameter.random)
   tValue <- Test.generate (Random.map (Interval.interpolate tRange) Parameter.random)
-  let curveValue = Curve2D.pointAt tValue curve
+  let curveValue = curve @ tValue
   let curveRange = Curve2D.range tRange curve
   Test.expect (curveValue ^ curveRange)
     & Test.output "tValue" tValue
@@ -354,7 +354,7 @@ arcConstruction = do
         let expectedPoint = Point2D.meters expectedX expectedY
         Test.verify label Try.do
           arc <- Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 1.0) sweptAngle
-          Test.expect (Curve2D.pointAt 0.5 arc ~= expectedPoint)
+          Test.expect (arc @ 0.5 ~= expectedPoint)
   let invSqrt2 = 1.0 / Number.sqrt 2.0
   Test.group "from" $
     [ testArcMidpoint 90 (invSqrt2, 1.0 - invSqrt2)
@@ -369,10 +369,10 @@ arcTransformation = Test.check 100 "arc transformation" do
   transform <- Test.generate Random.orthonormalTransform2D
   t <- Test.generate Parameter.random
   let transformedArc = Curve2D.transformBy transform initialArc
-  let pointOnTransformed = Curve2D.pointAt t transformedArc
+  let pointOnTransformed = transformedArc @ t
   let transformOfStart = Point2D.transformBy transform (Curve2D.startPoint initialArc)
   let transformOfEnd = Point2D.transformBy transform (Curve2D.endPoint initialArc)
-  let transformOfPoint = Point2D.transformBy transform (Curve2D.pointAt t initialArc)
+  let transformOfPoint = Point2D.transformBy transform (initialArc @ t)
   Test.all
     [ Test.expect (Curve2D.startPoint transformedArc ~= transformOfStart)
         & Test.output "transformedArc.startPoint" (Curve2D.startPoint transformedArc)
@@ -389,7 +389,7 @@ g2 = Test.check 100 "G2 continuity" Try.do
   p4 <- Test.generate Random.point2D
   spline <- Curve2D.cubicBezier p1 p2 p3 p4
   t <- Test.generate Parameter.random
-  let point = Curve2D.pointAt t spline
+  let point = spline @ t
   let tangentDirection = Curve.tangentDirectionAt t spline
   let curvatureVector = Curve2D.curvatureVectorAt t spline
   let signedRadius = 1.0 / (tangentDirection `cross` curvatureVector)

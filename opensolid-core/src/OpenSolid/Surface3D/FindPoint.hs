@@ -22,7 +22,6 @@ import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
 import OpenSolid.UvBag (UvBag)
 import OpenSolid.UvBag qualified as UvBag
 import OpenSolid.UvBounds (UvBounds)
-import OpenSolid.UvCurve qualified as UvCurve
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
@@ -63,7 +62,7 @@ findEdgeSolutions ::
 findEdgeSolutions poleSolutions point (Surface3D.Edge uvCurve curve) =
   Curve3D.findPoint point curve
     & List.filterMap \tValue -> do
-      let uvPoint = UvCurve.pointAt tValue uvCurve
+      let uvPoint = uvCurve @ tValue
       if unitless (uvPoint ^ poleSolutions) then Nothing else Just uvPoint
 
 data UniqueSolution = UniqueSolution deriving (Eq)

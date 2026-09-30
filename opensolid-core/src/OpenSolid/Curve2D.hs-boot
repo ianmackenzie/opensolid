@@ -5,8 +5,6 @@ module OpenSolid.Curve2D
   , new
   , startPoint
   , endPoint
-  , pointAt
-  , pointOn
   , range
   , bounds
   , compiled
@@ -42,8 +40,6 @@ new ::
   Result (IsDegenerate units) (Curve2D units)
 startPoint :: Curve2D units -> Point2D units
 endPoint :: Curve2D units -> Point2D units
-pointAt :: Number -> Curve2D units -> Point2D units
-pointOn :: Curve2D units -> Number -> Point2D units
 range :: Interval Unitless -> Curve2D units -> Bounds2D units
 bounds :: Curve2D units -> Bounds2D units
 compiled :: Curve2D units -> Compiled units

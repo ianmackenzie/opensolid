@@ -47,8 +47,6 @@ module OpenSolid.Curve2D
   , curvatureVectorRange
   , desingularizeStart
   , desingularizeEnd
-  , pointAt
-  , pointOn
   , startPoint
   , endPoint
   , endpoints
@@ -574,16 +572,6 @@ desingularizeEnd ::
   (Curve2D units, Curve2D units)
 desingularizeEnd = Curve.desingularizeEnd
 
-{-| Get the point on a curve at a given parameter value.
-
-The parameter value should be between 0 and 1.
--}
-pointAt :: Number -> Curve2D units -> Point2D units
-pointAt = Curve.pointAt
-
-pointOn :: Curve2D units -> Number -> Point2D units
-pointOn = Curve.pointOn
-
 -- | Get the start point of a curve.
 startPoint :: Curve2D units -> Point2D units
 startPoint = Curve.startPoint
@@ -839,7 +827,7 @@ piecewisePoint tree s = case tree of
   PiecewiseNode leftLength leftTree rightTree
     | s < leftLength -> piecewisePoint leftTree s
     | otherwise -> piecewisePoint rightTree (s - leftLength)
-  PiecewiseLeaf segmentLength curve -> pointAt (s / segmentLength) curve
+  PiecewiseLeaf segmentLength curve -> curve @ (s / segmentLength)
 
 piecewiseRange ::
   PiecewiseTree units space ->

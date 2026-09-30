@@ -7,8 +7,6 @@ module OpenSolid.Curve
   , CurveExists
   , Solver
   , Compiled
-  , pointAt
-  , pointOn
   , range
   , startPoint
   , endPoint
@@ -68,6 +66,10 @@ type Compiled dimension units space =
     (Interval Unitless)
     (Bounds dimension units space)
 
+instance At (Curve2D units) Number (Point2D units)
+
+instance At (Curve3D space) Number (Point3D space)
+
 instance
   (CurveExists dimension1 units1 space1, dimension1 ~ dimension2, space1 ~ space2, units1 ~ units2) =>
   Subtraction
@@ -89,14 +91,6 @@ instance
   space1 ~ space2 =>
   Subtraction (Point3D space1) (Curve3D space2) (VectorCurve3D Meters space1)
 
-pointAt ::
-  Number ->
-  Curve dimension units space ->
-  Point dimension units space
-pointOn ::
-  Curve dimension units space ->
-  Number ->
-  Point dimension units space
 range ::
   Interval Unitless ->
   Curve dimension units space ->

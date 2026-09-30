@@ -25,8 +25,6 @@ module OpenSolid.Curve
   , derivative
   , compiled
   , bounds
-  , pointAt
-  , pointOn
   , range
   , startPoint
   , endPoint
@@ -252,8 +250,8 @@ subsegment ::
   Segment dimension units space
 subsegment curve tRange = do
   let Interval t1 t2 = tRange
-  let p1 = pointAt t1 curve
-  let p2 = pointAt t2 curve
+  let p1 = curve @ t1
+  let p2 = curve @ t2
   let segmentRange0 = range tRange curve
   let segmentDerivativeRange = derivativeRange tRange curve
   let segmentSecondDerivativeRange = secondDerivativeRange tRange curve
@@ -468,6 +466,18 @@ instance
       (CompiledFunction.constant point - compiled curve)
       (negate (derivative curve))
 
+instance At (Curve2D units) Number (Point2D units) where
+  (@) = pointAt
+
+instance At (Curve3D space) Number (Point3D space) where
+  (@) = pointAt
+
+pointAt :: Curve dimension units space -> Number -> Point dimension units space
+pointAt curve tValue = case tValue of
+  0.0 -> startPoint curve
+  1.0 -> endPoint curve
+  _ -> CompiledFunction.value tValue (compiled curve)
+
 instance Composition () (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
   f << g = do
     let dfdt = derivative f << g
@@ -504,6 +514,7 @@ class
   , VectorBoundsExists dimension (Unitless ?/? units) space
   , DirectionBoundsExists dimension space
   , AxisExists dimension units space
+  , At (Curve dimension units space) Number (Point dimension units space)
   , Expression.Constant Number (Point dimension units space)
   , Expression.BezierCurve (Point dimension units space)
   , Expression.TransformBy
@@ -662,21 +673,13 @@ testPoints ::
   CurveExists dimension units space =>
   Curve dimension units space ->
   NonEmpty (Point dimension units space)
-testPoints curve = NonEmpty.map (pointOn curve) Parameter.samples
+testPoints curve = curve @ Parameter.samples
 
 secondDerivative ::
   CurveExists dimension units space =>
   Curve dimension units space ->
   VectorCurve dimension units space
 secondDerivative = VectorCurve.derivative . derivative
-
-pointAt :: Number -> Curve dimension units space -> Point dimension units space
-pointAt 0.0 curve = startPoint curve
-pointAt 1.0 curve = endPoint curve
-pointAt tValue curve = CompiledFunction.value tValue (compiled curve)
-
-pointOn :: Curve dimension units space -> Number -> Point dimension units space
-pointOn curve tValue = pointAt tValue curve
 
 startPoint :: Curve dimension units space -> Point dimension units space
 startPoint = (.startPoint)
@@ -941,7 +944,7 @@ desingularizeStart givenStartPoint givenStartDerivative curve =
     let tInner = affixWidth
     let prefixStart = givenStartPoint
     let prefixStartDerivatives = [affixWidth * givenStartDerivative]
-    let prefixEnd = pointAt tInner curve
+    let prefixEnd = curve @ tInner
     let prefixEndFirstDerivative = affixWidth * derivativeAt tInner curve
     let prefixEndSecondDerivative = affixWidth * affixWidth * secondDerivativeAt tInner curve
     let prefixEndDerivatives = [prefixEndFirstDerivative, prefixEndSecondDerivative]
@@ -960,7 +963,7 @@ desingularizeEnd curve givenEndPoint givenEndDerivative =
     let panic = error "Desingularization should never produce degenerate curve"
     let tInner = 1.0 - affixWidth
     let prefix = section (Interval 0.0 tInner) curve !! panic
-    let suffixStart = pointAt tInner curve
+    let suffixStart = curve @ tInner
     let suffixStartFirstDerivative = affixWidth * derivativeAt tInner curve
     let suffixStartSecondDerivative = affixWidth * affixWidth * secondDerivativeAt tInner curve
     let suffixStartDerivatives = [suffixStartFirstDerivative, suffixStartSecondDerivative]
@@ -978,18 +981,11 @@ findPoint ::
   List Number
 findPoint point curve
   | not (point ^ bounds curve) = []
-  | otherwise =
-      case findEndpointSolutions point curve of
-        NonEmpty endpointSolutions -> NonEmpty.toList endpointSolutions
+  | otherwise = do
+      let endpointSolutions = [tValue | tValue <- [0.0, 1.0], curve @ tValue ~= point]
+      case endpointSolutions of
         [] -> List.maybe (findInteriorSolution point curve)
-
-findEndpointSolutions ::
-  (CurveExists dimension units space, Tolerance units) =>
-  Point dimension units space ->
-  Curve dimension units space ->
-  List Number
-findEndpointSolutions point curve =
-  [tValue | tValue <- [0.0, 1.0], pointAt tValue curve ~= point]
+        List.OneOrMore -> endpointSolutions
 
 findInteriorSolution ::
   (CurveExists dimension units space, Tolerance units) =>
@@ -1004,10 +1000,10 @@ findInteriorSolution point curve = do
         | Curve.Segment.isDegenerate segment = Resolved (Just UniqueSolution)
         | otherwise = Unresolved
   let candidates = Bisection.resolve Bag.empty resolvedUniqueness (bisectionTree curve)
-  let f tValue = pointAt tValue curve - point
+  let f tValue = curve @ tValue - point
   let f' tValue = derivativeAt tValue curve
   let evaluate tValue = (# f tValue, f' tValue #)
-  let isSolution tValue = pointAt tValue curve ~= point
+  let isSolution tValue = curve @ tValue ~= point
   let resolvedSolution UniqueSolution tRange segment
         | isDistant segment = Resolved Nothing
         | otherwise = do
@@ -1027,7 +1023,7 @@ continuityAt ::
   (Curve dimension units space, Curve dimension units space) ->
   Maybe Continuity
 continuityAt (t1, t2) (curve1, curve2)
-  | pointAt t1 curve1 ~= pointAt t2 curve2 = do
+  | curve1 @ t1 ~= curve2 @ t2 = do
       let firstDerivative1 = derivativeAt t1 curve1
       let firstDerivative2 = derivativeAt t2 curve2
       let secondDerivative1 = secondDerivativeAt t1 curve1
@@ -1083,9 +1079,9 @@ linearDeviation ::
   Interval Unitless ->
   Quantity units
 linearDeviation curve (Interval t1 t2) = do
-  let p1 = pointAt t1 curve
-  let p2 = pointAt t2 curve
-  let pMid = pointAt (Number.midpoint t1 t2) curve
+  let p1 = curve @ t1
+  let p2 = curve @ t2
+  let pMid = curve @ Number.midpoint t1 t2
   let midError = Line.distanceTo pMid (Line p1 p2)
   max midError (leftRightError curve t1 t2 p1 p2)
 
@@ -1094,8 +1090,7 @@ toPolyline ::
   Resolution units ->
   Curve dimension units space ->
   Polyline dimension units space
-toPolyline resolution curve =
-  Polyline (NonEmpty.map (pointOn curve) (linearize resolution curve))
+toPolyline resolution curve = Polyline (curve @ linearize resolution curve)
 
 linearize ::
   CurveExists dimension units space =>
@@ -1105,7 +1100,7 @@ linearize ::
 linearize resolution curve = do
   let collect (Interval t1 t2) p1 p2 accumulated = do
         let tMid = Number.midpoint t1 t2
-        let pMid = pointAt tMid curve
+        let pMid = curve @ tMid
         let midError = Line.distanceTo pMid (Line p1 p2)
         let linearizationError = max midError (leftRightError curve t1 t2 p1 p2)
         let size = Point.distanceFrom p1 p2
@@ -1131,8 +1126,8 @@ leftRightError curve t1 t2 p1 p2 = do
   let tOffset = 0.5 * tWidth * Number.sqrt (3 / 7)
   let tLeft = tMid + tOffset
   let tRight = tMid - tOffset
-  let leftError = Line.distanceTo (pointAt tLeft curve) (Line p1 p2)
-  let rightError = Line.distanceTo (pointAt tRight curve) (Line p1 p2)
+  let leftError = Line.distanceTo (curve @ tLeft) (Line p1 p2)
+  let rightError = Line.distanceTo (curve @ tRight) (Line p1 p2)
   max leftError rightError
 
 arcLengthParameterization ::
@@ -1166,7 +1161,7 @@ atUniform ::
   Number ->
   Curve dimension units space ->
   Point dimension units space
-atUniform r curve = pointAt (uniformParameterization curve r) curve
+atUniform r curve = curve @ uniformParameterization curve r
 
 transformBy ::
   (CurveExists dimension units space, Transform.Tag.IsOrthonormal tag) =>

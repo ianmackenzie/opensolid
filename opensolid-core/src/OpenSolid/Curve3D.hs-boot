@@ -4,8 +4,6 @@ module OpenSolid.Curve3D
   , IsDegenerate
   , new
   , derivative
-  , pointAt
-  , pointOn
   , range
   , bounds
   , reverse
@@ -16,7 +14,7 @@ import {-# SOURCE #-} OpenSolid.Curve (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Bounds3D, Point3D)
+import OpenSolid.Primitives (Bounds3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
 
 type Compiled space = Curve.Compiled 3 Meters space
@@ -29,8 +27,6 @@ new ::
   VectorCurve3D Meters space ->
   Result (IsDegenerate space) (Curve3D space)
 derivative :: Curve3D space -> VectorCurve3D Meters space
-pointAt :: Number -> Curve3D space -> Point3D space
-pointOn :: Curve3D space -> Number -> Point3D space
 range :: Interval Unitless -> Curve3D space -> Bounds3D space
 bounds :: Curve3D space -> Bounds3D space
 reverse :: Curve3D space -> Curve3D space

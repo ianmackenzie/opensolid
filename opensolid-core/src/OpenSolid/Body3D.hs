@@ -465,8 +465,7 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
             Nothing -> do
               -- Degenerate half-edge not mated to any adjacent half-edge
               let edgePredicate = degenerateEdgeLinearizationPredicate uvCurve surfaceSegments
-              let tValues = Domain1D.leadingSamplingPoints edgePredicate
-              let uvPoints = NonEmpty.map (Curve2D.pointOn uvCurve) tValues
+              let uvPoints = uvCurve @ Domain1D.leadingSamplingPoints edgePredicate
               accumulated & HashMap.insert halfEdgeId uvPoints
             Just matingHalfEdgeId ->
               -- The logic below generates mesh vertices for *both* sides of a given half-edge,
@@ -494,12 +493,12 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
                           surfaceSegments
                           matingSurfaceSegments
                   let innerRValues = Domain1D.innerSamplingPoints edgePredicate
-                  let uvPoint = Curve2D.pointOn uvCurve . uniformParameterization
-                  let innerUvPoints = List.map uvPoint innerRValues
+                  let innerTValues = List.map uniformParameterization innerRValues
+                  let innerUvPoints = uvCurve @ innerTValues
                   let uvPoints = Curve2D.startPoint uvCurve :| innerUvPoints
                   let matingInnerRValues = List.reverseMap (1.0 -) innerRValues
-                  let matingUvPoint = Curve2D.pointOn matingUvCurve . matingUniformParameterization
-                  let matingInnerUvPoints = List.map matingUvPoint matingInnerRValues
+                  let matingInnerTValues = List.map matingUniformParameterization matingInnerRValues
+                  let matingInnerUvPoints = matingUvCurve @ matingInnerTValues
                   let matingUvPoints = Curve2D.startPoint matingUvCurve :| matingInnerUvPoints
                   accumulated
                     & HashMap.insert halfEdgeId uvPoints
@@ -529,18 +528,18 @@ edgeLinearizationPredicate
   (Interval rStart rEnd) = do
     let tStart = uniformParameterization rStart
     let tEnd = uniformParameterization rEnd
-    let uvStart = Curve2D.pointAt tStart uvCurve
-    let uvEnd = Curve2D.pointAt tEnd uvCurve
+    let uvStart = uvCurve @ tStart
+    let uvEnd = uvCurve @ tEnd
     let matingTStart = matingUniformParameterization (1.0 - rStart)
     let matingTEnd = matingUniformParameterization (1.0 - rEnd)
-    let matingUvStart = Curve2D.pointAt matingTStart matingUvCurve
-    let matingUvEnd = Curve2D.pointAt matingTEnd matingUvCurve
+    let matingUvStart = matingUvCurve @ matingTStart
+    let matingUvEnd = matingUvCurve @ matingTEnd
     let uvRange = Bounds2D.hull2 uvStart uvEnd
     let matingUvRange = Bounds2D.hull2 matingUvStart matingUvEnd
     let edgeSize = Point2D.distanceFrom uvStart uvEnd
     let matingEdgeSize = Point2D.distanceFrom matingUvStart matingUvEnd
-    let startPoint = Curve3D.pointAt tStart curve
-    let endPoint = Curve3D.pointAt tEnd curve
+    let startPoint = curve @ tStart
+    let endPoint = curve @ tEnd
     let edgeLength = Point3D.distanceFrom startPoint endPoint
     let edgeLinearDeviation = Curve.linearDeviation curve (Interval tStart tEnd)
     Resolution.acceptable {size = edgeLength, error = edgeLinearDeviation} resolution
@@ -553,8 +552,8 @@ degenerateEdgeLinearizationPredicate ::
   Interval Unitless ->
   Bool
 degenerateEdgeLinearizationPredicate uvCurve surfaceSegments (Interval tStart tEnd) = do
-  let uvStart = Curve2D.pointAt tStart uvCurve
-  let uvEnd = Curve2D.pointAt tEnd uvCurve
+  let uvStart = uvCurve @ tStart
+  let uvEnd = uvCurve @ tEnd
   let edgeBounds = Bounds2D.hull2 uvStart uvEnd
   let edgeSize = Point2D.distanceFrom uvStart uvEnd
   validEdge edgeBounds edgeSize surfaceSegments

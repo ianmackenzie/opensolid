@@ -275,8 +275,8 @@ addFillet radius point curves = do
             then couldNotSolveForFilletLocation
             else Try.do
               let (t1, t2) = intersection1
-              let centerPoint = Curve2D.pointAt t1 firstOffsetCurve
-              let startPoint = Curve2D.pointAt t1 firstCurve
+              let centerPoint = firstOffsetCurve @ t1
+              let startPoint = firstCurve @ t1
               let sweptAngle =
                     Direction2D.angleFrom
                       (Curve2D.tangentDirectionAt t1 firstCurve)

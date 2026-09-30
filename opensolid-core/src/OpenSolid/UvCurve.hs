@@ -6,8 +6,6 @@ module OpenSolid.UvCurve
   , unsafe
   , startPoint
   , endPoint
-  , pointAt
-  , pointOn
   , bounds
   , lineFrom
   , arcFrom
@@ -44,12 +42,6 @@ startPoint = Curve2D.startPoint
 
 endPoint :: UvCurve -> UvPoint
 endPoint = Curve2D.endPoint
-
-pointAt :: Number -> UvCurve -> UvPoint
-pointAt = Curve2D.pointAt
-
-pointOn :: UvCurve -> Number -> UvPoint
-pointOn = Curve2D.pointOn
 
 bounds :: UvCurve -> UvBounds
 bounds = Curve2D.bounds

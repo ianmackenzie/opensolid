@@ -63,7 +63,7 @@ testCurveMedialAxis label curve1 curve2 = Try.do
   let drawTangentCircles (segment :: Curve2D.MedialAxis.Segment Meters) = do
         let drawTangentCircle r = do
               let t = Curve2D.fromUniform r segment.curve
-              let centerPoint = Curve2D.pointAt t segment.curve
+              let centerPoint = segment.curve @ t
               let radius = Quantity.abs (Curve1D.valueAt t segment.radius)
               let strokeWidth = Length.millimeters 0.2
               Svg.with [Svg.strokeColor Color.gray, Svg.strokeWidth strokeWidth] do

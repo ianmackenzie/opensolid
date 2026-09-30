@@ -67,8 +67,8 @@ solve curveA curveB orientation (tRangeA, tRangeB) (segmentA, segmentB) =
     else do
       let scale = TangentSolver.lengthScale curveA curveB
       let evaluate (UvPoint tA tB) = do
-            let Point2D xA yA = Curve.pointAt tA curveA
-            let Point2D xB yB = Curve.pointAt tB curveB
+            let Point2D xA yA = curveA @ tA
+            let Point2D xB yB = curveB @ tB
             let Vector2D x'A y'A = Curve.derivativeAt tA curveA
             let Vector2D x'B y'B = Curve.derivativeAt tB curveB
             let Vector2D x''A y''A = Curve.secondDerivativeAt tA curveA

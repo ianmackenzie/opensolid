@@ -71,9 +71,8 @@ findIntersections
 
 findEndpointIntersections :: Problem dimension units space => List IntersectionPoint
 findEndpointIntersections = do
-  let findPoint curve t searchCurve = Curve.findPoint (Curve.pointOn curve t) searchCurve
-  let endpoints1On2 = [(t1, t2) | t1 <- [0.0, 1.0], t2 <- findPoint curve1 t1 curve2]
-  let endpoints2On1 = [(t1, t2) | t2 <- [0.0, 1.0], t1 <- findPoint curve2 t2 curve1]
+  let endpoints1On2 = [(t1, t2) | t1 <- [0.0, 1.0], t2 <- Curve.findPoint (curve1 @ t1) curve2]
+  let endpoints2On1 = [(t1, t2) | t2 <- [0.0, 1.0], t1 <- Curve.findPoint (curve2 @ t2) curve1]
   List.sortAndDeduplicate (endpoints1On2 <> endpoints2On1)
     & List.filterMap \solution -> do
       continuity <- Curve.continuityAt solution (curve1, curve2)

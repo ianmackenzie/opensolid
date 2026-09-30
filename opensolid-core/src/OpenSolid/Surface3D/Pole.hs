@@ -75,7 +75,7 @@ instance Intersects (Pole space) UvPoint Unitless where
 
 new :: UvCurve -> Point3D space -> Pole space
 new givenUvCurve givenPoint = do
-  let samplePoints = NonEmpty.map (UvCurve.pointOn givenUvCurve) Parameter.samples
+  let samplePoints = givenUvCurve @ Parameter.samples
   let allSamplePointsOn edge = unitless do NonEmpty.all (^ edge) samplePoints
   let detectedUvEdge
         | allSamplePointsOn UvEdge.Left = UvEdge.Left

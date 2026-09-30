@@ -42,8 +42,8 @@ solve curveA curveB Crossing (tRangeA, tRangeB) (segmentA, segmentB) =
     then Resolved Nothing
     else do
       let evaluate (UvPoint tA tB) = do
-            let pointA = Curve.pointAt tA curveA
-            let pointB = Curve.pointAt tB curveB
+            let pointA = curveA @ tA
+            let pointB = curveB @ tB
             let displacement = pointB - pointA
             let derivativeA = negate (Curve.derivativeAt tA curveA)
             let derivativeB = Curve.derivativeAt tB curveB

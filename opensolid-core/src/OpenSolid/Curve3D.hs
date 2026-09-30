@@ -33,8 +33,6 @@ module OpenSolid.Curve3D
   , startPoint
   , endPoint
   , endpoints
-  , pointAt
-  , pointOn
   , range
   , bounds
   , reverse
@@ -251,12 +249,6 @@ endPoint = Curve.endPoint
 
 endpoints :: Curve3D space -> (Point3D space, Point3D space)
 endpoints = Curve.endpoints
-
-pointAt :: Number -> Curve3D space -> Point3D space
-pointAt = Curve.pointAt
-
-pointOn :: Curve3D space -> Number -> Point3D space
-pointOn = Curve.pointOn
 
 range :: Interval Unitless -> Curve3D space -> Bounds3D space
 range = Curve.range

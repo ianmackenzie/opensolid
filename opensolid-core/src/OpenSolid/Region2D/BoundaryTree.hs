@@ -64,7 +64,7 @@ buildCurveImpl ::
 buildCurveImpl curve tRange startPoint endPoint = do
   let Interval tLow tHigh = tRange
   let tMid = Number.midpoint tLow tHigh
-  let midpoint = Curve2D.pointAt tMid curve
+  let midpoint = curve @ tMid
   let leftChild = buildCurveImpl curve (Interval tLow tMid) startPoint midpoint
   let rightChild = buildCurveImpl curve (Interval tMid tHigh) midpoint endPoint
   let children = NonEmpty.two leftChild rightChild

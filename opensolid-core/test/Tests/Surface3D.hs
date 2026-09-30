@@ -3,7 +3,6 @@ module Tests.Surface3D (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Curve2D qualified as Curve2D
-import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
@@ -109,8 +108,8 @@ ruledSurfaceCorrectValue =
     surface <- Surface3D.ruled curve1 curve2
     uvPoint <- Test.generate UvPoint.random
     let UvPoint u v = uvPoint
-    let p1 = Curve3D.pointAt u curve1
-    let p2 = Curve3D.pointAt u curve2
+    let p1 = curve1 @ u
+    let p2 = curve2 @ u
     let expectedPoint = Point3D.interpolateFrom p1 p2 v
     let actualPoint = SurfaceFunction3D.pointAt uvPoint (Surface3D.function surface)
     Test.expect (actualPoint ~~ expectedPoint)
@@ -149,7 +148,7 @@ translationalSurfaceCorrectValue =
     surface <- Surface3D.sweptBy translationCurve baseCurve
     uvPoint <- Test.generate UvPoint.random
     let UvPoint u v = uvPoint
-    let basePoint = Curve3D.pointAt u baseCurve
+    let basePoint = baseCurve @ u
     let translationVector = VectorCurve3D.valueAt v translationCurve
     let expectedPoint = basePoint + translationVector
     let actualPoint = SurfaceFunction3D.pointAt uvPoint (Surface3D.function surface)
