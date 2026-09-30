@@ -7,7 +7,6 @@ module OpenSolid.Prelude
   , Fuzzy (Resolved, Unresolved)
   , Err
   , Result (Ok, Err)
-  , try
   , (!!)
   , Exception
   , Void
@@ -91,7 +90,6 @@ import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
 import GHC.TypeLits (KnownSymbol, Symbol)
 import OpenSolid.Err (Err)
-import OpenSolid.Err qualified as Err
 import OpenSolid.Show qualified as Show
 import OpenSolid.Units (Meters, Radians, Unitless, Units, type (?*?), type (?/?))
 import OpenSolid.Units qualified as Units
@@ -489,10 +487,6 @@ instance Monad (Result x) where
 instance MonadFail (Result Text) where
   {-# INLINE fail #-}
   fail message = Err (fromString message)
-
-try :: MonadFail m => Result x a -> m a
-try (Ok value) = Prelude.return value
-try (Err err) = Prelude.fail (string (Err.message err))
 
 {-# INLINE (!!) #-}
 (!!) :: Result x a -> a -> a
