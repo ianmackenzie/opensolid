@@ -418,7 +418,7 @@ setField value function = function (name ::: value)
 
 ----- Composition -----
 
-class Composition constraint f g h | f g -> h, h -> constraint where
+class Composition constraint f g h | f g -> h, f g -> constraint where
   (<<) :: constraint => f -> g -> h
 
 infixr 9 <<
