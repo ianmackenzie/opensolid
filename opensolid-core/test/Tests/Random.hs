@@ -112,18 +112,16 @@ vectorBounds3D =
     lengthInterval
 
 axis2D :: Generator (Axis2D Meters)
-axis2D =
-  Random.map2
-    Axis2D.with
-    (Random.named "originPoint" point2D)
-    (Random.named "direction" Direction2D.random)
+axis2D = do
+  originPoint <- point2D
+  direction <- Direction2D.random
+  Random.return $ Axis2D.with {originPoint, direction}
 
 axis3D :: Generator (Axis3D space)
-axis3D =
-  Random.map2
-    Axis3D.with
-    (Random.named "originPoint" point3D)
-    (Random.named "direction" Direction3D.random)
+axis3D = do
+  originPoint <- point3D
+  direction <- Direction3D.random
+  Random.return $ Axis3D.with {originPoint, direction}
 
 plane3D :: Generator (Plane3D space)
 plane3D = Random.map2 Plane3D point3D PlaneOrientation3D.random
@@ -132,11 +130,10 @@ frame2D :: Generator (Frame2D Meters)
 frame2D = Random.map Frame2D.fromXAxis axis2D
 
 frame3D :: Generator (Frame3D global local)
-frame3D =
-  Random.map2
-    Frame3D.with
-    (Random.named "originPoint" point3D)
-    (Random.named "orientation" Orientation3D.random)
+frame3D = do
+  originPoint <- point3D
+  orientation <- Orientation3D.random
+  Random.return $ Frame3D.with {originPoint, orientation}
 
 bounds2D :: Generator (Bounds2D Meters)
 bounds2D = Random.map2 Bounds2D lengthInterval lengthInterval
