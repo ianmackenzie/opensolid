@@ -67,7 +67,7 @@ inscribed n circle
 {-| Create a regular polygon with the given number of vertices/sides.
 
 The polygon will be sized so that the given circle will just fit within the polygon
-(each polygon edge will touch the circle at the edge's midpoint).
+(each polygon edge will be tangent to the circle at the edge's midpoint).
 For a polygon with an even number of sides (square, hexagon, octagon etc.),
 this means that the "height" or "width across flats" will be equal to the given circle's diameter.
 The polygon will be oriented such that its bottom-most edge is horizontal.
