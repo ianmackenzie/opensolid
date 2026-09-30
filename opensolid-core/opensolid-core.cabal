@@ -252,6 +252,7 @@ library
     OpenSolid.UvEdge
     OpenSolid.UvPoint
     OpenSolid.UvRegion
+    OpenSolid.UvSet
     OpenSolid.Vector
     OpenSolid.Vector.Nonzero
     OpenSolid.Vector2D
