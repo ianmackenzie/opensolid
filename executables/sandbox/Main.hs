@@ -360,13 +360,7 @@ testNewtonRaphson2D = unitless do
   let bounds = Bounds2D (Interval 0.0 2.0) (Interval 0.0 2.0)
   let function = VectorSurfaceFunction2D.xy f g
   let (uDerivative, vDerivative) = VectorSurfaceFunction2D.partialDerivatives function
-  let solution =
-        Solve2D.unique
-          (VectorSurfaceFunction2D.range function)
-          (function @)
-          (uDerivative @)
-          (vDerivative @)
-          bounds
+  let solution = Solve2D.unique (function @) (function @) (uDerivative @) (vDerivative @) bounds
   log "Solve2D.unique solution" solution
 
 testExpression :: IO ()

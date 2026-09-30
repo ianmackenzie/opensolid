@@ -7,7 +7,6 @@ module OpenSolid.VectorSurfaceFunction2D
   , zero
   , constant
   , xy
-  , range
   , xComponent
   , yComponent
   , components
@@ -90,6 +89,28 @@ instance
   where
   {-# INLINE (@) #-}
   (fuu, fuv, fvv) @ uvPoint = (fuu @ uvPoint, fuv @ uvPoint, fvv @ uvPoint)
+
+instance At (VectorSurfaceFunction2D units) UvBounds (VectorBounds2D units) where
+  {-# INLINE (@) #-}
+  function @ uvBounds = CompiledFunction.range uvBounds function.compiled
+
+instance
+  At
+    (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)
+    UvBounds
+    (VectorBounds2D units, VectorBounds2D units)
+  where
+  {-# INLINE (@) #-}
+  (fu, fv) @ uvBounds = (fu @ uvBounds, fv @ uvBounds)
+
+instance
+  At
+    (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)
+    UvBounds
+    (VectorBounds2D units, VectorBounds2D units, VectorBounds2D units)
+  where
+  {-# INLINE (@) #-}
+  (fuu, fuv, fvv) @ uvBounds = (fuu @ uvBounds, fuv @ uvBounds, fvv @ uvBounds)
 
 instance Negation (VectorSurfaceFunction2D units) where
   negate function = new (negate function.compiled) (Pair.map negate function.partialDerivatives)
@@ -492,10 +513,6 @@ transformBy transform function = do
           function.compiled
   let transformedPartialDerivatives = Pair.map (transformBy transform) (partialDerivatives function)
   new compiledTransformed transformedPartialDerivatives
-
-{-# INLINE range #-}
-range :: VectorSurfaceFunction2D units -> UvBounds -> VectorBounds2D units
-range function uvRange = CompiledFunction.range uvRange function.compiled
 
 {-# INLINE compiled #-}
 compiled :: VectorSurfaceFunction2D units -> Compiled units

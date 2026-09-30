@@ -6,9 +6,7 @@ module OpenSolid.SurfaceFunction3D
   , range
   , compiled
   , partialDerivatives
-  , partialDerivativeRanges
   , secondPartialDerivatives
-  , secondPartialDerivativeRanges
   , normalDirectionRange
   , placeIn
   , relativeTo
@@ -39,11 +37,9 @@ import OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
-import OpenSolid.Triplet qualified as Triplet
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector3D (Vector3D)
-import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
@@ -195,20 +191,6 @@ constant value =
 {-# INLINE range #-}
 range :: UvBounds -> SurfaceFunction3D space -> Bounds3D space
 range uvRange function = CompiledFunction.range uvRange function.compiled
-
-partialDerivativeRanges ::
-  UvBounds ->
-  SurfaceFunction3D space ->
-  (VectorBounds3D Meters space, VectorBounds3D Meters space)
-partialDerivativeRanges uvRange function =
-  Pair.map (VectorSurfaceFunction3D.range uvRange) (partialDerivatives function)
-
-secondPartialDerivativeRanges ::
-  UvBounds ->
-  SurfaceFunction3D space ->
-  (VectorBounds3D Meters space, VectorBounds3D Meters space, VectorBounds3D Meters space)
-secondPartialDerivativeRanges uvRange function =
-  Triplet.map (VectorSurfaceFunction3D.range uvRange) (secondPartialDerivatives function)
 
 {-# INLINE compiled #-}
 compiled :: SurfaceFunction3D space -> Compiled space

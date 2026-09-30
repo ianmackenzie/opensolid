@@ -22,8 +22,6 @@ module OpenSolid.Surface3D
   , poles
   , edges
   , bisectionTree
-  , partialDerivativeRanges
-  , secondPartialDerivativeRanges
   , normalDirectionAt
   , normalDirectionRange
   , vertexAt
@@ -105,7 +103,6 @@ import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.Vector3D.Nonzero qualified as Vector3D.Nonzero
-import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve3D (VectorCurve3D)
 import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
@@ -242,20 +239,6 @@ bisectionTree = (.bisectionTree)
 range :: UvBounds -> Surface3D space -> Bounds3D space
 range uvRange surface = SurfaceFunction3D.range uvRange (function surface)
 
-partialDerivativeRanges ::
-  UvBounds ->
-  Surface3D space ->
-  (VectorBounds3D Meters space, VectorBounds3D Meters space)
-partialDerivativeRanges uvRange surface =
-  SurfaceFunction3D.partialDerivativeRanges uvRange (function surface)
-
-secondPartialDerivativeRanges ::
-  UvBounds ->
-  Surface3D space ->
-  (VectorBounds3D Meters space, VectorBounds3D Meters space, VectorBounds3D Meters space)
-secondPartialDerivativeRanges uvRange surface =
-  SurfaceFunction3D.secondPartialDerivativeRanges uvRange (function surface)
-
 normalDirectionAt :: UvPoint -> Surface3D space -> Direction3D space
 normalDirectionAt uvPoint surface = do
   let UvPoint uValue vValue = uvPoint
@@ -274,8 +257,8 @@ normalDirectionAt uvPoint surface = do
 normalDirectionRange :: UvBounds -> Surface3D space -> DirectionBounds3D space
 normalDirectionRange uvRange surface = do
   let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvRange
-  let (fu, fv) = partialDerivativeRanges uvRange surface
-  let (fuu, fuv, fvv) = secondPartialDerivativeRanges uvRange surface
+  let (fu, fv) = partialDerivatives surface @ uvRange
+  let (fuu, fuv, fvv) = secondPartialDerivatives surface @ uvRange
   let nu = fuu `cross` fv + fu `cross` fuv
   let nv = fuv `cross` fv + fu `cross` fvv
   VectorBounds3D.direction $
@@ -352,12 +335,12 @@ segment uvRange surface = do
   let isDegenerateRight = uLow >= Degeneracy.endValue && degenerateRight surface
   let isDegenerateBottom = vHigh <= Degeneracy.startValue && degenerateBottom surface
   let isDegenerateTop = vLow >= Degeneracy.endValue && degenerateTop surface
-  let derivativeRanges = partialDerivativeRanges uvRange surface
+  let derivativeRanges = partialDerivatives surface @ uvRange
   let (duRange, dvRange) = derivativeRanges
   Segment
     { range = range uvRange surface
     , partialDerivativeRanges = derivativeRanges
-    , secondPartialDerivativeRanges = secondPartialDerivativeRanges uvRange surface
+    , secondPartialDerivativeRanges = secondPartialDerivatives surface @ uvRange
     , normalDirectionRange = normalDirectionRange uvRange surface
     , isDegenerate = isDegenerateLeft || isDegenerateRight || isDegenerateBottom || isDegenerateTop
     , isMonotonic = VectorBounds3D.areIndependent duRange dvRange

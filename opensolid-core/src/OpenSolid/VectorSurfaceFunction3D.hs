@@ -11,12 +11,9 @@ module OpenSolid.VectorSurfaceFunction3D
   , degenerateTop
   , zero
   , constant
-  , range
   , compiled
   , partialDerivatives
   , secondPartialDerivatives
-  , partialDerivativeRanges
-  , secondPartialDerivativeRanges
   , placeIn
   , relativeTo
   , transformBy
@@ -47,7 +44,6 @@ import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
-import OpenSolid.Triplet qualified as Triplet
 import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
@@ -132,6 +128,31 @@ instance
   where
   {-# INLINE (@) #-}
   (fuu, fuv, fvv) @ uvPoint = (fuu @ uvPoint, fuv @ uvPoint, fvv @ uvPoint)
+
+instance At (VectorSurfaceFunction3D units space) UvBounds (VectorBounds3D units space) where
+  {-# INLINE (@) #-}
+  function @ uvBounds = CompiledFunction.range uvBounds function.compiled
+
+instance
+  At
+    (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space)
+    UvBounds
+    (VectorBounds3D units space, VectorBounds3D units space)
+  where
+  {-# INLINE (@) #-}
+  (fu, fv) @ uvBounds = (fu @ uvBounds, fv @ uvBounds)
+
+instance
+  At
+    ( VectorSurfaceFunction3D units space
+    , VectorSurfaceFunction3D units space
+    , VectorSurfaceFunction3D units space
+    )
+    UvBounds
+    (VectorBounds3D units space, VectorBounds3D units space, VectorBounds3D units space)
+  where
+  {-# INLINE (@) #-}
+  (fuu, fuv, fvv) @ uvBounds = (fuu @ uvBounds, fuv @ uvBounds, fvv @ uvBounds)
 
 instance Negation (VectorSurfaceFunction3D units space) where
   negate function = new (negate function.compiled) (Pair.map negate function.partialDerivatives)
@@ -544,10 +565,6 @@ zero = constant Vector3D.zero
 constant :: Vector3D units space -> VectorSurfaceFunction3D units space
 constant vector = new (CompiledFunction.constant vector) (zero, zero)
 
-{-# INLINE range #-}
-range :: UvBounds -> VectorSurfaceFunction3D units space -> VectorBounds3D units space
-range uvRange function = CompiledFunction.range uvRange function.compiled
-
 {-# INLINE compiled #-}
 compiled :: VectorSurfaceFunction3D units space -> Compiled units space
 compiled = (.compiled)
@@ -569,21 +586,6 @@ secondPartialDerivatives function = do
   let (fuu, fuv) = partialDerivatives fu
   let (_, fvv) = partialDerivatives fv
   (fuu, fuv, fvv)
-
-partialDerivativeRanges ::
-  UvBounds ->
-  VectorSurfaceFunction3D units space ->
-  (VectorBounds3D units space, VectorBounds3D units space)
-partialDerivativeRanges uvRange function = do
-  let (fu, fv) = partialDerivatives function
-  (range uvRange fu, range uvRange fv)
-
-secondPartialDerivativeRanges ::
-  UvBounds ->
-  VectorSurfaceFunction3D units space ->
-  (VectorBounds3D units space, VectorBounds3D units space, VectorBounds3D units space)
-secondPartialDerivativeRanges uvRange function =
-  Triplet.map (range uvRange) (secondPartialDerivatives function)
 
 placeIn ::
   Frame3D global local ->
@@ -644,14 +646,14 @@ directionRange ::
   DirectionBounds3D space
 directionRange uvRange function = do
   let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvRange
-  let (fuRange, fvRange) = partialDerivativeRanges uvRange function
+  let (fuRange, fvRange) = partialDerivatives function @ uvRange
   VectorBounds3D.direction do
     if
       | uLow == 0.0 && degenerateLeft function -> fuRange
       | uHigh == 1.0 && degenerateRight function -> negate fuRange
       | vLow == 0.0 && degenerateBottom function -> fvRange
       | vHigh == 1.0 && degenerateTop function -> negate fvRange
-      | otherwise -> range uvRange function
+      | otherwise -> function @ uvRange
 
 newtonRaphson :: VectorSurfaceFunction3D units space -> UvPoint -> Fuzzy UvPoint
 newtonRaphson f uvPoint0 = do
