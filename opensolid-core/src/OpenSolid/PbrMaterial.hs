@@ -27,6 +27,7 @@ data PbrMaterial = PbrMaterial
   , roughness :: Number
   , metallic :: Number
   }
+  deriving (Show)
 
 instance FFI PbrMaterial where
   representation = FFI.classRepresentation "PbrMaterial"
