@@ -3,17 +3,14 @@ module OpenSolid.VectorCurve.Nonzero
   , squaredMagnitude_
   , magnitude
   , normalize
-  , directionAt
   )
 where
 
 import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D.Nonzero qualified as Curve1D.Nonzero
-import OpenSolid.Direction (Direction)
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
-import OpenSolid.Vector.Nonzero qualified as Vector.Nonzero
 import OpenSolid.VectorCurve (VectorCurve, VectorCurveExists)
 import OpenSolid.VectorCurve qualified as VectorCurve
 
@@ -40,10 +37,3 @@ normalize ::
   Nonzero (VectorCurve dimension units space) ->
   Nonzero (VectorCurve dimension Unitless space)
 normalize (Nonzero curve) = Nonzero (curve / magnitude (Nonzero curve))
-
-directionAt ::
-  VectorCurveExists dimension units space =>
-  Number ->
-  Nonzero (VectorCurve dimension units space) ->
-  Direction dimension space
-directionAt tValue curve = Vector.Nonzero.direction (curve @ tValue)
