@@ -627,10 +627,10 @@ instance (Hashable key1, key1 ~ key2) => At (HashMap key1 value) key2 value wher
   (@) = (Data.HashMap.Strict.!)
 
 instance At datum location result => At datum (List location) (List result) where
-  (@) = Prelude.fmap . (@)
+  datum @ locations = Prelude.fmap (datum @) locations
 
 instance At datum location result => At datum (NonEmpty location) (NonEmpty result) where
-  (@) = Prelude.fmap . (@)
+  datum @ locations = Prelude.fmap (datum @) locations
 
 ----- On -----
 
