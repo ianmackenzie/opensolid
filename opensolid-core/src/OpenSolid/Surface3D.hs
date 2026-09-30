@@ -6,6 +6,8 @@ module OpenSolid.Surface3D
   , Boundary
   , Segment
   , function
+  , partialDerivatives
+  , secondPartialDerivatives
   , domain
   , degenerateLeft
   , degenerateRight
@@ -110,6 +112,7 @@ import OpenSolid.Vector3D.Nonzero qualified as Vector3D.Nonzero
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve3D (VectorCurve3D)
+import OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
 
 data Surface3D space = Surface3D
   { function :: SurfaceFunction3D space
@@ -164,6 +167,19 @@ type Boundary space = Set3D space (SurfaceCurve3D space)
 {-# INLINE function #-}
 function :: Surface3D space -> SurfaceFunction3D space
 function = (.function)
+
+partialDerivatives ::
+  Surface3D space ->
+  (VectorSurfaceFunction3D Meters space, VectorSurfaceFunction3D Meters space)
+partialDerivatives surface = SurfaceFunction3D.partialDerivatives (function surface)
+
+secondPartialDerivatives ::
+  Surface3D space ->
+  ( VectorSurfaceFunction3D Meters space
+  , VectorSurfaceFunction3D Meters space
+  , VectorSurfaceFunction3D Meters space
+  )
+secondPartialDerivatives surface = SurfaceFunction3D.secondPartialDerivatives (function surface)
 
 {-# INLINE domain #-}
 domain :: Surface3D space -> UvRegion
