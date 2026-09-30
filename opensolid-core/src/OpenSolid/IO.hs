@@ -34,8 +34,8 @@ import OpenSolid.Duration qualified as Duration
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude hiding (forEach, forEachWithIndex)
 import OpenSolid.Prelude qualified
-import OpenSolid.Result qualified as Result
 import OpenSolid.Text qualified as Text
+import OpenSolid.Try qualified as Try
 import System.Directory
 import System.FilePath qualified
 import System.IO.Error qualified
@@ -95,9 +95,10 @@ writeBinary :: Text -> Builder -> IO ()
 writeBinary path builder = Builder.writeFile (string path) builder
 
 readUtf8 :: Text -> IO Text
-readUtf8 path = do
+readUtf8 path = Try.do
   bytes <- readBinary path
-  Text.decodeUtf8 bytes & Result.orFail
+  decoded <- Text.decodeUtf8 bytes
+  succeed decoded
 
 writeUtf8 :: Text -> Text -> IO ()
 writeUtf8 path text = do
