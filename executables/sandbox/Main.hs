@@ -27,7 +27,6 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
-import OpenSolid.Polygon2D (Polygon2D (Polygon2D))
 import OpenSolid.Polyline2D qualified as Polyline2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -216,16 +215,10 @@ drawZeros path zeros = do
   Svg.write path (Svg.viewBox viewBox) $
     Svg.with [Svg.strokeWidth strokeWidth] do
       Svg.group
-        [ drawBounds (Bounds2D.convert toDrawing UvBounds.unitSquare)
+        [ Svg.bounds (Bounds2D.convert toDrawing UvBounds.unitSquare)
         , Svg.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
         , Svg.combine (drawDot Color.orange) zeros.saddlePoints
         ]
-
-drawBounds :: Bounds2D Meters -> Svg
-drawBounds bounds = do
-  let corner x y = Bounds2D.interpolate bounds x y
-  let vertices = NonEmpty.four (corner 0.0 0.0) (corner 1.0 0.0) (corner 1.0 1.0) (corner 0.0 1.0)
-  Svg.polygon (Polygon2D vertices)
 
 drawCrossingCurve :: Int -> UvCurve -> Svg
 drawCrossingCurve index curve = do
@@ -288,7 +281,7 @@ drawBezier color startPoint innerControlPoints endPoint = Try.do
   let drawingInnerControlPoints = List.map (Point2D.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints <> [drawingEndPoint])
   curve <- spatial (Curve2D.bezier drawingControlPoints)
-  let drawCurveRange tRange = drawBounds (Curve2D.range tRange curve)
+  let drawCurveRange tRange = Svg.bounds (Curve2D.range tRange curve)
   let controlPointDiameter = Length.millimeters 10.0
   let drawControlPoint point = Svg.circleWith {centerPoint = point, diameter = controlPointDiameter}
   let resolution = Resolution.maxError Length.millimeter
