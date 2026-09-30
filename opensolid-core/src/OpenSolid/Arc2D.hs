@@ -1,6 +1,6 @@
 module OpenSolid.Arc2D
   ( Arc2D
-  , new
+  , with
   , centerPoint
   , radius
   , startAngle
@@ -39,13 +39,13 @@ data Arc2D units = Arc2D
   }
   deriving (Show)
 
-new ::
+with ::
   ("centerPoint" ::: Point2D units) ->
   ("radius" ::: Quantity units) ->
   ("startAngle" ::: Angle) ->
   ("endAngle" ::: Angle) ->
   Arc2D units
-new
+with
   ("centerPoint" ::: givenCenterPoint)
   ("radius" ::: givenRadius)
   ("startAngle" ::: givenStartAngle)
