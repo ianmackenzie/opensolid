@@ -1524,6 +1524,8 @@ curve2D =
     , Class.property "Start Point" (Curve2D.startPoint) "The start point of the curve."
     , Class.property "End Point" (Curve2D.endPoint) "The end point of the curve."
     , Class.property "Derivative" Curve2D.derivative "The derivative of the curve."
+    , Class.atParameterValue
+    , Class.atUniformParameterValue
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "X Coordinate" (Curve2D.xCoordinate) $(docs 'Curve2D.xCoordinate)
     , Class.property "Y Coordinate" (Curve2D.yCoordinate) $(docs 'Curve2D.yCoordinate)
@@ -1551,6 +1553,8 @@ uvCurve =
     , Class.property "Start Point" (Curve2D.startPoint) "The start point of the curve."
     , Class.property "End Point" (Curve2D.endPoint) "The end point of the curve."
     , Class.property "Derivative" Curve2D.derivative "The derivative of the curve."
+    , Class.atParameterValue
+    , Class.atUniformParameterValue
     , Class.member0 "Reverse" Curve2D.reverse $(docs 'Curve2D.reverse)
     , Class.property "U Coordinate" (Curve2D.xCoordinate) "Get the U coordinate of a UV curve as a scalar curve."
     , Class.property "V Coordinate" (Curve2D.yCoordinate) "Get the V coordinate of a UV curve as a scalar curve."
