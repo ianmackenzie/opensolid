@@ -83,6 +83,7 @@ module OpenSolid.API.Class
   , divMod
   , dot
   , cross
+  , at
   , nested
   , functions
   )
@@ -1189,6 +1190,14 @@ cross ::
 cross =
   PostOverload BinaryOperator.Cross $
     PostOperatorOverload (wrap2 (OpenSolid.Prelude.cross :: value -> rhs -> result))
+
+at ::
+  forall rhs value result.
+  (At value rhs result, FFI value, FFI rhs, FFI result) =>
+  Member value
+at =
+  PostOverload BinaryOperator.At $
+    PostOperatorOverload (wrap2 ((@) :: value -> rhs -> result))
 
 nested :: FFI nestedValue => Text -> List (Member nestedValue) -> Member value
 nested = Nested

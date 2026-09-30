@@ -864,6 +864,7 @@ curve =
     , Class.member0 "Cos" (Curve1D.cos . (Angle.radian *)) $(docs 'Curve1D.cos)
     , Class.member0R "Roots" (unitless Curve1D.roots) $(docs 'Curve1D.roots)
     , Class.member0 "Is Zero" (unitless (~= Curve1D.zero)) "Check if a curve is (approximately) zero everywhere."
+    , Class.at @Number
     , Class.negation
     , Class.numberPlus
     , Class.numberMinus
@@ -903,6 +904,7 @@ angleCurve =
     , Class.member0 "Cos" Curve1D.cos $(docs 'Curve1D.cos)
     , Class.member0R "Roots" (angular Curve1D.roots) $(docs 'Curve1D.roots)
     , Class.member0 "Is Zero" (angular (~= Curve1D.zero)) "Check if a curve is (approximately) zero everywhere."
+    , Class.at @Number
     , Class.negation
     , Class.numberTimes
     , Class.plus @AngleCurve
@@ -929,6 +931,7 @@ lengthCurve =
     , Class.member0 "Squared" Curve1D.squared $(docs 'Curve1D.squared)
     , Class.memberT0R "Roots" Curve1D.roots $(docs 'Curve1D.roots)
     , Class.memberT0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
+    , Class.at @Number
     , Class.negation
     , Class.numberTimes
     , Class.plus @LengthCurve
@@ -954,6 +957,7 @@ areaCurve =
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
+    , Class.at @Number
     , Class.negation
     , Class.numberTimes
     , Class.plus @AreaCurve

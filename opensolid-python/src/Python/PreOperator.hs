@@ -56,6 +56,7 @@ documentation operatorId =
       BinaryOperator.Mod -> "Return ``" <> lhsArgName <> " % self``."
       BinaryOperator.Dot -> error "Dot product should never be a pre-operator"
       BinaryOperator.Cross -> error "Cross product should never be a pre-operator"
+      BinaryOperator.At -> error "Evaluation should never be a pre-operator"
 
 functionName :: BinaryOperator.Id -> Text
 functionName operatorId = case operatorId of
@@ -67,6 +68,7 @@ functionName operatorId = case operatorId of
   BinaryOperator.Mod -> "__rmod__"
   BinaryOperator.Dot -> error "Dot product should never be a pre-operator"
   BinaryOperator.Cross -> error "Cross product should never be a pre-operator"
+  BinaryOperator.At -> error "Evaluation should never be a pre-operator"
 
 overloadComponents ::
   FFI.ClassName ->

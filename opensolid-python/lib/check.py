@@ -14,8 +14,8 @@ from opensolid import (
 p1 = Point2D.meters(1, 2)
 p2 = Point2D.meters(3, 4)
 print(p1.distance_to(p2))
-print(Curve.t.value(0.5))
-print(Curve.t.squared().value(0.5))
+print(Curve.t(0.5))
+print(Curve.t.squared()(0.5))
 
 r1 = LengthInterval(Length.meters(1), Length.meters(5))
 r2 = LengthInterval(Length.meters(3), Length.meters(7))
