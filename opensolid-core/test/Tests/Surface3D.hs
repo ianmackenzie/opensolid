@@ -63,7 +63,7 @@ findPole = Test.check 100 "findPole" do
     [SurfacePoint3D.Pole pole] -> Try.do
       expectedUvCurve <- UvCurve.lineFrom (UvPoint 1.0 0.0) (UvPoint 1.0 1.0)
       Test.expect (Surface3D.Pole.uvCurve pole ~~ expectedUvCurve)
-    _ -> Test.fail "Expected a single solution pole" & Test.output "solutions" solutions
+    _ -> Test.fail "Expected a single solution pole" & Test.log {solutions}
 
 findNonPole :: Text -> Generator UvPoint -> Test
 findNonPole label uvPointGenerator = Test.check 100 label do
@@ -73,7 +73,7 @@ findNonPole label uvPointGenerator = Test.check 100 label do
   let solutions = Surface3D.findPoint point surface
   case solutions of
     [SurfacePoint3D.Point solution _] -> Test.expect (solution ~~ uvPoint)
-    _ -> Test.fail "Expected a single solution point" & Test.output "solutions" solutions
+    _ -> Test.fail "Expected a single solution point" & Test.log {solutions}
 
 findVertex :: Test
 findVertex = findNonPole "findVertex" do
@@ -110,9 +110,7 @@ ruledSurfaceCorrectValue =
     let p2 = curve2 @ u
     let expectedPoint = Point3D.interpolateFrom p1 p2 v
     let actualPoint = surface @ uvPoint
-    Test.expect (actualPoint ~~ expectedPoint)
-      & Test.output "expectedPoint" expectedPoint
-      & Test.output "actualPoint" actualPoint
+    Test.expect (actualPoint ~~ expectedPoint) & Test.log {expectedPoint, actualPoint}
 
 ruledSurfaceDerivativeConsistency :: Test
 ruledSurfaceDerivativeConsistency =
@@ -148,9 +146,7 @@ translationalSurfaceCorrectValue =
     let UvPoint u v = uvPoint
     let expectedPoint = baseCurve @ u + translationCurve @ v
     let actualPoint = surface @ uvPoint
-    Test.expect (actualPoint ~~ expectedPoint)
-      & Test.output "expectedPoint" expectedPoint
-      & Test.output "actualPoint" actualPoint
+    Test.expect (actualPoint ~~ expectedPoint) & Test.log {expectedPoint, actualPoint}
 
 translationalSurfaceDerivativeConsistency :: Test
 translationalSurfaceDerivativeConsistency =

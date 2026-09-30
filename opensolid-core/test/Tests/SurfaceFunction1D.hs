@@ -58,8 +58,7 @@ intersectionCurveFirstDerivativeConsistency =
     Test.check 100 "intersectionCurveFirstDerivativeConsistency" do
       curve <- Test.generate (Random.oneOf curves)
       tValue <- Test.generate Parameter.random
-      Tests.Curve2D.firstDerivativeIsConsistentWithin 1e-6 curve tValue
-        & Test.output "tValue" tValue
+      Tests.Curve2D.firstDerivativeIsConsistentWithin 1e-6 curve tValue & Test.log {tValue}
 
 intersectionCurveRangeConsistency :: Test
 intersectionCurveRangeConsistency =
@@ -121,10 +120,6 @@ firstDerivativesAreConsistent surfaceFunction p0 = do
   let (fuAnalytical, fvAnalytical) = SurfaceFunction1D.partialDerivatives surfaceFunction @ p0
   Tolerance.using Length.micrometer $
     Test.all
-      [ Test.expect (fuNumerical ~= fuAnalytical)
-          & Test.output "fuNumerical" fuNumerical
-          & Test.output "fuAnalytical" fuAnalytical
-      , Test.expect (fvNumerical ~= fvAnalytical)
-          & Test.output "fvNumerical" fvNumerical
-          & Test.output "fvAnalytical" fvAnalytical
+      [ Test.expect (fuNumerical ~= fuAnalytical) & Test.log {fuNumerical, fuAnalytical}
+      , Test.expect (fvNumerical ~= fvAnalytical) & Test.log {fvNumerical, fvAnalytical}
       ]

@@ -71,17 +71,12 @@ findPoint = Test.verify "findPoint" Try.do
   let endParameterValues = Curve2D.findPoint (Point2D.meters 2.0 0.0) testSpline
   let midParameterValues = Curve2D.findPoint (Point2D.meters 1.0 1.0) testSpline
   let offCurveParameterValues = Curve2D.findPoint (Point2D.meters 1.0 1.1) testSpline
-  Tolerance.using 1e-12 do
-    Test.all
-      [ Test.expect (startParameterValues ~= [0.0])
-          & Test.output "startParameterValues" startParameterValues
-      , Test.expect (endParameterValues ~= [1.0])
-          & Test.output "endParameterValues" endParameterValues
-      , Test.expect (midParameterValues ~= [0.5])
-          & Test.output "midParameterValues" midParameterValues
-      , Test.expect (offCurveParameterValues == [])
-          & Test.output "offCurveParameterValues" offCurveParameterValues
-      ]
+  Test.all
+    [ Test.expect (startParameterValues ~~ [0.0]) & Test.log {startParameterValues}
+    , Test.expect (endParameterValues ~~ [1.0]) & Test.log {endParameterValues}
+    , Test.expect (midParameterValues ~~ [0.5]) & Test.log {midParameterValues}
+    , Test.expect (offCurveParameterValues == []) & Test.log {offCurveParameterValues}
+    ]
 
 findOwnPoint :: Test
 findOwnPoint = Test.check 500 "findOwnPoint" Try.do
@@ -92,10 +87,7 @@ findOwnPoint = Test.check 500 "findOwnPoint" Try.do
   t <- Test.generate Parameter.random
   let p = testSpline @ t
   let solutions = Curve2D.findPoint p testSpline
-  Tolerance.using 1e-12 do
-    Test.expect (solutions ~= [t])
-      & Test.output "t" t
-      & Test.output "solutions" solutions
+  Test.expect (solutions ~~ [t]) & Test.log {t, solutions}
 
 overlappingSegments ::
   Tolerance Meters =>
@@ -169,13 +161,13 @@ overlapAndJoin = Test.verify "overlapAndJoin" Try.do
   let expectedSegments = NonEmpty.one (Interval 0.0 (1 / 4), Interval 0.0 (1 / 5))
   let expectedPoints = [IntersectionPoint.indistinguishable Negative (1.0, 1.0)]
   Test.all
-    [ Test.expect (segments ~~ expectedSegments)
-        & Test.output "segments" segments
-        & Test.output "expectedSegments" expectedSegments
+    [ Test.expect (segments ~~ expectedSegments) & Test.log {segments, expectedSegments}
     , Test.expect (sign == Negative)
     , Test.expect (points ~~ expectedPoints)
-        & Test.output "points" (List.map IntersectionPoint.parameterValues points)
-        & Test.output "expectedPoints" (List.map IntersectionPoint.parameterValues expectedPoints)
+        & Test.log
+          { points = List.map IntersectionPoint.parameterValues points
+          , expectedPoints = List.map IntersectionPoint.parameterValues expectedPoints
+          }
     ]
 
 crossingIntersection :: Test
@@ -191,8 +183,7 @@ crossingIntersection = Test.verify "crossingIntersection" Try.do
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
       Test.expect (actualIntersectionPoints ~~ expectedIntersectionPoints)
-        & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
-        & Test.output "actualIntersectionPoints" actualIntersectionPoints
+        & Test.log {expectedIntersectionPoints, actualIntersectionPoints}
     Just (Curve.OverlappingSegments {}) ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
 
@@ -218,8 +209,7 @@ tangentIntersection = Test.verify "tangentIntersection" Try.do
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
       Test.expect (actualIntersectionPoints ~~ expectedIntersectionPoints)
-        & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
-        & Test.output "actualIntersectionPoints" actualIntersectionPoints
+        & Test.log {expectedIntersectionPoints, actualIntersectionPoints}
     Just (Curve.OverlappingSegments {}) ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
 
@@ -266,8 +256,7 @@ firstDerivativeIsConsistentWithin givenTolerance curve tValue = do
   let analyticFirstDerivative = Curve2D.derivative curve @ tValue
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
-      & Test.output "numericalFirstDerivative" numericalFirstDerivative
-      & Test.output "analyticFirstDerivative" analyticFirstDerivative
+      & Test.log {numericalFirstDerivative, analyticFirstDerivative}
 
 firstDerivativeConsistency :: Generator (Curve2D Meters) -> Test
 firstDerivativeConsistency randomCurve = Test.check 100 "firstDerivativeConsistency" do
@@ -284,8 +273,7 @@ secondDerivativeIsConsistent curve tValue = do
   let analyticSecondDerivative = Curve2D.secondDerivative curve @ tValue
   Tolerance.using Length.micrometer do
     Test.expect (numericalSecondDerivative ~= analyticSecondDerivative)
-      & Test.output "numericalSecondDerivative" numericalSecondDerivative
-      & Test.output "analyticSecondDerivative" analyticSecondDerivative
+      & Test.log {numericalSecondDerivative, analyticSecondDerivative}
 
 secondDerivativeConsistency :: Generator (Curve2D Meters) -> Test
 secondDerivativeConsistency randomCurve = Test.check 100 "secondDerivativeConsistency" do
@@ -320,11 +308,7 @@ rangeConsistency curve = do
   tValue <- Test.generate (Random.map (tRange @) Parameter.random)
   let curveValue = curve @ tValue
   let curveRange = curve @ tRange
-  Test.expect (curveValue ^ curveRange)
-    & Test.output "tValue" tValue
-    & Test.output "tRange" tRange
-    & Test.output "curveValue" curveValue
-    & Test.output "curveRange" curveRange
+  Test.expect (curveValue ^ curveRange) & Test.log {tValue, tRange, curveValue, curveRange}
 
 arcConstruction :: Test
 arcConstruction = do
@@ -349,14 +333,14 @@ arcTransformation = Test.check 100 "arc transformation" do
   transform <- Test.generate Random.orthonormalTransform2D
   t <- Test.generate Parameter.random
   let transformedArc = Curve2D.transformBy transform initialArc
+  let startOfTransformed = Curve2D.startPoint transformedArc
   let pointOnTransformed = transformedArc @ t
   let transformOfStart = Point2D.transformBy transform (Curve2D.startPoint initialArc)
   let transformOfEnd = Point2D.transformBy transform (Curve2D.endPoint initialArc)
   let transformOfPoint = Point2D.transformBy transform (initialArc @ t)
   Test.all
-    [ Test.expect (Curve2D.startPoint transformedArc ~= transformOfStart)
-        & Test.output "transformedArc.startPoint" (Curve2D.startPoint transformedArc)
-        & Test.output "transformOfStart" transformOfStart
+    [ Test.expect (startOfTransformed ~= transformOfStart)
+        & Test.log {startOfTransformed, transformOfStart}
     , Test.expect (Curve2D.endPoint transformedArc ~= transformOfEnd)
     , Test.expect (pointOnTransformed ~= transformOfPoint)
     ]
@@ -377,5 +361,4 @@ g2 = Test.check 100 "G2 continuity" Try.do
   let arcCenter = point + signedRadius * normalDirection
   arc <- Curve2D.sweptArc arcCenter point (Quantity.sign signedRadius * Angle.degrees 30.0)
   let continuity = Curve.continuityAt (t, 0.0) (spline, arc)
-  Test.expect (continuity == Just (Continuity.Indistinguishable Positive))
-    & Test.output "continuity" continuity
+  Test.expect (continuity == Just (Continuity.Indistinguishable Positive)) & Test.log {continuity}

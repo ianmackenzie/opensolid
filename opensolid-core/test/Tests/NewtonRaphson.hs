@@ -83,17 +83,13 @@ curve1D :: Text -> Curve1D Unitless -> Number -> Number -> Test
 curve1D name curve t0 tExpected =
   Test.verify name do
     tSolution <- Curve1D.newtonRaphson curve t0 ?? Test.fail "Expected a solution"
-    Test.expect (unitless (tSolution ~= tExpected))
-      & Test.output "Expected solution" tExpected
-      & Test.output "Actual solution" tSolution
+    Test.expect (unitless (tSolution ~= tExpected)) & Test.log {tExpected, tSolution}
 
 curve2D :: Text -> VectorCurve2D Unitless -> Number -> Number -> Test
 curve2D name curve t0 tExpected =
   Test.verify name do
     tSolution <- VectorCurve2D.newtonRaphson curve t0 ?? Test.fail "Expected a solution"
-    Test.expect (unitless (tSolution ~= tExpected))
-      & Test.output "Expected solution" tExpected
-      & Test.output "Actual solution" tSolution
+    Test.expect (unitless (tSolution ~= tExpected)) & Test.log {tExpected, tSolution}
 
 surface2D ::
   VectorSurfaceFunction2D Unitless ->
@@ -102,9 +98,7 @@ surface2D ::
   Test.Expectation
 surface2D surface uv0 uvExpected = do
   uvSolution <- VectorSurfaceFunction2D.newtonRaphson surface uv0 ?? Test.fail "Expected a solution"
-  Test.expect (unitless (uvSolution ~= uvExpected))
-    & Test.output "Expected solution" uvExpected
-    & Test.output "Actual solution" uvSolution
+  Test.expect (unitless (uvSolution ~= uvExpected)) & Test.log {uvExpected, uvSolution}
 
 surface3D ::
   Tolerance Meters =>
@@ -114,6 +108,4 @@ surface3D ::
   Test.Expectation
 surface3D surface uv0 uvExpected = do
   uvSolution <- VectorSurfaceFunction3D.newtonRaphson surface uv0 ?? Test.fail "Expected a solution"
-  Test.expect (unitless (uvSolution ~= uvExpected))
-    & Test.output "Expected solution" uvExpected
-    & Test.output "Actual solution" uvSolution
+  Test.expect (unitless (uvSolution ~= uvExpected)) & Test.log {uvExpected, uvSolution}

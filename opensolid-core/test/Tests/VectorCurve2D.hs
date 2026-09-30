@@ -24,8 +24,7 @@ derivativeConsistency givenTolerance curve = do
   let analyticFirstDerivative = VectorCurve2D.derivative curve @ tValue
   Tolerance.using givenTolerance do
     Test.expect (numericalFirstDerivative ~= analyticFirstDerivative)
-      & Test.output "numericalFirstDerivative" numericalFirstDerivative
-      & Test.output "analyticFirstDerivative" analyticFirstDerivative
+      & Test.log {numericalFirstDerivative, analyticFirstDerivative}
 
 rangeConsistency ::
   (Tolerance units, Show (Quantity units)) =>
@@ -37,7 +36,4 @@ rangeConsistency vectorCurve = do
   let vectorCurveValue = vectorCurve @ tValue
   let vectorCurveRange = vectorCurve @ tRange
   Test.expect (vectorCurveValue ^ vectorCurveRange)
-    & Test.output "tValue" tValue
-    & Test.output "tRange" tRange
-    & Test.output "vectorCurveValue" vectorCurveValue
-    & Test.output "vectorCurveRange" vectorCurveRange
+    & Test.log {tValue, tRange, vectorCurveValue, vectorCurveRange}

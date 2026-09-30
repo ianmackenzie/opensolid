@@ -22,6 +22,4 @@ mapWithIndex = Test.verify "mapWithIndex" do
           & Number.sum
   let expected = 2.0
   Tolerance.using 1e-3 do
-    Test.expect (sum ~= expected)
-      & Test.output "sum" sum
-      & Test.output "error" (sum - expected)
+    Test.expect (sum ~= expected) & Test.log {sum, error = sum - expected}

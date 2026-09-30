@@ -43,6 +43,10 @@ findAll = Test.verify "findAll" do
   let foundPoints = Set2D.filterBounds (^ searchBounds) testSet
   let expectedPoints = Bag2D.pack [point 3 5, point 5 5]
   Test.expect (foundPoints ~~ expectedPoints)
+    & Test.log
+      { foundPoints = Bag2D.toList foundPoints
+      , expectedPoints = Bag2D.toList expectedPoints
+      }
 
 clusters :: Test
 clusters = Test.verify "clusters" do
@@ -59,12 +63,9 @@ clusters = Test.verify "clusters" do
   case NonEmpty.sortBy NonEmpty.length (Set2D.clusters boundsPredicate itemPredicate set) of
     NonEmpty.Three first second third ->
       Test.all
-        [ Test.expect (Set2D.build first ~~ Set2D.build (NonEmpty.one f))
-            & Test.output "first" first
-        , Test.expect (Set2D.build second ~~ Set2D.build (NonEmpty.two d e))
-            & Test.output "second" second
-        , Test.expect (Set2D.build third ~~ Set2D.build (NonEmpty.three a b c))
-            & Test.output "third" third
+        [ Test.expect (Set2D.build first ~~ Set2D.build (NonEmpty.one f)) & Test.log {first}
+        , Test.expect (Set2D.build second ~~ Set2D.build (NonEmpty.two d e)) & Test.log {second}
+        , Test.expect (Set2D.build third ~~ Set2D.build (NonEmpty.three a b c)) & Test.log {third}
         ]
     unexpected ->
       Test.fail $ "Expected three clusters, got " <> Text.int (NonEmpty.length unexpected)

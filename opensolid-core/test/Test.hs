@@ -11,7 +11,7 @@ module Test
   , expect
   , all
   , combine
-  , output
+  , log
   , pass
   , fail
   , (~~)
@@ -20,6 +20,7 @@ where
 
 import Control.Exception (SomeException)
 import Control.Exception qualified
+import GHC.TypeLits (KnownSymbol)
 import OpenSolid.Duration qualified as Duration
 import OpenSolid.Err qualified as Err
 import OpenSolid.IO qualified as IO
@@ -225,9 +226,16 @@ all expectations =
 combine :: (a -> Expectation) -> List a -> Expectation
 combine function values = all (List.map function values)
 
-output :: Show a => Text -> a -> Expectation -> Expectation
-output label value (Generator generator) =
-  Generator (Random.map (addOutput label value) generator)
+log :: Expectation -> Expectation
+log = id
+
+instance
+  (KnownSymbol name, Show value) =>
+  SetField name value (Expectation -> Expectation) (Expectation -> Expectation)
+  where
+  setField value function expectation = do
+    let Generator generator = function expectation
+    Generator (Random.map (addOutput (Text.symbol name) value) generator)
 
 addOutput :: Show a => Text -> a -> TestResult () -> TestResult ()
 addOutput _ _ (Succeeded ()) = Succeeded ()

@@ -59,13 +59,17 @@ sphereMeshing = Test.verify "sphereMeshing" Try.do
   let volumeTolerance = 0.02 * exactVolume
   Test.all
     [ Test.expect (Tolerance.using areaTolerance (approximateArea ~= exactArea))
-        & Test.output "Mesh area" approximateArea
-        & Test.output "Exact area" exactArea
-        & Test.output "Area error fraction" (fractionalError approximateArea exactArea)
-    , Test.expect (Tolerance.using volumeTolerance (meshVolume mesh ~= exactVolume))
-        & Test.output "Mesh volume" approximateVolume
-        & Test.output "Exact volume" exactVolume
-        & Test.output "Volume error fraction" (fractionalError approximateVolume exactVolume)
+        & Test.log
+          { approximateArea
+          , exactArea
+          , fractionalError = fractionalError approximateArea exactArea
+          }
+    , Test.expect (Tolerance.using volumeTolerance (approximateVolume ~= exactVolume))
+        & Test.log
+          { approximateVolume
+          , exactVolume
+          , fractionalError = fractionalError approximateVolume exactVolume
+          }
     ]
 
 revolvedNormals :: Test
@@ -94,7 +98,9 @@ revolvedNormals = Test.verify "revolvedNormals" Try.do
         let approximateVolume = meshVolume mesh
         let volumeTolerance = 0.02 * exactVolume
         Test.expect (Tolerance.using volumeTolerance (approximateVolume ~= exactVolume))
-          & Test.output "Exact volume" exactVolume
-          & Test.output "Mesh volume" approximateVolume
-          & Test.output "Error fraction" (fractionalError approximateVolume exactVolume)
+          & Test.log
+            { exactVolume
+            , approximateVolume
+            , fractionalError = fractionalError approximateVolume exactVolume
+            }
   Test.combine expectCorrectVolume bodies

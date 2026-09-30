@@ -23,11 +23,7 @@ quantityIntervalDivision = Test.check 1000 "quantityIntervalDivision" do
   let quotient = x / y
   let intervalQuotient = x / interval
   Test.expect (Interval.member quotient intervalQuotient)
-    & Test.output "x" x
-    & Test.output "interval" interval
-    & Test.output "y" y
-    & Test.output "quotient" quotient
-    & Test.output "intervalQuotient" intervalQuotient
+    & Test.log {x, interval, y, quotient, intervalQuotient}
 
 intervalQuantityDivision :: Test
 intervalQuantityDivision = Test.check 1000 "intervalQuantityDivision" do
@@ -38,11 +34,7 @@ intervalQuantityDivision = Test.check 1000 "intervalQuantityDivision" do
   let quotient = x / y
   let intervalQuotient = interval / y
   Test.expect (Interval.member quotient intervalQuotient)
-    & Test.output "interval" interval
-    & Test.output "x" x
-    & Test.output "y" y
-    & Test.output "quotient" quotient
-    & Test.output "intervalQuotient" intervalQuotient
+    & Test.log {interval, x, y, quotient, intervalQuotient}
 
 {-| TODO: have test helper for generally testing compatibility of
 Interval function with corresponding Quantity function
@@ -58,9 +50,4 @@ intervalIntervalDivision = Test.check 1000 "intervalIntervalDivision" do
   let quotient = x1 / x2
   let intervalQuotient = interval1 / interval2
   Test.expect (Interval.member quotient intervalQuotient)
-    & Test.output "interval1" interval1
-    & Test.output "interval2" interval2
-    & Test.output "x1" x1
-    & Test.output "x2" x2
-    & Test.output "quotient" quotient
-    & Test.output "intervalQuotient" intervalQuotient
+    & Test.log {interval1, interval2, x1, x2, quotient, intervalQuotient}

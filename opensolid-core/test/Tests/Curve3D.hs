@@ -116,8 +116,7 @@ crossingIntersection = Test.verify "crossingIntersection" Try.do
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
       Test.expect (actualIntersectionPoints ~~ expectedIntersectionPoints)
-        & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
-        & Test.output "actualIntersectionPoints" actualIntersectionPoints
+        & Test.log {expectedIntersectionPoints, actualIntersectionPoints}
     Just (Curve.OverlappingSegments {}) ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
 
@@ -145,7 +144,6 @@ tangentIntersection = Test.verify "tangentIntersection" Try.do
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
       Test.expect (actualIntersectionPoints ~~ expectedIntersectionPoints)
-        & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
-        & Test.output "actualIntersectionPoints" actualIntersectionPoints
+        & Test.log {expectedIntersectionPoints, actualIntersectionPoints}
     Just (Curve.OverlappingSegments {}) ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
