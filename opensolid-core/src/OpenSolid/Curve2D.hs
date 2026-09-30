@@ -91,7 +91,8 @@ import OpenSolid.Arc2D (Arc2D)
 import OpenSolid.Arc2D qualified as Arc2D
 import OpenSolid.Array (Array)
 import OpenSolid.Array qualified as Array
-import OpenSolid.Axis2D (Axis2D (Axis2D))
+import OpenSolid.Axis2D (Axis2D)
+import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
@@ -589,13 +590,13 @@ secondDerivative :: Curve2D units -> VectorCurve2D units
 secondDerivative = Curve.secondDerivative
 
 distanceAlong :: Axis2D units -> Curve2D units -> Curve1D units
-distanceAlong (Axis2D p0 d) curve = (curve - p0) `dot` d
+distanceAlong axis curve = (curve - Axis2D.originPoint axis) `dot` Axis2D.direction axis
 
 distanceLeftOf :: Axis2D units -> Curve2D units -> Curve1D units
-distanceLeftOf (Axis2D p0 d) curve = (curve - p0) `dot` Direction2D.rotateLeft d
+distanceLeftOf axis curve = (curve - Axis2D.originPoint axis) `dot` Axis2D.leftwardDirection axis
 
 distanceRightOf :: Axis2D units -> Curve2D units -> Curve1D units
-distanceRightOf (Axis2D p0 d) curve = (curve - p0) `dot` Direction2D.rotateRight d
+distanceRightOf axis curve = (curve - Axis2D.originPoint axis) `dot` Axis2D.rightwardDirection axis
 
 {-| Check if the given curve curve is collinear with (lies on) the given axis.
 

@@ -87,7 +87,8 @@ quadratic subproblem saddlePoint = do
   let d2 = Direction2D.unsafe v2
   let vX = Tolerance.using Quantity.zero (Vector2D.normalize (v1 + v2))
   let dX = Direction2D.unsafe vX
-  let frame = Frame2D.fromXAxis (Axis2D.through saddlePoint dX)
+  let xAxis = Axis2D.with {originPoint = saddlePoint, direction = dX}
+  let frame = Frame2D.fromXAxis xAxis
   SaddleRegion {subproblem, frame, d1, d2}
 
 secondDerivative ::
@@ -107,7 +108,7 @@ connectingCurves joiningCurve saddleRegion = do
   let saddlePoint = Frame2D.originPoint frame
   let dx = Frame2D.xDirection frame
   let dy = Frame2D.yDirection frame
-  let boundingAxis direction = Axis2D.through saddlePoint direction
+  let boundingAxis direction = Axis2D.with {originPoint = saddlePoint, direction}
   case (Quantity.sign x, Quantity.sign y) of
     (Positive, Positive) ->
       connect subproblem frame d2 joiningCurve [boundingAxis dx, boundingAxis -dy]

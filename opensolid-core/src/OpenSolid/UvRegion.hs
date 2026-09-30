@@ -12,7 +12,8 @@ module OpenSolid.UvRegion
   )
 where
 
-import OpenSolid.Axis2D (Axis2D (Axis2D))
+import OpenSolid.Axis2D (Axis2D)
+import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Prelude
@@ -69,7 +70,7 @@ flip :: UvRegion -> UvRegion
 flip = Region2D.mirrorAcross flipAxis
 
 flipAxis :: Axis2D Unitless
-flipAxis = Axis2D UvPoint.center Direction2D.y
+flipAxis = Axis2D.with {originPoint = UvPoint.center, direction = Direction2D.y}
 
 classifyPoint :: UvPoint -> UvRegion -> Region2D.PointClassification
 classifyPoint = unitless Region2D.classifyPoint

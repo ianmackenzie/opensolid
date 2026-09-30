@@ -1,12 +1,12 @@
 module OpenSolid.Axis2D
-  ( Axis2D (Axis2D, originPoint, direction)
+  ( Axis2D
   , originPoint
   , direction
   , leftwardDirection
   , rightwardDirection
   , x
   , y
-  , through
+  , with
   , moveTo
   , reverse
   , placeOn
@@ -59,8 +59,10 @@ x = Axis2D Point2D.origin Direction2D.x
 y :: Axis2D units
 y = Axis2D Point2D.origin Direction2D.y
 
-through :: Point2D units -> Direction2D -> Axis2D units
-through = Axis2D
+-- | Construct an axis with the given origin point and direction.
+with :: "originPoint" ::: Point2D units -> "direction" ::: Direction2D -> Axis2D units
+with ("originPoint" ::: givenOriginPoint) ("direction" ::: givenDirection) =
+  Axis2D {originPoint = givenOriginPoint, direction = givenDirection}
 
 moveTo :: Point2D units -> Axis2D units -> Axis2D units
 moveTo newOriginPoint axis = Axis2D newOriginPoint (direction axis)

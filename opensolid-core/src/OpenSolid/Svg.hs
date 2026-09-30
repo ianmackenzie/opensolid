@@ -38,7 +38,7 @@ module OpenSolid.Svg
 where
 
 import Data.Foldable qualified
-import OpenSolid.Axis2D (Axis2D (Axis2D))
+import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
@@ -335,7 +335,7 @@ arrow ("headLength" ::: headLength) ("headWidth" ::: headWidth) start end =
     Err Direction2D.PointsAreCoincident -> nothing
     Ok direction -> do
       let length = Point2D.distanceFrom start end
-      let axis = Axis2D start direction
+      let axis = Axis2D.with {originPoint = start, direction}
       let frame = Frame2D.fromXAxis axis
       let stemLength = length - headLength
       let stemEndPoint = on axis stemLength

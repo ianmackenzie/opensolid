@@ -69,7 +69,8 @@ where
 import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Axis3D (Axis3D (Axis3D))
+import OpenSolid.Axis3D (Axis3D)
+import OpenSolid.Axis3D qualified as Axis3D
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Length (Length)
 import OpenSolid.Orientation3D (Orientation3D)
@@ -137,29 +138,32 @@ upwardDirection frame = Orientation3D.upwardDirection (orientation frame)
 downwardDirection :: Frame3D global local -> Direction3D global
 downwardDirection frame = Orientation3D.downwardDirection (orientation frame)
 
+axisIn :: (Frame3D global local -> Direction3D global) -> Frame3D global local -> Axis3D global
+axisIn direction frame = Axis3D.with {originPoint = originPoint frame, direction = direction frame}
+
 -- | Get the rightward axis of a frame.
 rightwardAxis :: Frame3D global local -> Axis3D global
-rightwardAxis frame = Axis3D (originPoint frame) (rightwardDirection frame)
+rightwardAxis = axisIn rightwardDirection
 
 -- | Get the leftward axis of a frame.
 leftwardAxis :: Frame3D global local -> Axis3D global
-leftwardAxis frame = Axis3D (originPoint frame) (leftwardDirection frame)
+leftwardAxis = axisIn leftwardDirection
 
 -- | Get the forward axis of a frame.
 forwardAxis :: Frame3D global local -> Axis3D global
-forwardAxis frame = Axis3D (originPoint frame) (forwardDirection frame)
+forwardAxis = axisIn forwardDirection
 
 -- | Get the backward axis of a frame.
 backwardAxis :: Frame3D global local -> Axis3D global
-backwardAxis frame = Axis3D (originPoint frame) (backwardDirection frame)
+backwardAxis = axisIn backwardDirection
 
 -- | Get the upward axis of a frame.
 upwardAxis :: Frame3D global local -> Axis3D global
-upwardAxis frame = Axis3D (originPoint frame) (upwardDirection frame)
+upwardAxis = axisIn upwardDirection
 
 -- | Get the downward axis of a frame.
 downwardAxis :: Frame3D global local -> Axis3D global
-downwardAxis frame = Axis3D (originPoint frame) (downwardDirection frame)
+downwardAxis = axisIn downwardDirection
 
 planeWith ::
   (Orientation3D global -> PlaneOrientation3D global) ->

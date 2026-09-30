@@ -1008,7 +1008,7 @@ type Axis2D = Axis2D.Axis2D Meters
 axis2D :: Class
 axis2D =
   Class.new @Axis2D $(docs ''Axis2D.Axis2D) $
-    [ Class.constructor2 "Origin Point" "Direction" Axis2D.Axis2D $(docs 'Axis2D.Axis2D)
+    [ Class.constructor2 "Origin Point" "Direction" Axis2D.with $(docs 'Axis2D.with)
     , Class.property "Origin Point" Axis2D.originPoint $(docs 'Axis2D.originPoint)
     , Class.property "Direction" Axis2D.direction $(docs 'Axis2D.direction)
     , Class.constant "X" (Axis2D.x @Meters) $(docs 'Axis2D.x)
@@ -1022,7 +1022,7 @@ type UvAxis = Axis2D.Axis2D Unitless
 uvAxis :: Class
 uvAxis =
   Class.new @UvAxis $(docs ''Axis2D.Axis2D) $
-    [ Class.constructor2 "Origin Point" "Direction" Axis2D.Axis2D $(docs 'Axis2D.Axis2D)
+    [ Class.constructor2 "Origin Point" "Direction" Axis2D.with $(docs 'Axis2D.with)
     , Class.property "Origin Point" Axis2D.originPoint $(docs 'Axis2D.originPoint)
     , Class.property "Direction" Axis2D.direction $(docs 'Axis2D.direction)
     , Class.constant "U" (Axis2D.x @Unitless) "The U axis."
@@ -1258,7 +1258,7 @@ type Axis3D = Axis3D.Axis3D Void
 axis3D :: Class
 axis3D =
   Class.new @Axis3D $(docs ''Axis3D.Axis3D) $
-    [ Class.constructor2 "Origin Point" "Direction" Axis3D.Axis3D $(docs 'Axis3D.Axis3D)
+    [ Class.constructor2 "Origin Point" "Direction" Axis3D.with $(docs 'Axis3D.with)
     , Class.property "Origin Point" Axis3D.originPoint $(docs 'Axis3D.originPoint)
     , Class.property "Direction" Axis3D.direction $(docs 'Axis3D.direction)
     , Class.property "Normal Plane" (Axis3D.normalPlane :: Axis3D -> Plane3D) $(docs 'Axis3D.normalPlane)

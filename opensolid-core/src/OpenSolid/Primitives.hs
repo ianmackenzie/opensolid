@@ -882,12 +882,10 @@ instance units ~ Meters => On (Plane3D space) (Bounds2D units) (Bounds3D space) 
 type role Axis2D phantom
 
 -- | An axis in 2D, defined by an origin point and direction.
-data Axis2D units
-  = -- | Construct an axis from its origin point and direction.
-    Axis2D
-    { originPoint :: Point2D units
-    , direction :: Direction2D
-    }
+data Axis2D units = Axis2D
+  { originPoint :: Point2D units
+  , direction :: Direction2D
+  }
 
 deriving instance Eq (Axis2D units)
 
@@ -2043,12 +2041,10 @@ instance
 type role Axis3D phantom
 
 -- | An axis in 3D, defined by an origin point and direction.
-data Axis3D space
-  = -- | Construct an axis from its origin point and direction.
-    Axis3D
-    { originPoint :: Point3D space
-    , direction :: Direction3D space
-    }
+data Axis3D space = Axis3D
+  { originPoint :: Point3D space
+  , direction :: Direction3D space
+  }
 
 deriving instance Eq (Axis3D space)
 

@@ -1,9 +1,9 @@
 module OpenSolid.Axis3D
-  ( Axis3D (Axis3D, originPoint, direction)
+  ( Axis3D
   , coerce
   , originPoint
   , direction
-  , through
+  , with
   , normalPlane
   , moveTo
   , reverse
@@ -37,8 +37,10 @@ originPoint = (.originPoint)
 direction :: Axis3D space -> Direction3D space
 direction = (.direction)
 
-through :: Point3D space -> Direction3D space -> Axis3D space
-through = Axis3D
+-- | Construct an axis with the given origin point and direction.
+with :: "originPoint" ::: Point3D space -> "direction" ::: Direction3D space -> Axis3D space
+with ("originPoint" ::: givenOriginPoint) ("direction" ::: givenDirection) =
+  Axis3D {originPoint = givenOriginPoint, direction = givenDirection}
 
 {-| Construct a plane normal (perpendicular) to the given axis.
 

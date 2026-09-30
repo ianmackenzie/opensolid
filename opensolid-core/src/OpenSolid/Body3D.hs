@@ -22,7 +22,7 @@ import OpenSolid.Angle (Angle)
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Axis2D qualified as Axis2D
-import OpenSolid.Axis3D (Axis3D (Axis3D))
+import OpenSolid.Axis3D (Axis3D)
 import OpenSolid.Axis3D qualified as Axis3D
 import OpenSolid.Bag3D qualified as Bag3D
 import OpenSolid.Body3D.HalfEdge (HalfEdge (..))
@@ -165,7 +165,7 @@ cylinder ("diameter" ::: diameter) ("startPoint" ::: startPoint) ("endPoint" :::
     Err IsZero -> Err EmptyBody
     Ok (length, direction) ->
       cylinderAlong
-        { axis = Axis3D startPoint direction
+        { axis = Axis3D.with {originPoint = startPoint, direction}
         , diameter
         , start = Length.zero
         , end = length

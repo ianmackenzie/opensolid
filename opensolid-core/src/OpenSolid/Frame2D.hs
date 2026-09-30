@@ -86,10 +86,10 @@ fromYAxis axis =
     }
 
 xAxis :: Frame2D units -> Axis2D units
-xAxis frame = Axis2D.through (originPoint frame) (xDirection frame)
+xAxis frame = Axis2D.with {originPoint = originPoint frame, direction = xDirection frame}
 
 yAxis :: Frame2D units -> Axis2D units
-yAxis frame = Axis2D.through (originPoint frame) (yDirection frame)
+yAxis frame = Axis2D.with {originPoint = originPoint frame, direction = yDirection frame}
 
 placeIn :: Frame2D units -> Frame2D units -> Frame2D units
 placeIn globalFrame frame =

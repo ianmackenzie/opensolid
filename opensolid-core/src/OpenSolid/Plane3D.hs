@@ -31,7 +31,8 @@ where
 
 import Data.Coerce qualified
 import OpenSolid.Angle (Angle)
-import OpenSolid.Axis3D (Axis3D (Axis3D))
+import OpenSolid.Axis3D (Axis3D)
+import OpenSolid.Axis3D qualified as Axis3D
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Length (Length)
 import OpenSolid.PlaneOrientation3D (PlaneOrientation3D)
@@ -56,18 +57,26 @@ fromPointAndNormal p n = Plane3D p (PlaneOrientation3D.fromNormalDirection n)
 
 -- | Construct a plane having the given X axis, with an arbitrarily-chosen Y direction.
 fromXAxis :: Axis3D space -> Plane3D space
-fromXAxis (Axis3D p0 dx) = Plane3D p0 (PlaneOrientation3D.fromXDirection dx)
+fromXAxis axis =
+  Plane3D
+    { originPoint = Axis3D.originPoint axis
+    , orientation = PlaneOrientation3D.fromXDirection (Axis3D.direction axis)
+    }
 
 -- | Construct a plane having the given Y axis, with an arbitrarily-chosen X direction.
 fromYAxis :: Axis3D space -> Plane3D space
-fromYAxis (Axis3D p0 dy) = Plane3D p0 (PlaneOrientation3D.fromYDirection dy)
+fromYAxis axis =
+  Plane3D
+    { originPoint = Axis3D.originPoint axis
+    , orientation = PlaneOrientation3D.fromYDirection (Axis3D.direction axis)
+    }
 
 {-| Construct a plane having the given normal axis, with arbitrary X and Y directions.
 
 (The X and Y directions will, of course, be perpendicular to each other and the normal direction.)
 -}
 fromNormalAxis :: Axis3D space -> Plane3D space
-fromNormalAxis (Axis3D p0 n) = fromPointAndNormal p0 n
+fromNormalAxis axis = fromPointAndNormal (Axis3D.originPoint axis) (Axis3D.direction axis)
 
 {-# INLINE coerce #-}
 coerce :: Plane3D space1 -> Plane3D space2
@@ -101,7 +110,7 @@ The origin point of the axis will be the origin point of the plane,
 and the direction of the axis will be the normal direction of the plane.
 -}
 normalAxis :: Plane3D space -> Axis3D space
-normalAxis plane = Axis3D (originPoint plane) (normalDirection plane)
+normalAxis plane = Axis3D.with {originPoint = originPoint plane, direction = normalDirection plane}
 
 -- | Get the X direction of a plane.
 xDirection :: Plane3D space -> Direction3D space
@@ -116,14 +125,14 @@ yDirection plane = PlaneOrientation3D.yDirection (orientation plane)
 This is an axis formed from the plane's origin point and X direction.
 -}
 xAxis :: Plane3D space -> Axis3D space
-xAxis plane = Axis3D (originPoint plane) (xDirection plane)
+xAxis plane = Axis3D.with {originPoint = originPoint plane, direction = xDirection plane}
 
 {-| Get the Y axis of a plane.
 
 This is an axis formed from the plane's origin point and Y direction.
 -}
 yAxis :: Plane3D space -> Axis3D space
-yAxis plane = Axis3D (originPoint plane) (yDirection plane)
+yAxis plane = Axis3D.with {originPoint = originPoint plane, direction = yDirection plane}
 
 {-| Move a plane so that its origin point is the given point.
 

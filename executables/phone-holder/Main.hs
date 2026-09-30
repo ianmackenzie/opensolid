@@ -7,7 +7,7 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Ap242 qualified as Ap242
 import OpenSolid.Ap242.Surface qualified as Ap242.Surface
 import OpenSolid.Arc2D qualified as Arc2D
-import OpenSolid.Axis3D (Axis3D (Axis3D))
+import OpenSolid.Axis3D qualified as Axis3D
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Length qualified as Length
 import OpenSolid.Line2D (data Line2D)
@@ -85,7 +85,7 @@ main = spatial Try.do
           Ok (Ap242.Surface.plane3D plane)
         Edge2D.Arc arc2D -> do
           let originPoint = on midPlane (Arc2D.centerPoint arc2D)
-          let cylinderAxis = Axis3D originPoint (Plane3D.normalDirection midPlane)
+          let cylinderAxis = Axis3D.with {originPoint, direction = Plane3D.normalDirection midPlane}
           Ok (Ap242.Surface.cylinder3D {axis = cylinderAxis, radius = Arc2D.radius arc2D})
 
   let extrudedFace (edge, nextEdge) = do

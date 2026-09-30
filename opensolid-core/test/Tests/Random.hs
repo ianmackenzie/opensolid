@@ -43,8 +43,10 @@ module Tests.Random
 where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Axis2D (Axis2D (Axis2D))
-import OpenSolid.Axis3D (Axis3D (Axis3D))
+import OpenSolid.Axis2D (Axis2D)
+import OpenSolid.Axis2D qualified as Axis2D
+import OpenSolid.Axis3D (Axis3D)
+import OpenSolid.Axis3D qualified as Axis3D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Curve2D (Curve2D)
@@ -110,10 +112,18 @@ vectorBounds3D =
     lengthInterval
 
 axis2D :: Generator (Axis2D Meters)
-axis2D = Random.map2 Axis2D point2D Direction2D.random
+axis2D =
+  Random.map2
+    Axis2D.with
+    (Random.named "originPoint" point2D)
+    (Random.named "direction" Direction2D.random)
 
 axis3D :: Generator (Axis3D space)
-axis3D = Random.map2 Axis3D point3D Direction3D.random
+axis3D =
+  Random.map2
+    Axis3D.with
+    (Random.named "originPoint" point3D)
+    (Random.named "direction" Direction3D.random)
 
 plane3D :: Generator (Plane3D space)
 plane3D = Random.map2 Plane3D point3D PlaneOrientation3D.random
