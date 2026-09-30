@@ -24,8 +24,7 @@ module OpenSolid.Surface3D
   , bisectionTree
   , normalDirectionAt
   , normalDirectionRange
-  , vertexAt
-  , vertexOn
+  , vertex
   , parametric
   , planar
   , extruded
@@ -269,11 +268,8 @@ normalDirectionRange uvRange surface = do
       | vHigh == 1.0 && degenerateTop surface -> -nv
       | otherwise -> fu `cross` fv
 
-vertexAt :: UvPoint -> Surface3D space -> SurfaceVertex3D space
-vertexAt uvPoint surface = SurfaceVertex3D (surface @ uvPoint) (normalDirectionAt uvPoint surface)
-
-vertexOn :: Surface3D space -> UvPoint -> SurfaceVertex3D space
-vertexOn surface uvPoint = vertexAt uvPoint surface
+vertex :: Surface3D space -> UvPoint -> SurfaceVertex3D space
+vertex surface uvPoint = SurfaceVertex3D (surface @ uvPoint) (normalDirectionAt uvPoint surface)
 
 parametric ::
   Tolerance Meters =>

@@ -344,7 +344,7 @@ toSurfaceMesh ::
   Resolution Meters ->
   Body3D space ->
   Mesh (SurfaceVertex3D space)
-toSurfaceMesh resolution body = toMesh resolution Surface3D.vertexOn body
+toSurfaceMesh resolution body = toMesh resolution Surface3D.vertex body
 
 toMesh ::
   Tolerance Meters =>
