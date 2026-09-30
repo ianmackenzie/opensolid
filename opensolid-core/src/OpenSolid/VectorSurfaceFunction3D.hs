@@ -11,15 +11,11 @@ module OpenSolid.VectorSurfaceFunction3D
   , degenerateTop
   , zero
   , constant
-  , valueAt
-  , valueOf
   , range
   , compiled
   , partialDerivatives
   , secondPartialDerivatives
-  , partialDerivativesAt
   , partialDerivativeRanges
-  , secondPartialDerivativesAt
   , secondPartialDerivativeRanges
   , placeIn
   , relativeTo
@@ -111,6 +107,31 @@ instance
       , maxSampledBottomMagnitude = function.maxSampledBottomMagnitude
       , maxSampledTopMagnitude = function.maxSampledTopMagnitude
       }
+
+instance At (VectorSurfaceFunction3D units space) UvPoint (Vector3D units space) where
+  {-# INLINE (@) #-}
+  function @ uvPoint = CompiledFunction.value uvPoint function.compiled
+
+instance
+  At
+    (VectorSurfaceFunction3D units space, VectorSurfaceFunction3D units space)
+    UvPoint
+    (Vector3D units space, Vector3D units space)
+  where
+  {-# INLINE (@) #-}
+  (fu, fv) @ uvPoint = (fu @ uvPoint, fv @ uvPoint)
+
+instance
+  At
+    ( VectorSurfaceFunction3D units space
+    , VectorSurfaceFunction3D units space
+    , VectorSurfaceFunction3D units space
+    )
+    UvPoint
+    (Vector3D units space, Vector3D units space, Vector3D units space)
+  where
+  {-# INLINE (@) #-}
+  (fuu, fuv, fvv) @ uvPoint = (fuu @ uvPoint, fuv @ uvPoint, fvv @ uvPoint)
 
 instance Negation (VectorSurfaceFunction3D units space) where
   negate function = new (negate function.compiled) (Pair.map negate function.partialDerivatives)
@@ -523,14 +544,6 @@ zero = constant Vector3D.zero
 constant :: Vector3D units space -> VectorSurfaceFunction3D units space
 constant vector = new (CompiledFunction.constant vector) (zero, zero)
 
-{-# INLINE valueAt #-}
-valueAt :: UvPoint -> VectorSurfaceFunction3D units space -> Vector3D units space
-valueAt uvPoint function = CompiledFunction.value uvPoint function.compiled
-
-{-# INLINE valueOf #-}
-valueOf :: VectorSurfaceFunction3D units space -> UvPoint -> Vector3D units space
-valueOf function uvPoint = valueAt uvPoint function
-
 {-# INLINE range #-}
 range :: UvBounds -> VectorSurfaceFunction3D units space -> VectorBounds3D units space
 range uvRange function = CompiledFunction.range uvRange function.compiled
@@ -557,14 +570,6 @@ secondPartialDerivatives function = do
   let (_, fvv) = partialDerivatives fv
   (fuu, fuv, fvv)
 
-partialDerivativesAt ::
-  UvPoint ->
-  VectorSurfaceFunction3D units space ->
-  (Vector3D units space, Vector3D units space)
-partialDerivativesAt uvPoint function = do
-  let (fu, fv) = partialDerivatives function
-  (valueAt uvPoint fu, valueAt uvPoint fv)
-
 partialDerivativeRanges ::
   UvBounds ->
   VectorSurfaceFunction3D units space ->
@@ -572,13 +577,6 @@ partialDerivativeRanges ::
 partialDerivativeRanges uvRange function = do
   let (fu, fv) = partialDerivatives function
   (range uvRange fu, range uvRange fv)
-
-secondPartialDerivativesAt ::
-  UvPoint ->
-  VectorSurfaceFunction3D units space ->
-  (Vector3D units space, Vector3D units space, Vector3D units space)
-secondPartialDerivativesAt uvPoint function =
-  Triplet.map (valueAt uvPoint) (secondPartialDerivatives function)
 
 secondPartialDerivativeRanges ::
   UvBounds ->
@@ -658,5 +656,5 @@ directionRange uvRange function = do
 newtonRaphson :: VectorSurfaceFunction3D units space -> UvPoint -> Fuzzy UvPoint
 newtonRaphson f uvPoint0 = do
   let (fu, fv) = partialDerivatives f
-  let evaluate uvPoint = (# valueAt uvPoint f, valueAt uvPoint fu, valueAt uvPoint fv #)
+  let evaluate uvPoint = (# f @ uvPoint, fu @ uvPoint, fv @ uvPoint #)
   NewtonRaphson.Surface.solveFrom uvPoint0 evaluate

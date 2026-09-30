@@ -8,10 +8,8 @@ module OpenSolid.SurfaceFunction3D
   , range
   , compiled
   , partialDerivatives
-  , partialDerivativesAt
   , partialDerivativeRanges
   , secondPartialDerivatives
-  , secondPartialDerivativesAt
   , secondPartialDerivativeRanges
   , normalDirectionRange
   , placeIn
@@ -204,26 +202,12 @@ pointOn function uvPoint = pointAt uvPoint function
 range :: UvBounds -> SurfaceFunction3D space -> Bounds3D space
 range uvRange function = CompiledFunction.range uvRange function.compiled
 
-partialDerivativesAt ::
-  UvPoint ->
-  SurfaceFunction3D space ->
-  (Vector3D Meters space, Vector3D Meters space)
-partialDerivativesAt uvPoint function =
-  Pair.map (VectorSurfaceFunction3D.valueAt uvPoint) (partialDerivatives function)
-
 partialDerivativeRanges ::
   UvBounds ->
   SurfaceFunction3D space ->
   (VectorBounds3D Meters space, VectorBounds3D Meters space)
 partialDerivativeRanges uvRange function =
   Pair.map (VectorSurfaceFunction3D.range uvRange) (partialDerivatives function)
-
-secondPartialDerivativesAt ::
-  UvPoint ->
-  SurfaceFunction3D space ->
-  (Vector3D Meters space, Vector3D Meters space, Vector3D Meters space)
-secondPartialDerivativesAt uvPoint function =
-  Triplet.map (VectorSurfaceFunction3D.valueAt uvPoint) (secondPartialDerivatives function)
 
 secondPartialDerivativeRanges ::
   UvBounds ->

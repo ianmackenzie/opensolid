@@ -371,9 +371,9 @@ testNewtonRaphson2D = unitless do
   let solution =
         Solve2D.unique
           (VectorSurfaceFunction2D.range function)
-          (VectorSurfaceFunction2D.valueOf function)
-          (VectorSurfaceFunction2D.valueOf uDerivative)
-          (VectorSurfaceFunction2D.valueOf vDerivative)
+          (function @)
+          (uDerivative @)
+          (vDerivative @)
           bounds
   log "Solve2D.unique solution" solution
 

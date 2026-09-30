@@ -16,7 +16,6 @@ import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.Surface3D.Segment qualified as Segment
-import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfacePoint3D (SurfacePoint3D)
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
 import OpenSolid.UvBag (UvBag)
@@ -24,7 +23,6 @@ import OpenSolid.UvBag qualified as UvBag
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvRegion qualified as UvRegion
-import OpenSolid.VectorSurfaceFunction3D qualified as VectorSurfaceFunction3D
 
 findPoint :: Tolerance Meters => Point3D space -> Surface3D space -> List (SurfacePoint3D space)
 findPoint point surface
@@ -73,12 +71,9 @@ findInteriorSolution ::
   Surface3D space ->
   Maybe (SurfacePoint3D space)
 findInteriorSolution point surface = do
-  let (du, dv) = SurfaceFunction3D.partialDerivatives (Surface3D.function surface)
-  let evaluateNewtonRaphson uvPoint = do
-        let displacement = Surface3D.pointAt uvPoint surface - point
-        let duValue = VectorSurfaceFunction3D.valueAt uvPoint du
-        let dvValue = VectorSurfaceFunction3D.valueAt uvPoint dv
-        (# displacement, duValue, dvValue #)
+  let (du, dv) = Surface3D.partialDerivatives surface
+  let evaluateNewtonRaphson uvPoint =
+        (# Surface3D.pointAt uvPoint surface - point, du @ uvPoint, dv @ uvPoint #)
   let domain = Surface3D.domain surface
   let isDistant segment = not (point ^ Segment.range segment)
   let isExterior uvRange =

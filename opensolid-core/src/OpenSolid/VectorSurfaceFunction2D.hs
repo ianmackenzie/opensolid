@@ -7,8 +7,6 @@ module OpenSolid.VectorSurfaceFunction2D
   , zero
   , constant
   , xy
-  , valueAt
-  , valueOf
   , range
   , xComponent
   , yComponent
@@ -70,6 +68,28 @@ instance Units.Coercion (VectorSurfaceFunction2D units1) (VectorSurfaceFunction2
       { compiled = Units.coerce function.compiled
       , partialDerivatives = Pair.map Units.coerce function.partialDerivatives
       }
+
+instance At (VectorSurfaceFunction2D units) UvPoint (Vector2D units) where
+  {-# INLINE (@) #-}
+  function @ uvPoint = CompiledFunction.value uvPoint function.compiled
+
+instance
+  At
+    (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)
+    UvPoint
+    (Vector2D units, Vector2D units)
+  where
+  {-# INLINE (@) #-}
+  (fu, fv) @ uvPoint = (fu @ uvPoint, fv @ uvPoint)
+
+instance
+  At
+    (VectorSurfaceFunction2D units, VectorSurfaceFunction2D units, VectorSurfaceFunction2D units)
+    UvPoint
+    (Vector2D units, Vector2D units, Vector2D units)
+  where
+  {-# INLINE (@) #-}
+  (fuu, fuv, fvv) @ uvPoint = (fuu @ uvPoint, fuv @ uvPoint, fvv @ uvPoint)
 
 instance Negation (VectorSurfaceFunction2D units) where
   negate function = new (negate function.compiled) (Pair.map negate function.partialDerivatives)
@@ -473,14 +493,6 @@ transformBy transform function = do
   let transformedPartialDerivatives = Pair.map (transformBy transform) (partialDerivatives function)
   new compiledTransformed transformedPartialDerivatives
 
-{-# INLINE valueAt #-}
-valueAt :: UvPoint -> VectorSurfaceFunction2D units -> Vector2D units
-valueAt uvPoint function = CompiledFunction.value uvPoint function.compiled
-
-{-# INLINE valueOf #-}
-valueOf :: VectorSurfaceFunction2D units -> UvPoint -> Vector2D units
-valueOf function uvPoint = valueAt uvPoint function
-
 {-# INLINE range #-}
 range :: VectorSurfaceFunction2D units -> UvBounds -> VectorBounds2D units
 range function uvRange = CompiledFunction.range uvRange function.compiled
@@ -539,5 +551,5 @@ squaredMagnitude = Units.specialize . squaredMagnitude_
 newtonRaphson :: VectorSurfaceFunction2D units -> UvPoint -> Fuzzy UvPoint
 newtonRaphson f uvPoint0 = do
   let (fu, fv) = partialDerivatives f
-  let evaluate uvPoint = (# valueAt uvPoint f, valueAt uvPoint fu, valueAt uvPoint fv #)
+  let evaluate uvPoint = (# f @ uvPoint, fu @ uvPoint, fv @ uvPoint #)
   NewtonRaphson.Surface.solveFrom uvPoint0 evaluate

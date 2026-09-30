@@ -31,7 +31,7 @@ partialDerivativesAreConsistentAt uvPoint function = do
   let pUpper = SurfaceFunction3D.pointAt (UvPoint uMid vUpper) function
   let duNumeric = (pRight - pLeft) / (2.0 * delta)
   let dvNumeric = (pUpper - pLower) / (2.0 * delta)
-  let (duAnalytic, dvAnalytic) = SurfaceFunction3D.partialDerivativesAt uvPoint function
+  let (duAnalytic, dvAnalytic) = SurfaceFunction3D.partialDerivatives function @ uvPoint
   Tolerance.using (Length.meters 1e-6) $
     Test.all
       [ Test.expect (duNumeric ~= duAnalytic)

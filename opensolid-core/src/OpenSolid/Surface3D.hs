@@ -24,9 +24,7 @@ module OpenSolid.Surface3D
   , bisectionTree
   , pointAt
   , pointOn
-  , partialDerivativesAt
   , partialDerivativeRanges
-  , secondPartialDerivativesAt
   , secondPartialDerivativeRanges
   , normalDirectionAt
   , normalDirectionRange
@@ -250,26 +248,12 @@ pointOn surface uvPoint = SurfaceFunction3D.pointOn (function surface) uvPoint
 range :: UvBounds -> Surface3D space -> Bounds3D space
 range uvRange surface = SurfaceFunction3D.range uvRange (function surface)
 
-partialDerivativesAt ::
-  UvPoint ->
-  Surface3D space ->
-  (Vector3D Meters space, Vector3D Meters space)
-partialDerivativesAt uvPoint surface =
-  SurfaceFunction3D.partialDerivativesAt uvPoint (function surface)
-
 partialDerivativeRanges ::
   UvBounds ->
   Surface3D space ->
   (VectorBounds3D Meters space, VectorBounds3D Meters space)
 partialDerivativeRanges uvRange surface =
   SurfaceFunction3D.partialDerivativeRanges uvRange (function surface)
-
-secondPartialDerivativesAt ::
-  UvPoint ->
-  Surface3D space ->
-  (Vector3D Meters space, Vector3D Meters space, Vector3D Meters space)
-secondPartialDerivativesAt uvPoint surface =
-  SurfaceFunction3D.secondPartialDerivativesAt uvPoint (function surface)
 
 secondPartialDerivativeRanges ::
   UvBounds ->
@@ -281,8 +265,8 @@ secondPartialDerivativeRanges uvRange surface =
 normalDirectionAt :: UvPoint -> Surface3D space -> Direction3D space
 normalDirectionAt uvPoint surface = do
   let UvPoint uValue vValue = uvPoint
-  let (fu, fv) = partialDerivativesAt uvPoint surface
-  let (fuu, fuv, fvv) = secondPartialDerivativesAt uvPoint surface
+  let (fu, fv) = partialDerivatives surface @ uvPoint
+  let (fuu, fuv, fvv) = secondPartialDerivatives surface @ uvPoint
   let nu = fuu `cross` fv + fu `cross` fuv
   let nv = fuv `cross` fv + fu `cross` fvv
   Vector3D.Nonzero.direction . Nonzero $
@@ -341,7 +325,7 @@ parametric givenFunction givenDomain = do
 
 divergence :: SurfaceFunction3D space -> UvPoint -> Length
 divergence surfaceFunction uvPoint = do
-  let (duValue, dvValue) = SurfaceFunction3D.partialDerivativesAt uvPoint surfaceFunction
+  let (duValue, dvValue) = SurfaceFunction3D.partialDerivatives surfaceFunction @ uvPoint
   Vector3D.divergence duValue dvValue
 
 buildBoundaries ::
