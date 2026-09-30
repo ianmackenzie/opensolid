@@ -1,8 +1,6 @@
 module OpenSolid.SurfaceFunction1D.ImplicitCurveRange
   ( ImplicitCurveRange
   , build
-  , at
-  , over
   )
 where
 
@@ -33,15 +31,15 @@ subtree boxes begin end = case end - begin of
     let split = Interval.lower (Pair.first (boxes @ mid))
     Node left split right
 
-at :: Number -> ImplicitCurveRange -> Interval Unitless
-at x implicitCurveRange = case implicitCurveRange of
-  Node left split right -> if x < split then at x left else at x right
-  Leaf leafRange -> leafRange
+instance At ImplicitCurveRange Number (Interval Unitless) where
+  implicitCurveRange @ xValue = case implicitCurveRange of
+    Node left split right -> if xValue < split then left @ xValue else right @ xValue
+    Leaf leafRange -> leafRange
 
-over :: Interval Unitless -> ImplicitCurveRange -> Interval Unitless
-over x implicitCurveRange = case implicitCurveRange of
-  Node left split right
-    | Interval.upper x <= split -> over x left
-    | Interval.lower x >= split -> over x right
-    | otherwise -> Interval.aggregate2 (over x left) (over x right)
-  Leaf leafRange -> leafRange
+instance At ImplicitCurveRange (Interval Unitless) (Interval Unitless) where
+  implicitCurveRange @ xRange = case implicitCurveRange of
+    Node left split right
+      | Interval.upper xRange <= split -> left @ xRange
+      | Interval.lower xRange >= split -> right @ xRange
+      | otherwise -> Interval.aggregate2 (left @ xRange) (right @ xRange)
+    Leaf leafRange -> leafRange

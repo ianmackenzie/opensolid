@@ -91,8 +91,8 @@ verticalCurve ::
 verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
   let curveRange = implicitCurveRange boxes
   let clampedURange vValue =
-        ImplicitCurveRange.at vValue curveRange & do
-          forEach boundingAxes \boundingAxis (Interval uLow uHigh) -> do
+        curveRange @ vValue
+          & forEach boundingAxes \boundingAxis (Interval uLow uHigh) -> do
             let UvPoint u0 v0 = Axis2D.originPoint boundingAxis
             let Direction2D du dv = Axis2D.direction boundingAxis
             let u = u0 + (vValue - v0) * du / dv
@@ -123,8 +123,8 @@ verticalCurve f dudv vStart vEnd boxes monotonicity boundingAxes = do
             Bounds2D.hull2 (Point2D.relativeTo frame p1) (Point2D.relativeTo frame p2)
               & Bounds2D.placeIn frame
           NotMonotonic -> do
-            let uRange = ImplicitCurveRange.over (Interval v1 v2) curveRange
-            let slopeRange = SurfaceFunction1D.range (Bounds2D uRange (Interval v1 v2)) dudv
+            let uRange = curveRange @ Interval v1 v2
+            let slopeRange = dudv @ Bounds2D uRange (Interval v1 v2)
             let segmentURange = Internal.curveRangeAt v1 v2 u1 u2 slopeRange
             Bounds2D segmentURange (Interval v1 v2)
   recursive \self -> do

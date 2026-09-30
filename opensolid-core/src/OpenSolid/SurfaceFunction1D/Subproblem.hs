@@ -63,10 +63,9 @@ new ::
 new function dudv dvdu subdomain = do
   let uvRange = Domain2D.bounds subdomain
   let fValues = cornerValues uvRange function
-  let fRange = SurfaceFunction1D.range uvRange function
-  let (fuRange, fvRange) = SurfaceFunction1D.partialDerivativeRanges uvRange function
-  let (fuuRange, fuvRange, fvvRange) =
-        SurfaceFunction1D.secondPartialDerivativeRanges uvRange function
+  let fRange = function @ uvRange
+  let (fuRange, fvRange) = SurfaceFunction1D.partialDerivatives function @ uvRange
+  let (fuuRange, fuvRange, fvvRange) = SurfaceFunction1D.secondPartialDerivatives function @ uvRange
   Subproblem
     { function
     , dudv

@@ -1,11 +1,8 @@
 module OpenSolid.SurfaceFunction1D
   ( SurfaceFunction1D
   , Compiled
-  , range
   , partialDerivatives
-  , partialDerivativeRanges
   , secondPartialDerivatives
-  , secondPartialDerivativeRanges
   , derivativeIn
   , compiled
   , zero
@@ -60,7 +57,6 @@ import OpenSolid.SurfaceFunction1D.Subproblem (CornerValues (..), Subproblem (..
 import OpenSolid.SurfaceFunction1D.Subproblem qualified as Subproblem
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D.VerticalCurve qualified as VerticalCurve
 import OpenSolid.SurfaceFunction1D.Zeros (Zeros (..))
-import OpenSolid.Triplet qualified as Triplet
 import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
@@ -113,6 +109,28 @@ instance
   where
   {-# INLINE (@) #-}
   (fuu, fuv, fvv) @ uvPoint = (fuu @ uvPoint, fuv @ uvPoint, fvv @ uvPoint)
+
+instance At (SurfaceFunction1D units) UvBounds (Interval units) where
+  {-# INLINE (@) #-}
+  function @ uvBounds = CompiledFunction.range uvBounds function.compiled
+
+instance
+  At
+    (SurfaceFunction1D units, SurfaceFunction1D units)
+    UvBounds
+    (Interval units, Interval units)
+  where
+  {-# INLINE (@) #-}
+  (fu, fv) @ uvBounds = (fu @ uvBounds, fv @ uvBounds)
+
+instance
+  At
+    (SurfaceFunction1D units, SurfaceFunction1D units, SurfaceFunction1D units)
+    UvBounds
+    (Interval units, Interval units, Interval units)
+  where
+  {-# INLINE (@) #-}
+  (fuu, fuv, fvv) @ uvBounds = (fuu @ uvBounds, fuv @ uvBounds, fvv @ uvBounds)
 
 instance ApproximateEquality (SurfaceFunction1D units) units where
   function1 ~= function2 = do
@@ -370,18 +388,9 @@ instance Composition () (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFun
     let (dtdu, dtdv) = partialDerivatives g
     new (Curve1D.compiled f << compiled g) (dfdt * dtdu, dfdt * dtdv)
 
-range :: UvBounds -> SurfaceFunction1D units -> Interval units
-range uvRange function = CompiledFunction.range uvRange function.compiled
-
 {-# INLINE partialDerivatives #-}
 partialDerivatives :: SurfaceFunction1D units -> (SurfaceFunction1D units, SurfaceFunction1D units)
 partialDerivatives = (.partialDerivatives)
-
-partialDerivativeRanges ::
-  UvBounds ->
-  SurfaceFunction1D units ->
-  (Interval units, Interval units)
-partialDerivativeRanges uvRange function = Pair.map (range uvRange) (partialDerivatives function)
 
 secondPartialDerivatives ::
   SurfaceFunction1D units ->
@@ -391,13 +400,6 @@ secondPartialDerivatives f = do
   let (fuu, fuv) = partialDerivatives fu
   let fvv = Pair.second (partialDerivatives fv)
   (fuu, fuv, fvv)
-
-secondPartialDerivativeRanges ::
-  UvBounds ->
-  SurfaceFunction1D units ->
-  (Interval units, Interval units, Interval units)
-secondPartialDerivativeRanges uvRange function =
-  Triplet.map (range uvRange) (secondPartialDerivatives function)
 
 derivativeIn :: Direction2D -> SurfaceFunction1D units -> SurfaceFunction1D units
 derivativeIn (Direction2D du dv) function = do
@@ -577,7 +579,7 @@ findTangentSolutions subproblem = do
       let (fuu, fuv, fvv) = secondPartialDerivatives function
       let maybePoint =
             Solve2D.unique
-              (\testRange -> VectorBounds2D (range testRange fu) (range testRange fv))
+              (\testRange -> VectorBounds2D (fu @ testRange) (fv @ testRange))
               (\testPoint -> Vector2D (fu @ testPoint) (fv @ testPoint))
               (\testPoint -> Vector2D (fuu @ testPoint) (fuv @ testPoint))
               (\testPoint -> Vector2D (fuv @ testPoint) (fvv @ testPoint))
