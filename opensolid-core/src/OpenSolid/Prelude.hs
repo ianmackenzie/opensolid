@@ -13,11 +13,7 @@ module OpenSolid.Prelude
   , data NonEmpty
   , type (:::) ((:::))
   , setField
-  , (|>)
-  , (<|)
-  , (!>)
-  , (<!)
-  , (&>)
+  , (!)
   , (&)
   , Negation (negate)
   , Addition ((+))
@@ -140,35 +136,11 @@ import Prelude qualified
 
 ----- Pipe operators -----
 
-{-# INLINE (|>) #-}
-(|>) :: a -> (a -> b) -> b
-a |> f = f a
+{-# INLINE (!) #-}
+(!) :: (a -> b) -> Result x a -> Result x b
+(!) = Prelude.fmap
 
-infixl 0 |>
-
-{-# INLINE (<|) #-}
-(<|) :: (a -> b) -> a -> b
-f <| a = f a
-
-infixr 0 <|
-
-{-# INLINE (<!) #-}
-(<!) :: (a -> b) -> Result x a -> Result x b
-(<!) = Prelude.fmap
-
-infixr 0 <!
-
-{-# INLINE (!>) #-}
-(!>) :: Result x a -> (a -> b) -> Result x b
-(!>) = Prelude.flip Prelude.fmap
-
-infixl 0 !>
-
-{-# INLINE (&>) #-}
-(&>) :: Result x a -> (a -> Result x b) -> Result x b
-(&>) = (>>=)
-
-infixl 0 &>
+infixr 0 !
 
 ----- Arithmetic -----
 

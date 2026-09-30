@@ -20,8 +20,8 @@ fixities:
   - "infixl 9 >>"
   - "infixr 9 ."
   # Custom operators
-  - "infixl 0 |>, !>, &>, !!"
-  - "infixr 0 <|, <!"
+  - "infixl 0 !!"
+  - "infixr 0 !"
   - "infix 4 ~=, ^, ==#, >#, <#, >=#, <=#, ~~"
   - "infixl 6 +, -, +#, -#, +/-"
   - "infixl 7 *, /, ?*?, ?/?, *#, /#, //, %, `dot`, `cross`, `dot_`, `cross_`"
