@@ -465,13 +465,13 @@ instance
       (negate (derivative curve))
 
 instance At (Curve2D units) Number (Point2D units) where
-  (@) = pointAt
+  (@) = evaluate
 
 instance At (Curve3D space) Number (Point3D space) where
-  (@) = pointAt
+  (@) = evaluate
 
-pointAt :: Curve dimension units space -> Number -> Point dimension units space
-pointAt curve tValue = case tValue of
+evaluate :: Curve dimension units space -> Number -> Point dimension units space
+evaluate curve tValue = case tValue of
   0.0 -> startPoint curve
   1.0 -> endPoint curve
   _ -> CompiledFunction.value tValue (compiled curve)
@@ -984,12 +984,12 @@ findInteriorSolution point curve = do
   let candidates = Bisection.resolve Bag.empty resolvedUniqueness (bisectionTree curve)
   let f tValue = curve @ tValue - point
   let f' tValue = derivative curve @ tValue
-  let evaluate tValue = (# f tValue, f' tValue #)
+  let evaluateNewtonRaphson tValue = (# f tValue, f' tValue #)
   let isSolution tValue = curve @ tValue ~= point
   let resolvedSolution UniqueSolution tRange segment
         | isDistant segment = Resolved Nothing
         | otherwise = do
-            tValue <- NewtonRaphson.Curve.solveIn tRange evaluate
+            tValue <- NewtonRaphson.Curve.solveIn tRange evaluateNewtonRaphson
             Resolved (if isSolution tValue then Just tValue else Nothing)
   Bisection.find resolvedSolution (Queue.fromBag candidates)
 
