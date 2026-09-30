@@ -330,19 +330,19 @@ arrow ::
   Point2D Meters ->
   Point2D Meters ->
   Svg
-arrow ("headLength" ::: headLength) ("headWidth" ::: headWidth) start end =
-  case Tolerance.using Quantity.zero (Direction2D.from start end) of
+arrow ("headLength" ::: headLength) ("headWidth" ::: headWidth) startPoint endPoint =
+  case Tolerance.using Quantity.zero (Direction2D.from startPoint endPoint) of
     Err Direction2D.PointsAreCoincident -> nothing
     Ok direction -> do
-      let length = Point2D.distanceFrom start end
-      let axis = Axis2D.with {originPoint = start, direction}
+      let length = Point2D.distanceFrom startPoint endPoint
+      let axis = Axis2D.with {originPoint = startPoint, direction}
       let frame = Frame2D.fromXAxis axis
       let stemLength = length - headLength
       let stemEndPoint = on axis stemLength
       let leftPoint = Point2D.placeIn frame (Point2D stemLength (0.5 * headWidth))
       let rightPoint = Point2D.mirrorAcross axis leftPoint
-      let stem = line (Line2D start stemEndPoint)
-      let head = triangle (Triangle2D leftPoint rightPoint end)
+      let stem = line (Line2D startPoint stemEndPoint)
+      let head = triangle (Triangle2D leftPoint rightPoint endPoint)
       group [stem, head]
 
 pointsAttribute :: List (Point2D Meters) -> Attribute
