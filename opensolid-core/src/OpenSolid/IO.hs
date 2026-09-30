@@ -45,7 +45,7 @@ succeed :: a -> IO a
 succeed = Prelude.return
 
 fail :: Text -> IO a
-fail message = Prelude.fail (Text.unpack message)
+fail = Prelude.fail . Text.unpack
 
 map :: (a -> b) -> IO a -> IO b
 map = Prelude.fmap
