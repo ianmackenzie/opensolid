@@ -194,15 +194,15 @@ extraMemberFunctions className = do
   case className of
     "Length" ->
       Python.lines
-        [ repr ["return 'Length.meters(' + str(self.in_meters()) + ')'"]
+        [ repr ["return 'Length.meters(' + str(self.in_meters) + ')'"]
         , ""
         , "@staticmethod"
         , "def tolerance(value: Length) -> contextvars.Token[Length]:"
         , "    \"\"\"Set the length tolerance to use for a block of code.\"\"\""
         , "    return _tolerance_context_var.set(value)"
         ]
-    "Area" -> repr ["return 'Area.square_meters(' + str(self.in_square_meters()) + ')'"]
-    "Angle" -> repr ["return 'Angle.radians(' + str(self.in_radians()) + ')'"]
+    "Area" -> repr ["return 'Area.square_meters(' + str(self.in_square_meters) + ')'"]
+    "Angle" -> repr ["return 'Angle.radians(' + str(self.in_radians) + ')'"]
     "Interval" ->
       repr
         [ "low, high = self.endpoints"

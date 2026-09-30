@@ -162,13 +162,13 @@ length =
     , Class.factory1 "Nanometers" "Value" Length.nanometers $(docs 'Length.nanometers)
     , Class.factory1 "Inches" "Value" Length.inches $(docs 'Length.inches)
     , Class.factory1 "Pixels" "Value" Length.pixels $(docs 'Length.pixels)
-    , Class.member0 "In Meters" Length.inMeters $(docs 'Length.inMeters)
-    , Class.member0 "In Centimeters" Length.inCentimeters $(docs 'Length.inCentimeters)
-    , Class.member0 "In Millimeters" Length.inMillimeters $(docs 'Length.inMillimeters)
-    , Class.member0 "In Micrometers" Length.inMicrometers $(docs 'Length.inMicrometers)
-    , Class.member0 "In Nanometers" Length.inNanometers $(docs 'Length.inNanometers)
-    , Class.member0 "In Inches" Length.inInches $(docs 'Length.inInches)
-    , Class.member0 "In Pixels" Length.inPixels $(docs 'Length.inPixels)
+    , Class.property "In Meters" Length.inMeters $(docs 'Length.inMeters)
+    , Class.property "In Centimeters" Length.inCentimeters $(docs 'Length.inCentimeters)
+    , Class.property "In Millimeters" Length.inMillimeters $(docs 'Length.inMillimeters)
+    , Class.property "In Micrometers" Length.inMicrometers $(docs 'Length.inMicrometers)
+    , Class.property "In Nanometers" Length.inNanometers $(docs 'Length.inNanometers)
+    , Class.property "In Inches" Length.inInches $(docs 'Length.inInches)
+    , Class.property "In Pixels" Length.inPixels $(docs 'Length.inPixels)
     , Class.memberT0 "Is Zero" (~= Length.zero) "Check if a length is zero, within the current tolerance."
     , Class.equalityAndHash
     , Class.comparison
@@ -211,8 +211,8 @@ area =
     , Class.static3 "Midpoints" "Start" "End" "N" (Quantity.midpoints @SquareMeters) $(docs 'Quantity.midpoints)
     , Class.factory1 "Square Meters" "Value" Area.squareMeters $(docs 'Area.squareMeters)
     , Class.factory1 "Square Inches" "Value" Area.squareInches $(docs 'Area.squareInches)
-    , Class.member0 "In Square Meters" Area.inSquareMeters $(docs 'Area.inSquareMeters)
-    , Class.member0 "In Square Inches" Area.inSquareInches $(docs 'Area.inSquareInches)
+    , Class.property "In Square Meters" Area.inSquareMeters $(docs 'Area.inSquareMeters)
+    , Class.property "In Square Inches" Area.inSquareInches $(docs 'Area.inSquareInches)
     , Class.equalityAndHash
     , Class.comparison
     , Class.negation
@@ -264,13 +264,13 @@ angle =
     , Class.factory1 "Acos" "Value" Angle.acos $(docs 'Angle.acos)
     , Class.factory1 "Asin" "Value" Angle.asin $(docs 'Angle.asin)
     , Class.factory1 "Atan" "Value" Angle.atan $(docs 'Angle.atan)
-    , Class.member0 "In Radians" Angle.inRadians $(docs 'Angle.inRadians)
-    , Class.member0 "In Degrees" Angle.inDegrees $(docs 'Angle.inDegrees)
-    , Class.member0 "In Turns" Angle.inTurns $(docs 'Angle.inTurns)
+    , Class.property "In Radians" Angle.inRadians $(docs 'Angle.inRadians)
+    , Class.property "In Degrees" Angle.inDegrees $(docs 'Angle.inDegrees)
+    , Class.property "In Turns" Angle.inTurns $(docs 'Angle.inTurns)
     , Class.member0 "Is Zero" (angular (~= Angle.zero)) "Check if an angle is (approximately) zero."
-    , Class.member0 "Sin" Angle.sin $(docs 'Angle.sin)
-    , Class.member0 "Cos" Angle.cos $(docs 'Angle.cos)
-    , Class.member0 "Tan" Angle.tan $(docs 'Angle.tan)
+    , Class.property "Sin" Angle.sin $(docs 'Angle.sin)
+    , Class.property "Cos" Angle.cos $(docs 'Angle.cos)
+    , Class.property "Tan" Angle.tan $(docs 'Angle.tan)
     , Class.equalityAndHash
     , Class.comparison
     , Class.negation
@@ -314,7 +314,7 @@ interval =
     , Class.property "Endpoints" Interval.endpoints $(docs 'Interval.endpoints)
     , Class.property "Lower" Interval.lower $(docs 'Interval.lower)
     , Class.property "Upper" Interval.upper $(docs 'Interval.upper)
-    , Class.member0 "Reciprocal" (1.0 /) "Compute the reciprocal of the given interval."
+    , Class.property "Reciprocal" (1.0 /) "Compute the reciprocal of the given interval."
     , Class.member1 "Intersection" "Other" Interval.intersection $(docs 'Interval.intersection)
     , Class.member1 "Member" "Value" Interval.member $(docs 'Interval.member)
     , Class.member1 "Contains" "Other" Interval.contains $(docs 'Interval.contains)
@@ -742,7 +742,7 @@ line2D =
     [ Class.constructor2 "Start Point" "End Point" Line2D.Line2D $(docs 'Line2D.Line2D)
     , Class.property "Start Point" Line2D.startPoint $(docs 'Line2D.startPoint)
     , Class.property "End Point" Line2D.endPoint $(docs 'Line2D.endPoint)
-    , Class.member0 "Length" Line2D.length $(docs 'Line2D.length)
+    , Class.property "Length" Line2D.length $(docs 'Line2D.length)
     , Class.member1 "Distance To" "Point" Line2D.distanceTo $(docs 'Line2D.distanceTo)
     ]
       <> affineTransformations2D Line2D.transformBy
@@ -755,7 +755,7 @@ uvLine =
     [ Class.constructor2 "Start Point" "End Point" Line2D.Line2D $(docs 'Line2D.Line2D)
     , Class.property "Start Point" Line2D.startPoint $(docs 'Line2D.startPoint)
     , Class.property "End Point" Line2D.endPoint $(docs 'Line2D.endPoint)
-    , Class.member0 "Length" Line2D.length $(docs 'Line2D.length)
+    , Class.property "Length" Line2D.length $(docs 'Line2D.length)
     , Class.member1 "Distance To" "Point" Line2D.distanceTo $(docs 'Line2D.distanceTo)
     ]
       <> affineTransformations2D Line2D.transformBy
@@ -767,7 +767,7 @@ triangle2D =
   Class.new @Triangle2D $(docs ''Triangle2D.Triangle2D) $
     [ Class.constructor3 "First Vertex" "Second Vertex" "Third Vertex" Triangle2D.Triangle2D $(docs 'Triangle2D.Triangle2D)
     , Class.property "Vertices" Triangle2D.vertices $(docs 'Triangle2D.vertices)
-    , Class.member0 "Signed Area" Triangle2D.signedArea $(docs 'Triangle2D.signedArea)
+    , Class.property "Signed Area" Triangle2D.signedArea $(docs 'Triangle2D.signedArea)
     ]
 
 type Circle2D = Circle2D.Circle2D Meters
@@ -802,8 +802,8 @@ polyline2D =
     , Class.property "Num Vertices" Polyline2D.numVertices $(docs 'Polyline2D.numVertices)
     , Class.property "Start Point" Polyline2D.startPoint $(docs 'Polyline2D.startPoint)
     , Class.property "End Point" Polyline2D.endPoint $(docs 'Polyline2D.endPoint)
-    , Class.member0 "Segments" Polyline2D.segments $(docs 'Polyline2D.segments)
-    , Class.member0 "Length" Polyline2D.length $(docs 'Polyline2D.length)
+    , Class.property "Segments" Polyline2D.segments $(docs 'Polyline2D.segments)
+    , Class.property "Length" Polyline2D.length $(docs 'Polyline2D.length)
     ]
 
 type UvPolyline = Polyline2D.Polyline2D Unitless
@@ -816,8 +816,8 @@ uvPolyline =
     , Class.property "Num Vertices" Polyline2D.numVertices $(docs 'Polyline2D.numVertices)
     , Class.property "Start Point" Polyline2D.startPoint $(docs 'Polyline2D.startPoint)
     , Class.property "End Point" Polyline2D.endPoint $(docs 'Polyline2D.endPoint)
-    , Class.member0 "Segments" Polyline2D.segments $(docs 'Polyline2D.segments)
-    , Class.member0 "Length" Polyline2D.length $(docs 'Polyline2D.length)
+    , Class.property "Segments" Polyline2D.segments $(docs 'Polyline2D.segments)
+    , Class.property "Length" Polyline2D.length $(docs 'Polyline2D.length)
     ]
 
 type Polygon2D = Polygon2D.Polygon2D Meters
@@ -830,8 +830,8 @@ polygon2D =
     , Class.factory2R "Circumscribed" "Num Sides" "Circle" Polygon2D.circumscribed $(docs 'Polygon2D.circumscribed)
     , Class.factory2R "Hexagon" "Center Point" "Height" Polygon2D.hexagon $(docs 'Polygon2D.hexagon)
     , Class.property "Vertices" Polygon2D.vertices $(docs 'Polygon2D.vertices)
-    , Class.member0 "Edges" Polygon2D.edges $(docs 'Polygon2D.edges)
-    , Class.member0 "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
+    , Class.property "Edges" Polygon2D.edges $(docs 'Polygon2D.edges)
+    , Class.property "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
     ]
 
 type UvPolygon = Polygon2D.Polygon2D Unitless
@@ -844,8 +844,8 @@ uvPolygon =
     , Class.factory2R "Circumscribed" "Num Sides" "Circle" Polygon2D.circumscribed $(docs 'Polygon2D.circumscribed)
     , Class.factory2R "Hexagon" "Center Point" "Height" Polygon2D.hexagon $(docs 'Polygon2D.hexagon)
     , Class.property "Vertices" Polygon2D.vertices $(docs 'Polygon2D.vertices)
-    , Class.member0 "Edges" Polygon2D.edges $(docs 'Polygon2D.edges)
-    , Class.member0 "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
+    , Class.property "Edges" Polygon2D.edges $(docs 'Polygon2D.edges)
+    , Class.property "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
     ]
 
 type Curve = Curve1D.Curve1D Unitless
@@ -858,10 +858,10 @@ curve =
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
-    , Class.member0 "Squared" Curve1D.squared $(docs 'Curve1D.squared)
-    , Class.member0 "Cubed" Curve1D.cubed $(docs 'Curve1D.cubed)
-    , Class.member0 "Sin" (Curve1D.sin . (Angle.radian *)) $(docs 'Curve1D.sin)
-    , Class.member0 "Cos" (Curve1D.cos . (Angle.radian *)) $(docs 'Curve1D.cos)
+    , Class.property "Squared" Curve1D.squared $(docs 'Curve1D.squared)
+    , Class.property "Cubed" Curve1D.cubed $(docs 'Curve1D.cubed)
+    , Class.property "Sin" (Curve1D.sin . (Angle.radian *)) $(docs 'Curve1D.sin)
+    , Class.property "Cos" (Curve1D.cos . (Angle.radian *)) $(docs 'Curve1D.cos)
     , Class.member0R "Find Roots" (unitless Curve1D.findRoots) $(docs 'Curve1D.findRoots)
     , Class.member0 "Is Zero" (unitless (~= Curve1D.zero)) "Check if a curve is (approximately) zero everywhere."
     , Class.at @Number
@@ -900,8 +900,8 @@ angleCurve =
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
-    , Class.member0 "Sin" Curve1D.sin $(docs 'Curve1D.sin)
-    , Class.member0 "Cos" Curve1D.cos $(docs 'Curve1D.cos)
+    , Class.property "Sin" Curve1D.sin $(docs 'Curve1D.sin)
+    , Class.property "Cos" Curve1D.cos $(docs 'Curve1D.cos)
     , Class.member0R "Find Roots" (angular Curve1D.findRoots) $(docs 'Curve1D.findRoots)
     , Class.member0 "Is Zero" (angular (~= Curve1D.zero)) "Check if a curve is (approximately) zero everywhere."
     , Class.at @Number
@@ -928,7 +928,7 @@ lengthCurve =
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
-    , Class.member0 "Squared" Curve1D.squared $(docs 'Curve1D.squared)
+    , Class.property "Squared" Curve1D.squared $(docs 'Curve1D.squared)
     , Class.memberT0R "Find Roots" Curve1D.findRoots $(docs 'Curve1D.findRoots)
     , Class.memberT0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.at @Number
@@ -1076,8 +1076,8 @@ vector3D =
     , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3D.zUp $(docs 'Vector3D.zUp)
     , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3D.yUp $(docs 'Vector3D.yUp)
     , Class.member1 "Components" "Convention" Vector3D.components $(docs 'Vector3D.components)
-    , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
-    , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
+    , Class.property "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
+    , Class.property "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
     , Class.member1 "Component In" "Direction" Vector3D.componentIn $(docs 'Vector3D.componentIn)
     , Class.member0R "Direction" (unitless Vector3D.direction) $(docs 'Vector3D.direction)
     , Class.member0 "Is Zero" (unitless (~= Vector3D.zero)) "Check if a vector is (approximately) zero."
@@ -1117,8 +1117,8 @@ displacement3D =
     , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3D.zUp $(docs 'Vector3D.zUp)
     , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3D.yUp $(docs 'Vector3D.yUp)
     , Class.member1 "Components" "Convention" Vector3D.components $(docs 'Vector3D.components)
-    , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
-    , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
+    , Class.property "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
+    , Class.property "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
     , Class.member1 "Component In" "Direction" Vector3D.componentIn $(docs 'Vector3D.componentIn)
     , Class.memberT0R "Direction" Vector3D.direction $(docs 'Vector3D.direction)
     , Class.memberT0 "Is Zero" (~= Vector3D.zero) "Check if a displacement is zero, within the current tolerance."
@@ -1156,8 +1156,8 @@ areaVector3D =
     , Class.factory3 "Z Up" "X Component" "Y Component" "Z Component" Vector3D.zUp $(docs 'Vector3D.zUp)
     , Class.factory3 "Y Up" "X Component" "Y Component" "Z Component" Vector3D.yUp $(docs 'Vector3D.yUp)
     , Class.member1 "Components" "Convention" Vector3D.components $(docs 'Vector3D.components)
-    , Class.member0 "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
-    , Class.member0 "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
+    , Class.property "Z Up Components" Vector3D.zUpComponents $(docs 'Vector3D.zUpComponents)
+    , Class.property "Y Up Components" Vector3D.yUpComponents $(docs 'Vector3D.yUpComponents)
     , Class.member1 "Component In" "Direction" Vector3D.componentIn $(docs 'Vector3D.componentIn)
     , Class.member2 "Rotate In" "Direction" "Angle" Vector3D.rotateIn $(docs 'Vector3D.rotateIn)
     , Class.member2 "Rotate Around" "Axis" "Angle" (Vector3D.rotateAround :: Axis3D -> Angle -> AreaVector3D -> AreaVector3D) $(docs 'Vector3D.rotateAround)
@@ -1187,9 +1187,9 @@ direction3D :: Class
 direction3D =
   Class.new @Direction3D $(docs ''Direction3D.Direction3D) $
     [ Class.member1 "Components" "Convention" Direction3D.components $(docs 'Direction3D.components)
-    , Class.member0 "Z Up Components" Direction3D.zUpComponents $(docs 'Direction3D.zUpComponents)
-    , Class.member0 "Y Up Components" Direction3D.yUpComponents $(docs 'Direction3D.yUpComponents)
-    , Class.member0 "Perpendicular Direction" Direction3D.perpendicularDirection $(docs 'Direction3D.perpendicularDirection)
+    , Class.property "Z Up Components" Direction3D.zUpComponents $(docs 'Direction3D.zUpComponents)
+    , Class.property "Y Up Components" Direction3D.yUpComponents $(docs 'Direction3D.yUpComponents)
+    , Class.property "Perpendicular Direction" Direction3D.perpendicularDirection $(docs 'Direction3D.perpendicularDirection)
     , Class.member1 "Angle To" "Other" Direction3D.angleFrom $(docs 'Direction3D.angleFrom)
     , Class.member2 "Rotate In" "Direction" "Angle" Direction3D.rotateIn $(docs 'Direction3D.rotateIn)
     , Class.member2 "Rotate Around" "Axis" "Angle" (Direction3D.rotateAround :: Axis3D -> Angle -> Direction3D -> Direction3D) $(docs 'Direction3D.rotateAround)
@@ -1221,8 +1221,8 @@ point3D =
     , Class.factory3 "Z Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3D.zUp $(docs 'Point3D.zUp)
     , Class.factory3 "Y Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3D.yUp $(docs 'Point3D.yUp)
     , Class.member1 "Coordinates" "Convention" Point3D.coordinates $(docs 'Point3D.coordinates)
-    , Class.member0 "Z Up Coordinates" Point3D.zUpCoordinates $(docs 'Point3D.zUpCoordinates)
-    , Class.member0 "Y Up Coordinates" Point3D.yUpCoordinates $(docs 'Point3D.yUpCoordinates)
+    , Class.property "Z Up Coordinates" Point3D.zUpCoordinates $(docs 'Point3D.zUpCoordinates)
+    , Class.property "Y Up Coordinates" Point3D.yUpCoordinates $(docs 'Point3D.yUpCoordinates)
     , Class.member1 "Distance To" "Other" Point3D.distanceFrom $(docs 'Point3D.distanceFrom)
     , Class.member1 "Midpoint" "Other" Point3D.midpoint $(docs 'Point3D.midpoint)
     , Class.member1 "Project Onto" "Plane" Point3D.projectOnto $(docs 'Point3D.projectOnto)
@@ -1258,7 +1258,7 @@ axis3D =
     [ Class.constructor2 "Origin Point" "Direction" Axis3D.Axis3D $(docs 'Axis3D.Axis3D)
     , Class.property "Origin Point" Axis3D.originPoint $(docs 'Axis3D.originPoint)
     , Class.property "Direction" Axis3D.direction $(docs 'Axis3D.direction)
-    , Class.member0 "Normal Plane" (Axis3D.normalPlane :: Axis3D -> Plane3D) $(docs 'Axis3D.normalPlane)
+    , Class.property "Normal Plane" (Axis3D.normalPlane :: Axis3D -> Plane3D) $(docs 'Axis3D.normalPlane)
     , Class.member1 "Move To" "Point" Axis3D.moveTo $(docs 'Axis3D.moveTo)
     , Class.member0 "Reverse" Axis3D.reverse $(docs 'Axis3D.reverse)
     , Class.member1 "Place In" "Frame" (Axis3D.placeIn :: Frame3D -> Axis3D -> Axis3D) $(docs 'Axis3D.placeIn)
@@ -1369,7 +1369,7 @@ frame3D =
     , Class.property "Downward Frame" (Frame3D.downward :: Frame3D -> Frame3D) $(docs 'Frame3D.downward)
     , Class.member1 "Place In" "Other Frame" (Frame3D.placeIn :: Frame3D -> Frame3D -> Frame3D) $(docs 'Frame3D.placeIn)
     , Class.member1 "Relative To" "Other Frame" (Frame3D.relativeTo :: Frame3D -> Frame3D -> Frame3D) $(docs 'Frame3D.relativeTo)
-    , Class.member0 "Inverse" Frame3D.inverse $(docs 'Frame3D.inverse)
+    , Class.property "Inverse" Frame3D.inverse $(docs 'Frame3D.inverse)
     , Class.member1 "Move To" "Point" (Frame3D.moveTo :: Point3D -> Frame3D -> Frame3D) $(docs 'Frame3D.moveTo)
     , Class.member1 "Offset Forward By" "Distance" (Frame3D.offsetForwardBy :: Length -> Frame3D -> Frame3D) $(docs 'Frame3D.offsetForwardBy)
     , Class.member1 "Offset Backward By" "Distance" (Frame3D.offsetBackwardBy :: Length -> Frame3D -> Frame3D) $(docs 'Frame3D.offsetBackwardBy)
