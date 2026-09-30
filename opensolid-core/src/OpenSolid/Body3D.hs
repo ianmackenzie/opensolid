@@ -156,19 +156,19 @@ Fails if the cylinder length or diameter is zero.
 -}
 cylinder ::
   Tolerance Meters =>
-  Point3D space ->
-  Point3D space ->
   "diameter" ::: Length ->
+  Point3D space ->
+  Point3D space ->
   Result EmptyBody (Body3D space)
-cylinder startPoint endPoint ("diameter" ::: diameter) =
+cylinder ("diameter" ::: diameter) startPoint endPoint =
   case Vector3D.magnitudeAndDirection (endPoint - startPoint) of
     Err IsZero -> Err EmptyBody
     Ok (length, direction) ->
       cylinderAlong
         { axis = Axis3D startPoint direction
+        , diameter
         , start = Length.zero
         , end = length
-        , diameter
         }
 
 {-| Create a cylindrical body along a given axis.
@@ -184,17 +184,17 @@ Failes if the cylinder length or diameter is zero.
 cylinderAlong ::
   Tolerance Meters =>
   "axis" ::: Axis3D space ->
+  "diameter" ::: Length ->
   "start" ::: Length ->
   "end" ::: Length ->
-  "diameter" ::: Length ->
   Result EmptyBody (Body3D space)
-cylinderAlong ("axis" ::: axis) ("start" ::: d1) ("end" ::: d2) ("diameter" ::: diameter) =
+cylinderAlong ("axis" ::: axis) ("diameter" ::: diameter) ("start" ::: start) ("end" ::: end) =
   case Region2D.circle (Circle2D.withDiameter diameter Point2D.origin) of
     Err Region2D.EmptyRegion -> Err EmptyBody
     Ok profile ->
-      if d1 ~= d2
+      if start ~= end
         then Err EmptyBody
-        else case extruded (Axis3D.normalPlane axis) profile d1 d2 of
+        else case extruded (Axis3D.normalPlane axis) profile start end of
           Ok body -> Ok body
           Err _ -> error "Constructing non-empty cylinder body should not fail"
 

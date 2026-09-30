@@ -1596,8 +1596,8 @@ body3D = do
     , Class.factoryT4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3D.revolved @Void) $(docs 'Body3D.revolved)
     , Class.factoryT1R "Block" "Bounding Box" Body3D.block $(docs 'Body3D.block)
     , Class.factoryT2R "Sphere" "Center Point" "Diameter" Body3D.sphere $(docs 'Body3D.sphere)
-    , Class.factoryT3R "Cylinder" "Start Point" "End Point" "Diameter" Body3D.cylinder $(docs 'Body3D.cylinder)
-    , Class.factoryT4R "Cylinder Along" "Axis" "Start" "End" "Diameter" Body3D.cylinderAlong $(docs 'Body3D.cylinderAlong)
+    , Class.factoryT3R "Cylinder" "Diameter" "Start Point" "End Point" Body3D.cylinder $(docs 'Body3D.cylinder)
+    , Class.factoryT4R "Cylinder Along" "Axis" "Diameter" "Start" "End" Body3D.cylinderAlong $(docs 'Body3D.cylinderAlong)
     , Class.member1 "Place In" "Frame" (Body3D.placeIn :: Frame3D -> Body3D -> Body3D) $(docs 'Body3D.placeIn)
     , Class.member1 "Relative To" "Frame" (Body3D.relativeTo :: Frame3D -> Body3D -> Body3D) $(docs 'Body3D.relativeTo)
     , Class.memberT3I "Write STL" "Path" "Convention" "Resolution" writeStl "Write a body to a binary STL file, using units of millimeters."
