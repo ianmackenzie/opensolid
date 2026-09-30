@@ -62,6 +62,15 @@ module OpenSolid.Prelude
   , recursive
   , forEach
   , forEachWithIndex
+  , curry2
+  , curry3
+  , curry4
+  , curry5
+  , curry6
+  , curry7
+  , curry8
+  , curry9
+  , curry10
   )
 where
 
@@ -843,3 +852,41 @@ forEachWithIndex list function init = do
   let callback (WithIndex i acc) item = WithIndex (i + 1) (function i item acc)
   let WithIndex _ result = Prelude.foldl' callback (WithIndex 0 init) list
   result
+
+----- Currying -----
+
+{-# INLINE curry2 #-}
+curry2 :: ((a, b) -> result) -> (a -> b -> result)
+curry2 function a b = function (a, b)
+
+{-# INLINE curry3 #-}
+curry3 :: ((a, b, c) -> result) -> (a -> b -> c -> result)
+curry3 function a b c = function (a, b, c)
+
+{-# INLINE curry4 #-}
+curry4 :: ((a, b, c, d) -> result) -> (a -> b -> c -> d -> result)
+curry4 function a b c d = function (a, b, c, d)
+
+{-# INLINE curry5 #-}
+curry5 :: ((a, b, c, d, e) -> result) -> (a -> b -> c -> d -> e -> result)
+curry5 function a b c d e = function (a, b, c, d, e)
+
+{-# INLINE curry6 #-}
+curry6 :: ((a, b, c, d, e, f) -> result) -> (a -> b -> c -> d -> e -> f -> result)
+curry6 function a b c d e f = function (a, b, c, d, e, f)
+
+{-# INLINE curry7 #-}
+curry7 :: ((a, b, c, d, e, f, g) -> result) -> (a -> b -> c -> d -> e -> f -> g -> result)
+curry7 function a b c d e f g = function (a, b, c, d, e, f, g)
+
+{-# INLINE curry8 #-}
+curry8 :: ((a, b, c, d, e, f, g, h) -> result) -> (a -> b -> c -> d -> e -> f -> g -> h -> result)
+curry8 function a b c d e f g h = function (a, b, c, d, e, f, g, h)
+
+{-# INLINE curry9 #-}
+curry9 :: ((a, b, c, d, e, f, g, h, i) -> result) -> (a -> b -> c -> d -> e -> f -> g -> h -> i -> result)
+curry9 function a b c d e f g h i = function (a, b, c, d, e, f, g, h, i)
+
+{-# INLINE curry10 #-}
+curry10 :: ((a, b, c, d, e, f, g, h, i, j) -> result) -> (a -> b -> c -> d -> e -> f -> g -> h -> i -> j -> result)
+curry10 function a b c d e f g h i j = function (a, b, c, d, e, f, g, h, i, j)
