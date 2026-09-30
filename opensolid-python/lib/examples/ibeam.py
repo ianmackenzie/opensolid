@@ -56,7 +56,7 @@ profile = Region2D.bounded_by(curves)
 body = Body3D.extruded(World3D.front_plane, profile, -length / 2, length / 2)
 
 # Create a 3D model containing the body and write to GLB file
-material = PbrMaterial.metal(Color.rgb1(0.913, 0.921, 0.925), roughness=0.3)
+material = PbrMaterial.metal(base_color=Color.rgb1(0.913, 0.921, 0.925), roughness=0.3)
 model = Model3D.body(body).with_pbr_material(material)
 resolution = Resolution.max_error(Length.millimeters(0.1))
 Gltf(model).write_binary("ibeam.glb", resolution)

@@ -42,7 +42,7 @@ base_region = Region2D.bounded_by(left_curves + right_curves)
 left_fillet_points = [p2, p6, p5]
 right_fillet_points = [p.mirror_across(Axis2D.y) for p in left_fillet_points]
 fillet_points = left_fillet_points + right_fillet_points
-filleted_region = base_region.fillet(fillet_points, radius=Length.millimeters(4))
+filleted_region = base_region.fillet(points=fillet_points, radius=Length.millimeters(4))
 
 thickness = Length.centimeters(2)
 body = Body3D.extruded(
@@ -52,7 +52,7 @@ body = Body3D.extruded(
     thickness / 2,
 )
 
-material = PbrMaterial.nonmetal(Color.blue, roughness=0.3)
+material = PbrMaterial.nonmetal(base_color=Color.blue, roughness=0.3)
 model = Model3D.body(body).with_pbr_material(material).with_name("Body")
 ground_limits = LengthInterval.plus_minus(Length.meters(1))
 ground_body = Body3D.extruded(
@@ -61,7 +61,7 @@ ground_body = Body3D.extruded(
     Length.millimeters(2),
     Length.centimeters(1),
 )
-ground_material = PbrMaterial.nonmetal(Color.dark_charcoal, roughness=0.5)
+ground_material = PbrMaterial.nonmetal(base_color=Color.dark_charcoal, roughness=0.5)
 ground_model = (
     Model3D.body(ground_body).with_pbr_material(ground_material).with_name("Ground")
 )
