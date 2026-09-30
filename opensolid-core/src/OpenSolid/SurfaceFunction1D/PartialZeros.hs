@@ -1,5 +1,3 @@
-{-# LANGUAGE NoOverloadedRecordUpdate #-}
-
 module OpenSolid.SurfaceFunction1D.PartialZeros
   ( PartialZeros (..)
   , Parameterization (..)
@@ -80,10 +78,12 @@ empty =
 
 addCrossingSegment :: CrossingSegment -> PartialZeros units -> PartialZeros units
 addCrossingSegment newCrossingSegment partialZeros =
-  partialZeros
+  PartialZeros
     { crossingSegments =
         partialZeros.crossingSegments
           & insertCrossingSegment newCrossingSegment
+    , tangentPoints = partialZeros.tangentPoints
+    , saddleRegions = partialZeros.saddleRegions
     }
 
 insertCrossingSegment ::
@@ -129,11 +129,19 @@ jointParameterization Vertical Horizontal = Nothing
 
 addTangentPoint :: (UvPoint, Sign) -> PartialZeros units -> PartialZeros units
 addTangentPoint tangentPoint partialZeros =
-  partialZeros {tangentPoints = tangentPoint : partialZeros.tangentPoints}
+  PartialZeros
+    { crossingSegments = partialZeros.crossingSegments
+    , tangentPoints = tangentPoint : partialZeros.tangentPoints
+    , saddleRegions = partialZeros.saddleRegions
+    }
 
 addSaddleRegion :: SaddleRegion units -> PartialZeros units -> PartialZeros units
 addSaddleRegion saddleRegion partialZeros =
-  partialZeros {saddleRegions = saddleRegion : partialZeros.saddleRegions}
+  PartialZeros
+    { crossingSegments = partialZeros.crossingSegments
+    , tangentPoints = partialZeros.tangentPoints
+    , saddleRegions = saddleRegion : partialZeros.saddleRegions
+    }
 
 data PiecewiseCurve
   = PiecewiseCurve Domain2D.Boundary Domain2D.Boundary (NonEmpty UvCurve)

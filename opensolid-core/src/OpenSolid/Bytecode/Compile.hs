@@ -1,5 +1,4 @@
 {-# LANGUAGE UnboxedTuples #-}
-{-# LANGUAGE NoOverloadedRecordUpdate #-}
 
 module OpenSolid.Bytecode.Compile
   ( Step
@@ -110,16 +109,19 @@ addConstant components = Step \initialState ->
     Just constantIndex -> (# initialState, constantIndex #)
     Nothing -> do
       let constantIndex = nextConstantIndex initialState
-      let updatedCompilation =
-            initialState
+      let updatedState =
+            State
               { constantsBuilder =
                   initialState.constantsBuilder <> Binary.combine Encode.number components
               , constants =
                   Map.set components constantIndex initialState.constants
               , constantComponents =
                   initialState.constantComponents + NonEmpty.length components
+              , variablesBuilder = initialState.variablesBuilder
+              , variables = initialState.variables
+              , variableComponents = initialState.variableComponents
               }
-      (# updatedCompilation, constantIndex #)
+      (# updatedState, constantIndex #)
 
 addConstant1D :: Number -> Step ConstantIndex
 addConstant1D value = addConstant (NonEmpty.one value)
@@ -142,8 +144,11 @@ addVariable instruction (OutputComponents outputComponents) = Step \initialState
     Nothing -> do
       let resultIndex = nextVariableIndex initialState
       let updatedState =
-            initialState
-              { variablesBuilder =
+            State
+              { constantsBuilder = initialState.constantsBuilder
+              , constants = initialState.constants
+              , constantComponents = initialState.constantComponents
+              , variablesBuilder =
                   initialState.variablesBuilder <> Instruction.encode instruction resultIndex
               , variables =
                   Map.set instruction resultIndex initialState.variables

@@ -1,6 +1,5 @@
 -- Needed for 'property', since call sites will explicitly specify the property name
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE NoOverloadedRecordUpdate #-}
 
 module OpenSolid.API.Class
   ( Class (..)
@@ -1232,42 +1231,45 @@ init givenName givenDocumentation =
     }
 
 buildClass :: List (Member value) -> Class -> Class
-buildClass members built = case members of
-  [] -> built
-  first : rest -> buildClass rest $ case first of
-    Const name value ->
-      built {constants = built.constants <> [(name, value)]}
-    Constructor constructor ->
-      built {constructor = Just constructor}
-    Static name staticFunction ->
-      built {staticFunctions = built.staticFunctions <> [(name, staticFunction)]}
-    Prop name prop ->
-      built {properties = built.properties <> [(name, prop)]}
-    Member name memberFunction ->
-      built {memberFunctions = built.memberFunctions <> [(name, memberFunction)]}
-    EqualityAndHash functionPair ->
-      built {equalityAndHashFunctions = Just functionPair}
-    Comparison comparisonFunction ->
-      built {comparisonFunction = Just comparisonFunction}
-    Negate negationFunction ->
-      built {negationFunction = Just negationFunction}
-    Abs absFunction ->
-      built {absFunction = Just absFunction}
-    DivMod @units -> do
-      let divOperator :: Quantity units -> Quantity units -> Int = (//)
-      let modOperator :: Quantity units -> Quantity units -> Quantity units = (%)
-      built
-        { postOperators =
-            built.postOperators
-              & addPostOverload BinaryOperator.FloorDiv (PostOperatorOverload (wrap2 divOperator))
-              & addPostOverload BinaryOperator.Mod (PostOperatorOverload (wrap2 modOperator))
-        }
-    PreOverload operatorId overload ->
-      built {preOperators = addPreOverload operatorId overload built.preOperators}
-    PostOverload operatorId overload ->
-      built {postOperators = addPostOverload operatorId overload built.postOperators}
-    Nested nestedDocstring nestedMembers ->
-      built {nestedClasses = built.nestedClasses <> [new nestedDocstring nestedMembers]}
+buildClass members built = do
+  let Class {..} = built
+  case members of
+    [] -> built
+    first : rest -> buildClass rest $ case first of
+      Const name_ value ->
+        Class {constants = built.constants <> [(name_, value)], ..}
+      Constructor constructor_ ->
+        Class {constructor = Just constructor_, ..}
+      Static name_ staticFunction ->
+        Class {staticFunctions = built.staticFunctions <> [(name_, staticFunction)], ..}
+      Prop name_ prop ->
+        Class {properties = built.properties <> [(name_, prop)], ..}
+      Member name_ memberFunction ->
+        Class {memberFunctions = built.memberFunctions <> [(name_, memberFunction)], ..}
+      EqualityAndHash functionPair ->
+        Class {equalityAndHashFunctions = Just functionPair, ..}
+      Comparison comparisonFunction_ ->
+        Class {comparisonFunction = Just comparisonFunction_, ..}
+      Negate negationFunction_ ->
+        Class {negationFunction = Just negationFunction_, ..}
+      Abs absFunction_ ->
+        Class {absFunction = Just absFunction_, ..}
+      DivMod @units -> do
+        let divOperator :: Quantity units -> Quantity units -> Int = (//)
+        let modOperator :: Quantity units -> Quantity units -> Quantity units = (%)
+        Class
+          { postOperators =
+              built.postOperators
+                & addPostOverload BinaryOperator.FloorDiv (PostOperatorOverload (wrap2 divOperator))
+                & addPostOverload BinaryOperator.Mod (PostOperatorOverload (wrap2 modOperator))
+          , ..
+          }
+      PreOverload operatorId overload ->
+        Class {preOperators = addPreOverload operatorId overload built.preOperators, ..}
+      PostOverload operatorId overload ->
+        Class {postOperators = addPostOverload operatorId overload built.postOperators, ..}
+      Nested nestedDocstring nestedMembers ->
+        Class {nestedClasses = built.nestedClasses <> [new nestedDocstring nestedMembers], ..}
 
 ----- FUNCTION COLLECTION -----
 

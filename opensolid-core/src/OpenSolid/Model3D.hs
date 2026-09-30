@@ -1,5 +1,3 @@
-{-# LANGUAGE NoOverloadedRecordUpdate #-}
-
 module OpenSolid.Model3D
   ( Model3D (Body, Group)
   , Attribute
@@ -77,13 +75,20 @@ inspect :: (Traversal => Model3D space -> a) -> Model3D space -> a
 inspect function model = let ?context = rootContext in function model
 
 applyAttribute :: Attribute -> Context -> Context
-applyAttribute attr ctx = case attr of
-  Name value -> ctx {ownName = Just value}
-  PbrMaterial value -> ctx {ownPbrMaterial = Just value, currentPbrMaterial = value}
-  -- Note that here we *don't* update currentMultipliedOpacity here,
-  -- to avoid multiplying it multiple times just in case there are multiple opacity attributes
-  -- (it will be updated below, at the end of inChildContext)
-  Opacity value -> ctx {ownOpacity = value}
+applyAttribute attr ctx = do
+  let Context {..} = ctx
+  case attr of
+    Name value -> Context {ownName = Just value, ..}
+    PbrMaterial value -> Context {ownPbrMaterial = Just value, currentPbrMaterial = value, ..}
+    -- Note that here we *don't* update currentMultipliedOpacity here,
+    -- to avoid multiplying it multiple times just in case there are multiple opacity attributes
+    -- (it will be updated below, at the end of inChildContext)
+    Opacity value -> Context {ownOpacity = value, ..}
+
+setCurrentMultipliedOpacity :: Number -> Context -> Context
+setCurrentMultipliedOpacity givenOpacity context = do
+  let Context {..} = context
+  Context {currentMultipliedOpacity = givenOpacity, ..}
 
 inChildContext :: Traversal => List Attribute -> (Traversal => a) -> a
 inChildContext childAttributes callback = do
@@ -104,9 +109,8 @@ inChildContext childAttributes callback = do
   -- otherwise we could update currentMultipliedOpacity directly within applyAttribute)
   let updatedContext =
         appliedContext
-          { currentMultipliedOpacity =
-              appliedContext.currentMultipliedOpacity * appliedContext.ownOpacity
-          }
+          & setCurrentMultipliedOpacity
+            (appliedContext.currentMultipliedOpacity * appliedContext.ownOpacity)
   let ?context = updatedContext in callback
 
 rootContext :: Context

@@ -60,6 +60,7 @@ library
     OverloadedStrings
     PatternSynonyms
     RebindableSyntax
+    RecordWildCards
     RequiredTypeArguments
     TemplateHaskell
     TypeAbstractions
