@@ -14,6 +14,7 @@ import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
+import OpenSolid.Try qualified as Try
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.VectorCurve2D (VectorCurve2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -62,16 +63,16 @@ simpleSurface2D = Test.verify "Simple 2D surface" do
   surface2D surface (UvPoint 1.0 0.0) (UvPoint (Number.sqrt 2.0) 1.0)
 
 pointOnSphere3D :: Test
-pointOnSphere3D = Test.verify "Point on sphere" do
+pointOnSphere3D = Test.verify "Point on sphere" Try.do
   let radius = Length.meters 1.0
-  profileCurve <- try do
+  profileCurve <-
     Curve2D.polarArc
       { centerPoint = Point2D.origin
       , radius
       , startAngle = Angle.zero
       , endAngle = Angle.halfPi
       }
-  surface <- try do Surface3D.revolved World3D.rightPlane profileCurve Axis2D.y Angle.twoPi
+  surface <- Surface3D.revolved World3D.rightPlane profileCurve Axis2D.y Angle.twoPi
   let point =
         Point2D.polar radius (Angle.degrees 45.0)
           & Point2D.placeOn World3D.rightPlane

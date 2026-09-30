@@ -21,6 +21,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Try qualified as Try
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 import Test (Test)
 import Test qualified
@@ -73,8 +74,8 @@ resolvesTo value estimate
         else Err "Refined bounds are not narrower than original bounds"
 
 area :: Test
-area = Test.verify "area" do
-  curve <- try do
+area = Test.verify "area" Try.do
+  curve <-
     Curve2D.polarArc
       { centerPoint = Point2D.origin
       , radius = Length.meter
@@ -86,7 +87,7 @@ area = Test.verify "area" do
   let expectedArea = Area.squareMeters Number.halfPi
   areaIsCorrect <-
     Tolerance.using (Area.squareMeters 1e-4) do
-      try do resolvesTo expectedArea areaEstimate
+      resolvesTo expectedArea areaEstimate
   Test.expect areaIsCorrect
 
 minimumBy :: Test

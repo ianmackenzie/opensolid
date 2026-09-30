@@ -82,6 +82,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
+import OpenSolid.Try qualified as Try
 import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D)
@@ -221,10 +222,10 @@ fillet ::
   "radius" ::: Quantity units ->
   Region2D units ->
   Result Text (Region2D units)
-fillet ("points" ::: points) ("radius" ::: radius) region = do
+fillet ("points" ::: points) ("radius" ::: radius) region = Try.do
   let initialCurves = Set2D.toList (boundaryCurves region)
-  filletedCurves <- try do initialCurves & Result.forEach points (addFillet radius)
-  try do boundedBy filletedCurves
+  filletedCurves <- initialCurves & Result.forEach points (addFillet radius)
+  boundedBy filletedCurves
 
 addFillet ::
   Tolerance units =>
@@ -272,7 +273,7 @@ addFillet radius point curves = do
                   & Curve.IntersectionPoint.parameterValues
           if intersection1 /= intersection2
             then couldNotSolveForFilletLocation
-            else do
+            else Try.do
               let (t1, t2) = intersection1
               let centerPoint = Curve2D.pointAt t1 firstOffsetCurve
               let startPoint = Curve2D.pointAt t1 firstCurve
@@ -280,9 +281,9 @@ addFillet radius point curves = do
                     Direction2D.angleFrom
                       (Curve2D.tangentDirectionAt t1 firstCurve)
                       (Curve2D.tangentDirectionAt t2 secondCurve)
-              filletArc <- try do Curve2D.sweptArc centerPoint startPoint sweptAngle
-              trimmedFirstCurve <- try do firstCurve << Curve1D.interpolateFrom 0.0 t1
-              trimmedSecondCurve <- try do secondCurve << Curve1D.interpolateFrom t2 1.0
+              filletArc <- Curve2D.sweptArc centerPoint startPoint sweptAngle
+              trimmedFirstCurve <- firstCurve << Curve1D.interpolateFrom 0.0 t1
+              trimmedSecondCurve <- secondCurve << Curve1D.interpolateFrom t2 1.0
               Ok (filletArc : trimmedFirstCurve : trimmedSecondCurve : otherCurves)
 
 curveIncidence :: Tolerance units => Point2D units -> Curve2D units -> (Curve2D units, Maybe Number)

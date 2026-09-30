@@ -78,6 +78,7 @@ import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D)
+import OpenSolid.Try qualified as Try
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
@@ -217,7 +218,7 @@ sweptBy ::
   Plane3D space ->
   Region2D Meters ->
   Result Text (Body3D space)
-sweptBy givenDisplacementCurve sketchPlane profile = do
+sweptBy givenDisplacementCurve sketchPlane profile = Try.do
   -- Fix displacement curve so that extrusion is upwards from plane
   let givenStartDerivative = VectorCurve3D.startDerivative givenDisplacementCurve
   let displacementCurve =
@@ -226,11 +227,11 @@ sweptBy givenDisplacementCurve sketchPlane profile = do
           Negative -> VectorCurve3D.reverse givenDisplacementCurve
   let startPlane = Plane3D.translateBy (VectorCurve3D.startValue displacementCurve) sketchPlane
   let endPlane = Plane3D.translateBy (VectorCurve3D.endValue displacementCurve) sketchPlane
-  startCap <- try do Surface3D.on startPlane profile & Result.map Surface3D.flip
-  endCap <- try do Surface3D.on endPlane profile
+  startCap <- Surface3D.on startPlane profile & Result.map Surface3D.flip
+  endCap <- Surface3D.on endPlane profile
   let profileCurves = Set2D.toList (Region2D.boundaryCurves profile)
   let sideSurface curve = Surface3D.sweptBy displacementCurve (Curve2D.placeOn sketchPlane curve)
-  sideSurfaces <- try do Result.collect sideSurface profileCurves
+  sideSurfaces <- Result.collect sideSurface profileCurves
   boundedBy (startCap : endCap : sideSurfaces)
 
 {-| Create a revolved body from a sketch plane and profile.
@@ -248,7 +249,7 @@ revolved ::
   Axis2D Meters ->
   Angle ->
   Result Text (Body3D space)
-revolved sketchPlane profile givenAxis givenSweptAngle = do
+revolved sketchPlane profile givenAxis givenSweptAngle = Try.do
   let profileCurves = Set2D.toNonEmpty (Region2D.boundaryCurves profile)
   let offAxisCurves = NonEmpty.filter (not . Curve2D.isOnAxis givenAxis) profileCurves
   let signedDistanceCurves = List.map (Curve2D.distanceLeftOf givenAxis) offAxisCurves
@@ -268,8 +269,8 @@ revolved sketchPlane profile givenAxis givenSweptAngle = do
           Positive -> (sketchPlane, rotatedPlane)
           Negative -> (rotatedPlane, sketchPlane)
   let sweptAngle = Quantity.abs givenSweptAngle
-  startCap <- try do Surface3D.on startPlane profile & Result.map Surface3D.flip
-  endCap <- try do Surface3D.on endPlane profile
+  startCap <- Surface3D.on startPlane profile & Result.map Surface3D.flip
+  endCap <- Surface3D.on endPlane profile
   let isFullRevolution = angular (sweptAngle ~= Angle.twoPi)
   let endSurfaces = if isFullRevolution then [] else [startCap, endCap]
   -- A 2D axis such that the profile is to the *left* of the axis
@@ -277,7 +278,7 @@ revolved sketchPlane profile givenAxis givenSweptAngle = do
   -- in turn meaning that the side surfaces have the correct normal orientation)
   let axis2D = profileSign * givenAxis
   let sideSurface profileCurve = Surface3D.revolved startPlane profileCurve axis2D sweptAngle
-  sideSurfaces <- try do Result.collect sideSurface offAxisCurves
+  sideSurfaces <- Result.collect sideSurface offAxisCurves
   boundedBy (endSurfaces <> sideSurfaces)
 
 {-| Create a body bounded by the given surfaces.

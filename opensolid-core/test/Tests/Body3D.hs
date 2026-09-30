@@ -18,6 +18,7 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Triangle3D qualified as Triangle3D
+import OpenSolid.Try qualified as Try
 import OpenSolid.Volume (Volume)
 import OpenSolid.World3D qualified as World3D
 import Test (Test)
@@ -44,10 +45,10 @@ fractionalError :: Quantity units -> Quantity units -> Number
 fractionalError actual expected = Quantity.abs (actual - expected) / expected
 
 sphereMeshing :: Test
-sphereMeshing = Test.verify "sphereMeshing" do
+sphereMeshing = Test.verify "sphereMeshing" Try.do
   let diameter = Length.centimeters 10.0
   let resolution = Resolution.maxError (0.01 * diameter)
-  sphere <- try do Body3D.sphere {centerPoint = World3D.originPoint, diameter}
+  sphere <- Body3D.sphere {centerPoint = World3D.originPoint, diameter}
   let mesh = Body3D.toPointMesh resolution sphere
   let approximateArea = meshArea mesh
   let approximateVolume = meshVolume mesh
@@ -68,17 +69,17 @@ sphereMeshing = Test.verify "sphereMeshing" do
     ]
 
 revolvedNormals :: Test
-revolvedNormals = Test.verify "revolvedNormals" do
+revolvedNormals = Test.verify "revolvedNormals" Try.do
   let axes = [Axis2D.y, -Axis2D.y]
   let angle = Angle.degrees 45.0
   let sweptAngles = [angle, -angle]
   let r1 = Length.centimeters 5.0
   let r2 = Length.centimeters 10.0
   let interval = Interval r1 r2
-  leftRegion <- try do Region2D.rectangle (Bounds2D -interval interval)
-  rightRegion <- try do Region2D.rectangle (Bounds2D interval interval)
+  leftRegion <- Region2D.rectangle (Bounds2D -interval interval)
+  rightRegion <- Region2D.rectangle (Bounds2D interval interval)
   let profiles = [leftRegion, rightRegion]
-  bodies <- try do
+  bodies <-
     Result.sequence
       [ Body3D.revolved World3D.frontPlane profile axis sweptAngle
       | profile <- profiles

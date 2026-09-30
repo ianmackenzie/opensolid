@@ -141,6 +141,7 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
+import OpenSolid.Try qualified as Try
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
@@ -722,12 +723,13 @@ offsetLeftwardBy ::
   Quantity units ->
   Curve2D units ->
   Result Text (Curve2D units)
-offsetLeftwardBy offset curve = do
-  nonzeroCurve <- try do Curve.nonzero curve
+offsetLeftwardBy offset curve = Try.do
+  nonzeroCurve <- Curve.nonzero curve
   let nonzeroDerivative = Curve.Nonzero.derivative nonzeroCurve
   let tangentCurve = VectorCurve.Nonzero.normalize nonzeroDerivative
   let offsetCurve = VectorCurve2D.rotateBy Angle.quarterTurn (offset * Nonzero.unwrap tangentCurve)
-  try do displaceBy offsetCurve curve
+  displaced <- displaceBy offsetCurve curve
+  Ok displaced
 
 offsetRightwardBy ::
   Tolerance units =>

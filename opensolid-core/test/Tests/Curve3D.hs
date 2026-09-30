@@ -12,6 +12,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Try qualified as Try
 import OpenSolid.World3D qualified as World3D
 import Test (Test)
 import Test qualified
@@ -56,14 +57,14 @@ equalOverlapSegmentLists actualSegments expectedSegments =
     && NonEmpty.all equalOverlapSegments (NonEmpty.zip2 actualSegments expectedSegments)
 
 curveOverlap1 :: Test
-curveOverlap1 = Test.verify "curveOverlap1" do
-  arc1 <- try do
+curveOverlap1 = Test.verify "curveOverlap1" Try.do
+  arc1 <-
     Curve3D.on World3D.topPlane <!
       Curve2D.arcFrom (Point2D.meters 1.0 0.0) (Point2D.meters -1.0 0.0) Angle.halfTurn
-  arc2 <- try do
+  arc2 <-
     Curve3D.on World3D.topPlane <!
       Curve2D.arcFrom (Point2D.meters 0.0 -1.0) (Point2D.meters 0.0 1.0) Angle.halfTurn
-  (sign, actualSegments) <- try do overlappingSegments arc1 arc2
+  (sign, actualSegments) <- overlappingSegments arc1 arc2
   let expectedSegments = NonEmpty.one (Interval 0.0 0.5, Interval 0.5 1.0)
   Test.all
     [ Test.expect (equalOverlapSegmentLists actualSegments expectedSegments)
@@ -71,8 +72,8 @@ curveOverlap1 = Test.verify "curveOverlap1" do
     ]
 
 curveOverlap2 :: Test
-curveOverlap2 = Test.verify "curveOverlap2" do
-  arc1 <- try do
+curveOverlap2 = Test.verify "curveOverlap2" Try.do
+  arc1 <-
     Curve3D.on World3D.topPlane <!
       Curve2D.polarArc
         { centerPoint = Point2D.origin
@@ -80,7 +81,7 @@ curveOverlap2 = Test.verify "curveOverlap2" do
         , startAngle = Angle.zero
         , endAngle = -Angle.pi
         }
-  arc2 <- try do
+  arc2 <-
     Curve3D.on World3D.topPlane <!
       Curve2D.polarArc
         { centerPoint = Point2D.origin
@@ -88,7 +89,7 @@ curveOverlap2 = Test.verify "curveOverlap2" do
         , startAngle = Angle.degrees -45.0
         , endAngle = Angle.degrees 225.0
         }
-  (sign, segments) <- try do overlappingSegments arc1 arc2
+  (sign, segments) <- overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
           (Interval 0.0 (1 / 4), Interval 0.0 (1 / 6))
@@ -99,11 +100,11 @@ curveOverlap2 = Test.verify "curveOverlap2" do
     ]
 
 crossingIntersection :: Test
-crossingIntersection = Test.verify "crossingIntersection" do
-  arc1 <- try do
+crossingIntersection = Test.verify "crossingIntersection" Try.do
+  arc1 <-
     Curve3D.on World3D.topPlane <!
       Curve2D.arcFrom Point2D.origin (Point2D.meters 0.0 1.0) Angle.halfTurn
-  arc2 <- try do
+  arc2 <-
     Curve3D.on World3D.topPlane <!
       Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
   let intersections = Curve3D.intersections arc1 arc2
@@ -121,8 +122,8 @@ crossingIntersection = Test.verify "crossingIntersection" do
       Test.fail "Should have found some intersection points, got overlapping segments instead"
 
 tangentIntersection :: Test
-tangentIntersection = Test.verify "tangentIntersection" do
-  arc1 <- try do
+tangentIntersection = Test.verify "tangentIntersection" Try.do
+  arc1 <-
     Curve3D.on World3D.topPlane <!
       Curve2D.polarArc
         { centerPoint = Point2D.origin
@@ -130,7 +131,7 @@ tangentIntersection = Test.verify "tangentIntersection" do
         , startAngle = Angle.zero
         , endAngle = Angle.pi
         }
-  arc2 <- try do
+  arc2 <-
     Curve3D.on World3D.topPlane <!
       Curve2D.polarArc
         { centerPoint = Point2D.meters 0.0 1.5
