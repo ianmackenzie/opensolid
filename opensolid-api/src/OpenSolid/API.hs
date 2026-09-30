@@ -36,6 +36,7 @@ import OpenSolid.List qualified as List
 import OpenSolid.Mitsuba qualified as Mitsuba
 import OpenSolid.Model3D qualified as Model3D
 import OpenSolid.Orientation3D qualified as Orientation3D
+import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Plane3D qualified as Plane3D
@@ -122,6 +123,7 @@ classes =
   , orientation3D
   , frame3D
   , world3D
+  , parameter
   , vectorCurve2D
   , displacementCurve2D
   , curve2D
@@ -1394,6 +1396,17 @@ frame3D =
     , Class.member0 "Tilt Down" (Frame3D.tiltDown :: Frame3D -> Frame3D) $(docs 'Frame3D.tiltDown)
     ]
       <> rigidTransformations3D Frame3D.transformBy
+
+parameter :: Class
+parameter =
+  Class.static "Parameter" "Utilities for working with parameter values." $
+    [ Class.static1 "Steps" "Count" Parameter.steps $(docs 'Parameter.steps)
+    , Class.static1 "Leading" "Count" Parameter.leading $(docs 'Parameter.leading)
+    , Class.static1 "Trailing" "Count" Parameter.trailing $(docs 'Parameter.trailing)
+    , Class.static1 "In Between" "Count" Parameter.inBetween $(docs 'Parameter.inBetween)
+    , Class.static1 "Midpoints" "Count" Parameter.midpoints $(docs 'Parameter.midpoints)
+    , Class.static1 "Intervals" "Count" Parameter.intervals $(docs 'Parameter.intervals)
+    ]
 
 type VectorCurve2D = VectorCurve2D.VectorCurve2D Unitless
 
