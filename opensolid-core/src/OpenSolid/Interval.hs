@@ -51,7 +51,6 @@ module OpenSolid.Interval
   , maximum
   , sin
   , cos
-  , interpolate
   , interpolationParameter
   , resolution
   , isResolved
@@ -149,6 +148,10 @@ instance units1 ~ units2 => Bounded (Quantity units1) (Interval units2) where
 instance Units.Coercion (Interval units1) (Interval units2) where
   {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
+
+instance At (Interval units) Number (Quantity units) where
+  {-# INLINE (@) #-}
+  Interval low high @ tValue = Quantity.interpolateFrom low high tValue
 
 instance units1 ~ units2 => Intersects (Quantity units1) (Interval units2) units1 where
   {-# INLINE (^) #-}
@@ -587,10 +590,6 @@ cosIncludesMax (Interval low high) =
   (Quantity.isInfinite low || Quantity.isInfinite high)
     || (low // Angle.twoPi /= high // Angle.twoPi)
 
-interpolate :: Interval units -> Number -> Quantity units
-interpolate (Interval low high) t =
-  Quantity.interpolateFrom low high t
-
 interpolationParameter :: Interval units -> Quantity units -> Number
 interpolationParameter (Interval low high) value
   | low < high = (value - low) / (high - low)
@@ -627,7 +626,7 @@ random :: Random.Generator (Quantity units) -> Random.Generator (Interval units)
 random randomQuantity = Random.map2 Interval randomQuantity randomQuantity
 
 sampleValues :: Interval units -> NonEmpty (Quantity units)
-sampleValues interval = NonEmpty.map (interpolate interval) Parameter.samples
+sampleValues interval = interval @ Parameter.samples
 
 convert :: Quantity (units2 ?/? units1) -> Interval units1 -> Interval units2
 convert factor interval = Units.simplify (interval ?*? factor)

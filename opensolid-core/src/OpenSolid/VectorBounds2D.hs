@@ -304,8 +304,7 @@ intersection (VectorBounds2D x1 y1) (VectorBounds2D x2 y2) =
   Maybe.map2 VectorBounds2D (Interval.intersection x1 x2) (Interval.intersection y1 y2)
 
 interpolate :: VectorBounds2D units -> Number -> Number -> Vector2D units
-interpolate (VectorBounds2D x y) u v =
-  Vector2D (Interval.interpolate x u) (Interval.interpolate y v)
+interpolate (VectorBounds2D x y) u v = Vector2D (x @ u) (y @ v)
 
 placeIn :: Frame2D frameUnits -> VectorBounds2D units -> VectorBounds2D units
 placeIn frame = placeInOrientation frame.orientation

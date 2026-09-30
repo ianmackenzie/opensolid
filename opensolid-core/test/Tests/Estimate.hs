@@ -48,7 +48,7 @@ dummyEstimate :: Generator (Length, Estimate Meters)
 dummyEstimate = do
   interval <- Interval.random Random.length
   tValue <- Parameter.random
-  let value = Interval.interpolate interval tValue
+  let value = interval @ tValue
   Random.return (value, Estimate.new (DummyEstimate value interval))
 
 duplicatedDummyEstimates :: Generator (NonEmpty (Length, Estimate Meters))

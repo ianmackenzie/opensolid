@@ -337,7 +337,7 @@ reversalConsistency =
 rangeConsistency :: (Tolerance units, Show (Quantity units)) => Curve2D units -> Expectation
 rangeConsistency curve = do
   tRange <- Test.generate (Interval.random Parameter.random)
-  tValue <- Test.generate (Random.map (Interval.interpolate tRange) Parameter.random)
+  tValue <- Test.generate (Random.map (tRange @) Parameter.random)
   let curveValue = curve @ tValue
   let curveRange = Curve2D.range tRange curve
   Test.expect (curveValue ^ curveRange)

@@ -379,8 +379,7 @@ interpolate ::
   Number ->
   Number ->
   Vector3D units space
-interpolate (VectorBounds3D x y z) u v w =
-  Vector3D (Interval.interpolate x u) (Interval.interpolate y v) (Interval.interpolate z w)
+interpolate (VectorBounds3D x y z) u v w = Vector3D (x @ u) (y @ v) (z @ w)
 
 placeIn :: Frame3D global local -> VectorBounds3D units local -> VectorBounds3D units global
 placeIn frame (VectorBounds3D vR vF vU) = do
