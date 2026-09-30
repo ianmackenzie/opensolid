@@ -1354,7 +1354,7 @@ linearize resolution curve = do
         let midError = Line.distanceTo pMid (Line p1 p2)
         let linearizationError = max midError (leftRightError curve t1 t2 p1 p2)
         let size = Point.distanceFrom p1 p2
-        if Resolution.acceptable ("size" ::: size) ("error" ::: linearizationError) resolution
+        if Resolution.acceptable {size, error = linearizationError} resolution
           then NonEmpty.push t1 accumulated
           else
             accumulated
