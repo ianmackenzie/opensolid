@@ -4,7 +4,6 @@ module OpenSolid.Curve1D
   ( Curve1D
   , Compiled
   , Root
-  , range
   , startValue
   , endValue
   , compiled
@@ -14,8 +13,6 @@ module OpenSolid.Curve1D
   , concrete
   , zero
   , constant
-  , derivativeRange
-  , secondDerivativeRange
   , t
   , interpolateFrom
   , bezier
@@ -130,6 +127,10 @@ instance At (Curve1D units) Number (Quantity units) where
   curve @ 0.0 = startValue curve
   curve @ 1.0 = endValue curve
   curve @ tValue = CompiledFunction.value tValue (compiled curve)
+
+instance At (Curve1D units) (Interval Unitless) (Interval units) where
+  {-# INLINE (@) #-}
+  curve @ tRange = CompiledFunction.range tRange (compiled curve)
 
 instance
   units1 ~ units2 =>
@@ -383,10 +384,6 @@ rationalCubicSpline ::
   Result DivisionByZero (Curve1D units)
 rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.four pw1 pw2 pw3 pw4)
 
-{-# INLINE range #-}
-range :: Interval Unitless -> Curve1D units -> Interval units
-range tRange curve = CompiledFunction.range tRange (compiled curve)
-
 {-# INLINE startValue #-}
 startValue :: Curve1D units -> Quantity units
 startValue = (.startValue)
@@ -394,14 +391,6 @@ startValue = (.startValue)
 {-# INLINE endValue #-}
 endValue :: Curve1D units -> Quantity units
 endValue = (.endValue)
-
-{-# INLINE derivativeRange #-}
-derivativeRange :: Interval Unitless -> Curve1D units -> Interval units
-derivativeRange tRange curve = range tRange (derivative curve)
-
-{-# INLINE secondDerivativeRange #-}
-secondDerivativeRange :: Interval Unitless -> Curve1D units -> Interval units
-secondDerivativeRange tRange curve = range tRange (secondDerivative curve)
 
 instance Division_ (Curve1D units1) (Nonzero (Curve1D units2)) (Curve1D (units1 ?/? units2)) where
   lhs ?/? Nonzero rhs = do
@@ -479,10 +468,10 @@ data Integral units = Integral (Curve1D units) (Interval Unitless)
 instance Estimate.Interface (Integral units) units where
   boundsImpl (Integral curve tRange) = do
     let dt = Interval.width tRange
-    let estimate0 = dt * range tRange curve
+    let estimate0 = dt * curve @ tRange
     let value1 = curve @ Interval.lower tRange
     let value2 = curve @ Interval.upper tRange
-    let m = Interval.width (derivativeRange tRange curve)
+    let m = Interval.width (derivative curve @ tRange)
     let estimateValue = dt * Quantity.midpoint value1 value2
     let estimateError = 0.125 * m * dt * dt
     let estimate1 = Interval (estimateValue - estimateError) (estimateValue + estimateError)
@@ -553,7 +542,7 @@ findRoots curve
   | curve ~= zero = Err IsZero
   | otherwise = do
       let derivatives = Stream.iterate derivative curve
-      let derivativeRangeStream tRange = Stream.map (range tRange) derivatives
+      let derivativeRangeStream tRange = Stream.map (@ tRange) derivatives
       let cache = Solve1D.init derivativeRangeStream
       case Solve1D.search (findRootsImpl derivatives) cache of
         Ok foundRoots -> Ok (List.sortBy Root.location foundRoots)
