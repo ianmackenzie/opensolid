@@ -8,7 +8,11 @@ import Prelude qualified
 class Bind m1 m2 where
   (>>=) :: m1 a -> (a -> m2 b) -> m2 b
 
-instance MonadFail m => Bind (Result x) m where
+instance x2 ~ Text => Bind (Result x1) (Result x2) where
+  Ok value >>= function = function value
+  Err err >>= _ = Err (Err.message err)
+
+instance Bind (Result x) IO where
   Ok value >>= function = function value
   Err err >>= _ = Monad.fail (Err.message err)
 

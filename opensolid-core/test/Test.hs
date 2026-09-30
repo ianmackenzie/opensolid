@@ -21,6 +21,7 @@ where
 import Control.Exception (SomeException)
 import Control.Exception qualified
 import OpenSolid.Duration qualified as Duration
+import OpenSolid.Err qualified as Err
 import OpenSolid.IO qualified as IO
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
@@ -74,6 +75,10 @@ instance Monad Generator where
 
 instance MonadFail Generator where
   fail message = fail (fromString message)
+
+instance Try.Bind (Result x) Generator where
+  Ok value >>= function = function value
+  Err err >>= _ = fail (Err.message err)
 
 instance Try.Bind Generator Generator where
   (>>=) = (>>=)
