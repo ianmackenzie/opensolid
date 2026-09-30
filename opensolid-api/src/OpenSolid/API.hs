@@ -997,6 +997,7 @@ svg =
     , Class.constant "Black Stroke" Svg.blackStroke $(docs 'Svg.blackStroke)
     , Class.static1 "Stroke Color" "Color" Svg.strokeColor $(docs 'Svg.strokeColor)
     , Class.constant "No Fill" Svg.noFill $(docs 'Svg.noFill)
+    , Class.constant "White Fill" Svg.whiteFill $(docs 'Svg.whiteFill)
     , Class.static1 "Fill Color" "Color" Svg.fillColor $(docs 'Svg.fillColor)
     , Class.nested @Svg.Attribute $(docs ''Svg.Attribute) []
     , Class.nested @Svg.Layout $(docs ''Svg.Layout) []
