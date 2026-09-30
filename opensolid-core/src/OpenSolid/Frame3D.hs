@@ -74,10 +74,12 @@ import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Length (Length)
 import OpenSolid.Orientation3D (Orientation3D)
 import OpenSolid.Orientation3D qualified as Orientation3D
+import OpenSolid.Plane3D qualified as Plane3D
+import OpenSolid.PlaneOrientation3D (PlaneOrientation3D)
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Frame3D (..), Plane3D (Plane3D))
+import OpenSolid.Primitives (Frame3D (..), Plane3D (..))
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.World3D qualified as World3D
@@ -87,7 +89,17 @@ with ::
   "orientation" ::: Orientation3D global ->
   Frame3D global local
 with ("originPoint" ::: givenOriginPoint) ("orientation" ::: givenOrientation) =
-  Frame3D {originPoint = givenOriginPoint, orientation = givenOrientation}
+  recursive \self ->
+    Frame3D
+      { originPoint = givenOriginPoint
+      , orientation = givenOrientation
+      , inverse =
+          Frame3D
+            { originPoint = Point3D.relativeTo self World3D.originPoint
+            , orientation = Orientation3D.relativeTo self World3D.forwardOrientation
+            , inverse = self
+            }
+      }
 
 -- | Get the origin point of a frame.
 originPoint :: Frame3D global local -> Point3D global
@@ -149,6 +161,16 @@ upwardAxis frame = Axis3D (originPoint frame) (upwardDirection frame)
 downwardAxis :: Frame3D global local -> Axis3D global
 downwardAxis frame = Axis3D (originPoint frame) (downwardDirection frame)
 
+planeWith ::
+  (Orientation3D global -> PlaneOrientation3D global) ->
+  Frame3D global local ->
+  Plane3D global
+planeWith planeOrientation frame =
+  Plane3D
+    { originPoint = originPoint frame
+    , orientation = planeOrientation (orientation frame)
+    }
+
 {-| Construct a locally forward-facing plane from a frame.
 
 The returned plane will have the same origin point as the frame,
@@ -157,7 +179,7 @@ its X direction will be the frame's leftward direction
 and its Y direction will be frame's upward direction.
 -}
 frontPlane :: Frame3D global local -> Plane3D global
-frontPlane (Frame3D p o) = Plane3D p (Orientation3D.frontPlaneOrientation o)
+frontPlane = planeWith Orientation3D.frontPlaneOrientation
 
 {-| Construct a locally backward-facing plane from a frame.
 
@@ -167,7 +189,7 @@ its X direction will be the frame's rightward direction
 and its Y direction will be frame's upward direction.
 -}
 backPlane :: Frame3D global local -> Plane3D global
-backPlane (Frame3D p o) = Plane3D p (Orientation3D.backPlaneOrientation o)
+backPlane = planeWith Orientation3D.backPlaneOrientation
 
 {-| Construct a locally leftward-facing plane from a frame.
 
@@ -177,7 +199,7 @@ its X direction will be the frame's backward direction
 and its Y direction will be frame's upward direction.
 -}
 leftPlane :: Frame3D global local -> Plane3D global
-leftPlane (Frame3D p o) = Plane3D p (Orientation3D.leftPlaneOrientation o)
+leftPlane = planeWith Orientation3D.leftPlaneOrientation
 
 {-| Construct a locally rightward-facing plane from a frame.
 
@@ -187,7 +209,7 @@ its X direction will be the frame's forward direction
 and its Y direction will be frame's upward direction.
 -}
 rightPlane :: Frame3D global local -> Plane3D global
-rightPlane (Frame3D p o) = Plane3D p (Orientation3D.rightPlaneOrientation o)
+rightPlane = planeWith Orientation3D.rightPlaneOrientation
 
 {-| Construct a locally upward-facing plane from a frame.
 
@@ -197,7 +219,7 @@ its X direction will be the frame's rightward direction
 and its Y direction will be frame's forward direction.
 -}
 topPlane :: Frame3D global local -> Plane3D global
-topPlane (Frame3D p o) = Plane3D p (Orientation3D.topPlaneOrientation o)
+topPlane = planeWith Orientation3D.topPlaneOrientation
 
 {-| Construct a locally downward-facing plane from a frame.
 
@@ -207,31 +229,41 @@ its X direction will be the frame's leftward direction
 and its Y direction will be frame's forward direction.
 -}
 bottomPlane :: Frame3D global local -> Plane3D global
-bottomPlane (Frame3D p o) = Plane3D p (Orientation3D.bottomPlaneOrientation o)
+bottomPlane = planeWith Orientation3D.bottomPlaneOrientation
+
+fromPlane ::
+  (PlaneOrientation3D global -> Orientation3D global) ->
+  Plane3D global ->
+  Frame3D global local
+fromPlane fromPlaneOrientation plane =
+  with
+    { originPoint = Plane3D.originPoint plane
+    , orientation = fromPlaneOrientation (Plane3D.orientation plane)
+    }
 
 -- | Construct a plane from its front plane.
 fromFrontPlane :: Plane3D global -> Frame3D global local
-fromFrontPlane (Plane3D p o) = Frame3D p (Orientation3D.fromFrontPlaneOrientation o)
+fromFrontPlane = fromPlane Orientation3D.fromFrontPlaneOrientation
 
 -- | Construct a plane from its back plane.
 fromBackPlane :: Plane3D global -> Frame3D global local
-fromBackPlane (Plane3D p o) = Frame3D p (Orientation3D.fromBackPlaneOrientation o)
+fromBackPlane = fromPlane Orientation3D.fromBackPlaneOrientation
 
 -- | Construct a plane from its left plane.
 fromLeftPlane :: Plane3D global -> Frame3D global local
-fromLeftPlane (Plane3D p o) = Frame3D p (Orientation3D.fromLeftPlaneOrientation o)
+fromLeftPlane = fromPlane Orientation3D.fromLeftPlaneOrientation
 
 -- | Construct a plane from its right plane.
 fromRightPlane :: Plane3D global -> Frame3D global local
-fromRightPlane (Plane3D p o) = Frame3D p (Orientation3D.fromRightPlaneOrientation o)
+fromRightPlane = fromPlane Orientation3D.fromRightPlaneOrientation
 
 -- | Construct a plane from its top plane.
 fromTopPlane :: Plane3D global -> Frame3D global local
-fromTopPlane (Plane3D p o) = Frame3D p (Orientation3D.fromTopPlaneOrientation o)
+fromTopPlane = fromPlane Orientation3D.fromTopPlaneOrientation
 
 -- | Construct a plane from its bottom plane.
 fromBottomPlane :: Plane3D global -> Frame3D global local
-fromBottomPlane (Plane3D p o) = Frame3D p (Orientation3D.fromBottomPlaneOrientation o)
+fromBottomPlane = fromPlane Orientation3D.fromBottomPlaneOrientation
 
 {-| Construct a forward-facing frame relative to a parent/reference frame.
 
@@ -239,7 +271,17 @@ This is just an identical copy of the parent frame,
 but can be used to define a new/different local space.
 -}
 forward :: Frame3D global local1 -> Frame3D global local2
-forward frame = Frame3D frame.originPoint frame.orientation
+forward frame = with {originPoint = frame.originPoint, orientation = frame.orientation}
+
+reorient ::
+  (Orientation3D global -> Orientation3D global) ->
+  Frame3D global local1 ->
+  Frame3D global local2
+reorient orientationFunction frame =
+  with
+    { originPoint = originPoint frame
+    , orientation = orientationFunction (orientation frame)
+    }
 
 {-| Construct a backward-facing frame relative to a parent/reference frame.
 
@@ -249,7 +291,7 @@ and the rightward direction of the frame will point leftward
 (all relative to the parent frame).
 -}
 backward :: Frame3D global local1 -> Frame3D global local2
-backward (Frame3D p o) = Frame3D p (Orientation3D.backwardOrientation o)
+backward = reorient Orientation3D.backwardOrientation
 
 {-| Construct a leftward-facing frame relative to a parent/reference frame.
 
@@ -259,7 +301,7 @@ and the rightward direction of the frame will point forward
 (all relative to the parent frame).
 -}
 leftward :: Frame3D global local1 -> Frame3D global local2
-leftward (Frame3D p o) = Frame3D p (Orientation3D.leftwardOrientation o)
+leftward = reorient Orientation3D.leftwardOrientation
 
 {-| Construct a rightward-facing frame relative to a parent/reference frame.
 
@@ -269,7 +311,7 @@ and the rightward direction of the frame will point backward
 (all relative to the parent frame).
 -}
 rightward :: Frame3D global local1 -> Frame3D global local2
-rightward (Frame3D p o) = Frame3D p (Orientation3D.rightwardOrientation o)
+rightward = reorient Orientation3D.rightwardOrientation
 
 {-| Construct an upward-facing frame relative to a parent/reference frame.
 
@@ -279,7 +321,7 @@ and the rightward direction of the frame will point leftward
 (all relative to the parent frame).
 -}
 upward :: Frame3D global local1 -> Frame3D global local2
-upward (Frame3D p o) = Frame3D p (Orientation3D.upwardOrientation o)
+upward = reorient Orientation3D.upwardOrientation
 
 {-| Construct a downward-facing frame relative to a parent/reference frame.
 
@@ -289,7 +331,7 @@ and the rightward direction of the frame will point rightward
 (all relative to the parent frame).
 -}
 downward :: Frame3D global local1 -> Frame3D global local2
-downward (Frame3D p o) = Frame3D p (Orientation3D.downwardOrientation o)
+downward = reorient Orientation3D.downwardOrientation
 
 -- | Move a frame in its own forward direction by the given distance.
 offsetForwardBy :: Length -> Frame3D global local1 -> Frame3D global local2
@@ -408,36 +450,45 @@ tiltDown = tiltDownBy Angle.halfPi
 -- | Convert a frame defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3D space1 space2 -> Frame3D space2 space3 -> Frame3D space1 space3
 placeIn globalFrame frame =
-  Frame3D
-    (Point3D.placeIn globalFrame (originPoint frame))
-    (Orientation3D.placeIn globalFrame (orientation frame))
+  with
+    { originPoint = Point3D.placeIn globalFrame (originPoint frame)
+    , orientation = Orientation3D.placeIn globalFrame (orientation frame)
+    }
 
 -- | Convert a frame defined in global coordinates to one defined in local coordinates.
 relativeTo :: Frame3D space1 space2 -> Frame3D space1 space3 -> Frame3D space2 space3
 relativeTo globalFrame frame =
-  Frame3D
-    (Point3D.relativeTo globalFrame (originPoint frame))
-    (Orientation3D.relativeTo globalFrame (orientation frame))
+  with
+    { originPoint = Point3D.relativeTo globalFrame (originPoint frame)
+    , orientation = Orientation3D.relativeTo globalFrame (orientation frame)
+    }
 
-{-| Compute the "inverse" of a given frame.
+{-| Get the "inverse" of a given frame.
 
 This is a frame that defines the current global coordinate system
 in terms of the frame's local coordinate system,
 instead of the other way around.
 -}
 inverse :: Frame3D global local -> Frame3D local global
-inverse frame = relativeTo frame World3D.frame
+inverse = (.inverse)
 
 -- | Move a frame to a new origin point.
 moveTo :: Point3D global -> Frame3D global local1 -> Frame3D global local2
-moveTo newOriginPoint (Frame3D _ o) = Frame3D newOriginPoint (Orientation3D.coerce o)
+moveTo newOriginPoint frame =
+  with
+    { originPoint = newOriginPoint
+    , orientation = orientation frame
+    }
 
 -- | Apply the given transform to a frame.
 transformBy :: Transform3D.Rigid global -> Frame3D global local1 -> Frame3D global local2
-transformBy transform (Frame3D p o) =
-  Frame3D
-    (Point3D.transformBy transform p)
-    (Orientation3D.transformBy (Transform3D.vectorTransform transform) o)
+transformBy transform frame =
+  with
+    { originPoint = originPoint frame & Point3D.transformBy transform
+    , orientation =
+        orientation frame
+          & Orientation3D.transformBy (Transform3D.vectorTransform transform)
+    }
 
 translateBy :: Vector3D Meters global -> Frame3D global local1 -> Frame3D global local2
 translateBy = Transform3D.translateByImpl transformBy

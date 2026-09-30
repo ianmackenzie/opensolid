@@ -40,12 +40,13 @@ module OpenSolid.World3D
   )
 where
 
+import {-# SOURCE #-} OpenSolid.Frame3D (Frame3D)
+import {-# SOURCE #-} OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3D (Axis3D)
   , Direction3D (Direction3D)
-  , Frame3D (Frame3D)
   , Orientation3D (Orientation3D)
   , Plane3D (Plane3D)
   , PlaneOrientation3D (PlaneOrientation3D)
@@ -137,7 +138,7 @@ downwardOrientation = Orientation3D rightwardDirection downwardDirection forward
 
 -- | A frame of reference defining a global coordinate system.
 frame :: Frame3D space space
-frame = Frame3D originPoint forwardOrientation
+frame = Frame3D.with {originPoint, orientation = forwardOrientation}
 
 {-| A forward-facing plane through the global origin point.
 

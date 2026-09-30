@@ -42,7 +42,7 @@ import OpenSolid.Point2D (Point2D, data Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3D (Axis3D)
-  , Frame3D (Frame3D)
+  , Frame3D (..)
   , Orientation3D (Orientation3D)
   , Plane3D (..)
   , PlaneOrientation3D (..)
@@ -140,13 +140,16 @@ distanceAlong (Axis3D p0 d) p = (p - p0) `dot` d
 
 -- | Convert a point defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3D global local -> Point3D local -> Point3D global
-placeIn (Frame3D p0 (Orientation3D i j k)) (Point3D px py pz) =
-  p0 + px * i + py * j + pz * k
+placeIn (Frame3D {originPoint, orientation}) (Point3D px py pz) = do
+  let Orientation3D i j k = orientation
+  originPoint + px * i + py * j + pz * k
 
 -- | Convert a point defined in global coordinates to one defined in local coordinates.
 relativeTo :: Frame3D global local -> Point3D global -> Point3D local
-relativeTo (Frame3D p0 (Orientation3D i j k)) p =
-  let d = p - p0 in Point3D (d `dot` i) (d `dot` j) (d `dot` k)
+relativeTo (Frame3D {originPoint, orientation}) point = do
+  let Orientation3D i j k = orientation
+  let displacement = point - originPoint
+  Point3D (displacement `dot` i) (displacement `dot` j) (displacement `dot` k)
 
 -- | Project a point onto a plane.
 projectOnto :: Plane3D space -> Point3D space -> Point3D space

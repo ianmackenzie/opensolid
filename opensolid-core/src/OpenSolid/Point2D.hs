@@ -45,7 +45,7 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis2D (Axis2D)
-  , Frame2D (Frame2D)
+  , Frame2D (..)
   , Orientation2D (Orientation2D)
   , Plane3D (Plane3D)
   , PlaneOrientation3D (PlaneOrientation3D)
@@ -162,10 +162,16 @@ distanceRightOf :: Axis2D units -> Point2D units -> Quantity units
 distanceRightOf (Axis2D originPoint direction) point = direction `cross` (originPoint - point)
 
 placeIn :: Frame2D units -> Point2D units -> Point2D units
-placeIn (Frame2D p0 (Orientation2D i j)) (Point2D px py) = p0 + px * i + py * j
+placeIn (Frame2D {originPoint, orientation}) point = do
+  let Orientation2D i j = orientation
+  let Point2D px py = point
+  originPoint + px * i + py * j
 
 relativeTo :: Frame2D units -> Point2D units -> Point2D units
-relativeTo (Frame2D p0 (Orientation2D i j)) p = let d = p - p0 in Point2D (d `dot` i) (d `dot` j)
+relativeTo (Frame2D {originPoint, orientation}) point = do
+  let Orientation2D i j = orientation
+  let displacement = point - originPoint
+  Point2D (displacement `dot` i) (displacement `dot` j)
 
 {-| Convert a 2D point to 3D point by placing it on a plane.
 

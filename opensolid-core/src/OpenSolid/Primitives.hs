@@ -7,8 +7,8 @@ module OpenSolid.Primitives
   , Point2D (Point2D, Position2D)
   , VectorBounds2D (VectorBounds2D)
   , Bounds2D (Bounds2D, PositionBounds2D)
-  , Axis2D (Axis2D, originPoint, direction)
-  , Frame2D (Frame2D, originPoint, orientation)
+  , Axis2D (..)
+  , Frame2D (..)
   , VectorTransform2D (VectorTransform2D)
   , Transform2D (Transform2D)
   , Vector3D (Vector3D, V3D#)
@@ -18,9 +18,9 @@ module OpenSolid.Primitives
   , Point3D (Point3D, Position3D)
   , VectorBounds3D (VectorBounds3D, VB3D#)
   , Bounds3D (Bounds3D, PositionBounds3D)
-  , Axis3D (Axis3D, originPoint, direction)
-  , Plane3D (Plane3D, originPoint, orientation)
-  , Frame3D (Frame3D, originPoint, orientation)
+  , Axis3D (..)
+  , Plane3D (..)
+  , Frame3D (..)
   , VectorTransform3D (VectorTransform3D)
   , Transform3D (Transform3D)
   )
@@ -923,6 +923,7 @@ type Frame2D :: Type -> Type
 data Frame2D units = Frame2D
   { originPoint :: Point2D units
   , orientation :: Orientation2D
+  , inverse :: ~(Frame2D units)
   }
 
 deriving instance Eq (Frame2D units)
@@ -936,22 +937,25 @@ instance FFI (Frame2D Unitless) where
   representation = FFI.classRepresentation "UvFrame"
 
 instance Multiplication (Vector2D units1) (Frame2D units2) (Vector2D units1) where
-  Vector2D vx vy * Frame2D _ (Orientation2D i j) = vx * i + vy * j
+  Vector2D vx vy * Frame2D {orientation = Orientation2D i j} = vx * i + vy * j
 
 instance Multiplication (Frame2D units1) (Vector2D units2) (Vector2D units2) where
   frame * vector = vector * frame
 
 instance Division (Vector2D units1) (Frame2D units2) (Vector2D units1) where
-  v / Frame2D _ (Orientation2D i j) = Vector2D (v `dot` i) (v `dot` j)
+  vector / Frame2D {orientation = Orientation2D i j} = Vector2D (vector `dot` i) (vector `dot` j)
 
 instance units1 ~ units2 => Multiplication (Point2D units1) (Frame2D units2) (Point2D units1) where
-  Point2D px py * Frame2D p0 (Orientation2D i j) = p0 + px * i + py * j
+  Point2D px py * Frame2D {originPoint, orientation = Orientation2D i j} =
+    originPoint + px * i + py * j
 
 instance units1 ~ units2 => Multiplication (Frame2D units1) (Point2D units2) (Point2D units2) where
   frame * point = point * frame
 
 instance units1 ~ units2 => Division (Point2D units1) (Frame2D units2) (Point2D units1) where
-  p / Frame2D p0 (Orientation2D i j) = let v = p - p0 in Point2D (v `dot` i) (v `dot` j)
+  point / Frame2D {originPoint, orientation = Orientation2D i j} = do
+    let displacement = point - originPoint
+    Point2D (displacement `dot` i) (displacement `dot` j)
 
 ----- VectorTransform2D -----
 
@@ -2107,6 +2111,7 @@ type Frame3D :: Type -> Type -> Type
 data Frame3D global local = Frame3D
   { originPoint :: Point3D global
   , orientation :: Orientation3D global
+  , inverse :: ~(Frame3D local global)
   }
 
 deriving instance Eq (Frame3D global local)
@@ -2124,7 +2129,7 @@ instance
   local1 ~ local2 =>
   Multiplication (Vector3D units local1) (Frame3D global local2) (Vector3D units global)
   where
-  Vector3D vx vy vz * Frame3D _ (Orientation3D i j k) = vx * i + vy * j + vz * k
+  Vector3D vx vy vz * Frame3D {orientation = Orientation3D i j k} = vx * i + vy * j + vz * k
 
 instance
   local1 ~ local2 =>
@@ -2136,13 +2141,15 @@ instance
   global1 ~ global2 =>
   Division (Vector3D units global1) (Frame3D global2 local) (Vector3D units local)
   where
-  v / Frame3D _ (Orientation3D i j k) = Vector3D (v `dot` i) (v `dot` j) (v `dot` k)
+  v / Frame3D {orientation = Orientation3D i j k} = Vector3D (v `dot` i) (v `dot` j) (v `dot` k)
 
 instance
   local1 ~ local2 =>
   Multiplication (Point3D local1) (Frame3D global local2) (Point3D global)
   where
-  Point3D px py pz * Frame3D p0 (Orientation3D i j k) = p0 + px * i + py * j + pz * k
+  Point3D px py pz * Frame3D {originPoint, orientation} = do
+    let Orientation3D i j k = orientation
+    originPoint + px * i + py * j + pz * k
 
 instance
   local1 ~ local2 =>
@@ -2154,8 +2161,10 @@ instance
   global1 ~ global2 =>
   Division (Point3D global1) (Frame3D global2 local) (Point3D local)
   where
-  p / Frame3D p0 (Orientation3D i j k) =
-    let v = p - p0 in Point3D (v `dot` i) (v `dot` j) (v `dot` k)
+  point / Frame3D {originPoint, orientation} = do
+    let Orientation3D i j k = orientation
+    let displacement = point - originPoint
+    Point3D (displacement `dot` i) (displacement `dot` j) (displacement `dot` k)
 
 ----- VectorTransform3D -----
 

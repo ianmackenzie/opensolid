@@ -16,9 +16,9 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Axis3D (Axis3D)
+  ( Axis3D (..)
   , Direction3D (Direction3D, Unit3D)
-  , Frame3D (Frame3D)
+  , Frame3D (..)
   , Orientation3D (Orientation3D)
   )
 import OpenSolid.World3D qualified as World3D
@@ -106,15 +106,15 @@ zDirection (Orientation3D dr df du) (Convention3D {zr, zf, zu}) =
 
 -- | Get the X axis of a given frame for a particular coordinate convention.
 xAxis :: Frame3D global local -> Convention3D -> Axis3D global
-xAxis (Frame3D originPoint orientation) convention =
-  Axis3D originPoint (xDirection orientation convention)
+xAxis (Frame3D {originPoint, orientation}) convention =
+  Axis3D {originPoint, direction = xDirection orientation convention}
 
 -- | Get the Y axis of a given frame for a particular coordinate convention.
 yAxis :: Frame3D global local -> Convention3D -> Axis3D global
-yAxis (Frame3D originPoint orientation) convention =
-  Axis3D originPoint (yDirection orientation convention)
+yAxis (Frame3D {originPoint, orientation}) convention =
+  Axis3D {originPoint, direction = yDirection orientation convention}
 
 -- | Get the Z axis of a given frame for a particular coordinate convention.
 zAxis :: Frame3D global local -> Convention3D -> Axis3D global
-zAxis (Frame3D originPoint orientation) convention =
-  Axis3D originPoint (zDirection orientation convention)
+zAxis (Frame3D {originPoint, orientation}) convention =
+  Axis3D {originPoint, direction = zDirection orientation convention}

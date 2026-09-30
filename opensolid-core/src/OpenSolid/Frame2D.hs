@@ -31,14 +31,23 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Frame2D (..)
-  , Orientation2D (Orientation2D)
   , Plane3D (..)
   , PlaneOrientation3D (..)
   )
 
 with :: "originPoint" ::: Point2D units -> "orientation" ::: Orientation2D -> Frame2D units
 with ("originPoint" ::: givenOriginPoint) ("orientation" ::: givenOrientation) =
-  Frame2D {originPoint = givenOriginPoint, orientation = givenOrientation}
+  recursive \self ->
+    Frame2D
+      { originPoint = givenOriginPoint
+      , orientation = givenOrientation
+      , inverse =
+          Frame2D
+            { originPoint = Point2D.relativeTo self Point2D.origin
+            , orientation = Orientation2D.relativeTo self Orientation2D.horizontal
+            , inverse = self
+            }
+      }
 
 originPoint :: Frame2D units -> Point2D units
 originPoint = (.originPoint)
@@ -60,15 +69,21 @@ xy :: Frame2D units
 xy = atPoint Point2D.origin
 
 atPoint :: Point2D units -> Frame2D units
-atPoint p0 = Frame2D p0 Orientation2D.horizontal
+atPoint p0 = with {originPoint = p0, orientation = Orientation2D.horizontal}
 
 fromXAxis :: Axis2D units -> Frame2D units
 fromXAxis axis =
-  Frame2D (Axis2D.originPoint axis) (Orientation2D.fromXDirection (Axis2D.direction axis))
+  with
+    { originPoint = Axis2D.originPoint axis
+    , orientation = Orientation2D.fromXDirection (Axis2D.direction axis)
+    }
 
 fromYAxis :: Axis2D units -> Frame2D units
 fromYAxis axis =
-  Frame2D (Axis2D.originPoint axis) (Orientation2D.fromYDirection (Axis2D.direction axis))
+  with
+    { originPoint = Axis2D.originPoint axis
+    , orientation = Orientation2D.fromYDirection (Axis2D.direction axis)
+    }
 
 xAxis :: Frame2D units -> Axis2D units
 xAxis frame = Axis2D.through (originPoint frame) (xDirection frame)
@@ -78,23 +93,29 @@ yAxis frame = Axis2D.through (originPoint frame) (yDirection frame)
 
 placeIn :: Frame2D units -> Frame2D units -> Frame2D units
 placeIn globalFrame frame =
-  Frame2D
-    (Point2D.placeIn globalFrame (originPoint frame))
-    (Orientation2D.placeIn globalFrame (orientation frame))
+  with
+    { originPoint = Point2D.placeIn globalFrame (originPoint frame)
+    , orientation = Orientation2D.placeIn globalFrame (orientation frame)
+    }
 
 relativeTo :: Frame2D units -> Frame2D units -> Frame2D units
 relativeTo globalFrame frame =
-  Frame2D
-    (Point2D.relativeTo globalFrame (originPoint frame))
-    (Orientation2D.relativeTo globalFrame (orientation frame))
+  with
+    { originPoint = Point2D.relativeTo globalFrame (originPoint frame)
+    , orientation = Orientation2D.relativeTo globalFrame (orientation frame)
+    }
 
 placeOn :: Plane3D space -> Frame2D Meters -> Plane3D space
-placeOn plane (Frame2D p0 (Orientation2D i j)) =
-  Plane3D (Point2D.placeOn plane p0) $
-    PlaneOrientation3D
-      (Direction2D.placeOn plane i)
-      (Direction2D.placeOn plane j)
-      plane.orientation.normalDirection
+placeOn plane frame =
+  Plane3D
+    { originPoint = Point2D.placeOn plane (originPoint frame)
+    , orientation =
+        PlaneOrientation3D
+          { xDirection = Direction2D.placeOn plane (xDirection frame)
+          , yDirection = Direction2D.placeOn plane (yDirection frame)
+          , normalDirection = plane.orientation.normalDirection
+          }
+    }
 
 inverse :: Frame2D units -> Frame2D units
-inverse frame = relativeTo frame xy
+inverse = (.inverse)

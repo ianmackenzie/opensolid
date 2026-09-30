@@ -57,7 +57,7 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3D
   , Direction3D (Unit3D)
-  , Frame3D (Frame3D)
+  , Frame3D (..)
   , Orientation3D (Orientation3D)
   , Plane3D (Plane3D)
   , PlaneOrientation3D (PlaneOrientation3D)
@@ -230,11 +230,11 @@ normalize vector = do
 
 -- | Convert a vectr defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3D global local -> Vector3D units local -> Vector3D units global
-placeIn (Frame3D _ (Orientation3D i j k)) (Vector3D vx vy vz) = vx * i + vy * j + vz * k
+placeIn (Frame3D {orientation = Orientation3D i j k}) (Vector3D vx vy vz) = vx * i + vy * j + vz * k
 
 -- | Convert a vector defined in global coordinates to one defined in local coordinates.
 relativeTo :: Frame3D global local -> Vector3D units global -> Vector3D units local
-relativeTo (Frame3D _ (Orientation3D i j k)) vector =
+relativeTo (Frame3D {orientation = Orientation3D i j k}) vector =
   Vector3D (vector `dot` i) (vector `dot` j) (vector `dot` k)
 
 projectInto :: Plane3D space -> Vector3D units space -> Vector2D units

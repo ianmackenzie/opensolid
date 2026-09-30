@@ -55,7 +55,7 @@ import OpenSolid.Primitives
   ( Axis3D (Axis3D)
   , Bounds3D (Bounds3D, PositionBounds3D)
   , Direction3D (Direction3D)
-  , Frame3D (Frame3D)
+  , Frame3D (..)
   , Orientation3D (Orientation3D)
   , Plane3D (Plane3D)
   , PlaneOrientation3D (PlaneOrientation3D)
@@ -178,7 +178,7 @@ interpolate (PositionBounds3D pb) u v w = Position3D (VectorBounds3D.interpolate
 
 placeIn :: Frame3D global local -> Bounds3D local -> Bounds3D global
 placeIn frame (Bounds3D pR pF pU) = do
-  let Frame3D _ (Orientation3D i j k) = frame
+  let Frame3D {orientation = Orientation3D i j k} = frame
   let Direction3D iR iF iU = i
   let Direction3D jR jF jU = j
   let Direction3D kR kF kU = k
@@ -199,7 +199,7 @@ placeIn frame (Bounds3D pR pF pU) = do
 
 relativeTo :: Frame3D global local -> Bounds3D global -> Bounds3D local
 relativeTo frame (Bounds3D pR pF pU) = do
-  let Frame3D _ (Orientation3D i j k) = frame
+  let Frame3D {orientation = Orientation3D i j k} = frame
   let Direction3D iR iF iU = i
   let Direction3D jR jF jU = j
   let Direction3D kR kF kU = k
