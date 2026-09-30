@@ -56,7 +56,6 @@ documentation operatorId =
       BinaryOperator.Mod -> "Return ``self % " <> rhsArgName <> "``."
       BinaryOperator.Dot -> "Compute the dot product of two vector-like values."
       BinaryOperator.Cross -> "Compute the cross product of two vector-like values."
-      BinaryOperator.At -> "Evaluate ``self`` at the given argument."
 
 functionName :: BinaryOperator.Id -> Text
 functionName operatorId = case operatorId of
@@ -68,7 +67,6 @@ functionName operatorId = case operatorId of
   BinaryOperator.Mod -> "__mod__"
   BinaryOperator.Dot -> "dot"
   BinaryOperator.Cross -> "cross"
-  BinaryOperator.At -> "__call__"
 
 overloadComponents ::
   FFI.ClassName ->
