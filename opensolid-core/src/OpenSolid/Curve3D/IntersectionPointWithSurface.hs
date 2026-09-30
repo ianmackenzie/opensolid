@@ -19,7 +19,7 @@ data IntersectionPointWithSurface = IntersectionPointWithSurface
   deriving (Eq, Ord, Show)
 
 crossing :: Number -> UvPoint -> Sign -> IntersectionPointWithSurface
-crossing t uv sign = IntersectionPointWithSurface{t, uv, kind = Crossing sign}
+crossing t uv sign = IntersectionPointWithSurface {t, uv, kind = Crossing sign}
 
 tangent :: Number -> UvPoint -> IntersectionPointWithSurface
-tangent t uv = IntersectionPointWithSurface{t, uv, kind = Tangent}
+tangent t uv = IntersectionPointWithSurface {t, uv, kind = Tangent}

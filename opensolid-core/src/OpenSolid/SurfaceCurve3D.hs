@@ -36,10 +36,10 @@ data SurfaceCurve3D space
 {-# COMPLETE Pole, Edge #-}
 
 pattern Pole :: Surface3D.Pole space -> SurfaceCurve3D space
-pattern Pole pole <- Pole_{pole}
+pattern Pole pole <- Pole_ {pole}
 
 pattern Edge :: Surface3D.Edge space -> SurfaceCurve3D space
-pattern Edge edge <- Edge_{edge}
+pattern Edge edge <- Edge_ {edge}
 
 data IsDegenerate = IsDegenerate UvPoint deriving (Eq, Show, Err)
 

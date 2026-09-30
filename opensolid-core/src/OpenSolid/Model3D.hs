@@ -1,3 +1,5 @@
+{-# LANGUAGE NoOverloadedRecordUpdate #-}
+
 module OpenSolid.Model3D
   ( Model3D (Body, Group)
   , Attribute
@@ -76,12 +78,12 @@ inspect function model = let ?context = rootContext in function model
 
 applyAttribute :: Attribute -> Context -> Context
 applyAttribute attr ctx = case attr of
-  Name value -> ctx{ownName = Just value}
-  PbrMaterial value -> ctx{ownPbrMaterial = Just value, currentPbrMaterial = value}
+  Name value -> ctx {ownName = Just value}
+  PbrMaterial value -> ctx {ownPbrMaterial = Just value, currentPbrMaterial = value}
   -- Note that here we *don't* update currentMultipliedOpacity here,
   -- to avoid multiplying it multiple times just in case there are multiple opacity attributes
   -- (it will be updated below, at the end of inChildContext)
-  Opacity value -> ctx{ownOpacity = value}
+  Opacity value -> ctx {ownOpacity = value}
 
 inChildContext :: Traversal => List Attribute -> (Traversal => a) -> a
 inChildContext childAttributes callback = do
@@ -128,11 +130,11 @@ data GroupWithContext space where
   GroupWithContext :: Traversal => List (Model3D space) -> GroupWithContext space
 
 visitBody :: Traversal => Model3D space -> Maybe (BodyWithContext space)
-visitBody GroupNode{} = Nothing
+visitBody (GroupNode {}) = Nothing
 visitBody (BodyNode attrs bod) = inChildContext attrs (Just (BodyWithContext bod))
 
 visitGroup :: Traversal => Model3D space -> Maybe (GroupWithContext space)
-visitGroup BodyNode{} = Nothing
+visitGroup (BodyNode {}) = Nothing
 visitGroup (GroupNode attrs kids) = inChildContext attrs (Just (GroupWithContext kids))
 
 {-# COMPLETE Body, Group #-}

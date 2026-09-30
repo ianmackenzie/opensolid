@@ -56,22 +56,22 @@ instance Ord Boundary where
     compare (i1 * n2) (i2 * n1)
 
 unit :: Domain1D
-unit = Domain1D{n = 1.0, i = 0.0, j = 1.0}
+unit = Domain1D {n = 1.0, i = 0.0, j = 1.0}
 
 constant :: Boundary -> Domain1D
-constant Boundary{n, i} = Domain1D{n, i, j = i}
+constant (Boundary {n, i}) = Domain1D {n, i, j = i}
 
 isAtomic :: Domain1D -> Bool
-isAtomic (Domain1D{n, i, j}) = (j - i) / n <= Number.epsilon
+isAtomic (Domain1D {n, i, j}) = (j - i) / n <= Number.epsilon
 
 endpoints :: Domain1D -> (Boundary, Boundary)
-endpoints (Domain1D{n, i, j}) = (Boundary{n, i}, Boundary{n, i = j})
+endpoints (Domain1D {n, i, j}) = (Boundary {n, i}, Boundary {n, i = j})
 
 lowerBoundary :: Domain1D -> Boundary
-lowerBoundary (Domain1D{n, i}) = Boundary{n, i}
+lowerBoundary (Domain1D {n, i}) = Boundary {n, i}
 
 upperBoundary :: Domain1D -> Boundary
-upperBoundary (Domain1D{n, j}) = Boundary{n, i = j}
+upperBoundary (Domain1D {n, j}) = Boundary {n, i = j}
 
 midpoint :: Domain1D -> Boundary
 midpoint (Domain1D n i j) = Boundary (2.0 * n) (i + j)
@@ -80,7 +80,7 @@ width :: Domain1D -> Number
 width (Domain1D n i j) = (j - i) / n
 
 bisect :: Domain1D -> (Domain1D, Domain1D)
-bisect (Domain1D{n, i, j}) = do
+bisect (Domain1D {n, i, j}) = do
   let n2 = 2.0 * n
   let i2 = 2.0 * i
   let j2 = 2.0 * j
@@ -88,15 +88,15 @@ bisect (Domain1D{n, i, j}) = do
   (Domain1D n2 i2 mid, Domain1D n2 mid j2)
 
 half :: Domain1D -> Domain1D
-half (Domain1D{n, i, j}) = do
+half (Domain1D {n, i, j}) = do
   let delta = j - i
   Domain1D (4.0 * n) (4.0 * i + delta) (4.0 * j - delta)
 
 bounds :: Domain1D -> Interval Unitless
-bounds (Domain1D{n, i, j}) = Interval (i / n) (j / n)
+bounds (Domain1D {n, i, j}) = Interval (i / n) (j / n)
 
 interior :: Domain1D -> Interval Unitless
-interior (Domain1D{n, i, j}) = do
+interior (Domain1D {n, i, j}) = do
   let n8 = 8.0 * n
   let delta = j - i
   let low = if i == 0.0 then 0.0 else (8.0 * i + delta) / n8
@@ -108,7 +108,7 @@ overlaps (Domain1D n2 i2 j2) (Domain1D n1 i1 j1) =
   i1 * n2 < j2 * n1 && j1 * n2 > i2 * n1
 
 includes :: Boundary -> Domain1D -> Bool
-includes (Boundary{n = pn, i = pi}) (Domain1D{n, i, j}) = do
+includes (Boundary {n = pn, i = pi}) (Domain1D {n, i, j}) = do
   pi * n >= i * pn && pi * n <= j * pn
 
 contains :: Domain1D -> Domain1D -> Bool

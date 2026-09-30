@@ -356,7 +356,7 @@ expression ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->
   Result IsAbstract (Expression inputValue outputValue)
 expression (Concrete expr) = Ok expr
-expression Abstract{} = Err IsAbstract
+expression (Abstract {}) = Err IsAbstract
 
 map ::
   Expression.Evaluation inputValue outputValue2 inputBounds outputBounds2 =>
@@ -456,4 +456,4 @@ instance
 
 debug :: CompiledFunction input output inputBounds outputBounds -> Text
 debug (Concrete expr) = Expression.debug expr
-debug Abstract{} = "Abstract"
+debug (Abstract {}) = "Abstract"

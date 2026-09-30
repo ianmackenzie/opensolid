@@ -43,10 +43,11 @@ arc2D :: Test
 arc2D = unitless do
   let arc =
         Curve2D.polarArc
-          (#centerPoint Point2D.origin)
-          (#radius 1.0)
-          (#startAngle Angle.zero)
-          (#endAngle Angle.pi)
+          { centerPoint = Point2D.origin
+          , radius = 1.0
+          , startAngle = Angle.zero
+          , endAngle = Angle.pi
+          }
           !! error "Arc should not be degenerate"
   let point = Point2D (Number.sqrt 2.0 / 2.0) (Number.sqrt 2.0 / 2.0)
   curve2D "Arc" (arc - point) 0.5 0.25
@@ -65,10 +66,11 @@ pointOnSphere3D = Test.verify "Point on sphere" do
   let radius = Length.meters 1.0
   profileCurve <- try do
     Curve2D.polarArc
-      (#centerPoint Point2D.origin)
-      (#radius radius)
-      (#startAngle Angle.zero)
-      (#endAngle Angle.halfPi)
+      { centerPoint = Point2D.origin
+      , radius
+      , startAngle = Angle.zero
+      , endAngle = Angle.halfPi
+      }
   surface <- try do Surface3D.revolved World3D.rightPlane profileCurve Axis2D.y Angle.twoPi
   let point =
         Point2D.polar radius (Angle.degrees 45.0)

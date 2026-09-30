@@ -64,7 +64,9 @@ executable opensolid-python
     NoImplicitPrelude
     OverloadedLabels
     OverloadedRecordDot
+    OverloadedRecordUpdate
     OverloadedStrings
     PatternSynonyms
+    RebindableSyntax
     TypeAbstractions
     ViewPatterns

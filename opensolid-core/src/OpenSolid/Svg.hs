@@ -124,11 +124,11 @@ instance FFI Layout where
   representation = FFI.nestedClassRepresentation "Svg" "Layout"
 
 nodeText :: Text -> Node -> Text
-nodeText indent Node{tag, attributes, children} = do
-  let attributeLines = List.map (attributeText ("\n" <> indent <> "   ")) attributes
-  let openingTag = indent <> "<" <> tag <> Text.concat attributeLines <> ">"
-  let childLines = List.map (nodeText (indent <> "  ")) children
-  let closingTag = indent <> "</" <> tag <> ">"
+nodeText indent node = do
+  let attributeLines = List.map (attributeText ("\n" <> indent <> "   ")) node.attributes
+  let openingTag = indent <> "<" <> node.tag <> Text.concat attributeLines <> ">"
+  let childLines = List.map (nodeText (indent <> "  ")) node.children
+  let closingTag = indent <> "</" <> node.tag <> ">"
   Text.multiline (openingTag : childLines) <> "\n" <> closingTag
 
 attributeText :: Text -> Attribute -> Text
@@ -149,10 +149,11 @@ toText layout entity = do
           ViewBox givenViewBox -> givenViewBox
           Padding givenPadding ->
             case entity of
-              Svg Node{bounds = Bounds2D (Interval xLow xHigh) (Interval yLow yHigh)} ->
-                Bounds2D
-                  (Interval (xLow - givenPadding) (xHigh + givenPadding))
-                  (Interval (yLow - givenPadding) (yHigh + givenPadding))
+              Svg node -> do
+                let Bounds2D (Interval xLow xHigh) (Interval yLow yHigh) = node.bounds
+                let paddedX = Interval (xLow - givenPadding) (xHigh + givenPadding)
+                let paddedY = Interval (yLow - givenPadding) (yHigh + givenPadding)
+                Bounds2D paddedX paddedY
               Empty -> Bounds2D.constant Point2D.origin
   let Bounds2D xBounds yBounds = computedViewBox
   let Interval x1 x2 = xBounds

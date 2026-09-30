@@ -1,3 +1,5 @@
+{-# LANGUAGE NoOverloadedRecordUpdate #-}
+
 module OpenSolid.SurfaceFunction1D.PartialZeros
   ( PartialZeros (..)
   , Parameterization (..)
@@ -77,10 +79,12 @@ empty =
     }
 
 addCrossingSegment :: CrossingSegment -> PartialZeros units -> PartialZeros units
-addCrossingSegment newCrossingSegment partialZeros = do
-  let PartialZeros{crossingSegments} = partialZeros
-  let updatedCrossingSegments = insertCrossingSegment newCrossingSegment crossingSegments
-  partialZeros{crossingSegments = updatedCrossingSegments}
+addCrossingSegment newCrossingSegment partialZeros =
+  partialZeros
+    { crossingSegments =
+        partialZeros.crossingSegments
+          & insertCrossingSegment newCrossingSegment
+    }
 
 insertCrossingSegment ::
   CrossingSegment ->
@@ -124,14 +128,12 @@ jointParameterization Horizontal Vertical = Nothing
 jointParameterization Vertical Horizontal = Nothing
 
 addTangentPoint :: (UvPoint, Sign) -> PartialZeros units -> PartialZeros units
-addTangentPoint tangentPoint partialZeros = do
-  let PartialZeros{tangentPoints} = partialZeros
-  partialZeros{tangentPoints = tangentPoint : tangentPoints}
+addTangentPoint tangentPoint partialZeros =
+  partialZeros {tangentPoints = tangentPoint : partialZeros.tangentPoints}
 
 addSaddleRegion :: SaddleRegion units -> PartialZeros units -> PartialZeros units
-addSaddleRegion saddleRegion partialZeros = do
-  let PartialZeros{saddleRegions} = partialZeros
-  partialZeros{saddleRegions = saddleRegion : saddleRegions}
+addSaddleRegion saddleRegion partialZeros =
+  partialZeros {saddleRegions = saddleRegion : partialZeros.saddleRegions}
 
 data PiecewiseCurve
   = PiecewiseCurve Domain2D.Boundary Domain2D.Boundary (NonEmpty UvCurve)
@@ -190,7 +192,7 @@ finalize ::
   PartialZeros units ->
   Zeros
 finalize function dvdu dudv partialZeros = do
-  let PartialZeros{crossingSegments, tangentPoints, saddleRegions} = partialZeros
+  let PartialZeros {crossingSegments, tangentPoints, saddleRegions} = partialZeros
   let piecewiseCurveSegments =
         List.map (piecewiseCurve function dvdu dudv) crossingSegments
   let (piecewiseCurves, crossingLoopSegments) =

@@ -111,7 +111,7 @@ instance
     -- instead of finding *all* zeros (and the full geometry of each)
     case zeros (function - quantity) of
       Ok (Zeros [] [] [] []) -> False
-      Ok (Zeros{}) -> True
+      Ok (Zeros {}) -> True
       Err IsZero -> True
 
 instance
@@ -562,7 +562,7 @@ findZeros f dudv dvdu context subdomain exclusions = do
         case context of
           CrossingCurvesOnly -> findCrossingCurves subproblem
           AllZeroTypes -> do
-            let Subproblem{fuRange, fvRange} = subproblem
+            let Subproblem {fuRange, fvRange} = subproblem
             if Interval.isResolved fuRange || Interval.isResolved fvRange
               then findCrossingCurves subproblem
               else findTangentSolutions subproblem
@@ -572,7 +572,7 @@ findTangentSolutions ::
   Subproblem units ->
   Solve2D.Action Solve2D.NoExclusions FindZerosContext (Solution units)
 findTangentSolutions subproblem = do
-  let Subproblem{f, subdomain, uvRange, fuuRange, fuvRange, fvvRange} = subproblem
+  let Subproblem {f, subdomain, uvRange, fuuRange, fuvRange, fvvRange} = subproblem
   let determinant = fuuRange ?*? fvvRange - fuvRange ?*? fuvRange
   case Interval.resolvedSign determinant of
     Resolved determinantSign -> do
@@ -634,7 +634,7 @@ diagonalCrossingCurve ::
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
 diagonalCrossingCurve subproblem = do
-  let Subproblem{fuRange, fvRange} = subproblem
+  let Subproblem {fuRange, fvRange} = subproblem
   fuSign <- Interval.resolvedSign fuRange
   fvSign <- Interval.resolvedSign fvRange
   Resolved $
@@ -646,8 +646,8 @@ diagonalCrossingCurve subproblem = do
 
 southeastCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingSegment
 southeastCrossingCurve subproblem = do
-  let Subproblem{fValues} = subproblem
-  let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
+  let Subproblem {fValues} = subproblem
+  let CornerValues {bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
   if f11 <= Quantity.zero || f22 >= Quantity.zero
     then Nothing
     else do
@@ -663,8 +663,8 @@ southeastCrossingCurve subproblem = do
 
 southwestCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingSegment
 southwestCrossingCurve subproblem = do
-  let Subproblem{fValues} = subproblem
-  let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
+  let Subproblem {fValues} = subproblem
+  let CornerValues {bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
   if f12 <= Quantity.zero || f21 >= Quantity.zero
     then Nothing
     else do
@@ -680,8 +680,8 @@ southwestCrossingCurve subproblem = do
 
 northeastCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingSegment
 northeastCrossingCurve subproblem = do
-  let Subproblem{fValues} = subproblem
-  let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
+  let Subproblem {fValues} = subproblem
+  let CornerValues {bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
   if f21 <= Quantity.zero || f12 >= Quantity.zero
     then Nothing
     else do
@@ -697,8 +697,8 @@ northeastCrossingCurve subproblem = do
 
 northwestCrossingCurve :: Tolerance units => Subproblem units -> Maybe PartialZeros.CrossingSegment
 northwestCrossingCurve subproblem = do
-  let Subproblem{fValues} = subproblem
-  let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
+  let Subproblem {fValues} = subproblem
+  let CornerValues {bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
   if f22 <= Quantity.zero || f11 >= Quantity.zero
     then Nothing
     else do
@@ -727,7 +727,7 @@ horizontalCrossingCurve ::
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
 horizontalCrossingCurve subproblem = do
-  let Subproblem{fvRange} = subproblem
+  let Subproblem {fvRange} = subproblem
   if Interval.isResolved fvRange
     then do
       let bottomEdgeRange = Subproblem.bottomEdgeRange subproblem
@@ -759,7 +759,8 @@ horizontalCurve ::
   (UvPoint, Domain2D.Boundary) ->
   (UvPoint, Domain2D.Boundary) ->
   Fuzzy PartialZeros.CrossingSegment
-horizontalCurve Subproblem{f, dvdu, subdomain, uvRange} start end = do
+horizontalCurve subproblem start end = do
+  let Subproblem {f, dvdu, subdomain, uvRange} = subproblem
   let startPoint = Pair.first start
   let endPoint = Pair.first end
   let uStart = Point2D.xCoordinate startPoint
@@ -776,7 +777,7 @@ verticalCrossingCurve ::
   Subproblem units ->
   Fuzzy (Maybe PartialZeros.CrossingSegment)
 verticalCrossingCurve subproblem = do
-  let Subproblem{fuRange} = subproblem
+  let Subproblem {fuRange} = subproblem
   if Interval.isResolved fuRange
     then do
       let leftEdgeRange = Subproblem.leftEdgeRange subproblem
@@ -808,7 +809,8 @@ verticalCurve ::
   (UvPoint, Domain2D.Boundary) ->
   (UvPoint, Domain2D.Boundary) ->
   Fuzzy PartialZeros.CrossingSegment
-verticalCurve Subproblem{f, dudv, subdomain, uvRange} start end = do
+verticalCurve subproblem start end = do
+  let Subproblem {f, dudv, subdomain, uvRange} = subproblem
   let startPoint = Pair.first start
   let endPoint = Pair.first end
   let vStart = Point2D.yCoordinate startPoint

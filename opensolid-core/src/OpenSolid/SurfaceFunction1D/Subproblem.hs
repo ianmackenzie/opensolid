@@ -91,52 +91,61 @@ cornerValues (Bounds2D (Interval u1 u2) (Interval v1 v2)) function =
     }
 
 leftEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2D.Boundary)
-leftEdgePoint Subproblem{f, subdomain, uvRange} = do
+leftEdgePoint subproblem = do
+  let Subproblem {f, subdomain, uvRange} = subproblem
   let Bounds2D (Interval u1 _) vRange = uvRange
   let fv = Pair.second (SurfaceFunction1D.partialDerivatives f)
   (UvPoint u1 (Internal.solveForV f fv u1 vRange), Domain2D.leftEdge subdomain)
 
 rightEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2D.Boundary)
-rightEdgePoint Subproblem{f, subdomain, uvRange} = do
+rightEdgePoint subproblem = do
+  let Subproblem {f, subdomain, uvRange} = subproblem
   let Bounds2D (Interval _ u2) vRange = uvRange
   let fv = Pair.second (SurfaceFunction1D.partialDerivatives f)
   (UvPoint u2 (Internal.solveForV f fv u2 vRange), Domain2D.rightEdge subdomain)
 
 bottomEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2D.Boundary)
-bottomEdgePoint Subproblem{f, subdomain, uvRange} = do
+bottomEdgePoint subproblem = do
+  let Subproblem {f, subdomain, uvRange} = subproblem
   let Bounds2D uRange (Interval v1 _) = uvRange
   let fu = Pair.first (SurfaceFunction1D.partialDerivatives f)
   (UvPoint (Internal.solveForU f fu uRange v1) v1, Domain2D.bottomEdge subdomain)
 
 topEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2D.Boundary)
-topEdgePoint Subproblem{f, subdomain, uvRange} = do
+topEdgePoint subproblem = do
+  let Subproblem {f, subdomain, uvRange} = subproblem
   let Bounds2D uRange (Interval _ v2) = uvRange
   let fu = Pair.first (SurfaceFunction1D.partialDerivatives f)
   (UvPoint (Internal.solveForU f fu uRange v2) v2, Domain2D.topEdge subdomain)
 
 bottomLeftPoint :: Subproblem units -> (UvPoint, Domain2D.Boundary)
-bottomLeftPoint Subproblem{subdomain, uvRange} = do
+bottomLeftPoint subproblem = do
+  let Subproblem {subdomain, uvRange} = subproblem
   let Bounds2D (Interval u1 _) (Interval v1 _) = uvRange
   (UvPoint u1 v1, Domain2D.bottomLeftCorner subdomain)
 
 bottomRightPoint :: Subproblem units -> (UvPoint, Domain2D.Boundary)
-bottomRightPoint Subproblem{subdomain, uvRange} = do
+bottomRightPoint subproblem = do
+  let Subproblem {subdomain, uvRange} = subproblem
   let Bounds2D (Interval _ u2) (Interval v1 _) = uvRange
   (UvPoint u2 v1, Domain2D.bottomRightCorner subdomain)
 
 topLeftPoint :: Subproblem units -> (UvPoint, Domain2D.Boundary)
-topLeftPoint Subproblem{subdomain, uvRange} = do
+topLeftPoint subproblem = do
+  let Subproblem {subdomain, uvRange} = subproblem
   let Bounds2D (Interval u1 _) (Interval _ v2) = uvRange
   (UvPoint u1 v2, Domain2D.topLeftCorner subdomain)
 
 topRightPoint :: Subproblem units -> (UvPoint, Domain2D.Boundary)
-topRightPoint Subproblem{subdomain, uvRange} = do
+topRightPoint subproblem = do
+  let Subproblem {subdomain, uvRange} = subproblem
   let Bounds2D (Interval _ u2) (Interval _ v2) = uvRange
   (UvPoint u2 v2, Domain2D.topRightCorner subdomain)
 
 tightRange :: Subproblem units -> Interval units
-tightRange Subproblem{uvRange, fValues, fRange, fuRange, fvRange} = do
-  let CornerValues{bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
+tightRange subproblem = do
+  let Subproblem {uvRange, fValues, fRange, fuRange, fvRange} = subproblem
+  let CornerValues {bottomLeft = f11, bottomRight = f21, topLeft = f12, topRight = f22} = fValues
   let Bounds2D (Interval u1 u2) (Interval v1 v2) = uvRange
   let u1Range = Internal.curveRangeAt v1 v2 f11 f12 fvRange
   let u2Range = Internal.curveRangeAt v1 v2 f21 f22 fvRange
@@ -151,29 +160,33 @@ tightRange Subproblem{uvRange, fValues, fRange, fuRange, fvRange} = do
 
 isZeroCandidate :: Tolerance units => Subproblem units -> Bool
 isZeroCandidate subproblem = do
-  let Subproblem{fRange} = subproblem
+  let Subproblem {fRange} = subproblem
   fRange ^ Quantity.zero && tightRange subproblem ^ Quantity.zero
 
 leftEdgeRange :: Subproblem units -> Interval units
-leftEdgeRange Subproblem{uvRange, fvRange, fValues} = do
+leftEdgeRange subproblem = do
+  let Subproblem {uvRange, fvRange, fValues} = subproblem
   let Bounds2D _ (Interval v1 v2) = uvRange
-  let CornerValues{bottomLeft, topLeft} = fValues
+  let CornerValues {bottomLeft, topLeft} = fValues
   Internal.curveRangeAt v1 v2 bottomLeft topLeft fvRange
 
 rightEdgeRange :: Subproblem units -> Interval units
-rightEdgeRange Subproblem{uvRange, fvRange, fValues} = do
+rightEdgeRange subproblem = do
+  let Subproblem {uvRange, fvRange, fValues} = subproblem
   let Bounds2D _ (Interval v1 v2) = uvRange
-  let CornerValues{bottomRight, topRight} = fValues
+  let CornerValues {bottomRight, topRight} = fValues
   Internal.curveRangeAt v1 v2 bottomRight topRight fvRange
 
 bottomEdgeRange :: Subproblem units -> Interval units
-bottomEdgeRange Subproblem{uvRange, fuRange, fValues} = do
+bottomEdgeRange subproblem = do
+  let Subproblem {uvRange, fuRange, fValues} = subproblem
   let Bounds2D (Interval u1 u2) _ = uvRange
-  let CornerValues{bottomLeft, bottomRight} = fValues
+  let CornerValues {bottomLeft, bottomRight} = fValues
   Internal.curveRangeAt u1 u2 bottomLeft bottomRight fuRange
 
 topEdgeRange :: Subproblem units -> Interval units
-topEdgeRange Subproblem{uvRange, fuRange, fValues} = do
+topEdgeRange subproblem = do
+  let Subproblem {uvRange, fuRange, fValues} = subproblem
   let Bounds2D (Interval u1 u2) _ = uvRange
-  let CornerValues{topLeft, topRight} = fValues
+  let CornerValues {topLeft, topRight} = fValues
   Internal.curveRangeAt u1 u2 topLeft topRight fuRange

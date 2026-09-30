@@ -49,7 +49,7 @@ build curves = case curves of
     let lastChild = NonEmpty.last children
     let startPoint = firstChild.startPoint
     let endPoint = lastChild.endPoint
-    BoundaryTree{bounds = nodeBounds, startPoint, endPoint, children}
+    BoundaryTree {bounds = nodeBounds, startPoint, endPoint, children}
 
 buildCurve :: Curve2D units -> BoundaryTree units
 buildCurve curve =
@@ -68,7 +68,7 @@ buildCurveImpl curve tRange startPoint endPoint = do
   let leftChild = buildCurveImpl curve (Interval tLow tMid) startPoint midpoint
   let rightChild = buildCurveImpl curve (Interval tMid tHigh) midpoint endPoint
   let children = NonEmpty.two leftChild rightChild
-  BoundaryTree{bounds = Curve2D.range tRange curve, startPoint, endPoint, children}
+  BoundaryTree {bounds = Curve2D.range tRange curve, startPoint, endPoint, children}
 
 bounds :: BoundaryTree units -> Bounds2D units
 bounds = (.bounds)

@@ -70,7 +70,7 @@ typePattern ffiType = case ffiType of
   FFI.Text -> "str()"
   -- Note that there's no point trying to overload
   -- based on the type of items in the list, since it might be empty
-  FFI.List{} -> "list()"
+  FFI.List {} -> "list()"
   -- For non-empty lists we _can_ overload
   -- based on the type of items in the list
   FFI.NonEmpty itemType -> "[" <> typePattern itemType <> ", *_]"

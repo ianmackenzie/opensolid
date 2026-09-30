@@ -39,6 +39,7 @@ common config
     LexicalNegation
     OverloadedLabels
     OverloadedRecordDot
+    OverloadedRecordUpdate
     OverloadedStrings
     PatternSynonyms
     RebindableSyntax

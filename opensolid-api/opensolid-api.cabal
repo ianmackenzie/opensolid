@@ -56,6 +56,7 @@ library
     LexicalNegation
     OverloadedLabels
     OverloadedRecordDot
+    OverloadedRecordUpdate
     OverloadedStrings
     PatternSynonyms
     RebindableSyntax

@@ -1,4 +1,5 @@
 {-# LANGUAGE UnboxedTuples #-}
+{-# LANGUAGE NoOverloadedRecordUpdate #-}
 
 module OpenSolid.Bytecode.Compile
   ( Step
@@ -88,7 +89,9 @@ apply :: Step a -> State -> (# State, a #)
 apply (Step step) state = step state
 
 nextConstantIndex :: State -> ConstantIndex
-nextConstantIndex State{constantComponents = NumComponents n} = ConstantIndex n
+nextConstantIndex state = do
+  let NumComponents numConstantComponents = state.constantComponents
+  ConstantIndex numConstantComponents
 
 return :: a -> Step a
 return value = Step (# ,value #)
@@ -128,7 +131,9 @@ addConstant3D :: Vector3D Unitless space -> Step ConstantIndex
 addConstant3D (Vector3D x y z) = addConstant (NonEmpty.three x y z)
 
 nextVariableIndex :: State -> VariableIndex
-nextVariableIndex State{variableComponents = NumComponents n} = VariableIndex n
+nextVariableIndex state = do
+  let NumComponents numVariableComponents = state.variableComponents
+  VariableIndex numVariableComponents
 
 addVariable :: Instruction -> OutputComponents -> Step VariableIndex
 addVariable instruction (OutputComponents outputComponents) = Step \initialState ->

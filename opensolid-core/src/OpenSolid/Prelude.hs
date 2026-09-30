@@ -13,6 +13,7 @@ module OpenSolid.Prelude
   , Void
   , data NonEmpty
   , type (:::) ((:::))
+  , setField
   , (|>)
   , (<|)
   , (!>)
@@ -410,6 +411,10 @@ instance
   IsLabel name1 (value1 -> name2 ::: value2)
   where
   fromLabel = (name1 :::)
+
+{-# INLINE setField #-}
+setField :: forall (name :: Symbol) a b. a -> (name ::: a -> b) -> b
+setField value function = function (name ::: value)
 
 ----- Composition -----
 

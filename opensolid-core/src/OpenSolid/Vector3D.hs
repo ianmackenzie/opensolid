@@ -104,7 +104,8 @@ on (Plane3D _ (PlaneOrientation3D i j _)) (Vector2D vX vY) = do
 
 -- | Construct a vector from its XYZ components, given the coordinate convention to use.
 xyz :: Convention3D -> (Quantity units, Quantity units, Quantity units) -> Vector3D units space
-xyz Convention3D{xr, xf, xu, yr, yf, yu, zr, zf, zu} (vx, vy, vz) =
+xyz convention (vx, vy, vz) = do
+  let Convention3D {xr, xf, xu, yr, yf, yu, zr, zf, zu} = convention
   Vector3D
     (vx * xr + vy * yr + vz * zr)
     (vx * xf + vy * yf + vz * zf)
@@ -154,11 +155,12 @@ components ::
   Convention3D ->
   Vector3D units space ->
   (Quantity units, Quantity units, Quantity units)
-components Convention3D{xr, xf, xu, yr, yf, yu, zr, zf, zu} (Vector3D vr vf vu) =
-  ( vr * xr + vf * xf + vu * xu
-  , vr * yr + vf * yf + vu * yu
-  , vr * zr + vf * zf + vu * zu
-  )
+components convention (Vector3D vr vf vu) = do
+  let Convention3D {xr, xf, xu, yr, yf, yu, zr, zf, zu} = convention
+  let vx = vr * xr + vf * xf + vu * xu
+  let vy = vr * yr + vf * yf + vu * yu
+  let vz = vr * zr + vf * zf + vu * zu
+  (vx, vy, vz)
 
 {-| Get the XYZ components of a vector using a Z-up coordinate convention.
 

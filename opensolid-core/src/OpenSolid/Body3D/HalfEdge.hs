@@ -80,8 +80,8 @@ isMateOf halfEdge1 halfEdge2 =
     && matingCurves (surfaceCurve halfEdge1) (surfaceCurve halfEdge2)
 
 matingCurves :: Tolerance Meters => SurfaceCurve3D space -> SurfaceCurve3D space -> Bool
-matingCurves SurfaceCurve3D.Pole{} _ = False
-matingCurves _ SurfaceCurve3D.Pole{} = False
+matingCurves (SurfaceCurve3D.Pole _) _ = False
+matingCurves _ (SurfaceCurve3D.Pole _) = False
 matingCurves (SurfaceCurve3D.Edge edge1) (SurfaceCurve3D.Edge edge2) = do
   let Surface3D.Edge _ curve1 = edge1
   let Surface3D.Edge _ curve2 = edge2

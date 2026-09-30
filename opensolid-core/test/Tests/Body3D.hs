@@ -47,7 +47,7 @@ sphereMeshing :: Test
 sphereMeshing = Test.verify "sphereMeshing" do
   let diameter = Length.centimeters 10.0
   let resolution = Resolution.maxError (0.01 * diameter)
-  sphere <- try do Body3D.sphere (#centerPoint World3D.originPoint) (#diameter diameter)
+  sphere <- try do Body3D.sphere {centerPoint = World3D.originPoint, diameter}
   let mesh = Body3D.toPointMesh resolution sphere
   let approximateArea = meshArea mesh
   let approximateVolume = meshVolume mesh

@@ -7,16 +7,17 @@ main :: IO ()
 main = do
   let header =
         Step.header
-          (#description ["A minimal AP214 example with a single part"])
-          (#implementationLevel "2;1")
-          (#fileName "demo")
-          (#timestamp "2003-12-27T11:57:53")
-          (#author ["Lothar Klein"])
-          (#organization ["LKSoft"])
-          (#preprocessorVersion " ")
-          (#originatingSystem "IDA-STEP")
-          (#authorization " ")
-          (#schemaIdentifiers ["AUTOMOTIVE_DESIGN { 1 0 10303 214 2 1 1}"])
+          { description = ["A minimal AP214 example with a single part"]
+          , implementationLevel = "2;1"
+          , fileName = "demo"
+          , timestamp = "2003-12-27T11:57:53"
+          , author = ["Lothar Klein"]
+          , organization = ["LKSoft"]
+          , preprocessorVersion = " "
+          , originatingSystem = "IDA-STEP"
+          , authorization = " "
+          , schemaIdentifiers = ["AUTOMOTIVE_DESIGN { 1 0 10303 214 2 1 1}"]
+          }
   let applicationContext = Step.entity "APPLICATION_CONTEXT" [Step.text "mechanical design"]
   let applicationProtocolDefinition =
         Step.entity "APPLICATION_PROTOCOL_DEFINITION" $

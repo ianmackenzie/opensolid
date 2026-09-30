@@ -1596,7 +1596,7 @@ body3D = do
         Stl.writeBinary path convention Length.inMillimeters mesh
   let writeMitsuba path givenResolution body = do
         let mesh = Body3D.toSurfaceMesh givenResolution body
-        Mitsuba.writeMeshes path [(mesh, #name "")]
+        Mitsuba.writeMeshes path [("", mesh)]
   Class.new @Body3D $(docs ''Body3D.Body3D) $
     [ Class.factoryT4R "Extruded" "Sketch Plane" "Profile" "Start" "End" (Body3D.extruded @Void) $(docs 'Body3D.extruded)
     , Class.factoryT4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3D.revolved @Void) $(docs 'Body3D.revolved)
@@ -1693,13 +1693,8 @@ instance FFI Mitsuba where
 mitsuba :: Class
 mitsuba = do
   let writeFiles :: Text -> Resolution -> Mitsuba -> IO ()
-      writeFiles path res (Mitsuba model camera lighting) =
-        Mitsuba.writeFiles
-          (#path path)
-          (#model model)
-          (#resolution res)
-          (#camera camera)
-          (#lighting lighting)
+      writeFiles path resolution_ (Mitsuba model camera lighting) =
+        Mitsuba.writeFiles {path, model, resolution = resolution_, camera, lighting}
   Class.new @Mitsuba "A Mitsuba scene that can be written out to a file." $
     [ Class.constructor3 "Model" "Camera" "Lighting" Mitsuba "Construct a Mitsuba scene from a 3D model, a camera and some lighting."
     , Class.member2I "Write Files" "Path" "Resolution" writeFiles $(docs 'Mitsuba.writeFiles)

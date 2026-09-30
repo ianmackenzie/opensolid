@@ -125,8 +125,8 @@ instance
 
 get :: Int -> Set b a -> Maybe a
 get index set = case set of
-  Node{children} -> getInChildren index children
-  Leaf{leafItem} -> if index == 0 then Just leafItem else Nothing
+  Node {children} -> getInChildren index children
+  Leaf {leafItem} -> if index == 0 then Just leafItem else Nothing
 
 getInChildren :: Int -> NonEmpty (Set b a) -> Maybe a
 getInChildren index (first :| rest) = do
@@ -138,12 +138,14 @@ getInChildren index (first :| rest) = do
       [] -> Nothing
 
 size :: Set b a -> Int
-size Leaf{} = 1
-size Node{nodeSize} = nodeSize
+size set = case set of
+  Leaf {} -> 1
+  Node {nodeSize} -> nodeSize
 
 bounds :: Set b a -> b
-bounds Node{nodeBounds} = nodeBounds
-bounds Leaf{leafBounds} = leafBounds
+bounds set = case set of
+  Node {nodeBounds} -> nodeBounds
+  Leaf {leafBounds} -> leafBounds
 
 leaf :: Bounded a b => a -> Set b a
 leaf item = Leaf (Bounded.bounds item) item
@@ -214,14 +216,15 @@ splitAtIndex index nonEmpty =
     _ -> error "Bad split index in Set.split"
 
 flatten :: Set b (Set b a) -> Set b a
-flatten Leaf{leafItem} = leafItem
-flatten Node{nodeBounds, children} = do
-  let flattenedChildren = NonEmpty.map flatten children
-  Node
-    { nodeBounds -- Flattening subsets shouldn't change the overall bounds, so no need to recompute
-    , nodeSize = NonEmpty.sumOf size flattenedChildren
-    , children = flattenedChildren
-    }
+flatten set = case set of
+  Leaf {leafItem} -> leafItem
+  Node {nodeBounds, children} -> do
+    let flattenedChildren = NonEmpty.map flatten children
+    Node
+      { nodeBounds -- Flattening subsets shouldn't change the overall bounds, so no need to recompute
+      , nodeSize = NonEmpty.sumOf size flattenedChildren
+      , children = flattenedChildren
+      }
 
 extend :: Bounds b => Set b a -> Bag b a -> Set b a
 extend set Bag.Empty = set
@@ -238,8 +241,8 @@ mapWithIndex function = combineWithIndex \index item -> leaf (function index ite
 
 reverseMap :: (Bounded a2 b2, Bounds b2) => (a1 -> a2) -> Set b1 a1 -> Set b2 a2
 reverseMap function set = case set of
-  Leaf{leafItem} -> leaf (function leafItem)
-  Node{nodeSize, children} -> do
+  Leaf {leafItem} -> leaf (function leafItem)
+  Node {nodeSize, children} -> do
     let reverseMappedChildren = NonEmpty.reverseMap (reverseMap function) children
     Node
       { nodeBounds = Set.Bounds.aggregateOf bounds reverseMappedChildren
@@ -255,8 +258,8 @@ combineWithIndex function set = combineWithIndexImpl 0 function set
 
 combineWithIndexImpl :: Bounds b2 => Int -> (Int -> a1 -> Set b2 a2) -> Set b1 a1 -> Set b2 a2
 combineWithIndexImpl startIndex function set = case set of
-  Leaf{leafItem} -> function startIndex leafItem
-  Node{children} -> node (combineChildrenWithIndex startIndex function children)
+  Leaf {leafItem} -> function startIndex leafItem
+  Node {children} -> node (combineChildrenWithIndex startIndex function children)
 
 combineChildrenWithIndex ::
   Bounds b2 =>
@@ -272,12 +275,14 @@ combineChildrenWithIndex startIndex function children = case children of
       (combineChildrenWithIndex (startIndex + size first) function remaining)
 
 foldr :: (a -> acc -> acc) -> acc -> Set b a -> acc
-foldr function init Leaf{leafItem} = function leafItem init
-foldr function init Node{children} = Prelude.foldr (Prelude.flip (foldr function)) init children
+foldr function init set = case set of
+  Leaf {leafItem} -> function leafItem init
+  Node {children} -> Prelude.foldr (Prelude.flip (foldr function)) init children
 
 foldl :: (acc -> a -> acc) -> acc -> Set b a -> acc
-foldl function init Leaf{leafItem} = function init leafItem
-foldl function init Node{children} = Prelude.foldl (foldl function) init children
+foldl function init set = case set of
+  Leaf {leafItem} -> function init leafItem
+  Node {children} -> Prelude.foldl (foldl function) init children
 
 toNonEmpty :: Set b a -> NonEmpty a
 toNonEmpty = toNonEmptyOf id
@@ -290,8 +295,8 @@ toNonEmptyWithIndex = toNonEmptyImpl 0
 
 toNonEmptyImpl :: Int -> (Int -> a1 -> a2) -> Set b a1 -> NonEmpty a2
 toNonEmptyImpl startIndex function set = case set of
-  Leaf{leafItem} -> NonEmpty.one (function startIndex leafItem)
-  Node{children} -> childrenToNonEmpty startIndex function children
+  Leaf {leafItem} -> NonEmpty.one (function startIndex leafItem)
+  Node {children} -> childrenToNonEmpty startIndex function children
 
 childrenToNonEmpty :: Int -> (Int -> a1 -> a2) -> NonEmpty (Set b a1) -> NonEmpty a2
 childrenToNonEmpty startIndex function children = case children of
@@ -302,8 +307,8 @@ childrenToNonEmpty startIndex function children = case children of
 
 prependToNonEmpty :: Int -> (Int -> a1 -> a2) -> Set b a1 -> NonEmpty a2 -> NonEmpty a2
 prependToNonEmpty startIndex function set = case set of
-  Leaf{leafItem} -> NonEmpty.push (function startIndex leafItem)
-  Node{children} -> prependChildrenToNonEmpty startIndex function children
+  Leaf {leafItem} -> NonEmpty.push (function startIndex leafItem)
+  Node {children} -> prependChildrenToNonEmpty startIndex function children
 
 prependChildrenToNonEmpty ::
   Int ->
@@ -333,9 +338,9 @@ filter boundsPredicate itemPredicate set =
 
 filterImpl :: Bounds b => (b -> Bool) -> (a -> Bool) -> Set b a -> Maybe (Set b a)
 filterImpl boundsPredicate itemPredicate set = case set of
-  Leaf{leafBounds, leafItem} ->
+  Leaf {leafBounds, leafItem} ->
     if boundsPredicate leafBounds && itemPredicate leafItem then Just set else Nothing
-  Node{nodeBounds, children} ->
+  Node {nodeBounds, children} ->
     if boundsPredicate nodeBounds
       then case NonEmpty.filterMap (filterImpl boundsPredicate itemPredicate) children of
         NonEmpty filteredChildren -> Just (node filteredChildren)
@@ -364,11 +369,11 @@ filterMapImpl ::
   Set b1 a1 ->
   Maybe (Set b2 a2)
 filterMapImpl boundsPredicate itemFunction set = case set of
-  Leaf{leafBounds, leafItem} ->
+  Leaf {leafBounds, leafItem} ->
     if boundsPredicate leafBounds
       then Maybe.map leaf (itemFunction leafItem)
       else Nothing
-  Node{nodeBounds, children} ->
+  Node {nodeBounds, children} ->
     if boundsPredicate nodeBounds
       then case NonEmpty.filterMap (filterMapImpl boundsPredicate itemFunction) children of
         NonEmpty filteredChildren -> Just (node filteredChildren)
@@ -380,26 +385,26 @@ filterMapItems function = filterMap (const True) function
 
 any :: (b -> Bool) -> (a -> Bool) -> Set b a -> Bool
 any boundsPredicate itemPredicate set = case set of
-  Leaf{leafBounds, leafItem} ->
+  Leaf {leafBounds, leafItem} ->
     boundsPredicate leafBounds && itemPredicate leafItem
-  Node{nodeBounds, children} ->
+  Node {nodeBounds, children} ->
     boundsPredicate nodeBounds && NonEmpty.any (any boundsPredicate itemPredicate) children
 
 anyBounds :: (b -> Bool) -> Set b a -> Bool
 anyBounds predicate set = case set of
-  Leaf{leafBounds} -> predicate leafBounds
-  Node{nodeBounds, children} -> predicate nodeBounds && NonEmpty.any (anyBounds predicate) children
+  Leaf {leafBounds} -> predicate leafBounds
+  Node {nodeBounds, children} -> predicate nodeBounds && NonEmpty.any (anyBounds predicate) children
 
 anyItem :: (a -> Bool) -> Set b a -> Bool
 anyItem predicate set = case set of
-  Leaf{leafItem} -> predicate leafItem
-  Node{children} -> NonEmpty.any (anyItem predicate) children
+  Leaf {leafItem} -> predicate leafItem
+  Node {children} -> NonEmpty.any (anyItem predicate) children
 
 all :: (b -> Bool) -> (a -> Bool) -> Set b a -> Bool
 all boundsPredicate itemPredicate set = case set of
-  Leaf{leafBounds, leafItem} ->
+  Leaf {leafBounds, leafItem} ->
     boundsPredicate leafBounds && itemPredicate leafItem
-  Node{nodeBounds, children} ->
+  Node {nodeBounds, children} ->
     boundsPredicate nodeBounds && NonEmpty.all (all boundsPredicate itemPredicate) children
 
 allBounds :: (b -> Bool) -> Set b a -> Bool
@@ -491,15 +496,15 @@ pairwiseFilterMapWithIndices11 startIndex1 startIndex2 boundsPredicate callback 
   if not (boundsPredicate (bounds set1) (bounds set2))
     then id
     else case (set1, set2) of
-      (Leaf{}, Leaf{}) ->
+      (Leaf {}, Leaf {}) ->
         case callback startIndex1 startIndex2 set1.leafItem set2.leafItem of
           Just result -> (result :)
           Nothing -> id
-      (Leaf{}, Node{children = sets2}) ->
+      (Leaf {}, Node {children = sets2}) ->
         pairwiseFilterMapWithIndices1N startIndex1 startIndex2 boundsPredicate callback set1 sets2
-      (Node{children = sets1}, Leaf{}) ->
+      (Node {children = sets1}, Leaf {}) ->
         pairwiseFilterMapWithIndicesN1 startIndex1 startIndex2 boundsPredicate callback sets1 set2
-      (Node{children = sets1}, Node{children = sets2}) ->
+      (Node {children = sets1}, Node {children = sets2}) ->
         pairwiseFilterMapWithIndicesNN startIndex1 startIndex2 boundsPredicate callback sets1 sets2
 
 pairwiseFilterMapWithIndices1N ::

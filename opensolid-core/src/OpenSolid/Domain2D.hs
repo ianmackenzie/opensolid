@@ -86,11 +86,11 @@ adjacent (VerticalEdge xSign1 x1 y1) (Corner xSign2 _ x2 y2) =
   xSign1 /= xSign2 && x1 == x2 && Domain1D.includes y2 y1
 adjacent (VerticalEdge xSign1 x1 y1) (VerticalEdge xSign2 x2 y2) =
   xSign1 /= xSign2 && x1 == x2 && Domain1D.overlaps y1 y2
-adjacent VerticalEdge{} HorizontalEdge{} =
+adjacent (VerticalEdge {}) (HorizontalEdge {}) =
   False
 adjacent (HorizontalEdge ySign1 x1 y1) (Corner _ ySign2 x2 y2) =
   ySign1 /= ySign2 && Domain1D.includes x2 x1 && y1 == y2
-adjacent HorizontalEdge{} VerticalEdge{} =
+adjacent (HorizontalEdge {}) (VerticalEdge {}) =
   False
 adjacent (HorizontalEdge ySign1 x1 y1) (HorizontalEdge ySign2 x2 y2) =
   ySign1 /= ySign2 && Domain1D.overlaps x1 x2 && y1 == y2

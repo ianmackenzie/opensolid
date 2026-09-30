@@ -105,7 +105,7 @@ overlappingSegments curve1 curve2 =
   case Curve2D.intersections curve1 curve2 of
     Just (Curve.OverlappingSegments sign segments intersectionPoints) ->
       Ok (sign, segments, intersectionPoints)
-    Just Curve.IntersectionPoints{} ->
+    Just (Curve.IntersectionPoints {}) ->
       Err "Should have found some overlapping segments, got intersection points instead"
     Nothing -> Err "Should have found some overlapping segments"
 
@@ -143,16 +143,18 @@ curveOverlap2 :: Test
 curveOverlap2 = Test.verify "curveOverlap2" do
   arc1 <- try do
     Curve2D.polarArc
-      (#centerPoint Point2D.origin)
-      (#radius Length.meter)
-      (#startAngle Angle.zero)
-      (#endAngle -Angle.pi)
+      { centerPoint = Point2D.origin
+      , radius = Length.meter
+      , startAngle = Angle.zero
+      , endAngle = -Angle.pi
+      }
   arc2 <- try do
     Curve2D.polarArc
-      (#centerPoint Point2D.origin)
-      (#radius Length.meter)
-      (#startAngle (Angle.degrees -45.0))
-      (#endAngle (Angle.degrees 225.0))
+      { centerPoint = Point2D.origin
+      , radius = Length.meter
+      , startAngle = Angle.degrees -45.0
+      , endAngle = Angle.degrees 225.0
+      }
   (sign, segments, points) <- try do overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
@@ -168,16 +170,18 @@ overlapAndJoin :: Test
 overlapAndJoin = Test.verify "overlapAndJoin" do
   arc1 <- try do
     Curve2D.polarArc
-      (#centerPoint Point2D.origin)
-      (#radius Length.meter)
-      (#startAngle Angle.zero)
-      (#endAngle -Angle.pi)
+      { centerPoint = Point2D.origin
+      , radius = Length.meter
+      , startAngle = Angle.zero
+      , endAngle = -Angle.pi
+      }
   arc2 <- try do
     Curve2D.polarArc
-      (#centerPoint Point2D.origin)
-      (#radius Length.meter)
-      (#startAngle (Angle.degrees -45.0))
-      (#endAngle Angle.pi)
+      { centerPoint = Point2D.origin
+      , radius = Length.meter
+      , startAngle = Angle.degrees -45.0
+      , endAngle = Angle.pi
+      }
   (sign, segments, points) <- try do overlappingSegments arc1 arc2
   let expectedSegments = NonEmpty.one (Interval 0.0 (1 / 4), Interval 0.0 (1 / 5))
   let expectedPoints = [IntersectionPoint.indistinguishable Negative (1.0, 1.0)]
@@ -206,23 +210,25 @@ crossingIntersection = Test.verify "crossingIntersection" do
       Test.expect (actualIntersectionPoints ~~ expectedIntersectionPoints)
         & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
         & Test.output "actualIntersectionPoints" actualIntersectionPoints
-    Just Curve.OverlappingSegments{} ->
+    Just (Curve.OverlappingSegments {}) ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
 
 tangentIntersection :: Test
 tangentIntersection = Test.verify "tangentIntersection" do
   arc1 <- try do
     Curve2D.polarArc
-      (#centerPoint Point2D.origin)
-      (#radius Length.meter)
-      (#startAngle Angle.zero)
-      (#endAngle Angle.pi)
+      { centerPoint = Point2D.origin
+      , radius = Length.meter
+      , startAngle = Angle.zero
+      , endAngle = Angle.pi
+      }
   arc2 <- try do
     Curve2D.polarArc
-      (#centerPoint (Point2D.meters 0.0 1.5))
-      (#radius (Length.meters 0.5))
-      (#startAngle -Angle.pi)
-      (#endAngle Angle.zero)
+      { centerPoint = Point2D.meters 0.0 1.5
+      , radius = Length.meters 0.5
+      , startAngle = -Angle.pi
+      , endAngle = Angle.zero
+      }
   let intersections = Curve2D.intersections arc1 arc2
   let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent Negative (0.5, 0.5))
   case intersections of
@@ -231,7 +237,7 @@ tangentIntersection = Test.verify "tangentIntersection" do
       Test.expect (actualIntersectionPoints ~~ expectedIntersectionPoints)
         & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
         & Test.output "actualIntersectionPoints" actualIntersectionPoints
-    Just Curve.OverlappingSegments{} ->
+    Just (Curve.OverlappingSegments {}) ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
 
 degenerateStartPointTangent :: Test

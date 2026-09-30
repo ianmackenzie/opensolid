@@ -87,7 +87,7 @@ main = spatial do
         Edge2D.Arc arc2D -> do
           let originPoint = Point3D.on midPlane (Arc2D.centerPoint arc2D)
           let cylinderAxis = Axis3D originPoint (Plane3D.normalDirection midPlane)
-          Ok (Ap242.Surface.cylinder3D cylinderAxis (#radius (Arc2D.radius arc2D)))
+          Ok (Ap242.Surface.cylinder3D {axis = cylinderAxis, radius = Arc2D.radius arc2D})
 
   let extrudedFace (edge, nextEdge) = do
         surface <- extrudedSurface edge
@@ -218,16 +218,17 @@ main = spatial do
           ]
   let header =
         Step.header
-          (#description ["A simple phone holder"])
-          (#implementationLevel "2;1")
-          (#fileName "phone-holder.step")
-          (#timestamp "2026-03-25T13:00:00")
-          (#author ["Ian Mackenzie"])
-          (#organization ["Generative Engineering"])
-          (#preprocessorVersion "")
-          (#originatingSystem "OpenSolid")
-          (#authorization "")
-          (#schemaIdentifiers ["AUTOMOTIVE_DESIGN { 1 0 10303 442 4 1 4 }"])
+          { description = ["A simple phone holder"]
+          , implementationLevel = "2;1"
+          , fileName = "phone-holder.step"
+          , timestamp = "2026-03-25T13:00:00"
+          , author = ["Ian Mackenzie"]
+          , organization = ["Generative Engineering"]
+          , preprocessorVersion = ""
+          , originatingSystem = "OpenSolid"
+          , authorization = ""
+          , schemaIdentifiers = ["AUTOMOTIVE_DESIGN { 1 0 10303 442 4 1 4 }"]
+          }
   Step.write "executables/phone-holder/phone-holder.step" header $
     [ applicationProtocolDefinition
     , shapeRepresentationRelationship

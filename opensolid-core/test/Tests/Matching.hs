@@ -83,7 +83,7 @@ matchingCurves ::
 matchingCurves curve1 curve2 =
   case Curve.intersections curve1 curve2 of
     Nothing -> False
-    Just Curve.Intersections.IntersectionPoints{} -> False
+    Just (Curve.Intersections.IntersectionPoints {}) -> False
     Just (Curve.Intersections.OverlappingSegments sign segments intersectionPoints) ->
       sign == Positive
         && segments == NonEmpty.one (Interval.unit, Interval.unit)

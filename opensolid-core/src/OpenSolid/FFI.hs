@@ -516,7 +516,7 @@ store ptr offset value = do
     ClassRep _ -> do
       stablePtr <- Foreign.newStablePtr value
       Foreign.pokeByteOff ptr offset stablePtr
-    NamedArgumentRep{} ->
+    NamedArgumentRep ->
       error "Should never have a named argument as a Haskell return type"
 
 invoke :: FFI a => IO a -> Ptr Void -> Ptr Text -> IO Int64

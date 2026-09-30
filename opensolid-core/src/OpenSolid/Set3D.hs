@@ -58,10 +58,10 @@ import OpenSolid.Set qualified as Set
 type Set3D space item = Set (Bounds3D space) item
 
 pattern Leaf :: Bounds3D space -> item -> Set3D space item
-pattern Leaf leafBounds leafItem <- Set.Leaf{leafBounds, leafItem}
+pattern Leaf leafBounds leafItem <- Set.Leaf {leafBounds, leafItem}
 
 pattern Node :: Bounds3D space -> NonEmpty (Set3D space item) -> Set3D space item
-pattern Node nodeBounds children <- Set.Node{nodeBounds, children}
+pattern Node nodeBounds children <- Set.Node {nodeBounds, children}
 
 {-# COMPLETE Node, Leaf #-}
 

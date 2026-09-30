@@ -55,7 +55,7 @@ joiningPoint (Incoming curve) = Curve2D.endPoint curve
 joiningPoint (Outgoing curve) = Curve2D.startPoint curve
 
 point :: SaddleRegion units -> UvPoint
-point SaddleRegion{frame} = Frame2D.originPoint frame
+point saddleRegion = Frame2D.originPoint saddleRegion.frame
 
 subdomain :: SaddleRegion units -> Domain2D
 subdomain = (.subproblem.subdomain)
@@ -88,7 +88,7 @@ quadratic subproblem saddlePoint = do
   let vX = Tolerance.using Quantity.zero (Vector2D.normalize (v1 + v2))
   let dX = Direction2D.unsafe vX
   let frame = Frame2D.fromXAxis (Axis2D.through saddlePoint dX)
-  SaddleRegion{subproblem, frame, d1, d2}
+  SaddleRegion {subproblem, frame, d1, d2}
 
 secondDerivative ::
   Quantity units ->
@@ -101,7 +101,8 @@ secondDerivative fuu fuv fvv direction = do
   du * du * fuu + 2.0 * du * dv * fuv + dv * dv * fvv
 
 connectingCurves :: Tolerance units => JoiningCurve -> SaddleRegion units -> NonEmpty UvCurve
-connectingCurves joiningCurve SaddleRegion{subproblem, frame, d1, d2} = do
+connectingCurves joiningCurve saddleRegion = do
+  let SaddleRegion {subproblem, frame, d1, d2} = saddleRegion
   let Point2D x y = Point2D.relativeTo frame (joiningPoint joiningCurve)
   let saddlePoint = Frame2D.originPoint frame
   let dx = Frame2D.xDirection frame
@@ -127,7 +128,7 @@ connect ::
   NonEmpty UvCurve
 connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
   let saddlePoint = Frame2D.originPoint frame
-  let Subproblem{f, dvdu, dudv, uvRange} = subproblem
+  let Subproblem {f, dvdu, dudv, uvRange} = subproblem
   let Bounds2D uRange vRange = uvRange
   let UvPoint uP vP = saddlePoint
   let UvPoint uC vC = joiningPoint joiningCurve

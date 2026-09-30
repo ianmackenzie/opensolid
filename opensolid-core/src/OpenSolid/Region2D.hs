@@ -195,7 +195,7 @@ polygon givenPolygon = do
   let toCurve (Line2D p1 p2) =
         case Curve2D.lineFrom p1 p2 of
           Ok curve -> Just curve
-          Err Curve2D.IsDegenerate{} -> Nothing
+          Err (Curve2D.IsDegenerate _) -> Nothing
   boundedBy (NonEmpty.filterMap toCurve (Polygon2D.edges givenPolygon))
 
 {-| Fillet a region at the given corner points, with the given radius.
@@ -207,11 +207,11 @@ or if it is not possible to solve for a given fillet
 -}
 fillet ::
   Tolerance units =>
-  List (Point2D units) ->
+  "points" ::: List (Point2D units) ->
   "radius" ::: Quantity units ->
   Region2D units ->
   Result Text (Region2D units)
-fillet points ("radius" ::: radius) region = do
+fillet ("points" ::: points) ("radius" ::: radius) region = do
   let initialCurves = Set2D.toList (boundaryCurves region)
   filletedCurves <- try do initialCurves & Result.forEach points (addFillet radius)
   try do boundedBy filletedCurves
@@ -250,7 +250,7 @@ addFillet radius point curves = do
       secondOffsetCurve <- Curve2D.offsetLeftwardBy offsetDistance secondCurve
       case Curve2D.intersections firstOffsetCurve secondOffsetCurve of
         Nothing -> couldNotSolveForFilletLocation
-        Just Curve.OverlappingSegments{} -> couldNotSolveForFilletLocation
+        Just (Curve.OverlappingSegments {}) -> couldNotSolveForFilletLocation
         Just (Curve.IntersectionPoints intersectionPoints) -> do
           let intersection1 =
                 intersectionPoints
@@ -312,7 +312,7 @@ checkCurvesForInnerIntersection ::
 checkCurvesForInnerIntersection curve1 curve2 =
   case Curve2D.intersections curve1 curve2 of
     -- Any overlap between boundary curves is bad
-    Just Curve.OverlappingSegments{} -> Err "Boundary curves overlap each other"
+    Just (Curve.OverlappingSegments {}) -> Err "Boundary curves overlap each other"
     -- If there are no intersections at all then we're good!
     Nothing -> Ok ()
     -- Otherwise, make sure curves only intersect (meet) at endpoints

@@ -51,15 +51,15 @@ neighborhood n value = do
   let radius =
         (Number.fromInt (Int.factorial n) * ?tolerance / magnitude)
           ** (1.0 / Number.fromInt n)
-  Neighborhood{n, sign, magnitude, radius}
+  Neighborhood {n, sign, magnitude, radius}
 
 derivativeTolerance :: Neighborhood units -> Int -> Quantity units
-derivativeTolerance Neighborhood{n, magnitude, radius} k = do
+derivativeTolerance (Neighborhood {n, magnitude, radius}) k = do
   (magnitude * radius ** Number.fromInt (n - k))
     / Number.fromInt (Int.factorial (n - k))
 
 root :: Number -> Neighborhood units -> Root
-root location Neighborhood{n, sign} = Root location (n - 1) sign
+root location (Neighborhood {n, sign}) = Root location (n - 1) sign
 
 data Cache cached
   = Tree Domain1D cached (Node cached)

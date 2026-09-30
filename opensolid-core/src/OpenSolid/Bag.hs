@@ -112,7 +112,7 @@ fromMaybeSet (Just set) = Full set
 
 isEmpty :: Bag b a -> Bool
 isEmpty Empty = True
-isEmpty Full{} = False
+isEmpty (Full _) = False
 
 size :: Bag b a -> Int
 size Empty = 0

@@ -66,6 +66,7 @@ common config
     NoImplicitPrelude
     OverloadedLabels
     OverloadedRecordDot
+    OverloadedRecordUpdate
     OverloadedStrings
     PatternSynonyms
     RebindableSyntax

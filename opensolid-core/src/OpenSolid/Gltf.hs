@@ -72,7 +72,7 @@ compile mode resolution model = do
         let byteLengthField = Json.field "byteLength" $ Json.int bufferSize
         case mode of
           Glb -> Json.object [byteLengthField]
-          Gltf{bufferUri} -> Json.object [byteLengthField, Json.field "uri" $ Json.text bufferUri]
+          Gltf {bufferUri} -> Json.object [byteLengthField, Json.field "uri" $ Json.text bufferUri]
   let assetObject =
         Json.object
           [ Json.field "version" $ Json.text "2.0"
@@ -91,7 +91,7 @@ compile mode resolution model = do
             , Json.field "materials" $ Json.listOf (.materialObject) encodedMeshes
             , Json.field "buffers" $ Json.list [bufferObject]
             ]
-  Compiled{json, buffer, bufferSize}
+  Compiled {json, buffer, bufferSize}
 
 builder :: Resolution Meters -> Model3D space -> Builder
 builder resolution model = do
@@ -127,7 +127,8 @@ writeText path model resolution = do
   let pathString = Text.unpack path
   let bufferFileName = Text.pack (System.FilePath.takeBaseName pathString) <> ".bin"
   let bufferPath = Text.pack (System.FilePath.dropFileName pathString) <> bufferFileName
-  let compiled = compile Gltf{bufferUri = bufferFileName} resolution model
+  let mode = Gltf {bufferUri = bufferFileName}
+  let compiled = compile mode resolution model
   IO.writeBinary path compiled.json
   IO.writeBinary bufferPath compiled.buffer
 

@@ -1,5 +1,6 @@
 -- Needed for 'property', since call sites will explicitly specify the property name
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE NoOverloadedRecordUpdate #-}
 
 module OpenSolid.API.Class
   ( Class (..)
@@ -1235,23 +1236,23 @@ buildClass members built = case members of
   [] -> built
   first : rest -> buildClass rest $ case first of
     Const name value ->
-      built{constants = built.constants <> [(name, value)]}
+      built {constants = built.constants <> [(name, value)]}
     Constructor constructor ->
-      built{constructor = Just constructor}
+      built {constructor = Just constructor}
     Static name staticFunction ->
-      built{staticFunctions = built.staticFunctions <> [(name, staticFunction)]}
+      built {staticFunctions = built.staticFunctions <> [(name, staticFunction)]}
     Prop name prop ->
-      built{properties = built.properties <> [(name, prop)]}
+      built {properties = built.properties <> [(name, prop)]}
     Member name memberFunction ->
-      built{memberFunctions = built.memberFunctions <> [(name, memberFunction)]}
+      built {memberFunctions = built.memberFunctions <> [(name, memberFunction)]}
     EqualityAndHash functionPair ->
-      built{equalityAndHashFunctions = Just functionPair}
+      built {equalityAndHashFunctions = Just functionPair}
     Comparison comparisonFunction ->
-      built{comparisonFunction = Just comparisonFunction}
+      built {comparisonFunction = Just comparisonFunction}
     Negate negationFunction ->
-      built{negationFunction = Just negationFunction}
+      built {negationFunction = Just negationFunction}
     Abs absFunction ->
-      built{absFunction = Just absFunction}
+      built {absFunction = Just absFunction}
     DivMod @units -> do
       let divOperator :: Quantity units -> Quantity units -> Int = (//)
       let modOperator :: Quantity units -> Quantity units -> Quantity units = (%)
@@ -1262,11 +1263,11 @@ buildClass members built = case members of
               & addPostOverload BinaryOperator.Mod (PostOperatorOverload (wrap2 modOperator))
         }
     PreOverload operatorId overload ->
-      built{preOperators = addPreOverload operatorId overload built.preOperators}
+      built {preOperators = addPreOverload operatorId overload built.preOperators}
     PostOverload operatorId overload ->
-      built{postOperators = addPostOverload operatorId overload built.postOperators}
+      built {postOperators = addPostOverload operatorId overload built.postOperators}
     Nested nestedDocstring nestedMembers ->
-      built{nestedClasses = built.nestedClasses <> [new nestedDocstring nestedMembers]}
+      built {nestedClasses = built.nestedClasses <> [new nestedDocstring nestedMembers]}
 
 ----- FUNCTION COLLECTION -----
 

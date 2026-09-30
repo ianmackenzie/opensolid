@@ -24,16 +24,16 @@ instance FFI (Resolution Meters) where
 
 -- | Specify the maximum error/deviation of the approximation from the actual shape.
 maxError :: Quantity units -> Resolution units
-maxError givenError = Resolution{maxError = givenError, maxSize = Quantity.infinity}
+maxError givenError = Resolution {maxError = givenError, maxSize = Quantity.infinity}
 
 -- | Specify the maximum size of any element (line, triangle) in the approximation.
 maxSize :: Quantity units -> Resolution units
-maxSize givenSize = Resolution{maxError = Quantity.infinity, maxSize = givenSize}
+maxSize givenSize = Resolution {maxError = Quantity.infinity, maxSize = givenSize}
 
 -- | Specify both the maximum error and maximum element size in the approximation.
 custom :: "maxError" ::: Quantity units -> "maxSize" ::: Quantity units -> Resolution units
 custom ("maxError" ::: givenError) ("maxSize" ::: givenSize) =
-  Resolution{maxError = givenError, maxSize = givenSize}
+  Resolution {maxError = givenError, maxSize = givenSize}
 
 acceptable :: "size" ::: Quantity units -> "error" ::: Quantity units -> Resolution units -> Bool
 acceptable ("size" ::: givenSize) ("error" ::: givenError) resolution =

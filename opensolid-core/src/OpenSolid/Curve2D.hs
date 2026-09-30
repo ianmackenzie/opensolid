@@ -206,10 +206,11 @@ lineFrom = Curve.lineFrom
 arc :: Tolerance units => Arc2D units -> Result (IsDegenerate units) (Curve2D units)
 arc givenArc =
   polarArc
-    (#centerPoint (Arc2D.centerPoint givenArc))
-    (#radius (Arc2D.radius givenArc))
-    (#startAngle (Arc2D.startAngle givenArc))
-    (#endAngle (Arc2D.endAngle givenArc))
+    { centerPoint = Arc2D.centerPoint givenArc
+    , radius = Arc2D.radius givenArc
+    , startAngle = Arc2D.startAngle givenArc
+    , endAngle = Arc2D.endAngle givenArc
+    }
 
 {-| Create an arc from the given start point to the given end point, with the given swept angle.
 
@@ -271,11 +272,7 @@ sweptArc ::
 sweptArc centerPoint givenStartPoint sweptAngle = do
   let radius = Point2D.distanceFrom centerPoint givenStartPoint
   let startAngle = Point2D.angleFrom centerPoint givenStartPoint
-  polarArc
-    (#centerPoint centerPoint)
-    (#radius radius)
-    (#startAngle startAngle)
-    (#endAngle (startAngle + sweptAngle))
+  polarArc {centerPoint, radius, startAngle, endAngle = startAngle + sweptAngle}
 
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
@@ -368,10 +365,11 @@ customArc p0 v1 v2 a b = displacedFrom p0 (VectorCurve2D.arc v1 v2 a b)
 circle :: Tolerance units => Circle2D units -> Result (IsDegenerate units) (Curve2D units)
 circle givenCircle =
   polarArc
-    (#centerPoint (Circle2D.centerPoint givenCircle))
-    (#radius (Circle2D.radius givenCircle))
-    (#startAngle Angle.zero)
-    (#endAngle Angle.twoPi)
+    { centerPoint = Circle2D.centerPoint givenCircle
+    , radius = Circle2D.radius givenCircle
+    , startAngle = Angle.zero
+    , endAngle = Angle.twoPi
+    }
 
 {-| Create an ellipes with the given principal axes and major/minor radii.
 The first radius given will be the radius along the X axis,
@@ -766,7 +764,7 @@ medialAxis curve1 curve2 = do
         let curve = curve1 << SurfaceFunction1D.u + offset1
         let toSegment solutionCurve =
               case curve << solutionCurve of
-                Err IsDegenerate{} -> Nothing
+                Err (IsDegenerate _) -> Nothing
                 Ok segmentCurve -> Just do
                   MedialAxis.Segment
                     { t1 = xCoordinate solutionCurve

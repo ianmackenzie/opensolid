@@ -102,15 +102,10 @@ writeFiles
   ("camera" ::: camera)
   ("lighting" ::: lighting) = do
     let collectedMeshes = Model3D.inspect (collectMeshes resolution) model
-    let (meshes, properties) = List.unzip2 collectedMeshes
+    let (meshes, meshProperties) = List.unzip2 collectedMeshes
     let meshFileName = path <> ".serialized"
     writeMeshes meshFileName meshes
-    let sceneXml =
-          sceneDocument
-            (#camera camera)
-            (#lighting lighting)
-            (#meshProperties properties)
-            (#meshFileName meshFileName)
+    let sceneXml = sceneDocument {camera, lighting, meshProperties, meshFileName}
     let sceneFileName = path <> ".xml"
     IO.writeUtf8 sceneFileName sceneXml
 
@@ -126,7 +121,7 @@ collectMeshes ::
   Model3D.Traversal =>
   Resolution Meters ->
   Model3D space ->
-  List ((Mesh space, "name" ::: Text), Properties)
+  List ((Text, Mesh space), Properties)
 collectMeshes resolution model = case model of
   Model3D.Group children -> List.combine (collectMeshes resolution) children
   Model3D.Body body -> do
@@ -138,8 +133,8 @@ collectMeshes resolution model = case model of
           Just ownName -> do
             let nameComponents = Model3D.traversal.parentNames <> [ownName]
             Text.join "." nameComponents
-    let properties = Properties{material, opacity, qualifiedName}
-    List.singleton ((mesh, #name qualifiedName), properties)
+    let properties = Properties {material, opacity, qualifiedName}
+    List.singleton ((qualifiedName, mesh), properties)
 
 {-| Specify an environment map to be used as lighting.
 
@@ -157,11 +152,11 @@ environmentMap = EnvironmentMap
 
 The names may all be empty if desired.
 -}
-writeMeshes :: Text -> List (Mesh space, "name" ::: Text) -> IO ()
+writeMeshes :: Text -> List (Text, Mesh space) -> IO ()
 writeMeshes path meshes = IO.writeBinary path (meshesBuilder meshes)
 
 -- | Generate the binary content of a Mitsuba .serialized file containing the given meshes.
-meshesBuilder :: List (Mesh space, "name" ::: Text) -> Builder
+meshesBuilder :: List (Text, Mesh space) -> Builder
 meshesBuilder meshes = do
   let (meshBuilders, meshSizes) = List.unzip2 (List.map buildSingleMesh meshes)
   Binary.concat
@@ -177,8 +172,8 @@ meshOffsets currentOffset meshSizes = case meshSizes of
     let nextOffset = currentOffset + currentSize
     Binary.uint64LE currentOffset <> meshOffsets nextOffset remainingSizes
 
-buildSingleMesh :: (Mesh space, "name" ::: Text) -> (Builder, Int)
-buildSingleMesh (mesh, "name" ::: name) = do
+buildSingleMesh :: (Text, Mesh space) -> (Builder, Int)
+buildSingleMesh (name, mesh) = do
   let header =
         Binary.concat
           [ Binary.uint16LE 0x041C -- File format identifier

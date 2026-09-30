@@ -87,21 +87,21 @@ custom givenXDirection givenYDirection givenZDirection = do
   let Direction3D xr xf xu = givenXDirection World3D.forwardOrientation
   let Direction3D yr yf yu = givenYDirection World3D.forwardOrientation
   let Direction3D zr zf zu = givenZDirection World3D.forwardOrientation
-  Convention3D{xr, xf, xu, yr, yf, yu, zr, zf, zu}
+  Convention3D {xr, xf, xu, yr, yf, yu, zr, zf, zu}
 
 -- | Get the X direction of a given orientation for a particular coordinate convention.
 xDirection :: Orientation3D space -> Convention3D -> Direction3D space
-xDirection (Orientation3D dr df du) Convention3D{xr, xf, xu} =
+xDirection (Orientation3D dr df du) (Convention3D {xr, xf, xu}) =
   Unit3D (dr * xr + df * xf + du * xu)
 
 -- | Get the Y direction of a given orientation for a particular coordinate convention.
 yDirection :: Orientation3D space -> Convention3D -> Direction3D space
-yDirection (Orientation3D dr df du) Convention3D{yr, yf, yu} =
+yDirection (Orientation3D dr df du) (Convention3D {yr, yf, yu}) =
   Unit3D (dr * yr + df * yf + du * yu)
 
 -- | Get the Z direction of a given orientation for a particular coordinate convention.
 zDirection :: Orientation3D space -> Convention3D -> Direction3D space
-zDirection (Orientation3D dr df du) Convention3D{zr, zf, zu} =
+zDirection (Orientation3D dr df du) (Convention3D {zr, zf, zu}) =
   Unit3D (dr * zr + df * zf + du * zu)
 
 -- | Get the X axis of a given frame for a particular coordinate convention.

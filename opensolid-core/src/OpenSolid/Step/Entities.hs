@@ -18,7 +18,7 @@ data EntityMap = EntityMap
   }
 
 emptyMap :: EntityMap
-emptyMap = EntityMap{nextId = 1, idMap = Map.empty}
+emptyMap = EntityMap {nextId = 1, idMap = Map.empty}
 
 buildMap :: List Entity -> EntityMap
 buildMap entities = emptyMap & forEach entities \entity -> Pair.second . addEntity entity

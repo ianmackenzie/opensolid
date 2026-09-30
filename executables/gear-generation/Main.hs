@@ -22,9 +22,9 @@ import OpenSolid.World3D qualified as World3D
 
 gearBody :: Tolerance Meters => Int -> Result Text (Body3D space)
 gearBody numTeeth = do
-  let gearModule = Length.millimeters 1.0
+  let module_ = Length.millimeters 1.0
   let holeDiameter = Length.millimeters 8.0
-  let spurGear = SpurGear.metric (#numTeeth numTeeth) (#module gearModule)
+  let spurGear = SpurGear.metric {numTeeth, module_}
   outerProfile <- try do SpurGear.profile spurGear
   hole <- try do Curve2D.circle (Circle2D.withDiameter holeDiameter Point2D.origin)
   profile <- try do Region2D.boundedBy (hole : outerProfile)
@@ -38,7 +38,7 @@ main = spatial do
         timer <- Timer.start
         body <- try do gearBody numTeeth
         let glbPath = "executables/gear-generation/gear" <> Text.int numTeeth <> ".glb"
-        let material = PbrMaterial.iron (#roughness 0.3)
+        let material = PbrMaterial.iron {roughness = 0.3}
         let model = Model3D.bodyWith [Model3D.pbrMaterial material] body
         Gltf.writeBinary glbPath model resolution
         elapsed <- Timer.elapsed timer

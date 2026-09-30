@@ -525,9 +525,9 @@ nonzero ::
   Result HasZero (Nonzero (Curve1D units))
 nonzero curve =
   case roots curve of
-    Err IsZero -> Err HasZero
     Ok [] -> Ok (Nonzero curve)
-    Ok NonEmpty{} -> Err HasZero
+    Ok List.OneOrMore -> Err HasZero
+    Err IsZero -> Err HasZero
 
 ----- ROOT FINDING -----
 

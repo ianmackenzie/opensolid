@@ -58,10 +58,10 @@ import OpenSolid.Set qualified as Set
 type Set2D units item = Set (Bounds2D units) item
 
 pattern Leaf :: Bounds2D units -> item -> Set2D units item
-pattern Leaf leafBounds leafItem <- Set.Leaf{leafBounds, leafItem}
+pattern Leaf leafBounds leafItem <- Set.Leaf {leafBounds, leafItem}
 
 pattern Node :: Bounds2D units -> NonEmpty (Set2D units item) -> Set2D units item
-pattern Node nodeBounds children <- Set.Node{nodeBounds, children}
+pattern Node nodeBounds children <- Set.Node {nodeBounds, children}
 
 {-# COMPLETE Node, Leaf #-}
 

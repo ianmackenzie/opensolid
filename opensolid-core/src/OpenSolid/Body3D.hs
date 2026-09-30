@@ -97,7 +97,9 @@ instance Indexed (Body3D space) SurfaceId (Surface3D space) where
   body @ surfaceId = body.surfaces @ surfaceId
 
 instance Indexed (Body3D space) HalfEdge.Id (SurfaceCurve3D space) where
-  body @ HalfEdge.Id{surfaceId, boundaryId, curveId} = body @ surfaceId @ boundaryId @ curveId
+  body @ halfEdgeId = do
+    let HalfEdge.Id {surfaceId, boundaryId, curveId} = halfEdgeId
+    body @ surfaceId @ boundaryId @ curveId
 
 instance FFI (Body3D Void) where
   representation = FFI.classRepresentation "Body3D"
@@ -162,7 +164,12 @@ cylinder startPoint endPoint ("diameter" ::: diameter) =
   case Vector3D.magnitudeAndDirection (endPoint - startPoint) of
     Err IsZero -> Err EmptyBody
     Ok (length, direction) ->
-      cylinderAlong (Axis3D startPoint direction) Length.zero length (#diameter diameter)
+      cylinderAlong
+        { axis = Axis3D startPoint direction
+        , start = Length.zero
+        , end = length
+        , diameter
+        }
 
 {-| Create a cylindrical body along a given axis.
 
@@ -176,12 +183,12 @@ Failes if the cylinder length or diameter is zero.
 -}
 cylinderAlong ::
   Tolerance Meters =>
-  Axis3D space ->
-  Length ->
-  Length ->
+  "axis" ::: Axis3D space ->
+  "start" ::: Length ->
+  "end" ::: Length ->
   "diameter" ::: Length ->
   Result EmptyBody (Body3D space)
-cylinderAlong axis d1 d2 ("diameter" ::: diameter) =
+cylinderAlong ("axis" ::: axis) ("start" ::: d1) ("end" ::: d2) ("diameter" ::: diameter) =
   case Region2D.circle (Circle2D.withDiameter diameter Point2D.origin) of
     Err Region2D.EmptyRegion -> Err EmptyBody
     Ok profile ->
@@ -285,7 +292,7 @@ boundedBy (NonEmpty givenSurfaces) = do
   let surfaceSet = Set3D.build givenSurfaces
   let halfEdgeSet = buildHalfEdgeSet surfaceSet
   seams <- HashMap.empty & Result.forEach halfEdgeSet (registerSeam halfEdgeSet)
-  Ok Body3D{surfaces = surfaceSet, seams}
+  Ok (Body3D {surfaces = surfaceSet, seams})
 
 buildHalfEdgeSet ::
   Tolerance Meters =>
@@ -299,8 +306,8 @@ buildHalfEdgeSet surfaceSet =
       let boundaryId = BoundaryId boundaryIndex
       boundary & Set3D.combineWithIndex \curveIndex surfaceCurve -> do
         let curveId = CurveId curveIndex
-        let halfEdgeId = HalfEdge.Id{surfaceId, boundaryId, curveId}
-        let halfEdge = HalfEdge{id = halfEdgeId, surfaceCurve}
+        let halfEdgeId = HalfEdge.Id {surfaceId, boundaryId, curveId}
+        let halfEdge = HalfEdge {id = halfEdgeId, surfaceCurve}
         Set3D.leaf halfEdge
 
 registerSeam ::
@@ -323,7 +330,7 @@ registerSeam halfEdgeSet halfEdge accumulated =
               accumulated
                 & HashMap.insert halfEdge.id (Just matingHalfEdge.id)
                 & HashMap.insert matingHalfEdge.id (Just halfEdge.id)
-            Bag3D.Full Set3D.Node{} -> Err "Body is non-manifold" -- More than one mating half-edge found
+            Bag3D.Full (Set3D.Node {}) -> Err "Body is non-manifold" -- More than one mating half-edge found
 
 ----- MESHING -----
 
@@ -409,7 +416,7 @@ buildSurfaceSegmentSet resolution surface uvRange p11 p21 p12 p22 = do
           `max` interiorError21
           `max` interiorError12
           `max` interiorError22
-  if Resolution.acceptable (#size size) (#error maxError) resolution
+  if Resolution.acceptable {size, error = maxError} resolution
     then Set2D.leaf uvRange
     else do
       let Interval u1 u2 = uRange
@@ -452,7 +459,7 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
         let boundaryId = BoundaryId boundaryIndex
         forEachWithIndex boundary \curveIndex surfaceCurve accumulated -> do
           let curveId = CurveId curveIndex
-          let halfEdgeId = HalfEdge.Id{surfaceId, boundaryId, curveId}
+          let halfEdgeId = HalfEdge.Id {surfaceId, boundaryId, curveId}
           let uvCurve = SurfaceCurve3D.uvCurve surfaceCurve
           case body.seams @ halfEdgeId of
             Nothing -> do
@@ -536,7 +543,7 @@ edgeLinearizationPredicate
     let endPoint = Curve3D.pointAt tEnd curve
     let edgeLength = Point3D.distanceFrom startPoint endPoint
     let edgeLinearDeviation = Curve.linearDeviation curve (Interval tStart tEnd)
-    Resolution.acceptable (#size edgeLength) (#error edgeLinearDeviation) resolution
+    Resolution.acceptable {size = edgeLength, error = edgeLinearDeviation} resolution
       && validEdge uvRange edgeSize surfaceSegments
       && validEdge matingUvRange matingEdgeSize matingSurfaceSegments
 
@@ -609,7 +616,7 @@ getLeadingEdgeVertices ::
   SurfaceCurve3D space ->
   NonEmpty UvPoint
 getLeadingEdgeVertices leadingEdgeVerticesMap surfaceId boundaryId curveIndex _ = do
-  let halfEdgeId = HalfEdge.Id{surfaceId, boundaryId, curveId = CurveId curveIndex}
+  let halfEdgeId = HalfEdge.Id {surfaceId, boundaryId, curveId = CurveId curveIndex}
   leadingEdgeVerticesMap @ halfEdgeId
 
 steinerPoint :: Set2D Unitless (Line2D Unitless) -> UvBounds -> Maybe UvPoint
@@ -629,7 +636,7 @@ surfaces = (.surfaces)
 
 orthonormalTransform :: (Surface3D space1 -> Surface3D space2) -> Body3D space1 -> Body3D space2
 orthonormalTransform function body =
-  Body3D{surfaces = Set3D.map function body.surfaces, seams = body.seams}
+  Body3D {surfaces = Set3D.map function body.surfaces, seams = body.seams}
 
 -- | Convert a body defined in local coordinates to one defined in global coordinates.
 placeIn :: Frame3D global local -> Body3D local -> Body3D global

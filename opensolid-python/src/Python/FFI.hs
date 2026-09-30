@@ -26,12 +26,12 @@ typeName ffiType = case ffiType of
   FFI.Bool -> "c_int64"
   FFI.Sign -> "c_int64"
   FFI.Text -> "_Text"
-  FFI.List{} -> "_" <> typeNameComponent ffiType
-  FFI.NonEmpty{} -> "_" <> typeNameComponent ffiType
-  FFI.Array{} -> "_" <> typeNameComponent ffiType
-  FFI.Tuple{} -> "_" <> typeNameComponent ffiType
-  FFI.Maybe{} -> "_" <> typeNameComponent ffiType
-  FFI.Class{} -> "c_void_p"
+  FFI.List {} -> "_" <> typeNameComponent ffiType
+  FFI.NonEmpty {} -> "_" <> typeNameComponent ffiType
+  FFI.Array {} -> "_" <> typeNameComponent ffiType
+  FFI.Tuple {} -> "_" <> typeNameComponent ffiType
+  FFI.Maybe {} -> "_" <> typeNameComponent ffiType
+  FFI.Class {} -> "c_void_p"
 
 typeNameComponent :: FFI.Type -> Text
 typeNameComponent ffiType = case ffiType of
@@ -50,7 +50,7 @@ typeNameComponent ffiType = case ffiType of
     let prefix = "Tuple" <> Text.int numItems
     Text.join "_" (prefix : List.map typeNameComponent itemTypes)
   FFI.Maybe valueType -> "Maybe_" <> typeNameComponent valueType
-  FFI.Class{} -> "c_void_p"
+  FFI.Class {} -> "c_void_p"
 
 dummyValue :: FFI.Type -> Text
 dummyValue ffiType = typeName ffiType <> "()"
@@ -63,12 +63,12 @@ dummyFieldValue ffiType = case ffiType of
   FFI.Bool -> "0"
   FFI.Sign -> "0"
   FFI.Text -> dummyValue ffiType
-  FFI.List{} -> dummyValue ffiType
-  FFI.NonEmpty{} -> dummyValue ffiType
-  FFI.Array{} -> dummyValue ffiType
-  FFI.Tuple{} -> dummyValue ffiType
-  FFI.Maybe{} -> dummyValue ffiType
-  FFI.Class{} -> dummyValue ffiType
+  FFI.List {} -> dummyValue ffiType
+  FFI.NonEmpty {} -> dummyValue ffiType
+  FFI.Array {} -> dummyValue ffiType
+  FFI.Tuple {} -> dummyValue ffiType
+  FFI.Maybe {} -> dummyValue ffiType
+  FFI.Class {} -> dummyValue ffiType
 
 fieldName :: Int -> Text
 fieldName index = "field" <> Text.int index
@@ -213,7 +213,7 @@ registerType ffiType registry = do
       FFI.Array itemType -> registerList (FFI.List itemType) itemType registry
       FFI.Tuple type1 type2 rest -> registerTuple ffiType type1 type2 rest registry
       FFI.Maybe valueType -> registerMaybe ffiType valueType registry
-      FFI.Class{} -> registry
+      FFI.Class {} -> registry
 
 registerList :: FFI.Type -> FFI.Type -> Registry -> Registry
 registerList listType itemType registry = do
