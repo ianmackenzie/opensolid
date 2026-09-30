@@ -79,14 +79,15 @@ zUp =
     }
 
 custom ::
-  (forall space. Orientation3D space -> Direction3D space) ->
-  (forall space. Orientation3D space -> Direction3D space) ->
-  (forall space. Orientation3D space -> Direction3D space) ->
+  ( "xDirection" ::: (Orientation3D space -> Direction3D space)
+  , "yDirection" ::: (Orientation3D space -> Direction3D space)
+  , "zDirection" ::: (Orientation3D space -> Direction3D space)
+  ) ->
   Convention3D
-custom givenXDirection givenYDirection givenZDirection = do
-  let Direction3D xr xf xu = givenXDirection World3D.forwardOrientation
-  let Direction3D yr yf yu = givenYDirection World3D.forwardOrientation
-  let Direction3D zr zf zu = givenZDirection World3D.forwardOrientation
+custom params = do
+  let Direction3D xr xf xu = params.xDirection World3D.forwardOrientation
+  let Direction3D yr yf yu = params.yDirection World3D.forwardOrientation
+  let Direction3D zr zf zu = params.zDirection World3D.forwardOrientation
   Convention3D {xr, xf, xu, yr, yf, yu, zr, zf, zu}
 
 -- | Get the X direction of a given orientation for a particular coordinate convention.

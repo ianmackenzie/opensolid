@@ -54,22 +54,19 @@ instance units ~ Meters => On (Plane3D space) (Arc2D units) (Arc3D space) where
       }
 
 with ::
-  "centerPoint" ::: Point2D units ->
-  "radius" ::: Quantity units ->
-  "startAngle" ::: Angle ->
-  "endAngle" ::: Angle ->
+  ( "centerPoint" ::: Point2D units
+  , "radius" ::: Quantity units
+  , "startAngle" ::: Angle
+  , "endAngle" ::: Angle
+  ) ->
   Arc2D units
-with
-  ("centerPoint" ::: givenCenterPoint)
-  ("radius" ::: givenRadius)
-  ("startAngle" ::: givenStartAngle)
-  ("endAngle" ::: givenEndAngle) =
-    Arc2D
-      { centerPoint = givenCenterPoint
-      , radius = givenRadius
-      , startAngle = givenStartAngle
-      , endAngle = givenEndAngle
-      }
+with params =
+  Arc2D
+    { centerPoint = params.centerPoint
+    , radius = params.radius
+    , startAngle = params.startAngle
+    , endAngle = params.endAngle
+    }
 
 centerPoint :: Arc2D units -> Point2D units
 centerPoint arc = arc.centerPoint

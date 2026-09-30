@@ -194,6 +194,7 @@ library
     OpenSolid.Polyline2D
     OpenSolid.Prelude
     OpenSolid.Primitives
+    OpenSolid.Params
     OpenSolid.Quantity
     OpenSolid.Queue
     OpenSolid.Random

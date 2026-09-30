@@ -141,40 +141,31 @@ builder givenHeader entities = do
     "AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }" (more commonly known as AP214).
 -}
 header ::
-  "description" ::: List Text ->
-  "implementationLevel" ::: Text ->
-  "fileName" ::: Text ->
-  "timestamp" ::: Text ->
-  "author" ::: List Text ->
-  "organization" ::: List Text ->
-  "preprocessorVersion" ::: Text ->
-  "originatingSystem" ::: Text ->
-  "authorization" ::: Text ->
-  "schemaIdentifiers" ::: List Text ->
+  ( "description" ::: List Text
+  , "implementationLevel" ::: Text
+  , "fileName" ::: Text
+  , "timestamp" ::: Text
+  , "author" ::: List Text
+  , "organization" ::: List Text
+  , "preprocessorVersion" ::: Text
+  , "originatingSystem" ::: Text
+  , "authorization" ::: Text
+  , "schemaIdentifiers" ::: List Text
+  ) ->
   Header
-header
-  ("description" ::: givenDescription)
-  ("implementationLevel" ::: givenImplementationLevel)
-  ("fileName" ::: givenFileName)
-  ("timestamp" ::: givenTimestamp)
-  ("author" ::: givenAuthor)
-  ("organization" ::: givenOrganization)
-  ("preprocessorVersion" ::: givenPreprocessorVersion)
-  ("originatingSystem" ::: givenOriginatingSystem)
-  ("authorization" ::: givenAuthorization)
-  ("schemaIdentifiers" ::: givenSchemaIdentifiers) =
-    Header
-      { description = givenDescription
-      , implementationLevel = givenImplementationLevel
-      , fileName = givenFileName
-      , timestamp = givenTimestamp
-      , author = givenAuthor
-      , organization = givenOrganization
-      , preprocessorVersion = givenPreprocessorVersion
-      , originatingSystem = givenOriginatingSystem
-      , authorization = givenAuthorization
-      , schemaIdentifiers = givenSchemaIdentifiers
-      }
+header params =
+  Header
+    { description = params.description
+    , implementationLevel = params.implementationLevel
+    , fileName = params.fileName
+    , timestamp = params.timestamp
+    , author = params.author
+    , organization = params.organization
+    , preprocessorVersion = params.preprocessorVersion
+    , originatingSystem = params.originatingSystem
+    , authorization = params.authorization
+    , schemaIdentifiers = params.schemaIdentifiers
+    }
 
 {-| Construct a single simple entity with the given type and attributes.
 

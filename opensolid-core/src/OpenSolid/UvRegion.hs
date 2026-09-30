@@ -61,8 +61,9 @@ circle = unitless Region2D.circle
 
 -- | Create a circular region with the given center point and diameter.
 circleWith ::
-  "centerPoint" ::: UvPoint ->
-  "diameter" ::: Number ->
+  ( "centerPoint" ::: UvPoint
+  , "diameter" ::: Number
+  ) ->
   Result Region2D.EmptyRegion UvRegion
 circleWith = unitless Region2D.circleWith
 

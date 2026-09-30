@@ -183,10 +183,9 @@ rectangle (Bounds2D xBounds yBounds) =
 
 -- | Create a region from the given circle.
 circle :: Tolerance units => Circle2D units -> Result EmptyRegion (Region2D units)
-circle givenCircle =
-  if Circle2D.diameter givenCircle ~= Quantity.zero
-    then Err EmptyRegion
-    else do
+circle givenCircle
+  | Circle2D.diameter givenCircle ~= Quantity.zero = Err EmptyRegion
+  | otherwise = do
       let panic = error "Constructing region from non-empty circle should not fail"
       let edges = NonEmpty.one (Curve2D.circle givenCircle !! panic)
       Ok (unsafe (Boundary.unsafe edges) Bag2D.empty)
@@ -194,11 +193,11 @@ circle givenCircle =
 -- | Create a circular region with the given center point and diameter.
 circleWith ::
   Tolerance units =>
-  "centerPoint" ::: Point2D units ->
-  "diameter" ::: Quantity units ->
+  ( "centerPoint" ::: Point2D units
+  , "diameter" ::: Quantity units
+  ) ->
   Result EmptyRegion (Region2D units)
-circleWith ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) =
-  circle (Circle2D.with {centerPoint, diameter})
+circleWith = circle . Circle2D.with
 
 -- | Create a region from the given polygon.
 polygon :: Tolerance units => Polygon2D units -> Result Text (Region2D units)
@@ -218,14 +217,18 @@ or if it is not possible to solve for a given fillet
 -}
 fillet ::
   Tolerance units =>
-  "points" ::: List (Point2D units) ->
-  "radius" ::: Quantity units ->
+  ( "points" ::: List (Point2D units)
+  , "radius" ::: Quantity units
+  ) ->
   Region2D units ->
   Result Text (Region2D units)
-fillet ("points" ::: points) ("radius" ::: radius) region = Try.do
-  let initialCurves = Set2D.toList (boundaryCurves region)
-  filletedCurves <- initialCurves & Result.forEach points (addFillet radius)
-  boundedBy filletedCurves
+fillet params region
+  | params.radius ~= Quantity.zero = Ok region
+  | params.radius < Quantity.zero = error "Radius must not be negative"
+  | otherwise = Try.do
+      let initialCurves = Set2D.toList (boundaryCurves region)
+      filletedCurves <- initialCurves & Result.forEach params.points (addFillet params.radius)
+      boundedBy filletedCurves
 
 addFillet ::
   Tolerance units =>

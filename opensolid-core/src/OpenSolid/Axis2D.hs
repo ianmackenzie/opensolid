@@ -60,9 +60,12 @@ y :: Axis2D units
 y = Axis2D {originPoint = Point2D.origin, direction = Direction2D.y}
 
 -- | Construct an axis with the given origin point and direction.
-with :: "originPoint" ::: Point2D units -> "direction" ::: Direction2D -> Axis2D units
-with ("originPoint" ::: givenOriginPoint) ("direction" ::: givenDirection) =
-  Axis2D {originPoint = givenOriginPoint, direction = givenDirection}
+with :: ("originPoint" ::: Point2D units, "direction" ::: Direction2D) -> Axis2D units
+with params =
+  Axis2D
+    { originPoint = params.originPoint
+    , direction = params.direction
+    }
 
 moveTo :: Point2D units -> Axis2D units -> Axis2D units
 moveTo newOriginPoint axis =

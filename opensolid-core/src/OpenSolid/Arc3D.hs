@@ -47,22 +47,19 @@ data Arc3D space = Arc3D
   }
 
 with ::
-  "plane" ::: Plane3D space ->
-  "radius" ::: Length ->
-  "startAngle" ::: Angle ->
-  "endAngle" ::: Angle ->
+  ( "plane" ::: Plane3D space
+  , "radius" ::: Length
+  , "startAngle" ::: Angle
+  , "endAngle" ::: Angle
+  ) ->
   Arc3D space
-with
-  ("plane" ::: givenPlane)
-  ("radius" ::: givenRadius)
-  ("startAngle" ::: givenStartAngle)
-  ("endAngle" ::: givenEndAngle) =
-    Arc3D
-      { plane = givenPlane
-      , radius = givenRadius
-      , startAngle = givenStartAngle
-      , endAngle = givenEndAngle
-      }
+with params =
+  Arc3D
+    { plane = params.plane
+    , radius = params.radius
+    , startAngle = params.startAngle
+    , endAngle = params.endAngle
+    }
 
 plane :: Arc3D space -> Plane3D space
 plane arc = arc.plane

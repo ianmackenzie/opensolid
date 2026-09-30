@@ -20,8 +20,9 @@ import OpenSolid.Prelude
 import OpenSolid.Primitives (Axis3D, Frame3D, Orientation3D, Plane3D, Point3D)
 
 with ::
-  "originPoint" ::: Point3D global ->
-  "orientation" ::: Orientation3D global ->
+  ( "originPoint" ::: Point3D global
+  , "orientation" ::: Orientation3D global
+  ) ->
   Frame3D global local
 forwardAxis :: Frame3D global local -> Axis3D global
 backwardAxis :: Frame3D global local -> Axis3D global

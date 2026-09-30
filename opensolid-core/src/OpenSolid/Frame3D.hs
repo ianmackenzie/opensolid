@@ -86,14 +86,15 @@ import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.World3D qualified as World3D
 
 with ::
-  "originPoint" ::: Point3D global ->
-  "orientation" ::: Orientation3D global ->
+  ( "originPoint" ::: Point3D global
+  , "orientation" ::: Orientation3D global
+  ) ->
   Frame3D global local
-with ("originPoint" ::: givenOriginPoint) ("orientation" ::: givenOrientation) =
+with params =
   recursive \self ->
     Frame3D
-      { originPoint = givenOriginPoint
-      , orientation = givenOrientation
+      { originPoint = params.originPoint
+      , orientation = params.orientation
       , inverse =
           Frame3D
             { originPoint = Point3D.relativeTo self World3D.originPoint

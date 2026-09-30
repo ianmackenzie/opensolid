@@ -60,12 +60,10 @@ instance At (Circle2D units) Number (Point2D units) where
   circle @ parameterValue = circle @ Angle.turns parameterValue
 
 -- | Construct a circle with the given center point and diameter.
-with ::
-  "centerPoint" ::: Point2D units ->
-  "diameter" ::: Quantity units ->
-  Circle2D units
-with ("centerPoint" ::: givenCenterPoint) ("diameter" ::: givenDiameter) =
-  Circle2D {centerPoint = givenCenterPoint, radius = 0.5 * Quantity.abs givenDiameter}
+with :: ("centerPoint" ::: Point2D units, "diameter" ::: Quantity units) -> Circle2D units
+with params
+  | params.diameter < Quantity.zero = error "Diameter must not be negative"
+  | otherwise = Circle2D {centerPoint = params.centerPoint, radius = 0.5 * params.diameter}
 
 -- | Get the center point of a circle.
 centerPoint :: Circle2D units -> Point2D units

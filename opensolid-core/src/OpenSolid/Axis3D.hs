@@ -38,9 +38,8 @@ direction :: Axis3D space -> Direction3D space
 direction = (.direction)
 
 -- | Construct an axis with the given origin point and direction.
-with :: "originPoint" ::: Point3D space -> "direction" ::: Direction3D space -> Axis3D space
-with ("originPoint" ::: givenOriginPoint) ("direction" ::: givenDirection) =
-  Axis3D {originPoint = givenOriginPoint, direction = givenDirection}
+with :: ("originPoint" ::: Point3D space, "direction" ::: Direction3D space) -> Axis3D space
+with params = Axis3D {originPoint = params.originPoint, direction = params.direction}
 
 {-| Construct a plane normal (perpendicular) to the given axis.
 

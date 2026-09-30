@@ -47,7 +47,6 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Plane3D (Plane3D (Plane3D))
 import OpenSolid.PlaneOrientation3D qualified as PlaneOrientation3D
 import OpenSolid.Point3D (Point3D)
-import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
@@ -78,11 +77,11 @@ instance FFI Projection where
 
 -- | Define a perspective projection with a given vertical field of view.
 perspective :: "verticalFov" ::: Angle -> Projection
-perspective ("verticalFov" ::: verticalFov) = Perspective verticalFov
+perspective param = Perspective param.verticalFov
 
 -- | Define an orthographic projection with a given viewport height.
 orthographic :: "viewportHeight" ::: Length -> Projection
-orthographic ("viewportHeight" ::: viewportHeight) = Orthographic viewportHeight
+orthographic param = Orthographic param.viewportHeight
 
 new :: Frame3D space CameraSpace -> Length -> Projection -> Camera3D space
 new givenFrame givenFocalDistance givenProjection =
@@ -98,40 +97,39 @@ The camera will be oriented such that its local up direction
 will be as close as possible to the global up direction.
 -}
 lookAt ::
-  "eyePoint" ::: Point3D space ->
-  "focalPoint" ::: Point3D space ->
-  "projection" ::: Projection ->
+  ( "eyePoint" ::: Point3D space
+  , "focalPoint" ::: Point3D space
+  , "projection" ::: Projection
+  ) ->
   Camera3D space
-lookAt
-  ("eyePoint" ::: givenEyePoint)
-  ("focalPoint" ::: givenFocalPoint)
-  ("projection" ::: givenProjection) = do
-    let computedFocalDistance = Point3D.distanceFrom givenEyePoint givenFocalPoint
-    let computedFrame =
-          case Tolerance.using Quantity.zero (Vector3D.direction (givenFocalPoint - givenEyePoint)) of
-            Ok computedForwardDirection -> do
-              case PlaneOrientation3D.fromDirections computedForwardDirection World3D.upwardDirection of
-                Just rightPlaneOrientation ->
-                  Frame3D.fromRightPlane (Plane3D givenEyePoint rightPlaneOrientation)
-                Nothing -- View direction is either straight up or straight down
-                  | Direction3D.upwardComponent computedForwardDirection > 0.0 ->
-                      Frame3D.with
-                        { originPoint = givenEyePoint
-                        , orientation = World3D.upwardOrientation
-                        }
-                  | otherwise ->
-                      Frame3D.with
-                        { originPoint = givenEyePoint
-                        , orientation = World3D.downwardOrientation
-                        }
-            Err IsZero ->
-              -- Given eye and focal points are coincident,
-              -- so just look straight forward
-              Frame3D.with
-                { originPoint = givenEyePoint
-                , orientation = World3D.forwardOrientation
-                }
-    new computedFrame computedFocalDistance givenProjection
+lookAt params = do
+  let viewVector = params.focalPoint - params.eyePoint
+  let viewDistance = Vector3D.magnitude viewVector
+  let computedFrame =
+        case Tolerance.using Quantity.zero (Vector3D.direction viewVector) of
+          Ok viewDirection -> do
+            case PlaneOrientation3D.fromDirections viewDirection World3D.upwardDirection of
+              Just rightPlaneOrientation ->
+                Frame3D.fromRightPlane (Plane3D params.eyePoint rightPlaneOrientation)
+              Nothing -- View direction is either straight up or straight down
+                | Direction3D.upwardComponent viewDirection > 0.0 ->
+                    Frame3D.with
+                      { originPoint = params.eyePoint
+                      , orientation = World3D.upwardOrientation
+                      }
+                | otherwise ->
+                    Frame3D.with
+                      { originPoint = params.eyePoint
+                      , orientation = World3D.downwardOrientation
+                      }
+          Err IsZero ->
+            -- Given eye and focal points are coincident,
+            -- so just look straight forward
+            Frame3D.with
+              { originPoint = params.eyePoint
+              , orientation = World3D.forwardOrientation
+              }
+  new computedFrame viewDistance params.projection
 
 {-| Construct a camera orbiting around a given focal point, a given distance away.
 
@@ -141,24 +139,20 @@ The elevation is the vertical angle towards the camera from the focal point,
 measure upwards from the global top plane.
 -}
 orbit ::
-  "focalPoint" ::: Point3D space ->
-  "azimuth" ::: Angle ->
-  "elevation" ::: Angle ->
-  "distance" ::: Length ->
-  "projection" ::: Projection ->
+  ( "focalPoint" ::: Point3D space
+  , "azimuth" ::: Angle
+  , "elevation" ::: Angle
+  , "distance" ::: Length
+  , "projection" ::: Projection
+  ) ->
   Camera3D space
-orbit
-  ("focalPoint" ::: givenFocalPoint)
-  ("azimuth" ::: azimuth)
-  ("elevation" ::: elevation)
-  ("distance" ::: distance)
-  ("projection" ::: givenProjection) = do
-    let computedFrame =
-          Frame3D.with {originPoint = givenFocalPoint, orientation = World3D.backwardOrientation}
-            & Frame3D.turnRightBy azimuth
-            & Frame3D.tiltDownBy elevation
-            & Frame3D.offsetBackwardBy distance
-    new computedFrame distance givenProjection
+orbit params = do
+  let computedFrame =
+        Frame3D.with {originPoint = params.focalPoint, orientation = World3D.backwardOrientation}
+          & Frame3D.turnRightBy params.azimuth
+          & Frame3D.tiltDownBy params.elevation
+          & Frame3D.offsetBackwardBy params.distance
+  new computedFrame params.distance params.projection
 
 isometricElevation :: Angle
 isometricElevation = Angle.atan2 1.0 (Number.sqrt 2.0)

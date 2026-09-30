@@ -289,9 +289,8 @@ circle givenCircle = do
   entity "circle" (Circle2D.bounds givenCircle) [cxAttribute, cyAttribute, rAttribute]
 
 -- | Draw a circle with the given center point and diameter.
-circleWith :: "centerPoint" ::: Point2D Meters -> "diameter" ::: Length -> Svg
-circleWith ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) =
-  circle (Circle2D.with {centerPoint, diameter})
+circleWith :: ("centerPoint" ::: Point2D Meters, "diameter" ::: Length) -> Svg
+circleWith = circle . Circle2D.with
 
 -- | Draw a curve with the given resolution.
 curve :: Resolution Meters -> Curve2D Meters -> Svg
@@ -325,21 +324,22 @@ lineTo :: Point2D Meters -> Text
 lineTo (Point2D x y) = Text.join " " ["L", lengthText x, lengthText -y]
 
 arrow ::
-  "headLength" ::: Length ->
-  "headWidth" ::: Length ->
+  ( "headLength" ::: Length
+  , "headWidth" ::: Length
+  ) ->
   Point2D Meters ->
   Point2D Meters ->
   Svg
-arrow ("headLength" ::: headLength) ("headWidth" ::: headWidth) startPoint endPoint =
+arrow params startPoint endPoint =
   case Tolerance.using Quantity.zero (Direction2D.from startPoint endPoint) of
     Err Direction2D.PointsAreCoincident -> nothing
     Ok direction -> do
       let length = Point2D.distanceFrom startPoint endPoint
       let axis = Axis2D.with {originPoint = startPoint, direction}
       let frame = Frame2D.fromXAxis axis
-      let stemLength = length - headLength
+      let stemLength = length - params.headLength
       let stemEndPoint = on axis stemLength
-      let leftPoint = Point2D.placeIn frame (Point2D stemLength (0.5 * headWidth))
+      let leftPoint = Point2D.placeIn frame (Point2D stemLength (0.5 * params.headWidth))
       let rightPoint = Point2D.mirrorAcross axis leftPoint
       let stem = line (Line2D startPoint stemEndPoint)
       let head = triangle (Triangle2D leftPoint rightPoint endPoint)

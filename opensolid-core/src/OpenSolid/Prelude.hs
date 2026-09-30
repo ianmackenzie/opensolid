@@ -14,7 +14,7 @@ module OpenSolid.Prelude
   , Void
   , data NonEmpty
   , type (:::) ((:::))
-  , setField
+  , SetField (setField)
   , (&)
   , Negation (negate)
   , Addition ((+))
@@ -95,8 +95,8 @@ import GHC.OverloadedLabels (IsLabel (fromLabel))
 import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
-import GHC.TypeLits (KnownSymbol, Symbol)
 import OpenSolid.Err (Err)
+import OpenSolid.Params (SetField (setField), type (:::) ((:::)))
 import OpenSolid.Show qualified as Show
 import OpenSolid.Units (Meters, Radians, Unitless, Units, type (?*?), type (?/?))
 import OpenSolid.Units qualified as Units
@@ -372,23 +372,6 @@ instance
   ApproximateEquality (a1, a2, a3, a4) units1
   where
   (a1, a2, a3, a4) ~= (b1, b2, b3, b4) = a1 ~= b1 && a2 ~= b2 && a3 ~= b3 && a4 ~= b4
-
------ Named -----
-
-newtype (name :: Symbol) ::: value where
-  (:::) :: forall name -> value -> name ::: value
-
-infix 0 :::
-
-instance
-  (KnownSymbol name1, name1 ~ name2, value1 ~ value2) =>
-  IsLabel name1 (value1 -> name2 ::: value2)
-  where
-  fromLabel = (name1 :::)
-
-{-# INLINE setField #-}
-setField :: forall (name :: Symbol) a b. a -> (name ::: a -> b) -> b
-setField value function = function (name ::: value)
 
 ----- Composition -----
 

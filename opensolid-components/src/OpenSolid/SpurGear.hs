@@ -19,6 +19,7 @@ import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Length (Length)
+import OpenSolid.Length qualified as Length
 import OpenSolid.List qualified as List
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D qualified as Point2D
@@ -32,9 +33,11 @@ instance FFI SpurGear where
   representation = FFI.classRepresentation "SpurGear"
 
 -- | Create a metric spur gear with the given number of teeth and module.
-metric :: "numTeeth" ::: Int -> "module_" ::: Length -> SpurGear
-metric ("numTeeth" ::: givenNumTeeth) ("module_" ::: givenModule) =
-  Metric {numTeeth = givenNumTeeth, module_ = givenModule}
+metric :: ("numTeeth" ::: Int, "module_" ::: Length) -> SpurGear
+metric params
+  | params.numTeeth <= 0 = error "Number of teeth must be positive"
+  | params.module_ <= Length.zero = error "Gear module must be positive"
+  | otherwise = Metric {numTeeth = params.numTeeth, module_ = params.module_}
 
 -- | The number of teeth of a gear.
 numTeeth :: SpurGear -> Int

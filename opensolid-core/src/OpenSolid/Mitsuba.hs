@@ -33,7 +33,6 @@ import OpenSolid.List qualified as List
 import OpenSolid.Mesh qualified as Mesh
 import OpenSolid.Model3D (Model3D)
 import OpenSolid.Model3D qualified as Model3D
-import OpenSolid.Orientation3D qualified as Orientation3D
 import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Point3D qualified as Point3D
@@ -57,9 +56,10 @@ Source: https://github.com/mitsuba-renderer/mitsuba-blender/discussions/47#discu
 convention :: Convention3D
 convention =
   Convention3D.custom
-    Orientation3D.rightwardDirection
-    Orientation3D.upwardDirection
-    Orientation3D.backwardDirection
+    { xDirection = Direction3D.rightward
+    , yDirection = Direction3D.upward
+    , zDirection = Direction3D.backward
+    }
 
 xDirection :: Frame3D global local -> Direction3D global
 xDirection frame = Convention3D.xDirection (Frame3D.orientation frame) convention
@@ -89,25 +89,27 @@ setting the 'spp', 'width' and 'height' parameters when loading the scene,
 for example with 'mitsuba.load_file(path_to_xml_file, spp=256, width=1920, height=1080)'.
 -}
 writeFiles ::
-  "path" ::: Text ->
-  "model" ::: Model3D space ->
-  "resolution" ::: Resolution Meters ->
-  "camera" ::: Camera3D space ->
-  "lighting" ::: Lighting space ->
+  ( "path" ::: Text
+  , "model" ::: Model3D space
+  , "resolution" ::: Resolution Meters
+  , "camera" ::: Camera3D space
+  , "lighting" ::: Lighting space
+  ) ->
   IO ()
-writeFiles
-  ("path" ::: path)
-  ("model" ::: model)
-  ("resolution" ::: resolution)
-  ("camera" ::: camera)
-  ("lighting" ::: lighting) = do
-    let collectedMeshes = Model3D.inspect (collectMeshes resolution) model
-    let (meshes, meshProperties) = List.unzip2 collectedMeshes
-    let meshFileName = path <> ".serialized"
-    writeMeshes meshFileName meshes
-    let sceneXml = sceneDocument {camera, lighting, meshProperties, meshFileName}
-    let sceneFileName = path <> ".xml"
-    IO.writeUtf8 sceneFileName sceneXml
+writeFiles params = do
+  let collectedMeshes = Model3D.inspect (collectMeshes params.resolution) params.model
+  let (meshes, meshProperties) = List.unzip2 collectedMeshes
+  let meshFileName = params.path <> ".serialized"
+  writeMeshes meshFileName meshes
+  let sceneXml =
+        sceneDocument
+          { camera = params.camera
+          , lighting = params.lighting
+          , meshProperties
+          , meshFileName
+          }
+  let sceneFileName = params.path <> ".xml"
+  IO.writeUtf8 sceneFileName sceneXml
 
 type Mesh space = Mesh.Mesh (SurfaceVertex3D space)
 
@@ -238,28 +240,25 @@ attributeText :: (Text, Text) -> Text
 attributeText (name, value) = name <> "=\"" <> value <> "\""
 
 sceneDocument ::
-  "camera" ::: Camera3D space ->
-  "lighting" ::: Lighting space ->
-  "meshProperties" ::: List Properties ->
-  "meshFileName" ::: Text ->
+  ( "camera" ::: Camera3D space
+  , "lighting" ::: Lighting space
+  , "meshProperties" ::: List Properties
+  , "meshFileName" ::: Text
+  ) ->
   Text
-sceneDocument
-  ("camera" ::: camera)
-  ("lighting" ::: lighting)
-  ("meshProperties" ::: meshProperties)
-  ("meshFileName" ::: meshFileName) = do
-    let shapeNodes = List.mapWithIndex (shapeNode meshFileName) meshProperties
-    let integratorNode = XmlNode "integrator" [("type", "path")] []
-    let documentNodes =
-          defaultNode "spp" "16"
-            : defaultNode "width" "800"
-            : defaultNode "height" "600"
-            : cameraNode camera
-            : lightingNode lighting
-            : integratorNode
-            : shapeNodes
-    let rootNode = XmlNode "scene" [("version", "3.0.0")] documentNodes
-    nodeText rootNode
+sceneDocument params = do
+  let shapeNodes = List.mapWithIndex (shapeNode params.meshFileName) params.meshProperties
+  let integratorNode = XmlNode "integrator" [("type", "path")] []
+  let documentNodes =
+        defaultNode "spp" "16"
+          : defaultNode "width" "800"
+          : defaultNode "height" "600"
+          : cameraNode params.camera
+          : lightingNode params.lighting
+          : integratorNode
+          : shapeNodes
+  let rootNode = XmlNode "scene" [("version", "3.0.0")] documentNodes
+  nodeText rootNode
 
 defaultNode :: Text -> Text -> XmlNode
 defaultNode name value = XmlNode "default" [("name", name), ("value", value)] []

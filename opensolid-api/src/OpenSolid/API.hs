@@ -780,7 +780,7 @@ type Circle2D = Circle2D.Circle2D Meters
 circle2D :: Class
 circle2D =
   Class.new @Circle2D $(docs ''Circle2D.Circle2D) $
-    [ Class.constructor2 "Center Point" "Diameter" Circle2D.with $(docs 'Circle2D.with)
+    [ Class.constructor2 "Center Point" "Diameter" (curry2 Circle2D.with) $(docs 'Circle2D.with)
     , Class.property "Center Point" Circle2D.centerPoint $(docs 'Circle2D.centerPoint)
     , Class.property "Diameter" Circle2D.diameter $(docs 'Circle2D.diameter)
     , Class.property "Radius" Circle2D.radius $(docs 'Circle2D.radius)
@@ -791,7 +791,7 @@ type UvCircle = Circle2D.Circle2D Unitless
 uvCircle :: Class
 uvCircle =
   Class.new @UvCircle $(docs ''Circle2D.Circle2D) $
-    [ Class.constructor2 "Center Point" "Diameter" Circle2D.with $(docs 'Circle2D.with)
+    [ Class.constructor2 "Center Point" "Diameter" (curry2 Circle2D.with) $(docs 'Circle2D.with)
     , Class.property "Center Point" Circle2D.centerPoint $(docs 'Circle2D.centerPoint)
     , Class.property "Diameter" Circle2D.diameter $(docs 'Circle2D.diameter)
     , Class.property "Radius" Circle2D.radius $(docs 'Circle2D.radius)
@@ -833,7 +833,7 @@ polygon2D =
     [ Class.factory1 "From Vertices" "Vertices" Polygon2D.fromVertices $(docs 'Polygon2D.fromVertices)
     , Class.factory2R "Inscribed" "Num Sides" "Circle" Polygon2D.inscribed $(docs 'Polygon2D.inscribed)
     , Class.factory2R "Circumscribed" "Num Sides" "Circle" Polygon2D.circumscribed $(docs 'Polygon2D.circumscribed)
-    , Class.factory2R "Hexagon" "Center Point" "Height" Polygon2D.hexagon $(docs 'Polygon2D.hexagon)
+    , Class.factory2R "Hexagon" "Center Point" "Height" (curry2 Polygon2D.hexagon) $(docs 'Polygon2D.hexagon)
     , Class.property "Vertices" Polygon2D.vertices $(docs 'Polygon2D.vertices)
     , Class.property "Edges" Polygon2D.edges $(docs 'Polygon2D.edges)
     , Class.property "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
@@ -847,7 +847,7 @@ uvPolygon =
     [ Class.factory1 "From Vertices" "Vertices" Polygon2D.fromVertices $(docs 'Polygon2D.fromVertices)
     , Class.factory2R "Inscribed" "Num Sides" "Circle" Polygon2D.inscribed $(docs 'Polygon2D.inscribed)
     , Class.factory2R "Circumscribed" "Num Sides" "Circle" Polygon2D.circumscribed $(docs 'Polygon2D.circumscribed)
-    , Class.factory2R "Hexagon" "Center Point" "Height" Polygon2D.hexagon $(docs 'Polygon2D.hexagon)
+    , Class.factory2R "Hexagon" "Center Point" "Height" (curry2 Polygon2D.hexagon) $(docs 'Polygon2D.hexagon)
     , Class.property "Vertices" Polygon2D.vertices $(docs 'Polygon2D.vertices)
     , Class.property "Edges" Polygon2D.edges $(docs 'Polygon2D.edges)
     , Class.property "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
@@ -994,7 +994,7 @@ svg =
     , Class.factory1 "Polygon" "Polygon" Svg.polygon $(docs 'Svg.polygon)
     , Class.factory1 "Triangle" "Triangle" Svg.triangle $(docs 'Svg.triangle)
     , Class.factory1 "Circle" "Circle" Svg.circle $(docs 'Svg.circle)
-    , Class.factory2 "Circle With" "Center Point" "Diameter" Svg.circleWith $(docs 'Svg.circleWith)
+    , Class.factory2 "Circle With" "Center Point" "Diameter" (curry2 Svg.circleWith) $(docs 'Svg.circleWith)
     , Class.factory2 "Curve" "Resolution" "Curve" Svg.curve $(docs 'Svg.curve)
     , Class.member1 "With Attributes" "Attributes" Svg.with $(docs 'Svg.with)
     , Class.constant "Black Stroke" Svg.blackStroke $(docs 'Svg.blackStroke)
@@ -1011,7 +1011,7 @@ type Axis2D = Axis2D.Axis2D Meters
 axis2D :: Class
 axis2D =
   Class.new @Axis2D $(docs ''Axis2D.Axis2D) $
-    [ Class.constructor2 "Origin Point" "Direction" Axis2D.with $(docs 'Axis2D.with)
+    [ Class.constructor2 "Origin Point" "Direction" (curry2 Axis2D.with) $(docs 'Axis2D.with)
     , Class.property "Origin Point" Axis2D.originPoint $(docs 'Axis2D.originPoint)
     , Class.property "Direction" Axis2D.direction $(docs 'Axis2D.direction)
     , Class.constant "X" (Axis2D.x @Meters) $(docs 'Axis2D.x)
@@ -1025,7 +1025,7 @@ type UvAxis = Axis2D.Axis2D Unitless
 uvAxis :: Class
 uvAxis =
   Class.new @UvAxis $(docs ''Axis2D.Axis2D) $
-    [ Class.constructor2 "Origin Point" "Direction" Axis2D.with $(docs 'Axis2D.with)
+    [ Class.constructor2 "Origin Point" "Direction" (curry2 Axis2D.with) $(docs 'Axis2D.with)
     , Class.property "Origin Point" Axis2D.originPoint $(docs 'Axis2D.originPoint)
     , Class.property "Direction" Axis2D.direction $(docs 'Axis2D.direction)
     , Class.constant "U" (Axis2D.x @Unitless) "The U axis."
@@ -1261,7 +1261,7 @@ type Axis3D = Axis3D.Axis3D Void
 axis3D :: Class
 axis3D =
   Class.new @Axis3D $(docs ''Axis3D.Axis3D) $
-    [ Class.constructor2 "Origin Point" "Direction" Axis3D.with $(docs 'Axis3D.with)
+    [ Class.constructor2 "Origin Point" "Direction" (curry2 Axis3D.with) $(docs 'Axis3D.with)
     , Class.property "Origin Point" Axis3D.originPoint $(docs 'Axis3D.originPoint)
     , Class.property "Direction" Axis3D.direction $(docs 'Axis3D.direction)
     , Class.property "Normal Plane" (Axis3D.normalPlane :: Axis3D -> Plane3D) $(docs 'Axis3D.normalPlane)
@@ -1527,11 +1527,11 @@ curve2D =
     , Class.factoryT1R "Line" "Line" Curve2D.line $(docs 'Curve2D.line)
     , Class.factoryT2R "Line From" "Start Point" "End Point" Curve2D.lineFrom $(docs 'Curve2D.lineFrom)
     , Class.factoryT3R "Arc From" "Start Point" "End Point" "Swept Angle" Curve2D.arcFrom $(docs 'Curve2D.arcFrom)
-    , Class.factoryT4R "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" Curve2D.polarArc $(docs 'Curve2D.polarArc)
+    , Class.factoryT4R "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" (curry4 Curve2D.polarArc) $(docs 'Curve2D.polarArc)
     , Class.factoryT3R "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2D.sweptArc $(docs 'Curve2D.sweptArc)
-    , Class.factoryT4R "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2D.cornerArc $(docs 'Curve2D.cornerArc)
+    , Class.factoryT4R "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" (curry4 Curve2D.cornerArc) $(docs 'Curve2D.cornerArc)
     , Class.factoryT1R "Circle" "Circle" Curve2D.circle $(docs 'Curve2D.circle)
-    , Class.factoryT2R "Circle With" "Center Point" "Diameter" Curve2D.circleWith $(docs 'Curve2D.circleWith)
+    , Class.factoryT2R "Circle With" "Center Point" "Diameter" (curry2 Curve2D.circleWith) $(docs 'Curve2D.circleWith)
     , Class.factoryT1R "Bezier" "Control Points" Curve2D.bezier $(docs 'Curve2D.bezier)
     , Class.factoryT4R "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
     , Class.property "Start Point" (Curve2D.startPoint) "The start point of the curve."
@@ -1557,11 +1557,11 @@ uvCurve =
     , Class.factory1R "Line" "Line" (unitless Curve2D.line) $(docs 'Curve2D.line)
     , Class.factory2R "Line From" "Start Point" "End Point" UvCurve.lineFrom $(docs 'UvCurve.lineFrom)
     , Class.factory3R "Arc From" "Start Point" "End Point" "Swept Angle" UvCurve.arcFrom $(docs 'UvCurve.arcFrom)
-    , Class.factory4R "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" (unitless Curve2D.polarArc) $(docs 'Curve2D.polarArc)
+    , Class.factory4R "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" (unitless (curry4 Curve2D.polarArc)) $(docs 'Curve2D.polarArc)
     , Class.factory1R "Circle" "Circle" (unitless Curve2D.circle) $(docs 'Curve2D.circle)
-    , Class.factory2R "Circle With" "Center Point" "Diameter" (unitless Curve2D.circleWith) $(docs 'Curve2D.circleWith)
+    , Class.factory2R "Circle With" "Center Point" "Diameter" (unitless (curry2 Curve2D.circleWith)) $(docs 'Curve2D.circleWith)
     , Class.factory3R "Swept Arc" "Center Point" "Start Point" "Swept Angle" (unitless Curve2D.sweptArc) $(docs 'Curve2D.sweptArc)
-    , Class.factory4R "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" UvCurve.cornerArc $(docs 'UvCurve.cornerArc)
+    , Class.factory4R "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" (curry4 UvCurve.cornerArc) $(docs 'UvCurve.cornerArc)
     , Class.factory1R "Bezier" "Control Points" (unitless Curve2D.bezier) $(docs 'Curve2D.bezier)
     , Class.factory4R "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" (unitless Curve2D.hermite) $(docs 'Curve2D.hermite)
     , Class.property "Start Point" (Curve2D.startPoint) "The start point of the curve."
@@ -1586,12 +1586,12 @@ region2D =
     [ Class.factoryT1R "Bounded By" "Curves" Region2D.boundedBy $(docs 'Region2D.boundedBy)
     , Class.factoryT1R "Rectangle" "Bounding Box" Region2D.rectangle $(docs 'Region2D.rectangle)
     , Class.factoryT1R "Circle" "Circle" Region2D.circle $(docs 'Region2D.circle)
-    , Class.factoryT2R "Circle With" "Center Point" "Diameter" Region2D.circleWith $(docs 'Region2D.circleWith)
+    , Class.factoryT2R "Circle With" "Center Point" "Diameter" (curry2 Region2D.circleWith) $(docs 'Region2D.circleWith)
     , Class.property "Outer Loop" Region2D.outerLoop $(docs 'Region2D.outerLoop)
     , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
     , Class.property "Boundary Curves" (Set2D.toNonEmpty . Region2D.boundaryCurves) $(docs 'Region2D.boundaryCurves)
     , Class.factoryT1R "Polygon" "Polygon" Region2D.polygon $(docs 'Region2D.polygon)
-    , Class.memberT2R "Fillet" "Points" "Radius" Region2D.fillet $(docs 'Region2D.fillet)
+    , Class.memberT2R "Fillet" "Points" "Radius" (curry2 Region2D.fillet) $(docs 'Region2D.fillet)
     ]
       <> orthonormalTransformations2D Region2D.transformBy
 
@@ -1602,7 +1602,7 @@ uvRegion =
     , Class.factory1R "Bounded By" "Curves" UvRegion.boundedBy $(docs 'UvRegion.boundedBy)
     , Class.factory1R "Rectangle" "Bounding Box" UvRegion.rectangle $(docs 'UvRegion.rectangle)
     , Class.factory1R "Circle" "Circle" UvRegion.circle $(docs 'UvRegion.circle)
-    , Class.factory2R "Circle With" "Center Point" "Diameter" UvRegion.circleWith $(docs 'UvRegion.circleWith)
+    , Class.factory2R "Circle With" "Center Point" "Diameter" (curry2 UvRegion.circleWith) $(docs 'UvRegion.circleWith)
     , Class.property "Outer Loop" Region2D.outerLoop $(docs 'Region2D.outerLoop)
     , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
     , Class.property "Boundary Curves" (Set2D.toNonEmpty . Region2D.boundaryCurves) $(docs 'Region2D.boundaryCurves)
@@ -1623,9 +1623,9 @@ body3D = do
     [ Class.factoryT4R "Extruded" "Sketch Plane" "Profile" "Start" "End" (Body3D.extruded @Void) $(docs 'Body3D.extruded)
     , Class.factoryT4R "Revolved" "Sketch Plane" "Profile" "Axis" "Angle" (Body3D.revolved @Void) $(docs 'Body3D.revolved)
     , Class.factoryT1R "Block" "Bounding Box" Body3D.block $(docs 'Body3D.block)
-    , Class.factoryT2R "Sphere" "Center Point" "Diameter" Body3D.sphere $(docs 'Body3D.sphere)
-    , Class.factoryT3R "Cylinder" "Diameter" "Start Point" "End Point" Body3D.cylinder $(docs 'Body3D.cylinder)
-    , Class.factoryT4R "Cylinder Along" "Axis" "Diameter" "Start" "End" Body3D.cylinderAlong $(docs 'Body3D.cylinderAlong)
+    , Class.factoryT2R "Sphere" "Center Point" "Diameter" (curry2 Body3D.sphere) $(docs 'Body3D.sphere)
+    , Class.factoryT3R "Cylinder" "Diameter" "Start Point" "End Point" (curry3 Body3D.cylinder) $(docs 'Body3D.cylinder)
+    , Class.factoryT4R "Cylinder Along" "Axis" "Diameter" "Start" "End" (curry4 Body3D.cylinderAlong) $(docs 'Body3D.cylinderAlong)
     , Class.member1 "Place In" "Frame" (Body3D.placeIn :: Frame3D -> Body3D -> Body3D) $(docs 'Body3D.placeIn)
     , Class.member1 "Relative To" "Frame" (Body3D.relativeTo :: Frame3D -> Body3D -> Body3D) $(docs 'Body3D.relativeTo)
     , Class.memberT3I "Write STL" "Path" "Convention" "Resolution" writeStl "Write a body to a binary STL file, using units of millimeters."
@@ -1639,13 +1639,13 @@ resolution =
   Class.new @Resolution $(docs ''Resolution.Resolution) $
     [ Class.factory1 "Max Error" "Error" (Resolution.maxError @Meters) $(docs 'Resolution.maxError)
     , Class.factory1 "Max Size" "Size" (Resolution.maxSize @Meters) $(docs 'Resolution.maxSize)
-    , Class.constructor2 "Max Error" "Max Size" Resolution.custom $(docs 'Resolution.custom)
+    , Class.constructor2 "Max Error" "Max Size" (curry2 Resolution.with) $(docs 'Resolution.with)
     ]
 
 pbrMaterial :: Class
 pbrMaterial =
   Class.new @PbrMaterial $(docs ''PbrMaterial) $
-    [ Class.factory2 "Metal" "Base Color" "Roughness" PbrMaterial.metal $(docs 'PbrMaterial.metal)
+    [ Class.factory2 "Metal" "Base Color" "Roughness" (curry2 PbrMaterial.metal) $(docs 'PbrMaterial.metal)
     , Class.factory1 "Aluminum" "Roughness" PbrMaterial.aluminum $(docs 'PbrMaterial.aluminum)
     , Class.factory1 "Brass" "Roughness" PbrMaterial.brass $(docs 'PbrMaterial.brass)
     , Class.factory1 "Chromium" "Roughness" PbrMaterial.chromium $(docs 'PbrMaterial.chromium)
@@ -1655,8 +1655,8 @@ pbrMaterial =
     , Class.factory1 "Nickel" "Roughness" PbrMaterial.nickel $(docs 'PbrMaterial.nickel)
     , Class.factory1 "Silver" "Roughness" PbrMaterial.silver $(docs 'PbrMaterial.silver)
     , Class.factory1 "Titanium" "Roughness" PbrMaterial.titanium $(docs 'PbrMaterial.titanium)
-    , Class.factory2 "Nonmetal" "Base Color" "Roughness" PbrMaterial.nonmetal $(docs 'PbrMaterial.nonmetal)
-    , Class.factory3 "Custom" "Base Color" "Metallic" "Roughness" PbrMaterial.custom $(docs 'PbrMaterial.custom)
+    , Class.factory2 "Nonmetal" "Base Color" "Roughness" (curry2 PbrMaterial.nonmetal) $(docs 'PbrMaterial.nonmetal)
+    , Class.constructor3 "Base Color" "Roughness" "Metallic" (curry3 PbrMaterial.with) $(docs 'PbrMaterial.with)
     ]
 
 type Model3D = Model3D.Model3D Void
@@ -1700,8 +1700,8 @@ type Camera3D = Camera3D.Camera3D Void
 camera3D :: Class
 camera3D =
   Class.new @Camera3D $(docs ''Camera3D.Camera3D) $
-    [ Class.factory3 "Look At" "Eye Point" "Focal Point" "Projection" Camera3D.lookAt $(docs 'Camera3D.lookAt)
-    , Class.factory5 "Orbit" "Focal Point" "Azimuth" "Elevation" "Distance" "Projection" Camera3D.orbit $(docs 'Camera3D.orbit)
+    [ Class.factory3 "Look At" "Eye Point" "Focal Point" "Projection" (curry3 Camera3D.lookAt) $(docs 'Camera3D.lookAt)
+    , Class.factory5 "Orbit" "Focal Point" "Azimuth" "Elevation" "Distance" "Projection" (curry5 Camera3D.orbit) $(docs 'Camera3D.orbit)
     , Class.nested @Camera3D.Projection $(docs ''Camera3D.Projection) []
     , Class.static1 "Perspective" "Vertical FOV" Camera3D.perspective $(docs 'Camera3D.perspective)
     , Class.static1 "Orthographic" "Viewport Height" Camera3D.orthographic $(docs 'Camera3D.orthographic)
@@ -1727,7 +1727,7 @@ mitsuba = do
 spurGear :: Class
 spurGear =
   Class.new @SpurGear $(docs ''SpurGear) $
-    [ Class.factory2 "Metric" "Num Teeth" "Module" SpurGear.metric $(docs 'SpurGear.metric)
+    [ Class.factory2 "Metric" "Num Teeth" "Module" (curry2 SpurGear.metric) $(docs 'SpurGear.metric)
     , Class.property "Num Teeth" (SpurGear.numTeeth) $(docs 'SpurGear.numTeeth)
     , Class.property "Module" (SpurGear.module_) $(docs 'SpurGear.module_)
     , Class.property "Pitch Diameter" (SpurGear.pitchDiameter) $(docs 'SpurGear.pitchDiameter)
@@ -1751,7 +1751,7 @@ step = do
     , Class.nested @Step.Attribute $(docs ''Step.Attribute) []
     , Class.factory2 "Model" "Header" "Entities" Step "Construct a STEP model from a header and a list of entities."
     , Class.member1I "Write" "Path" write $(docs 'Step.write)
-    , Class.static10 "Header" "Description" "Implementation Level" "File Name" "Timestamp" "Author" "Organization" "Preprocessor Version" "Originating System" "Authorization" "Schema Identifiers" Step.header $(docs 'Step.header)
+    , Class.static10 "Header" "Description" "Implementation Level" "File Name" "Timestamp" "Author" "Organization" "Preprocessor Version" "Originating System" "Authorization" "Schema Identifiers" (curry10 Step.header) $(docs 'Step.header)
     , Class.static2 "Entity" "Type Name" "Attributes" Step.entity $(docs 'Step.entity)
     , Class.static1 "Complex Entity" "Sub Entities" Step.complexEntity $(docs 'Step.complexEntity)
     , Class.static2 "Sub Entity" "Type Name" "Attributes" Step.subEntity $(docs 'Step.subEntity)

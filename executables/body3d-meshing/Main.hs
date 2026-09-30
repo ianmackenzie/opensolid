@@ -26,10 +26,11 @@ main = Tolerance.using Length.defaultTolerance do
   let length = Length.meters 4.0
   arc <-
     Curve2D.polarArc
-      (#centerPoint Point2D.origin)
-      (#radius radius)
-      (#startAngle (Angle.degrees -45.0))
-      (#endAngle (Angle.degrees 225.0))
+      ( #centerPoint Point2D.origin
+      , #radius radius
+      , #startAngle (Angle.degrees -45.0)
+      , #endAngle (Angle.degrees 225.0)
+      )
       & Result.orFail
   line <- Curve2D.lineFrom (Curve2D.endPoint arc) (Curve2D.startPoint arc) & Result.orFail
   profile <- Region2D.boundedBy [arc, line] & Result.orFail

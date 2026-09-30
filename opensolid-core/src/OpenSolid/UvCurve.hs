@@ -64,10 +64,11 @@ arcFrom = unitless Curve2D.arcFrom
 
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
-  "cornerPoint" ::: UvPoint ->
-  "incoming" ::: Direction2D ->
-  "outgoing" ::: Direction2D ->
-  "radius" ::: Number ->
+  ( "cornerPoint" ::: UvPoint
+  , "incoming" ::: Direction2D
+  , "outgoing" ::: Direction2D
+  , "radius" ::: Number
+  ) ->
   Result IsDegenerate UvCurve
 cornerArc = unitless Curve2D.cornerArc
 

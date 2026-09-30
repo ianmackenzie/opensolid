@@ -11,6 +11,7 @@ where
 
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Length (Length)
+import OpenSolid.Length qualified as Length
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point3D (Point3D)
@@ -23,9 +24,10 @@ data Circle3D space = Circle3D
   , radius :: Length
   }
 
-with :: "plane" ::: Plane3D space -> "diameter" ::: Length -> Circle3D space
-with ("plane" ::: givenPlane) ("diameter" ::: givenDiameter) =
-  Circle3D {plane = givenPlane, radius = 0.5 * givenDiameter}
+with :: ("plane" ::: Plane3D space, "diameter" ::: Length) -> Circle3D space
+with params
+  | params.diameter < Length.zero = error "Diameter must not be negative"
+  | otherwise = Circle3D {plane = params.plane, radius = 0.5 * params.diameter}
 
 centerPoint :: Circle3D space -> Point3D space
 centerPoint circle = Plane3D.originPoint (plane circle)

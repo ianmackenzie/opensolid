@@ -89,8 +89,8 @@ implicitToleranceArgument :: ImplicitTolerance -> (Text, FFI.Type)
 implicitToleranceArgument ImplicitTolerance = ("_tolerance()", ImplicitTolerance.ffiType)
 
 arguments :: "includeSelf" ::: Bool -> List (Name, FFI.Type) -> List (Name, FFI.Type) -> Text
-arguments ("includeSelf" ::: includeSelf) positional named = do
-  let selfArg = ["self" | includeSelf]
+arguments param positional named = do
+  let selfArg = ["self" | param.includeSelf]
   let positionalArgs = List.map argument positional
   let separator = ["*" | not (List.isEmpty named)]
   let namedArgs = List.map argument named

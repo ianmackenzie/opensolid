@@ -2,7 +2,7 @@ module OpenSolid.Resolution
   ( Resolution (maxError, maxSize)
   , maxError
   , maxSize
-  , custom
+  , with
   , acceptable
   )
 where
@@ -31,11 +31,10 @@ maxSize :: Quantity units -> Resolution units
 maxSize givenSize = Resolution {maxError = Quantity.infinity, maxSize = givenSize}
 
 -- | Specify both the maximum error and maximum element size in the approximation.
-custom :: "maxError" ::: Quantity units -> "maxSize" ::: Quantity units -> Resolution units
-custom ("maxError" ::: givenError) ("maxSize" ::: givenSize) =
-  Resolution {maxError = givenError, maxSize = givenSize}
+with :: ("maxError" ::: Quantity units, "maxSize" ::: Quantity units) -> Resolution units
+with params = Resolution {maxError = params.maxError, maxSize = params.maxSize}
 
-acceptable :: "size" ::: Quantity units -> "error" ::: Quantity units -> Resolution units -> Bool
-acceptable ("size" ::: givenSize) ("error" ::: givenError) resolution =
-  (Quantity.isInfinite resolution.maxSize || givenSize <= resolution.maxSize)
-    && (Quantity.isInfinite resolution.maxError || givenError <= resolution.maxError)
+acceptable :: ("size" ::: Quantity units, "error" ::: Quantity units) -> Resolution units -> Bool
+acceptable params resolution =
+  (Quantity.isInfinite resolution.maxSize || params.size <= resolution.maxSize)
+    && (Quantity.isInfinite resolution.maxError || params.error <= resolution.maxError)

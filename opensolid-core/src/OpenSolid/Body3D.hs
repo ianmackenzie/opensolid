@@ -139,16 +139,18 @@ Fails if the given diameter is zero.
 -}
 sphere ::
   Tolerance Meters =>
-  "centerPoint" ::: Point3D space ->
-  "diameter" ::: Length ->
+  ( "centerPoint" ::: Point3D space
+  , "diameter" ::: Length
+  ) ->
   Result EmptyBody (Body3D space)
-sphere ("centerPoint" ::: centerPoint) ("diameter" ::: diameter)
-  | diameter ~= Length.zero = Err EmptyBody
+sphere params
+  | params.diameter ~= Length.zero = Err EmptyBody
+  | params.diameter < Length.zero = error "Diameter must be positive"
   | otherwise = Ok do
       let panic = error "Constructing sphere from non-zero diameter should not fail"
-      let r = 0.5 * diameter
+      let r = 0.5 * params.diameter
       let arc = Curve2D.arcFrom (on Axis2D.y r) (on Axis2D.y -r) -Angle.pi !! panic
-      let plane = World3D.forwardPlane centerPoint
+      let plane = World3D.forwardPlane params.centerPoint
       let revolvedSurface = Surface3D.revolved plane arc Axis2D.y Angle.twoPi !! panic
       boundedBy [revolvedSurface] !! panic
 
@@ -158,20 +160,23 @@ Fails if the cylinder length or diameter is zero.
 -}
 cylinder ::
   Tolerance Meters =>
-  "diameter" ::: Length ->
-  "startPoint" ::: Point3D space ->
-  "endPoint" ::: Point3D space ->
+  ( "diameter" ::: Length
+  , "startPoint" ::: Point3D space
+  , "endPoint" ::: Point3D space
+  ) ->
   Result EmptyBody (Body3D space)
-cylinder ("diameter" ::: diameter) ("startPoint" ::: startPoint) ("endPoint" ::: endPoint) =
-  case Vector3D.magnitudeAndDirection (endPoint - startPoint) of
-    Err IsZero -> Err EmptyBody
-    Ok (length, direction) ->
-      cylinderAlong
-        { axis = Axis3D.with {originPoint = startPoint, direction}
-        , diameter
-        , start = Length.zero
-        , end = length
-        }
+cylinder params
+  | params.diameter ~= Length.zero = Err EmptyBody
+  | params.diameter < Length.zero = error "Diameter must be positive"
+  | otherwise = case Vector3D.magnitudeAndDirection (params.endPoint - params.startPoint) of
+      Err IsZero -> Err EmptyBody
+      Ok (length, direction) ->
+        cylinderAlong
+          { axis = Axis3D.with {originPoint = params.startPoint, direction}
+          , diameter = params.diameter
+          , start = Length.zero
+          , end = length
+          }
 
 {-| Create a cylindrical body along a given axis.
 
@@ -185,20 +190,21 @@ Failes if the cylinder length or diameter is zero.
 -}
 cylinderAlong ::
   Tolerance Meters =>
-  "axis" ::: Axis3D space ->
-  "diameter" ::: Length ->
-  "start" ::: Length ->
-  "end" ::: Length ->
+  ( "axis" ::: Axis3D space
+  , "diameter" ::: Length
+  , "start" ::: Length
+  , "end" ::: Length
+  ) ->
   Result EmptyBody (Body3D space)
-cylinderAlong ("axis" ::: axis) ("diameter" ::: diameter) ("start" ::: start) ("end" ::: end) =
-  case Region2D.circleWith {centerPoint = Point2D.origin, diameter} of
-    Err Region2D.EmptyRegion -> Err EmptyBody
-    Ok profile ->
-      if start ~= end
-        then Err EmptyBody
-        else case extruded (Axis3D.normalPlane axis) profile start end of
-          Ok body -> Ok body
-          Err _ -> error "Constructing non-empty cylinder body should not fail"
+cylinderAlong params
+  | params.diameter ~= Length.zero = Err EmptyBody
+  | params.diameter < Length.zero = error "Diameter must be positive"
+  | params.start ~= params.end = Err EmptyBody
+  | otherwise = do
+      let panic = error "Constructing non-empty cylinder body should not fail"
+      profile <-
+        Region2D.circleWith {centerPoint = Point2D.origin, diameter = params.diameter} ?? panic
+      extruded (Axis3D.normalPlane params.axis) profile params.start params.end ?? panic
 
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::

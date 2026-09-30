@@ -35,12 +35,12 @@ import OpenSolid.Primitives
   , PlaneOrientation3D (..)
   )
 
-with :: "originPoint" ::: Point2D units -> "orientation" ::: Orientation2D -> Frame2D units
-with ("originPoint" ::: givenOriginPoint) ("orientation" ::: givenOrientation) =
+with :: ("originPoint" ::: Point2D units, "orientation" ::: Orientation2D) -> Frame2D units
+with params =
   recursive \self ->
     Frame2D
-      { originPoint = givenOriginPoint
-      , orientation = givenOrientation
+      { originPoint = params.originPoint
+      , orientation = params.orientation
       , inverse =
           Frame2D
             { originPoint = Point2D.relativeTo self Point2D.origin

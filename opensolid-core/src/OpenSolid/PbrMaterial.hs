@@ -11,7 +11,7 @@ module OpenSolid.PbrMaterial
   , silver
   , titanium
   , nonmetal
-  , custom
+  , with
   )
 where
 
@@ -33,9 +33,8 @@ instance FFI PbrMaterial where
   representation = FFI.classRepresentation "PbrMaterial"
 
 -- | Create a metallic material with the given color and roughness.
-metal :: "baseColor" ::: Color -> "roughness" ::: Number -> PbrMaterial
-metal ("baseColor" ::: baseColor) ("roughness" ::: roughness) =
-  PbrMaterial {baseColor, metallic = 1.0, roughness}
+metal :: ("baseColor" ::: Color, "roughness" ::: Number) -> PbrMaterial
+metal params = with {baseColor = params.baseColor, roughness = params.roughness, metallic = 1.0}
 
 -- | Create an aluminum material with the given roughness.
 aluminum :: "roughness" ::: Number -> PbrMaterial
@@ -74,11 +73,19 @@ titanium :: "roughness" ::: Number -> PbrMaterial
 titanium = metal {baseColor = Color.rgb1 0.807 0.787 0.764}
 
 -- | Create a non-metallic material with the given color and roughness.
-nonmetal :: "baseColor" ::: Color -> "roughness" ::: Number -> PbrMaterial
-nonmetal ("baseColor" ::: baseColor) ("roughness" ::: roughness) =
-  PbrMaterial {baseColor, roughness, metallic = 0.0}
+nonmetal :: ("baseColor" ::: Color, "roughness" ::: Number) -> PbrMaterial
+nonmetal params = with {baseColor = params.baseColor, roughness = params.roughness, metallic = 0.0}
 
 -- | Create a material with the given base color, metallic factor and roughness.
-custom :: "baseColor" ::: Color -> "metallic" ::: Number -> "roughness" ::: Number -> PbrMaterial
-custom ("baseColor" ::: baseColor) ("metallic" ::: metallic) ("roughness" ::: roughness) =
-  PbrMaterial {baseColor, metallic, roughness}
+with ::
+  ( "baseColor" ::: Color
+  , "roughness" ::: Number
+  , "metallic" ::: Number
+  ) ->
+  PbrMaterial
+with params =
+  PbrMaterial
+    { baseColor = params.baseColor
+    , metallic = params.metallic
+    , roughness = params.roughness
+    }

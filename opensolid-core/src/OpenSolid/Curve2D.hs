@@ -243,17 +243,19 @@ arcFrom givenStartPoint givenEndPoint sweptAngle =
 -- | Create an arc with the given center point, radius, start angle and end angle.
 polarArc ::
   Tolerance units =>
-  "centerPoint" ::: Point2D units ->
-  "radius" ::: Quantity units ->
-  "startAngle" ::: Angle ->
-  "endAngle" ::: Angle ->
+  ( "centerPoint" ::: Point2D units
+  , "radius" ::: Quantity units
+  , "startAngle" ::: Angle
+  , "endAngle" ::: Angle
+  ) ->
   Result (IsDegenerate units) (Curve2D units)
-polarArc
-  ("centerPoint" ::: centerPoint)
-  ("radius" ::: radius)
-  ("startAngle" ::: startAngle)
-  ("endAngle" ::: endAngle) =
-    customArc centerPoint (Vector2D.x radius) (Vector2D.y radius) startAngle endAngle
+polarArc params
+  | params.radius ~= Quantity.zero = Err (IsDegenerate params.centerPoint)
+  | params.radius < Quantity.zero = error "Radius must be positive"
+  | otherwise = do
+      let xVector = Vector2D.x params.radius
+      let yVector = Vector2D.y params.radius
+      customArc params.centerPoint xVector yVector params.startAngle params.endAngle
 
 {-| Create an arc with the given center point, start point and swept angle.
 
@@ -273,25 +275,24 @@ sweptArc centerPoint givenStartPoint sweptAngle = do
 -- | Create an arc for rounding off the corner between two straight lines.
 cornerArc ::
   Tolerance units =>
-  "cornerPoint" ::: Point2D units ->
-  "incoming" ::: Direction2D ->
-  "outgoing" ::: Direction2D ->
-  "radius" ::: Quantity units ->
+  ( "cornerPoint" ::: Point2D units
+  , "incoming" ::: Direction2D
+  , "outgoing" ::: Direction2D
+  , "radius" ::: Quantity units
+  ) ->
   Result (IsDegenerate units) (Curve2D units)
-cornerArc
-  ("cornerPoint" ::: cornerPoint)
-  ("incoming" ::: incomingDirection)
-  ("outgoing" ::: outgoingDirection)
-  ("radius" ::: givenRadius) = do
-    let radius = Quantity.abs givenRadius
-    let sweptAngle = Direction2D.angleFrom incomingDirection outgoingDirection
-    if 0.25 * radius * Number.squared (Angle.inRadians sweptAngle) ~= Quantity.zero
-      then lineFrom cornerPoint cornerPoint
-      else do
-        let offset = radius * Number.abs (Angle.tan (0.5 * sweptAngle))
-        let computedStartPoint = cornerPoint - offset * incomingDirection
-        let computedEndPoint = cornerPoint + offset * outgoingDirection
-        arcFrom computedStartPoint computedEndPoint sweptAngle
+cornerArc params
+  | params.radius ~= Quantity.zero = Err (IsDegenerate params.cornerPoint)
+  | params.radius < Quantity.zero = error "Radius must be positive"
+  | otherwise = do
+      let sweptAngle = Direction2D.angleFrom params.incoming params.outgoing
+      if 0.25 * params.radius * Number.squared (Angle.inRadians sweptAngle) ~= Quantity.zero
+        then Err (IsDegenerate params.cornerPoint)
+        else do
+          let offset = params.radius * Number.abs (Angle.tan (0.5 * sweptAngle))
+          let computedStartPoint = params.cornerPoint - offset * params.incoming
+          let computedEndPoint = params.cornerPoint + offset * params.outgoing
+          arcFrom computedStartPoint computedEndPoint sweptAngle
 
 data WhichArc
   = SmallCounterclockwise
@@ -370,11 +371,14 @@ circle givenCircle =
 -- | Create a circular curve with the given center point and diameter.
 circleWith ::
   Tolerance units =>
-  "centerPoint" ::: Point2D units ->
-  "diameter" ::: Quantity units ->
+  ( "centerPoint" ::: Point2D units
+  , "diameter" ::: Quantity units
+  ) ->
   Result (IsDegenerate units) (Curve2D units)
-circleWith ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) =
-  circle (Circle2D.with {centerPoint, diameter})
+circleWith params
+  | params.diameter ~= Quantity.zero = Err (IsDegenerate params.centerPoint)
+  | params.diameter < Quantity.zero = error "Diameter must not be negative"
+  | otherwise = circle (Circle2D.with params)
 
 {-| Create an ellipse with the given principal axes and major/minor radii.
 The first radius given will be the radius along the X axis,

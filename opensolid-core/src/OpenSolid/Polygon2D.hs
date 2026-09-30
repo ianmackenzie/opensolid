@@ -96,12 +96,15 @@ circumscribed n circle = do
 The hexagon will be oriented such that its top and bottom edges are horizontal.
 -}
 hexagon ::
-  "centerPoint" ::: Point2D units ->
-  "height" ::: Quantity units ->
+  ( "centerPoint" ::: Point2D units
+  , "height" ::: Quantity units
+  ) ->
   Result IsEmpty (Polygon2D units)
-hexagon ("centerPoint" ::: centerPoint) ("height" ::: height) = do
-  let innerCircle = Circle2D.with {centerPoint, diameter = height}
-  circumscribed 6 innerCircle
+hexagon params
+  | params.height < Quantity.zero = error "Height must not be negative"
+  | otherwise = do
+      let innerCircle = Circle2D.with {centerPoint = params.centerPoint, diameter = params.height}
+      circumscribed 6 innerCircle
 
 -- | Get the vertices of a polygon.
 vertices :: Polygon2D units -> NonEmpty (Point2D units)
