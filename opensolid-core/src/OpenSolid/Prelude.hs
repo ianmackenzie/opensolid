@@ -637,6 +637,77 @@ instance At datum location result => At datum (NonEmpty location) (NonEmpty resu
 class On datum geometry result | datum geometry -> result where
   on :: datum -> geometry -> result
 
+instance
+  ( On datum geometry1 result1
+  , On datum geometry2 result2
+  ) =>
+  On datum (geometry1, geometry2) (result1, result2)
+  where
+  on datum (geometry1, geometry2) = (on datum geometry1, on datum geometry2)
+
+instance
+  ( On datum geometry1 result1
+  , On datum geometry2 result2
+  , On datum geometry3 result3
+  ) =>
+  On datum (geometry1, geometry2, geometry3) (result1, result2, result3)
+  where
+  on datum (geometry1, geometry2, geometry3) =
+    (on datum geometry1, on datum geometry2, on datum geometry3)
+
+instance
+  ( On datum geometry1 result1
+  , On datum geometry2 result2
+  , On datum geometry3 result3
+  , On datum geometry4 result4
+  ) =>
+  On datum (geometry1, geometry2, geometry3, geometry4) (result1, result2, result3, result4)
+  where
+  on datum (geometry1, geometry2, geometry3, geometry4) =
+    (on datum geometry1, on datum geometry2, on datum geometry3, on datum geometry4)
+
+instance
+  ( On datum geometry1 result1
+  , On datum geometry2 result2
+  , On datum geometry3 result3
+  , On datum geometry4 result4
+  , On datum geometry5 result5
+  ) =>
+  On
+    datum
+    (geometry1, geometry2, geometry3, geometry4, geometry5)
+    (result1, result2, result3, result4, result5)
+  where
+  on datum (geometry1, geometry2, geometry3, geometry4, geometry5) =
+    ( on datum geometry1
+    , on datum geometry2
+    , on datum geometry3
+    , on datum geometry4
+    , on datum geometry5
+    )
+
+instance
+  ( On datum geometry1 result1
+  , On datum geometry2 result2
+  , On datum geometry3 result3
+  , On datum geometry4 result4
+  , On datum geometry5 result5
+  , On datum geometry6 result6
+  ) =>
+  On
+    datum
+    (geometry1, geometry2, geometry3, geometry4, geometry5, geometry6)
+    (result1, result2, result3, result4, result5, result6)
+  where
+  on datum (geometry1, geometry2, geometry3, geometry4, geometry5, geometry6) =
+    ( on datum geometry1
+    , on datum geometry2
+    , on datum geometry3
+    , on datum geometry4
+    , on datum geometry5
+    , on datum geometry6
+    )
+
 instance On datum geometry result => On datum (Maybe geometry) (Maybe result) where
   on = Prelude.fmap . on
 
