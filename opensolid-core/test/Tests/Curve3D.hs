@@ -11,7 +11,6 @@ import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
-import OpenSolid.Result qualified as Result
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.World3D qualified as World3D
 import Test (Test)
@@ -60,10 +59,10 @@ curveOverlap1 :: Test
 curveOverlap1 = Test.verify "curveOverlap1" do
   arc1 <- try do
     Curve2D.arcFrom (Point2D.meters 1.0 0.0) (Point2D.meters -1.0 0.0) Angle.halfTurn
-      & Result.map (Curve3D.on World3D.topPlane)
+      !> Curve3D.on World3D.topPlane
   arc2 <- try do
     Curve2D.arcFrom (Point2D.meters 0.0 -1.0) (Point2D.meters 0.0 1.0) Angle.halfTurn
-      & Result.map (Curve3D.on World3D.topPlane)
+      !> Curve3D.on World3D.topPlane
   (sign, actualSegments) <- try do overlappingSegments arc1 arc2
   let expectedSegments = NonEmpty.one (Interval 0.0 0.5, Interval 0.5 1.0)
   Test.all
@@ -79,14 +78,14 @@ curveOverlap2 = Test.verify "curveOverlap2" do
       (#radius Length.meter)
       (#startAngle Angle.zero)
       (#endAngle -Angle.pi)
-      & Result.map (Curve3D.on World3D.topPlane)
+      !> Curve3D.on World3D.topPlane
   arc2 <- try do
     Curve2D.polarArc
       (#centerPoint Point2D.origin)
       (#radius Length.meter)
       (#startAngle (Angle.degrees -45.0))
       (#endAngle (Angle.degrees 225.0))
-      & Result.map (Curve3D.on World3D.topPlane)
+      !> Curve3D.on World3D.topPlane
   (sign, segments) <- try do overlappingSegments arc1 arc2
   let expectedSegments =
         NonEmpty.two
@@ -101,10 +100,10 @@ crossingIntersection :: Test
 crossingIntersection = Test.verify "crossingIntersection" do
   arc1 <- try do
     Curve2D.arcFrom Point2D.origin (Point2D.meters 0.0 1.0) Angle.halfTurn
-      & Result.map (Curve3D.on World3D.topPlane)
+      !> Curve3D.on World3D.topPlane
   arc2 <- try do
     Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
-      & Result.map (Curve3D.on World3D.topPlane)
+      !> Curve3D.on World3D.topPlane
   let intersections = Curve3D.intersections arc1 arc2
   let expectedIntersectionPoints =
         NonEmpty.two
@@ -114,8 +113,8 @@ crossingIntersection = Test.verify "crossingIntersection" do
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
       Test.expect (actualIntersectionPoints ~~ expectedIntersectionPoints)
-        & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
-        & Test.output "actualIntersectionPoints" actualIntersectionPoints
+        |> Test.output "expectedIntersectionPoints" expectedIntersectionPoints
+        |> Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just Curve.OverlappingSegments{} ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
 
@@ -127,21 +126,21 @@ tangentIntersection = Test.verify "tangentIntersection" do
       (#radius Length.meter)
       (#startAngle Angle.zero)
       (#endAngle Angle.pi)
-      & Result.map (Curve3D.on World3D.topPlane)
+      !> Curve3D.on World3D.topPlane
   arc2 <- try do
     Curve2D.polarArc
       (#centerPoint (Point2D.meters 0.0 1.5))
       (#radius (Length.meters 0.5))
       (#startAngle -Angle.pi)
       (#endAngle Angle.zero)
-      & Result.map (Curve3D.on World3D.topPlane)
+      !> Curve3D.on World3D.topPlane
   let intersections = Curve3D.intersections arc1 arc2
   let expectedIntersectionPoints = NonEmpty.one (IntersectionPoint.tangent Negative (0.5, 0.5))
   case intersections of
     Nothing -> Test.fail "Should have found some intersection points"
     Just (Curve.IntersectionPoints actualIntersectionPoints) ->
       Test.expect (actualIntersectionPoints ~~ expectedIntersectionPoints)
-        & Test.output "expectedIntersectionPoints" expectedIntersectionPoints
-        & Test.output "actualIntersectionPoints" actualIntersectionPoints
+        |> Test.output "expectedIntersectionPoints" expectedIntersectionPoints
+        |> Test.output "actualIntersectionPoints" actualIntersectionPoints
     Just (Curve.OverlappingSegments{}) ->
       Test.fail "Should have found some intersection points, got overlapping segments instead"
