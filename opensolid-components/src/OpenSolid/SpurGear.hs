@@ -38,11 +38,11 @@ metric ("numTeeth" ::: givenNumTeeth) ("module_" ::: givenModule) =
 
 -- | The number of teeth of a gear.
 numTeeth :: SpurGear -> Int
-numTeeth = (.numTeeth)
+numTeeth gear = gear.numTeeth
 
 -- | The module of a gear.
 module_ :: SpurGear -> Length
-module_ = (.module_)
+module_ gear = gear.module_
 
 -- | The pitch diameter of a gear.
 pitchDiameter :: SpurGear -> Length
