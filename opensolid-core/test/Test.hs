@@ -12,7 +12,6 @@ module Test
   , all
   , combine
   , output
-  , lines
   , pass
   , fail
   )
@@ -231,12 +230,3 @@ output label value (Generator generator) =
 addOutput :: Show a => Text -> a -> TestResult () -> TestResult ()
 addOutput _ _ (Succeeded ()) = Succeeded ()
 addOutput label value (Failed messages) = Failed (messages <> [label <> ": " <> Text.show value])
-
-newtype Lines a = Lines (List a)
-
-instance Show a => Show (Lines a) where
-  show (Lines values) = string do
-    Text.concat (List.map (\value -> "\n  " <> Text.show value) values)
-
-lines :: List a -> Lines a
-lines = Lines
