@@ -1,5 +1,6 @@
 module OpenSolid.Polygon2D
   ( Polygon2D (Polygon2D)
+  , IsEmpty (IsEmpty)
   , inscribed
   , circumscribed
   , hexagon
