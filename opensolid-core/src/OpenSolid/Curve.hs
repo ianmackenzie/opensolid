@@ -316,6 +316,9 @@ instance Space.Coercion (Curve3D space1) (Curve3D space2) where
 instance FFI (Curve2D Meters) where
   representation = FFI.classRepresentation "Curve2D"
 
+instance FFI (Curve3D Void) where
+  representation = FFI.classRepresentation "Curve3D"
+
 instance FFI UvCurve where
   representation = FFI.classRepresentation "UvCurve"
 
