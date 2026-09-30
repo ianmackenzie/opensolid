@@ -58,11 +58,11 @@ equalOverlapSegmentLists actualSegments expectedSegments =
 curveOverlap1 :: Test
 curveOverlap1 = Test.verify "curveOverlap1" do
   arc1 <- try do
-    Curve2D.arcFrom (Point2D.meters 1.0 0.0) (Point2D.meters -1.0 0.0) Angle.halfTurn
-      !> Curve3D.on World3D.topPlane
+    Curve3D.on World3D.topPlane <!
+      Curve2D.arcFrom (Point2D.meters 1.0 0.0) (Point2D.meters -1.0 0.0) Angle.halfTurn
   arc2 <- try do
-    Curve2D.arcFrom (Point2D.meters 0.0 -1.0) (Point2D.meters 0.0 1.0) Angle.halfTurn
-      !> Curve3D.on World3D.topPlane
+    Curve3D.on World3D.topPlane <!
+      Curve2D.arcFrom (Point2D.meters 0.0 -1.0) (Point2D.meters 0.0 1.0) Angle.halfTurn
   (sign, actualSegments) <- try do overlappingSegments arc1 arc2
   let expectedSegments = NonEmpty.one (Interval 0.0 0.5, Interval 0.5 1.0)
   Test.all
@@ -101,11 +101,11 @@ curveOverlap2 = Test.verify "curveOverlap2" do
 crossingIntersection :: Test
 crossingIntersection = Test.verify "crossingIntersection" do
   arc1 <- try do
-    Curve2D.arcFrom Point2D.origin (Point2D.meters 0.0 1.0) Angle.halfTurn
-      !> Curve3D.on World3D.topPlane
+    Curve3D.on World3D.topPlane <!
+      Curve2D.arcFrom Point2D.origin (Point2D.meters 0.0 1.0) Angle.halfTurn
   arc2 <- try do
-    Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
-      !> Curve3D.on World3D.topPlane
+    Curve3D.on World3D.topPlane <!
+      Curve2D.arcFrom Point2D.origin (Point2D.meters 1.0 0.0) -Angle.halfTurn
   let intersections = Curve3D.intersections arc1 arc2
   let expectedIntersectionPoints =
         NonEmpty.two
