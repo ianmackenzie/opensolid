@@ -72,16 +72,16 @@ with
       }
 
 centerPoint :: Arc2D units -> Point2D units
-centerPoint = (.centerPoint)
+centerPoint arc = arc.centerPoint
 
 radius :: Arc2D units -> Quantity units
-radius = (.radius)
+radius arc = arc.radius
 
 startAngle :: Arc2D units -> Angle
-startAngle = (.startAngle)
+startAngle arc = arc.startAngle
 
 endAngle :: Arc2D units -> Angle
-endAngle = (.endAngle)
+endAngle arc = arc.endAngle
 
 sweptAngle :: Arc2D units -> Angle
 sweptAngle arc = endAngle arc - startAngle arc

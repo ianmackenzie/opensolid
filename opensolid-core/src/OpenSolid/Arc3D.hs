@@ -65,19 +65,19 @@ with
       }
 
 plane :: Arc3D space -> Plane3D space
-plane = (.plane)
+plane arc = arc.plane
 
 centerPoint :: Arc3D space -> Point3D space
 centerPoint arc = Plane3D.originPoint (plane arc)
 
 radius :: Arc3D space -> Length
-radius = (.radius)
+radius arc = arc.radius
 
 startAngle :: Arc3D space -> Angle
-startAngle = (.startAngle)
+startAngle arc = arc.startAngle
 
 endAngle :: Arc3D space -> Angle
-endAngle = (.endAngle)
+endAngle arc = arc.endAngle
 
 sweptAngle :: Arc3D space -> Angle
 sweptAngle arc = endAngle arc - startAngle arc
