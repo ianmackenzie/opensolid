@@ -647,7 +647,7 @@ directionRange ::
 directionRange uvRange function = do
   let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvRange
   let (fuRange, fvRange) = partialDerivativeRanges uvRange function
-  VectorBounds3D.direction $
+  VectorBounds3D.direction do
     if
       | uLow == 0.0 && degenerateLeft function -> fuRange
       | uHigh == 1.0 && degenerateRight function -> negate fuRange

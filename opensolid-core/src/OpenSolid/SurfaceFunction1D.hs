@@ -637,7 +637,7 @@ diagonalCrossingCurve subproblem = do
   let Subproblem {fuRange, fvRange} = subproblem
   fuSign <- Interval.resolvedSign fuRange
   fvSign <- Interval.resolvedSign fvRange
-  Resolved $
+  Resolved do
     case (fuSign, fvSign) of
       (Negative, Negative) -> southeastCrossingCurve subproblem
       (Negative, Positive) -> southwestCrossingCurve subproblem
