@@ -11,6 +11,7 @@ module OpenSolid.Maybe
   )
 where
 
+import OpenSolid.Monad qualified as Monad
 import OpenSolid.Prelude
 import Prelude qualified
 
@@ -43,5 +44,5 @@ isNothing Nothing = True
 isNothing (Just _) = False
 
 orFail :: MonadFail m => Text -> Maybe a -> m a
-orFail _ (Just value) = Prelude.return value
-orFail message Nothing = Prelude.fail (string message)
+orFail _ (Just value) = Monad.return value
+orFail message Nothing = Monad.fail message

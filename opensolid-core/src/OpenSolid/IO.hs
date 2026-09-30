@@ -31,6 +31,7 @@ import Data.Text.IO.Utf8 qualified
 import OpenSolid.Binary (Builder, ByteString)
 import OpenSolid.Duration (Duration)
 import OpenSolid.Duration qualified as Duration
+import OpenSolid.Monad qualified as Monad
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude hiding (forEach, forEachWithIndex)
 import OpenSolid.Prelude qualified
@@ -42,10 +43,10 @@ import System.IO.Error qualified
 import Prelude qualified
 
 succeed :: a -> IO a
-succeed = Prelude.return
+succeed = Monad.return
 
 fail :: Text -> IO a
-fail = Prelude.fail . string
+fail = Monad.fail
 
 map :: (a -> b) -> IO a -> IO b
 map = Prelude.fmap

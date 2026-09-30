@@ -1,6 +1,7 @@
 module OpenSolid.Try (Bind ((>>=)), (>>)) where
 
 import OpenSolid.Err qualified as Err
+import OpenSolid.Monad qualified as Monad
 import OpenSolid.Prelude hiding ((>>), (>>=))
 import Prelude qualified
 
@@ -9,7 +10,7 @@ class Bind m1 m2 where
 
 instance MonadFail m => Bind (Result x) m where
   Ok value >>= function = function value
-  Err err >>= _ = Prelude.fail (string (Err.message err))
+  Err err >>= _ = Monad.fail (Err.message err)
 
 instance Bind IO IO where
   (>>=) = (Prelude.>>=)

@@ -13,6 +13,8 @@ module OpenSolid.Result
 where
 
 import Data.Foldable qualified
+import OpenSolid.Err qualified as Err
+import OpenSolid.Monad qualified as Monad
 import OpenSolid.Prelude hiding (forEach)
 import Prelude qualified
 
@@ -29,8 +31,8 @@ map2 function result1 result = do
   Ok (function value1 value2)
 
 orFail :: MonadFail m => Result x a -> m a
-orFail (Ok value) = Prelude.return value
-orFail (Err err) = Prelude.fail (Prelude.show err)
+orFail (Ok value) = Monad.return value
+orFail (Err err) = Monad.fail (Err.message err)
 
 collect :: Traversable list => (a -> Result x b) -> list a -> Result x (list b)
 collect = Prelude.mapM

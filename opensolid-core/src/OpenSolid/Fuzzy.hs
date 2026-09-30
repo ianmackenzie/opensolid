@@ -8,6 +8,7 @@ module OpenSolid.Fuzzy
   )
 where
 
+import OpenSolid.Monad qualified as Monad
 import OpenSolid.Prelude
 import Prelude qualified
 
@@ -28,5 +29,5 @@ oneOf fuzzies = case fuzzies of
   [] -> Unresolved
 
 orFail :: MonadFail m => Text -> Fuzzy a -> m a
-orFail _ (Resolved value) = Prelude.return value
-orFail message Unresolved = Prelude.fail (string message)
+orFail _ (Resolved value) = Monad.return value
+orFail message Unresolved = Monad.fail message

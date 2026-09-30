@@ -173,6 +173,7 @@ library
     OpenSolid.Mesh
     OpenSolid.Mitsuba
     OpenSolid.Model3D
+    OpenSolid.Monad
     OpenSolid.NewtonRaphson.Curve
     OpenSolid.NewtonRaphson.Surface
     OpenSolid.NonEmpty
