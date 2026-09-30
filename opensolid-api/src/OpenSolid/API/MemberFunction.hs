@@ -146,12 +146,9 @@ invoke function = case function of
 normalizeSignature ::
   (Maybe ImplicitTolerance, List (Name, FFI.Type, Argument.Kind), FFI.Type) ->
   (Maybe ImplicitTolerance, List (Name, FFI.Type), List (Name, FFI.Type), FFI.Type)
-normalizeSignature (maybeImplicitTolerance, arguments, returnType) =
-  if not (List.isOrdered (\(_, _, kind1) (_, _, kind2) -> kind1 <= kind2) arguments)
-    then error "Named arguments should always come after positional arguments"
-    else do
-      let args desiredKind = [(name, typ) | (name, typ, kind) <- arguments, kind == desiredKind]
-      (maybeImplicitTolerance, args Argument.Positional, args Argument.Named, returnType)
+normalizeSignature (maybeImplicitTolerance, arguments, returnType) = do
+  let args desiredKind = [(name, typ) | (name, typ, kind) <- arguments, kind == desiredKind]
+  (maybeImplicitTolerance, args Argument.Positional, args Argument.Named, returnType)
 
 signature ::
   MemberFunction ->
