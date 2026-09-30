@@ -21,6 +21,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
+import OpenSolid.Try qualified as Try
 
 formatLength :: Length -> Text
 formatLength length =
@@ -32,16 +33,16 @@ testCurve label curve = do
   IO.printLine (label <> ": " <> formatLength length)
 
 testLineLength :: IO ()
-testLineLength = spatial do
-  line <- try do Curve2D.lineFrom Point2D.origin (Point2D.centimeters 30.0 40.0)
+testLineLength = spatial Try.do
+  line <- Curve2D.lineFrom Point2D.origin (Point2D.centimeters 30.0 40.0)
   testCurve "Line" line
 
 testQuadraticSplineLength :: IO ()
-testQuadraticSplineLength = spatial do
+testQuadraticSplineLength = spatial Try.do
   let p1 = Point2D.origin
   let p2 = Point2D.centimeters 20.0 30.0
   let p3 = Point2D.centimeters 40.0 0.0
-  spline <- try do Curve2D.quadraticBezier p1 p2 p3
+  spline <- Curve2D.quadraticBezier p1 p2 p3
   testCurve "Quadratic spline" spline
   IO.printLine ("Analytical value: " <> formatLength (analyticalLength p1 p2 p3))
 
@@ -62,12 +63,12 @@ analyticalLength (Point2D x0 y0) (Point2D x1 y1) (Point2D x2 y2) = do
   (a_32 * s_abc + a_2 * b * (s_abc - c_2) + (4.0 * c * a - b * b) * Number.log ((2.0 * a_2 + ba + s_abc) / (ba + c_2))) / (4.0 * a_32)
 
 testCubicSplineParameterization :: IO ()
-testCubicSplineParameterization = spatial do
+testCubicSplineParameterization = spatial Try.do
   let p1 = Point2D.centimeters 5.0 5.0
   let p2 = Point2D.centimeters 7.0 8.0
   let p3 = Point2D.centimeters 16.0 15.0
   let p4 = Point2D.centimeters 25.0 5.0
-  spline <- try do Curve2D.cubicBezier p1 p2 p3 p4
+  spline <- Curve2D.cubicBezier p1 p2 p3 p4
   let reversedSpline = Curve2D.reverse spline
   let length = Curve2D.length spline
   IO.printLine ("Cubic spline: " <> formatLength length)

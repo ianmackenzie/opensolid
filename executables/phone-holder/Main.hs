@@ -21,6 +21,7 @@ import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.Step qualified as Step
+import OpenSolid.Try qualified as Try
 import OpenSolid.World3D qualified as World3D
 import Path2D qualified
 import Path3D qualified
@@ -47,14 +48,14 @@ advancedFaceEntity loop surface =
     ]
 
 main :: IO ()
-main = spatial do
+main = spatial Try.do
   let rLarge = Length.centimeters 1.0
   let rSmall = Length.centimeters 0.5
   let thickness = Length.millimeters 3.0
   let width = Length.centimeters 5.0
 
   let baseLine = Line2D Point2D.origin (Point2D.centimeters 5.0 0.0)
-  profilePath <- try do
+  profilePath <-
     NonEmpty.one (Edge2D.Line baseLine)
       |> Path2D.addArc rLarge (Angle.degrees 100.0)
       &> Path2D.addLine (Length.centimeters 5.0)
@@ -65,7 +66,7 @@ main = spatial do
       &> Path2D.addArc rSmall (Angle.degrees -90.0)
       &> Path2D.addLine (Length.centimeters 1.0)
 
-  profile2D <- try do Path2D.thickenLeftwardBy thickness profilePath
+  profile2D <- Path2D.thickenLeftwardBy thickness profilePath
 
   let midPlane = World3D.rightPlane
   let rightPlane = midPlane & Plane3D.offsetBy (0.5 * width)
@@ -102,7 +103,7 @@ main = spatial do
         let loop = NonEmpty.four leftEdge endEdge rightEdge startEdge
         Ok (advancedFaceEntity loop surface)
 
-  extrudedFaces <- try do Result.collect extrudedFace (NonEmpty.loop (,) profile2D)
+  extrudedFaces <- Result.collect extrudedFace (NonEmpty.loop (,) profile2D)
   let allFaces = extrudedFaces & NonEmpty.push leftFace & NonEmpty.push rightFace
   let closedShell =
         Step.entity "CLOSED_SHELL" $

@@ -11,11 +11,12 @@ import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Svg qualified as Svg
+import OpenSolid.Try qualified as Try
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
 
 main :: IO ()
-main = spatial do
+main = spatial Try.do
   let weightCurve = Nonzero (Curve1D.quadraticSpline 1.0 (1.0 / Number.sqrt 2.0) 1.0)
   let vE = Vector2D 1.0 0.0
   let vNE = Vector2D 1.0 1.0 / Number.sqrt 2.0
@@ -26,7 +27,7 @@ main = spatial do
   let vS = Vector2D 0.0 -1.0
   let vSE = Vector2D 1.0 -1.0 / Number.sqrt 2.0
   let radius = Length.centimeters 10.0
-  let arc v1 v2 v3 = try do
+  let arc v1 v2 v3 = do
         let radialUnitVector = VectorCurve2D.quadraticBezier v1 v2 v3 / weightCurve
         Curve2D.displacedFrom Point2D.origin (radius * radialUnitVector)
   arc1 <- arc vE vNE vN

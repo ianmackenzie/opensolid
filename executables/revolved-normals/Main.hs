@@ -14,17 +14,18 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Result qualified as Result
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Text qualified as Text
+import OpenSolid.Try qualified as Try
 import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
-main = spatial do
+main = spatial Try.do
   let axes = [Axis2D.y, -Axis2D.y]
   let sweptAngles = [Angle.degrees 45.0, Angle.degrees -45.0]
   let interval = Interval (Length.centimeters 5.0) (Length.centimeters 10.0)
-  leftRegion <- try do Region2D.rectangle (Bounds2D -interval interval)
-  rightRegion <- try do Region2D.rectangle (Bounds2D interval interval)
+  leftRegion <- Region2D.rectangle (Bounds2D -interval interval)
+  rightRegion <- Region2D.rectangle (Bounds2D interval interval)
   let profiles = [leftRegion, rightRegion]
-  bodies <- try do
+  bodies <-
     Result.sequence
       [ Body3D.revolved World3D.frontPlane profile axis sweptAngle
       | profile <- profiles

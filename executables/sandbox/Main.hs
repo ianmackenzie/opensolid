@@ -42,6 +42,7 @@ import OpenSolid.Svg (Svg)
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
 import OpenSolid.Tolerance qualified as Tolerance
+import OpenSolid.Try qualified as Try
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
@@ -128,23 +129,23 @@ testListOperations = do
   log "Successive intervals" intervals
 
 getCrossProduct :: Result Text Number
-getCrossProduct = spatial do
-  vectorDirection <- try do Vector2D.direction (Vector2D.meters 2.0 3.0)
-  lineDirection <- try do Direction2D.from Point2D.origin Point2D.origin
+getCrossProduct = spatial Try.do
+  vectorDirection <- Vector2D.direction (Vector2D.meters 2.0 3.0)
+  lineDirection <- Direction2D.from Point2D.origin Point2D.origin
   Ok (vectorDirection `cross` lineDirection)
 
 testTry :: IO ()
 testTry =
-  IO.onError IO.printLine do
-    crossProduct <- try getCrossProduct
+  IO.onError IO.printLine Try.do
+    crossProduct <- getCrossProduct
     log "Got cross product" crossProduct
 
 testIOIteration :: IO ()
 testIOIteration = IO.forEach [1 .. 3] (log "Looping")
 
 doublingIO :: Text -> IO Int
-doublingIO input = do
-  value <- try do Int.parse input
+doublingIO input = Try.do
+  value <- Int.parse input
   let doubled = 2 * value
   IO.succeed doubled
 
@@ -176,27 +177,27 @@ testNonEmpty = do
   testEmptyCheck [2, 3, 1]
 
 testPlaneTorusIntersection :: IO ()
-testPlaneTorusIntersection = spatial do
+testPlaneTorusIntersection = spatial Try.do
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
-  crossSection <- try do Curve2D.circleWith {centerPoint = Point2D.x majorRadius, diameter = 2.0 * minorRadius}
-  surface <- try do Surface3D.revolved World3D.frontPlane crossSection Axis2D.y Angle.twoPi
+  crossSection <- Curve2D.circleWith {centerPoint = Point2D.x majorRadius, diameter = 2.0 * minorRadius}
+  surface <- Surface3D.revolved World3D.frontPlane crossSection Axis2D.y Angle.twoPi
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3D.xy (Angle.degrees 45), Direction3D.z
   let planeNormal = Direction3D.polar World3D.frontPlane (alpha + Angle.halfPi)
   let f = planeNormal `dot` (Surface3D.function surface - World3D.originPoint)
-  zeros <- try do SurfaceFunction1D.zeros f
+  zeros <- SurfaceFunction1D.zeros f
   drawZeros "executables/sandbox/test-plane-torus-intersection.svg" zeros
   IO.printLine "Plane torus intersection solutions:"
   log "  Crossing curves" (List.length zeros.crossingCurves)
   log "  Saddle points" (List.length zeros.saddlePoints)
 
 testPlaneParaboloidIntersection :: IO ()
-testPlaneParaboloidIntersection = unitless do
+testPlaneParaboloidIntersection = unitless Try.do
   let u = SurfaceFunction1D.u
   let v = SurfaceFunction1D.v
   let f = SurfaceFunction1D.squared u + SurfaceFunction1D.squared v - 0.5
-  zeros <- try do SurfaceFunction1D.zeros f
+  zeros <- SurfaceFunction1D.zeros f
   drawZeros "executables/sandbox/test-plane-paraboloid-intersection.svg" zeros
   IO.printLine "Plane paraboloid intersection solutions:"
   log "  Crossing curves" (List.length zeros.crossingCurves)
@@ -278,12 +279,12 @@ drawBezier ::
   List (Point2D Unitless) ->
   Point2D Unitless ->
   Result Text Svg
-drawBezier color startPoint innerControlPoints endPoint = do
+drawBezier color startPoint innerControlPoints endPoint = Try.do
   let drawingStartPoint = Point2D.convert toDrawing startPoint
   let drawingEndPoint = Point2D.convert toDrawing endPoint
   let drawingInnerControlPoints = List.map (Point2D.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints <> [drawingEndPoint])
-  curve <- try do spatial (Curve2D.bezier drawingControlPoints)
+  curve <- spatial (Curve2D.bezier drawingControlPoints)
   let drawCurveRange tRange = drawBounds (Curve2D.range tRange curve)
   let controlPointDiameter = Length.millimeters 10.0
   let drawControlPoint point = Svg.circleWith {centerPoint = point, diameter = controlPointDiameter}
@@ -301,7 +302,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
         ]
 
 testBezierSegment :: IO ()
-testBezierSegment = do
+testBezierSegment = Try.do
   let p1 = Point2D.origin
   let p2 = Point2D 0.0 5.0
   let p3 = Point2D 2.5 10.0
@@ -310,16 +311,16 @@ testBezierSegment = do
   let p6 = Point2D 10.0 10.0
   let coordinateBounds = Interval.convert toDrawing (Interval -1.0 11.0)
   let drawingBounds = Bounds2D coordinateBounds coordinateBounds
-  curveEntity <- try do drawBezier Color.blue p1 [p2, p3, p4, p5] p6
+  curveEntity <- drawBezier Color.blue p1 [p2, p3, p4, p5] p6
   Svg.write "executables/sandbox/test-bezier-segment.svg" (Svg.viewBox drawingBounds) curveEntity
 
 testHermiteBezier :: IO ()
-testHermiteBezier = spatial do
+testHermiteBezier = spatial Try.do
   let startPoint = Point2D.origin
   let startDerivatives = [Vector2D.centimeters 10.0 10.0]
   let endDerivatives = [Vector2D.centimeters 0.0 -10.0, Vector2D.zero]
   let endPoint = Point2D.centimeters 10.0 0.0
-  curve <- try do Curve2D.hermite startPoint startDerivatives endPoint endDerivatives
+  curve <- Curve2D.hermite startPoint startDerivatives endPoint endDerivatives
   let attributes = [Svg.strokeColor Color.blue, Svg.strokeWidth (Length.millimeters 1.0)]
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   let curveEntity = Svg.with attributes do Svg.curve resolution curve
@@ -347,11 +348,11 @@ textSum t1 t2 = do
 
 testTextSum :: IO ()
 testTextSum = do
-  IO.onError IO.printLine do
-    sum <- try do textSum "5" "abc"
+  IO.onError IO.printLine Try.do
+    sum <- textSum "5" "abc"
     log "sum" sum
-  IO.onError IO.printLine do
-    sum <- try do textSum "2" "3"
+  IO.onError IO.printLine Try.do
+    sum <- textSum "2" "3"
     log "sum" sum
 
 testNewtonRaphson2D :: IO ()

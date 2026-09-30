@@ -10,11 +10,12 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Stl qualified as Stl
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
+import OpenSolid.Try qualified as Try
 import OpenSolid.UvRegion qualified as UvRegion
 import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
-main = spatial do
+main = spatial Try.do
   let majorRadius = Length.meter
   let k = Length.meters 2.0
   let minorRadius =
@@ -28,8 +29,8 @@ main = spatial do
           + r * SurfaceFunction1D.cos theta * World3D.rightwardDirection
           + r * SurfaceFunction1D.sin theta * World3D.forwardDirection
           + minorRadius * SurfaceFunction1D.sin phi * World3D.upwardDirection
-  surface <- try do Surface3D.parametric surfaceFunction UvRegion.unitSquare
-  body <- try do Body3D.boundedBy [surface]
+  surface <- Surface3D.parametric surfaceFunction UvRegion.unitSquare
+  body <- Body3D.boundedBy [surface]
   let resolution = Resolution.maxSize (Length.centimeters 20.0)
   let mesh = Body3D.toPointMesh resolution body
   Stl.writeBinary "executables/croissant/mesh.stl" Convention3D.yUp Length.inMillimeters mesh

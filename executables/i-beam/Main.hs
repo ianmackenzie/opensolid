@@ -14,10 +14,11 @@ import OpenSolid.Polygon2D (Polygon2D (Polygon2D))
 import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
+import OpenSolid.Try qualified as Try
 import OpenSolid.World3D qualified as World3D
 
 main :: IO ()
-main = spatial do
+main = spatial Try.do
   let length = Length.centimeters 30.0
   let width = Length.centimeters 10.0
   let height = Length.centimeters 15.0
@@ -37,9 +38,9 @@ main = spatial do
         , webTopRight & Point2D.mirrorAcross Axis2D.x
         , webTopRight & Point2D.mirrorAcross Axis2D.y & Point2D.mirrorAcross Axis2D.x
         ]
-  baseProfile <- try do Region2D.polygon (Polygon2D allPoints)
-  profile <- try do Region2D.fillet {points = filletPoints, radius = filletRadius} baseProfile
-  body <- try do Body3D.extruded World3D.frontPlane profile (-0.5 * length) (0.5 * length)
+  baseProfile <- Region2D.polygon (Polygon2D allPoints)
+  profile <- Region2D.fillet {points = filletPoints, radius = filletRadius} baseProfile
+  body <- Body3D.extruded World3D.frontPlane profile (-0.5 * length) (0.5 * length)
   let material = PbrMaterial.metal {baseColor = Color.rgb1 0.913 0.921 0.925, roughness = 0.3}
   let model = Model3D.bodyWith [Model3D.pbrMaterial material] body
   let resolution = Resolution.maxError (Length.millimeters 1.0)

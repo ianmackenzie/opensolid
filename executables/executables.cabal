@@ -39,6 +39,7 @@ common config
     OverloadedRecordUpdate
     OverloadedStrings
     PatternSynonyms
+    QualifiedDo
     RebindableSyntax
     TypeApplications
 
