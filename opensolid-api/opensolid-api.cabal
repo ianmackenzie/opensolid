@@ -54,6 +54,7 @@ library
     BlockArguments
     ImplicitParams
     LexicalNegation
+    MultilineStrings
     OverloadedLabels
     OverloadedRecordDot
     OverloadedRecordUpdate

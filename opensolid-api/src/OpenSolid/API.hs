@@ -850,9 +850,6 @@ uvPolygon =
     , Class.property "Signed Area" Polygon2D.signedArea $(docs 'Polygon2D.signedArea)
     ]
 
-at :: forall location value result. At value location result => location -> value -> result
-at = flip (@)
-
 type Curve = Curve1D.Curve1D Unitless
 
 curve :: Class
@@ -869,7 +866,7 @@ curve =
     , Class.property "Cos" (Curve1D.cos . (Angle.radian *)) $(docs 'Curve1D.cos)
     , Class.member0R "Find Roots" (unitless Curve1D.findRoots) $(docs 'Curve1D.findRoots)
     , Class.member0 "Is Zero" (unitless (~= Curve1D.zero)) "Check if a curve is (approximately) zero everywhere."
-    , Class.member1 "At" "Parameter Value" (at @Number) "Get the value of a curve at a given parameter value."
+    , Class.atParameterValue
     , Class.negation
     , Class.numberPlus
     , Class.numberMinus
@@ -909,7 +906,7 @@ angleCurve =
     , Class.property "Cos" Curve1D.cos $(docs 'Curve1D.cos)
     , Class.member0R "Find Roots" (angular Curve1D.findRoots) $(docs 'Curve1D.findRoots)
     , Class.member0 "Is Zero" (angular (~= Curve1D.zero)) "Check if a curve is (approximately) zero everywhere."
-    , Class.member1 "At" "Parameter Value" (at @Number) "Get the value of a curve at a given parameter value."
+    , Class.atParameterValue
     , Class.negation
     , Class.numberTimes
     , Class.plus @AngleCurve
@@ -936,7 +933,7 @@ lengthCurve =
     , Class.property "Squared" Curve1D.squared $(docs 'Curve1D.squared)
     , Class.memberT0R "Find Roots" Curve1D.findRoots $(docs 'Curve1D.findRoots)
     , Class.memberT0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
-    , Class.member1 "At" "Parameter Value" (at @Number) "Get the value of a curve at a given parameter value."
+    , Class.atParameterValue
     , Class.negation
     , Class.numberTimes
     , Class.plus @LengthCurve
@@ -962,7 +959,7 @@ areaCurve =
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
-    , Class.member1 "At" "Parameter Value" (at @Number) "Get the value of a curve at a given parameter value."
+    , Class.atParameterValue
     , Class.negation
     , Class.numberTimes
     , Class.plus @AreaCurve

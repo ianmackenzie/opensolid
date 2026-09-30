@@ -83,6 +83,8 @@ module OpenSolid.API.Class
   , divMod
   , dot
   , cross
+  , atParameterValue
+  , atUniformParameterValue
   , nested
   , functions
   )
@@ -128,6 +130,7 @@ import OpenSolid.Prelude hiding (cross, dot)
 import OpenSolid.Prelude qualified
 import OpenSolid.Result qualified as Result
 import OpenSolid.Try qualified as Try
+import OpenSolid.Uniform (Uniform (Uniform))
 
 data Class where
   Class ::
@@ -1189,6 +1192,29 @@ cross ::
 cross =
   PostOverload BinaryOperator.Cross $
     PostOperatorOverload (wrap2 (OpenSolid.Prelude.cross :: value -> rhs -> result))
+
+atParameterValue :: (FFI curve, FFI result, At curve Number result) => Member curve
+atParameterValue = do
+  let impl (tValue :: Number) curve = curve @ tValue
+  let docs = "Get the value of a curve at a given parameter value."
+  member1 "At" "Parameter Value" impl docs
+
+atUniformParameterValue :: (FFI curve, FFI result, At curve Uniform result) => Member curve
+atUniformParameterValue = do
+  let impl (rValue :: Number) curve = curve @ Uniform rValue
+  let docs =
+        """Get the value of a curve at a given uniform parameter value.
+
+        Unlike normal curve evaluation, when using this function,
+        passing evenly-spaced parameter values (e.g. 0, 0.1, 0.2, 0.3...)
+        will always result in points that are evenly spaced along the curve.
+
+        Said another way, if the input parameter to this function is varied at a constant rate,
+        the resulting evaluated point will move at a constant speed.
+        (This will be true regardless for simple curves like lines and arcs,
+        but not in general for more complex ones like Bezier or NURBS curves.)
+        """
+  member1 "At Uniform" "Parameter Value" impl docs
 
 nested :: FFI nestedValue => Text -> List (Member nestedValue) -> Member value
 nested = Nested
