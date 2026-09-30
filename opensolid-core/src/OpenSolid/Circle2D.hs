@@ -1,7 +1,6 @@
 module OpenSolid.Circle2D
-  ( Circle2D
-  , withRadius
-  , withDiameter
+  ( Circle2D (Circle2D)
+  , with
   , centerPoint
   , radius
   , diameter
@@ -33,6 +32,14 @@ instance FFI (Circle2D Meters) where
 instance FFI (Circle2D Unitless) where
   representation = FFI.classRepresentation "UvCircle"
 
+-- | Construct a circle with the given center point and diameter.
+with ::
+  "centerPoint" ::: Point2D units ->
+  "diameter" ::: Quantity units ->
+  Circle2D units
+with ("centerPoint" ::: givenCenterPoint) ("diameter" ::: givenDiameter) =
+  Circle2D {centerPoint = givenCenterPoint, radius = 0.5 * Quantity.abs givenDiameter}
+
 -- | Get the center point of a circle.
 centerPoint :: Circle2D units -> Point2D units
 centerPoint = (.centerPoint)
@@ -44,18 +51,6 @@ radius = (.radius)
 -- | Get the diameter of a circle.
 diameter :: Circle2D units -> Quantity units
 diameter circle = 2.0 * radius circle
-
--- | Construct a circle with the given radius and center point.
-withRadius :: Quantity units -> Point2D units -> Circle2D units
-withRadius givenRadius givenCenterPoint =
-  Circle2D
-    { radius = Quantity.abs givenRadius
-    , centerPoint = givenCenterPoint
-    }
-
--- | Construct a circle with the given diameter and center point.
-withDiameter :: Quantity units -> Point2D units -> Circle2D units
-withDiameter givenDiameter = withRadius (0.5 * givenDiameter)
 
 {-| Construct a point on the circle, at the given angle.
 

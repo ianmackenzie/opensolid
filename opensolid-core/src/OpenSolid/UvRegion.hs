@@ -4,6 +4,7 @@ module OpenSolid.UvRegion
   , boundedBy
   , rectangle
   , circle
+  , circleWith
   , flip
   , flipAxis
   , classifyPoint
@@ -56,6 +57,13 @@ rectangle = unitless Region2D.rectangle
 -- | Create a region from the given circle.
 circle :: Circle2D Unitless -> Result Region2D.EmptyRegion UvRegion
 circle = unitless Region2D.circle
+
+-- | Create a circular region with the given center point and diameter.
+circleWith ::
+  "centerPoint" ::: UvPoint ->
+  "diameter" ::: Number ->
+  Result Region2D.EmptyRegion UvRegion
+circleWith = unitless Region2D.circleWith
 
 flip :: UvRegion -> UvRegion
 flip = Region2D.mirrorAcross flipAxis

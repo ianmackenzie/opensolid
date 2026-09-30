@@ -777,8 +777,7 @@ type Circle2D = Circle2D.Circle2D Meters
 circle2D :: Class
 circle2D =
   Class.new @Circle2D $(docs ''Circle2D.Circle2D) $
-    [ Class.factory2 "With Radius" "Radius" "Center Point" Circle2D.withRadius $(docs 'Circle2D.withRadius)
-    , Class.factory2 "With Diameter" "Diameter" "Center Point" Circle2D.withDiameter $(docs 'Circle2D.withDiameter)
+    [ Class.constructor2 "Center Point" "Diameter" Circle2D.with $(docs 'Circle2D.with)
     , Class.property "Center Point" Circle2D.centerPoint $(docs 'Circle2D.centerPoint)
     , Class.property "Diameter" Circle2D.diameter $(docs 'Circle2D.diameter)
     , Class.property "Radius" Circle2D.radius $(docs 'Circle2D.radius)
@@ -790,8 +789,7 @@ type UvCircle = Circle2D.Circle2D Unitless
 uvCircle :: Class
 uvCircle =
   Class.new @UvCircle $(docs ''Circle2D.Circle2D) $
-    [ Class.factory2 "With Radius" "Radius" "Center Point" Circle2D.withRadius $(docs 'Circle2D.withRadius)
-    , Class.factory2 "With Diameter" "Diameter" "Center Point" Circle2D.withDiameter $(docs 'Circle2D.withDiameter)
+    [ Class.constructor2 "Center Point" "Diameter" Circle2D.with $(docs 'Circle2D.with)
     , Class.property "Center Point" Circle2D.centerPoint $(docs 'Circle2D.centerPoint)
     , Class.property "Diameter" Circle2D.diameter $(docs 'Circle2D.diameter)
     , Class.property "Radius" Circle2D.radius $(docs 'Circle2D.radius)
@@ -994,6 +992,7 @@ svg =
     , Class.factory1 "Polygon" "Polygon" Svg.polygon $(docs 'Svg.polygon)
     , Class.factory1 "Triangle" "Triangle" Svg.triangle $(docs 'Svg.triangle)
     , Class.factory1 "Circle" "Circle" Svg.circle $(docs 'Svg.circle)
+    , Class.factory2 "Circle With" "Center Point" "Diameter" Svg.circleWith $(docs 'Svg.circleWith)
     , Class.factory2 "Curve" "Resolution" "Curve" Svg.curve $(docs 'Svg.curve)
     , Class.member1 "With Attributes" "Attributes" Svg.with $(docs 'Svg.with)
     , Class.constant "Black Stroke" Svg.blackStroke $(docs 'Svg.blackStroke)
@@ -1511,6 +1510,7 @@ curve2D =
     , Class.factoryT3R "Swept Arc" "Center Point" "Start Point" "Swept Angle" Curve2D.sweptArc $(docs 'Curve2D.sweptArc)
     , Class.factoryT4R "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" Curve2D.cornerArc $(docs 'Curve2D.cornerArc)
     , Class.factoryT1R "Circle" "Circle" Curve2D.circle $(docs 'Curve2D.circle)
+    , Class.factoryT2R "Circle With" "Center Point" "Diameter" Curve2D.circleWith $(docs 'Curve2D.circleWith)
     , Class.factoryT1R "Bezier" "Control Points" Curve2D.bezier $(docs 'Curve2D.bezier)
     , Class.factoryT4R "Hermite" "Start Point" "Start Derivatives" "End Point" "End Derivatives" Curve2D.hermite $(docs 'Curve2D.hermite)
     , Class.property "Start Point" (Curve2D.startPoint) "The start point of the curve."
@@ -1536,6 +1536,7 @@ uvCurve =
     , Class.factory3R "Arc From" "Start Point" "End Point" "Swept Angle" UvCurve.arcFrom $(docs 'UvCurve.arcFrom)
     , Class.factory4R "Polar Arc" "Center Point" "Radius" "Start Angle" "End Angle" (unitless Curve2D.polarArc) $(docs 'Curve2D.polarArc)
     , Class.factory1R "Circle" "Circle" (unitless Curve2D.circle) $(docs 'Curve2D.circle)
+    , Class.factory2R "Circle With" "Center Point" "Diameter" (unitless Curve2D.circleWith) $(docs 'Curve2D.circleWith)
     , Class.factory3R "Swept Arc" "Center Point" "Start Point" "Swept Angle" (unitless Curve2D.sweptArc) $(docs 'Curve2D.sweptArc)
     , Class.factory4R "Corner Arc" "Corner Point" "Incoming" "Outgoing" "Radius" UvCurve.cornerArc $(docs 'UvCurve.cornerArc)
     , Class.factory1R "Bezier" "Control Points" (unitless Curve2D.bezier) $(docs 'Curve2D.bezier)
@@ -1560,6 +1561,7 @@ region2D =
     [ Class.factoryT1R "Bounded By" "Curves" Region2D.boundedBy $(docs 'Region2D.boundedBy)
     , Class.factoryT1R "Rectangle" "Bounding Box" Region2D.rectangle $(docs 'Region2D.rectangle)
     , Class.factoryT1R "Circle" "Circle" Region2D.circle $(docs 'Region2D.circle)
+    , Class.factoryT2R "Circle With" "Center Point" "Diameter" Region2D.circleWith $(docs 'Region2D.circleWith)
     , Class.property "Outer Loop" Region2D.outerLoop $(docs 'Region2D.outerLoop)
     , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
     , Class.property "Boundary Curves" (Set2D.toNonEmpty . Region2D.boundaryCurves) $(docs 'Region2D.boundaryCurves)
@@ -1575,6 +1577,7 @@ uvRegion =
     , Class.factory1R "Bounded By" "Curves" UvRegion.boundedBy $(docs 'UvRegion.boundedBy)
     , Class.factory1R "Rectangle" "Bounding Box" UvRegion.rectangle $(docs 'UvRegion.rectangle)
     , Class.factory1R "Circle" "Circle" UvRegion.circle $(docs 'UvRegion.circle)
+    , Class.factory2R "Circle With" "Center Point" "Diameter" UvRegion.circleWith $(docs 'UvRegion.circleWith)
     , Class.property "Outer Loop" Region2D.outerLoop $(docs 'Region2D.outerLoop)
     , Class.property "Inner Loops" Region2D.innerLoops $(docs 'Region2D.innerLoops)
     , Class.property "Boundary Curves" (Set2D.toNonEmpty . Region2D.boundaryCurves) $(docs 'Region2D.boundaryCurves)

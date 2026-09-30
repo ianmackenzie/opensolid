@@ -1,7 +1,6 @@
 module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
-import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Length qualified as Length
@@ -31,7 +30,7 @@ main = spatial do
   arc23 <- try do Curve2D.arcFrom p2 p3 Angle.quarterTurn
   line34 <- try do Curve2D.lineFrom p3 p4
   line40 <- try do Curve2D.lineFrom p4 p0
-  hole <- try do Curve2D.circle (Circle2D.withDiameter holeDiameter holeCenter)
+  hole <- try do Curve2D.circleWith {centerPoint = holeCenter, diameter = holeDiameter}
   region <- try do Region2D.boundedBy [line01, line12, arc23, line34, line40, hole]
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   Svg.write "executables/region-triangulation/region.svg" (Svg.padding Length.centimeter) do

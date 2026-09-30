@@ -2,7 +2,6 @@ module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area qualified as Area
-import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
@@ -81,8 +80,7 @@ testCubicSplineParameterization = spatial do
               let endHue = Angle.turns 0.75
               let hue = Quantity.interpolateFrom startHue endHue tValue
               let fillColor = Color.hsl1 hue 0.5 0.5
-              Svg.with [Svg.fillColor fillColor] do
-                Svg.circle (Circle2D.withDiameter diameter point)
+              Svg.with [Svg.fillColor fillColor] do Svg.circleWith {centerPoint = point, diameter}
         let resolution = Resolution.maxError Length.micrometer
         Svg.write fileName (Svg.padding Length.centimeter) $
           Svg.group

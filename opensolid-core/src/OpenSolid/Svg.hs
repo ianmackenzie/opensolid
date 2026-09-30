@@ -15,6 +15,7 @@ module OpenSolid.Svg
   , polygon
   , triangle
   , circle
+  , circleWith
   , bounds
   , curve
   , region
@@ -281,6 +282,11 @@ circle givenCircle = do
   let cyAttribute = Attribute "cy" (lengthText -cy)
   let rAttribute = Attribute "r" (lengthText (Circle2D.radius givenCircle))
   entity "circle" (Circle2D.bounds givenCircle) [cxAttribute, cyAttribute, rAttribute]
+
+-- | Draw a circle with the given center point and diameter.
+circleWith :: "centerPoint" ::: Point2D Meters -> "diameter" ::: Length -> Svg
+circleWith ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) =
+  circle (Circle2D.with {centerPoint, diameter})
 
 -- | Draw a curve with the given resolution.
 curve :: Resolution Meters -> Curve2D Meters -> Svg

@@ -1,6 +1,5 @@
 module Main (main) where
 
-import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Length qualified as Length
@@ -37,7 +36,7 @@ main = spatial do
   let circle = Curve2D.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
   let drawDot point =
         Svg.with [Svg.whiteFill] do
-          Svg.circle (Circle2D.withDiameter (Length.millimeters 4.0) point)
+          Svg.circleWith {centerPoint = point, diameter = Length.millimeters 4.0}
   let drawCurve n curve =
         Svg.group
           [ Svg.curve (Resolution.maxError Length.micrometer) curve

@@ -5,7 +5,6 @@ import OpenSolid.Area qualified as Area
 import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Bounds2D qualified as Bounds2D
-import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Color (Color)
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2D qualified as Curve2D
@@ -180,7 +179,7 @@ testPlaneTorusIntersection :: IO ()
 testPlaneTorusIntersection = spatial do
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
-  crossSection <- try do Curve2D.circle (Circle2D.withRadius minorRadius (Point2D.x majorRadius))
+  crossSection <- try do Curve2D.circleWith {centerPoint = Point2D.x majorRadius, diameter = 2.0 * minorRadius}
   surface <- try do Surface3D.revolved World3D.frontPlane crossSection Axis2D.y Angle.twoPi
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3D.xy (Angle.degrees 45), Direction3D.z
@@ -243,7 +242,7 @@ drawDot :: Color -> UvPoint -> Svg
 drawDot color point = do
   let centerPoint = Point2D.convert toDrawing point
   let diameter = Length.millimeters 1.0
-  Svg.with [Svg.fillColor color] do Svg.circle (Circle2D.withDiameter diameter centerPoint)
+  Svg.with [Svg.fillColor color] do Svg.circleWith {centerPoint, diameter}
 
 delayedPrint :: Int -> Duration -> IO ()
 delayedPrint n delay = do
@@ -287,7 +286,7 @@ drawBezier color startPoint innerControlPoints endPoint = do
   curve <- try do spatial (Curve2D.bezier drawingControlPoints)
   let drawCurveRange tRange = drawBounds (Curve2D.range tRange curve)
   let controlPointDiameter = Length.millimeters 10.0
-  let drawControlPoint point = Svg.circle (Circle2D.withDiameter controlPointDiameter point)
+  let drawControlPoint point = Svg.circleWith {centerPoint = point, diameter = controlPointDiameter}
   let resolution = Resolution.maxError Length.millimeter
   Ok $
     Svg.with [Svg.strokeColor color, Svg.strokeWidth (Length.millimeters 1.0)] do

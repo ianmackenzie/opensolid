@@ -79,7 +79,7 @@ endPoint :: Arc2D units -> Point2D units
 endPoint arc = centerPoint arc + Vector2D.polar (radius arc) (endAngle arc)
 
 toCircle :: Arc2D units -> Circle2D units
-toCircle arc = Circle2D.withRadius (radius arc) (centerPoint arc)
+toCircle arc = Circle2D.with {centerPoint = centerPoint arc, diameter = 2.0 * radius arc}
 
 point :: Arc2D units -> Number -> Point2D units
 point arc t = do

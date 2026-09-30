@@ -20,6 +20,7 @@ module OpenSolid.Curve2D
   , ellipticalArc
   , customArc
   , circle
+  , circleWith
   , ellipse
   , bezier
   , quadraticBezier
@@ -370,6 +371,15 @@ circle givenCircle =
     , startAngle = Angle.zero
     , endAngle = Angle.twoPi
     }
+
+-- | Create a circular curve with the given center point and diameter.
+circleWith ::
+  Tolerance units =>
+  "centerPoint" ::: Point2D units ->
+  "diameter" ::: Quantity units ->
+  Result (IsDegenerate units) (Curve2D units)
+circleWith ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) =
+  circle (Circle2D.with {centerPoint, diameter})
 
 {-| Create an ellipes with the given principal axes and major/minor radii.
 The first radius given will be the radius along the X axis,

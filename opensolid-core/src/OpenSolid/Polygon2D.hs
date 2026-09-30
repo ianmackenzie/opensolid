@@ -74,8 +74,9 @@ The polygon will be oriented such that its bottom-most edge is horizontal.
 -}
 circumscribed :: Int -> Circle2D units -> Result IsEmpty (Polygon2D units)
 circumscribed n circle = do
+  let centerPoint = Circle2D.centerPoint circle
   let outerDiameter = Circle2D.diameter circle / Angle.cos (Angle.pi / Number.fromInt n)
-  let outerCircle = Circle2D.withDiameter outerDiameter (Circle2D.centerPoint circle)
+  let outerCircle = Circle2D.with {centerPoint, diameter = outerDiameter}
   inscribed n outerCircle
 
 {-| Create a hexagon with the given center point and height.
@@ -86,8 +87,9 @@ hexagon ::
   "centerPoint" ::: Point2D units ->
   "height" ::: Quantity units ->
   Result IsEmpty (Polygon2D units)
-hexagon ("centerPoint" ::: centerPoint) ("height" ::: height) =
-  circumscribed 6 (Circle2D.withDiameter height centerPoint)
+hexagon ("centerPoint" ::: centerPoint) ("height" ::: height) = do
+  let innerCircle = Circle2D.with {centerPoint, diameter = height}
+  circumscribed 6 innerCircle
 
 -- | Get the vertices of a polygon.
 vertices :: Polygon2D units -> NonEmpty (Point2D units)

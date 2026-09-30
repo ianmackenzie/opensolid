@@ -85,7 +85,9 @@ endPoint :: Arc3D space -> Point3D space
 endPoint arc = point arc 1.0
 
 toCircle :: Arc3D space -> Circle3D space
-toCircle arc = Circle3D.on (plane arc) (Circle2D.withRadius (radius arc) Point2D.origin)
+toCircle arc =
+  Circle3D.on (plane arc) <|
+    Circle2D.with {centerPoint = Point2D.origin, diameter = 2.0 * radius arc}
 
 reverse :: Arc3D space -> Arc3D space
 reverse (Arc3D p r a b) = Arc3D p r b a

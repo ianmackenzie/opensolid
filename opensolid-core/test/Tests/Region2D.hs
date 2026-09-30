@@ -3,7 +3,6 @@ module Tests.Region2D (tests) where
 import OpenSolid.Angle qualified as Angle
 import OpenSolid.Area (Area)
 import OpenSolid.Area qualified as Area
-import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Estimate qualified as Estimate
 import OpenSolid.Interval qualified as Interval
@@ -77,7 +76,7 @@ squareWithHoleArea = Test.verify "squareWithHoleArea" do
   let centerPoint = Point2D (0.5 * width) (0.5 * width)
   let holeDiameter = 0.5 * width
   let holeRadius = 0.5 * holeDiameter
-  hole <- try do Curve2D.circle (Circle2D.withDiameter holeDiameter centerPoint)
+  hole <- try do Curve2D.circleWith {centerPoint, diameter = holeDiameter}
   region <- try do Region2D.boundedBy [line1, line3, line2, line4, hole]
   let expectedArea = width * width - Number.pi * holeRadius * holeRadius
   Test.expect (areaIsApproximately expectedArea region)
@@ -108,7 +107,7 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" do
   line3 <- try do Curve2D.lineFrom p4 p3
   line4 <- try do Curve2D.lineFrom p4 p1
   let centerPoint = Point2D (0.5 * width) (0.5 * width)
-  hole <- try do Curve2D.circle (Circle2D.withDiameter width centerPoint)
+  hole <- try do Curve2D.circleWith {centerPoint, diameter = width}
   case Region2D.boundedBy [line1, line2, line3, line4, hole] of
     Ok _ -> Test.fail "Expected non-manifold region construction to fail"
     Err _ -> Test.pass
@@ -116,9 +115,9 @@ squareWithTangentHole = Test.verify "squareWithTangentHole" do
 twoCircles :: Test
 twoCircles = Test.verify "twoCircles" do
   circle1 <- try do
-    Curve2D.circle (Circle2D.withDiameter (Length.meters 2.0) (Point2D.meters -2.0 0.0))
+    Curve2D.circleWith {centerPoint = Point2D.meters -2.0 0.0, diameter = Length.meters 2.0}
   circle2 <- try do
-    Curve2D.circle (Circle2D.withDiameter (Length.meters 1.0) (Point2D.meters 1.0 0.0))
+    Curve2D.circleWith {centerPoint = Point2D.meters 1.0 0.0, diameter = Length.meters 1.0}
   case Region2D.boundedBy [circle1, circle2] of
     Ok _ -> Test.fail "Expected region construction to fail when given two disjoint circles"
     Err _ -> Test.pass
@@ -129,7 +128,7 @@ pointContainment = Test.verify "pointContainment" do
   let r = Length.centimeters 2.5
   let point i j = Point2D (i * d) (j * d)
   let circle i j = do
-        curve <- Curve2D.circle (Circle2D.withRadius r (point i j))
+        curve <- Curve2D.circleWith {centerPoint = point i j, diameter = 2.0 * r}
         Ok [curve]
   let square i j = do
         let cx = i * d

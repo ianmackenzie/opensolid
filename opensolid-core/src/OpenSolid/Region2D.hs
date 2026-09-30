@@ -8,6 +8,7 @@ module OpenSolid.Region2D
   , boundedBy
   , rectangle
   , circle
+  , circleWith
   , polygon
   , outerBoundary
   , outerLoop
@@ -188,6 +189,15 @@ circle givenCircle =
       let panic = error "Constructing region from non-empty circle should not fail"
       let edges = NonEmpty.one (Curve2D.circle givenCircle !! panic)
       Ok (unsafe (Boundary.unsafe edges) Bag2D.empty)
+
+-- | Create a circular region with the given center point and diameter.
+circleWith ::
+  Tolerance units =>
+  "centerPoint" ::: Point2D units ->
+  "diameter" ::: Quantity units ->
+  Result EmptyRegion (Region2D units)
+circleWith ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) =
+  circle (Circle2D.with {centerPoint, diameter})
 
 -- | Create a region from the given polygon.
 polygon :: Tolerance units => Polygon2D units -> Result Text (Region2D units)

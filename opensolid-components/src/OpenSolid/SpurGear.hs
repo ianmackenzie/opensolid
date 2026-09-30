@@ -109,4 +109,6 @@ profile gear = do
   Ok (List.combine rotatedProfileCurves [0 .. n - 1])
 
 bounds :: SpurGear -> Bounds2D Meters
-bounds gear = Circle2D.bounds (Circle2D.withDiameter (outerDiameter gear) Point2D.origin)
+bounds gear = do
+  let outerCircle = Circle2D.with {centerPoint = Point2D.origin, diameter = outerDiameter gear}
+  Circle2D.bounds outerCircle
