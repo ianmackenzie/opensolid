@@ -158,7 +158,7 @@ toText layout svg = do
         , Attribute "width" (lengthText width <> "mm")
         , Attribute "height" (lengthText height <> "mm")
         , Attribute "viewBox" $
-            Text.join " " $
+            Text.sentence
               [ lengthText x1
               , lengthText -y2
               , lengthText width
