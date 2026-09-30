@@ -736,7 +736,7 @@ medialAxis curve1 curve2 = do
   let target =
         v2 `cross_` (2.0 * (v1 `dot_` d) ?*? d - VectorSurfaceFunction2D.squaredMagnitude_ d ?*? v1)
   let targetTolerance = ?tolerance ?*? ((?tolerance ?*? ?tolerance) ?*? ?tolerance)
-  case Tolerance.using targetTolerance (SurfaceFunction1D.zeros target) of
+  case Tolerance.using targetTolerance (SurfaceFunction1D.findZeros target) of
     Err SurfaceFunction1D.IsZero -> TODO -- curves are identical arcs?
     Ok zeros ->
       assert (List.isEmpty zeros.crossingLoops && List.isEmpty zeros.tangentPoints) do

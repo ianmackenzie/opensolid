@@ -9,7 +9,7 @@ module OpenSolid.Curve1D
   , compiled
   , derivative
   , range
-  , roots
+  , findRoots
   , degeneracyTolerance
   , squared_
   , erase
@@ -89,7 +89,7 @@ bezier :: NonEmpty (Quantity units) -> Curve1D units
 compiled :: Curve1D units -> Compiled units
 derivative :: Curve1D units -> Curve1D units
 range :: Interval Unitless -> Curve1D units -> Interval units
-roots :: Tolerance units => Curve1D units -> Result IsZero (List Root)
+findRoots :: Tolerance units => Curve1D units -> Result IsZero (List Root)
 degeneracyTolerance :: Curve1D units -> Quantity units
 squared_ :: Curve1D units -> Curve1D (units ?*? units)
 erase :: Curve1D units -> Curve1D Unitless

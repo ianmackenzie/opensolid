@@ -32,7 +32,7 @@ module OpenSolid.VectorCurve
   , squaredMagnitude
   , reverse
   , transformBy
-  , zeros
+  , findZeros
   , erase
   , unerase
   , coerce
@@ -1153,14 +1153,15 @@ transformBy transform curve = do
           (compiled curve)
   new compiledTransformed (transformBy affineTransform (derivative curve))
 
-zeros ::
+findZeros ::
   (VectorCurveExists dimension units space, Tolerance units) =>
   VectorCurve dimension units space ->
   Result IsZero (List Number)
-zeros vectorCurve =
-  case Tolerance.using (Quantity.squared_ ?tolerance) (Curve1D.roots (squaredMagnitude_ vectorCurve)) of
-    Ok zeros1D -> Ok (List.map Curve1D.Root.location zeros1D)
-    Err Curve1D.IsZero -> Err IsZero
+findZeros vectorCurve =
+  Tolerance.using (Quantity.squared_ ?tolerance) $
+    case Curve1D.findRoots (squaredMagnitude_ vectorCurve) of
+      Ok zeros1D -> Ok (List.map Curve1D.Root.location zeros1D)
+      Err Curve1D.IsZero -> Err IsZero
 
 squaredMagnitude_ ::
   VectorCurveExists dimension units space =>

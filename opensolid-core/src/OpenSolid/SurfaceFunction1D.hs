@@ -14,7 +14,7 @@ module OpenSolid.SurfaceFunction1D
   , v
   , Zeros
   , IsZero (IsZero)
-  , zeros
+  , findZeros
   , new
   , squared
   , squared_
@@ -127,7 +127,7 @@ instance
     -- TODO optimize this to use a special Solve2D.find or similar
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and the full geometry of each)
-    case zeros (function - quantity) of
+    case findZeros (function - quantity) of
       Ok (Zeros [] [] [] []) -> False
       Ok (Zeros {}) -> True
       Err IsZero -> True
@@ -505,8 +505,8 @@ cos f = do
 
 data IsZero = IsZero deriving (Eq, Show, Err)
 
-zeros :: Tolerance units => SurfaceFunction1D units -> Result IsZero Zeros
-zeros function
+findZeros :: Tolerance units => SurfaceFunction1D units -> Result IsZero Zeros
+findZeros function
   | function ~= zero = Err IsZero
   | otherwise = do
       let (dfdu, dfdv) = partialDerivatives function
@@ -515,7 +515,7 @@ zeros function
       -- in subdomains where we know the denominator is non-zero
       let dudv = -dfdv / Nonzero dfdu
       let dvdu = -dfdu / Nonzero dfdv
-      case Solve2D.search (findZeros function dudv dvdu) AllZeroTypes of
+      case Solve2D.search (findZerosImpl function dudv dvdu) AllZeroTypes of
         Ok solutions -> do
           let partialZeros = PartialZeros.empty & forEach solutions addSolution
           Ok (PartialZeros.finalize function dvdu dudv partialZeros)
@@ -537,7 +537,7 @@ data Solution units
   | TangentPointSolution (UvPoint, Sign)
   | SaddleRegionSolution (SaddleRegion units)
 
-findZeros ::
+findZerosImpl ::
   Tolerance units =>
   SurfaceFunction1D units ->
   SurfaceFunction1D Unitless ->
@@ -546,7 +546,7 @@ findZeros ::
   Domain2D ->
   Solve2D.Exclusions exclusions ->
   Solve2D.Action exclusions FindZerosContext (Solution units)
-findZeros f dudv dvdu context subdomain exclusions = do
+findZerosImpl f dudv dvdu context subdomain exclusions = do
   -- TODO find zeros along unit domain boundaries
   -- (including nasty cases like curves emanating from a saddle point
   -- being along a domain boundary)

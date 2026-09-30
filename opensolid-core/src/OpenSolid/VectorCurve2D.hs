@@ -32,7 +32,7 @@ module OpenSolid.VectorCurve2D
   , isZero
   , hasDegenerateStart
   , hasDegenerateEnd
-  , zeros
+  , findZeros
   , placeIn
   , relativeTo
   , transformBy
@@ -210,8 +210,8 @@ hasDegenerateStart = VectorCurve.hasDegenerateStart
 hasDegenerateEnd :: VectorCurve2D units -> Bool
 hasDegenerateEnd = VectorCurve.hasDegenerateEnd
 
-zeros :: Tolerance units => VectorCurve2D units -> Result IsZero (List Number)
-zeros = VectorCurve.zeros
+findZeros :: Tolerance units => VectorCurve2D units -> Result IsZero (List Number)
+findZeros = VectorCurve.findZeros
 
 placeIn :: Frame2D frameUnits -> VectorCurve2D units -> VectorCurve2D units
 placeIn frame curve = do

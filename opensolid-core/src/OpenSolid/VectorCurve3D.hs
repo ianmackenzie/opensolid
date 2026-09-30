@@ -26,7 +26,7 @@ module OpenSolid.VectorCurve3D
   , squaredMagnitude
   , squaredMagnitude_
   , reverse
-  , zeros
+  , findZeros
   , placeIn
   , relativeTo
   , transformBy
@@ -162,8 +162,8 @@ squaredMagnitude = VectorCurve.squaredMagnitude
 squaredMagnitude_ :: VectorCurve3D units space -> Curve1D (units ?*? units)
 squaredMagnitude_ = VectorCurve.squaredMagnitude_
 
-zeros :: Tolerance units => VectorCurve3D units space -> Result IsZero (List Number)
-zeros = VectorCurve.zeros
+findZeros :: Tolerance units => VectorCurve3D units space -> Result IsZero (List Number)
+findZeros = VectorCurve.findZeros
 
 placeIn ::
   Frame3D global local ->

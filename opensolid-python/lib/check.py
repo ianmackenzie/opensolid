@@ -32,7 +32,7 @@ print(v.direction().components)
 
 theta = Angle.two_pi * Curve.t
 c = theta.cos()
-root_locations = [root.location for root in c.roots()]
+root_locations = [root.location for root in c.find_roots()]
 print(root_locations)
 
 color1 = Color.hex("#555555")

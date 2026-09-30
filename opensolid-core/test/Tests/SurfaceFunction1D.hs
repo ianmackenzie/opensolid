@@ -46,7 +46,7 @@ firstDerivativeConsistency = Test.check 100 "firstDerivativeConsistency" do
 withIntersectionCurves :: (NonEmpty UvCurve -> Test) -> Test
 withIntersectionCurves callback =
   Tolerance.using Length.defaultTolerance do
-    case SurfaceFunction1D.zeros planeTorusSurface of
+    case SurfaceFunction1D.findZeros planeTorusSurface of
       Err err -> Test.abort (Text.show err)
       Ok zeros -> case zeros.crossingCurves of
         [] -> Test.abort "No intersection curves found"

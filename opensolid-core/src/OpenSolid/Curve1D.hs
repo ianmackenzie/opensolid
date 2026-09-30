@@ -34,7 +34,7 @@ module OpenSolid.Curve1D
   , isZero
   , nonzero
   , IsZero (IsZero)
-  , roots
+  , findRoots
   , CrossesZero (CrossesZero)
   , sign
   , reverse
@@ -139,7 +139,7 @@ instance
     -- TODO optimize this to use a special Solve1D.find or similar
     -- to efficiently check if there is *a* zero anywhere
     -- instead of finding *all* zeros (and their exact locations)
-    case roots (curve - quantity) of
+    case findRoots (curve - quantity) of
       Ok [] -> False
       Ok List.OneOrMore -> True
       Err IsZero -> True
@@ -505,7 +505,7 @@ nonzero ::
   Curve1D units ->
   Result HasZero (Nonzero (Curve1D units))
 nonzero curve =
-  case roots curve of
+  case findRoots curve of
     Ok [] -> Ok (Nonzero curve)
     Ok List.OneOrMore -> Err HasZero
     Err IsZero -> Err HasZero
@@ -548,25 +548,25 @@ we consider 0.0001 as just roundoff error,
 so we would end up reporting a single order-1 root at x=0
 (the point at which the *first derivative* is zero).
 -}
-roots :: Tolerance units => Curve1D units -> Result IsZero (List Root)
-roots curve
+findRoots :: Tolerance units => Curve1D units -> Result IsZero (List Root)
+findRoots curve
   | curve ~= zero = Err IsZero
   | otherwise = do
       let derivatives = Stream.iterate derivative curve
       let derivativeRangeStream tRange = Stream.map (range tRange) derivatives
       let cache = Solve1D.init derivativeRangeStream
-      case Solve1D.search (findRoots derivatives) cache of
+      case Solve1D.search (findRootsImpl derivatives) cache of
         Ok foundRoots -> Ok (List.sortBy Root.location foundRoots)
         Err Solve1D.InfiniteRecursion -> error "Higher order zero detected"
 
-findRoots ::
+findRootsImpl ::
   Tolerance units =>
   Stream (Curve1D units) ->
   Domain1D ->
   Stream (Interval units) ->
   Solve1D.Exclusions exclusions ->
   Solve1D.Action exclusions Root
-findRoots derivatives subdomain derivativeRangeStream exclusions
+findRootsImpl derivatives subdomain derivativeRangeStream exclusions
   -- Skip the subdomain entirely if the curve itself is non-zero everywhere
   | not (Stream.head derivativeRangeStream ^ Quantity.zero) = Solve1D.pass
   -- Optimization heuristic: bisect down to small subdomains first,
@@ -658,7 +658,7 @@ or has an indeterminate higher-order root anywhere.
 If the curve is zero everywhere, then returns positive.
 -}
 sign :: Tolerance units => Curve1D units -> Result CrossesZero Sign
-sign curve = case roots curve of
+sign curve = case findRoots curve of
   Err IsZero -> Ok Positive
   Ok curveRoots ->
     case List.filter isInnerRoot curveRoots of
