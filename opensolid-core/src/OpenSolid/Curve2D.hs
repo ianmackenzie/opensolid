@@ -1,6 +1,7 @@
 module OpenSolid.Curve2D
   ( Curve2D
   , ParameterValue
+  , TangentDirection2D
   , Compiled
   , Segment
   , IsDegenerate
@@ -32,8 +33,7 @@ module OpenSolid.Curve2D
   , endDerivative
   , startSecondDerivative
   , endSecondDerivative
-  , tangentDirectionAt
-  , tangentDirectionRange
+  , tangentDirection
   , curvatureAt_
   , curvatureAt
   , curvatureVectorAt_
@@ -96,7 +96,7 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve2D, ParameterValue)
+import OpenSolid.Curve (Curve2D, ParameterValue, TangentDirection2D)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve1D (Curve1D)
@@ -472,11 +472,8 @@ startSecondDerivative = Curve.startSecondDerivative
 endSecondDerivative :: Curve2D units -> Vector2D units
 endSecondDerivative = Curve.endSecondDerivative
 
-tangentDirectionAt :: Number -> Curve2D units -> Direction2D
-tangentDirectionAt = Curve.tangentDirectionAt
-
-tangentDirectionRange :: Interval Unitless -> Curve2D units -> DirectionBounds2D
-tangentDirectionRange = Curve.tangentDirectionRange
+tangentDirection :: Curve2D units -> TangentDirection2D
+tangentDirection = Curve.tangentDirection
 
 curvatureAt_ ::
   Tolerance units =>

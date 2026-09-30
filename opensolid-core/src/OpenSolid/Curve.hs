@@ -14,6 +14,9 @@ module OpenSolid.Curve
   , HasDegeneracy (HasDegeneracy)
   , IsDegenerateAndCoincidentWithPoint (IsDegenerateAndCoincidentWithPoint)
   , ParameterValue
+  , TangentDirection
+  , TangentDirection2D
+  , TangentDirection3D
   , new
   , unsafe
   , displacedFrom
@@ -34,8 +37,7 @@ module OpenSolid.Curve
   , endDerivative
   , startSecondDerivative
   , endSecondDerivative
-  , tangentDirectionAt
-  , tangentDirectionRange
+  , tangentDirection
   , curvatureAt_
   , curvatureVectorAt_
   , curvatureRange_
@@ -99,7 +101,11 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Degeneracy qualified as Degeneracy
 import OpenSolid.Direction (Direction)
 import OpenSolid.Direction qualified as Direction
+import OpenSolid.Direction2D (Direction2D)
+import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DirectionBounds (DirectionBounds, DirectionBoundsExists)
+import OpenSolid.DirectionBounds2D (DirectionBounds2D)
+import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.Expression (Expression)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.FFI (FFI)
@@ -230,6 +236,22 @@ newtype ParameterValue = ParameterValue (Uniform -> Number)
 
 instance FFI ParameterValue where
   representation = FFI.classRepresentation "ParameterValue"
+
+data TangentDirection dimension space where
+  TangentDirection ::
+    CurveExists dimension units space =>
+    Curve dimension units space ->
+    TangentDirection dimension space
+
+type TangentDirection2D = TangentDirection 2 Void
+
+type TangentDirection3D space = TangentDirection 3 space
+
+instance FFI TangentDirection2D where
+  representation = FFI.classRepresentation "TangentDirection2D"
+
+instance FFI (TangentDirection3D Void) where
+  representation = FFI.classRepresentation "TangentDirection3D"
 
 type BisectionTree dimension units space =
   Bisection.Tree (Interval Unitless) (Segment dimension units space)
@@ -498,6 +520,30 @@ instance At (Curve2D units) Uniform (Point2D units) where
 instance At (Curve3D space) Uniform (Point3D space) where
   curve @ rValue = curve @ (parameterValue curve @ rValue)
 
+instance At TangentDirection2D Number Direction2D where
+  TangentDirection curve @ tValue = do
+    let derivativeValue = derivative curve @ tValue
+    let secondDerivativeValue = secondDerivative curve @ tValue
+    tangentDirectionImpl tValue curve derivativeValue secondDerivativeValue
+
+instance At (TangentDirection3D space) Number (Direction3D space) where
+  TangentDirection curve @ tValue = do
+    let derivativeValue = derivative curve @ tValue
+    let secondDerivativeValue = secondDerivative curve @ tValue
+    tangentDirectionImpl tValue curve derivativeValue secondDerivativeValue
+
+instance At TangentDirection2D (Interval Unitless) DirectionBounds2D where
+  TangentDirection curve @ tRange = do
+    let derivativeRange = derivative curve @ tRange
+    let secondDerivativeRange = secondDerivative curve @ tRange
+    tangentDirectionRangeImpl tRange curve derivativeRange secondDerivativeRange
+
+instance At (TangentDirection3D space) (Interval Unitless) (DirectionBounds3D space) where
+  TangentDirection curve @ tRange = do
+    let derivativeRange = derivative curve @ tRange
+    let secondDerivativeRange = secondDerivative curve @ tRange
+    tangentDirectionRangeImpl tRange curve derivativeRange secondDerivativeRange
+
 instance Composition () (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
   f << g = do
     let dfdt = derivative f << g
@@ -536,6 +582,8 @@ class
   , AxisExists dimension units space
   , At (Curve dimension units space) Number (Point dimension units space)
   , At (Curve dimension units space) (Interval Unitless) (Bounds dimension units space)
+  , At (TangentDirection dimension space) Number (Direction dimension space)
+  , At (TangentDirection dimension space) (Interval Unitless) (DirectionBounds dimension space)
   , Expression.Constant Number (Point dimension units space)
   , Expression.BezierCurve (Point dimension units space)
   , Expression.TransformBy
@@ -620,7 +668,7 @@ buildArcLengthParameterization ::
   (Quantity units, Uniform -> Number)
 buildArcLengthParameterization curve = do
   let dsdt tValue = Vector.magnitude (derivative curve @ tValue)
-  let d2sdt2 tValue = secondDerivative curve @ tValue `dot` tangentDirectionAt tValue curve
+  let d2sdt2 tValue = secondDerivative curve @ tValue `dot` tangentDirection curve @ tValue
   ArcLength.parameterization dsdt d2sdt2
 
 displacedFrom ::
@@ -696,6 +744,12 @@ testPoints ::
   NonEmpty (Point dimension units space)
 testPoints curve = curve @ Parameter.samples
 
+tangentDirection ::
+  CurveExists dimension units space =>
+  Curve dimension units space ->
+  TangentDirection dimension space
+tangentDirection = TangentDirection
+
 secondDerivative ::
   CurveExists dimension units space =>
   Curve dimension units space ->
@@ -715,24 +769,6 @@ endpoints curve = (startPoint curve, endPoint curve)
 
 bounds :: Curve dimension units space -> Bounds dimension units space
 bounds = (.bounds)
-
-tangentDirectionAt ::
-  CurveExists dimension units space =>
-  Number ->
-  Curve dimension units space ->
-  Direction dimension space
-tangentDirectionAt tValue curve =
-  tangentDirectionImpl tValue curve (derivative curve @ tValue) (secondDerivative curve @ tValue)
-
-tangentDirectionRange ::
-  CurveExists dimension units space =>
-  Interval Unitless ->
-  Curve dimension units space ->
-  DirectionBounds dimension space
-tangentDirectionRange tRange curve = do
-  let derivativeRange_ = derivative curve @ tRange
-  let secondDerivativeRange_ = secondDerivative curve @ tRange
-  tangentDirectionRangeImpl tRange curve derivativeRange_ secondDerivativeRange_
 
 tangentDirectionImpl ::
   CurveExists dimension units space =>

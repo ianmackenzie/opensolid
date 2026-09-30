@@ -1,6 +1,7 @@
 module OpenSolid.Curve3D
   ( Curve3D
   , ParameterValue
+  , TangentDirection3D
   , Compiled
   , Segment
   , IsDegenerate
@@ -21,8 +22,7 @@ module OpenSolid.Curve3D
   , endDerivative
   , startSecondDerivative
   , endSecondDerivative
-  , tangentDirectionAt
-  , tangentDirectionRange
+  , tangentDirection
   , curvatureAt
   , curvatureVectorAt
   , curvatureRange
@@ -46,7 +46,7 @@ where
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve3D, ParameterValue)
+import OpenSolid.Curve (Curve3D, ParameterValue, TangentDirection3D)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve3D.IntersectionPointWithSurface (IntersectionPointWithSurface)
 import OpenSolid.Direction3D (Direction3D)
@@ -182,11 +182,8 @@ startSecondDerivative = Curve.startSecondDerivative
 endSecondDerivative :: Curve3D space -> Vector3D Meters space
 endSecondDerivative = Curve.endSecondDerivative
 
-tangentDirectionAt :: Number -> Curve3D space -> Direction3D space
-tangentDirectionAt = Curve.tangentDirectionAt
-
-tangentDirectionRange :: Interval Unitless -> Curve3D space -> DirectionBounds3D space
-tangentDirectionRange = Curve.tangentDirectionRange
+tangentDirection :: Curve3D space -> TangentDirection3D space
+tangentDirection = Curve.tangentDirection
 
 curvatureAt ::
   Tolerance Meters =>

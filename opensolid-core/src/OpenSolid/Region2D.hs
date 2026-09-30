@@ -253,8 +253,8 @@ addFillet radius point curves = do
     List.One _ -> couldNotFindPointToFillet
     List.ThreeOrMore -> couldNotFindPointToFillet
     List.Two firstCurve secondCurve -> do
-      let firstEndDirection = Curve2D.tangentDirectionAt 1.0 firstCurve
-      let secondStartDirection = Curve2D.tangentDirectionAt 0.0 secondCurve
+      let firstEndDirection = Curve2D.tangentDirection firstCurve @ 1.0
+      let secondStartDirection = Curve2D.tangentDirection secondCurve @ 0.0
       let cornerAngle = Direction2D.angleFrom firstEndDirection secondStartDirection
       let offsetDistance = Quantity.sign cornerAngle * Quantity.abs radius
       firstOffsetCurve <- Curve2D.offsetLeftwardBy offsetDistance firstCurve
@@ -279,8 +279,8 @@ addFillet radius point curves = do
               let startPoint = firstCurve @ t1
               let sweptAngle =
                     Direction2D.angleFrom
-                      (Curve2D.tangentDirectionAt t1 firstCurve)
-                      (Curve2D.tangentDirectionAt t2 secondCurve)
+                      (Curve2D.tangentDirection firstCurve @ t1)
+                      (Curve2D.tangentDirection secondCurve @ t2)
               filletArc <- Curve2D.sweptArc centerPoint startPoint sweptAngle
               trimmedFirstCurve <- firstCurve << Curve1D.interpolateFrom 0.0 t1
               trimmedSecondCurve <- secondCurve << Curve1D.interpolateFrom t2 1.0

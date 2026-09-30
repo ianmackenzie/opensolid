@@ -248,9 +248,8 @@ degenerateStartPointTangent = Test.check 100 "degenerateStartPointTangent" Try.d
   p2 <- Test.generate Random.point2D
   curve <- Curve2D.cubicBezier p0 p0 p1 p2
   let decreasingTValues = [2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-  let tangentDirectionAt tValue = Curve.tangentDirectionAt tValue curve
-  let startTangent = tangentDirectionAt 0.0
-  let otherTangents = List.map tangentDirectionAt decreasingTValues
+  let startTangent = Curve2D.tangentDirection curve @ 0.0
+  let otherTangents = Curve2D.tangentDirection curve @ decreasingTValues
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom startTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -262,9 +261,8 @@ degenerateEndPointTangent = Test.check 100 "degenerateEndPointTangent" Try.do
   p2 <- Test.generate Random.point2D
   curve <- Curve2D.cubicBezier p0 p1 p2 p2
   let increasingTValues = [1.0 - 2.0 ** Number.fromInt -n | n <- [8 .. 16]]
-  let tangentDirectionAt tValue = Curve.tangentDirectionAt tValue curve
-  let endTangent = tangentDirectionAt 1.0
-  let otherTangents = List.map tangentDirectionAt increasingTValues
+  let endTangent = Curve2D.tangentDirection curve @ 1.0
+  let otherTangents = Curve2D.tangentDirection curve @ increasingTValues
   let angleDifference otherTangent = Quantity.abs (Direction2D.angleFrom endTangent otherTangent)
   let angleDifferences = List.map angleDifference otherTangents
   Test.expect (List.isDescending angleDifferences)
@@ -390,7 +388,7 @@ g2 = Test.check 100 "G2 continuity" Try.do
   spline <- Curve2D.cubicBezier p1 p2 p3 p4
   t <- Test.generate Parameter.random
   let point = spline @ t
-  let tangentDirection = Curve.tangentDirectionAt t spline
+  let tangentDirection = Curve.tangentDirection spline @ t
   let curvatureVector = Curve2D.curvatureVectorAt t spline
   let signedRadius = 1.0 / (tangentDirection `cross` curvatureVector)
   let normalDirection = Direction2D.rotateLeft tangentDirection
