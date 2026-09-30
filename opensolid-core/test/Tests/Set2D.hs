@@ -3,7 +3,6 @@ module Tests.Set2D (tests) where
 import OpenSolid.Bag2D qualified as Bag2D
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Interval (Interval (Interval))
-import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Point2D (Point2D)
@@ -13,7 +12,7 @@ import OpenSolid.Set2D (Set2D)
 import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.Text qualified as Text
 import OpenSolid.UvBounds (data UvBounds)
-import Test (Test)
+import Test (Test, (~~))
 import Test qualified
 
 tests :: List Test
@@ -41,12 +40,9 @@ testSet =
 findAll :: Test
 findAll = Test.verify "findAll" do
   let searchBounds = Bounds2D.hull2 (point 2 2) (point 6 6)
-  let foundPoints = Set2D.filterBounds (^ searchBounds) testSet & Bag2D.toList
-  let expectedPoints = [point 3 5, point 5 5]
-  Test.expect (List.sort foundPoints == List.sort expectedPoints)
-
-equalSets :: Eq item => Set2D units item -> Set2D space item -> Bool
-equalSets set1 set2 = Set2D.toList set1 == Set2D.toList set2
+  let foundPoints = Set2D.filterBounds (^ searchBounds) testSet
+  let expectedPoints = Bag2D.pack [point 3 5, point 5 5]
+  Test.expect (foundPoints ~~ expectedPoints)
 
 clusters :: Test
 clusters = Test.verify "clusters" do
@@ -63,11 +59,11 @@ clusters = Test.verify "clusters" do
   case NonEmpty.sortBy NonEmpty.length (Set2D.clusters boundsPredicate itemPredicate set) of
     NonEmpty.Three first second third ->
       Test.all
-        [ Test.expect (equalSets (Set2D.build first) (Set2D.build (NonEmpty.one f)))
+        [ Test.expect (Set2D.build first ~~ Set2D.build (NonEmpty.one f))
             & Test.output "first" first
-        , Test.expect (equalSets (Set2D.build second) (Set2D.build (NonEmpty.two d e)))
+        , Test.expect (Set2D.build second ~~ Set2D.build (NonEmpty.two d e))
             & Test.output "second" second
-        , Test.expect (equalSets (Set2D.build third) (Set2D.build (NonEmpty.three a b c)))
+        , Test.expect (Set2D.build third ~~ Set2D.build (NonEmpty.three a b c))
             & Test.output "third" third
         ]
     unexpected ->
