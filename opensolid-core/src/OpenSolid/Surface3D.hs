@@ -22,8 +22,7 @@ module OpenSolid.Surface3D
   , poles
   , edges
   , bisectionTree
-  , normalDirectionAt
-  , normalDirectionRange
+  , normalDirection
   , vertex
   , parametric
   , planar
@@ -164,6 +163,38 @@ instance At (Surface3D space) UvBounds (Bounds3D space) where
   {-# INLINE (@) #-}
   surface @ uvRange = function surface @ uvRange
 
+newtype NormalDirection space = NormalDirection (Surface3D space)
+
+instance At (NormalDirection space) UvPoint (Direction3D space) where
+  NormalDirection surface @ uvPoint = do
+    let UvPoint uValue vValue = uvPoint
+    let (fu, fv) = partialDerivatives surface @ uvPoint
+    let (fuu, fuv, fvv) = secondPartialDerivatives surface @ uvPoint
+    let nu = fuu `cross` fv + fu `cross` fuv
+    let nv = fuv `cross` fv + fu `cross` fvv
+    Vector3D.Nonzero.direction . Nonzero $
+      if
+        | uValue == 0.0 && degenerateLeft surface -> nu
+        | uValue == 1.0 && degenerateRight surface -> -nu
+        | vValue == 0.0 && degenerateBottom surface -> nv
+        | vValue == 1.0 && degenerateTop surface -> -nv
+        | otherwise -> fu `cross` fv
+
+instance At (NormalDirection space) UvBounds (DirectionBounds3D space) where
+  NormalDirection surface @ uvRange = do
+    let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvRange
+    let (fu, fv) = partialDerivatives surface @ uvRange
+    let (fuu, fuv, fvv) = secondPartialDerivatives surface @ uvRange
+    let nu = fuu `cross` fv + fu `cross` fuv
+    let nv = fuv `cross` fv + fu `cross` fvv
+    VectorBounds3D.direction $
+      if
+        | uLow == 0.0 && degenerateLeft surface -> nu
+        | uHigh == 1.0 && degenerateRight surface -> -nu
+        | vLow == 0.0 && degenerateBottom surface -> nv
+        | vHigh == 1.0 && degenerateTop surface -> -nv
+        | otherwise -> fu `cross` fv
+
 {-# INLINE function #-}
 function :: Surface3D space -> SurfaceFunction3D space
 function = (.function)
@@ -238,38 +269,11 @@ edges surface = do
 bisectionTree :: Surface3D space -> BisectionTree space
 bisectionTree = (.bisectionTree)
 
-normalDirectionAt :: UvPoint -> Surface3D space -> Direction3D space
-normalDirectionAt uvPoint surface = do
-  let UvPoint uValue vValue = uvPoint
-  let (fu, fv) = partialDerivatives surface @ uvPoint
-  let (fuu, fuv, fvv) = secondPartialDerivatives surface @ uvPoint
-  let nu = fuu `cross` fv + fu `cross` fuv
-  let nv = fuv `cross` fv + fu `cross` fvv
-  Vector3D.Nonzero.direction . Nonzero $
-    if
-      | uValue == 0.0 && degenerateLeft surface -> nu
-      | uValue == 1.0 && degenerateRight surface -> -nu
-      | vValue == 0.0 && degenerateBottom surface -> nv
-      | vValue == 1.0 && degenerateTop surface -> -nv
-      | otherwise -> fu `cross` fv
-
-normalDirectionRange :: UvBounds -> Surface3D space -> DirectionBounds3D space
-normalDirectionRange uvRange surface = do
-  let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvRange
-  let (fu, fv) = partialDerivatives surface @ uvRange
-  let (fuu, fuv, fvv) = secondPartialDerivatives surface @ uvRange
-  let nu = fuu `cross` fv + fu `cross` fuv
-  let nv = fuv `cross` fv + fu `cross` fvv
-  VectorBounds3D.direction $
-    if
-      | uLow == 0.0 && degenerateLeft surface -> nu
-      | uHigh == 1.0 && degenerateRight surface -> -nu
-      | vLow == 0.0 && degenerateBottom surface -> nv
-      | vHigh == 1.0 && degenerateTop surface -> -nv
-      | otherwise -> fu `cross` fv
+normalDirection :: Surface3D space -> NormalDirection space
+normalDirection = NormalDirection
 
 vertex :: Surface3D space -> UvPoint -> SurfaceVertex3D space
-vertex surface uvPoint = SurfaceVertex3D (surface @ uvPoint) (normalDirectionAt uvPoint surface)
+vertex surface uvPoint = SurfaceVertex3D (surface @ uvPoint) (normalDirection surface @ uvPoint)
 
 parametric ::
   Tolerance Meters =>
@@ -337,7 +341,7 @@ segment uvRange surface = do
     { range = surface @ uvRange
     , partialDerivativeRanges = derivativeRanges
     , secondPartialDerivativeRanges = secondPartialDerivatives surface @ uvRange
-    , normalDirectionRange = normalDirectionRange uvRange surface
+    , normalDirectionRange = normalDirection surface @ uvRange
     , isDegenerate = isDegenerateLeft || isDegenerateRight || isDegenerateBottom || isDegenerateTop
     , isMonotonic = VectorBounds3D.areIndependent duRange dvRange
     }
