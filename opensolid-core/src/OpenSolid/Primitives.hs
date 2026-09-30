@@ -901,15 +901,15 @@ instance FFI (Axis2D Meters) where
 instance FFI (Axis2D Unitless) where
   representation = FFI.classRepresentation "UvAxis"
 
-instance Multiplication Sign (Axis2D space) (Axis2D space) where
+instance Multiplication Sign (Axis2D units) (Axis2D units) where
   Positive * axis = axis
   Negative * axis = -axis
 
-instance Multiplication (Axis2D space) Sign (Axis2D space) where
+instance Multiplication (Axis2D units) Sign (Axis2D units) where
   axis * Positive = axis
   axis * Negative = -axis
 
-instance Negation (Axis2D space) where
+instance Negation (Axis2D units) where
   negate (Axis2D p0 d) = Axis2D p0 (negate d)
 
 instance units1 ~ units2 => On (Axis2D units1) (Quantity units2) (Point2D units1) where
