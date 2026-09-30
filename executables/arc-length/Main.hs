@@ -81,7 +81,8 @@ testCubicSplineParameterization = spatial do
               let endHue = Angle.turns 0.75
               let hue = Quantity.interpolateFrom startHue endHue tValue
               let fillColor = Color.hsl1 hue 0.5 0.5
-              Svg.circleWith [Svg.fillColor fillColor] (Circle2D.withDiameter diameter point)
+              Svg.with [Svg.fillColor fillColor] do
+                Svg.circle (Circle2D.withDiameter diameter point)
         let resolution = Resolution.maxError Length.micrometer
         Svg.write fileName (Svg.padding Length.centimeter) $
           Svg.group

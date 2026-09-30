@@ -35,16 +35,17 @@ main = spatial do
   region <- try do Region2D.boundedBy [line01, line12, arc23, line34, line40, hole]
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   Svg.write "executables/region-triangulation/region.svg" (Svg.padding Length.centimeter) do
-    Svg.regionWith [Svg.blackStroke, Svg.fillColor Color.lightGrey] resolution region
+    Svg.with [Svg.blackStroke, Svg.fillColor Color.lightGrey] do
+      Svg.region resolution region
   let mesh = Region2D.toMesh resolution region
   let triangles = Mesh.faceVertices mesh
   let drawTriangle (a, b, c) =
-        Svg.triangleWith
+        Svg.with
           [ Svg.fillColor Color.lightGrey
           , Svg.strokeColor Color.lightBlue
           , Svg.strokeWidth (Length.millimeters 0.1)
           , Svg.roundStrokeJoins
           ]
-          (Triangle2D a b c)
+          do Svg.triangle (Triangle2D a b c)
   Svg.write "executables/region-triangulation/triangulated.svg" (Svg.padding Length.centimeter) do
     Svg.combine drawTriangle triangles

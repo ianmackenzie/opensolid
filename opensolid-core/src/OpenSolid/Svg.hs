@@ -7,28 +7,18 @@ module OpenSolid.Svg
   , toText
   , write
   , nothing
+  , with
   , group
-  , groupWith
   , combine
-  , combineWith
   , line
-  , lineWith
   , polyline
-  , polylineWith
   , polygon
-  , polygonWith
   , triangle
-  , triangleWith
   , circle
-  , circleWith
   , bounds
-  , boundsWith
   , curve
-  , curveWith
   , region
-  , regionWith
   , arrow
-  , arrowWith
   , blackStroke
   , strokeColor
   , strokeWidth
@@ -143,12 +133,12 @@ In most cases it's more convenient to write a file directly using 'write',
 but 'toText' can be useful if you want to e.g. return the SVG text as part of an HTTP response.
 -}
 toText :: Layout -> Svg -> Text
-toText layout entity = do
+toText layout svg = do
   let computedViewBox =
         case layout of
           ViewBox givenViewBox -> givenViewBox
           Padding givenPadding ->
-            case entity of
+            case svg of
               Svg node -> do
                 let Bounds2D (Interval xLow xHigh) (Interval yLow yHigh) = node.bounds
                 let paddedX = Interval (xLow - givenPadding) (xHigh + givenPadding)
@@ -181,7 +171,7 @@ toText layout entity = do
           { bounds = computedViewBox
           , tag = "svg"
           , attributes
-          , children = List.maybe (toNode entity)
+          , children = List.maybe (toNode svg)
           }
   Text.multiline
     [ "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
@@ -195,7 +185,7 @@ The given bounding box defines the overall size of the drawing;
 anything outside of this will be cropped.
 -}
 write :: Text -> Layout -> Svg -> IO ()
-write path layout entity = IO.writeUtf8 path (toText layout entity)
+write path layout svg = IO.writeUtf8 path (toText layout svg)
 
 {-| Don't draw anything at all.
 
@@ -204,9 +194,32 @@ Can be useful if you want to conditionally render some content.
 nothing :: Svg
 nothing = Empty
 
--- | Group several SVG entities into a single entity, applying the given attributes to the group.
-groupWith :: List Attribute -> List Svg -> Svg
-groupWith attributes children =
+entity :: Text -> Bounds2D Meters -> List Attribute -> Svg
+entity givenTag givenBounds givenAttributes =
+  Svg
+    Node
+      { bounds = givenBounds
+      , tag = givenTag
+      , attributes = givenAttributes
+      , children = []
+      }
+
+-- | Add the given attributes to an SVG entity.
+with :: List Attribute -> Svg -> Svg
+with givenAttributes svg = case svg of
+  Empty -> Empty
+  Svg node ->
+    Svg
+      Node
+        { bounds = node.bounds
+        , tag = node.tag
+        , attributes = givenAttributes <> node.attributes
+        , children = node.children
+        }
+
+-- | Group several SVG entities into a single entity.
+group :: List Svg -> Svg
+group children =
   case List.filterMap toNode children of
     [] -> Empty
     NonEmpty childNodes ->
@@ -214,147 +227,72 @@ groupWith attributes children =
         Node
           { bounds = Bounds2D.aggregateOf (.bounds) childNodes
           , tag = "g"
-          , attributes
+          , attributes = []
           , children = NonEmpty.toList childNodes
           }
 
--- | Group several SVG entities into a single entity.
-group :: List Svg -> Svg
-group = groupWith []
-
 combine :: Foldable list => (a -> Svg) -> list a -> Svg
-combine = combineWith []
+combine function list = group (List.map function (Data.Foldable.toList list))
 
-combineWith :: Foldable list => List Attribute -> (a -> Svg) -> list a -> Svg
-combineWith attributes function list =
-  groupWith attributes (List.map function (Data.Foldable.toList list))
-
--- | Draw a line with the given attributes.
-lineWith :: List Attribute -> Line2D Meters -> Svg
-lineWith attributes (Line2D p1 p2) = do
+-- | Draw a line.
+line :: Line2D Meters -> Svg
+line (Line2D p1 p2) = do
   let Point2D x1 y1 = p1
   let Point2D x2 y2 = p2
   let x1Attribute = Attribute "x1" (lengthText x1)
   let y1Attribute = Attribute "y1" (lengthText -y1)
   let x2Attribute = Attribute "x2" (lengthText x2)
   let y2Attribute = Attribute "y2" (lengthText -y2)
-  Svg
-    Node
-      { bounds = Bounds2D.hull2 p1 p2
-      , tag = "line"
-      , attributes = x1Attribute : y1Attribute : x2Attribute : y2Attribute : attributes
-      , children = []
-      }
-
--- | Draw a line.
-line :: Line2D Meters -> Svg
-line = lineWith []
-
--- | Draw a polyline with the given attributes.
-polylineWith :: List Attribute -> Polyline2D Meters -> Svg
-polylineWith attributes givenPolyline = do
-  let points = NonEmpty.toList (Polyline2D.vertices givenPolyline)
-  Svg
-    Node
-      { bounds = Polyline2D.bounds givenPolyline
-      , tag = "polyline"
-      , attributes = noFill : pointsAttribute points : attributes
-      , children = []
-      }
+  entity "line" (Bounds2D.hull2 p1 p2) [x1Attribute, y1Attribute, x2Attribute, y2Attribute]
 
 -- | Draw a polyline.
 polyline :: Polyline2D Meters -> Svg
-polyline = polylineWith []
-
--- | Draw a polygon with the given attributes.
-polygonWith :: List Attribute -> Polygon2D Meters -> Svg
-polygonWith attributes givenPolygon = do
-  let points = NonEmpty.toList (Polygon2D.vertices givenPolygon)
-  Svg
-    Node
-      { bounds = Polygon2D.bounds givenPolygon
-      , tag = "polygon"
-      , attributes = pointsAttribute points : attributes
-      , children = []
-      }
+polyline givenPolyline = do
+  let points = NonEmpty.toList (Polyline2D.vertices givenPolyline)
+  entity "polyline" (Polyline2D.bounds givenPolyline) [pointsAttribute points, noFill]
 
 -- | Draw a polygon.
 polygon :: Polygon2D Meters -> Svg
-polygon = polygonWith []
-
--- | Draw a triangle with the given attributes.
-triangleWith :: List Attribute -> Triangle2D Meters -> Svg
-triangleWith attributes (Triangle2D p1 p2 p3) = do
-  let vertices = NonEmpty.three p1 p2 p3
-  polygonWith attributes (Polygon2D vertices)
+polygon givenPolygon = do
+  let points = NonEmpty.toList (Polygon2D.vertices givenPolygon)
+  entity "polygon" (Polygon2D.bounds givenPolygon) [pointsAttribute points]
 
 -- | Draw a triangle.
 triangle :: Triangle2D Meters -> Svg
-triangle = triangleWith []
+triangle (Triangle2D p1 p2 p3) = do
+  let vertices = NonEmpty.three p1 p2 p3
+  polygon (Polygon2D vertices)
 
 -- | Draw a bounding box.
 bounds :: Bounds2D Meters -> Svg
-bounds = boundsWith []
-
-boundsWith :: List Attribute -> Bounds2D Meters -> Svg
-boundsWith attributes givenBounds = do
+bounds givenBounds = do
   let Bounds2D xInterval yInterval = givenBounds
   let xAttribute = Attribute "x" (lengthText (Interval.lower xInterval))
   let yAttribute = Attribute "y" (lengthText (negate (Interval.upper yInterval)))
   let widthAttribute = Attribute "width" (lengthText (Interval.width xInterval))
   let heightAttribute = Attribute "height" (lengthText (Interval.width yInterval))
-  Svg
-    Node
-      { bounds = givenBounds
-      , tag = "rect"
-      , attributes = xAttribute : yAttribute : widthAttribute : heightAttribute : attributes
-      , children = []
-      }
+  entity "rect" givenBounds [xAttribute, yAttribute, widthAttribute, heightAttribute]
 
--- | Draw a circle with the given attributes.
-circleWith :: List Attribute -> Circle2D Meters -> Svg
-circleWith attributes givenCircle = do
+-- | Draw a circle.
+circle :: Circle2D Meters -> Svg
+circle givenCircle = do
   let Point2D cx cy = Circle2D.centerPoint givenCircle
   let cxAttribute = Attribute "cx" (lengthText cx)
   let cyAttribute = Attribute "cy" (lengthText -cy)
   let rAttribute = Attribute "r" (lengthText (Circle2D.radius givenCircle))
-  Svg
-    Node
-      { bounds = Circle2D.bounds givenCircle
-      , tag = "circle"
-      , attributes = cxAttribute : cyAttribute : rAttribute : attributes
-      , children = []
-      }
-
--- | Draw a circle.
-circle :: Circle2D Meters -> Svg
-circle = circleWith []
-
--- | Draw a curve with the given attributes and resolution.
-curveWith :: List Attribute -> Resolution Meters -> Curve2D Meters -> Svg
-curveWith attributes resolution givenCurve =
-  polylineWith attributes (Curve2D.toPolyline resolution givenCurve)
+  entity "circle" (Circle2D.bounds givenCircle) [cxAttribute, cyAttribute, rAttribute]
 
 -- | Draw a curve with the given resolution.
 curve :: Resolution Meters -> Curve2D Meters -> Svg
-curve = curveWith []
+curve resolution = polyline . Curve2D.toPolyline resolution
 
 region :: Resolution Meters -> Region2D Meters -> Svg
-region = regionWith []
-
-regionWith :: List Attribute -> Resolution Meters -> Region2D Meters -> Svg
-regionWith attributes resolution givenRegion = do
+region resolution givenRegion = do
   let outerPolygon = loopPolygon resolution (Region2D.outerLoop givenRegion)
   let innerPolygons = List.map (loopPolygon resolution) (Region2D.innerLoops givenRegion)
   let allPolygons = outerPolygon : innerPolygons
-  let dAttribute = Attribute "d" (Text.join " " (List.map polygonCommands allPolygons))
-  Svg
-    Node
-      { bounds = Polygon2D.bounds outerPolygon
-      , tag = "path"
-      , attributes = dAttribute : attributes
-      , children = []
-      }
+  let pathAttribute = Attribute "d" (Text.join " " (List.map polygonCommands allPolygons))
+  entity "path" (Polygon2D.bounds outerPolygon) [pathAttribute]
 
 loopPolygon :: Resolution Meters -> NonEmpty (Curve2D Meters) -> Polygon2D Meters
 loopPolygon resolution loop = do
@@ -376,39 +314,25 @@ lineTo :: Point2D Meters -> Text
 lineTo (Point2D x y) = Text.join " " ["L", lengthText x, lengthText -y]
 
 arrow ::
-  "start" ::: Point2D Meters ->
-  "end" ::: Point2D Meters ->
   "headLength" ::: Length ->
   "headWidth" ::: Length ->
+  Point2D Meters ->
+  Point2D Meters ->
   Svg
-arrow = arrowWith []
-
-arrowWith ::
-  List Attribute ->
-  "start" ::: Point2D Meters ->
-  "end" ::: Point2D Meters ->
-  "headLength" ::: Length ->
-  "headWidth" ::: Length ->
-  Svg
-arrowWith
-  attributes
-  ("start" ::: start)
-  ("end" ::: end)
-  ("headLength" ::: headLength)
-  ("headWidth" ::: headWidth) =
-    case Tolerance.using Quantity.zero (Direction2D.from start end) of
-      Err Direction2D.PointsAreCoincident -> nothing
-      Ok direction -> do
-        let length = Point2D.distanceFrom start end
-        let axis = Axis2D start direction
-        let frame = Frame2D.fromXAxis axis
-        let stemLength = length - headLength
-        let stemEndPoint = Point2D.along axis stemLength
-        let leftPoint = Point2D.placeIn frame (Point2D stemLength (0.5 * headWidth))
-        let rightPoint = Point2D.mirrorAcross axis leftPoint
-        let stem = line (Line2D start stemEndPoint)
-        let tip = triangle (Triangle2D leftPoint rightPoint end)
-        groupWith attributes [stem, tip]
+arrow ("headLength" ::: headLength) ("headWidth" ::: headWidth) start end =
+  case Tolerance.using Quantity.zero (Direction2D.from start end) of
+    Err Direction2D.PointsAreCoincident -> nothing
+    Ok direction -> do
+      let length = Point2D.distanceFrom start end
+      let axis = Axis2D start direction
+      let frame = Frame2D.fromXAxis axis
+      let stemLength = length - headLength
+      let stemEndPoint = Point2D.along axis stemLength
+      let leftPoint = Point2D.placeIn frame (Point2D stemLength (0.5 * headWidth))
+      let rightPoint = Point2D.mirrorAcross axis leftPoint
+      let stem = line (Line2D start stemEndPoint)
+      let head = triangle (Triangle2D leftPoint rightPoint end)
+      group [stem, head]
 
 pointsAttribute :: List (Point2D Meters) -> Attribute
 pointsAttribute givenPoints =

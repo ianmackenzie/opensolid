@@ -35,9 +35,9 @@ main = spatial do
   arc3 <- arc vW vSW vS
   arc4 <- arc vS vSE vE
   let circle = Curve2D.piecewise (NonEmpty.four arc1 arc2 arc3 arc4)
-  let drawDot point = do
-        let diameter = Length.millimeters 4.0
-        Svg.circleWith [Svg.whiteFill] (Circle2D.withDiameter diameter point)
+  let drawDot point =
+        Svg.with [Svg.whiteFill] do
+          Svg.circle (Circle2D.withDiameter (Length.millimeters 4.0) point)
   let drawCurve n curve =
         Svg.group
           [ Svg.curve (Resolution.maxError Length.micrometer) curve

@@ -3,7 +3,6 @@ module OpenSolid.Debug.Plot
   , xAxis
   , yAxis
   , curve
-  , curveWith
   )
 where
 
@@ -38,23 +37,23 @@ axisHeadWidth = Length.millimeters 2.0
 viewBox :: Point2D Unitless -> Point2D Unitless -> Bounds2D Meters
 viewBox p1 p2 = Bounds2D.hull2 (Point2D.convert scale p1) (Point2D.convert scale p2)
 
+arrow :: Point2D Meters -> Point2D Meters -> Svg
+arrow = Svg.arrow {headLength = axisHeadLength, headWidth = axisHeadWidth}
+
 xAxis :: Number -> Number -> Svg
 xAxis x1 x2 = do
   let p1 = Point2D.x (Quantity.convert scale x1)
   let p2 = Point2D.x (Quantity.convert scale x2 + axisHeadLength)
-  Svg.arrow {start = p1, end = p2, headLength = axisHeadLength, headWidth = axisHeadWidth}
+  arrow p1 p2
 
 yAxis :: Number -> Number -> Svg
 yAxis y1 y2 = do
   let p1 = Point2D.y (Quantity.convert scale y1)
   let p2 = Point2D.y (Quantity.convert scale y2 + axisHeadLength)
-  Svg.arrow {start = p1, end = p2, headLength = axisHeadLength, headWidth = axisHeadWidth}
+  arrow p1 p2
 
 curve :: Curve1D Unitless -> Svg
-curve = curveWith []
-
-curveWith :: List Svg.Attribute -> Curve1D Unitless -> Svg
-curveWith attributes givenCurve = do
+curve givenCurve = do
   let panic = error "Curve should not be degenerate, by construction"
   let curve2D = unitless (Curve2D.xy Curve1D.t givenCurve) !! panic
-  Svg.curveWith attributes resolution (Curve2D.convert scale curve2D)
+  Svg.curve resolution (Curve2D.convert scale curve2D)

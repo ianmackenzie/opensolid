@@ -211,11 +211,12 @@ drawZeros path zeros = do
   let uvBounds = Interval.convert toDrawing (Interval -0.05 1.05)
   let viewBox = Bounds2D uvBounds uvBounds
   Svg.write path (Svg.viewBox viewBox) $
-    Svg.groupWith [Svg.strokeWidth strokeWidth] $
-      [ drawBounds (Bounds2D.convert toDrawing UvBounds.unitSquare)
-      , Svg.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
-      , Svg.combine (drawDot Color.orange) zeros.saddlePoints
-      ]
+    Svg.with [Svg.strokeWidth strokeWidth] do
+      Svg.group
+        [ drawBounds (Bounds2D.convert toDrawing UvBounds.unitSquare)
+        , Svg.group (List.mapWithIndex drawCrossingCurve zeros.crossingCurves)
+        , Svg.combine (drawDot Color.orange) zeros.saddlePoints
+        ]
 
 drawBounds :: Bounds2D Meters -> Svg
 drawBounds bounds = do
@@ -236,13 +237,13 @@ drawUvCurve :: List Svg.Attribute -> UvCurve -> Svg
 drawUvCurve attributes curve = do
   let resolution = Resolution.maxError 0.0002
   let polyline = Curve2D.toPolyline resolution curve
-  Svg.polylineWith attributes (Polyline2D.map (Point2D.convert toDrawing) polyline)
+  Svg.with attributes do Svg.polyline (Polyline2D.map (Point2D.convert toDrawing) polyline)
 
 drawDot :: Color -> UvPoint -> Svg
 drawDot color point = do
   let centerPoint = Point2D.convert toDrawing point
   let diameter = Length.millimeters 1.0
-  Svg.circleWith [Svg.fillColor color] (Circle2D.withDiameter diameter centerPoint)
+  Svg.with [Svg.fillColor color] do Svg.circle (Circle2D.withDiameter diameter centerPoint)
 
 delayedPrint :: Int -> Duration -> IO ()
 delayedPrint n delay = do
@@ -289,16 +290,16 @@ drawBezier color startPoint innerControlPoints endPoint = do
   let drawControlPoint point = Svg.circle (Circle2D.withDiameter controlPointDiameter point)
   let resolution = Resolution.maxError Length.millimeter
   Ok $
-    Svg.groupWith
-      [Svg.strokeColor color, Svg.strokeWidth (Length.millimeters 1.0)]
-      [ Svg.groupWith [Svg.opacity 0.3] $
-          [ Svg.polyline (Polyline2D drawingControlPoints)
-          , Svg.combineWith [Svg.fillColor color] drawControlPoint $
-              NonEmpty.toList drawingControlPoints
-          , Svg.combine drawCurveRange (Parameter.intervals 10)
-          ]
-      , Svg.curve resolution curve
-      ]
+    Svg.with [Svg.strokeColor color, Svg.strokeWidth (Length.millimeters 1.0)] do
+      Svg.group
+        [ Svg.with [Svg.opacity 0.3] do
+            Svg.group
+              [ Svg.polyline (Polyline2D drawingControlPoints)
+              , Svg.with [Svg.fillColor color] do Svg.combine drawControlPoint drawingControlPoints
+              , Svg.combine drawCurveRange (Parameter.intervals 10)
+              ]
+        , Svg.curve resolution curve
+        ]
 
 testBezierSegment :: IO ()
 testBezierSegment = do
@@ -320,12 +321,9 @@ testHermiteBezier = spatial do
   let endDerivatives = [Vector2D.centimeters 0.0 -10.0, Vector2D.zero]
   let endPoint = Point2D.centimeters 10.0 0.0
   curve <- try do Curve2D.hermite startPoint startDerivatives endPoint endDerivatives
-  let curveAttributes =
-        [ Svg.strokeColor Color.blue
-        , Svg.strokeWidth (Length.millimeters 1.0)
-        ]
-  let curveResolution = Resolution.maxError (Length.millimeters 0.1)
-  let curveEntity = Svg.curveWith curveAttributes curveResolution curve
+  let attributes = [Svg.strokeColor Color.blue, Svg.strokeWidth (Length.millimeters 1.0)]
+  let resolution = Resolution.maxError (Length.millimeters 0.1)
+  let curveEntity = Svg.with attributes do Svg.curve resolution curve
   let coordinateBounds = Interval (Length.centimeters -1.0) (Length.centimeters 11.0)
   let drawingBounds = Bounds2D coordinateBounds coordinateBounds
   Svg.write "executables/sandbox/test-hermite-bezier.svg" (Svg.viewBox drawingBounds) curveEntity
