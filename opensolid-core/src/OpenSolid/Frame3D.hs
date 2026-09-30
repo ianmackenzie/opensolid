@@ -1,5 +1,6 @@
 module OpenSolid.Frame3D
-  ( Frame3D (Frame3D, originPoint, orientation)
+  ( Frame3D
+  , with
   , coerce
   , forward
   , backward
@@ -76,10 +77,17 @@ import OpenSolid.Orientation3D qualified as Orientation3D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Frame3D (Frame3D, orientation, originPoint), Plane3D (Plane3D))
+import OpenSolid.Primitives (Frame3D (..), Plane3D (Plane3D))
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.World3D qualified as World3D
+
+with ::
+  "originPoint" ::: Point3D global ->
+  "orientation" ::: Orientation3D global ->
+  Frame3D global local
+with ("originPoint" ::: givenOriginPoint) ("orientation" ::: givenOrientation) =
+  Frame3D {originPoint = givenOriginPoint, orientation = givenOrientation}
 
 -- | Get the origin point of a frame.
 originPoint :: Frame3D global local -> Point3D global

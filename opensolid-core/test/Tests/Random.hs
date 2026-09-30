@@ -55,7 +55,8 @@ import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
-import OpenSolid.Frame3D (Frame3D (Frame3D))
+import OpenSolid.Frame3D (Frame3D)
+import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
@@ -121,7 +122,11 @@ frame2D :: Generator (Frame2D Meters)
 frame2D = Random.map Frame2D.fromXAxis axis2D
 
 frame3D :: Generator (Frame3D global local)
-frame3D = Random.map2 Frame3D point3D Orientation3D.random
+frame3D =
+  Random.map2
+    Frame3D.with
+    (Random.map ("originPoint" :::) point3D)
+    (Random.map ("orientation" :::) Orientation3D.random)
 
 bounds2D :: Generator (Bounds2D Meters)
 bounds2D = Random.map2 Bounds2D lengthInterval lengthInterval

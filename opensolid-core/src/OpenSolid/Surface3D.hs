@@ -428,7 +428,7 @@ revolved plane curve axis angle = do
   let height = yCoordinate << SurfaceFunction1D.u
   let theta = angle * SurfaceFunction1D.v
   let surfaceFunction =
-        frame3D.originPoint
+        Frame3D.originPoint frame3D
           + radius * SurfaceFunction1D.cos theta * Frame3D.rightwardDirection frame3D
           + radius * SurfaceFunction1D.sin theta * Frame3D.forwardDirection frame3D
           + height * Frame3D.upwardDirection frame3D

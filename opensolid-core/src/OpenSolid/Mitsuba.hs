@@ -62,13 +62,13 @@ convention =
     Orientation3D.backwardDirection
 
 xDirection :: Frame3D global local -> Direction3D global
-xDirection frame = Convention3D.xDirection frame.orientation convention
+xDirection frame = Convention3D.xDirection (Frame3D.orientation frame) convention
 
 yDirection :: Frame3D global local -> Direction3D global
-yDirection frame = Convention3D.yDirection frame.orientation convention
+yDirection frame = Convention3D.yDirection (Frame3D.orientation frame) convention
 
 zDirection :: Frame3D global local -> Direction3D global
-zDirection frame = Convention3D.zDirection frame.orientation convention
+zDirection frame = Convention3D.zDirection (Frame3D.orientation frame) convention
 
 {-| Write a Mitsuba scene out to an XML scene description and a file containing binary mesh data.
 
@@ -267,7 +267,7 @@ defaultNode name value = XmlNode "default" [("name", name), ("value", value)] []
 lightingNode :: Lighting space -> XmlNode
 lightingNode lighting = case lighting of
   EnvironmentMap frame path -> do
-    let (x0, y0, z0) = Point3D.coordinates convention frame.originPoint
+    let (x0, y0, z0) = Point3D.coordinates convention (Frame3D.originPoint frame)
     let px = Length.inMeters x0
     let py = Length.inMeters y0
     let pz = Length.inMeters z0

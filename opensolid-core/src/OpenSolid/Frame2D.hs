@@ -1,5 +1,6 @@
 module OpenSolid.Frame2D
-  ( Frame2D (Frame2D, originPoint, orientation)
+  ( Frame2D
+  , with
   , coerce
   , xy
   , atPoint
@@ -29,17 +30,21 @@ import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Frame2D (Frame2D, orientation, originPoint)
+  ( Frame2D (..)
   , Orientation2D (Orientation2D)
   , Plane3D (..)
   , PlaneOrientation3D (..)
   )
 
+with :: "originPoint" ::: Point2D units -> "orientation" ::: Orientation2D -> Frame2D units
+with ("originPoint" ::: givenOriginPoint) ("orientation" ::: givenOrientation) =
+  Frame2D {originPoint = givenOriginPoint, orientation = givenOrientation}
+
 originPoint :: Frame2D units -> Point2D units
-originPoint (Frame2D p0 _) = p0
+originPoint = (.originPoint)
 
 orientation :: Frame2D units -> Orientation2D
-orientation (Frame2D _ o) = o
+orientation = (.orientation)
 
 {-# INLINE coerce #-}
 coerce :: Frame2D units1 -> Frame2D units2

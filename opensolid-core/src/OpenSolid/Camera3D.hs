@@ -39,7 +39,7 @@ import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.Direction3D qualified as Direction3D
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
-import OpenSolid.Frame3D (Frame3D (Frame3D))
+import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Length (Length)
@@ -115,13 +115,22 @@ lookAt
                   Frame3D.fromRightPlane (Plane3D givenEyePoint rightPlaneOrientation)
                 Nothing -- View direction is either straight up or straight down
                   | Direction3D.upwardComponent computedForwardDirection > 0.0 ->
-                      Frame3D givenEyePoint World3D.upwardOrientation
+                      Frame3D.with
+                        { originPoint = givenEyePoint
+                        , orientation = World3D.upwardOrientation
+                        }
                   | otherwise ->
-                      Frame3D givenEyePoint World3D.downwardOrientation
+                      Frame3D.with
+                        { originPoint = givenEyePoint
+                        , orientation = World3D.downwardOrientation
+                        }
             Err IsZero ->
               -- Given eye and focal points are coincident,
               -- so just look straight forward
-              Frame3D givenEyePoint World3D.forwardOrientation
+              Frame3D.with
+                { originPoint = givenEyePoint
+                , orientation = World3D.forwardOrientation
+                }
     new computedFrame computedFocalDistance givenProjection
 
 {-| Construct a camera orbiting around a given focal point, a given distance away.
@@ -145,7 +154,7 @@ orbit
   ("distance" ::: distance)
   ("projection" ::: givenProjection) = do
     let computedFrame =
-          Frame3D givenFocalPoint World3D.backwardOrientation
+          Frame3D.with {originPoint = givenFocalPoint, orientation = World3D.backwardOrientation}
             & Frame3D.turnRightBy azimuth
             & Frame3D.tiltDownBy elevation
             & Frame3D.offsetBackwardBy distance
