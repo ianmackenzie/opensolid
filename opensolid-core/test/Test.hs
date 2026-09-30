@@ -28,6 +28,7 @@ import OpenSolid.Prelude
 import OpenSolid.Random qualified as Random
 import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
+import OpenSolid.Try qualified as Try
 import System.Console.ANSI qualified as AnsiTerminal
 import System.Environment
 import System.Exit qualified
@@ -73,6 +74,9 @@ instance Monad Generator where
 
 instance MonadFail Generator where
   fail message = Generator (Random.return (Failed [Text.pack message]))
+
+instance Try.Bind Generator Generator where
+  (>>=) = (>>=)
 
 generate :: Random.Generator a -> Generator a
 generate generator = Generator (Random.map Succeeded generator)

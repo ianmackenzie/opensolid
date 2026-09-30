@@ -69,6 +69,7 @@ common config
     OverloadedRecordUpdate
     OverloadedStrings
     PatternSynonyms
+    QualifiedDo
     RebindableSyntax
     RecordWildCards
     RequiredTypeArguments
@@ -239,6 +240,7 @@ library
     OpenSolid.Triangle2D
     OpenSolid.Triangle3D
     OpenSolid.Triplet
+    OpenSolid.Try
     OpenSolid.Unboxed.Math
     OpenSolid.Units
     OpenSolid.UvBag
