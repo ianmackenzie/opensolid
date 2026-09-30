@@ -36,8 +36,10 @@ import OpenSolid.Units qualified as Units
 
 The last point will be joined back to the first.
 -}
-newtype Polygon2D units
-  = Polygon2D {vertices :: NonEmpty (Point2D units)}
+data Polygon2D units = Polygon2D
+  { vertices :: NonEmpty (Point2D units)
+  , signedArea_ :: ~(Quantity (units ?*? units))
+  }
 
 instance FFI (Polygon2D Meters) where
   representation = FFI.classRepresentation "Polygon2D"
@@ -53,7 +55,13 @@ data IsEmpty = IsEmpty deriving (Eq, Show, Err)
    (clockwise order will be interpreted as a 'negative' polygon or hole).
 -}
 fromVertices :: NonEmpty (Point2D units) -> Polygon2D units
-fromVertices = Polygon2D
+fromVertices givenVertices = do
+  let v0 :| vs = givenVertices
+  let triangleSignedArea_ v1 v2 = Triangle2D.signedArea_ (Triangle2D v0 v1 v2)
+  Polygon2D
+    { vertices = givenVertices
+    , signedArea_ = Quantity.sum (List.successive triangleSignedArea_ vs)
+    }
 
 {-| Create a regular polygon with the given number of vertices/sides.
 
@@ -64,7 +72,7 @@ The polygon will be oriented such that its bottom-most edge is horizontal.
 inscribed :: Int -> Circle2D units -> Result IsEmpty (Polygon2D units)
 inscribed n circle
   | n >= 3 = case Quantity.midpoints (Angle.degrees -90.0) (Angle.degrees 270.0) n of
-      NonEmpty vertexAngles -> Ok (Polygon2D (NonEmpty.map (circle @) vertexAngles))
+      NonEmpty vertexAngles -> Ok (fromVertices (NonEmpty.map (circle @) vertexAngles))
       [] -> error "Should have at least three vertex angles"
   | otherwise = Err IsEmpty
 
@@ -109,10 +117,7 @@ bounds :: Polygon2D units -> Bounds2D units
 bounds polygon = Bounds2D.hull (vertices polygon)
 
 signedArea_ :: Polygon2D units -> Quantity (units ?*? units)
-signedArea_ polygon = do
-  let v0 :| vs = vertices polygon
-  let triangleSignedArea_ v1 v2 = Triangle2D.signedArea_ (Triangle2D v0 v1 v2)
-  Quantity.sum (List.successive triangleSignedArea_ vs)
+signedArea_ = (.signedArea_)
 
 {-| Get the signed area of a polygon.
 
@@ -128,4 +133,4 @@ collectEdges first current remaining = case remaining of
   next : following -> NonEmpty.push (Line2D current next) (collectEdges first next following)
 
 map :: (Point2D units1 -> Point2D units2) -> Polygon2D units1 -> Polygon2D units2
-map function polyline = Polygon2D (NonEmpty.map function (vertices polyline))
+map function polyline = fromVertices (NonEmpty.map function (vertices polyline))
