@@ -8,10 +8,6 @@ module OpenSolid.Curve1D
   , bezier
   , compiled
   , derivative
-  , valueAt
-  , valueOf
-  , derivativeAt
-  , secondDerivativeAt
   , range
   , roots
   , degeneracyTolerance
@@ -52,6 +48,8 @@ instance Units.Coercion (Nonzero (Curve1D units1)) (Nonzero (Curve1D units2))
 
 instance ApproximateEquality (Curve1D units) units
 
+instance At (Curve1D units) Number (Quantity units)
+
 instance Negation (Curve1D units)
 
 instance Multiplication Sign (Curve1D units) (Curve1D units)
@@ -90,10 +88,6 @@ zero :: Curve1D units
 bezier :: NonEmpty (Quantity units) -> Curve1D units
 compiled :: Curve1D units -> Compiled units
 derivative :: Curve1D units -> Curve1D units
-valueAt :: Number -> Curve1D units -> Quantity units
-valueOf :: Curve1D units -> Number -> Quantity units
-derivativeAt :: Number -> Curve1D units -> Quantity units
-secondDerivativeAt :: Number -> Curve1D units -> Quantity units
 range :: Interval Unitless -> Curve1D units -> Interval units
 roots :: Tolerance units => Curve1D units -> Result IsZero (List Root)
 degeneracyTolerance :: Curve1D units -> Quantity units

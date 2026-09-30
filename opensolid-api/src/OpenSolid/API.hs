@@ -862,7 +862,6 @@ curve =
     , Class.member0 "Cubed" Curve1D.cubed $(docs 'Curve1D.cubed)
     , Class.member0 "Sin" (Curve1D.sin . (Angle.radian *)) $(docs 'Curve1D.sin)
     , Class.member0 "Cos" (Curve1D.cos . (Angle.radian *)) $(docs 'Curve1D.cos)
-    , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
     , Class.member0R "Roots" (unitless Curve1D.roots) $(docs 'Curve1D.roots)
     , Class.member0 "Is Zero" (unitless (~= Curve1D.zero)) "Check if a curve is (approximately) zero everywhere."
     , Class.negation
@@ -902,7 +901,6 @@ angleCurve =
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
     , Class.member0 "Sin" Curve1D.sin $(docs 'Curve1D.sin)
     , Class.member0 "Cos" Curve1D.cos $(docs 'Curve1D.cos)
-    , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
     , Class.member0R "Roots" (angular Curve1D.roots) $(docs 'Curve1D.roots)
     , Class.member0 "Is Zero" (angular (~= Curve1D.zero)) "Check if a curve is (approximately) zero everywhere."
     , Class.negation
@@ -929,7 +927,6 @@ lengthCurve =
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
     , Class.member0 "Squared" Curve1D.squared $(docs 'Curve1D.squared)
-    , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
     , Class.memberT0R "Roots" Curve1D.roots $(docs 'Curve1D.roots)
     , Class.memberT0 "Is Zero" (~= Curve1D.zero) "Check if a curve is zero everywhere, within the current tolerance."
     , Class.negation
@@ -957,7 +954,6 @@ areaCurve =
     , Class.factory1 "Constant" "Value" Curve1D.constant $(docs 'Curve1D.constant)
     , Class.factory2 "Interpolate From" "Start" "End" Curve1D.interpolateFrom $(docs 'Curve1D.interpolateFrom)
     , Class.property "Derivative" Curve1D.derivative $(docs 'Curve1D.derivative)
-    , Class.member1 "Value" "Parameter Value" Curve1D.valueAt $(docs 'Curve1D.valueAt)
     , Class.negation
     , Class.numberTimes
     , Class.plus @AreaCurve

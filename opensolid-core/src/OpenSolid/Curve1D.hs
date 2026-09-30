@@ -4,20 +4,17 @@ module OpenSolid.Curve1D
   ( Curve1D
   , Compiled
   , Root
-  , valueAt
-  , valueOf
   , range
   , startValue
   , endValue
   , compiled
   , derivative
+  , secondDerivative
   , new
   , concrete
   , zero
   , constant
-  , derivativeAt
   , derivativeRange
-  , secondDerivativeAt
   , secondDerivativeRange
   , t
   , interpolateFrom
@@ -125,8 +122,14 @@ instance Units.Coercion (Curve1D units1) (Curve1D units2) where
 
 instance ApproximateEquality (Curve1D units) units where
   curve1 ~= curve2 = do
-    let equalPointsAt tValue = valueAt tValue curve1 ~= valueAt tValue curve2
+    let equalPointsAt tValue = curve1 @ tValue ~= curve2 @ tValue
     NonEmpty.all equalPointsAt Parameter.samples
+
+instance At (Curve1D units) Number (Quantity units) where
+  {-# INLINE (@) #-}
+  curve @ 0.0 = startValue curve
+  curve @ 1.0 = endValue curve
+  curve @ tValue = CompiledFunction.value tValue (compiled curve)
 
 instance
   units1 ~ units2 =>
@@ -380,20 +383,6 @@ rationalCubicSpline ::
   Result DivisionByZero (Curve1D units)
 rationalCubicSpline pw1 pw2 pw3 pw4 = rationalBezier (NonEmpty.four pw1 pw2 pw3 pw4)
 
-{-| Evaluate a curve at a given parameter value.
-
-The parameter value should be between 0 and 1.
--}
-{-# INLINE valueAt #-}
-valueAt :: Number -> Curve1D units -> Quantity units
-valueAt 0.0 curve = startValue curve
-valueAt 1.0 curve = endValue curve
-valueAt tValue curve = CompiledFunction.value tValue (compiled curve)
-
-{-# INLINE valueOf #-}
-valueOf :: Curve1D units -> Number -> Quantity units
-valueOf curve tValue = valueAt tValue curve
-
 {-# INLINE range #-}
 range :: Interval Unitless -> Curve1D units -> Interval units
 range tRange curve = CompiledFunction.range tRange (compiled curve)
@@ -406,17 +395,9 @@ startValue = (.startValue)
 endValue :: Curve1D units -> Quantity units
 endValue = (.endValue)
 
-{-# INLINE derivativeAt #-}
-derivativeAt :: Number -> Curve1D units -> Quantity units
-derivativeAt tValue curve = valueAt tValue (derivative curve)
-
 {-# INLINE derivativeRange #-}
 derivativeRange :: Interval Unitless -> Curve1D units -> Interval units
 derivativeRange tRange curve = range tRange (derivative curve)
-
-{-# INLINE secondDerivativeAt #-}
-secondDerivativeAt :: Number -> Curve1D units -> Quantity units
-secondDerivativeAt tValue curve = valueAt tValue (secondDerivative curve)
 
 {-# INLINE secondDerivativeRange #-}
 secondDerivativeRange :: Interval Unitless -> Curve1D units -> Interval units
@@ -499,8 +480,8 @@ instance Estimate.Interface (Integral units) units where
   boundsImpl (Integral curve tRange) = do
     let dt = Interval.width tRange
     let estimate0 = dt * range tRange curve
-    let value1 = valueAt (Interval.lower tRange) curve
-    let value2 = valueAt (Interval.upper tRange) curve
+    let value1 = curve @ Interval.lower tRange
+    let value2 = curve @ Interval.upper tRange
     let m = Interval.width (derivativeRange tRange curve)
     let estimateValue = dt * Quantity.midpoint value1 value2
     let estimateError = 0.125 * m * dt * dt
@@ -635,7 +616,7 @@ findRootsOrder k derivatives subdomain derivativeRangeStream
       case higherOrderRoots of
         [] -> solveMonotonic k currentDerivative nextDerivative tRange
         List.One (t0, neighborhood) -> do
-          if Quantity.abs (valueAt t0 currentDerivative)
+          if Quantity.abs (currentDerivative @ t0)
             <= Solve1D.derivativeTolerance neighborhood k
             then Resolved [(t0, neighborhood)]
             else do
@@ -656,16 +637,16 @@ solveMonotonic ::
 solveMonotonic m fm fn tRange = do
   let n = m + 1
   let Interval tLow tHigh = tRange
-  let startNeighborhood = Solve1D.neighborhood n (valueAt tLow fn)
-  if Quantity.abs (valueAt tLow fm) <= Solve1D.derivativeTolerance startNeighborhood m
+  let startNeighborhood = Solve1D.neighborhood n (fn @ tLow)
+  if Quantity.abs (fm @ tLow) <= Solve1D.derivativeTolerance startNeighborhood m
     then if tLow == 0.0 then Resolved [(0.0, startNeighborhood)] else Unresolved
     else do
-      let endNeighborhood = Solve1D.neighborhood n (valueAt tHigh fn)
-      if Quantity.abs (valueAt tHigh fm) <= Solve1D.derivativeTolerance endNeighborhood m
+      let endNeighborhood = Solve1D.neighborhood n (fn @ tHigh)
+      if Quantity.abs (fm @ tHigh) <= Solve1D.derivativeTolerance endNeighborhood m
         then if tHigh == 1.0 then Resolved [(1.0, endNeighborhood)] else Unresolved
         else do
-          case Solve1D.monotonic (valueOf fm) (valueOf fn) tRange of
-            Solve1D.Exact t0 -> Resolved [(t0, Solve1D.neighborhood n (valueAt t0 fn))]
+          case Solve1D.monotonic (fm @) (fn @) tRange of
+            Solve1D.Exact t0 -> Resolved [(t0, Solve1D.neighborhood n (fn @ t0))]
             Solve1D.Closest _ -> Unresolved
 
 data CrossesZero = CrossesZero deriving (Eq, Show, Err)
@@ -681,7 +662,7 @@ sign curve = case roots curve of
   Err IsZero -> Ok Positive
   Ok curveRoots ->
     case List.filter isInnerRoot curveRoots of
-      [] -> Ok (Quantity.sign (valueAt 0.5 curve)) -- No inner roots, so check sign at t=0.5
+      [] -> Ok (Quantity.sign (curve @ 0.5)) -- No inner roots, so check sign at t=0.5
       NonEmpty innerRoots ->
         case NonEmpty.filter isCrossingRoot innerRoots of
           List.OneOrMore -> Err CrossesZero -- There exists at least one inner crossing root
@@ -691,7 +672,7 @@ sign curve = case roots curve of
             -- halfway between t=0 and the first inner root
             let firstInnerRoot = NonEmpty.first innerRoots
             let testPoint = 0.5 * Root.location firstInnerRoot
-            Ok (Quantity.sign (valueAt testPoint curve))
+            Ok (Quantity.sign (curve @ testPoint))
 
 isInnerRoot :: Root -> Bool
 isInnerRoot root = not (Parameter.isEndpoint (Root.location root))
@@ -706,7 +687,7 @@ isCrossingRoot root =
 
 newtonRaphson :: Curve1D units -> Number -> Fuzzy Number
 newtonRaphson curve t0 = do
-  let evaluate tValue = (# valueAt tValue curve, derivativeAt tValue curve #)
+  let evaluate tValue = (# curve @ tValue, derivative curve @ tValue #)
   NewtonRaphson.Curve.solveFrom t0 evaluate
 
 erase :: Curve1D units -> Curve1D Unitless
