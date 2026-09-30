@@ -5,8 +5,6 @@ module OpenSolid.SurfaceFunction2D
   , constant
   , uv
   , xy
-  , pointAt
-  , pointOn
   , range
   , compiled
   , partialDerivatives
@@ -65,6 +63,10 @@ instance Units.Coercion (SurfaceFunction2D units1) (SurfaceFunction2D units2) wh
       { compiled = Units.coerce function.compiled
       , partialDerivatives = Pair.map Units.coerce function.partialDerivatives
       }
+
+instance At (SurfaceFunction2D units) UvPoint (Point2D units) where
+  {-# INLINE (@) #-}
+  function @ uvPoint = CompiledFunction.value uvPoint (compiled function)
 
 instance
   units1 ~ units2 =>
@@ -173,14 +175,6 @@ xy x y = do
           (SurfaceFunction1D.partialDerivatives x)
           (SurfaceFunction1D.partialDerivatives y)
   new compiledXY xyPartialDerivatives
-
-{-# INLINE pointAt #-}
-pointAt :: UvPoint -> SurfaceFunction2D units -> Point2D units
-pointAt uvPoint function = CompiledFunction.value uvPoint (compiled function)
-
-{-# INLINE pointOn #-}
-pointOn :: SurfaceFunction2D units -> UvPoint -> Point2D units
-pointOn function uvPoint = pointAt uvPoint function
 
 {-# INLINE range #-}
 range :: SurfaceFunction2D units -> UvBounds -> Bounds2D units

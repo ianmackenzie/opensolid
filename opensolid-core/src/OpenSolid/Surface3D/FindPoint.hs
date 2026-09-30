@@ -72,8 +72,7 @@ findInteriorSolution ::
   Maybe (SurfacePoint3D space)
 findInteriorSolution point surface = do
   let (du, dv) = Surface3D.partialDerivatives surface
-  let evaluateNewtonRaphson uvPoint =
-        (# Surface3D.pointAt uvPoint surface - point, du @ uvPoint, dv @ uvPoint #)
+  let evaluateNewtonRaphson uvPoint = (# surface @ uvPoint - point, du @ uvPoint, dv @ uvPoint #)
   let domain = Surface3D.domain surface
   let isDistant segment = not (point ^ Segment.range segment)
   let isExterior uvRange =
@@ -86,7 +85,7 @@ findInteriorSolution point surface = do
   let candidates =
         Surface3D.bisectionTree surface
           & Bisection.resolve UvBag.empty resolvedUniqueness
-  let isSolution uvPoint = Surface3D.pointAt uvPoint surface ~= point
+  let isSolution uvPoint = surface @ uvPoint ~= point
   let isInterior uvPoint = UvRegion.classifyPoint uvPoint domain == Region2D.InteriorPoint
   let isInteriorSolution uvPoint = isSolution uvPoint && isInterior uvPoint
   let resolvedSolution UniqueSolution uvRange segment

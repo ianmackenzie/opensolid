@@ -335,7 +335,7 @@ registerSeam halfEdgeSet halfEdge accumulated =
 ----- MESHING -----
 
 toPointMesh :: Tolerance Meters => Resolution Meters -> Body3D space -> Mesh (Point3D space)
-toPointMesh resolution body = toMesh resolution Surface3D.pointOn body
+toPointMesh resolution body = toMesh resolution (@) body
 
 toSurfaceMesh ::
   Tolerance Meters =>
@@ -368,10 +368,10 @@ surfaceSegmentsEntry resolution surfaceIndex surface = do
   let uvBounds = Region2D.bounds (Surface3D.domain surface)
   let Bounds2D (Interval u1 u2) (Interval v1 v2) = uvBounds
   let surfaceSegmentSet = do
-        let p11 = Surface3D.pointAt (UvPoint u1 v1) surface
-        let p21 = Surface3D.pointAt (UvPoint u2 v1) surface
-        let p12 = Surface3D.pointAt (UvPoint u1 v2) surface
-        let p22 = Surface3D.pointAt (UvPoint u2 v2) surface
+        let p11 = surface @ UvPoint u1 v1
+        let p21 = surface @ UvPoint u2 v1
+        let p12 = surface @ UvPoint u1 v2
+        let p22 = surface @ UvPoint u2 v2
         buildSurfaceSegmentSet resolution surface uvBounds p11 p21 p12 p22
   (SurfaceId surfaceIndex, surfaceSegmentSet)
 
@@ -393,7 +393,7 @@ buildSurfaceSegmentSet resolution surface uvRange p11 p21 p12 p22 = do
   let uMid = Interval.midpoint uRange
   let vMid = Interval.midpoint vRange
   let uvCenter = UvPoint uMid vMid
-  let pCenter = Surface3D.pointAt uvCenter surface
+  let pCenter = surface @ uvCenter
   let nCenter = Surface3D.normalDirectionAt uvCenter surface
   let pointError point = Quantity.abs ((point - pCenter) `dot` nCenter)
   let maxCornerError = pointError p11 `max` pointError p12 `max` pointError p21 `max` pointError p22
@@ -405,7 +405,7 @@ buildSurfaceSegmentSet resolution surface uvRange p11 p21 p12 p22 = do
   let uInterior2 = uMid + uOffset
   let vInterior1 = vMid - vOffset
   let vInterior2 = vMid + vOffset
-  let interiorError uvPoint = pointError (Surface3D.pointAt uvPoint surface)
+  let interiorError uvPoint = pointError (surface @ uvPoint)
   let interiorError11 = interiorError (UvPoint uInterior1 vInterior1)
   let interiorError21 = interiorError (UvPoint uInterior2 vInterior1)
   let interiorError12 = interiorError (UvPoint uInterior1 vInterior2)
@@ -421,10 +421,10 @@ buildSurfaceSegmentSet resolution surface uvRange p11 p21 p12 p22 = do
     else do
       let Interval u1 u2 = uRange
       let Interval v1 v2 = vRange
-      let pMid1 = Surface3D.pointAt (UvPoint uMid v1) surface
-      let pMid2 = Surface3D.pointAt (UvPoint uMid v2) surface
-      let p1Mid = Surface3D.pointAt (UvPoint u1 vMid) surface
-      let p2Mid = Surface3D.pointAt (UvPoint u2 vMid) surface
+      let pMid1 = surface @ UvPoint uMid v1
+      let pMid2 = surface @ UvPoint uMid v2
+      let p1Mid = surface @ UvPoint u1 vMid
+      let p2Mid = surface @ UvPoint u2 vMid
       let uRange1 = Interval u1 uMid
       let uRange2 = Interval uMid u2
       let vRange1 = Interval v1 vMid

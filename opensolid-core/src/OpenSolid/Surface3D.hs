@@ -22,8 +22,6 @@ module OpenSolid.Surface3D
   , poles
   , edges
   , bisectionTree
-  , pointAt
-  , pointOn
   , partialDerivativeRanges
   , secondPartialDerivativeRanges
   , normalDirectionAt
@@ -162,6 +160,10 @@ instance Bounded (Edge space) UvBounds where
 
 type Boundary space = Set3D space (SurfaceCurve3D space)
 
+instance At (Surface3D space) UvPoint (Point3D space) where
+  {-# INLINE (@) #-}
+  surface @ uvPoint = function surface @ uvPoint
+
 {-# INLINE function #-}
 function :: Surface3D space -> SurfaceFunction3D space
 function = (.function)
@@ -236,14 +238,6 @@ edges surface = do
 bisectionTree :: Surface3D space -> BisectionTree space
 bisectionTree = (.bisectionTree)
 
-{-# INLINE pointAt #-}
-pointAt :: UvPoint -> Surface3D space -> Point3D space
-pointAt uvPoint surface = SurfaceFunction3D.pointAt uvPoint (function surface)
-
-{-# INLINE pointOn #-}
-pointOn :: Surface3D space -> UvPoint -> Point3D space
-pointOn surface uvPoint = SurfaceFunction3D.pointOn (function surface) uvPoint
-
 {-# INLINE range #-}
 range :: UvBounds -> Surface3D space -> Bounds3D space
 range uvRange surface = SurfaceFunction3D.range uvRange (function surface)
@@ -293,8 +287,7 @@ normalDirectionRange uvRange surface = do
       | otherwise -> fu `cross` fv
 
 vertexAt :: UvPoint -> Surface3D space -> SurfaceVertex3D space
-vertexAt uvPoint surface =
-  SurfaceVertex3D (pointAt uvPoint surface) (normalDirectionAt uvPoint surface)
+vertexAt uvPoint surface = SurfaceVertex3D (surface @ uvPoint) (normalDirectionAt uvPoint surface)
 
 vertexOn :: Surface3D space -> UvPoint -> SurfaceVertex3D space
 vertexOn surface uvPoint = vertexAt uvPoint surface

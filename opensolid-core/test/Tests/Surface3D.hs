@@ -13,7 +13,6 @@ import OpenSolid.Random qualified as Random
 import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.Surface3D.Pole qualified as Surface3D.Pole
-import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
 import OpenSolid.Try qualified as Try
 import OpenSolid.UvCurve qualified as UvCurve
@@ -58,7 +57,7 @@ findPoint =
 findPole :: Test
 findPole = Test.check 100 "findPole" do
   surface <- Test.generate spherePatch
-  let point = Surface3D.pointAt (UvPoint 1.0 0.0) surface
+  let point = surface @ UvPoint 1.0 0.0
   let solutions = Surface3D.findPoint point surface
   case solutions of
     [SurfacePoint3D.Pole pole] -> Try.do
@@ -70,7 +69,7 @@ findNonPole :: Text -> Generator UvPoint -> Test
 findNonPole label uvPointGenerator = Test.check 100 label do
   surface <- Test.generate spherePatch
   uvPoint <- Test.generate uvPointGenerator
-  let point = Surface3D.pointAt uvPoint surface
+  let point = surface @ uvPoint
   let solutions = Surface3D.findPoint point surface
   case solutions of
     [SurfacePoint3D.Point solution _] -> Test.expect (solution ~~ uvPoint)
@@ -110,7 +109,7 @@ ruledSurfaceCorrectValue =
     let p1 = curve1 @ u
     let p2 = curve2 @ u
     let expectedPoint = Point3D.interpolateFrom p1 p2 v
-    let actualPoint = SurfaceFunction3D.pointAt uvPoint (Surface3D.function surface)
+    let actualPoint = surface @ uvPoint
     Test.expect (actualPoint ~~ expectedPoint)
       & Test.output "expectedPoint" expectedPoint
       & Test.output "actualPoint" actualPoint
@@ -148,7 +147,7 @@ translationalSurfaceCorrectValue =
     uvPoint <- Test.generate UvPoint.random
     let UvPoint u v = uvPoint
     let expectedPoint = baseCurve @ u + translationCurve @ v
-    let actualPoint = SurfaceFunction3D.pointAt uvPoint (Surface3D.function surface)
+    let actualPoint = surface @ uvPoint
     Test.expect (actualPoint ~~ expectedPoint)
       & Test.output "expectedPoint" expectedPoint
       & Test.output "actualPoint" actualPoint

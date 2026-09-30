@@ -3,8 +3,6 @@ module OpenSolid.SurfaceFunction3D
   , Compiled
   , new
   , constant
-  , pointAt
-  , pointOn
   , range
   , compiled
   , partialDerivatives
@@ -68,6 +66,10 @@ instance Space.Coercion (SurfaceFunction3D space1) (SurfaceFunction3D space2) wh
       { compiled = Space.coerce function.compiled
       , partialDerivatives = Pair.map Space.coerce function.partialDerivatives
       }
+
+instance At (SurfaceFunction3D space) UvPoint (Point3D space) where
+  {-# INLINE (@) #-}
+  function @ uvPoint = CompiledFunction.value uvPoint (compiled function)
 
 instance
   space1 ~ space2 =>
@@ -189,14 +191,6 @@ constant value =
   new
     (CompiledFunction.constant value)
     (VectorSurfaceFunction3D.zero, VectorSurfaceFunction3D.zero)
-
-{-# INLINE pointAt #-}
-pointAt :: UvPoint -> SurfaceFunction3D space -> Point3D space
-pointAt uvPoint function = CompiledFunction.value uvPoint function.compiled
-
-{-# INLINE pointOn #-}
-pointOn :: SurfaceFunction3D space -> UvPoint -> Point3D space
-pointOn function uvPoint = pointAt uvPoint function
 
 {-# INLINE range #-}
 range :: UvBounds -> SurfaceFunction3D space -> Bounds3D space
