@@ -28,8 +28,8 @@ import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Axis2D (Axis2D, direction, originPoint)
-  , Axis3D (Axis3D)
+  ( Axis2D (..)
+  , Axis3D (..)
   , Plane3D
   , Transform2D
   )
@@ -53,11 +53,11 @@ rightwardDirection axis = Direction2D.rotateRight (direction axis)
 
 -- | The X axis.
 x :: Axis2D units
-x = Axis2D Point2D.origin Direction2D.x
+x = Axis2D {originPoint = Point2D.origin, direction = Direction2D.x}
 
 -- | The Y axis.
 y :: Axis2D units
-y = Axis2D Point2D.origin Direction2D.y
+y = Axis2D {originPoint = Point2D.origin, direction = Direction2D.y}
 
 -- | Construct an axis with the given origin point and direction.
 with :: "originPoint" ::: Point2D units -> "direction" ::: Direction2D -> Axis2D units
@@ -65,10 +65,18 @@ with ("originPoint" ::: givenOriginPoint) ("direction" ::: givenDirection) =
   Axis2D {originPoint = givenOriginPoint, direction = givenDirection}
 
 moveTo :: Point2D units -> Axis2D units -> Axis2D units
-moveTo newOriginPoint axis = Axis2D newOriginPoint (direction axis)
+moveTo newOriginPoint axis =
+  Axis2D
+    { originPoint = newOriginPoint
+    , direction = direction axis
+    }
 
 reverse :: Axis2D units -> Axis2D units
-reverse (Axis2D p0 d) = Axis2D p0 -d
+reverse axis =
+  Axis2D
+    { originPoint = originPoint axis
+    , direction = negate (direction axis)
+    }
 
 {-| Convert a 2D axis to 3D axis by placing it on a plane.
 
@@ -76,18 +84,22 @@ Given a 2D axis defined within a plane's coordinate system,
 this returns the corresponding 3D axis.
 -}
 placeOn :: Plane3D space -> Axis2D Meters -> Axis3D space
-placeOn plane (Axis2D p0 d) = Axis3D (Point2D.placeOn plane p0) (Direction2D.placeOn plane d)
+placeOn plane axis =
+  Axis3D
+    { originPoint = Point2D.placeOn plane (originPoint axis)
+    , direction = Direction2D.placeOn plane (direction axis)
+    }
 
 transformBy ::
   Transform.Tag.IsOrthonormal tag =>
   Transform2D tag units ->
   Axis2D units ->
   Axis2D units
-transformBy transform axis = do
-  let transformedOriginPoint = Point2D.transformBy transform (originPoint axis)
-  let transformedDirection =
-        Direction2D.transformBy (Transform2D.vectorTransform transform) (direction axis)
-  Axis2D transformedOriginPoint transformedDirection
+transformBy transform axis =
+  Axis2D
+    { originPoint = Point2D.transformBy transform (originPoint axis)
+    , direction = Direction2D.transformBy (Transform2D.vectorTransform transform) (direction axis)
+    }
 
 offsetLeftwardBy :: Quantity units -> Axis2D units -> Axis2D units
 offsetLeftwardBy distance axis = translateIn (leftwardDirection axis) distance axis
