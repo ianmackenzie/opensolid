@@ -73,7 +73,6 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified
-import Data.Proxy (Proxy (Proxy))
 import Data.String (fromString)
 import Data.Text (Text)
 import Data.Text qualified
@@ -85,7 +84,6 @@ import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
 import GHC.TypeLits (KnownSymbol, Symbol)
-import GHC.TypeLits qualified
 import OpenSolid.Err (Err)
 import OpenSolid.Err qualified as Err
 import OpenSolid.Show qualified as Show
@@ -369,18 +367,6 @@ newtype (name :: Symbol) ::: value where
   (:::) :: forall name -> value -> name ::: value
 
 infix 0 :::
-
-instance (KnownSymbol name, Show value) => Show (name ::: value) where
-  showsPrec precedence (_ ::: value) = do
-    let nameString = GHC.TypeLits.symbolVal @name Proxy
-    Prelude.showParen (precedence > 0) $
-      Prelude.showString nameString . Prelude.showString " ::: " . Prelude.shows value
-
-instance Eq value => Eq (name ::: value) where
-  (_ ::: value1) == (_ ::: value2) = value1 == value2
-
-instance Ord value => Ord (name ::: value) where
-  compare (_ ::: value1) (_ ::: value2) = compare value1 value2
 
 instance
   (KnownSymbol name1, name1 ~ name2, value1 ~ value2) =>
