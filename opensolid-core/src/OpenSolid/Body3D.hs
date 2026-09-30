@@ -156,10 +156,10 @@ Fails if the cylinder length or diameter is zero.
 cylinder ::
   Tolerance Meters =>
   "diameter" ::: Length ->
-  Point3D space ->
-  Point3D space ->
+  "startPoint" ::: Point3D space ->
+  "endPoint" ::: Point3D space ->
   Result EmptyBody (Body3D space)
-cylinder ("diameter" ::: diameter) startPoint endPoint =
+cylinder ("diameter" ::: diameter) ("startPoint" ::: startPoint) ("endPoint" ::: endPoint) =
   case Vector3D.magnitudeAndDirection (endPoint - startPoint) of
     Err IsZero -> Err EmptyBody
     Ok (length, direction) ->
