@@ -202,7 +202,7 @@ dummy_value = {
     Point2D: Point2D.origin,
     UvPoint: UvPoint.bottom_left,
     Bounds2D: Bounds2D.constant(Point2D.origin),
-    UvBounds: UvBounds.constant(UvPoint.origin),
+    UvBounds: UvBounds.constant(UvPoint.bottom_left),
     Curve: Curve.constant(1),
     LengthCurve: LengthCurve.constant(Length.meters(1)),
     AreaCurve: AreaCurve.constant(Area.square_meters(1)),

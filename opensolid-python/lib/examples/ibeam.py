@@ -28,11 +28,11 @@ top_flange_top_y = height / 2
 top_flange_bottom_y = top_flange_top_y - thickness
 
 # Define key points on sketch profile
-p1 = Point2D.x(web_right_x)
+p1 = Point2D(web_right_x, Length.zero)
 p2 = Point2D(web_right_x, top_flange_bottom_y)
 p3 = Point2D(flange_right_x, top_flange_bottom_y)
 p4 = Point2D(flange_right_x, top_flange_top_y)
-p5 = Point2D.y(top_flange_top_y)
+p5 = Point2D(Length.zero, top_flange_top_y)
 
 # Create the sketch profile
 fillet = Curve2D.corner_arc(
