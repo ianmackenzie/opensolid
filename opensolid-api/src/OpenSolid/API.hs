@@ -988,6 +988,7 @@ svg =
     , Class.static1 "Padding" "Padding" Svg.padding $(docs 'Svg.padding)
     , Class.factory1 "Group" "Children" Svg.group $(docs 'Svg.group)
     , Class.factory1 "Line" "Line" Svg.line $(docs 'Svg.line)
+    , Class.factory2 "Line From" "Start Point" "End Point" Svg.lineFrom $(docs 'Svg.lineFrom)
     , Class.factory1 "Polyline" "Polyline" Svg.polyline $(docs 'Svg.polyline)
     , Class.factory1 "Polygon" "Polygon" Svg.polygon $(docs 'Svg.polygon)
     , Class.factory1 "Triangle" "Triangle" Svg.triangle $(docs 'Svg.triangle)

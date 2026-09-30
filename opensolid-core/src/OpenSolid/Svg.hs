@@ -11,6 +11,7 @@ module OpenSolid.Svg
   , group
   , combine
   , line
+  , lineFrom
   , polyline
   , polygon
   , triangle
@@ -245,6 +246,10 @@ line (Line2D p1 p2) = do
   let x2Attribute = Attribute "x2" (lengthText x2)
   let y2Attribute = Attribute "y2" (lengthText -y2)
   entity "line" (Bounds2D.hull2 p1 p2) [x1Attribute, y1Attribute, x2Attribute, y2Attribute]
+
+-- | Draw a line between two points.
+lineFrom :: Point2D Meters -> Point2D Meters -> Svg
+lineFrom p1 p2 = line (Line2D p1 p2)
 
 -- | Draw a polyline.
 polyline :: Polyline2D Meters -> Svg
