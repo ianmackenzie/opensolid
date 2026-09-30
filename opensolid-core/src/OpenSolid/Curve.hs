@@ -17,6 +17,18 @@ module OpenSolid.Curve
   , TangentDirection
   , TangentDirection2D
   , TangentDirection3D
+  , Curvature_
+  , Curvature
+  , Curvature2D_
+  , Curvature2D
+  , Curvature3D_
+  , Curvature3D
+  , CurvatureVector_
+  , CurvatureVector
+  , CurvatureVector2D_
+  , CurvatureVector2D
+  , CurvatureVector3D_
+  , CurvatureVector3D
   , new
   , unsafe
   , displacedFrom
@@ -38,10 +50,10 @@ module OpenSolid.Curve
   , startSecondDerivative
   , endSecondDerivative
   , tangentDirection
-  , curvatureAt_
-  , curvatureVectorAt_
-  , curvatureRange_
-  , curvatureVectorRange_
+  , curvature_
+  , curvature
+  , curvatureVector_
+  , curvatureVector
   , reverse
   , section
   , hasDegenerateStart
@@ -116,6 +128,7 @@ import OpenSolid.IsZero (IsZero (IsZero))
 import OpenSolid.Line (Line (Line))
 import OpenSolid.Line qualified as Line
 import OpenSolid.List qualified as List
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.NewtonRaphson.Surface qualified as NewtonRaphson.Surface
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -151,13 +164,17 @@ import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Uniform (Uniform)
 import OpenSolid.Uniform qualified as Uniform
-import OpenSolid.Units (Units)
+import OpenSolid.Units (InverseMeters, Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector, VectorExists)
 import OpenSolid.Vector qualified as Vector
 import OpenSolid.Vector.Nonzero qualified as Vector.Nonzero
+import OpenSolid.Vector2D (Vector2D)
+import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
 import OpenSolid.VectorBounds qualified as VectorBounds
+import OpenSolid.VectorBounds2D (VectorBounds2D)
+import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorCurve (VectorCurve, VectorCurveExists)
 import OpenSolid.VectorCurve qualified as VectorCurve
 import OpenSolid.VectorCurve2D (VectorCurve2D)
@@ -252,6 +269,61 @@ instance FFI TangentDirection2D where
 
 instance FFI (TangentDirection3D Void) where
   representation = FFI.classRepresentation "TangentDirection3D"
+
+data Curvature_ dimension units space where
+  Curvature_ ::
+    (CurveExists dimension units space, Tolerance units) =>
+    Curve dimension units space ->
+    Curvature_ dimension units space
+
+type Curvature2D_ units = Curvature_ 2 units Void
+
+type Curvature3D_ space = Curvature_ 3 Meters space
+
+data Curvature dimension inverseUnits space where
+  Curvature ::
+    Units.Inverse units inverseUnits =>
+    Curvature_ dimension units space ->
+    Curvature dimension inverseUnits space
+
+type Curvature2D inverseUnits = Curvature 2 inverseUnits Void
+
+instance FFI (Curvature2D InverseMeters) where
+  representation = FFI.classRepresentation "Curvature2D"
+
+instance FFI (Curvature2D Unitless) where
+  representation = FFI.classRepresentation "UvCurvature"
+
+type Curvature3D space = Curvature 3 InverseMeters space
+
+instance FFI (Curvature3D Void) where
+  representation = FFI.classRepresentation "Curvature3D"
+
+newtype CurvatureVector_ dimension units space
+  = CurvatureVector_ (Curvature_ dimension units space)
+
+type CurvatureVector2D_ units = CurvatureVector_ 2 units Void
+
+type CurvatureVector3D_ space = CurvatureVector_ 3 Meters space
+
+data CurvatureVector dimension inverseUnits space where
+  CurvatureVector ::
+    Units.Inverse units inverseUnits =>
+    CurvatureVector_ dimension units space ->
+    CurvatureVector dimension inverseUnits space
+
+type CurvatureVector2D inverseUnits = CurvatureVector 2 inverseUnits Void
+
+instance FFI (CurvatureVector2D InverseMeters) where
+  representation = FFI.classRepresentation "CurvatureVector2D"
+
+instance FFI (CurvatureVector2D Unitless) where
+  representation = FFI.classRepresentation "UvCurvatureVector"
+
+type CurvatureVector3D space = CurvatureVector 3 InverseMeters space
+
+instance FFI (CurvatureVector3D Void) where
+  representation = FFI.classRepresentation "CurvatureVector3D"
 
 type BisectionTree dimension units space =
   Bisection.Tree (Interval Unitless) (Segment dimension units space)
@@ -520,6 +592,8 @@ instance At (Curve2D units) Uniform (Point2D units) where
 instance At (Curve3D space) Uniform (Point3D space) where
   curve @ rValue = curve @ (parameterValue curve @ rValue)
 
+----- At instances for TangentDirection -----
+
 instance At TangentDirection2D Number Direction2D where
   TangentDirection curve @ tValue = do
     let derivativeValue = derivative curve @ tValue
@@ -543,6 +617,189 @@ instance At (TangentDirection3D space) (Interval Unitless) (DirectionBounds3D sp
     let derivativeRange = derivative curve @ tRange
     let secondDerivativeRange = secondDerivative curve @ tRange
     tangentDirectionRangeImpl tRange curve derivativeRange secondDerivativeRange
+
+----- At instances for Curvature_ -----
+
+instance
+  At
+    (Curvature2D_ units)
+    Number
+    (Maybe (Quantity (Unitless ?/? units), Direction2D))
+  where
+  Curvature_ curve @ tValue = do
+    let derivativeValue = derivative curve @ tValue
+    let secondDerivativeValue = secondDerivative curve @ tValue
+    let tangentDirectionValue =
+          tangentDirectionImpl tValue curve derivativeValue secondDerivativeValue
+    curvatureImpl_ tValue curve derivativeValue secondDerivativeValue tangentDirectionValue
+
+instance
+  At
+    (Curvature3D_ space)
+    Number
+    (Maybe (Quantity (Unitless ?/? Meters), Direction3D space))
+  where
+  Curvature_ curve @ tValue = do
+    let derivativeValue = derivative curve @ tValue
+    let secondDerivativeValue = secondDerivative curve @ tValue
+    let tangentDirectionValue =
+          tangentDirectionImpl tValue curve derivativeValue secondDerivativeValue
+    curvatureImpl_ tValue curve derivativeValue secondDerivativeValue tangentDirectionValue
+
+curvatureImpl_ ::
+  (CurveExists dimension units space, Tolerance units) =>
+  Number ->
+  Curve dimension units space ->
+  Vector dimension units space ->
+  Vector dimension units space ->
+  Direction dimension space ->
+  Maybe (Quantity (Unitless ?/? units), Direction dimension space)
+curvatureImpl_ tValue curve derivativeValue secondDerivativeValue tangentDirectionValue = do
+  let perpendicularSecondDerivative =
+        secondDerivativeValue - Vector.projectionIn tangentDirectionValue secondDerivativeValue
+  case Vector.magnitudeAndDirection perpendicularSecondDerivative of
+    Err IsZero -> Nothing
+    Ok (perpendicularSecondDerivativeMagnitude, curvatureDirection) -> do
+      let curvatureMagnitude =
+            if isDegenerateAt tValue curve
+              then Quantity.infinity
+              else Units.simplify do
+                perpendicularSecondDerivativeMagnitude ?/? Vector.squaredMagnitude_ derivativeValue
+      Just (curvatureMagnitude, curvatureDirection)
+
+instance
+  At
+    (Curvature2D_ units)
+    (Interval Unitless)
+    (Interval (Unitless ?/? units), DirectionBounds2D)
+  where
+  Curvature_ curve @ tRange = do
+    let derivativeRange = derivative curve @ tRange
+    let secondDerivativeRange = secondDerivative curve @ tRange
+    let tangentDirectionRange =
+          tangentDirectionRangeImpl tRange curve derivativeRange secondDerivativeRange
+    curvatureRangeImpl_ derivativeRange secondDerivativeRange tangentDirectionRange
+
+instance
+  At
+    (Curvature3D_ space)
+    (Interval Unitless)
+    (Interval (Unitless ?/? Meters), DirectionBounds3D space)
+  where
+  Curvature_ curve @ tRange = do
+    let derivativeRange = derivative curve @ tRange
+    let secondDerivativeRange = secondDerivative curve @ tRange
+    let tangentDirectionRange =
+          tangentDirectionRangeImpl tRange curve derivativeRange secondDerivativeRange
+    curvatureRangeImpl_ derivativeRange secondDerivativeRange tangentDirectionRange
+
+curvatureRangeImpl_ ::
+  CurveExists dimension units space =>
+  VectorBounds dimension units space ->
+  VectorBounds dimension units space ->
+  DirectionBounds dimension space ->
+  (Interval (Unitless ?/? units), DirectionBounds dimension space)
+curvatureRangeImpl_ derivativeRange secondDerivativeRange tangentDirectionRange = do
+  let perpendicularSecondDerivative =
+        secondDerivativeRange
+          - tangentDirectionRange * (secondDerivativeRange `dot` tangentDirectionRange)
+  let curvatureDirection = VectorBounds.direction perpendicularSecondDerivative
+  let curvatureMagnitude = Units.simplify do
+        VectorBounds.magnitude perpendicularSecondDerivative
+          ?/? VectorBounds.squaredMagnitude_ derivativeRange
+  (curvatureMagnitude, curvatureDirection)
+
+----- At instances for CurvatureVector_ -----
+
+instance At (CurvatureVector2D_ units) Number (Vector2D (Unitless ?/? units)) where
+  CurvatureVector_ curveCurvature_ @ tValue =
+    case curveCurvature_ @ tValue of
+      Nothing -> Vector.zero
+      Just (curvatureMagnitude_, curvatureDirection) -> curvatureMagnitude_ * curvatureDirection
+
+instance At (CurvatureVector3D_ space) Number (Vector3D (Unitless ?/? Meters) space) where
+  CurvatureVector_ curveCurvature_ @ tValue =
+    case curveCurvature_ @ tValue of
+      Nothing -> Vector.zero
+      Just (curvatureMagnitude_, curvatureDirection) -> curvatureMagnitude_ * curvatureDirection
+
+instance
+  At
+    (CurvatureVector2D_ units)
+    (Interval Unitless)
+    (VectorBounds2D (Unitless ?/? units))
+  where
+  CurvatureVector_ curveCurvature_ @ tRange = do
+    let (curvatureMagnitudeRange_, curvatureDirectionRange) = curveCurvature_ @ tRange
+    curvatureMagnitudeRange_ * curvatureDirectionRange
+
+instance
+  At
+    (CurvatureVector3D_ space)
+    (Interval Unitless)
+    (VectorBounds3D (Unitless ?/? Meters) space)
+  where
+  CurvatureVector_ curveCurvature_ @ tRange = do
+    let (curvatureMagnitudeRange_, curvatureDirectionRange) = curveCurvature_ @ tRange
+    curvatureMagnitudeRange_ * curvatureDirectionRange
+
+--- At instances for Curvature
+
+instance At (Curvature2D inverseUnits) Number (Maybe (Quantity inverseUnits, Direction2D)) where
+  Curvature curveCurvature_ @ tValue =
+    Maybe.map (Pair.mapFirst Units.specialize) (curveCurvature_ @ tValue)
+
+instance At (Curvature3D space) Number (Maybe (Quantity InverseMeters, Direction3D space)) where
+  Curvature curveCurvature_ @ tValue =
+    Maybe.map (Pair.mapFirst Units.specialize) (curveCurvature_ @ tValue)
+
+instance
+  At
+    (Curvature2D inverseUnits)
+    (Interval Unitless)
+    (Interval inverseUnits, DirectionBounds2D)
+  where
+  Curvature curveCurvature_ @ tRange =
+    Pair.mapFirst Units.specialize (curveCurvature_ @ tRange)
+
+instance
+  At
+    (Curvature3D space)
+    (Interval Unitless)
+    (Interval InverseMeters, DirectionBounds3D space)
+  where
+  Curvature curveCurvature_ @ tRange =
+    Pair.mapFirst Units.specialize (curveCurvature_ @ tRange)
+
+----- At instances for CurvatureVector -----
+
+instance At (CurvatureVector2D inverseUnits) Number (Vector2D inverseUnits) where
+  CurvatureVector curveCurvatureVector_ @ tValue =
+    Units.specialize (curveCurvatureVector_ @ tValue)
+
+instance At (CurvatureVector3D space) Number (Vector3D InverseMeters space) where
+  CurvatureVector curveCurvatureVector_ @ tValue =
+    Units.specialize (curveCurvatureVector_ @ tValue)
+
+instance
+  At
+    (CurvatureVector2D inverseUnits)
+    (Interval Unitless)
+    (VectorBounds2D inverseUnits)
+  where
+  CurvatureVector curveCurvatureVector_ @ tValue =
+    Units.specialize (curveCurvatureVector_ @ tValue)
+
+instance
+  At
+    (CurvatureVector3D space)
+    (Interval Unitless)
+    (VectorBounds3D InverseMeters space)
+  where
+  CurvatureVector curveCurvatureVector_ @ tValue =
+    Units.specialize (curveCurvatureVector_ @ tValue)
+
+---- Composition instances -----
 
 instance Composition () (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
   f << g = do
@@ -584,6 +841,22 @@ class
   , At (Curve dimension units space) (Interval Unitless) (Bounds dimension units space)
   , At (TangentDirection dimension space) Number (Direction dimension space)
   , At (TangentDirection dimension space) (Interval Unitless) (DirectionBounds dimension space)
+  , At
+      (Curvature_ dimension units space)
+      Number
+      (Maybe (Quantity (Unitless ?/? units), Direction dimension space))
+  , At
+      (Curvature_ dimension units space)
+      (Interval Unitless)
+      (Interval (Unitless ?/? units), DirectionBounds dimension space)
+  , At
+      (CurvatureVector_ dimension units space)
+      Number
+      (Vector dimension (Unitless ?/? units) space)
+  , At
+      (CurvatureVector_ dimension units space)
+      (Interval Unitless)
+      (VectorBounds dimension (Unitless ?/? units) space)
   , Expression.Constant Number (Point dimension units space)
   , Expression.BezierCurve (Point dimension units space)
   , Expression.TransformBy
@@ -798,77 +1071,29 @@ tangentDirectionRangeImpl tRange curve firstDerivativeRange_ secondDerivativeRan
       | Interval.upper tRange == 1.0 && hasDegenerateEnd curve -> -secondDerivativeRange_
       | otherwise -> firstDerivativeRange_
 
-curvatureAt_ ::
+curvature_ ::
   (CurveExists dimension units space, Tolerance units) =>
-  Number ->
   Curve dimension units space ->
-  Maybe (Quantity (Unitless ?/? units), Direction dimension space)
-curvatureAt_ tValue curve = do
-  let f' = derivative curve @ tValue
-  let f'' = secondDerivative curve @ tValue
-  let tangent = tangentDirectionImpl tValue curve f' f''
-  curvatureImpl_ tValue curve f' f'' tangent
+  Curvature_ dimension units space
+curvature_ = Curvature_
 
-curvatureVectorAt_ ::
+curvature ::
+  (CurveExists dimension units space, Tolerance units, Units.Inverse units inverseUnits) =>
+  Curve dimension units space ->
+  Curvature dimension inverseUnits space
+curvature = Curvature . curvature_
+
+curvatureVector_ ::
   (CurveExists dimension units space, Tolerance units) =>
-  Number ->
   Curve dimension units space ->
-  Vector dimension (Unitless ?/? units) space
-curvatureVectorAt_ tValue curve =
-  case curvatureAt_ tValue curve of
-    Nothing -> Vector.zero
-    Just (curvatureMagnitude_, curvatureDirection) -> curvatureMagnitude_ * curvatureDirection
+  CurvatureVector_ dimension units space
+curvatureVector_ = CurvatureVector_ . curvature_
 
-curvatureRange_ ::
-  CurveExists dimension units space =>
-  Interval Unitless ->
+curvatureVector ::
+  (CurveExists dimension units space, Tolerance units, Units.Inverse units inverseUnits) =>
   Curve dimension units space ->
-  (Interval (Unitless ?/? units), DirectionBounds dimension space)
-curvatureRange_ tRange curve = do
-  let f' = derivative curve @ tRange
-  let f'' = secondDerivative curve @ tRange
-  let tangent = tangentDirectionRangeImpl tRange curve f' f''
-  curvatureRangeImpl_ f' f'' tangent
-
-curvatureVectorRange_ ::
-  CurveExists dimension units space =>
-  Interval Unitless ->
-  Curve dimension units space ->
-  VectorBounds dimension (Unitless ?/? units) space
-curvatureVectorRange_ tRange curve = do
-  let (curvatureMagnitudeRange_, curvatureDirectionRange) = curvatureRange_ tRange curve
-  curvatureMagnitudeRange_ * curvatureDirectionRange
-
-curvatureImpl_ ::
-  (CurveExists dimension units space, Tolerance units) =>
-  Number ->
-  Curve dimension units space ->
-  Vector dimension units space ->
-  Vector dimension units space ->
-  Direction dimension space ->
-  Maybe (Quantity (Unitless ?/? units), Direction dimension space)
-curvatureImpl_ tValue curve f' f'' tangent =
-  case Vector.magnitudeAndDirection (f'' - Vector.projectionIn tangent f'') of
-    Err IsZero -> Nothing
-    Ok (numerator, curvatureDirection) -> do
-      let curvatureMagnitude =
-            if isDegenerateAt tValue curve
-              then Quantity.infinity
-              else Units.simplify (numerator ?/? Vector.squaredMagnitude_ f')
-      Just (curvatureMagnitude, curvatureDirection)
-
-curvatureRangeImpl_ ::
-  CurveExists dimension units space =>
-  VectorBounds dimension units space ->
-  VectorBounds dimension units space ->
-  DirectionBounds dimension space ->
-  (Interval (Unitless ?/? units), DirectionBounds dimension space)
-curvatureRangeImpl_ f' f'' tangent = do
-  let f''Perpendicular = f'' - tangent * (f'' `dot` tangent)
-  let curvatureDirection = VectorBounds.direction f''Perpendicular
-  let curvatureMagnitude = Units.simplify do
-        VectorBounds.magnitude f''Perpendicular ?/? VectorBounds.squaredMagnitude_ f'
-  (curvatureMagnitude, curvatureDirection)
+  CurvatureVector dimension inverseUnits space
+curvatureVector = CurvatureVector . curvatureVector_
 
 bisectionTree :: Curve dimension units space -> BisectionTree dimension units space
 bisectionTree = (.bisectionTree)

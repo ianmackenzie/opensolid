@@ -389,7 +389,7 @@ g2 = Test.check 100 "G2 continuity" Try.do
   t <- Test.generate Parameter.random
   let point = spline @ t
   let tangentDirection = Curve.tangentDirection spline @ t
-  let curvatureVector = Curve2D.curvatureVectorAt t spline
+  let curvatureVector = Curve2D.curvatureVector spline @ t
   let signedRadius = 1.0 / (tangentDirection `cross` curvatureVector)
   let normalDirection = Direction2D.rotateLeft tangentDirection
   let arcCenter = point + signedRadius * normalDirection

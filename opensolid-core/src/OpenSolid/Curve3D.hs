@@ -23,10 +23,8 @@ module OpenSolid.Curve3D
   , startSecondDerivative
   , endSecondDerivative
   , tangentDirection
-  , curvatureAt
-  , curvatureVectorAt
-  , curvatureRange
-  , curvatureVectorRange
+  , curvature
+  , curvatureVector
   , startPoint
   , endPoint
   , endpoints
@@ -46,28 +44,21 @@ where
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve3D, ParameterValue, TangentDirection3D)
+import OpenSolid.Curve (Curvature3D, CurvatureVector3D, Curve3D, ParameterValue, TangentDirection3D)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve3D.IntersectionPointWithSurface (IntersectionPointWithSurface)
-import OpenSolid.Direction3D (Direction3D)
-import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval)
 import OpenSolid.Length (Length)
 import OpenSolid.Line3D (Line3D)
-import OpenSolid.Maybe qualified as Maybe
-import OpenSolid.Pair qualified as Pair
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform3D (Transform3D)
-import OpenSolid.Units (InverseMeters)
-import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3D (Vector3D)
-import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorCurve3D (VectorCurve3D)
 import OpenSolid.VectorCurve3D qualified as VectorCurve3D
 
@@ -185,35 +176,11 @@ endSecondDerivative = Curve.endSecondDerivative
 tangentDirection :: Curve3D space -> TangentDirection3D space
 tangentDirection = Curve.tangentDirection
 
-curvatureAt ::
-  Tolerance Meters =>
-  Number ->
-  Curve3D space ->
-  Maybe (Quantity InverseMeters, Direction3D space)
-curvatureAt tValue curve =
-  Maybe.map (Pair.mapFirst Units.specialize) (Curve.curvatureAt_ tValue curve)
+curvature :: Tolerance Meters => Curve3D space -> Curvature3D space
+curvature = Curve.curvature
 
-curvatureVectorAt ::
-  Tolerance Meters =>
-  Number ->
-  Curve3D space ->
-  Vector3D InverseMeters space
-curvatureVectorAt tValue curve =
-  Units.specialize (Curve.curvatureVectorAt_ tValue curve)
-
-curvatureRange ::
-  Interval Unitless ->
-  Curve3D space ->
-  (Interval InverseMeters, DirectionBounds3D space)
-curvatureRange tRange curve =
-  Pair.mapFirst Units.specialize (Curve.curvatureRange_ tRange curve)
-
-curvatureVectorRange ::
-  Interval Unitless ->
-  Curve3D space ->
-  VectorBounds3D InverseMeters space
-curvatureVectorRange tRange curve =
-  Units.specialize (Curve.curvatureVectorRange_ tRange curve)
+curvatureVector :: Tolerance Meters => Curve3D space -> CurvatureVector3D space
+curvatureVector = Curve.curvatureVector
 
 startPoint :: Curve3D space -> Point3D space
 startPoint = Curve.startPoint
