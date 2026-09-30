@@ -381,7 +381,7 @@ circleWith ::
 circleWith ("centerPoint" ::: centerPoint) ("diameter" ::: diameter) =
   circle (Circle2D.with {centerPoint, diameter})
 
-{-| Create an ellipes with the given principal axes and major/minor radii.
+{-| Create an ellipse with the given principal axes and major/minor radii.
 The first radius given will be the radius along the X axis,
 and the second radius will be the radius along the Y axis.
 -}
