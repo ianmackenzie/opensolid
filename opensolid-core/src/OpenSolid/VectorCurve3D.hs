@@ -9,13 +9,10 @@ module OpenSolid.VectorCurve3D
   , derivative
   , startValue
   , endValue
-  , range
   , startDerivative
   , endDerivative
-  , derivativeRange
   , startSecondDerivative
   , endSecondDerivative
-  , secondDerivativeRange
   , zero
   , constant
   , interpolateFrom
@@ -39,13 +36,11 @@ import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
-import OpenSolid.Interval (Interval)
 import OpenSolid.IsZero (IsZero)
 import OpenSolid.Prelude
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
-import OpenSolid.VectorBounds3D (VectorBounds3D)
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
 import OpenSolid.VectorCurve (VectorCurve3D)
 import OpenSolid.VectorCurve qualified as VectorCurve
@@ -126,32 +121,17 @@ startValue = VectorCurve.startValue
 endValue :: VectorCurve3D units space -> Vector3D units space
 endValue = VectorCurve.endValue
 
-{-# INLINE range #-}
-range :: Interval Unitless -> VectorCurve3D units space -> VectorBounds3D units space
-range = VectorCurve.range
-
 startDerivative :: VectorCurve3D space units -> Vector3D space units
 startDerivative = VectorCurve.startDerivative
 
 endDerivative :: VectorCurve3D space units -> Vector3D space units
 endDerivative = VectorCurve.endDerivative
 
-{-# INLINE derivativeRange #-}
-derivativeRange :: Interval Unitless -> VectorCurve3D units space -> VectorBounds3D units space
-derivativeRange = VectorCurve.derivativeRange
-
 startSecondDerivative :: VectorCurve3D space units -> Vector3D space units
 startSecondDerivative = VectorCurve.startSecondDerivative
 
 endSecondDerivative :: VectorCurve3D space units -> Vector3D space units
 endSecondDerivative = VectorCurve.endSecondDerivative
-
-{-# INLINE secondDerivativeRange #-}
-secondDerivativeRange ::
-  Interval Unitless ->
-  VectorCurve3D units space ->
-  VectorBounds3D units space
-secondDerivativeRange = VectorCurve.secondDerivativeRange
 
 reverse :: VectorCurve3D units space -> VectorCurve3D units space
 reverse = VectorCurve.reverse

@@ -281,7 +281,7 @@ drawBezier color startPoint innerControlPoints endPoint = Try.do
   let drawingInnerControlPoints = List.map (Point2D.convert toDrawing) innerControlPoints
   let drawingControlPoints = drawingStartPoint :| (drawingInnerControlPoints <> [drawingEndPoint])
   curve <- spatial (Curve2D.bezier drawingControlPoints)
-  let drawCurveRange tRange = Svg.bounds (Curve2D.range tRange curve)
+  let drawCurveRange tRange = Svg.bounds (curve @ tRange)
   let controlPointDiameter = Length.millimeters 10.0
   let drawControlPoint point = Svg.circleWith {centerPoint = point, diameter = controlPointDiameter}
   let resolution = Resolution.maxError Length.millimeter

@@ -8,13 +8,10 @@ module OpenSolid.VectorCurve2D
   , derivative
   , startValue
   , endValue
-  , range
   , startDerivative
   , endDerivative
-  , derivativeRange
   , startSecondDerivative
   , endSecondDerivative
-  , secondDerivativeRange
   , xComponent
   , yComponent
   , components
@@ -50,7 +47,6 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Expression qualified as Expression
 import OpenSolid.Frame2D (Frame2D)
 import OpenSolid.Frame2D qualified as Frame2D
-import OpenSolid.Interval (Interval)
 import OpenSolid.IsZero (IsZero)
 import OpenSolid.NewtonRaphson.Curve qualified as NewtonRaphson.Curve
 import OpenSolid.Prelude
@@ -143,29 +139,17 @@ startValue = VectorCurve.startValue
 endValue :: VectorCurve2D units -> Vector2D units
 endValue = VectorCurve.endValue
 
-{-# INLINE range #-}
-range :: Interval Unitless -> VectorCurve2D units -> VectorBounds2D units
-range = VectorCurve.range
-
 startDerivative :: VectorCurve2D units -> Vector2D units
 startDerivative = VectorCurve.startDerivative
 
 endDerivative :: VectorCurve2D units -> Vector2D units
 endDerivative = VectorCurve.endDerivative
 
-{-# INLINE derivativeRange #-}
-derivativeRange :: Interval Unitless -> VectorCurve2D units -> VectorBounds2D units
-derivativeRange = VectorCurve.derivativeRange
-
 startSecondDerivative :: VectorCurve2D units -> Vector2D units
 startSecondDerivative = VectorCurve.startSecondDerivative
 
 endSecondDerivative :: VectorCurve2D units -> Vector2D units
 endSecondDerivative = VectorCurve.endSecondDerivative
-
-{-# INLINE secondDerivativeRange #-}
-secondDerivativeRange :: Interval Unitless -> VectorCurve2D units -> VectorBounds2D units
-secondDerivativeRange = VectorCurve.secondDerivativeRange
 
 -- | Get the X coordinate of a 2D curve as a scalar curve.
 xComponent :: VectorCurve2D units -> Curve1D units

@@ -18,10 +18,8 @@ module OpenSolid.Curve3D
   , secondDerivative
   , startDerivative
   , endDerivative
-  , derivativeRange
   , startSecondDerivative
   , endSecondDerivative
-  , secondDerivativeRange
   , tangentDirectionAt
   , tangentDirectionRange
   , curvatureAt
@@ -31,7 +29,6 @@ module OpenSolid.Curve3D
   , startPoint
   , endPoint
   , endpoints
-  , range
   , bounds
   , reverse
   , section
@@ -181,19 +178,11 @@ startDerivative = Curve.startDerivative
 endDerivative :: Curve3D space -> Vector3D Meters space
 endDerivative = Curve.endDerivative
 
-{-# INLINE derivativeRange #-}
-derivativeRange :: Interval Unitless -> Curve3D space -> VectorBounds3D Meters space
-derivativeRange = Curve.derivativeRange
-
 startSecondDerivative :: Curve3D space -> Vector3D Meters space
 startSecondDerivative = Curve.startSecondDerivative
 
 endSecondDerivative :: Curve3D space -> Vector3D Meters space
 endSecondDerivative = Curve.endSecondDerivative
-
-{-# INLINE secondDerivativeRange #-}
-secondDerivativeRange :: Interval Unitless -> Curve3D space -> VectorBounds3D Meters space
-secondDerivativeRange = Curve.secondDerivativeRange
 
 tangentDirectionAt :: Number -> Curve3D space -> Direction3D space
 tangentDirectionAt = Curve.tangentDirectionAt
@@ -239,9 +228,6 @@ endPoint = Curve.endPoint
 
 endpoints :: Curve3D space -> (Point3D space, Point3D space)
 endpoints = Curve.endpoints
-
-range :: Interval Unitless -> Curve3D space -> Bounds3D space
-range = Curve.range
 
 bounds :: Curve3D space -> Bounds3D space
 bounds = Curve.bounds

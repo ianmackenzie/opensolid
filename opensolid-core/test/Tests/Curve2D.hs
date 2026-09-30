@@ -339,7 +339,7 @@ rangeConsistency curve = do
   tRange <- Test.generate (Interval.random Parameter.random)
   tValue <- Test.generate (Random.map (tRange @) Parameter.random)
   let curveValue = curve @ tValue
-  let curveRange = Curve2D.range tRange curve
+  let curveRange = curve @ tRange
   Test.expect (curveValue ^ curveRange)
     & Test.output "tValue" tValue
     & Test.output "tRange" tRange

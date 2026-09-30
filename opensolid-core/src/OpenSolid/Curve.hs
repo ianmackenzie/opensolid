@@ -25,17 +25,14 @@ module OpenSolid.Curve
   , derivative
   , compiled
   , bounds
-  , range
   , startPoint
   , endPoint
   , endpoints
   , secondDerivative
   , startDerivative
   , endDerivative
-  , derivativeRange
   , startSecondDerivative
   , endSecondDerivative
-  , secondDerivativeRange
   , tangentDirectionAt
   , tangentDirectionRange
   , curvatureAt_
@@ -251,9 +248,9 @@ subsegment curve tRange = do
   let Interval t1 t2 = tRange
   let p1 = curve @ t1
   let p2 = curve @ t2
-  let segmentRange0 = range tRange curve
-  let segmentDerivativeRange = derivativeRange tRange curve
-  let segmentSecondDerivativeRange = secondDerivativeRange tRange curve
+  let segmentRange0 = curve @ tRange
+  let segmentDerivativeRange = derivative curve @ tRange
+  let segmentSecondDerivativeRange = secondDerivative curve @ tRange
   let halfDisplacementRange = 0.5 * Interval.width tRange * segmentDerivativeRange
   let leftRange = Bounds.aggregate2 (Bounds.constant p1) (p1 + halfDisplacementRange)
   let rightRange = Bounds.aggregate2 (Bounds.constant p2) (p2 - halfDisplacementRange)
@@ -477,6 +474,12 @@ evaluate curve tValue = case tValue of
   1.0 -> endPoint curve
   _ -> CompiledFunction.value tValue (compiled curve)
 
+instance At (Curve2D units) (Interval Unitless) (Bounds2D units) where
+  curve @ tRange = CompiledFunction.range tRange (compiled curve)
+
+instance At (Curve3D space) (Interval Unitless) (Bounds3D space) where
+  curve @ tRange = CompiledFunction.range tRange (compiled curve)
+
 instance Composition () (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
   f << g = do
     let dfdt = derivative f << g
@@ -514,6 +517,7 @@ class
   , DirectionBoundsExists dimension space
   , AxisExists dimension units space
   , At (Curve dimension units space) Number (Point dimension units space)
+  , At (Curve dimension units space) (Interval Unitless) (Bounds dimension units space)
   , Expression.Constant Number (Point dimension units space)
   , Expression.BezierCurve (Point dimension units space)
   , Expression.TransformBy
@@ -691,9 +695,6 @@ endpoints ::
   (Point dimension units space, Point dimension units space)
 endpoints curve = (startPoint curve, endPoint curve)
 
-range :: Interval Unitless -> Curve dimension units space -> Bounds dimension units space
-range tRange curve = CompiledFunction.range tRange (compiled curve)
-
 bounds :: Curve dimension units space -> Bounds dimension units space
 bounds = (.bounds)
 
@@ -711,8 +712,8 @@ tangentDirectionRange ::
   Curve dimension units space ->
   DirectionBounds dimension space
 tangentDirectionRange tRange curve = do
-  let derivativeRange_ = derivativeRange tRange curve
-  let secondDerivativeRange_ = secondDerivativeRange tRange curve
+  let derivativeRange_ = derivative curve @ tRange
+  let secondDerivativeRange_ = secondDerivative curve @ tRange
   tangentDirectionRangeImpl tRange curve derivativeRange_ secondDerivativeRange_
 
 tangentDirectionImpl ::
@@ -770,8 +771,8 @@ curvatureRange_ ::
   Curve dimension units space ->
   (Interval (Unitless ?/? units), DirectionBounds dimension space)
 curvatureRange_ tRange curve = do
-  let f' = derivativeRange tRange curve
-  let f'' = secondDerivativeRange tRange curve
+  let f' = derivative curve @ tRange
+  let f'' = secondDerivative curve @ tRange
   let tangent = tangentDirectionRangeImpl tRange curve f' f''
   curvatureRangeImpl_ f' f'' tangent
 
@@ -852,13 +853,6 @@ endDerivative ::
   Vector dimension units space
 endDerivative curve = VectorCurve.endValue (derivative curve)
 
-derivativeRange ::
-  CurveExists dimension units space =>
-  Interval Unitless ->
-  Curve dimension units space ->
-  VectorBounds dimension units space
-derivativeRange tRange curve = VectorCurve.range tRange (derivative curve)
-
 startSecondDerivative ::
   CurveExists dimension units space =>
   Curve dimension units space ->
@@ -870,13 +864,6 @@ endSecondDerivative ::
   Curve dimension units space ->
   Vector dimension units space
 endSecondDerivative curve = VectorCurve.endValue (secondDerivative curve)
-
-secondDerivativeRange ::
-  CurveExists dimension units space =>
-  Interval Unitless ->
-  Curve dimension units space ->
-  VectorBounds dimension units space
-secondDerivativeRange tRange curve = VectorCurve.range tRange (secondDerivative curve)
 
 reverse ::
   CurveExists dimension units space =>

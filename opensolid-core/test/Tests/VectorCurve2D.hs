@@ -35,7 +35,7 @@ rangeConsistency vectorCurve = do
   tRange <- Test.generate (Interval.random Parameter.random)
   tValue <- Test.generate (Random.map (tRange @) Parameter.random)
   let vectorCurveValue = vectorCurve @ tValue
-  let vectorCurveRange = VectorCurve2D.range tRange vectorCurve
+  let vectorCurveRange = vectorCurve @ tRange
   Test.expect (vectorCurveValue ^ vectorCurveRange)
     & Test.output "tValue" tValue
     & Test.output "tRange" tRange

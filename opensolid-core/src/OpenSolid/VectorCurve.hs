@@ -18,16 +18,13 @@ module OpenSolid.VectorCurve
   , arc
   , startValue
   , endValue
-  , range
   , compiled
   , derivative
   , secondDerivative
   , startDerivative
   , endDerivative
-  , derivativeRange
   , startSecondDerivative
   , endSecondDerivative
-  , secondDerivativeRange
   , squaredMagnitude_
   , squaredMagnitude
   , reverse
@@ -81,6 +78,8 @@ import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
 import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
 import OpenSolid.VectorBounds qualified as VectorBounds
+import OpenSolid.VectorBounds2D (VectorBounds2D)
+import OpenSolid.VectorBounds3D (VectorBounds3D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D (VectorSurfaceFunction2D)
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction2D qualified as VectorSurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.VectorSurfaceFunction3D (VectorSurfaceFunction3D)
@@ -116,6 +115,7 @@ class
   , Units.Coercion (VectorCurve dimension units space) (VectorCurve dimension Unitless space)
   , Units.Coercion (VectorCurve dimension Unitless space) (VectorCurve dimension units space)
   , At (VectorCurve dimension units space) Number (Vector dimension units space)
+  , At (VectorCurve dimension units space) (Interval Unitless) (VectorBounds dimension units space)
   , At (Nonzero (VectorCurve dimension units space)) Number (Nonzero (Vector dimension units space))
   , Expression.Constant Number (Vector dimension units space)
   , Expression.Evaluation
@@ -282,14 +282,6 @@ instance At (VectorCurve3D units space) Number (Vector3D units space) where
   {-# INLINE (@) #-}
   (@) = evaluate
 
-instance At (Nonzero (VectorCurve2D units)) Number (Nonzero (Vector2D units)) where
-  {-# INLINE (@) #-}
-  Nonzero curve @ tValue = Nonzero (curve @ tValue)
-
-instance At (Nonzero (VectorCurve3D units space)) Number (Nonzero (Vector3D units space)) where
-  {-# INLINE (@) #-}
-  Nonzero curve @ tValue = Nonzero (curve @ tValue)
-
 {-# INLINE evaluate #-}
 evaluate ::
   VectorCurveExists dimension units space =>
@@ -299,6 +291,22 @@ evaluate ::
 evaluate curve 0.0 = startValue curve
 evaluate curve 1.0 = endValue curve
 evaluate curve tValue = CompiledFunction.value tValue (compiled curve)
+
+instance At (VectorCurve2D units) (Interval Unitless) (VectorBounds2D units) where
+  {-# INLINE (@) #-}
+  curve @ tRange = CompiledFunction.range tRange (compiled curve)
+
+instance At (VectorCurve3D units space) (Interval Unitless) (VectorBounds3D units space) where
+  {-# INLINE (@) #-}
+  curve @ tRange = CompiledFunction.range tRange (compiled curve)
+
+instance At (Nonzero (VectorCurve2D units)) Number (Nonzero (Vector2D units)) where
+  {-# INLINE (@) #-}
+  Nonzero curve @ tValue = Nonzero (curve @ tValue)
+
+instance At (Nonzero (VectorCurve3D units space)) Number (Nonzero (Vector3D units space)) where
+  {-# INLINE (@) #-}
+  Nonzero curve @ tValue = Nonzero (curve @ tValue)
 
 instance
   VectorCurveExists dimension units space =>
@@ -1060,14 +1068,6 @@ startValue = (.startValue)
 endValue :: VectorCurve dimension units space -> Vector dimension units space
 endValue = (.endValue)
 
-{-# INLINE range #-}
-range ::
-  VectorCurveExists dimension units space =>
-  Interval Unitless ->
-  VectorCurve dimension units space ->
-  VectorBounds dimension units space
-range tRange curve = CompiledFunction.range tRange (compiled curve)
-
 startDerivative ::
   VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
@@ -1080,14 +1080,6 @@ endDerivative ::
   Vector dimension units space
 endDerivative curve = endValue (derivative curve)
 
-{-# INLINE derivativeRange #-}
-derivativeRange ::
-  VectorCurveExists dimension units space =>
-  Interval Unitless ->
-  VectorCurve dimension units space ->
-  VectorBounds dimension units space
-derivativeRange tRange curve = range tRange (derivative curve)
-
 startSecondDerivative ::
   VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
@@ -1099,14 +1091,6 @@ endSecondDerivative ::
   VectorCurve dimension units space ->
   Vector dimension units space
 endSecondDerivative curve = endValue (secondDerivative curve)
-
-{-# INLINE secondDerivativeRange #-}
-secondDerivativeRange ::
-  VectorCurveExists dimension units space =>
-  Interval Unitless ->
-  VectorCurve dimension units space ->
-  VectorBounds dimension units space
-secondDerivativeRange tRange curve = range tRange (secondDerivative curve)
 
 {-# INLINE isZero #-}
 isZero :: Tolerance units => VectorCurve dimension units space -> Bool

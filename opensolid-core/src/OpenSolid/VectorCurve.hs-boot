@@ -7,7 +7,6 @@ module OpenSolid.VectorCurve
   , constant
   , hasDegenerateStart
   , hasDegenerateEnd
-  , range
   , derivative
   , squaredMagnitude_
   )
@@ -22,7 +21,11 @@ import OpenSolid.Prelude
 import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector)
+import OpenSolid.Vector2D (Vector2D)
+import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.VectorBounds (VectorBounds)
+import OpenSolid.VectorBounds2D (VectorBounds2D)
+import OpenSolid.VectorBounds3D (VectorBounds3D)
 
 type role VectorCurve nominal nominal nominal
 
@@ -48,6 +51,14 @@ instance Units.Coercion (VectorCurve2D units1) (VectorCurve2D units2)
 instance
   space1 ~ space2 =>
   Units.Coercion (VectorCurve3D units1 space1) (VectorCurve3D units2 space2)
+
+instance At (VectorCurve2D units) Number (Vector2D units)
+
+instance At (VectorCurve3D units space) Number (Vector3D units space)
+
+instance At (VectorCurve2D units) (Interval Unitless) (VectorBounds2D units)
+
+instance At (VectorCurve3D units space) (Interval Unitless) (VectorBounds3D units space)
 
 instance
   VectorCurveExists dimension units space =>
@@ -196,11 +207,6 @@ hasDegenerateEnd ::
   VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->
   Bool
-range ::
-  VectorCurveExists dimension units space =>
-  Interval Unitless ->
-  VectorCurve dimension units space ->
-  VectorBounds dimension units space
 derivative ::
   VectorCurveExists dimension units space =>
   VectorCurve dimension units space ->

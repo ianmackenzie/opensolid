@@ -68,7 +68,7 @@ buildCurveImpl curve tRange startPoint endPoint = do
   let leftChild = buildCurveImpl curve (Interval tLow tMid) startPoint midpoint
   let rightChild = buildCurveImpl curve (Interval tMid tHigh) midpoint endPoint
   let children = NonEmpty.two leftChild rightChild
-  BoundaryTree {bounds = Curve2D.range tRange curve, startPoint, endPoint, children}
+  BoundaryTree {bounds = curve @ tRange, startPoint, endPoint, children}
 
 bounds :: BoundaryTree units -> Bounds2D units
 bounds = (.bounds)

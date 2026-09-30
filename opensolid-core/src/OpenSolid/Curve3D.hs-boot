@@ -4,7 +4,6 @@ module OpenSolid.Curve3D
   , IsDegenerate
   , new
   , derivative
-  , range
   , bounds
   , reverse
   )
@@ -12,7 +11,6 @@ where
 
 import {-# SOURCE #-} OpenSolid.Curve (Curve3D)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
-import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds3D)
 import {-# SOURCE #-} OpenSolid.VectorCurve3D (VectorCurve3D)
@@ -27,6 +25,5 @@ new ::
   VectorCurve3D Meters space ->
   Result (IsDegenerate space) (Curve3D space)
 derivative :: Curve3D space -> VectorCurve3D Meters space
-range :: Interval Unitless -> Curve3D space -> Bounds3D space
 bounds :: Curve3D space -> Bounds3D space
 reverse :: Curve3D space -> Curve3D space

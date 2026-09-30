@@ -5,7 +5,6 @@ module OpenSolid.Curve2D
   , new
   , startPoint
   , endPoint
-  , range
   , bounds
   , compiled
   , derivative
@@ -23,7 +22,6 @@ where
 import {-# SOURCE #-} OpenSolid.Curve (Curve2D)
 import {-# SOURCE #-} OpenSolid.Curve qualified as Curve
 import {-# SOURCE #-} OpenSolid.Curve1D (Curve1D)
-import OpenSolid.Interval (Interval)
 import OpenSolid.Prelude
 import OpenSolid.Primitives (Bounds2D, Point2D, Transform2D, Vector2D)
 import OpenSolid.Transform.Tag qualified as Transform.Tag
@@ -40,7 +38,6 @@ new ::
   Result (IsDegenerate units) (Curve2D units)
 startPoint :: Curve2D units -> Point2D units
 endPoint :: Curve2D units -> Point2D units
-range :: Interval Unitless -> Curve2D units -> Bounds2D units
 bounds :: Curve2D units -> Bounds2D units
 compiled :: Curve2D units -> Compiled units
 derivative :: Curve2D units -> VectorCurve2D units
