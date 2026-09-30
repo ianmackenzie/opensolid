@@ -292,6 +292,7 @@ triangleWith attributes (Triangle2D p1 p2 p3) = do
 triangle :: Triangle2D Meters -> Svg
 triangle = triangleWith []
 
+-- | Draw a bounding box.
 bounds :: Bounds2D Meters -> Svg
 bounds = boundsWith []
 
