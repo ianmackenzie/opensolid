@@ -1,5 +1,6 @@
 module Tests.Matching (Matching, (~~)) where
 
+import OpenSolid.Angle (Angle)
 import OpenSolid.Bag (Bag)
 import OpenSolid.Bag qualified as Bag
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
@@ -8,6 +9,7 @@ import OpenSolid.Curve (Curve, CurveExists)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.IntersectionPoint qualified as Curve.IntersectionPoint
 import OpenSolid.Curve.Intersections qualified as Curve.Intersections
+import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve1D.Root qualified as Curve1D.Root
 import OpenSolid.Curve3D qualified as Curve3D
@@ -33,6 +35,8 @@ import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.UvSet (UvSet)
+import OpenSolid.Vector2D (Vector2D)
+import OpenSolid.Vector3D (Vector3D)
 
 class Matching a where
   (~~) :: a -> a -> Bool
@@ -60,7 +64,22 @@ instance Matching a => Matching (Maybe a) where
 instance Matching Number where
   (~~) = unitless (~=)
 
+instance Matching Angle where
+  (~~) = angular (~=)
+
 instance Matching Length where
+  (~~) = spatial (~=)
+
+instance Matching (Vector2D Unitless) where
+  (~~) = unitless (~=)
+
+instance Matching (Vector2D Meters) where
+  (~~) = spatial (~=)
+
+instance Matching (Vector3D Unitless space) where
+  (~~) = unitless (~=)
+
+instance Matching (Vector3D Meters space) where
   (~~) = spatial (~=)
 
 instance Matching (Point2D Meters) where
@@ -147,6 +166,15 @@ instance Matching (Curve3D.IntersectionPointWithSurface space) where
 
 instance Matching UvPoint where
   (~~) = unitless (~=)
+
+instance Matching (Curve1D Unitless) where
+  (~~) = unitless (~=)
+
+instance Matching (Curve1D Radians) where
+  (~~) = angular (~=)
+
+instance Matching (Curve1D Meters) where
+  (~~) = spatial (~=)
 
 instance Matching UvCurve where
   (~~) = unitless matchingCurves
