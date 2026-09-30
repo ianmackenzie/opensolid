@@ -243,6 +243,7 @@ library
     OpenSolid.Triplet
     OpenSolid.Try
     OpenSolid.Unboxed.Math
+    OpenSolid.Uniform
     OpenSolid.Units
     OpenSolid.Unwrap
     OpenSolid.UvBag

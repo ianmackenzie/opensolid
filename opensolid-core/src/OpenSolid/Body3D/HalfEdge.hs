@@ -19,13 +19,13 @@ import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.NonEmpty qualified as NonEmpty
-import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Prelude hiding (id)
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
+import OpenSolid.Uniform qualified as Uniform
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvCurve (UvCurve)
 
@@ -86,8 +86,4 @@ matingCurves (SurfaceCurve3D.Edge edge1) (SurfaceCurve3D.Edge edge2) = do
   let Surface3D.Edge _ curve1 = edge1
   let Surface3D.Edge _ curve2 = edge2
   Curve3D.length curve1 ~= Curve3D.length curve2 && do
-    Parameter.samples & NonEmpty.all \r1 -> do
-      let r2 = 1.0 - r1
-      let point1 = Curve3D.atUniform r1 curve1
-      let point2 = Curve3D.atUniform r2 curve2
-      point1 ~= point2
+    Uniform.samples & NonEmpty.all \r1 -> curve1 @ r1 ~= curve2 @ Uniform.reverse r1

@@ -1,5 +1,6 @@
 module OpenSolid.Curve3D
   ( Curve3D
+  , ParameterValue
   , Compiled
   , Segment
   , IsDegenerate
@@ -32,11 +33,8 @@ module OpenSolid.Curve3D
   , bounds
   , reverse
   , section
-  , arcLengthParameterization
   , length
-  , uniformParameterization
-  , fromUniform
-  , atUniform
+  , parameterValue
   , transformBy
   , placeIn
   , relativeTo
@@ -48,7 +46,7 @@ where
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve3D)
+import OpenSolid.Curve (Curve3D, ParameterValue)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve3D.IntersectionPointWithSurface (IntersectionPointWithSurface)
 import OpenSolid.Direction3D (Direction3D)
@@ -242,20 +240,11 @@ section ::
   Result (IsDegenerate space) (Curve3D space)
 section = Curve.section
 
-arcLengthParameterization :: Curve3D space -> (Length, Number -> Number)
-arcLengthParameterization = Curve.arcLengthParameterization
-
 length :: Curve3D space -> Length
 length = Curve.length
 
-uniformParameterization :: Curve3D space -> Number -> Number
-uniformParameterization = Curve.uniformParameterization
-
-fromUniform :: Number -> Curve3D space -> Number
-fromUniform = Curve.fromUniform
-
-atUniform :: Number -> Curve3D space -> Point3D space
-atUniform = Curve.atUniform
+parameterValue :: Curve3D space -> ParameterValue
+parameterValue = Curve.parameterValue
 
 transformBy ::
   Transform.Tag.IsOrthonormal tag =>

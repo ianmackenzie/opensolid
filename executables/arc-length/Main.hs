@@ -21,6 +21,7 @@ import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Svg qualified as Svg
 import OpenSolid.Text qualified as Text
 import OpenSolid.Try qualified as Try
+import OpenSolid.Uniform (Uniform (Uniform))
 
 formatLength :: Length -> Text
 formatLength length =
@@ -61,6 +62,9 @@ analyticalLength (Point2D x0 y0) (Point2D x1 y1) (Point2D x2 y2) = do
   let ba = b / a_2
   (a_32 * s_abc + a_2 * b * (s_abc - c_2) + (4.0 * c * a - b * b) * Number.log ((2.0 * a_2 + ba + s_abc) / (ba + c_2))) / (4.0 * a_32)
 
+file :: Text -> Text
+file name = "executables/arc-length/" <> name
+
 testCubicSplineParameterization :: IO ()
 testCubicSplineParameterization = spatial Try.do
   let p1 = Point2D.centimeters 5.0 5.0
@@ -87,22 +91,15 @@ testCubicSplineParameterization = spatial Try.do
             [ Svg.curve resolution curve
             , Svg.combine drawPoint parameterValues
             ]
-  drawCurve "executables/arc-length/cubic-spline.svg" spline id
-  drawCurve "executables/arc-length/cubic-spline-reversed.svg" reversedSpline id
-  drawCurve
-    "executables/arc-length/parameterized-spline.svg"
-    spline
-    (Curve2D.uniformParameterization spline)
-  drawCurve
-    "executables/arc-length/parameterized-spline-reversed.svg"
-    reversedSpline
-    (Curve2D.uniformParameterization reversedSpline)
-  drawParameterization
-    "executables/arc-length/parameterization.svg"
-    (Curve2D.uniformParameterization spline)
-  drawParameterization
-    "executables/arc-length/parameterization-reversed.svg"
-    (Curve2D.uniformParameterization reversedSpline)
+  let uniformParameterizationOf curve rValue = Curve2D.parameterValue curve @ Uniform rValue
+  let uniformParameterization = uniformParameterizationOf spline
+  let reversedParameterization = uniformParameterizationOf reversedSpline
+  drawCurve (file "cubic-spline.svg") spline id
+  drawCurve (file "cubic-spline-reversed.svg") reversedSpline id
+  drawCurve (file "parameterized-spline.svg") spline uniformParameterization
+  drawCurve (file "parameterized-spline-reversed.svg") reversedSpline reversedParameterization
+  drawParameterization (file "parameterization.svg") uniformParameterization
+  drawParameterization (file "parameterization-reversed.svg") reversedParameterization
 
 drawParameterization :: Text -> (Number -> Number) -> IO ()
 drawParameterization fileName parameterization = do

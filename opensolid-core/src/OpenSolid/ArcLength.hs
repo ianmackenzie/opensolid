@@ -8,6 +8,8 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Unboxed.Math
+import OpenSolid.Uniform (Uniform)
+import OpenSolid.Uniform qualified as Uniform
 
 data Tree units
   = Node (Quantity units) (Tree units) (Tree units)
@@ -18,7 +20,7 @@ data Tree units
 parameterization ::
   (Number -> Quantity units) ->
   (Number -> Quantity units) ->
-  (Quantity units, Number -> Number)
+  (Quantity units, Uniform -> Number)
 parameterization dsdt d2sdt2 = do
   let dsdt1 = dsdt 0.0
   let dsdt2 = dsdt Lobatto.p2
@@ -31,12 +33,12 @@ parameterization dsdt d2sdt2 = do
         Tolerance.using dsdtTolerance do
           (dsdtMin ~= dsdtMax, dsdt1 ~= Quantity.zero, dsdt4 ~= Quantity.zero)
   if isConstant
-    then (dsdt1, id) -- Constant-speed curve (e.g. line or arc)
+    then (dsdt1, Uniform.unwrap) -- Constant-speed curve (e.g. line or arc)
     else do
       let initialEstimate = Lobatto.estimate dsdt1 dsdt2 dsdt3 dsdt4
       let (length, tree) =
             buildTree 1 dsdt d2sdt2 hasDegenerateStart hasDegenerateEnd 0.0 1.0 dsdt1 dsdt4 initialEstimate
-      let uniformParameterization r = evaluate tree (length * r)
+      let uniformParameterization rValue = evaluate tree (length * rValue)
       (length, uniformParameterization)
 
 evaluate :: Tree units -> Quantity units -> Number

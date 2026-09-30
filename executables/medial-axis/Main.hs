@@ -12,7 +12,6 @@ import OpenSolid.IO qualified as IO
 import OpenSolid.IO.Parallel qualified as IO.Parallel
 import OpenSolid.Length qualified as Length
 import OpenSolid.Number qualified as Number
-import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
@@ -22,6 +21,7 @@ import OpenSolid.Text qualified as Text
 import OpenSolid.Timer qualified as Timer
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Try qualified as Try
+import OpenSolid.Uniform qualified as Uniform
 
 formatDuration :: Duration -> Text
 formatDuration duration = Text.int (Number.round (Duration.inMilliseconds duration)) <> " ms"
@@ -61,13 +61,13 @@ testCurveMedialAxis label curve1 curve2 = Try.do
   segments <- Curve2D.medialAxis curve1 curve2
   let drawTangentCircles (segment :: Curve2D.MedialAxis.Segment Meters) = do
         let drawTangentCircle r = do
-              let t = Curve2D.fromUniform r segment.curve
+              let t = Curve2D.parameterValue segment.curve @ r
               let centerPoint = segment.curve @ t
               let radius = Quantity.abs (segment.radius @ t)
               let strokeWidth = Length.millimeters 0.2
               Svg.with [Svg.strokeColor Color.gray, Svg.strokeWidth strokeWidth] do
                 Svg.circleWith {centerPoint, diameter = 2.0 * radius}
-        Svg.combine drawTangentCircle (Parameter.steps 50)
+        Svg.combine drawTangentCircle (Uniform.steps 50)
   let resolution = Resolution.maxError (Length.millimeters 0.1)
   let drawCurve = Svg.curve resolution
   let drawSegment segment = drawCurve segment.curve

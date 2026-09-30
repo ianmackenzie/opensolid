@@ -1,5 +1,6 @@
 module OpenSolid.Curve2D
   ( Curve2D
+  , ParameterValue
   , Compiled
   , Segment
   , IsDegenerate
@@ -75,11 +76,8 @@ module OpenSolid.Curve2D
   , unconvert
   , toPolyline
   , medialAxis
-  , arcLengthParameterization
   , length
-  , uniformParameterization
-  , fromUniform
-  , atUniform
+  , parameterValue
   , piecewise
   , displaceBy
   )
@@ -98,7 +96,7 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Circle2D qualified as Circle2D
 import OpenSolid.CompiledFunction qualified as CompiledFunction
-import OpenSolid.Curve (Curve2D)
+import OpenSolid.Curve (Curve2D, ParameterValue)
 import OpenSolid.Curve qualified as Curve
 import OpenSolid.Curve.Nonzero qualified as Curve.Nonzero
 import OpenSolid.Curve1D (Curve1D)
@@ -746,20 +744,11 @@ medialAxis curve1 curve2 = do
                     }
         Ok (List.filterMap toSegment zeros.crossingCurves)
 
-arcLengthParameterization :: Curve2D units -> (Quantity units, Number -> Number)
-arcLengthParameterization = Curve.arcLengthParameterization
-
 length :: Curve2D units -> Quantity units
 length = Curve.length
 
-uniformParameterization :: Curve2D units -> Number -> Number
-uniformParameterization = Curve.uniformParameterization
-
-fromUniform :: Number -> Curve2D units -> Number
-fromUniform = Curve.fromUniform
-
-atUniform :: Number -> Curve2D units -> Point2D units
-atUniform = Curve.atUniform
+parameterValue :: Curve2D units -> ParameterValue
+parameterValue = Curve.parameterValue
 
 piecewise :: NonEmpty (Curve2D units) -> Curve2D units
 piecewise segments = do

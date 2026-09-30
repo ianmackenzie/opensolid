@@ -79,6 +79,8 @@ import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D)
 import OpenSolid.Try qualified as Try
+import OpenSolid.Uniform (Uniform (Uniform))
+import OpenSolid.Uniform qualified as Uniform
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
@@ -476,28 +478,28 @@ buildLeadingEdgeVerticesMap resolution body surfaceSegmentsMap =
               if halfEdgeId < matingHalfEdgeId
                 then do
                   let curve = unsafeGetCurve surfaceCurve
-                  let uniformParameterization = Curve3D.uniformParameterization curve
+                  let parameterValue = Curve3D.parameterValue curve
                   let matingSurfaceCurve = body @ matingHalfEdgeId
                   let matingSurfaceSegments = surfaceSegmentsMap @ matingHalfEdgeId.surfaceId
                   let matingCurve = unsafeGetCurve matingSurfaceCurve
-                  let matingUniformParameterization = Curve3D.uniformParameterization matingCurve
+                  let matingParameterValue = Curve3D.parameterValue matingCurve
                   let matingUvCurve = SurfaceCurve3D.uvCurve matingSurfaceCurve
                   let edgePredicate =
                         edgeLinearizationPredicate
                           resolution
                           curve
                           uvCurve
-                          uniformParameterization
+                          parameterValue
                           matingUvCurve
-                          matingUniformParameterization
+                          matingParameterValue
                           surfaceSegments
                           matingSurfaceSegments
-                  let innerRValues = Domain1D.innerSamplingPoints edgePredicate
-                  let innerTValues = List.map uniformParameterization innerRValues
+                  let innerRValues = List.map Uniform (Domain1D.innerSamplingPoints edgePredicate)
+                  let innerTValues = parameterValue @ innerRValues
                   let innerUvPoints = uvCurve @ innerTValues
                   let uvPoints = Curve2D.startPoint uvCurve :| innerUvPoints
-                  let matingInnerRValues = List.reverseMap (1.0 -) innerRValues
-                  let matingInnerTValues = List.map matingUniformParameterization matingInnerRValues
+                  let matingInnerRValues = List.reverseMap Uniform.reverse innerRValues
+                  let matingInnerTValues = matingParameterValue @ matingInnerRValues
                   let matingInnerUvPoints = matingUvCurve @ matingInnerTValues
                   let matingUvPoints = Curve2D.startPoint matingUvCurve :| matingInnerUvPoints
                   accumulated
@@ -509,9 +511,9 @@ edgeLinearizationPredicate ::
   Resolution Meters ->
   Curve3D space ->
   UvCurve ->
-  (Number -> Number) ->
+  Curve3D.ParameterValue ->
   UvCurve ->
-  (Number -> Number) ->
+  Curve3D.ParameterValue ->
   Set2D Unitless UvBounds ->
   Set2D Unitless UvBounds ->
   Interval Unitless ->
@@ -520,18 +522,20 @@ edgeLinearizationPredicate
   resolution
   curve
   uvCurve
-  uniformParameterization
+  parameterValue
   matingUvCurve
-  matingUniformParameterization
+  matingParameterValue
   surfaceSegments
   matingSurfaceSegments
-  (Interval rStart rEnd) = do
-    let tStart = uniformParameterization rStart
-    let tEnd = uniformParameterization rEnd
+  rInterval = do
+    let rStart = Uniform (Interval.lower rInterval)
+    let rEnd = Uniform (Interval.upper rInterval)
+    let tStart = parameterValue @ rStart
+    let tEnd = parameterValue @ rEnd
     let uvStart = uvCurve @ tStart
     let uvEnd = uvCurve @ tEnd
-    let matingTStart = matingUniformParameterization (1.0 - rStart)
-    let matingTEnd = matingUniformParameterization (1.0 - rEnd)
+    let matingTStart = matingParameterValue @ Uniform.reverse rStart
+    let matingTEnd = matingParameterValue @ Uniform.reverse rEnd
     let matingUvStart = matingUvCurve @ matingTStart
     let matingUvEnd = matingUvCurve @ matingTEnd
     let uvRange = Bounds2D.hull2 uvStart uvEnd

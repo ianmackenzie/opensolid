@@ -13,6 +13,7 @@ module OpenSolid.Curve
   , IsDegenerate (IsDegenerate)
   , HasDegeneracy (HasDegeneracy)
   , IsDegenerateAndCoincidentWithPoint (IsDegenerateAndCoincidentWithPoint)
+  , ParameterValue
   , new
   , unsafe
   , displacedFrom
@@ -59,11 +60,8 @@ module OpenSolid.Curve
   , linearDeviation
   , linearize
   , toPolyline
-  , arcLengthParameterization
   , length
-  , uniformParameterization
-  , fromUniform
-  , atUniform
+  , parameterValue
   , transformBy
   , orthonormalTransform
   , convert
@@ -145,6 +143,8 @@ import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform (Transform, TransformExists)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform.Tag qualified as Transform.Tag
+import OpenSolid.Uniform (Uniform)
+import OpenSolid.Uniform qualified as Uniform
 import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector, VectorExists)
@@ -170,7 +170,7 @@ data Curve dimension units space = Curve
   , hasDegenerateStart :: ~Bool
   , hasDegenerateEnd :: ~Bool
   , bisectionTree :: ~(BisectionTree dimension units space)
-  , arcLengthParameterization :: ~(Quantity units, Number -> Number)
+  , arcLengthParameterization :: ~(Quantity units, Uniform -> Number)
   }
 
 -- | A parametric curve in 2D space.
@@ -480,6 +480,17 @@ instance At (Curve2D units) (Interval Unitless) (Bounds2D units) where
 instance At (Curve3D space) (Interval Unitless) (Bounds3D space) where
   curve @ tRange = CompiledFunction.range tRange (compiled curve)
 
+newtype ParameterValue = ParameterValue (Uniform -> Number)
+
+instance At ParameterValue Uniform Number where
+  ParameterValue uniformParameterization @ rValue = uniformParameterization rValue
+
+instance At (Curve2D units) Uniform (Point2D units) where
+  curve @ rValue = curve @ (parameterValue curve @ rValue)
+
+instance At (Curve3D space) Uniform (Point3D space) where
+  curve @ rValue = curve @ (parameterValue curve @ rValue)
+
 instance Composition () (Curve3D space) (SurfaceFunction1D Unitless) (SurfaceFunction3D space) where
   f << g = do
     let dfdt = derivative f << g
@@ -599,7 +610,7 @@ unsafe givenCompiled givenDerivative =
 buildArcLengthParameterization ::
   CurveExists dimension units space =>
   Curve dimension units space ->
-  (Quantity units, Number -> Number)
+  (Quantity units, Uniform -> Number)
 buildArcLengthParameterization curve = do
   let dsdt tValue = Vector.magnitude (derivative curve @ tValue)
   let d2sdt2 tValue = secondDerivative curve @ tValue `dot` tangentDirectionAt tValue curve
@@ -881,7 +892,8 @@ reverse curve =
       , hasDegenerateEnd = curve.hasDegenerateStart
       , bisectionTree = buildBisectionTree Interval.unit reversed
       , arcLengthParameterization =
-          Pair.mapSecond (\f r -> 1.0 - f (1.0 - r)) curve.arcLengthParameterization
+          curve.arcLengthParameterization
+            & Pair.mapSecond (\f r -> 1.0 - f (Uniform.reverse r))
       }
 
 section ::
@@ -1100,38 +1112,17 @@ leftRightError curve t1 t2 p1 p2 = do
   let rightError = Line.distanceTo (curve @ tRight) (Line p1 p2)
   max leftError rightError
 
-arcLengthParameterization ::
-  CurveExists dimension units space =>
-  Curve dimension units space ->
-  (Quantity units, Number -> Number)
-arcLengthParameterization = (.arcLengthParameterization)
-
 length ::
   CurveExists dimension units space =>
   Curve dimension units space ->
   Quantity units
-length = Pair.first . arcLengthParameterization
+length curve = Pair.first curve.arcLengthParameterization
 
-uniformParameterization ::
+parameterValue ::
   CurveExists dimension units space =>
   Curve dimension units space ->
-  Number ->
-  Number
-uniformParameterization = Pair.second . arcLengthParameterization
-
-fromUniform ::
-  CurveExists dimension units space =>
-  Number ->
-  Curve dimension units space ->
-  Number
-fromUniform rValue curve = uniformParameterization curve rValue
-
-atUniform ::
-  CurveExists dimension units space =>
-  Number ->
-  Curve dimension units space ->
-  Point dimension units space
-atUniform r curve = curve @ uniformParameterization curve r
+  ParameterValue
+parameterValue curve = ParameterValue (Pair.second curve.arcLengthParameterization)
 
 transformBy ::
   (CurveExists dimension units space, Transform.Tag.IsOrthonormal tag) =>
