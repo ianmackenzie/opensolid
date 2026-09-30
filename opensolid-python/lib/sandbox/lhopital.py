@@ -22,7 +22,7 @@ d2 = d1.derivative
 d3 = d2.derivative
 
 t0 = 0.3
-print(n3.value(t0))
-print((y5 * x1 + 2 * y4 * x2 - 2 * y2 * x4 - y1 * x5).value(t0))
-print(d3.value(t0))
-print((6 * x2.cubed + 18 * x1 * x2 * x3 + 3 * x1.squared * x4).value(t0))
+print(n3.at(t0))
+print((y5 * x1 + 2 * y4 * x2 - 2 * y2 * x4 - y1 * x5).at(t0))
+print(d3.at(t0))
+print((6 * x2.cubed + 18 * x1 * x2 * x3 + 3 * x1.squared * x4).at(t0))
