@@ -6,7 +6,6 @@ import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Length qualified as Length
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Parameter qualified as Parameter
-import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Random (Generator)
@@ -33,7 +32,7 @@ spherePatch = do
   sketchPlane <- Random.plane3D
   let radius = Length.centimeters 10.0
   let profile =
-        Curve2D.arcFrom (Point2D.x radius) (Point2D.y radius) Angle.quarterTurn
+        Curve2D.arcFrom (on Axis2D.x radius) (on Axis2D.y radius) Angle.quarterTurn
           !! error "Sphere profile should never be degenerate"
   let surface =
         Surface3D.revolved sketchPlane profile Axis2D.y Angle.quarterTurn

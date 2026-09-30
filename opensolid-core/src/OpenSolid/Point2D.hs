@@ -4,9 +4,6 @@ module OpenSolid.Point2D
   , coerce
   , erase
   , unerase
-  , x
-  , y
-  , along
   , polar
   , meters
   , centimeters
@@ -56,7 +53,6 @@ import OpenSolid.Primitives
   , Point3D
   , Transform2D
   )
-import OpenSolid.Quantity qualified as Quantity
 import {-# SOURCE #-} OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Unboxed.Math
 import OpenSolid.Vector2D (Vector2D)
@@ -77,17 +73,6 @@ erase = coerce
 {-# INLINE unerase #-}
 unerase :: Point2D Unitless -> Point2D units
 unerase = coerce
-
--- | Construct a point along the X axis, with the given X coordinate.
-x :: Quantity units -> Point2D units
-x px = Point2D px Quantity.zero
-
--- | Construct a point along the Y axis, with the given Y coordinate.
-y :: Quantity units -> Point2D units
-y py = Point2D Quantity.zero py
-
-along :: Axis2D units -> Quantity units -> Point2D units
-along (Axis2D originPoint direction) distance = originPoint + distance * direction
 
 {-| Construct a point from polar coordinates (radius and angle).
 

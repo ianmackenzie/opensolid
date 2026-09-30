@@ -145,7 +145,7 @@ sphere ("centerPoint" ::: centerPoint) ("diameter" ::: diameter)
   | otherwise = Ok do
       let panic = error "Constructing sphere from non-zero diameter should not fail"
       let r = 0.5 * diameter
-      let arc = Curve2D.arcFrom (Point2D.y r) (Point2D.y -r) -Angle.pi !! panic
+      let arc = Curve2D.arcFrom (on Axis2D.y r) (on Axis2D.y -r) -Angle.pi !! panic
       let plane = World3D.forwardPlane centerPoint
       let revolvedSurface = Surface3D.revolved plane arc Axis2D.y Angle.twoPi !! panic
       boundedBy [revolvedSurface] !! panic

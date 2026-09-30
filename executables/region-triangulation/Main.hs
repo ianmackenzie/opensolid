@@ -1,6 +1,7 @@
 module Main (main) where
 
 import OpenSolid.Angle qualified as Angle
+import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Color qualified as Color
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Length qualified as Length
@@ -21,10 +22,10 @@ main = spatial Try.do
   let cornerRadius = Length.centimeters 5.0
   let holeDiameter = Length.centimeters 8.0
   let p0 = Point2D.origin
-  let p1 = Point2D.x width
+  let p1 = on Axis2D.x width
   let p2 = Point2D width (height - cornerRadius)
   let p3 = Point2D (width - cornerRadius) height
-  let p4 = Point2D.y height
+  let p4 = on Axis2D.y height
   let holeCenter = Point2D (width - cornerRadius) (height - cornerRadius)
   line01 <- Curve2D.lineFrom p0 p1
   line12 <- Curve2D.lineFrom p1 p2

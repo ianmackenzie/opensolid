@@ -180,7 +180,11 @@ testPlaneTorusIntersection :: IO ()
 testPlaneTorusIntersection = spatial Try.do
   let minorRadius = Length.centimeters 1.0
   let majorRadius = Length.centimeters 2.0
-  crossSection <- Curve2D.circleWith {centerPoint = Point2D.x majorRadius, diameter = 2.0 * minorRadius}
+  crossSection <-
+    Curve2D.circleWith
+      { centerPoint = on Axis2D.x majorRadius
+      , diameter = 2.0 * minorRadius
+      }
   surface <- Surface3D.revolved World3D.frontPlane crossSection Axis2D.y Angle.twoPi
   let alpha = Angle.asin (minorRadius / majorRadius)
   -- Other possibilities: Direction3D.xy (Angle.degrees 45), Direction3D.z

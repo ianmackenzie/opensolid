@@ -6,6 +6,7 @@ module OpenSolid.Debug.Plot
   )
 where
 
+import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Curve1D (Curve1D)
@@ -42,14 +43,14 @@ arrow = Svg.arrow {headLength = axisHeadLength, headWidth = axisHeadWidth}
 
 xAxis :: Number -> Number -> Svg
 xAxis x1 x2 = do
-  let p1 = Point2D.x (Quantity.convert scale x1)
-  let p2 = Point2D.x (Quantity.convert scale x2 + axisHeadLength)
+  let p1 = on Axis2D.x (Quantity.convert scale x1)
+  let p2 = on Axis2D.x (Quantity.convert scale x2 + axisHeadLength)
   arrow p1 p2
 
 yAxis :: Number -> Number -> Svg
 yAxis y1 y2 = do
-  let p1 = Point2D.y (Quantity.convert scale y1)
-  let p2 = Point2D.y (Quantity.convert scale y2 + axisHeadLength)
+  let p1 = on Axis2D.y (Quantity.convert scale y1)
+  let p2 = on Axis2D.y (Quantity.convert scale y2 + axisHeadLength)
   arrow p1 p2
 
 curve :: Curve1D Unitless -> Svg

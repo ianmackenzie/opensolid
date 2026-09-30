@@ -659,8 +659,6 @@ point2D =
   Class.new @Point2D "A point in 2D, defined by its X and Y coordinates." $
     [ Class.constant "Origin" (Point2D.origin @Meters) $(docs 'Point2D.origin)
     , Class.constructor2 "X Coordinate" "Y Coordinate" Point2D.Point2D $(docs 'Point2D.Point2D)
-    , Class.factory1 "X" "X Coordinate" Point2D.x $(docs 'Point2D.x)
-    , Class.factory1 "Y" "Y Coordinate" Point2D.y $(docs 'Point2D.y)
     , Class.factory2 "Polar" "Radius" "Angle" Point2D.polar $(docs 'Point2D.polar)
     , Class.factory2 "Meters" "X Coordinate" "Y Coordinate" Point2D.meters $(docs 'Point2D.meters)
     , Class.factory2 "Centimeters" "X Coordinate" "Y Coordinate" Point2D.centimeters $(docs 'Point2D.centimeters)
@@ -1219,8 +1217,7 @@ type Point3D = Point3D.Point3D Void
 point3D :: Class
 point3D =
   Class.new @Point3D "A point in 3D." $
-    [ Class.factory2 "Along" "Axis" "Distance" Point3D.along $(docs 'Point3D.along)
-    , Class.factory2 "XYZ" "Convention" "Coordinates" Point3D.xyz $(docs 'Point3D.xyz)
+    [ Class.factory2 "XYZ" "Convention" "Coordinates" Point3D.xyz $(docs 'Point3D.xyz)
     , Class.factory3 "Z Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3D.zUp $(docs 'Point3D.zUp)
     , Class.factory3 "Y Up" "X Coordinate" "Y Coordinate" "Z Coordinate" Point3D.yUp $(docs 'Point3D.yUp)
     , Class.member1 "Coordinates" "Convention" Point3D.coordinates $(docs 'Point3D.coordinates)

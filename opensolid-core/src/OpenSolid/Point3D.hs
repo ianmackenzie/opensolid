@@ -7,7 +7,6 @@ module OpenSolid.Point3D
   , zUpCoordinates#
   , yUpCoordinates
   , yUpCoordinates#
-  , along
   , coerce
   , erase
   , unerase
@@ -43,7 +42,6 @@ import OpenSolid.Point2D (Point2D, data Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3D (Axis3D)
-  , Direction3D (Direction3D)
   , Frame3D (Frame3D)
   , Orientation3D (Orientation3D)
   , Plane3D (..)
@@ -84,16 +82,6 @@ yUpCoordinates (Position3D vector) = Vector3D.yUpComponents vector
 {-# INLINE yUpCoordinates# #-}
 yUpCoordinates# :: Point3D space -> (# Double#, Double#, Double# #)
 yUpCoordinates# (Position3D vector) = Vector3D.yUpComponents# vector
-
--- | Construct a point the given distance along the given axis.
-along :: Axis3D space -> Length -> Point3D space
-along (Axis3D originPoint direction) distance = do
-  let Point3D oR oF oU = originPoint
-  let Direction3D dR dF dU = direction
-  Point3D
-    (oR + dR * distance)
-    (oF + dF * distance)
-    (oU + dU * distance)
 
 {-# INLINE coerce #-}
 coerce :: Point3D space1 -> Point3D space2

@@ -7,7 +7,6 @@ import OpenSolid.Convention3D qualified as Convention3D
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Length qualified as Length
 import OpenSolid.Point2D (data Point2D)
-import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution qualified as Resolution
@@ -21,8 +20,8 @@ main = spatial Try.do
   let width = Length.centimeters 3.0
   let outerRadius = innerRadius + width
   let thickness = Length.millimeters 10.0
-  let p0 = Point2D.x innerRadius
-  let p1 = Point2D.x outerRadius
+  let p0 = on Axis2D.x innerRadius
+  let p1 = on Axis2D.x outerRadius
   let p2 = Point2D outerRadius thickness
   let p3 = Point2D (innerRadius + thickness) width
   let p4 = Point2D innerRadius width

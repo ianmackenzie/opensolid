@@ -912,6 +912,9 @@ instance Multiplication (Axis2D space) Sign (Axis2D space) where
 instance Negation (Axis2D space) where
   negate (Axis2D p0 d) = Axis2D p0 (negate d)
 
+instance units1 ~ units2 => On (Axis2D units1) (Quantity units2) (Point2D units1) where
+  on (Axis2D originPoint direction) distance = originPoint + distance * direction
+
 ----- Frame2D -----
 
 type role Frame2D phantom
@@ -2064,6 +2067,9 @@ instance Multiplication (Axis3D space) Sign (Axis3D space) where
 
 instance Negation (Axis3D space) where
   negate (Axis3D p0 d) = Axis3D p0 (negate d)
+
+instance On (Axis3D space) Length (Point3D space) where
+  on (Axis3D originPoint direction) distance = originPoint + distance * direction
 
 ----- Plane3D -----
 
