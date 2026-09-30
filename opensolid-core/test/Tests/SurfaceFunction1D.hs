@@ -116,13 +116,9 @@ firstDerivativesAreConsistent surfaceFunction p0 = do
   let right = UvPoint (u0 + samplingRadius) v0
   let bottom = UvPoint u0 (v0 - samplingRadius)
   let top = UvPoint u0 (v0 + samplingRadius)
-  let leftValue = SurfaceFunction1D.valueAt left surfaceFunction
-  let rightValue = SurfaceFunction1D.valueAt right surfaceFunction
-  let bottomValue = SurfaceFunction1D.valueAt bottom surfaceFunction
-  let topValue = SurfaceFunction1D.valueAt top surfaceFunction
-  let fuNumerical = (rightValue - leftValue) / (2.0 * samplingRadius)
-  let fvNumerical = (topValue - bottomValue) / (2.0 * samplingRadius)
-  let (fuAnalytical, fvAnalytical) = SurfaceFunction1D.partialDerivativesAt p0 surfaceFunction
+  let fuNumerical = (surfaceFunction @ right - surfaceFunction @ left) / (2.0 * samplingRadius)
+  let fvNumerical = (surfaceFunction @ top - surfaceFunction @ bottom) / (2.0 * samplingRadius)
+  let (fuAnalytical, fvAnalytical) = SurfaceFunction1D.partialDerivatives surfaceFunction @ p0
   Tolerance.using Length.micrometer $
     Test.all
       [ Test.expect (fuNumerical ~= fuAnalytical)

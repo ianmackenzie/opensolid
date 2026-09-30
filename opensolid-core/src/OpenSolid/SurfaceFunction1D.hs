@@ -1,14 +1,10 @@
 module OpenSolid.SurfaceFunction1D
   ( SurfaceFunction1D
   , Compiled
-  , valueAt
-  , valueOf
   , range
   , partialDerivatives
-  , partialDerivativesAt
   , partialDerivativeRanges
   , secondPartialDerivatives
-  , secondPartialDerivativesAt
   , secondPartialDerivativeRanges
   , derivativeIn
   , compiled
@@ -96,9 +92,31 @@ instance Units.Coercion (SurfaceFunction1D units1) (SurfaceFunction1D units2) wh
       , partialDerivatives = Pair.map Units.coerce function.partialDerivatives
       }
 
+instance At (SurfaceFunction1D units) UvPoint (Quantity units) where
+  {-# INLINE (@) #-}
+  function @ uvPoint = CompiledFunction.value uvPoint function.compiled
+
+instance
+  At
+    (SurfaceFunction1D units, SurfaceFunction1D units)
+    UvPoint
+    (Quantity units, Quantity units)
+  where
+  {-# INLINE (@) #-}
+  (fu, fv) @ uvPoint = (fu @ uvPoint, fv @ uvPoint)
+
+instance
+  At
+    (SurfaceFunction1D units, SurfaceFunction1D units, SurfaceFunction1D units)
+    UvPoint
+    (Quantity units, Quantity units, Quantity units)
+  where
+  {-# INLINE (@) #-}
+  (fuu, fuv, fvv) @ uvPoint = (fuu @ uvPoint, fuv @ uvPoint, fvv @ uvPoint)
+
 instance ApproximateEquality (SurfaceFunction1D units) units where
   function1 ~= function2 = do
-    let equalValuesAt uvPoint = valueAt uvPoint function1 ~= valueAt uvPoint function2
+    let equalValuesAt uvPoint = function1 @ uvPoint ~= function2 @ uvPoint
     NonEmpty.all equalValuesAt UvPoint.interiorSamples
 
 instance
@@ -352,26 +370,12 @@ instance Composition () (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFun
     let (dtdu, dtdv) = partialDerivatives g
     new (Curve1D.compiled f << compiled g) (dfdt * dtdu, dfdt * dtdv)
 
-{-# INLINE valueAt #-}
-valueAt :: UvPoint -> SurfaceFunction1D units -> Quantity units
-valueAt uvPoint function = CompiledFunction.value uvPoint function.compiled
-
-{-# INLINE valueOf #-}
-valueOf :: SurfaceFunction1D units -> UvPoint -> Quantity units
-valueOf function uvPoint = valueAt uvPoint function
-
 range :: UvBounds -> SurfaceFunction1D units -> Interval units
 range uvRange function = CompiledFunction.range uvRange function.compiled
 
 {-# INLINE partialDerivatives #-}
 partialDerivatives :: SurfaceFunction1D units -> (SurfaceFunction1D units, SurfaceFunction1D units)
 partialDerivatives = (.partialDerivatives)
-
-partialDerivativesAt ::
-  UvPoint ->
-  SurfaceFunction1D units ->
-  (Quantity units, Quantity units)
-partialDerivativesAt uvPoint function = Pair.map (valueAt uvPoint) (partialDerivatives function)
 
 partialDerivativeRanges ::
   UvBounds ->
@@ -387,13 +391,6 @@ secondPartialDerivatives f = do
   let (fuu, fuv) = partialDerivatives fu
   let fvv = Pair.second (partialDerivatives fv)
   (fuu, fuv, fvv)
-
-secondPartialDerivativesAt ::
-  UvPoint ->
-  SurfaceFunction1D units ->
-  (Quantity units, Quantity units, Quantity units)
-secondPartialDerivativesAt uvPoint function =
-  Triplet.map (valueAt uvPoint) (secondPartialDerivatives function)
 
 secondPartialDerivativeRanges ::
   UvBounds ->
@@ -581,15 +578,14 @@ findTangentSolutions subproblem = do
       let maybePoint =
             Solve2D.unique
               (\testRange -> VectorBounds2D (range testRange fu) (range testRange fv))
-              (\testPoint -> Vector2D (valueAt testPoint fu) (valueAt testPoint fv))
-              (\testPoint -> Vector2D (valueAt testPoint fuu) (valueAt testPoint fuv))
-              (\testPoint -> Vector2D (valueAt testPoint fuv) (valueAt testPoint fvv))
+              (\testPoint -> Vector2D (fu @ testPoint) (fv @ testPoint))
+              (\testPoint -> Vector2D (fuu @ testPoint) (fuv @ testPoint))
+              (\testPoint -> Vector2D (fuv @ testPoint) (fvv @ testPoint))
               uvRange
       case maybePoint of
         Nothing -> Solve2D.recurse CrossingCurvesOnly
         Just point ->
-          if Bounds2D.member point (Domain2D.interior subdomain)
-            && valueAt point f ~= Quantity.zero
+          if Bounds2D.member point (Domain2D.interior subdomain) && f @ point ~= Quantity.zero
             then case determinantSign of
               Positive -> do
                 -- Non-saddle tangent point

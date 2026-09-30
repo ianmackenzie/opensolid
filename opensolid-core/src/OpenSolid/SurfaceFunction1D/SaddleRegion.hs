@@ -66,7 +66,7 @@ bounds = (.subproblem.uvRange)
 quadratic :: Subproblem units -> UvPoint -> SaddleRegion units
 quadratic subproblem saddlePoint = do
   let f = subproblem.f
-  let (fuu, fuv, fvv) = SurfaceFunction1D.secondPartialDerivativesAt saddlePoint f
+  let (fuu, fuv, fvv) = SurfaceFunction1D.secondPartialDerivatives f @ saddlePoint
   let bDirectionCandidates = NonEmpty.three Direction2D.x Direction2D.y (Direction2D.degrees 45.0)
   let directionalSecondDerivative = secondDerivative fuu fuv fvv
   let dB = NonEmpty.maximumBy (Quantity.abs . directionalSecondDerivative) bDirectionCandidates

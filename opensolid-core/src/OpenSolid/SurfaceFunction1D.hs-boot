@@ -5,15 +5,11 @@ module OpenSolid.SurfaceFunction1D
   , zero
   , u
   , v
-  , valueAt
-  , valueOf
   , range
   , compiled
   , partialDerivatives
-  , partialDerivativesAt
   , partialDerivativeRanges
   , secondPartialDerivatives
-  , secondPartialDerivativesAt
   , secondPartialDerivativeRanges
   , squared
   , squared_
@@ -34,6 +30,20 @@ type role SurfaceFunction1D nominal
 data SurfaceFunction1D (units :: Type)
 
 type Compiled units = CompiledFunction UvPoint (Quantity units) UvBounds (Interval units)
+
+instance At (SurfaceFunction1D units) UvPoint (Quantity units)
+
+instance
+  At
+    (SurfaceFunction1D units, SurfaceFunction1D units)
+    UvPoint
+    (Quantity units, Quantity units)
+
+instance
+  At
+    (SurfaceFunction1D units, SurfaceFunction1D units, SurfaceFunction1D units)
+    UvPoint
+    (Quantity units, Quantity units, Quantity units)
 
 instance Composition () (Curve1D units) (SurfaceFunction1D Unitless) (SurfaceFunction1D units)
 
@@ -103,20 +113,13 @@ constant :: Quantity units -> SurfaceFunction1D units
 zero :: SurfaceFunction1D units
 u :: SurfaceFunction1D Unitless
 v :: SurfaceFunction1D Unitless
-valueAt :: UvPoint -> SurfaceFunction1D units -> Quantity units
-valueOf :: SurfaceFunction1D units -> UvPoint -> Quantity units
 range :: UvBounds -> SurfaceFunction1D units -> Interval units
 compiled :: SurfaceFunction1D units -> Compiled units
 partialDerivatives :: SurfaceFunction1D units -> (SurfaceFunction1D units, SurfaceFunction1D units)
-partialDerivativesAt :: UvPoint -> SurfaceFunction1D units -> (Quantity units, Quantity units)
 partialDerivativeRanges :: UvBounds -> SurfaceFunction1D units -> (Interval units, Interval units)
 secondPartialDerivatives ::
   SurfaceFunction1D units ->
   (SurfaceFunction1D units, SurfaceFunction1D units, SurfaceFunction1D units)
-secondPartialDerivativesAt ::
-  UvPoint ->
-  SurfaceFunction1D units ->
-  (Quantity units, Quantity units, Quantity units)
 secondPartialDerivativeRanges ::
   UvBounds ->
   SurfaceFunction1D units ->

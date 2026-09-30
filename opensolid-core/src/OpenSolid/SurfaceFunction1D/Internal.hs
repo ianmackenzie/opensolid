@@ -13,7 +13,6 @@ import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Solve1D qualified as Solve1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
-import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.UvPoint (data UvPoint)
 
 solveForU ::
@@ -24,9 +23,8 @@ solveForU ::
   Number ->
   Number
 solveForU f fu uBounds vValue = do
-  let uvPoint uValue = UvPoint uValue vValue
-  let fValue uValue = SurfaceFunction1D.valueAt (uvPoint uValue) f
-  let fuValue uValue = SurfaceFunction1D.valueAt (uvPoint uValue) fu
+  let fValue uValue = f @ UvPoint uValue vValue
+  let fuValue uValue = fu @ UvPoint uValue vValue
   case Solve1D.monotonic fValue fuValue uBounds of
     Solve1D.Exact uValue -> uValue
     Solve1D.Closest uValue -> uValue
@@ -39,9 +37,8 @@ solveForV ::
   Interval Unitless ->
   Number
 solveForV f fv uValue vBounds = do
-  let uvPoint vValue = UvPoint uValue vValue
-  let fValue vValue = SurfaceFunction1D.valueAt (uvPoint vValue) f
-  let fvValue vValue = SurfaceFunction1D.valueAt (uvPoint vValue) fv
+  let fValue vValue = f @ UvPoint uValue vValue
+  let fvValue vValue = fv @ UvPoint uValue vValue
   case Solve1D.monotonic fValue fvValue vBounds of
     Solve1D.Exact vValue -> vValue
     Solve1D.Closest vValue -> vValue

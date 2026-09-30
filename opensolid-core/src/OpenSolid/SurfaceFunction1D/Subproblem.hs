@@ -84,10 +84,10 @@ new f dudv dvdu subdomain = do
 cornerValues :: UvBounds -> SurfaceFunction1D units -> CornerValues units
 cornerValues (Bounds2D (Interval u1 u2) (Interval v1 v2)) function =
   CornerValues
-    { bottomLeft = SurfaceFunction1D.valueAt (UvPoint u1 v1) function
-    , bottomRight = SurfaceFunction1D.valueAt (UvPoint u2 v1) function
-    , topLeft = SurfaceFunction1D.valueAt (UvPoint u1 v2) function
-    , topRight = SurfaceFunction1D.valueAt (UvPoint u2 v2) function
+    { bottomLeft = function @ UvPoint u1 v1
+    , bottomRight = function @ UvPoint u2 v1
+    , topLeft = function @ UvPoint u1 v2
+    , topRight = function @ UvPoint u2 v2
     }
 
 leftEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2D.Boundary)
