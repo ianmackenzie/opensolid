@@ -57,14 +57,14 @@ main = spatial Try.do
   let baseLine = Line2D Point2D.origin (Point2D.centimeters 5.0 0.0)
   profilePath <-
     NonEmpty.one (Edge2D.Line baseLine)
-      |> Path2D.addArc rLarge (Angle.degrees 100.0)
-      &> Path2D.addLine (Length.centimeters 5.0)
-      &> Path2D.addArc rLarge (Angle.degrees 150.0)
-      &> Path2D.addLine (Length.centimeters 3.0)
-      &> Path2D.addArc rSmall (Angle.degrees -90.0)
-      &> Path2D.addLine (Length.centimeters 1.0)
-      &> Path2D.addArc rSmall (Angle.degrees -90.0)
-      &> Path2D.addLine (Length.centimeters 1.0)
+      & Path2D.addArc rLarge (Angle.degrees 100.0)
+      >>= Path2D.addLine (Length.centimeters 5.0)
+      >>= Path2D.addArc rLarge (Angle.degrees 150.0)
+      >>= Path2D.addLine (Length.centimeters 3.0)
+      >>= Path2D.addArc rSmall (Angle.degrees -90.0)
+      >>= Path2D.addLine (Length.centimeters 1.0)
+      >>= Path2D.addArc rSmall (Angle.degrees -90.0)
+      >>= Path2D.addLine (Length.centimeters 1.0)
 
   profile2D <- Path2D.thickenLeftwardBy thickness profilePath
 
