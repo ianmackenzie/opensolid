@@ -65,7 +65,7 @@ as required by the STEP standard.
 -}
 number :: Number -> Builder
 number value = do
-  let formatted = Text.pack (Numeric.showGFloatAlt Nothing value "")
+  let formatted = fromString (Numeric.showGFloatAlt Nothing value [])
   Text.toUtf8 $
     case Text.split "e" formatted of
       [mantissa, exponent] -> removeTrailingZeros mantissa <> "E" <> exponent

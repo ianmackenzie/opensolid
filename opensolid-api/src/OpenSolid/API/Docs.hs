@@ -8,5 +8,5 @@ docs :: TH.Name -> TH.Q TH.Exp
 docs name = do
   maybeString <- TH.getDoc (TH.DeclDoc name)
   case maybeString of
-    Just string -> Prelude.return (TH.LitE (TH.StringL string))
-    Nothing -> Prelude.fail "Expected a docstring"
+    Just docstring -> Prelude.return (TH.LitE (TH.StringL docstring))
+    Nothing -> Prelude.fail (string "Expected a docstring")

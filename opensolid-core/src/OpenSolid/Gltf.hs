@@ -39,7 +39,6 @@ import OpenSolid.Prelude
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D)
 import OpenSolid.SurfaceVertex3D qualified as SurfaceVertex3D
-import OpenSolid.Text qualified as Text
 import OpenSolid.Vector3D qualified as Vector3D
 import System.FilePath qualified
 
@@ -124,9 +123,9 @@ writeBinary path model resolution = IO.writeBinary path (builder resolution mode
 
 writeText :: Text -> Model3D space -> Resolution Meters -> IO ()
 writeText path model resolution = do
-  let pathString = Text.unpack path
-  let bufferFileName = Text.pack (System.FilePath.takeBaseName pathString) <> ".bin"
-  let bufferPath = Text.pack (System.FilePath.dropFileName pathString) <> bufferFileName
+  let pathString = string path
+  let bufferFileName = fromString (System.FilePath.takeBaseName pathString) <> ".bin"
+  let bufferPath = fromString (System.FilePath.dropFileName pathString) <> bufferFileName
   let mode = Gltf {bufferUri = bufferFileName}
   let compiled = compile mode resolution model
   IO.writeBinary path compiled.json

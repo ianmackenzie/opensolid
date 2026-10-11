@@ -1,7 +1,5 @@
 module OpenSolid.Text
   ( Text
-  , pack
-  , unpack
   , concat
   , join
   , int
@@ -47,12 +45,6 @@ concat = Data.Text.concat
 join :: Text -> List Text -> Text
 join = Data.Text.intercalate
 
-pack :: List Char -> Text
-pack = Data.Text.pack
-
-unpack :: Text -> List Char
-unpack = Data.Text.unpack
-
 int :: Int -> Text
 int = show
 
@@ -60,10 +52,10 @@ number :: Number -> Text
 number (Number x) = show x
 
 char :: Char -> Text
-char c = pack [c]
+char c = Data.Text.pack [c]
 
 show :: Show a => a -> Text
-show value = pack (Prelude.show value)
+show value = Data.Text.pack (Prelude.show value)
 
 isEmpty :: Text -> Bool
 isEmpty = Data.Text.null

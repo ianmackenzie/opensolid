@@ -45,7 +45,7 @@ succeed :: a -> IO a
 succeed = Prelude.return
 
 fail :: Text -> IO a
-fail = Prelude.fail . Text.unpack
+fail = Prelude.fail . string
 
 map :: (a -> b) -> IO a -> IO b
 map = Prelude.fmap
@@ -74,7 +74,7 @@ sleep duration = Control.Concurrent.threadDelay (Number.round (Duration.inMicros
 onError :: (Text -> IO a) -> IO a -> IO a
 onError callback io =
   System.IO.Error.catchIOError io do
-    callback . Text.pack . System.IO.Error.ioeGetErrorString
+    callback . fromString . System.IO.Error.ioeGetErrorString
 
 attempt :: IO a -> IO (Result Text a)
 attempt io = onError (succeed . Err) (map Ok io)
@@ -89,10 +89,10 @@ printLine :: Text -> IO ()
 printLine = Data.Text.IO.Utf8.putStrLn
 
 readBinary :: Text -> IO ByteString
-readBinary path = Data.ByteString.readFile (Text.unpack path)
+readBinary path = Data.ByteString.readFile (string path)
 
 writeBinary :: Text -> Builder -> IO ()
-writeBinary path builder = Builder.writeFile (Text.unpack path) builder
+writeBinary path builder = Builder.writeFile (string path) builder
 
 readUtf8 :: Text -> IO Text
 readUtf8 path = do
@@ -105,7 +105,7 @@ writeUtf8 path text = do
   writeBinary path bytes
 
 deleteFile :: Text -> IO ()
-deleteFile path = System.Directory.removeFile (Text.unpack path)
+deleteFile path = System.Directory.removeFile (string path)
 
 pathSeparator :: Text
 pathSeparator = Text.char System.FilePath.pathSeparator

@@ -13,7 +13,6 @@ import OpenSolid.FFI qualified as FFI
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
-import OpenSolid.Text qualified as Text
 import Prelude qualified
 
 functionArray :: Array FFI.Function
@@ -32,7 +31,7 @@ generateExports =
 
 generateExport :: (Int, Text) -> TH.Q (List TH.Dec)
 generateExport (index, name) = do
-  let nameString = Text.unpack name
+  let nameString = string name
   let thName = TH.mkName nameString
   functionTypeAliasInfo <- TH.reify ''FFI.Function
   foreignFunctionType <-

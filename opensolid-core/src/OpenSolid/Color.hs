@@ -52,7 +52,6 @@ import OpenSolid.Angle qualified as Angle
 import OpenSolid.Int qualified as Int
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
-import OpenSolid.Text qualified as Text
 
 -- | An RGB color value.
 type Color = Data.Colour.Colour Number
@@ -76,7 +75,7 @@ hsl1 hue saturation lightness =
 
 -- | Construct a color from a hex string such as '#f3f3f3' or 'f3f3f3'.
 hex :: Text -> Color
-hex text = Data.Colour.SRGB.sRGB24read (Text.unpack text)
+hex text = Data.Colour.SRGB.sRGB24read (string text)
 
 -- | Get the RGB components of a color as values in the range [0,1].
 toRgb1 :: Color -> (Number, Number, Number)
@@ -102,7 +101,7 @@ toHsl1 color = do
 
 -- | Convert a color to a hex string such as '#f3f3f3'.
 toHex :: Color -> Text
-toHex color = Text.pack (Data.Colour.SRGB.sRGB24show color)
+toHex color = fromString (Data.Colour.SRGB.sRGB24show color)
 
 -- | Light Scarlet Red from the Tango icon theme.
 lightRed :: Color

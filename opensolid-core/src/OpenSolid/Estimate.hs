@@ -65,7 +65,7 @@ refine estimate = checkRefinement 0 estimate
 data RefinementStalled = RefinementStalled deriving (Show)
 
 instance Exception RefinementStalled where
-  displayException RefinementStalled = "Estimate refinement stalled"
+  displayException RefinementStalled = string "Estimate refinement stalled"
 
 checkRefinement :: Int -> Estimate units -> Estimate units
 checkRefinement stepsWithoutProgress estimate = case estimate of

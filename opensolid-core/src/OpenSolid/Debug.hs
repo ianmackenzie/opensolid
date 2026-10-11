@@ -14,7 +14,7 @@ import OpenSolid.Prelude hiding (show)
 import OpenSolid.Text qualified as Text
 
 trace :: Text -> a -> a
-trace message value = Debug.Trace.trace (Text.unpack message) value
+trace message value = Debug.Trace.trace (string message) value
 
 show :: Show a => a -> Text
 show = Text.show
@@ -28,4 +28,4 @@ intercept label value = log label id value
 callStack :: HasCallStack => Text
 callStack = do
   let callerCallStack = GHC.Stack.popCallStack GHC.Stack.callStack
-  Text.pack (GHC.Stack.prettyCallStack callerCallStack)
+  fromString (GHC.Stack.prettyCallStack callerCallStack)

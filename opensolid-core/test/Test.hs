@@ -73,7 +73,7 @@ instance Monad Generator where
       Failed errors -> Random.return (Failed errors)
 
 instance MonadFail Generator where
-  fail message = Generator (Random.return (Failed [Text.pack message]))
+  fail message = Generator (Random.return (Failed [fromString message]))
 
 instance Try.Bind Generator Generator where
   (>>=) = (>>=)
@@ -115,7 +115,7 @@ run :: List Test -> IO ()
 run tests = do
   IO.printLine "Running tests..."
   argStrings <- System.Environment.getArgs
-  let args = List.map Text.pack argStrings
+  let args = List.map fromString argStrings
   results <- IO.collect (runImpl args "") tests
   let (successes, failures) = sum results
   let printSummary color count description =
@@ -172,8 +172,8 @@ runImpl args context test = case test of
 
 fixed :: Int -> Number -> Text
 fixed decimalPlaces value = do
-  let formatString = "%." <> Text.int decimalPlaces <> "f"
-  Text.pack (Text.Printf.printf (Text.unpack formatString) (Number.toDouble value))
+  let formatString = string ("%." <> Text.int decimalPlaces <> "f")
+  fromString (Text.Printf.printf formatString (Number.toDouble value))
 
 appendTo :: Text -> Text -> Text
 appendTo "" name = name
@@ -230,9 +230,8 @@ addOutput label value (Failed messages) = Failed (messages <> [label <> ": " <> 
 newtype Lines a = Lines (List a)
 
 instance Show a => Show (Lines a) where
-  show (Lines values) =
-    Text.unpack $
-      Text.concat (List.map (\value -> "\n  " <> Text.show value) values)
+  show (Lines values) = string do
+    Text.concat (List.map (\value -> "\n  " <> Text.show value) values)
 
 lines :: List a -> Lines a
 lines = Lines

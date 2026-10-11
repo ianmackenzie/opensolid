@@ -19,7 +19,7 @@ num reader text =
                   <> suffix
                   <> "'"
           Err message
-    Left message -> Err (Data.Text.pack message)
+    Left message -> Err (fromString message)
 
 int :: Text -> Result Text Int
 int = num Data.Text.Read.decimal

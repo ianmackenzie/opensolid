@@ -55,6 +55,7 @@ module OpenSolid.Prelude
   , fromInteger
   , fromRational
   , fromString
+  , string
   , fromLabel
   , getField
   , ifThenElse
@@ -79,7 +80,6 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import Data.List.NonEmpty qualified
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified
-import Data.String (fromString)
 import Data.Text (Text)
 import Data.Text qualified
 import Data.Void (Void)
@@ -488,11 +488,11 @@ instance Monad (Result x) where
 
 instance MonadFail (Result Text) where
   {-# INLINE fail #-}
-  fail message = Err (Data.Text.pack message)
+  fail message = Err (fromString message)
 
 try :: MonadFail m => Result x a -> m a
 try (Ok value) = Prelude.return value
-try (Err err) = Prelude.fail (Data.Text.unpack (Err.message err))
+try (Err err) = Prelude.fail (string (Err.message err))
 
 {-# INLINE (!!) #-}
 (!!) :: Result x a -> a -> a
@@ -663,8 +663,8 @@ instance
 newtype Sign = Sign_ Number deriving (Eq, Ord)
 
 instance Show Sign where
-  show Positive = "Positive"
-  show Negative = "Negative"
+  show Positive = string "Positive"
+  show Negative = string "Negative"
 
 instance Units Sign Unitless
 
@@ -724,6 +724,13 @@ fromInteger = Prelude.fromInteger
 fromRational :: Prelude.Rational -> Number
 fromRational = Prelude.fromRational
 
+{-# INLINE fromString #-}
+fromString :: Prelude.String -> Text
+fromString = Data.Text.pack
+
+string :: Text -> Prelude.String
+string = Data.Text.unpack
+
 {-# INLINE ifThenElse #-}
 ifThenElse :: Bool -> a -> a -> a
 ifThenElse True first _ = first
@@ -737,10 +744,10 @@ pattern TODO <- (GHC.Stack.withFrozenCallStack todoImpl -> ())
   TODO = GHC.Stack.withFrozenCallStack todoImpl
 
 todoImpl :: HasCallStack => a
-todoImpl = Prelude.error "Not implemented"
+todoImpl = error "Not implemented"
 
 error :: Text -> a
-error = Prelude.error . Data.Text.unpack
+error = Prelude.error . string
 
 {-# INLINE recursive #-}
 recursive :: (a -> a) -> a
