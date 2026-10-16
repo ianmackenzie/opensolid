@@ -569,12 +569,12 @@ findTangentSolutions ::
   Subproblem units ->
   Solve2D.Action Solve2D.NoExclusions FindZerosContext (Solution units)
 findTangentSolutions subproblem = do
-  let Subproblem {f, subdomain, uvRange, fuuRange, fuvRange, fvvRange} = subproblem
+  let Subproblem {function, subdomain, uvRange, fuuRange, fuvRange, fvvRange} = subproblem
   let determinant = fuuRange ?*? fvvRange - fuvRange ?*? fuvRange
   case Interval.resolvedSign determinant of
     Resolved determinantSign -> do
-      let (fu, fv) = partialDerivatives f
-      let (fuu, fuv, fvv) = secondPartialDerivatives f
+      let (fu, fv) = partialDerivatives function
+      let (fuu, fuv, fvv) = secondPartialDerivatives function
       let maybePoint =
             Solve2D.unique
               (\testRange -> VectorBounds2D (range testRange fu) (range testRange fv))
@@ -585,7 +585,8 @@ findTangentSolutions subproblem = do
       case maybePoint of
         Nothing -> Solve2D.recurse CrossingCurvesOnly
         Just point ->
-          if Bounds2D.member point (Domain2D.interior subdomain) && f @ point ~= Quantity.zero
+          if Bounds2D.member point (Domain2D.interior subdomain)
+            && function @ point ~= Quantity.zero
             then case determinantSign of
               Positive -> do
                 -- Non-saddle tangent point
@@ -756,12 +757,12 @@ horizontalCurve ::
   (UvPoint, Domain2D.Boundary) ->
   Fuzzy PartialZeros.CrossingSegment
 horizontalCurve subproblem start end = do
-  let Subproblem {f, dvdu, subdomain, uvRange} = subproblem
+  let Subproblem {function, dvdu, subdomain, uvRange} = subproblem
   let startPoint = Pair.first start
   let endPoint = Pair.first end
   let uStart = Point2D.xCoordinate startPoint
   let uEnd = Point2D.xCoordinate endPoint
-  let curve = HorizontalCurve.new f dvdu uStart uEnd (NonEmpty.one uvRange)
+  let curve = HorizontalCurve.new function dvdu uStart uEnd (NonEmpty.one uvRange)
   let Domain2D _ vSubdomain = subdomain
   let Bounds2D _ curveVBounds = Curve2D.bounds curve
   if Interval.contains curveVBounds (Domain1D.interior vSubdomain)
@@ -806,12 +807,12 @@ verticalCurve ::
   (UvPoint, Domain2D.Boundary) ->
   Fuzzy PartialZeros.CrossingSegment
 verticalCurve subproblem start end = do
-  let Subproblem {f, dudv, subdomain, uvRange} = subproblem
+  let Subproblem {function, dudv, subdomain, uvRange} = subproblem
   let startPoint = Pair.first start
   let endPoint = Pair.first end
   let vStart = Point2D.yCoordinate startPoint
   let vEnd = Point2D.yCoordinate endPoint
-  let curve = VerticalCurve.new f dudv vStart vEnd (NonEmpty.one uvRange)
+  let curve = VerticalCurve.new function dudv vStart vEnd (NonEmpty.one uvRange)
   let Domain2D uSubdomain _ = subdomain
   let Bounds2D curveUBounds _ = Curve2D.bounds curve
   if Interval.contains curveUBounds (Domain1D.interior uSubdomain)

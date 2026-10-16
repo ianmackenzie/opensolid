@@ -33,7 +33,7 @@ import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 
 data Subproblem units = Subproblem
-  { f :: SurfaceFunction1D units
+  { function :: SurfaceFunction1D units
   , dudv :: SurfaceFunction1D Unitless
   , dvdu :: SurfaceFunction1D Unitless
   , subdomain :: Domain2D
@@ -60,14 +60,15 @@ new ::
   SurfaceFunction1D Unitless ->
   Domain2D ->
   Subproblem units
-new f dudv dvdu subdomain = do
+new function dudv dvdu subdomain = do
   let uvRange = Domain2D.bounds subdomain
-  let fValues = cornerValues uvRange f
-  let fRange = SurfaceFunction1D.range uvRange f
-  let (fuRange, fvRange) = SurfaceFunction1D.partialDerivativeRanges uvRange f
-  let (fuuRange, fuvRange, fvvRange) = SurfaceFunction1D.secondPartialDerivativeRanges uvRange f
+  let fValues = cornerValues uvRange function
+  let fRange = SurfaceFunction1D.range uvRange function
+  let (fuRange, fvRange) = SurfaceFunction1D.partialDerivativeRanges uvRange function
+  let (fuuRange, fuvRange, fvvRange) =
+        SurfaceFunction1D.secondPartialDerivativeRanges uvRange function
   Subproblem
-    { f
+    { function
     , dudv
     , dvdu
     , subdomain
@@ -92,31 +93,31 @@ cornerValues (Bounds2D (Interval u1 u2) (Interval v1 v2)) function =
 
 leftEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2D.Boundary)
 leftEdgePoint subproblem = do
-  let Subproblem {f, subdomain, uvRange} = subproblem
+  let Subproblem {function, subdomain, uvRange} = subproblem
   let Bounds2D (Interval u1 _) vRange = uvRange
-  let fv = Pair.second (SurfaceFunction1D.partialDerivatives f)
-  (UvPoint u1 (Internal.solveForV f fv u1 vRange), Domain2D.leftEdge subdomain)
+  let fv = Pair.second (SurfaceFunction1D.partialDerivatives function)
+  (UvPoint u1 (Internal.solveForV function fv u1 vRange), Domain2D.leftEdge subdomain)
 
 rightEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2D.Boundary)
 rightEdgePoint subproblem = do
-  let Subproblem {f, subdomain, uvRange} = subproblem
+  let Subproblem {function, subdomain, uvRange} = subproblem
   let Bounds2D (Interval _ u2) vRange = uvRange
-  let fv = Pair.second (SurfaceFunction1D.partialDerivatives f)
-  (UvPoint u2 (Internal.solveForV f fv u2 vRange), Domain2D.rightEdge subdomain)
+  let fv = Pair.second (SurfaceFunction1D.partialDerivatives function)
+  (UvPoint u2 (Internal.solveForV function fv u2 vRange), Domain2D.rightEdge subdomain)
 
 bottomEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2D.Boundary)
 bottomEdgePoint subproblem = do
-  let Subproblem {f, subdomain, uvRange} = subproblem
+  let Subproblem {function, subdomain, uvRange} = subproblem
   let Bounds2D uRange (Interval v1 _) = uvRange
-  let fu = Pair.first (SurfaceFunction1D.partialDerivatives f)
-  (UvPoint (Internal.solveForU f fu uRange v1) v1, Domain2D.bottomEdge subdomain)
+  let fu = Pair.first (SurfaceFunction1D.partialDerivatives function)
+  (UvPoint (Internal.solveForU function fu uRange v1) v1, Domain2D.bottomEdge subdomain)
 
 topEdgePoint :: Tolerance units => Subproblem units -> (UvPoint, Domain2D.Boundary)
 topEdgePoint subproblem = do
-  let Subproblem {f, subdomain, uvRange} = subproblem
+  let Subproblem {function, subdomain, uvRange} = subproblem
   let Bounds2D uRange (Interval _ v2) = uvRange
-  let fu = Pair.first (SurfaceFunction1D.partialDerivatives f)
-  (UvPoint (Internal.solveForU f fu uRange v2) v2, Domain2D.topEdge subdomain)
+  let fu = Pair.first (SurfaceFunction1D.partialDerivatives function)
+  (UvPoint (Internal.solveForU function fu uRange v2) v2, Domain2D.topEdge subdomain)
 
 bottomLeftPoint :: Subproblem units -> (UvPoint, Domain2D.Boundary)
 bottomLeftPoint subproblem = do

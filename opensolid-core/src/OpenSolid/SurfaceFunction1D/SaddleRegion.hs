@@ -65,8 +65,8 @@ bounds = (.subproblem.uvRange)
 
 quadratic :: Subproblem units -> UvPoint -> SaddleRegion units
 quadratic subproblem saddlePoint = do
-  let f = subproblem.f
-  let (fuu, fuv, fvv) = SurfaceFunction1D.secondPartialDerivatives f @ saddlePoint
+  let function = subproblem.function
+  let (fuu, fuv, fvv) = SurfaceFunction1D.secondPartialDerivatives function @ saddlePoint
   let bDirectionCandidates = NonEmpty.three Direction2D.x Direction2D.y (Direction2D.degrees 45.0)
   let directionalSecondDerivative = secondDerivative fuu fuv fvv
   let dB = NonEmpty.maximumBy (Quantity.abs . directionalSecondDerivative) bDirectionCandidates
@@ -128,7 +128,7 @@ connect ::
   NonEmpty UvCurve
 connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
   let saddlePoint = Frame2D.originPoint frame
-  let Subproblem {f, dvdu, dudv, uvRange} = subproblem
+  let Subproblem {function, dvdu, dudv, uvRange} = subproblem
   let Bounds2D uRange vRange = uvRange
   let UvPoint uP vP = saddlePoint
   let UvPoint uC vC = joiningPoint joiningCurve
@@ -140,12 +140,14 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
         Incoming _ -> do
           let dudt = uP - uC
           let endDerivative = Vector2D dudt (dudt * (dv / du))
-          let implicitCurve = HorizontalCurve.bounded f dvdu uC uP implicitBounds frame boundingAxes
+          let implicitCurve =
+                HorizontalCurve.bounded function dvdu uC uP implicitBounds frame boundingAxes
           NonEmpty.fromTuple2 (Curve2D.desingularizeEnd implicitCurve saddlePoint endDerivative)
         Outgoing _ -> do
           let dudt = uC - uP
           let startDerivative = Vector2D dudt (dudt * (dv / du))
-          let implicitCurve = HorizontalCurve.bounded f dvdu uP uC implicitBounds frame boundingAxes
+          let implicitCurve =
+                HorizontalCurve.bounded function dvdu uP uC implicitBounds frame boundingAxes
           NonEmpty.fromTuple2 (Curve2D.desingularizeStart saddlePoint startDerivative implicitCurve)
     else do
       let implicitBounds = NonEmpty.one (Bounds2D uRange (Interval vP vC))
@@ -153,10 +155,12 @@ connect subproblem frame outgoingDirection joiningCurve boundingAxes = do
         Incoming _ -> do
           let dvdt = vP - vC
           let endDerivative = Vector2D (dvdt * (du / dv)) dvdt
-          let implicitCurve = VerticalCurve.bounded f dudv vC vP implicitBounds frame boundingAxes
+          let implicitCurve =
+                VerticalCurve.bounded function dudv vC vP implicitBounds frame boundingAxes
           NonEmpty.fromTuple2 (Curve2D.desingularizeEnd implicitCurve saddlePoint endDerivative)
         Outgoing _ -> do
           let dvdt = vC - vP
           let startDerivative = Vector2D (dvdt * (du / dv)) dvdt
-          let implicitCurve = VerticalCurve.bounded f dudv vP vC implicitBounds frame boundingAxes
+          let implicitCurve =
+                VerticalCurve.bounded function dudv vP vC implicitBounds frame boundingAxes
           NonEmpty.fromTuple2 (Curve2D.desingularizeStart saddlePoint startDerivative implicitCurve)
