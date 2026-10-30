@@ -132,7 +132,6 @@ class
   , Units (Vector dimension units space) units
   , Coercible (Vector dimension units space) (Vector dimension Unitless space)
   , Coercible (Vector dimension Unitless space) (Vector dimension units space)
-  , Eq (Vector dimension units space)
   , Show (Vector dimension units space)
   , ApproximateEquality (Vector dimension units space) units
   , Negation (Vector dimension units space)
@@ -258,7 +257,6 @@ instance VectorExists 3 units space where
 
 class
   ( VectorExists dimension Unitless space
-  , Eq (Direction dimension space)
   , Show (Direction dimension space)
   , Negation (Direction dimension space)
   , DotMultiplication (Direction dimension space) (Direction dimension space) Number
@@ -311,7 +309,6 @@ instance DirectionExists 3 space where
 class
   ( VectorExists dimension units space
   , BoundsExists dimension units space
-  , Eq (Point dimension units space)
   , Show (Point dimension units space)
   , ApproximateEquality (Point dimension units space) units
   , Addition
