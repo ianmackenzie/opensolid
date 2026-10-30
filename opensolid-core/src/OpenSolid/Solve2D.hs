@@ -51,7 +51,7 @@ data Exclusions exclusions where
 
 deriving instance Show (Exclusions exclusions)
 
-data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Err)
+data InfiniteRecursion = InfiniteRecursion deriving (Show, Err)
 
 type Callback context solution =
   forall exclusions.
@@ -221,7 +221,7 @@ solveUnique localBounds fBounds f fu fv globalBounds =
                 ]
     else Nothing
 
-data Divergence = Divergence deriving (Eq, Show, Err)
+data Divergence = Divergence deriving (Show, Err)
 
 newtonRaphson ::
   Tolerance units =>

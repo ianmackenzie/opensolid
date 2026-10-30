@@ -365,7 +365,7 @@ abstract ::
   CompiledFunction inputValue outputValue inputBounds outputBounds
 abstract = Abstract
 
-data IsAbstract = IsAbstract deriving (Eq, Show, Err)
+data IsAbstract = IsAbstract deriving (Show, Err)
 
 expression ::
   CompiledFunction inputValue outputValue inputBounds outputBounds ->

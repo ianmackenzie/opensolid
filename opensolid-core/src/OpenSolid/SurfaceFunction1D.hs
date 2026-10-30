@@ -505,7 +505,7 @@ cos f = do
         )
   new compiledCos cosPartialDerivatives
 
-data IsZero = IsZero deriving (Eq, Show, Err)
+data IsZero = IsZero deriving (Show, Err)
 
 findZeros :: Tolerance units => SurfaceFunction1D units -> Result IsZero Zeros
 findZeros function

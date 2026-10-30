@@ -638,7 +638,7 @@ solveMonotonic m fm fn tRange = do
             Solve1D.Exact t0 -> Resolved [(t0, Solve1D.neighborhood n (fn @ t0))]
             Solve1D.Closest _ -> Unresolved
 
-data CrossesZero = CrossesZero deriving (Eq, Show, Err)
+data CrossesZero = CrossesZero deriving (Show, Err)
 
 {-| Attempt to find the (consistent) sign of all values on the curve.
 

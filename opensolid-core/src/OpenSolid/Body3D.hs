@@ -115,7 +115,7 @@ instance Space.Coercion (Body3D space1) (Body3D space2) where
 
 ----- CONSTRUCTION -----
 
-data EmptyBody = EmptyBody deriving (Eq, Show, Err)
+data EmptyBody = EmptyBody deriving (Show, Err)
 
 {-| Create a rectangular block body.
 

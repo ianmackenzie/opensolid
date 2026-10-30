@@ -47,7 +47,7 @@ instance FFI (Polygon2D Meters) where
 instance FFI (Polygon2D Unitless) where
   representation = FFI.classRepresentation "UvPolygon"
 
-data IsEmpty = IsEmpty deriving (Eq, Show, Err)
+data IsEmpty = IsEmpty deriving (Show, Err)
 
 {-| Construct a polygon from its boundary vertices.
 

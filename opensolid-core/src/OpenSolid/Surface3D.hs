@@ -119,7 +119,7 @@ data Surface3D space = Surface3D
 
 data Edge space = Edge UvCurve (Curve3D space) deriving (Show)
 
-data IsDegenerate = IsDegenerate deriving (Eq, Show, Err)
+data IsDegenerate = IsDegenerate deriving (Show, Err)
 
 type BisectionTree space = Bisection.Tree UvBounds (Segment space)
 

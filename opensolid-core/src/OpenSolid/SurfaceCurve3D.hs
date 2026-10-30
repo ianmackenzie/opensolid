@@ -41,7 +41,7 @@ pattern Pole pole <- Pole_ {pole}
 pattern Edge :: Surface3D.Edge space -> SurfaceCurve3D space
 pattern Edge edge <- Edge_ {edge}
 
-data IsDegenerate = IsDegenerate UvPoint deriving (Eq, Show, Err)
+data IsDegenerate = IsDegenerate UvPoint deriving (Show, Err)
 
 instance Space.Coercion (SurfaceCurve3D space1) (SurfaceCurve3D space2) where
   coerce (Pole_ function pole) = Pole_ (Space.coerce function) (Space.coerce pole)

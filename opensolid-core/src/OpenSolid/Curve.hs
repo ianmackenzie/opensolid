@@ -236,17 +236,15 @@ type Compiled dimension units space =
 data IsDegenerate dimension units space
   = IsDegenerate (Point dimension units space)
 
-deriving instance PointExists dimension units space => Eq (IsDegenerate dimension units space)
-
 deriving instance PointExists dimension units space => Show (IsDegenerate dimension units space)
 
 deriving instance PointExists dimension units space => Err (IsDegenerate dimension units space)
 
-data HasDegeneracy = HasDegeneracy deriving (Eq, Show, Err)
+data HasDegeneracy = HasDegeneracy deriving (Show, Err)
 
 data IsDegenerateAndCoincidentWithPoint
   = IsDegenerateAndCoincidentWithPoint
-  deriving (Eq, Show, Err)
+  deriving (Show, Err)
 
 -- | An abstract representation of the parameter value of some curve.
 newtype ParameterValue = ParameterValue (Uniform -> Number)

@@ -158,7 +158,7 @@ boundedBy curves = do
   loops <- connect curves
   classifyLoops loops
 
-data EmptyRegion = EmptyRegion deriving (Eq, Show, Err)
+data EmptyRegion = EmptyRegion deriving (Show, Err)
 
 {-| Create a rectangular region.
 

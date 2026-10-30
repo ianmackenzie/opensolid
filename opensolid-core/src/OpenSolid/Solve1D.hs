@@ -100,7 +100,7 @@ data Exclusions exclusions where
   NoExclusions :: Exclusions NoExclusions
   SomeExclusions :: Exclusions SomeExclusions
 
-data InfiniteRecursion = InfiniteRecursion deriving (Eq, Show, Err)
+data InfiniteRecursion = InfiniteRecursion deriving (Show, Err)
 
 type Callback cached solution =
   forall exclusions.
@@ -220,7 +220,7 @@ solveMonotonic function derivative interval sign1 x1 x2 = do
               else solveMonotonic function derivative interval sign1 x1 xMid
         | otherwise -> Exact xMid -- We've converged to a root by bisection
 
-data Divergence = Divergence deriving (Eq, Show, Err)
+data Divergence = Divergence deriving (Show, Err)
 
 newtonRaphson ::
   Tolerance units =>
