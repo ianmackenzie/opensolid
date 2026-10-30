@@ -22,7 +22,7 @@ import OpenSolid.Prelude
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
 
-data Queue a = Queue Int (List a) (List a) deriving (Eq, Show)
+data Queue a = Queue Int (List a) (List a) deriving (Show)
 
 empty :: Queue a
 empty = Queue 0 [] []

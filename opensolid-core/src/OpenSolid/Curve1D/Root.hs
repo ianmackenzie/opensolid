@@ -10,7 +10,7 @@ data Root = Root
   , order :: Int
   , sign :: Sign
   }
-  deriving (Eq, Show)
+  deriving (Show)
 
 instance FFI Root where
   representation = FFI.nestedClassRepresentation "Curve" "Root"

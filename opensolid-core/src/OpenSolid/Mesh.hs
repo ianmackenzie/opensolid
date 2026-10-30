@@ -32,7 +32,7 @@ data Mesh vertex = Mesh
   { vertices :: Array vertex
   , faceIndices :: List (Int, Int, Int)
   }
-  deriving (Eq, Show)
+  deriving (Show)
 
 instance
   (Units.Coercion vertex1 vertex2, Coercible vertex1 vertex2) =>
