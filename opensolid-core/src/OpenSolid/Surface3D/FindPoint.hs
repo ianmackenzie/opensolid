@@ -15,6 +15,7 @@ import OpenSolid.Queue qualified as Queue
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
+import OpenSolid.Surface3D.Edge qualified as Surface3D.Edge
 import OpenSolid.Surface3D.Segment qualified as Segment
 import OpenSolid.SurfacePoint3D (SurfacePoint3D)
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
@@ -57,10 +58,10 @@ findEdgeSolutions ::
   Point3D space ->
   Surface3D.Edge space ->
   List UvPoint
-findEdgeSolutions poleSolutions point (Surface3D.Edge uvCurve curve) =
-  Curve3D.findPoint point curve
+findEdgeSolutions poleSolutions point edge =
+  Curve3D.findPoint point (Surface3D.Edge.curve edge)
     & List.filterMap \tValue -> do
-      let uvPoint = uvCurve @ tValue
+      let uvPoint = Surface3D.Edge.uvCurve edge @ tValue
       if unitless (uvPoint ^ poleSolutions) then Nothing else Just uvPoint
 
 data UniqueSolution = UniqueSolution deriving (Eq)

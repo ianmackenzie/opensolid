@@ -75,6 +75,7 @@ import OpenSolid.Set3D qualified as Set3D
 import OpenSolid.Space qualified as Space
 import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
+import OpenSolid.Surface3D.Edge qualified as Surface3D.Edge
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D)
@@ -448,7 +449,7 @@ buildSurfaceSegmentSet resolution surface uvRange p11 p21 p12 p22 = do
       Set2D.node (NonEmpty.four set11 set21 set12 set22)
 
 unsafeGetCurve :: SurfaceCurve3D space -> Curve3D space
-unsafeGetCurve (SurfaceCurve3D.Edge (Surface3D.Edge _ curve)) = curve
+unsafeGetCurve (SurfaceCurve3D.Edge edge) = Surface3D.Edge.curve edge
 unsafeGetCurve (SurfaceCurve3D.Pole _) = error "Mating surface curve should be a valid edge"
 
 buildLeadingEdgeVerticesMap ::

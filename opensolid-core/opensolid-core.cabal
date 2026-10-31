@@ -219,8 +219,10 @@ library
     OpenSolid.Stream
     OpenSolid.Surface1D
     OpenSolid.Surface3D
+    OpenSolid.Surface3D.Edge
     OpenSolid.Surface3D.Intersections
     OpenSolid.Surface3D.OverlappingSegment
+    OpenSolid.Surface3D.Pin
     OpenSolid.Surface3D.Pole
     OpenSolid.Surface3D.Segment
     OpenSolid.SurfaceCurve3D

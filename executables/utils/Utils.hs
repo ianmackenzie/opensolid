@@ -12,6 +12,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Result qualified as Result
 import OpenSolid.Surface3D qualified as Surface3D
+import OpenSolid.Surface3D.Edge qualified as Surface3D.Edge
 import OpenSolid.Text qualified as Text
 import OpenSolid.Try qualified as Try
 
@@ -26,7 +27,7 @@ numLines text = List.length (Text.lines text)
 
 showMostComplexCurve :: Tolerance Meters => Body3D space -> IO ()
 showMostComplexCurve body = Try.do
-  let getExpression (Surface3D.Edge _ curve) = CompiledFunction.expression (Curve3D.compiled curve)
+  let getExpression = CompiledFunction.expression . Curve3D.compiled . Surface3D.Edge.curve
   expressions <- Result.collect getExpression (allEdges body)
   case List.map Expression.debug expressions of
     [] -> IO.fail "No edges found"

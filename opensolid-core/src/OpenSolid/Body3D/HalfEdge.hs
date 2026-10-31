@@ -22,7 +22,7 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude hiding (id)
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
-import OpenSolid.Surface3D qualified as Surface3D
+import OpenSolid.Surface3D.Edge qualified as Surface3D.Edge
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
 import OpenSolid.SurfaceCurve3D qualified as SurfaceCurve3D
 import OpenSolid.Uniform qualified as Uniform
@@ -83,7 +83,7 @@ matingCurves :: Tolerance Meters => SurfaceCurve3D space -> SurfaceCurve3D space
 matingCurves (SurfaceCurve3D.Pole _) _ = False
 matingCurves _ (SurfaceCurve3D.Pole _) = False
 matingCurves (SurfaceCurve3D.Edge edge1) (SurfaceCurve3D.Edge edge2) = do
-  let Surface3D.Edge _ curve1 = edge1
-  let Surface3D.Edge _ curve2 = edge2
+  let curve1 = Surface3D.Edge.curve edge1
+  let curve2 = Surface3D.Edge.curve edge2
   Curve3D.length curve1 ~= Curve3D.length curve2 && do
     Uniform.samples & NonEmpty.all \r1 -> curve1 @ r1 ~= curve2 @ Uniform.reverse r1

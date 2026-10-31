@@ -1,7 +1,8 @@
 module OpenSolid.Surface3D
   ( Surface3D
   , Pole
-  , Edge (..)
+  , Edge
+  , Pin
   , IsDegenerate (IsDegenerate)
   , Boundary
   , Segment
@@ -53,7 +54,6 @@ import OpenSolid.Curve1D qualified as Curve1D
 import OpenSolid.Curve2D (Curve2D)
 import OpenSolid.Curve2D qualified as Curve2D
 import OpenSolid.Curve3D (Curve3D)
-import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Degeneracy qualified as Degeneracy
 import OpenSolid.Direction3D (Direction3D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
@@ -79,7 +79,9 @@ import OpenSolid.Set qualified as Set
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
 import OpenSolid.Space qualified as Space
+import OpenSolid.Surface3D.Edge (Edge)
 import {-# SOURCE #-} OpenSolid.Surface3D.FindPoint qualified as Surface3D.FindPoint
+import OpenSolid.Surface3D.Pin (Pin)
 import OpenSolid.Surface3D.Pole (Pole)
 import OpenSolid.Surface3D.Segment (Segment (..))
 import OpenSolid.SurfaceCurve3D (SurfaceCurve3D)
@@ -92,8 +94,6 @@ import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D))
 import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
 import OpenSolid.UvBounds qualified as UvBounds
-import OpenSolid.UvCurve (UvCurve)
-import OpenSolid.UvCurve qualified as UvCurve
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 import OpenSolid.UvPoint qualified as UvPoint
 import OpenSolid.UvRegion (UvRegion)
@@ -117,8 +117,6 @@ data Surface3D space = Surface3D
   , bisectionTree :: ~(BisectionTree space)
   }
 
-data Edge space = Edge UvCurve (Curve3D space) deriving (Show)
-
 data IsDegenerate = IsDegenerate deriving (Show, Err)
 
 type BisectionTree space = Bisection.Tree UvBounds (Segment space)
@@ -137,21 +135,9 @@ instance Space.Coercion (Surface3D space1) (Surface3D space2) where
       , bisectionTree = Space.coerce surface.bisectionTree
       }
 
-instance Space.Coercion (Edge space1) (Edge space2) where
-  {-# INLINE coerce #-}
-  coerce (Edge uvCurve curve) = Edge uvCurve (Space.coerce curve)
-
 instance space1 ~ space2 => Bounded (Surface3D space1) (Bounds3D space2) where
   {-# INLINE bounds #-}
   bounds = bounds
-
-instance space1 ~ space2 => Bounded (Edge space1) (Bounds3D space2) where
-  {-# INLINE bounds #-}
-  bounds (Edge _ curve) = Curve3D.bounds curve
-
-instance Bounded (Edge space) UvBounds where
-  {-# INLINE bounds #-}
-  bounds (Edge uvCurve _) = UvCurve.bounds uvCurve
 
 type Boundary space = Set3D space (SurfaceCurve3D space)
 

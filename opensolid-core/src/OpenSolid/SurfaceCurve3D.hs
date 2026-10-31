@@ -21,6 +21,7 @@ import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Prelude
 import OpenSolid.Space qualified as Space
 import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
+import OpenSolid.Surface3D.Edge qualified as Surface3D.Edge
 import OpenSolid.Surface3D.Pole qualified as Surface3D.Pole
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
@@ -74,18 +75,19 @@ new ::
   SurfaceCurve3D space
 new givenFunction givenUvCurve =
   case givenFunction << givenUvCurve of
-    Ok curve -> Edge_ givenFunction (Surface3D.Edge givenUvCurve curve)
-    Err (Curve3D.IsDegenerate point) -> Pole_ givenFunction (Surface3D.Pole.new givenUvCurve point)
+    Ok curve -> Edge_ givenFunction (Surface3D.Edge.with {uvCurve = givenUvCurve, curve})
+    Err (Curve3D.IsDegenerate point) ->
+      Pole_ givenFunction (Surface3D.Pole.with {uvCurve = givenUvCurve, point})
 
 uvCurve :: SurfaceCurve3D space -> UvCurve
 uvCurve surfaceCurve = case surfaceCurve of
   Pole pole -> Surface3D.Pole.uvCurve pole
-  Edge (Surface3D.Edge edgeUvCurve _) -> edgeUvCurve
+  Edge edge -> Surface3D.Edge.uvCurve edge
 
 bounds :: SurfaceCurve3D space -> Bounds3D space
 bounds surfaceCurve = case surfaceCurve of
   Pole pole -> Bounds3D.constant (Surface3D.Pole.point pole)
-  Edge (Surface3D.Edge _ curve) -> Curve3D.bounds curve
+  Edge edge -> Curve3D.bounds (Surface3D.Edge.curve edge)
 
 uvBounds :: SurfaceCurve3D space -> UvBounds
 uvBounds = UvCurve.bounds . uvCurve
@@ -97,10 +99,10 @@ placeIn frame surfaceCurve = case surfaceCurve of
       { function = SurfaceFunction3D.placeIn frame function
       , pole = Surface3D.Pole.placeIn frame pole
       }
-  Edge_ function (Surface3D.Edge edgeUvCurve curve) ->
+  Edge_ function edge ->
     Edge_
       { function = SurfaceFunction3D.placeIn frame function
-      , edge = Surface3D.Edge edgeUvCurve (Curve3D.placeIn frame curve)
+      , edge = Surface3D.Edge.placeIn frame edge
       }
 
 relativeTo :: Frame3D global local -> SurfaceCurve3D global -> SurfaceCurve3D local
