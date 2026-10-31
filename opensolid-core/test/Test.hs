@@ -110,6 +110,12 @@ withTextColor color io = do
   let resetColor = AnsiTerminal.setSGR [AnsiTerminal.Reset]
   IO.bracket (setColor, const resetColor) (const io)
 
+printErrorLine :: Text -> IO ()
+printErrorLine = withTextColor errorColor . IO.printLine
+
+printSuccessLine :: Text -> IO ()
+printSuccessLine = withTextColor successColor . IO.printLine
+
 run :: List Test -> IO ()
 run tests = do
   IO.printLine "Running tests..."
@@ -117,26 +123,24 @@ run tests = do
   let args = List.map fromString argStrings
   results <- IO.collect (runImpl args "") tests
   let (successes, failures) = sum results
-  let printSummary color count description =
-        withTextColor color $
-          IO.printLine $
-            Text.sentence
-              [ Text.int count
-              , Text.pluralize "test" "tests" count
-              , description
-              ]
+  let summary count description =
+        Text.sentence [Text.int count, Text.pluralize "test" "tests" count, description]
   if failures == 0
     then do
-      printSummary successColor successes "passed"
+      printSuccessLine (summary successes "passed")
       System.Exit.exitSuccess
     else do
-      printSummary errorColor failures "failed"
+      printErrorLine (summary failures "failed")
       System.Exit.exitFailure
 
 reportError :: Text -> List Text -> IO (Int, Int)
 reportError context messages = do
-  withTextColor errorColor (IO.printLine (context <> " failed:"))
-  IO.forEach messages (IO.printLine . Text.indent "   ")
+  let summary = context <> " failed"
+  if List.isEmpty messages
+    then printErrorLine summary
+    else do
+      printErrorLine (summary <> ":")
+      IO.forEach messages (IO.printLine . Text.indent "   ")
   IO.succeed (0, 1)
 
 runImpl :: List Text -> Text -> Test -> IO (Int, Int)
