@@ -183,6 +183,7 @@ library
     OpenSolid.Orientation3D
     OpenSolid.Pair
     OpenSolid.Parameter
+    OpenSolid.Params
     OpenSolid.PbrMaterial
     OpenSolid.Plane3D
     OpenSolid.PlaneOrientation3D
@@ -194,7 +195,6 @@ library
     OpenSolid.Polyline2D
     OpenSolid.Prelude
     OpenSolid.Primitives
-    OpenSolid.Params
     OpenSolid.Quantity
     OpenSolid.Queue
     OpenSolid.Random
