@@ -22,31 +22,22 @@ import OpenSolid.Prelude
 import OpenSolid.Space qualified as Space
 import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.Surface3D.Edge qualified as Surface3D.Edge
+import OpenSolid.Surface3D.Pin (Pin)
 import OpenSolid.Surface3D.Pole qualified as Surface3D.Pole
 import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
-import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvCurve qualified as UvCurve
-import OpenSolid.UvPoint (UvPoint)
 
 data SurfaceCurve3D space
-  = Pole_ {function :: SurfaceFunction3D space, pole :: Surface3D.Pole space}
-  | Edge_ {function :: SurfaceFunction3D space, edge :: Surface3D.Edge space}
+  = Pole (Surface3D.Pole space)
+  | Edge (Surface3D.Edge space)
 
-{-# COMPLETE Pole, Edge #-}
-
-pattern Pole :: Surface3D.Pole space -> SurfaceCurve3D space
-pattern Pole pole <- Pole_ {pole}
-
-pattern Edge :: Surface3D.Edge space -> SurfaceCurve3D space
-pattern Edge edge <- Edge_ {edge}
-
-data IsDegenerate = IsDegenerate UvPoint deriving (Show, Err)
+data IsDegenerate space = IsDegenerate (Pin space) deriving (Show, Err)
 
 instance Space.Coercion (SurfaceCurve3D space1) (SurfaceCurve3D space2) where
-  coerce (Pole_ function pole) = Pole_ (Space.coerce function) (Space.coerce pole)
-  coerce (Edge_ function edge) = Edge_ (Space.coerce function) (Space.coerce edge)
+  coerce (Pole pole) = Pole (Space.coerce pole)
+  coerce (Edge edge) = Edge (Space.coerce edge)
 
 instance space1 ~ space2 => Bounded (SurfaceCurve3D space1) (Bounds3D space2) where
   {-# INLINE bounds #-}
@@ -61,12 +52,16 @@ instance
     (Tolerance Meters)
     (SurfaceCurve3D space)
     (Curve1D Unitless)
-    (Result IsDegenerate (SurfaceCurve3D space))
+    (Result (IsDegenerate space) (SurfaceCurve3D space))
   where
-  surfaceCurve << parameterization =
-    case unitless (uvCurve surfaceCurve << parameterization) of
-      Ok composedUvCurve -> Ok (new surfaceCurve.function composedUvCurve)
-      Err (UvCurve.IsDegenerate uvPoint) -> Err (IsDegenerate uvPoint)
+  Pole pole << parameterization =
+    case pole << parameterization of
+      Ok composedPole -> Ok (Pole composedPole)
+      Err (Surface3D.Pole.IsDegenerate pin) -> Err (IsDegenerate pin)
+  Edge edge << parameterization =
+    case edge << parameterization of
+      Ok composedEdge -> Ok (Edge composedEdge)
+      Err (Surface3D.Edge.IsDegenerate pin) -> Err (IsDegenerate pin)
 
 new ::
   Tolerance Meters =>
@@ -75,9 +70,8 @@ new ::
   SurfaceCurve3D space
 new givenFunction givenUvCurve =
   case givenFunction << givenUvCurve of
-    Ok curve -> Edge_ givenFunction (Surface3D.Edge.with {uvCurve = givenUvCurve, curve})
-    Err (Curve3D.IsDegenerate point) ->
-      Pole_ givenFunction (Surface3D.Pole.with {uvCurve = givenUvCurve, point})
+    Ok curve -> Edge (Surface3D.Edge.with {uvCurve = givenUvCurve, curve})
+    Err (Curve3D.IsDegenerate point) -> Pole (Surface3D.Pole.with {uvCurve = givenUvCurve, point})
 
 uvCurve :: SurfaceCurve3D space -> UvCurve
 uvCurve surfaceCurve = case surfaceCurve of
@@ -94,16 +88,8 @@ uvBounds = UvCurve.bounds . uvCurve
 
 placeIn :: Frame3D global local -> SurfaceCurve3D local -> SurfaceCurve3D global
 placeIn frame surfaceCurve = case surfaceCurve of
-  Pole_ function pole ->
-    Pole_
-      { function = SurfaceFunction3D.placeIn frame function
-      , pole = Surface3D.Pole.placeIn frame pole
-      }
-  Edge_ function edge ->
-    Edge_
-      { function = SurfaceFunction3D.placeIn frame function
-      , edge = Surface3D.Edge.placeIn frame edge
-      }
+  Pole pole -> Pole (Surface3D.Pole.placeIn frame pole)
+  Edge edge -> Edge (Surface3D.Edge.placeIn frame edge)
 
 relativeTo :: Frame3D global local -> SurfaceCurve3D global -> SurfaceCurve3D local
 relativeTo frame surfaceCurve = placeIn (Frame3D.inverse frame) surfaceCurve
