@@ -30,6 +30,7 @@ module OpenSolid.Curve1D
   , degeneracyTolerance
   , isZero
   , nonzero
+  , asConstant
   , IsZero (IsZero)
   , findRoots
   , CrossesZero (CrossesZero)
@@ -498,6 +499,12 @@ nonzero curve =
     Ok [] -> Ok (Nonzero curve)
     Ok List.OneOrMore -> Err HasZero
     Err IsZero -> Err HasZero
+
+asConstant :: Tolerance units => Curve1D units -> Maybe (Quantity units)
+asConstant curve =
+  if NonEmpty.all (~= startValue curve) (curve @ Parameter.samples)
+    then Just (startValue curve)
+    else Nothing
 
 ----- ROOT FINDING -----
 
