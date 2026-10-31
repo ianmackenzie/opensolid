@@ -19,7 +19,6 @@ import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Prelude
-import OpenSolid.Space qualified as Space
 import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.Surface3D.Edge qualified as Surface3D.Edge
 import OpenSolid.Surface3D.Pin (Pin)
@@ -34,10 +33,6 @@ data SurfaceCurve3D space
   | Edge (Surface3D.Edge space)
 
 data IsDegenerate space = IsDegenerate (Pin space) deriving (Show, Err)
-
-instance Space.Coercion (SurfaceCurve3D space1) (SurfaceCurve3D space2) where
-  coerce (Pole pole) = Pole (Space.coerce pole)
-  coerce (Edge edge) = Edge (Space.coerce edge)
 
 instance space1 ~ space2 => Bounded (SurfaceCurve3D space1) (Bounds3D space2) where
   {-# INLINE bounds #-}

@@ -30,7 +30,6 @@ import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
-import OpenSolid.Space qualified as Space
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 
@@ -57,12 +56,6 @@ data Subtree tag domain segment = Subtree tag (Tree domain segment)
 instance
   (domain1 ~ domain2, Units.Coercion segment1 segment2, Coercible segment1 segment2) =>
   Units.Coercion (Tree domain1 segment1) (Tree domain2 segment2)
-  where
-  coerce = Data.Coerce.coerce
-
-instance
-  (domain1 ~ domain2, Space.Coercion segment1 segment2, Coercible segment1 segment2) =>
-  Space.Coercion (Tree domain1 segment1) (Tree domain2 segment2)
   where
   coerce = Data.Coerce.coerce
 

@@ -16,11 +16,8 @@ where
 import OpenSolid.Bounds (Bounds, BoundsExists)
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
-import OpenSolid.Point (Point)
 import OpenSolid.Prelude
-import OpenSolid.Space qualified as Space
 import OpenSolid.Units (Units)
-import OpenSolid.Units qualified as Units
 import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
 import OpenSolid.VectorBounds qualified as VectorBounds
 
@@ -34,39 +31,6 @@ data Segment dimension units space = Segment
   }
 
 instance Units (Segment dimension units space) units
-
-instance
-  ( dimension1 ~ dimension2
-  , space1 ~ space2
-  , VectorBoundsExists dimension1 units1 space1
-  , VectorBoundsExists dimension2 units2 space2
-  , VectorBoundsExists dimension1 (Unitless ?/? units1) space1
-  , VectorBoundsExists dimension2 (Unitless ?/? units2) space2
-  , Units.Coercion (Point dimension1 units1 space1) (Point dimension2 units2 space2)
-  , Units.Coercion (Bounds dimension1 units1 space1) (Bounds dimension2 units2 space2)
-  ) =>
-  Units.Coercion (Segment dimension1 units1 space1) (Segment dimension2 units2 space2)
-  where
-  coerce segment =
-    Segment
-      { range = Units.coerce segment.range
-      , derivativeRange = VectorBounds.coerce segment.derivativeRange
-      , secondDerivativeRange = VectorBounds.coerce segment.secondDerivativeRange
-      , tangentDirectionRange = segment.tangentDirectionRange
-      , curvatureVectorRange_ = VectorBounds.coerce segment.curvatureVectorRange_
-      , isDegenerate = segment.isDegenerate
-      }
-
-instance Space.Coercion (Segment 3 Meters space1) (Segment 3 Meters space2) where
-  coerce segment =
-    Segment
-      { range = Space.coerce segment.range
-      , derivativeRange = VectorBounds.coerce segment.derivativeRange
-      , secondDerivativeRange = VectorBounds.coerce segment.secondDerivativeRange
-      , tangentDirectionRange = Space.coerce segment.tangentDirectionRange
-      , curvatureVectorRange_ = VectorBounds.coerce segment.curvatureVectorRange_
-      , isDegenerate = segment.isDegenerate
-      }
 
 range :: Segment dimension units space -> Bounds dimension units space
 range = (.range)

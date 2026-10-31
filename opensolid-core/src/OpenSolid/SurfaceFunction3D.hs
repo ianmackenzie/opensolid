@@ -28,7 +28,6 @@ import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Region2D (Region2D)
-import OpenSolid.Space qualified as Space
 import {-# SOURCE #-} OpenSolid.Surface3D (Surface3D)
 import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
@@ -54,13 +53,6 @@ data SurfaceFunction3D space = SurfaceFunction3D
 
 type Compiled space =
   CompiledFunction UvPoint (Point3D space) UvBounds (Bounds3D space)
-
-instance Space.Coercion (SurfaceFunction3D space1) (SurfaceFunction3D space2) where
-  coerce function =
-    SurfaceFunction3D
-      { compiled = Space.coerce function.compiled
-      , partialDerivatives = Pair.map Space.coerce function.partialDerivatives
-      }
 
 instance At (SurfaceFunction3D space) UvPoint (Point3D space) where
   {-# INLINE (@) #-}

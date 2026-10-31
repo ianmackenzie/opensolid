@@ -77,7 +77,6 @@ import OpenSolid.Region2D.Boundary qualified as Region2D.Boundary
 import OpenSolid.Set qualified as Set
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
-import OpenSolid.Space qualified as Space
 import OpenSolid.Surface3D.Edge (Edge)
 import {-# SOURCE #-} OpenSolid.Surface3D.FindPoint qualified as Surface3D.FindPoint
 import OpenSolid.Surface3D.Pin (Pin)
@@ -118,20 +117,6 @@ data Surface3D space = Surface3D
 data IsDegenerate = IsDegenerate deriving (Show, Err)
 
 type BisectionTree space = Bisection.Tree UvBounds (Segment space)
-
-instance Space.Coercion (Surface3D space1) (Surface3D space2) where
-  coerce surface =
-    Surface3D
-      { function = Space.coerce surface.function
-      , domain = surface.domain
-      , outerBoundary = Set3D.map Space.coerce surface.outerBoundary
-      , innerBoundaries = Bag3D.map (Set3D.map Space.coerce) surface.innerBoundaries
-      , degenerateLeft = surface.degenerateLeft
-      , degenerateRight = surface.degenerateRight
-      , degenerateBottom = surface.degenerateBottom
-      , degenerateTop = surface.degenerateTop
-      , bisectionTree = Space.coerce surface.bisectionTree
-      }
 
 instance space1 ~ space2 => Bounded (Surface3D space1) (Bounds3D space2) where
   {-# INLINE bounds #-}

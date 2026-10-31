@@ -150,7 +150,6 @@ import OpenSolid.Queue qualified as Queue
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Resolution qualified as Resolution
 import OpenSolid.Show qualified as Show
-import OpenSolid.Space qualified as Space
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction2D (SurfaceFunction2D)
@@ -375,34 +374,6 @@ subsegment curve tRange = do
     , curvatureVectorRange_ = segmentCurvatureVectorRange_
     , isDegenerate = isDegenerateStart || isDegenerateEnd
     }
-
-instance Units.Coercion (Curve2D units1) (Curve2D units2) where
-  coerce curve =
-    Curve
-      { compiled = Units.coerce curve.compiled
-      , derivative = Units.coerce curve.derivative
-      , startPoint = Units.coerce curve.startPoint
-      , endPoint = Units.coerce curve.endPoint
-      , bounds = Units.coerce curve.bounds
-      , hasDegenerateStart = curve.hasDegenerateStart
-      , hasDegenerateEnd = curve.hasDegenerateEnd
-      , bisectionTree = Bisection.map Units.coerce curve.bisectionTree
-      , arcLengthParameterization = Pair.mapFirst Units.coerce curve.arcLengthParameterization
-      }
-
-instance Space.Coercion (Curve3D space1) (Curve3D space2) where
-  coerce curve =
-    Curve
-      { compiled = Space.coerce curve.compiled
-      , derivative = Space.coerce curve.derivative
-      , startPoint = Space.coerce curve.startPoint
-      , endPoint = Space.coerce curve.endPoint
-      , bounds = Space.coerce curve.bounds
-      , hasDegenerateStart = curve.hasDegenerateStart
-      , hasDegenerateEnd = curve.hasDegenerateEnd
-      , bisectionTree = Bisection.map Space.coerce curve.bisectionTree
-      , arcLengthParameterization = curve.arcLengthParameterization
-      }
 
 instance FFI (Curve2D Meters) where
   representation = FFI.classRepresentation "Curve2D"

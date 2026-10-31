@@ -21,7 +21,6 @@ import OpenSolid.Point2D (Point2D)
 import OpenSolid.Prelude
 import OpenSolid.Set2D (Set2D)
 import OpenSolid.Set2D qualified as Set2D
-import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D qualified as Vector2D
 
 data BoundaryTree units = BoundaryTree
@@ -30,15 +29,6 @@ data BoundaryTree units = BoundaryTree
   , endPoint :: Point2D units
   , children :: ~(NonEmpty (BoundaryTree units))
   }
-
-instance Units.Coercion (BoundaryTree units1) (BoundaryTree units2) where
-  coerce tree =
-    BoundaryTree
-      { bounds = Units.coerce tree.bounds
-      , startPoint = Units.coerce tree.startPoint
-      , endPoint = Units.coerce tree.endPoint
-      , children = NonEmpty.map Units.coerce tree.children
-      }
 
 build :: Set2D units (Curve2D units) -> BoundaryTree units
 build curves = case curves of

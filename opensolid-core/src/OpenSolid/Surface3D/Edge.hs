@@ -19,7 +19,6 @@ import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Prelude
-import OpenSolid.Space qualified as Space
 import OpenSolid.Surface3D.Pin (Pin)
 import OpenSolid.Surface3D.Pin qualified as Surface3D.Pin
 import OpenSolid.UvBounds (UvBounds)
@@ -31,13 +30,6 @@ data Edge space = Edge
   , curve :: Curve3D space
   }
   deriving (Show)
-
-instance Space.Coercion (Edge space1) (Edge space2) where
-  coerce edge =
-    Edge
-      { uvCurve = uvCurve edge
-      , curve = Space.coerce (curve edge)
-      }
 
 instance Bounded (Edge space) UvBounds where
   {-# INLINE bounds #-}

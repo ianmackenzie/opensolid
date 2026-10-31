@@ -10,7 +10,6 @@ module OpenSolid.Surface3D.Pole
   )
 where
 
-import Data.Coerce qualified
 import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds3D (Bounds3D)
@@ -23,7 +22,6 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
-import OpenSolid.Space qualified as Space
 import OpenSolid.Surface3D.Pin (Pin)
 import OpenSolid.Surface3D.Pin qualified as Surface3D.Pin
 import OpenSolid.UvBounds (UvBounds)
@@ -39,10 +37,6 @@ data Pole space = Pole
   , point :: Point3D space
   }
   deriving (Show)
-
-instance Space.Coercion (Pole space1) (Pole space2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
 
 instance Bounded (Pole space) UvBounds where
   {-# INLINE bounds #-}

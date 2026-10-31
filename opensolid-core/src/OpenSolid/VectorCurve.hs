@@ -63,7 +63,6 @@ import OpenSolid.Parameter qualified as Parameter
 import OpenSolid.Plane3D (Plane3D)
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Space qualified as Space
 import OpenSolid.SurfaceFunction1D (SurfaceFunction1D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Tolerance qualified as Tolerance
@@ -252,27 +251,6 @@ instance
     (Nonzero (VectorCurve3D units2 space2))
   where
   coerce (Nonzero curve) = Nonzero (Units.coerce curve)
-
-instance
-  units1 ~ units2 =>
-  Space.Coercion (VectorCurve3D units1 space1) (VectorCurve3D units2 space2)
-  where
-  coerce curve =
-    VectorCurve
-      { compiled = Space.coerce curve.compiled
-      , derivative = Space.coerce curve.derivative
-      , startValue = Space.coerce curve.startValue
-      , endValue = Space.coerce curve.endValue
-      , maxSampledMagnitude = curve.maxSampledMagnitude
-      }
-
-instance
-  units1 ~ units2 =>
-  Space.Coercion
-    (Nonzero (VectorCurve3D units1 space1))
-    (Nonzero (VectorCurve3D units2 space2))
-  where
-  coerce (Nonzero curve) = Nonzero (Space.coerce curve)
 
 instance At (VectorCurve2D units) Number (Vector2D units) where
   {-# INLINE (@) #-}

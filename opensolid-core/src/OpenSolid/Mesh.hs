@@ -24,7 +24,6 @@ import OpenSolid.Int qualified as Int
 import OpenSolid.List qualified as List
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
-import OpenSolid.Space qualified as Space
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
 
@@ -37,12 +36,6 @@ data Mesh vertex = Mesh
 instance
   (Units.Coercion vertex1 vertex2, Coercible vertex1 vertex2) =>
   Units.Coercion (Mesh vertex1) (Mesh vertex2)
-  where
-  coerce = Data.Coerce.coerce
-
-instance
-  (Space.Coercion vertex1 vertex2, Coercible vertex1 vertex2) =>
-  Space.Coercion (Mesh vertex1) (Mesh vertex2)
   where
   coerce = Data.Coerce.coerce
 

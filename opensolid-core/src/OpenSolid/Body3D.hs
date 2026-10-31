@@ -72,7 +72,6 @@ import OpenSolid.Set2D (Set2D)
 import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Set3D qualified as Set3D
-import OpenSolid.Space qualified as Space
 import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.Surface3D.Edge qualified as Surface3D.Edge
@@ -106,13 +105,6 @@ instance At (Body3D space) HalfEdge.Id (SurfaceCurve3D space) where
 
 instance FFI (Body3D Void) where
   representation = FFI.classRepresentation "Body3D"
-
-instance Space.Coercion (Body3D space1) (Body3D space2) where
-  coerce body =
-    Body3D
-      { surfaces = Set3D.map Space.coerce body.surfaces
-      , seams = body.seams
-      }
 
 ----- CONSTRUCTION -----
 

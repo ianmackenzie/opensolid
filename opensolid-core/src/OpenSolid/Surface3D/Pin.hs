@@ -8,7 +8,6 @@ module OpenSolid.Surface3D.Pin
   )
 where
 
-import Data.Coerce qualified
 import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds3D (Bounds3D)
@@ -18,7 +17,6 @@ import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
-import OpenSolid.Space qualified as Space
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvPoint (UvPoint)
@@ -28,10 +26,6 @@ data Pin space = Pin
   , point :: Point3D space
   }
   deriving (Show)
-
-instance Space.Coercion (Pin space1) (Pin space2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
 
 instance Bounded (Pin space) UvBounds where
   bounds = UvBounds.constant . uvPoint

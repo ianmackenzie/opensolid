@@ -38,7 +38,6 @@ import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Show qualified as Show
-import OpenSolid.Space qualified as Space
 import OpenSolid.Unboxed.Math
 import OpenSolid.Units (SquareMeters, Units)
 import OpenSolid.Units qualified as Units
@@ -363,10 +362,6 @@ instance Units (Point2D units) units
 instance units1 ~ units2 => Bounded (Point2D units1) (Bounds2D units2) where
   {-# INLINE bounds #-}
   bounds (Point2D px py) = Bounds2D (Interval.constant px) (Interval.constant py)
-
-instance Units.Coercion (Point2D units1) (Point2D units2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
 
 instance
   units1 ~ units2 =>
@@ -768,10 +763,6 @@ instance units1 ~ units2 => Bounded (Bounds2D units1) (Bounds2D units2) where
   {-# INLINE bounds #-}
   bounds = id
 
-instance Units.Coercion (Bounds2D units1) (Bounds2D units2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
-
 instance FFI (Bounds2D Meters) where
   representation = FFI.classRepresentation "Bounds2D"
 
@@ -999,13 +990,6 @@ deriving instance Show (Transform2D tag units)
 
 instance Units (Transform2D tag units) units
 
-instance
-  tag1 ~ tag2 =>
-  Units.Coercion (Transform2D tag1 units1) (Transform2D tag2 units2)
-  where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
-
 instance Multiplication (Transform2D tag translationUnits) (Vector2D units) (Vector2D units) where
   transform * vector = vector * transform
 
@@ -1080,13 +1064,6 @@ instance Units (Vector3D units space) units
 instance
   space1 ~ space2 =>
   Units.Coercion (Vector3D units1 space1) (Vector3D units2 space2)
-  where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
-
-instance
-  units1 ~ units2 =>
-  Space.Coercion (Vector3D units1 space1) (Vector3D units2 space2)
   where
   {-# INLINE coerce #-}
   coerce = Data.Coerce.coerce
@@ -1290,10 +1267,6 @@ instance Show (Direction3D space) where
 instance FFI (Direction3D Void) where
   representation = FFI.classRepresentation "Direction3D"
 
-instance Space.Coercion (Direction3D space1) (Direction3D space2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
-
 instance ApproximateEquality (Direction3D space) Unitless where
   Unit3D v1 ~= Unit3D v2 = v1 ~= v2
 
@@ -1358,10 +1331,6 @@ deriving instance Show (PlaneOrientation3D space)
 instance FFI (PlaneOrientation3D Void) where
   representation = FFI.classRepresentation "PlaneOrientation3D"
 
-instance Space.Coercion (PlaneOrientation3D space1) (PlaneOrientation3D space2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
-
 ----- Orientation3D -----
 
 type role Orientation3D phantom
@@ -1379,10 +1348,6 @@ deriving instance Show (Orientation3D space)
 
 instance FFI (Orientation3D Void) where
   representation = FFI.classRepresentation "Orientation3D"
-
-instance Space.Coercion (Orientation3D space1) (Orientation3D space2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
 
 ----- Point3D -----
 
@@ -1408,10 +1373,6 @@ instance Show (Point3D space) where
 
 instance FFI (Point3D Void) where
   representation = FFI.classRepresentation "Point3D"
-
-instance Space.Coercion (Point3D space1) (Point3D space2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
 
 instance space1 ~ space2 => Bounded (Point3D space1) (Bounds3D space2) where
   {-# INLINE bounds #-}
@@ -1484,13 +1445,6 @@ type role VectorBounds3D phantom phantom
 
 type VectorBounds3D :: Type -> Type -> Type
 data VectorBounds3D units space = VB3D# Double# Double# Double# Double# Double# Double#
-
-instance
-  units1 ~ units2 =>
-  Space.Coercion (VectorBounds3D units1 space1) (VectorBounds3D units2 space2)
-  where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
 
 -- | Construct a vector bounds from its rightward, forward and upward components.
 {-# INLINE VectorBounds3D #-}
@@ -1948,10 +1902,6 @@ instance space1 ~ space2 => Bounded (Bounds3D space1) (Bounds3D space2) where
 instance FFI (Bounds3D Void) where
   representation = FFI.classRepresentation "Bounds3D"
 
-instance Space.Coercion (Bounds3D space1) (Bounds3D space2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
-
 instance
   space1 ~ space2 =>
   Addition
@@ -2050,10 +2000,6 @@ deriving instance Show (Axis3D space)
 instance FFI (Axis3D Void) where
   representation = FFI.classRepresentation "Axis3D"
 
-instance Space.Coercion (Axis3D space1) (Axis3D space2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
-
 instance Multiplication Sign (Axis3D space) (Axis3D space) where
   Positive * axis = axis
   Negative * axis = -axis
@@ -2091,10 +2037,6 @@ deriving instance Show (Plane3D space)
 instance FFI (Plane3D Void) where
   representation = FFI.classRepresentation "Plane3D"
 
-instance Space.Coercion (Plane3D space1) (Plane3D space2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
-
 ----- Frame3D -----
 
 type role Frame3D phantom phantom
@@ -2113,10 +2055,6 @@ deriving instance Show (Frame3D global local)
 
 instance FFI (Frame3D Void Void) where
   representation = FFI.classRepresentation "Frame3D"
-
-instance Space.Coercion (Frame3D local1 global1) (Frame3D local2 global2) where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
 
 instance
   local1 ~ local2 =>
@@ -2175,13 +2113,6 @@ deriving instance Eq (VectorTransform3D tag space)
 deriving instance Show (VectorTransform3D tag space)
 
 instance
-  tag1 ~ tag2 =>
-  Space.Coercion (VectorTransform3D tag1 space1) (VectorTransform3D tag2 space2)
-  where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
-
-instance
   space1 ~ space2 =>
   Multiplication
     (VectorTransform3D tag space1)
@@ -2223,13 +2154,6 @@ data Transform3D tag space = Transform3D (Point3D space) (VectorTransform3D tag 
 deriving instance Eq (Transform3D tag space)
 
 deriving instance Show (Transform3D tag space)
-
-instance
-  tag1 ~ tag2 =>
-  Space.Coercion (Transform3D tag1 space1) (Transform3D tag2 space2)
-  where
-  {-# INLINE coerce #-}
-  coerce = Data.Coerce.coerce
 
 instance
   space1 ~ space2 =>

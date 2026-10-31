@@ -35,7 +35,6 @@ import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Units (Units)
-import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
@@ -55,13 +54,6 @@ type Compiled units =
   CompiledFunction UvPoint (Point2D units) UvBounds (Bounds2D units)
 
 instance Units (SurfaceFunction2D units) units
-
-instance Units.Coercion (SurfaceFunction2D units1) (SurfaceFunction2D units2) where
-  coerce function =
-    SurfaceFunction2D
-      { compiled = Units.coerce function.compiled
-      , partialDerivatives = Pair.map Units.coerce function.partialDerivatives
-      }
 
 instance At (SurfaceFunction2D units) UvPoint (Point2D units) where
   {-# INLINE (@) #-}

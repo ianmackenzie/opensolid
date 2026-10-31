@@ -66,7 +66,6 @@ import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Set.Bounds (Bounds)
 import OpenSolid.Set.Bounds qualified as Set.Bounds
-import OpenSolid.Space qualified as Space
 import OpenSolid.Units qualified as Units
 import Prelude qualified
 
@@ -90,12 +89,6 @@ instance Bounds b => Prelude.Semigroup (Set b a) where
 instance
   (Units.Coercion b1 b2, Units.Coercion a1 a2, Coercible b1 b2, Coercible a1 a2) =>
   Units.Coercion (Set b1 a1) (Set b2 a2)
-  where
-  coerce = Data.Coerce.coerce
-
-instance
-  (Space.Coercion b1 b2, Space.Coercion a1 a2, Coercible b1 b2, Coercible a1 a2) =>
-  Space.Coercion (Set b1 a1) (Set b2 a2)
   where
   coerce = Data.Coerce.coerce
 
