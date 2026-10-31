@@ -39,6 +39,8 @@
               # (somehow Zed wants *both* of these)
               pkgs.nixd
               pkgs.nil
+              # Typst (for math authoring)
+              pkgs.typst
             ];
             # Executed when entering the development shell
             shellHook = builtins.concatStringsSep "\n" [
