@@ -30,13 +30,11 @@ where
 import Data.Coerce qualified
 import Data.Kind (Constraint, Type)
 import Data.List.NonEmpty (NonEmpty)
-import Prelude (Eq, Int, Maybe (Just, Nothing), Show, type (~))
+import Prelude (Eq, Maybe (Just, Nothing), Show, type (~))
 
 class Units a units | a -> units
 
 data Unitless deriving (Eq, Show)
-
-instance Units Int Unitless
 
 instance Units a units => Units (Maybe a) units
 

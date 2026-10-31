@@ -162,7 +162,7 @@ import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Uniform (Uniform)
 import OpenSolid.Uniform qualified as Uniform
-import OpenSolid.Units (InverseMeters, Units)
+import OpenSolid.Units (InverseMeters)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector (Vector, VectorExists)
 import OpenSolid.Vector qualified as Vector
@@ -383,8 +383,6 @@ instance FFI (Curve3D Void) where
 
 instance FFI UvCurve where
   representation = FFI.classRepresentation "UvCurve"
-
-instance Units (Curve dimension units space) units
 
 instance
   CurveExists dimension units space =>

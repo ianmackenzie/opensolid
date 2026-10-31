@@ -33,14 +33,11 @@ import OpenSolid.Set2D qualified as Set2D
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
-import OpenSolid.Units (Units)
 
 data Boundary units = Boundary
   { curves :: Set2D units (Curve2D units)
   , tree :: ~(BoundaryTree units)
   }
-
-instance Units (Boundary units) units
 
 instance units1 ~ units2 => Bounded (Boundary units1) (Bounds2D units2) where
   {-# INLINE bounds #-}

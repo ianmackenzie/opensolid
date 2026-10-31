@@ -83,7 +83,6 @@ import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
 import OpenSolid.Try qualified as Try
-import OpenSolid.Units (Units)
 import OpenSolid.Units qualified as Units
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.VectorCurve2D qualified as VectorCurve2D
@@ -115,8 +114,6 @@ instance FFI (Region2D Meters) where
 
 instance FFI (Region2D Unitless) where
   representation = FFI.classRepresentation "UvRegion"
-
-instance Units (Region2D units) units
 
 instance Intersects (Point2D units) (Region2D units) units where
   point ^ region =

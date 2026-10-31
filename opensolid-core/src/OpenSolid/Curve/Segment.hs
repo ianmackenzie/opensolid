@@ -17,7 +17,6 @@ import OpenSolid.Bounds (Bounds, BoundsExists)
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
 import OpenSolid.Prelude
-import OpenSolid.Units (Units)
 import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
 import OpenSolid.VectorBounds qualified as VectorBounds
 
@@ -29,8 +28,6 @@ data Segment dimension units space = Segment
   , curvatureVectorRange_ :: ~(VectorBounds dimension (Unitless ?/? units) space)
   , isDegenerate :: ~Bool
   }
-
-instance Units (Segment dimension units space) units
 
 range :: Segment dimension units space -> Bounds dimension units space
 range = (.range)

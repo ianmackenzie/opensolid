@@ -34,7 +34,6 @@ import OpenSolid.SurfaceFunction1D qualified as SurfaceFunction1D
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
-import OpenSolid.Units (Units)
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvPoint (UvPoint)
@@ -52,8 +51,6 @@ data SurfaceFunction2D units = SurfaceFunction2D
 
 type Compiled units =
   CompiledFunction UvPoint (Point2D units) UvBounds (Bounds2D units)
-
-instance Units (SurfaceFunction2D units) units
 
 instance At (SurfaceFunction2D units) UvPoint (Point2D units) where
   {-# INLINE (@) #-}

@@ -741,8 +741,6 @@ instance Show Sign where
   show Positive = string "Positive"
   show Negative = string "Negative"
 
-instance Units Sign Unitless
-
 instance ApproximateEquality Sign Unitless where (~=) = (==)
 
 {-# COMPLETE Sign #-}

@@ -178,8 +178,6 @@ instance Units (Expression input (Vector2D units)) units
 
 instance Units (Expression input (Vector3D units space)) units
 
-instance Units (Expression input (Point2D units)) units
-
 instance
   input1 ~ input2 =>
   Units.Coercion

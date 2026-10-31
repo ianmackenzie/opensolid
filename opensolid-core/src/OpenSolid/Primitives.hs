@@ -357,8 +357,6 @@ instance FFI (Point2D Meters) where
 instance FFI (Point2D Unitless) where
   representation = FFI.classRepresentation "UvPoint"
 
-instance Units (Point2D units) units
-
 instance units1 ~ units2 => Bounded (Point2D units1) (Bounds2D units2) where
   {-# INLINE bounds #-}
   bounds (Point2D px py) = Bounds2D (Interval.constant px) (Interval.constant py)
@@ -757,8 +755,6 @@ instance Show (Bounds2D units) where
   showsPrec precedence (Bounds2D bx by) =
     Show.constructor2 precedence "Bounds2D" bx by
 
-instance Units (Bounds2D units) units
-
 instance units1 ~ units2 => Bounded (Bounds2D units1) (Bounds2D units2) where
   {-# INLINE bounds #-}
   bounds = id
@@ -883,8 +879,6 @@ deriving instance Eq (Axis2D units)
 
 deriving instance Show (Axis2D units)
 
-instance Units (Axis2D units) units
-
 instance FFI (Axis2D Meters) where
   representation = FFI.classRepresentation "Axis2D"
 
@@ -987,8 +981,6 @@ data Transform2D tag units = Transform2D (Point2D units) (VectorTransform2D tag)
 deriving instance Eq (Transform2D tag units)
 
 deriving instance Show (Transform2D tag units)
-
-instance Units (Transform2D tag units) units
 
 instance Multiplication (Transform2D tag translationUnits) (Vector2D units) (Vector2D units) where
   transform * vector = vector * transform
