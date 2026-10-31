@@ -12,6 +12,7 @@ import OpenSolid.Random (Generator)
 import OpenSolid.Random qualified as Random
 import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
+import OpenSolid.Surface3D.Pin qualified as Surface3D.Pin
 import OpenSolid.Surface3D.Pole qualified as Surface3D.Pole
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
 import OpenSolid.Try qualified as Try
@@ -71,7 +72,7 @@ findNonPole label uvPointGenerator = Test.check 100 label do
   let point = surface @ uvPoint
   let solutions = Surface3D.findPoint point surface
   case solutions of
-    [SurfacePoint3D.Point solution _] -> Test.expect (solution ~~ uvPoint)
+    [SurfacePoint3D.Pin solution] -> Test.expect (Surface3D.Pin.uvPoint solution ~~ uvPoint)
     _ -> Test.fail "Expected a single solution point" & Test.log {solutions}
 
 findVertex :: Test

@@ -28,6 +28,7 @@ import OpenSolid.Set qualified as Set
 import OpenSolid.Set2D (Set2D)
 import OpenSolid.Set3D (Set3D)
 import OpenSolid.Surface3D qualified as Surface3D
+import OpenSolid.Surface3D.Pin qualified as Surface3D.Pin
 import OpenSolid.Surface3D.Pole qualified as Surface3D.Pole
 import OpenSolid.SurfacePoint3D (SurfacePoint3D)
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
@@ -145,12 +146,16 @@ instance Matching (Surface3D.Pole space) where
     Surface3D.Pole.uvCurve first ~~ Surface3D.Pole.uvCurve second
       && Surface3D.Pole.point first ~~ Surface3D.Pole.point second
 
+instance Matching (Surface3D.Pin space) where
+  first ~~ second =
+    Surface3D.Pin.uvPoint first ~~ Surface3D.Pin.uvPoint second
+      && Surface3D.Pin.point first ~~ Surface3D.Pin.point second
+
 instance Matching (SurfacePoint3D space) where
-  SurfacePoint3D.Pole {} ~~ SurfacePoint3D.Point {} = False
-  SurfacePoint3D.Point {} ~~ SurfacePoint3D.Pole {} = False
+  SurfacePoint3D.Pole {} ~~ SurfacePoint3D.Pin {} = False
+  SurfacePoint3D.Pin {} ~~ SurfacePoint3D.Pole {} = False
   SurfacePoint3D.Pole pole1 ~~ SurfacePoint3D.Pole pole2 = pole1 ~~ pole2
-  SurfacePoint3D.Point uvPoint1 point1 ~~ SurfacePoint3D.Point uvPoint2 point2 =
-    uvPoint1 ~~ uvPoint2 && point1 ~~ point2
+  SurfacePoint3D.Pin pin1 ~~ SurfacePoint3D.Pin pin2 = pin1 ~~ pin2
 
 instance Matching (Curve3D.IntersectionPointWithSurface space) where
   first ~~ second = do

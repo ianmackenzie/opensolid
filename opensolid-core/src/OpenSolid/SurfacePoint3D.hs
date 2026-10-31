@@ -1,5 +1,5 @@
 module OpenSolid.SurfacePoint3D
-  ( SurfacePoint3D (Point, Pole)
+  ( SurfacePoint3D (Pin, Pole)
   , point
   , uvBounds
   )
@@ -12,14 +12,14 @@ import OpenSolid.Bounds3D qualified as Bounds3D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
 import {-# SOURCE #-} OpenSolid.Surface3D qualified as Surface3D
+import OpenSolid.Surface3D.Pin qualified as Surface3D.Pin
 import OpenSolid.Surface3D.Pole qualified as Surface3D.Pole
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvCurve qualified as UvCurve
-import OpenSolid.UvPoint (UvPoint)
 
 data SurfacePoint3D space
-  = Point UvPoint (Point3D space)
+  = Pin (Surface3D.Pin space)
   | Pole (Surface3D.Pole space)
   deriving (Show)
 
@@ -45,9 +45,9 @@ instance space1 ~ space2 => Intersects (Bounds3D space1) (SurfacePoint3D space2)
   bounds ^ surfacePoint = bounds ^ point surfacePoint
 
 point :: SurfacePoint3D space -> Point3D space
-point (Point _ p) = p
+point (Pin pin) = Surface3D.Pin.point pin
 point (Pole pole) = Surface3D.Pole.point pole
 
 uvBounds :: SurfacePoint3D space -> UvBounds
-uvBounds (Point uvPoint _) = UvBounds.constant uvPoint
+uvBounds (Pin pin) = UvBounds.constant (Surface3D.Pin.uvPoint pin)
 uvBounds (Pole pole) = UvCurve.bounds (Surface3D.Pole.uvCurve pole)

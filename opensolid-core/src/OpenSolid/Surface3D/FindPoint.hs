@@ -16,6 +16,7 @@ import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Surface3D (Surface3D)
 import OpenSolid.Surface3D qualified as Surface3D
 import OpenSolid.Surface3D.Edge qualified as Surface3D.Edge
+import OpenSolid.Surface3D.Pin qualified as Surface3D.Pin
 import OpenSolid.Surface3D.Segment qualified as Segment
 import OpenSolid.SurfacePoint3D (SurfacePoint3D)
 import OpenSolid.SurfacePoint3D qualified as SurfacePoint3D
@@ -49,7 +50,7 @@ findBoundarySolutions point surface = do
           & List.combine (findEdgeSolutions poleSolutions point) -- Try to find the given point on each edge
           & UvBag.pack -- Pack into a bag to find duplicates efficiently
           & UvBag.uniqueItems -- Filter out duplicate solutions
-  let toSurfacePoint uvPoint = SurfacePoint3D.Point uvPoint point
+  let toSurfacePoint uvPoint = SurfacePoint3D.Pin $ Surface3D.Pin.with {uvPoint, point}
   UvBag.toListOf SurfacePoint3D.Pole poleSolutions <> List.map toSurfacePoint edgeSolutions
 
 findEdgeSolutions ::
@@ -93,6 +94,6 @@ findInteriorSolution point surface = do
         | isDistant segment || isExterior uvRange = Resolved Nothing
         | otherwise = do
             uvPoint <- NewtonRaphson.Surface.solveIn uvRange evaluateNewtonRaphson
-            let surfacePoint = SurfacePoint3D.Point uvPoint point
+            let surfacePoint = SurfacePoint3D.Pin $ Surface3D.Pin.with {uvPoint, point}
             Resolved (if isInteriorSolution uvPoint then Just surfacePoint else Nothing)
   Bisection.find resolvedSolution (Queue.fromBag candidates)
