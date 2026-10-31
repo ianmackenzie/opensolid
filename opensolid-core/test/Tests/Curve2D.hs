@@ -136,7 +136,7 @@ curveOverlap2 = Test.verify "curveOverlap2" Try.do
           (Interval 0.0 (1 / 4), Interval 0.0 (1 / 6))
           (Interval (3 / 4) 1.0, Interval (5 / 6) 1.0)
   Test.all
-    [ Test.expect (segments ~~ expectedSegments)
+    [ Test.expect (segments ~~ expectedSegments) & Test.log {segments, expectedSegments}
     , Test.expect (sign == Negative)
     , Test.expect (List.isEmpty points)
     ]
