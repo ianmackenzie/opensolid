@@ -1,9 +1,3 @@
-Give Surface3D.Edge its own module
-Add Surface3D.Point (Pinpoint?)
-Have Surface3D.[Point,Edge,Pole] all hold a reference back to their Surface3D
-Refactor SurfacePoint3D to store a Surface3D.Point in the Point case (rename to Pinpoint)
-Add SurfacePoint3D.normalDirection function, returning Nothing if it's a true cusp / sharp pole
-
 Replace fallible Composition instances with ofCurve, ofSurface functions?
 - or even 'Surface3D.curve' which returns a SurfaceCurve3D?
 - search for regex 'Composition\n\s+\(Tolerance' to find instances
