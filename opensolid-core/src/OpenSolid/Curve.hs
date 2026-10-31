@@ -158,7 +158,6 @@ import {-# SOURCE #-} OpenSolid.SurfaceFunction2D qualified as SurfaceFunction2D
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import {-# SOURCE #-} OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.Text qualified as Text
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform (Transform, TransformExists)
 import OpenSolid.Transform qualified as Transform
 import OpenSolid.Transform.Tag qualified as Transform.Tag
@@ -1187,7 +1186,7 @@ desingularizeStart ::
   Curve dimension units space ->
   (Curve dimension units space, Curve dimension units space)
 desingularizeStart givenStartPoint givenStartDerivative curve =
-  Tolerance.using Quantity.zero do
+  zeroTolerance do
     let panic = error "Desingularization should never produce degenerate curve"
     let tInner = affixWidth
     let prefixStart = givenStartPoint
@@ -1207,7 +1206,7 @@ desingularizeEnd ::
   Vector dimension units space ->
   (Curve dimension units space, Curve dimension units space)
 desingularizeEnd curve givenEndPoint givenEndDerivative =
-  Tolerance.using Quantity.zero do
+  zeroTolerance do
     let panic = error "Desingularization should never produce degenerate curve"
     let tInner = 1.0 - affixWidth
     let prefix = section (Interval 0.0 tInner) curve !! panic

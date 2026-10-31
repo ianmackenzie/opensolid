@@ -66,12 +66,10 @@ import OpenSolid.Polygon2D qualified as Polygon2D
 import OpenSolid.Polyline2D (Polyline2D)
 import OpenSolid.Polyline2D qualified as Polyline2D
 import OpenSolid.Prelude
-import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Resolution (Resolution)
 import OpenSolid.Text qualified as Text
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Triangle2D (Triangle2D (Triangle2D))
 
 -- | Some SVG drawing content such as a shape with attributes.
@@ -331,7 +329,7 @@ arrow ::
   Point2D Meters ->
   Svg
 arrow params startPoint endPoint =
-  case Tolerance.using Quantity.zero (Direction2D.from startPoint endPoint) of
+  case zeroTolerance (Direction2D.from startPoint endPoint) of
     Err Direction2D.PointsAreCoincident -> nothing
     Ok direction -> do
       let length = Point2D.distanceFrom startPoint endPoint

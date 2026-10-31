@@ -19,11 +19,9 @@ import OpenSolid.Curve3D qualified as Curve3D
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Prelude
-import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Space qualified as Space
 import OpenSolid.Surface3D.Pin (Pin)
 import OpenSolid.Surface3D.Pin qualified as Surface3D.Pin
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvCurve (UvCurve)
 import OpenSolid.UvCurve qualified as UvCurve
@@ -69,10 +67,8 @@ instance
         Err $ IsDegenerate pin
       Nothing -> do
         let panic = error "Composition with non-constant parameterization should not fail"
-        let composedUvCurve =
-              Tolerance.using Quantity.zero (uvCurve edge << parameterization) !! panic
-        let composedCurve =
-              Tolerance.using Quantity.zero (curve edge << parameterization) !! panic
+        let composedUvCurve = zeroTolerance (uvCurve edge << parameterization) !! panic
+        let composedCurve = zeroTolerance (curve edge << parameterization) !! panic
         Ok $ Edge {uvCurve = composedUvCurve, curve = composedCurve}
 
 with :: ("uvCurve" ::: UvCurve, "curve" ::: Curve3D space) -> Edge space

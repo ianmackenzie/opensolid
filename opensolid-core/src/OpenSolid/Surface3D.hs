@@ -71,7 +71,6 @@ import OpenSolid.Plane3D qualified as Plane3D
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
-import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
 import OpenSolid.Region2D.Boundary qualified as Region2D.Boundary
@@ -91,7 +90,6 @@ import OpenSolid.SurfaceFunction3D (SurfaceFunction3D)
 import OpenSolid.SurfaceFunction3D qualified as SurfaceFunction3D
 import OpenSolid.SurfacePoint3D (SurfacePoint3D)
 import OpenSolid.SurfaceVertex3D (SurfaceVertex3D (SurfaceVertex3D))
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds, data UvBounds)
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvPoint (UvPoint, data UvPoint)
@@ -418,7 +416,7 @@ flip surface = recursive \flippedSurface -> do
         -- In general buildBoundaries *should* take a tolerance and return a Result
         -- (and therefore ensure that all boundary curves are nondegenerate),
         -- but here we know that it should always succeed
-        Tolerance.using Quantity.zero (buildBoundaries flippedFunction flippedDomain)
+        zeroTolerance (buildBoundaries flippedFunction flippedDomain)
   Surface3D
     { function = flippedFunction
     , domain = flippedDomain

@@ -17,10 +17,8 @@ import OpenSolid.Axis2D qualified as Axis2D
 import OpenSolid.Circle2D (Circle2D)
 import OpenSolid.Direction2D qualified as Direction2D
 import OpenSolid.Prelude
-import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvBounds qualified as UvBounds
 import OpenSolid.UvCurve (UvCurve)
@@ -31,8 +29,8 @@ type UvRegion = Region2D Unitless
 
 -- | The unit square in UV space.
 unitSquare :: UvRegion
-unitSquare = Tolerance.using Quantity.zero do
-  case Region2D.rectangle UvBounds.unitSquare of
+unitSquare =
+  case zeroTolerance (Region2D.rectangle UvBounds.unitSquare) of
     Ok region -> region
     Err Region2D.EmptyRegion -> error "Constructing UV unit square region should not fail"
 

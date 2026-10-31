@@ -48,8 +48,6 @@ import OpenSolid.Plane3D (Plane3D (Plane3D))
 import OpenSolid.PlaneOrientation3D qualified as PlaneOrientation3D
 import OpenSolid.Point3D (Point3D)
 import OpenSolid.Prelude
-import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
@@ -106,7 +104,7 @@ lookAt params = do
   let viewVector = params.focalPoint - params.eyePoint
   let viewDistance = Vector3D.magnitude viewVector
   let computedFrame =
-        case Tolerance.using Quantity.zero (Vector3D.direction viewVector) of
+        case zeroTolerance (Vector3D.direction viewVector) of
           Ok viewDirection -> do
             case PlaneOrientation3D.fromDirections viewDirection World3D.upwardDirection of
               Just rightPlaneOrientation ->

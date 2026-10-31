@@ -34,6 +34,7 @@ module OpenSolid.Prelude
   , Exponentiation ((**))
   , Composition ((<<))
   , Tolerance
+  , zeroTolerance
   , unitless
   , angular
   , spatial
@@ -301,6 +302,10 @@ instance Exponentiation Number Int Number where
 ----- Tolerance -----
 
 type Tolerance units = ?tolerance :: Quantity units
+
+{-# INLINE zeroTolerance #-}
+zeroTolerance :: (Tolerance units => a) -> a
+zeroTolerance expression = let ?tolerance = Quantity 0.0 in expression
 
 {-# INLINE unitless #-}
 unitless :: (Tolerance Unitless => a) -> a

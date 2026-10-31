@@ -727,7 +727,7 @@ piecewise segments = do
   let (totalLength, tree) = buildPiecewiseTree segmentArray 0 (Array.length segmentArray)
   let pointImpl r = piecewisePoint tree (totalLength * r)
   let rangeImpl (Interval r1 r2) = piecewiseRange tree (totalLength * r1) (totalLength * r2)
-  Tolerance.using Quantity.zero do
+  zeroTolerance do
     Curve.unsafe
       (CompiledFunction.abstract pointImpl rangeImpl)
       (piecewiseDerivative (piecewiseTreeDerivative tree totalLength) totalLength)
