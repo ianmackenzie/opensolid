@@ -1,5 +1,6 @@
 module OpenSolid.Surface3D.Pole
   ( Pole
+  , IsDegenerate (IsDegenerate)
   , with
   , uvCurve
   , uvEdge
@@ -14,6 +15,7 @@ import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.Bounds3D qualified as Bounds3D
+import OpenSolid.Curve1D (Curve1D)
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.NonEmpty qualified as NonEmpty
@@ -78,6 +80,22 @@ instance Intersects UvPoint (Pole space) Unitless where
 
 instance Intersects (Pole space) UvPoint Unitless where
   pole ^ givenPoint = givenPoint ^ pole
+
+data IsDegenerate space = IsDegenerate (Pin space) deriving (Show, Err)
+
+instance
+  Composition
+    ()
+    (Pole space)
+    (Curve1D Unitless)
+    (Result (IsDegenerate space) (Pole space))
+  where
+  pole << parameterization =
+    case unitless (uvCurve pole << parameterization) of
+      Ok composedUvCurve ->
+        Ok $ Pole {uvCurve = composedUvCurve, uvEdge = uvEdge pole, point = point pole}
+      Err (UvCurve.IsDegenerate uvPoint) ->
+        Err $ IsDegenerate (Surface3D.Pin.with {uvPoint = uvPoint, point = point pole})
 
 with :: ("uvCurve" ::: UvCurve, "point" ::: Point3D space) -> Pole space
 with params = do
