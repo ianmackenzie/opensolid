@@ -5,7 +5,6 @@ module OpenSolid.Bisection
   , subdomain
   , segment
   , children
-  , map
   , pairwise
   , resolve
   , clusters
@@ -93,14 +92,6 @@ segment = (.segment)
 
 children :: forall domain segment. Tree domain segment -> NonEmpty (Tree domain segment)
 children = (.children)
-
-map :: (segment1 -> segment2) -> Tree domain segment1 -> Tree domain segment2
-map function tree =
-  Tree
-    { subdomain = tree.subdomain
-    , segment = function tree.segment
-    , children = NonEmpty.map (map function) tree.children
-    }
 
 resolve ::
   forall domain segment existing tag.
