@@ -1,5 +1,6 @@
 module OpenSolid.Surface3D.Segment
   ( Segment (..)
+  , domain
   , range
   , partialDerivativeRanges
   , secondPartialDerivativeRanges
@@ -11,14 +12,20 @@ module OpenSolid.Surface3D.Segment
   )
 where
 
+import OpenSolid.Bisection qualified as Bisection
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionBounds3D qualified as DirectionBounds3D
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
+import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.VectorBounds3D (VectorBounds3D)
 
 data Segment space = Segment
-  { range :: ~(Bounds3D space)
+  { domain :: UvBounds
+  , range :: ~(Bounds3D space)
   , partialDerivativeRanges :: (VectorBounds3D Meters space, VectorBounds3D Meters space)
   , secondPartialDerivativeRanges ::
       ( VectorBounds3D Meters space
@@ -28,10 +35,31 @@ data Segment space = Segment
   , normalDirectionRange :: ~(DirectionBounds3D space)
   , isDegenerate :: ~Bool
   , isMonotonic :: ~Bool
+  , bottomLeftChild :: ~(Segment space)
+  , bottomRightChild :: ~(Segment space)
+  , topLeftChild :: ~(Segment space)
+  , topRightChild :: ~(Segment space)
   }
 
+instance Bounded (Segment space) UvBounds where
+  bounds = domain
+
+instance space1 ~ space2 => Bounded (Segment space1) (Bounds3D space2) where
+  bounds = range
+
+instance Bisection.Segment (Segment space) UvBounds where
+  children segment =
+    NonEmpty.four
+      segment.bottomLeftChild
+      segment.bottomRightChild
+      segment.topLeftChild
+      segment.topRightChild
+
+domain :: Segment space -> UvBounds
+domain segment = segment.domain
+
 range :: Segment space -> Bounds3D space
-range = (.range)
+range segment = segment.range
 
 partialDerivativeRanges ::
   Segment space ->

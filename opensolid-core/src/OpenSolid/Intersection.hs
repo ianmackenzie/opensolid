@@ -2,7 +2,6 @@ module OpenSolid.Intersection (Problem (..), solveInterior) where
 
 import OpenSolid.Bag (Bag)
 import OpenSolid.Bag qualified as Bag
-import OpenSolid.Bisection (Tree)
 import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.List qualified as List
 import OpenSolid.Prelude
@@ -11,14 +10,14 @@ import OpenSolid.Queue qualified as Queue
 
 data Problem intersection where
   Problem ::
-    Bisection.Domain domain =>
+    Bisection.Segment segment domain =>
     { boundaryTangentSubdomains :: Bag domain boundarySegment
     , boundaryCrossingSubdomains :: Bag domain boundarySegment
-    , searchTree :: Tree domain segment
-    , resolveTangent :: domain -> segment -> Fuzzy (Maybe tangentTag)
-    , resolveCrossing :: domain -> segment -> Fuzzy (Maybe crossingTag)
-    , solveTangent :: Queue (Bisection.Subtree tangentTag domain segment) -> List intersection
-    , solveCrossing :: Queue (Bisection.Subtree crossingTag domain segment) -> List intersection
+    , searchTree :: segment
+    , resolveTangent :: segment -> Fuzzy (Maybe tangentTag)
+    , resolveCrossing :: segment -> Fuzzy (Maybe crossingTag)
+    , solveTangent :: Queue (Bisection.Tagged tangentTag segment) -> List intersection
+    , solveCrossing :: Queue (Bisection.Tagged crossingTag segment) -> List intersection
     } ->
     Problem intersection
 

@@ -1,11 +1,8 @@
 module OpenSolid.Bisection
   ( Domain
-  , Tree (Tree)
-  , Subtree (Subtree)
+  , Segment (children)
+  , Tagged (Tagged)
   , subdomain
-  , segment
-  , children
-  , pairwise
   , resolve
   , clusters
   , find
@@ -13,8 +10,6 @@ module OpenSolid.Bisection
   )
 where
 
-import Data.Coerce (Coercible)
-import Data.Coerce qualified
 import OpenSolid.Bag (Bag)
 import OpenSolid.Bag qualified as Bag
 import OpenSolid.Bounded (Bounded)
@@ -29,7 +24,6 @@ import OpenSolid.Queue (Queue)
 import OpenSolid.Queue qualified as Queue
 import OpenSolid.Set (Set)
 import OpenSolid.Set qualified as Set
-import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (UvBounds)
 
 class (Set.Bounds domain, Intersects domain domain Unitless) => Domain domain where
@@ -44,90 +38,59 @@ instance Domain UvBounds where
 instance (Domain domain1, Domain domain2) => Domain (domain1, domain2) where
   contains (b1, b2) (a1, a2) = contains b1 a1 && contains b2 a2
 
-data Tree domain segment = Tree
-  { subdomain :: domain
-  , segment :: segment
-  , children :: ~(NonEmpty (Tree domain segment))
-  }
+class (Bounded segment domain, Domain domain) => Segment segment domain | segment -> domain where
+  children :: segment -> NonEmpty segment
 
-data Subtree tag domain segment = Subtree tag (Tree domain segment)
+data Tagged tag segment = Tagged tag segment
 
-instance
-  (domain1 ~ domain2, Units.Coercion segment1 segment2, Coercible segment1 segment2) =>
-  Units.Coercion (Tree domain1 segment1) (Tree domain2 segment2)
-  where
-  coerce = Data.Coerce.coerce
-
-instance
-  forall domain1 domain2 segment.
-  domain1 ~ domain2 =>
-  Bounded (Tree domain1 segment) domain2
-  where
+instance Segment segment domain => Bounded (Tagged tag segment) domain where
   {-# INLINE bounds #-}
-  bounds = subdomain
+  bounds (Tagged _ segment) = subdomain segment
 
 instance
-  forall domain1 domain2 segment tag.
-  domain1 ~ domain2 =>
-  Bounded (Subtree tag domain1 segment) domain2
+  (Segment segment1 domain1, Segment segment2 domain2) =>
+  Segment (segment1, segment2) (domain1, domain2)
   where
-  {-# INLINE bounds #-}
-  bounds (Subtree _ tree) = subdomain tree
+  children (segment1, segment2) = NonEmpty.pairwise (,) (children segment1) (children segment2)
 
-pairwise ::
-  Tree domain1 segment1 ->
-  Tree domain2 segment2 ->
-  Tree (domain1, domain2) (segment1, segment2)
-pairwise tree1 tree2 = do
-  let Tree subdomain1 segment1 children1 = tree1
-  let Tree subdomain2 segment2 children2 = tree2
-  let pairwiseChildren = NonEmpty.pairwise pairwise children1 children2
-  Tree (subdomain1, subdomain2) (segment1, segment2) pairwiseChildren
-
-subdomain :: forall domain segment. Tree domain segment -> domain
-subdomain = (.subdomain)
-
-segment :: forall domain segment. Tree domain segment -> segment
-segment = (.segment)
-
-children :: forall domain segment. Tree domain segment -> NonEmpty (Tree domain segment)
-children = (.children)
+{-# INLINE subdomain #-}
+subdomain :: Segment segment domain => segment -> domain
+subdomain = Bounded.bounds
 
 resolve ::
-  forall domain segment existing tag.
-  Domain domain =>
+  Segment segment domain =>
   Bag domain existing ->
-  (domain -> segment -> Fuzzy (Maybe tag)) ->
-  Tree domain segment ->
-  Bag domain (Subtree tag domain segment)
-resolve existing callback tree =
-  if containedIn existing tree.subdomain
+  (segment -> Fuzzy (Maybe tag)) ->
+  segment ->
+  Bag domain (Tagged tag segment)
+resolve existing callback segment =
+  if containedIn existing (subdomain segment)
     then Bag.empty
-    else case callback tree.subdomain tree.segment of
+    else case callback segment of
       Resolved Nothing -> Bag.empty
-      Resolved (Just tag) -> Bag.singleton (Subtree tag tree)
-      Unresolved -> Bag.group (List.map (resolve existing callback) (NonEmpty.toList tree.children))
+      Resolved (Just tag) -> Bag.singleton $ Tagged tag segment
+      Unresolved -> do
+        let segmentChildren = NonEmpty.toList (children segment)
+        Bag.group $ List.map (resolve existing callback) segmentChildren
 
 containedIn :: forall domain existing. Domain domain => Bag domain existing -> domain -> Bool
 containedIn existing candidate = existing & Bag.anyBounds (contains candidate)
 
 touching ::
-  forall domain segment existing tag.
-  Domain domain =>
+  Segment segment domain =>
   Bag domain existing ->
-  Set domain (Subtree tag domain segment) ->
+  Set domain (Tagged tag segment) ->
   Bool
 touching Bag.Empty _ = False
 touching (Bag.Full existing) cluster =
   Set.pairwiseAnyBounds (unitless (^)) existing cluster
 
 clusters ::
-  forall domain segment existing tag.
-  Domain domain =>
+  Segment segment domain =>
   Bag domain existing ->
-  (domain -> segment -> Fuzzy (Maybe tag)) ->
-  Tree domain segment ->
-  List (Set domain (Subtree tag domain segment))
+  (segment -> Fuzzy (Maybe tag)) ->
+  segment ->
+  List (Set domain (Tagged tag segment))
 clusters existing resolveFunction tree = do
   resolve existing resolveFunction tree
     & Bag.clusters (unitless (^)) (\_ _ -> True)
@@ -135,17 +98,17 @@ clusters existing resolveFunction tree = do
     & List.filter (not . touching existing)
 
 find ::
-  forall domain segment tag solution.
-  (tag -> domain -> segment -> Fuzzy (Maybe solution)) ->
-  Queue (Subtree tag domain segment) ->
+  Segment segment domain =>
+  (tag -> segment -> Fuzzy (Maybe solution)) ->
+  Queue (Tagged tag segment) ->
   Maybe solution
 find callback queue = do
-  (Subtree tag subtree, remaining) <- Queue.pop queue
-  case callback tag subtree.subdomain subtree.segment of
+  (Tagged tag segment, remaining) <- Queue.pop queue
+  case callback tag segment of
     Resolved Nothing -> find callback remaining
     Resolved (Just solution) -> Just solution
     Unresolved -> do
       let updatedQueue =
-            remaining & forEach subtree.children \child ->
-              Queue.push (Subtree tag child)
+            remaining & forEach (children segment) \child ->
+              Queue.push (Tagged tag child)
       find callback updatedQueue

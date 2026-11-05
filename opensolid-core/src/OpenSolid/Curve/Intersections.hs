@@ -30,13 +30,7 @@ type Problem dimension units space =
   , Tolerance units
   , ?curve1 :: Curve dimension units space
   , ?curve2 :: Curve dimension units space
-  , ?bisectionTree :: BisectionTree dimension units space
   )
-
-type BisectionTree dimension units space =
-  Bisection.Tree
-    (Interval Unitless, Interval Unitless)
-    (Curve.Segment dimension units space, Curve.Segment dimension units space)
 
 curve1 :: Problem dimension units space => Curve dimension units space
 curve1 = ?curve1
@@ -44,8 +38,10 @@ curve1 = ?curve1
 curve2 :: Problem dimension units space => Curve dimension units space
 curve2 = ?curve2
 
-bisectionTree :: Problem dimension units space => BisectionTree dimension units space
-bisectionTree = ?bisectionTree
+searchTree ::
+  Problem dimension units space =>
+  (Curve.Segment dimension units space, Curve.Segment dimension units space)
+searchTree = (Curve.searchTree curve1, Curve.searchTree curve2)
 
 intersections ::
   (CurveExists dimension units space, Tolerance units) =>
@@ -55,9 +51,6 @@ intersections ::
 intersections givenCurve1 givenCurve2 = do
   let ?curve1 = givenCurve1
   let ?curve2 = givenCurve2
-  let tree1 = Curve.bisectionTree givenCurve1
-  let tree2 = Curve.bisectionTree givenCurve2
-  let ?bisectionTree = Bisection.pairwise tree1 tree2
   findIntersections
 
 findIntersections :: Problem dimension units space => Maybe Intersections
@@ -132,10 +125,10 @@ findInteriorIntersections
       Intersection.Problem
         { boundaryTangentSubdomains = boundarySubdomains IntersectionPoint.isTangent
         , boundaryCrossingSubdomains = boundarySubdomains IntersectionPoint.isCrossing
-        , searchTree = bisectionTree
-        , resolveTangent = resolveTangent
+        , searchTree
+        , resolveTangent
         , solveTangent = List.maybe . Bisection.find (solveTangent curve1 curve2)
-        , resolveCrossing = resolveCrossing
+        , resolveCrossing
         , solveCrossing = List.maybe . Bisection.find (solveCrossing curve1 curve2)
         }
 

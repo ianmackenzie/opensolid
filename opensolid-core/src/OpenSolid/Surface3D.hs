@@ -22,7 +22,7 @@ module OpenSolid.Surface3D
   , boundaryLoops
   , poles
   , edges
-  , bisectionTree
+  , searchTree
   , normalDirection
   , vertex
   , parametric
@@ -45,7 +45,6 @@ import OpenSolid.Axis2D (Axis2D)
 import OpenSolid.Bag qualified as Bag
 import OpenSolid.Bag3D (Bag3D)
 import OpenSolid.Bag3D qualified as Bag3D
-import OpenSolid.Bisection qualified as Bisection
 import OpenSolid.Bounded (Bounded)
 import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds2D qualified as Bounds2D
@@ -111,12 +110,10 @@ data Surface3D space = Surface3D
   , degenerateRight :: ~Bool
   , degenerateBottom :: ~Bool
   , degenerateTop :: ~Bool
-  , bisectionTree :: ~(BisectionTree space)
+  , searchTree :: ~(Segment space)
   }
 
 data IsDegenerate = IsDegenerate deriving (Show, Err)
-
-type BisectionTree space = Bisection.Tree UvBounds (Segment space)
 
 instance space1 ~ space2 => Bounded (Surface3D space1) (Bounds3D space2) where
   {-# INLINE bounds #-}
@@ -235,8 +232,8 @@ edges surface = do
         SurfaceCurve3D.Pole _ -> Nothing
   Set3D.filterMapItems toEdge surfaceCurves
 
-bisectionTree :: Surface3D space -> BisectionTree space
-bisectionTree = (.bisectionTree)
+searchTree :: Surface3D space -> Segment space
+searchTree = (.searchTree)
 
 normalDirection :: Surface3D space -> NormalDirection space
 normalDirection = NormalDirection
@@ -265,7 +262,7 @@ parametric givenFunction givenDomain = do
         , degenerateRight = allDegenerate UvPoint.rightSamples
         , degenerateBottom = allDegenerate UvPoint.bottomSamples
         , degenerateTop = allDegenerate UvPoint.topSamples
-        , bisectionTree = buildBisectionTree UvBounds.unitSquare surface
+        , searchTree = subsegment UvBounds.unitSquare surface
         }
 
 divergence :: SurfaceFunction3D space -> UvPoint -> Length
@@ -285,34 +282,31 @@ buildBoundaries surfaceFunction surfaceDomain = do
   let surfaceInnerBoundaries = Bag.map surfaceBoundary (Region2D.innerBoundaries surfaceDomain)
   (surfaceOuterBoundary, surfaceInnerBoundaries)
 
-buildBisectionTree :: UvBounds -> Surface3D space -> BisectionTree space
-buildBisectionTree uvRange surface = do
+subsegment :: UvBounds -> Surface3D space -> Segment space
+subsegment uvRange surface = do
   let UvBounds uRange vRange = uvRange
-  let (uLeft, uRight) = Interval.bisect uRange
-  let (vBottom, vTop) = Interval.bisect vRange
-  let bottomLeft = buildBisectionTree (UvBounds uLeft vBottom) surface
-  let bottomRight = buildBisectionTree (UvBounds uRight vBottom) surface
-  let topLeft = buildBisectionTree (UvBounds uLeft vTop) surface
-  let topRight = buildBisectionTree (UvBounds uRight vTop) surface
-  let children = NonEmpty.four bottomLeft bottomRight topLeft topRight
-  Bisection.Tree uvRange (segment uvRange surface) children
-
-segment :: UvBounds -> Surface3D space -> Segment space
-segment uvRange surface = do
-  let UvBounds (Interval uLow uHigh) (Interval vLow vHigh) = uvRange
+  let Interval uLow uHigh = uRange
+  let Interval vLow vHigh = vRange
   let isDegenerateLeft = uHigh <= Degeneracy.startValue && degenerateLeft surface
   let isDegenerateRight = uLow >= Degeneracy.endValue && degenerateRight surface
   let isDegenerateBottom = vHigh <= Degeneracy.startValue && degenerateBottom surface
   let isDegenerateTop = vLow >= Degeneracy.endValue && degenerateTop surface
   let derivativeRanges = partialDerivatives surface @ uvRange
   let (duRange, dvRange) = derivativeRanges
+  let (uLeft, uRight) = Interval.bisect uRange
+  let (vBottom, vTop) = Interval.bisect vRange
   Segment
-    { range = surface @ uvRange
+    { domain = uvRange
+    , range = surface @ uvRange
     , partialDerivativeRanges = derivativeRanges
     , secondPartialDerivativeRanges = secondPartialDerivatives surface @ uvRange
     , normalDirectionRange = normalDirection surface @ uvRange
     , isDegenerate = isDegenerateLeft || isDegenerateRight || isDegenerateBottom || isDegenerateTop
     , isMonotonic = VectorBounds3D.areIndependent duRange dvRange
+    , bottomLeftChild = subsegment (UvBounds uLeft vBottom) surface
+    , bottomRightChild = subsegment (UvBounds uRight vBottom) surface
+    , topLeftChild = subsegment (UvBounds uLeft vTop) surface
+    , topRightChild = subsegment (UvBounds uRight vTop) surface
     }
 
 planar ::
@@ -411,7 +405,7 @@ flip surface = recursive \flippedSurface -> do
     , degenerateRight = surface.degenerateLeft
     , degenerateBottom = surface.degenerateBottom
     , degenerateTop = surface.degenerateTop
-    , bisectionTree = buildBisectionTree UvBounds.unitSquare flippedSurface
+    , searchTree = subsegment UvBounds.unitSquare flippedSurface
     }
 
 -- | Convert a surface defined in local coordinates to one defined in global coordinates.
@@ -429,7 +423,7 @@ placeIn frame surface = recursive \placedSurface -> do
     , degenerateRight = surface.degenerateRight
     , degenerateBottom = surface.degenerateBottom
     , degenerateTop = surface.degenerateTop
-    , bisectionTree = buildBisectionTree UvBounds.unitSquare placedSurface
+    , searchTree = subsegment UvBounds.unitSquare placedSurface
     }
 
 -- | Convert a surface defined in global coordinates to one defined in local coordinates.

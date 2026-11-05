@@ -23,10 +23,9 @@ data Orientation = X | Y
 
 resolve ::
   Tolerance units =>
-  (Interval Unitless, Interval Unitless) ->
   (Curve.Segment 2 units Void, Curve.Segment 2 units Void) ->
   Fuzzy (Maybe Orientation)
-resolve _ (segmentA, segmentB) =
+resolve (segmentA, segmentB) =
   if TangentSolver.areDistinctOrCrossing segmentA segmentB
     then Resolved Nothing
     else do
@@ -58,10 +57,9 @@ solve ::
   Curve2D units ->
   Curve2D units ->
   Orientation ->
-  (Interval Unitless, Interval Unitless) ->
   (Curve.Segment 2 units Void, Curve.Segment 2 units Void) ->
   Fuzzy (Maybe IntersectionPoint)
-solve curveA curveB orientation (tRangeA, tRangeB) (segmentA, segmentB) =
+solve curveA curveB orientation (segmentA, segmentB) =
   if TangentSolver.areDistinctOrCrossing segmentA segmentB
     then Resolved Nothing
     else do
@@ -87,4 +85,4 @@ solve curveA curveB orientation (tRangeA, tRangeB) (segmentA, segmentB) =
                 let fA = Vector2D -y'A crossProduct'A
                 let fB = Vector2D y'B crossProduct'B
                 (# f, fA, fB #)
-      TangentSolver.solve curveA curveB tRangeA tRangeB evaluate
+      TangentSolver.solve curveA curveB segmentA.domain segmentB.domain evaluate

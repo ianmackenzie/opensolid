@@ -13,21 +13,43 @@ module OpenSolid.Curve.Segment
   )
 where
 
+import OpenSolid.Bisection qualified as Bisection
+import OpenSolid.Bounded (Bounded)
+import OpenSolid.Bounded qualified as Bounded
 import OpenSolid.Bounds (Bounds, BoundsExists)
+import OpenSolid.Bounds2D (Bounds2D)
+import OpenSolid.Bounds3D (Bounds3D)
 import OpenSolid.DirectionBounds (DirectionBounds)
 import OpenSolid.DirectionBounds qualified as DirectionBounds
+import OpenSolid.Interval (Interval)
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.VectorBounds (VectorBounds, VectorBoundsExists)
 import OpenSolid.VectorBounds qualified as VectorBounds
 
 data Segment dimension units space = Segment
-  { range :: ~(Bounds dimension units space)
+  { domain :: Interval Unitless
+  , range :: ~(Bounds dimension units space)
   , derivativeRange :: ~(VectorBounds dimension units space)
   , secondDerivativeRange :: ~(VectorBounds dimension units space)
   , tangentDirectionRange :: ~(DirectionBounds dimension space)
   , curvatureVectorRange_ :: ~(VectorBounds dimension (Unitless ?/? units) space)
   , isDegenerate :: ~Bool
+  , leftChild :: ~(Segment dimension units space)
+  , rightChild :: ~(Segment dimension units space)
   }
+
+instance Bounded (Segment dimension units space) (Interval Unitless) where
+  bounds segment = segment.domain
+
+instance Bounded (Segment 2 units Void) (Bounds2D units) where
+  bounds segment = segment.range
+
+instance Bounded (Segment 3 Meters space) (Bounds3D space) where
+  bounds segment = segment.range
+
+instance Bisection.Segment (Segment dimension units space) (Interval Unitless) where
+  children segment = NonEmpty.two segment.leftChild segment.rightChild
 
 range :: Segment dimension units space -> Bounds dimension units space
 range = (.range)

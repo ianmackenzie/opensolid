@@ -79,21 +79,21 @@ findInteriorSolution point surface = do
   let isDistant segment = not (point ^ Segment.range segment)
   let isExterior uvRange =
         UvRegion.classifyBounds uvRange domain == Resolved Region2D.ExteriorBounds
-  let resolvedUniqueness uvRange segment
-        | isDistant segment || isExterior uvRange = Resolved Nothing
+  let resolvedUniqueness segment
+        | isDistant segment || isExterior segment.domain = Resolved Nothing
         | Segment.isMonotonic segment = Resolved (Just UniqueSolution)
         | Segment.isDegenerate segment = Resolved (Just UniqueSolution)
         | otherwise = Unresolved
   let candidates =
-        Surface3D.bisectionTree surface
+        Surface3D.searchTree surface
           & Bisection.resolve UvBag.empty resolvedUniqueness
   let isSolution uvPoint = surface @ uvPoint ~= point
   let isInterior uvPoint = UvRegion.classifyPoint uvPoint domain == Region2D.InteriorPoint
   let isInteriorSolution uvPoint = isSolution uvPoint && isInterior uvPoint
-  let resolvedSolution UniqueSolution uvRange segment
-        | isDistant segment || isExterior uvRange = Resolved Nothing
+  let resolvedSolution UniqueSolution segment
+        | isDistant segment || isExterior segment.domain = Resolved Nothing
         | otherwise = do
-            uvPoint <- NewtonRaphson.Surface.solveIn uvRange evaluateNewtonRaphson
+            uvPoint <- NewtonRaphson.Surface.solveIn segment.domain evaluateNewtonRaphson
             let surfacePoint = SurfacePoint3D.Pin $ Surface3D.Pin.with {uvPoint, point}
             Resolved (if isInteriorSolution uvPoint then Just surfacePoint else Nothing)
   Bisection.find resolvedSolution (Queue.fromBag candidates)

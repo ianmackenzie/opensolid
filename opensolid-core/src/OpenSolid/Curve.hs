@@ -9,7 +9,6 @@ module OpenSolid.Curve
   , Solver (..)
   , Compiled
   , Segment
-  , BisectionTree
   , IsDegenerate (IsDegenerate)
   , HasDegeneracy (HasDegeneracy)
   , IsDegenerateAndCoincidentWithPoint (IsDegenerateAndCoincidentWithPoint)
@@ -65,7 +64,7 @@ module OpenSolid.Curve
   , desingularizeEnd
   , findPoint
   , continuityAt
-  , bisectionTree
+  , searchTree
   , crossingSolver
   , tangentSolver
   , Intersections (IntersectionPoints, OverlappingSegments)
@@ -190,7 +189,7 @@ data Curve dimension units space = Curve
   , bounds :: ~(Bounds dimension units space)
   , hasDegenerateStart :: ~Bool
   , hasDegenerateEnd :: ~Bool
-  , bisectionTree :: ~(BisectionTree dimension units space)
+  , searchTree :: ~(Segment dimension units space)
   , arcLengthParameterization :: ~(Quantity units, Uniform -> Number)
   }
 
@@ -321,26 +320,12 @@ type CurvatureVector3D space = CurvatureVector 3 InverseMeters space
 instance FFI (CurvatureVector3D Void) where
   representation = FFI.classRepresentation "CurvatureVector3D"
 
-type BisectionTree dimension units space =
-  Bisection.Tree (Interval Unitless) (Segment dimension units space)
-
-buildBisectionTree ::
-  CurveExists dimension units space =>
-  Interval Unitless ->
-  Curve dimension units space ->
-  BisectionTree dimension units space
-buildBisectionTree tRange curve = do
-  let (tLeft, tRight) = Interval.bisect tRange
-  let left = buildBisectionTree tLeft curve
-  let right = buildBisectionTree tRight curve
-  Bisection.Tree tRange (subsegment curve tRange) (NonEmpty.two left right)
-
 subsegment ::
   CurveExists dimension units space =>
-  Curve dimension units space ->
   Interval Unitless ->
+  Curve dimension units space ->
   Segment dimension units space
-subsegment curve tRange = do
+subsegment tRange curve = do
   let Interval t1 t2 = tRange
   let p1 = curve @ t1
   let p2 = curve @ t2
@@ -366,13 +351,17 @@ subsegment curve tRange = do
         segmentCurvatureMagnitudeRange_ * segmentCurvatureDirectionRange
   let isDegenerateStart = t2 <= Degeneracy.startValue && hasDegenerateStart curve
   let isDegenerateEnd = t1 >= Degeneracy.endValue && hasDegenerateEnd curve
+  let (tLeft, tRight) = Interval.bisect tRange
   Segment
-    { range = segmentRange
+    { domain = tRange
+    , range = segmentRange
     , derivativeRange = segmentDerivativeRange
     , secondDerivativeRange = segmentSecondDerivativeRange
     , tangentDirectionRange = segmentTangentDirectionRange
     , curvatureVectorRange_ = segmentCurvatureVectorRange_
     , isDegenerate = isDegenerateStart || isDegenerateEnd
+    , leftChild = subsegment tLeft curve
+    , rightChild = subsegment tRight curve
     }
 
 instance FFI (Curve2D Meters) where
@@ -779,7 +768,6 @@ data Solver dimension units space where
   Solver ::
     { resolve ::
         (CurveExists dimension units space, Tolerance units) =>
-        (Interval Unitless, Interval Unitless) ->
         (Segment dimension units space, Segment dimension units space) ->
         Fuzzy (Maybe tag)
     , solve ::
@@ -787,7 +775,6 @@ data Solver dimension units space where
         Curve dimension units space ->
         Curve dimension units space ->
         tag ->
-        (Interval Unitless, Interval Unitless) ->
         (Segment dimension units space, Segment dimension units space) ->
         Fuzzy (Maybe IntersectionPoint)
     } ->
@@ -897,7 +884,7 @@ unsafe givenCompiled givenDerivative =
       , bounds = CompiledFunction.range Interval.unit givenCompiled
       , hasDegenerateStart = VectorCurve.startValue givenDerivative ~= Vector.zero
       , hasDegenerateEnd = VectorCurve.endValue givenDerivative ~= Vector.zero
-      , bisectionTree = buildBisectionTree Interval.unit curve
+      , searchTree = subsegment Interval.unit curve
       , arcLengthParameterization = buildArcLengthParameterization curve
       }
 
@@ -1061,8 +1048,8 @@ curvatureVector ::
   CurvatureVector dimension inverseUnits space
 curvatureVector = CurvatureVector . curvatureVector_
 
-bisectionTree :: Curve dimension units space -> BisectionTree dimension units space
-bisectionTree = (.bisectionTree)
+searchTree :: Curve dimension units space -> Segment dimension units space
+searchTree curve = curve.searchTree
 
 hasDegenerateStart :: Curve dimension units space -> Bool
 hasDegenerateStart = (.hasDegenerateStart)
@@ -1124,7 +1111,7 @@ reverse curve =
       , bounds = curve.bounds
       , hasDegenerateStart = curve.hasDegenerateEnd
       , hasDegenerateEnd = curve.hasDegenerateStart
-      , bisectionTree = buildBisectionTree Interval.unit reversed
+      , searchTree = subsegment Interval.unit reversed
       , arcLengthParameterization =
           curve.arcLengthParameterization
             & Pair.mapSecond (\f r -> 1.0 - f (Uniform.reverse r))
@@ -1210,20 +1197,20 @@ findInteriorSolution ::
   Maybe Number
 findInteriorSolution point curve = do
   let isDistant segment = not (point ^ Curve.Segment.range segment)
-  let resolvedUniqueness _ segment
+  let resolvedUniqueness segment
         | isDistant segment = Resolved Nothing
         | Curve.Segment.isMonotonic segment = Resolved (Just UniqueSolution)
         | Curve.Segment.isDegenerate segment = Resolved (Just UniqueSolution)
         | otherwise = Unresolved
-  let candidates = Bisection.resolve Bag.empty resolvedUniqueness (bisectionTree curve)
+  let candidates = Bisection.resolve Bag.empty resolvedUniqueness (searchTree curve)
   let f tValue = curve @ tValue - point
   let f' tValue = derivative curve @ tValue
   let evaluateNewtonRaphson tValue = (# f tValue, f' tValue #)
   let isSolution tValue = curve @ tValue ~= point
-  let resolvedSolution UniqueSolution tRange segment
+  let resolvedSolution UniqueSolution segment
         | isDistant segment = Resolved Nothing
         | otherwise = do
-            tValue <- NewtonRaphson.Curve.solveIn tRange evaluateNewtonRaphson
+            tValue <- NewtonRaphson.Curve.solveIn segment.domain evaluateNewtonRaphson
             Resolved (if isSolution tValue then Just tValue else Nothing)
   Bisection.find resolvedSolution (Queue.fromBag candidates)
 
@@ -1391,7 +1378,7 @@ orthonormalTransform transformCompiled transformDerivative curve =
       , bounds = CompiledFunction.range Interval.unit transformedCompiled
       , hasDegenerateStart = curve.hasDegenerateStart
       , hasDegenerateEnd = curve.hasDegenerateEnd
-      , bisectionTree = buildBisectionTree Interval.unit transformed
+      , searchTree = subsegment Interval.unit transformed
       , arcLengthParameterization = curve.arcLengthParameterization
       }
 
@@ -1411,8 +1398,8 @@ convert factor curve =
       , hasDegenerateStart = curve.hasDegenerateStart
       , hasDegenerateEnd = curve.hasDegenerateEnd
       , bounds = Bounds2D.convert factor curve.bounds
-      , -- TODO just apply units conversion to the existing bisection tree
-        bisectionTree = buildBisectionTree Interval.unit converted
+      , -- TODO just apply units conversion to the existing search tree?
+        searchTree = subsegment Interval.unit converted
       , arcLengthParameterization =
           Pair.mapFirst (Quantity.convert factor) curve.arcLengthParameterization
       }
