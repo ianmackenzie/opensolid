@@ -37,8 +37,8 @@ data Segment dimension units space = Segment
   , isDegenerate :: ~Bool
   , leftChild :: ~(Segment dimension units space)
   , rightChild :: ~(Segment dimension units space)
-  , leftNeighbour :: ~(Maybe (Segment dimension units space))
-  , rightNeighbour :: ~(Maybe (Segment dimension units space))
+  , leftNeighbour :: Maybe (Segment dimension units space)
+  , rightNeighbour :: Maybe (Segment dimension units space)
   }
 
 instance Bounded (Segment dimension units space) (Interval Unitless) where
