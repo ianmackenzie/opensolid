@@ -286,19 +286,19 @@ buildBoundaries surfaceFunction surfaceDomain = do
 buildSearchTree :: Surface3D space -> Segment space
 buildSearchTree surface =
   subsegment
-    { leftNeighbour = Nothing
-    , rightNeighbour = Nothing
-    , bottomNeighbour = Nothing
-    , topNeighbour = Nothing
+    { leftNeighbor = Nothing
+    , rightNeighbor = Nothing
+    , bottomNeighbor = Nothing
+    , topNeighbor = Nothing
     }
     UvBounds.unitSquare
     surface
 
 subsegment ::
-  ( "leftNeighbour" ::: Maybe (Segment space)
-  , "rightNeighbour" ::: Maybe (Segment space)
-  , "bottomNeighbour" ::: Maybe (Segment space)
-  , "topNeighbour" ::: Maybe (Segment space)
+  ( "leftNeighbor" ::: Maybe (Segment space)
+  , "rightNeighbor" ::: Maybe (Segment space)
+  , "bottomNeighbor" ::: Maybe (Segment space)
+  , "topNeighbor" ::: Maybe (Segment space)
   ) ->
   UvBounds ->
   Surface3D space ->
@@ -317,37 +317,37 @@ subsegment params uvRange surface = do
   let (vBottom, vTop) = Interval.bisect vRange
   let bottomLeftChild =
         subsegment
-          { leftNeighbour = Maybe.map (.bottomRightChild) params.leftNeighbour
-          , rightNeighbour = Just bottomRightChild
-          , bottomNeighbour = Maybe.map (.topLeftChild) params.bottomNeighbour
-          , topNeighbour = Just topLeftChild
+          { leftNeighbor = Maybe.map (.bottomRightChild) params.leftNeighbor
+          , rightNeighbor = Just bottomRightChild
+          , bottomNeighbor = Maybe.map (.topLeftChild) params.bottomNeighbor
+          , topNeighbor = Just topLeftChild
           }
           (UvBounds uLeft vBottom)
           surface
       bottomRightChild =
         subsegment
-          { leftNeighbour = Just bottomLeftChild
-          , rightNeighbour = Maybe.map (.bottomLeftChild) params.rightNeighbour
-          , bottomNeighbour = Maybe.map (.topRightChild) params.bottomNeighbour
-          , topNeighbour = Just topRightChild
+          { leftNeighbor = Just bottomLeftChild
+          , rightNeighbor = Maybe.map (.bottomLeftChild) params.rightNeighbor
+          , bottomNeighbor = Maybe.map (.topRightChild) params.bottomNeighbor
+          , topNeighbor = Just topRightChild
           }
           (UvBounds uRight vBottom)
           surface
       topLeftChild =
         subsegment
-          { leftNeighbour = Maybe.map (.topRightChild) params.leftNeighbour
-          , rightNeighbour = Just topRightChild
-          , bottomNeighbour = Just bottomLeftChild
-          , topNeighbour = Maybe.map (.bottomLeftChild) params.topNeighbour
+          { leftNeighbor = Maybe.map (.topRightChild) params.leftNeighbor
+          , rightNeighbor = Just topRightChild
+          , bottomNeighbor = Just bottomLeftChild
+          , topNeighbor = Maybe.map (.bottomLeftChild) params.topNeighbor
           }
           (UvBounds uLeft vTop)
           surface
       topRightChild =
         subsegment
-          { leftNeighbour = Just topLeftChild
-          , rightNeighbour = Maybe.map (.topLeftChild) params.rightNeighbour
-          , bottomNeighbour = Just bottomRightChild
-          , topNeighbour = Maybe.map (.bottomRightChild) params.topNeighbour
+          { leftNeighbor = Just topLeftChild
+          , rightNeighbor = Maybe.map (.topLeftChild) params.rightNeighbor
+          , bottomNeighbor = Just bottomRightChild
+          , topNeighbor = Maybe.map (.bottomRightChild) params.topNeighbor
           }
           (UvBounds uRight vTop)
           surface
@@ -363,10 +363,10 @@ subsegment params uvRange surface = do
     , bottomRightChild
     , topLeftChild
     , topRightChild
-    , leftNeighbour = params.leftNeighbour
-    , rightNeighbour = params.rightNeighbour
-    , bottomNeighbour = params.bottomNeighbour
-    , topNeighbour = params.topNeighbour
+    , leftNeighbor = params.leftNeighbor
+    , rightNeighbor = params.rightNeighbor
+    , bottomNeighbor = params.bottomNeighbor
+    , topNeighbor = params.topNeighbor
     }
 
 planar ::

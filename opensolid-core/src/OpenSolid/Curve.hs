@@ -333,7 +333,7 @@ subsegment ::
   Maybe (Segment dimension units space) ->
   Curve dimension units space ->
   Segment dimension units space
-subsegment tRange leftNeighbour rightNeighbour curve = do
+subsegment tRange leftNeighbor rightNeighbor curve = do
   let Interval t1 t2 = tRange
   let p1 = curve @ t1
   let p2 = curve @ t2
@@ -355,8 +355,8 @@ subsegment tRange leftNeighbour rightNeighbour curve = do
   let isDegenerateStart = t2 <= Degeneracy.startValue && hasDegenerateStart curve
   let isDegenerateEnd = t1 >= Degeneracy.endValue && hasDegenerateEnd curve
   let (tLeft, tRight) = Interval.bisect tRange
-  let leftChild = subsegment tLeft (Maybe.map (.rightChild) leftNeighbour) (Just rightChild) curve
-      rightChild = subsegment tRight (Just leftChild) (Maybe.map (.leftChild) rightNeighbour) curve
+  let leftChild = subsegment tLeft (Maybe.map (.rightChild) leftNeighbor) (Just rightChild) curve
+      rightChild = subsegment tRight (Just leftChild) (Maybe.map (.leftChild) rightNeighbor) curve
   Segment {domain = tRange, isDegenerate = isDegenerateStart || isDegenerateEnd, ..}
 
 instance FFI (Curve2D Meters) where
