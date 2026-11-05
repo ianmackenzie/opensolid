@@ -337,44 +337,27 @@ subsegment tRange leftNeighbour rightNeighbour curve = do
   let Interval t1 t2 = tRange
   let p1 = curve @ t1
   let p2 = curve @ t2
-  let segmentRange0 = curve @ tRange
-  let segmentDerivativeRange = derivative curve @ tRange
-  let segmentSecondDerivativeRange = secondDerivative curve @ tRange
-  let halfDisplacementRange = 0.5 * Interval.width tRange * segmentDerivativeRange
+  let range0 = curve @ tRange
+  let derivativeRange = derivative curve @ tRange
+  let secondDerivativeRange = secondDerivative curve @ tRange
+  let halfDisplacementRange = 0.5 * Interval.width tRange * derivativeRange
   let leftRange = Bounds.aggregate2 (Bounds.constant p1) (p1 + halfDisplacementRange)
   let rightRange = Bounds.aggregate2 (Bounds.constant p2) (p2 - halfDisplacementRange)
-  let segmentRange1 = Bounds.aggregate2 leftRange rightRange
-  let segmentRange =
-        case Bounds.intersection segmentRange0 segmentRange1 of
-          Just intersection -> intersection
-          Nothing -> error "Curve bounds and derivative bounds are inconsistent"
-  let segmentTangentDirectionRange =
-        tangentDirectionRangeImpl tRange curve segmentDerivativeRange segmentSecondDerivativeRange
+  let range1 = Bounds.aggregate2 leftRange rightRange
+  let range =
+        Bounds.intersection range0 range1
+          !! error "Curve bounds and derivative bounds are inconsistent"
+  let tangentDirectionRange =
+        tangentDirectionRangeImpl tRange curve derivativeRange secondDerivativeRange
   let (segmentCurvatureMagnitudeRange_, segmentCurvatureDirectionRange) =
-        curvatureRangeImpl_
-          segmentDerivativeRange
-          segmentSecondDerivativeRange
-          segmentTangentDirectionRange
-  let segmentCurvatureVectorRange_ =
-        segmentCurvatureMagnitudeRange_ * segmentCurvatureDirectionRange
+        curvatureRangeImpl_ derivativeRange secondDerivativeRange tangentDirectionRange
+  let curvatureVectorRange_ = segmentCurvatureMagnitudeRange_ * segmentCurvatureDirectionRange
   let isDegenerateStart = t2 <= Degeneracy.startValue && hasDegenerateStart curve
   let isDegenerateEnd = t1 >= Degeneracy.endValue && hasDegenerateEnd curve
   let (tLeft, tRight) = Interval.bisect tRange
   let leftChild = subsegment tLeft (Maybe.map (.rightChild) leftNeighbour) (Just rightChild) curve
       rightChild = subsegment tRight (Just leftChild) (Maybe.map (.leftChild) rightNeighbour) curve
-  Segment
-    { domain = tRange
-    , range = segmentRange
-    , derivativeRange = segmentDerivativeRange
-    , secondDerivativeRange = segmentSecondDerivativeRange
-    , tangentDirectionRange = segmentTangentDirectionRange
-    , curvatureVectorRange_ = segmentCurvatureVectorRange_
-    , isDegenerate = isDegenerateStart || isDegenerateEnd
-    , leftChild
-    , rightChild
-    , leftNeighbour
-    , rightNeighbour
-    }
+  Segment {domain = tRange, isDegenerate = isDegenerateStart || isDegenerateEnd, ..}
 
 instance FFI (Curve2D Meters) where
   representation = FFI.classRepresentation "Curve2D"
