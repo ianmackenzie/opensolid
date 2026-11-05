@@ -320,12 +320,20 @@ type CurvatureVector3D space = CurvatureVector 3 InverseMeters space
 instance FFI (CurvatureVector3D Void) where
   representation = FFI.classRepresentation "CurvatureVector3D"
 
+buildSearchTree ::
+  CurveExists dimension units space =>
+  Curve dimension units space ->
+  Segment dimension units space
+buildSearchTree curve = subsegment Interval.unit Nothing Nothing curve
+
 subsegment ::
   CurveExists dimension units space =>
   Interval Unitless ->
+  Maybe (Segment dimension units space) ->
+  Maybe (Segment dimension units space) ->
   Curve dimension units space ->
   Segment dimension units space
-subsegment tRange curve = do
+subsegment tRange leftNeighbour rightNeighbour curve = do
   let Interval t1 t2 = tRange
   let p1 = curve @ t1
   let p2 = curve @ t2
@@ -352,6 +360,8 @@ subsegment tRange curve = do
   let isDegenerateStart = t2 <= Degeneracy.startValue && hasDegenerateStart curve
   let isDegenerateEnd = t1 >= Degeneracy.endValue && hasDegenerateEnd curve
   let (tLeft, tRight) = Interval.bisect tRange
+  let leftChild = subsegment tLeft (Maybe.map (.rightChild) leftNeighbour) (Just rightChild) curve
+      rightChild = subsegment tRight (Just leftChild) (Maybe.map (.leftChild) rightNeighbour) curve
   Segment
     { domain = tRange
     , range = segmentRange
@@ -360,8 +370,10 @@ subsegment tRange curve = do
     , tangentDirectionRange = segmentTangentDirectionRange
     , curvatureVectorRange_ = segmentCurvatureVectorRange_
     , isDegenerate = isDegenerateStart || isDegenerateEnd
-    , leftChild = subsegment tLeft curve
-    , rightChild = subsegment tRight curve
+    , leftChild
+    , rightChild
+    , leftNeighbour
+    , rightNeighbour
     }
 
 instance FFI (Curve2D Meters) where
@@ -884,7 +896,7 @@ unsafe givenCompiled givenDerivative =
       , bounds = CompiledFunction.range Interval.unit givenCompiled
       , hasDegenerateStart = VectorCurve.startValue givenDerivative ~= Vector.zero
       , hasDegenerateEnd = VectorCurve.endValue givenDerivative ~= Vector.zero
-      , searchTree = subsegment Interval.unit curve
+      , searchTree = buildSearchTree curve
       , arcLengthParameterization = buildArcLengthParameterization curve
       }
 
@@ -1111,7 +1123,7 @@ reverse curve =
       , bounds = curve.bounds
       , hasDegenerateStart = curve.hasDegenerateEnd
       , hasDegenerateEnd = curve.hasDegenerateStart
-      , searchTree = subsegment Interval.unit reversed
+      , searchTree = buildSearchTree reversed
       , arcLengthParameterization =
           curve.arcLengthParameterization
             & Pair.mapSecond (\f r -> 1.0 - f (Uniform.reverse r))
@@ -1378,7 +1390,7 @@ orthonormalTransform transformCompiled transformDerivative curve =
       , bounds = CompiledFunction.range Interval.unit transformedCompiled
       , hasDegenerateStart = curve.hasDegenerateStart
       , hasDegenerateEnd = curve.hasDegenerateEnd
-      , searchTree = subsegment Interval.unit transformed
+      , searchTree = buildSearchTree transformed
       , arcLengthParameterization = curve.arcLengthParameterization
       }
 
@@ -1399,7 +1411,7 @@ convert factor curve =
       , hasDegenerateEnd = curve.hasDegenerateEnd
       , bounds = Bounds2D.convert factor curve.bounds
       , -- TODO just apply units conversion to the existing search tree?
-        searchTree = subsegment Interval.unit converted
+        searchTree = buildSearchTree converted
       , arcLengthParameterization =
           Pair.mapFirst (Quantity.convert factor) curve.arcLengthParameterization
       }
