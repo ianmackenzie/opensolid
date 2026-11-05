@@ -63,6 +63,7 @@ import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Length (Length)
 import OpenSolid.Length qualified as Length
+import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Nonzero (Nonzero (Nonzero))
 import OpenSolid.Plane3D (Plane3D)
@@ -262,7 +263,7 @@ parametric givenFunction givenDomain = do
         , degenerateRight = allDegenerate UvPoint.rightSamples
         , degenerateBottom = allDegenerate UvPoint.bottomSamples
         , degenerateTop = allDegenerate UvPoint.topSamples
-        , searchTree = subsegment UvBounds.unitSquare surface
+        , searchTree = buildSearchTree surface
         }
 
 divergence :: SurfaceFunction3D space -> UvPoint -> Length
@@ -282,8 +283,27 @@ buildBoundaries surfaceFunction surfaceDomain = do
   let surfaceInnerBoundaries = Bag.map surfaceBoundary (Region2D.innerBoundaries surfaceDomain)
   (surfaceOuterBoundary, surfaceInnerBoundaries)
 
-subsegment :: UvBounds -> Surface3D space -> Segment space
-subsegment uvRange surface = do
+buildSearchTree :: Surface3D space -> Segment space
+buildSearchTree surface =
+  subsegment
+    { leftNeighbour = Nothing
+    , rightNeighbour = Nothing
+    , bottomNeighbour = Nothing
+    , topNeighbour = Nothing
+    }
+    UvBounds.unitSquare
+    surface
+
+subsegment ::
+  ( "leftNeighbour" ::: Maybe (Segment space)
+  , "rightNeighbour" ::: Maybe (Segment space)
+  , "bottomNeighbour" ::: Maybe (Segment space)
+  , "topNeighbour" ::: Maybe (Segment space)
+  ) ->
+  UvBounds ->
+  Surface3D space ->
+  Segment space
+subsegment params uvRange surface = do
   let UvBounds uRange vRange = uvRange
   let Interval uLow uHigh = uRange
   let Interval vLow vHigh = vRange
@@ -295,6 +315,42 @@ subsegment uvRange surface = do
   let (duRange, dvRange) = derivativeRanges
   let (uLeft, uRight) = Interval.bisect uRange
   let (vBottom, vTop) = Interval.bisect vRange
+  let bottomLeftChild =
+        subsegment
+          { leftNeighbour = Maybe.map (.bottomRightChild) params.leftNeighbour
+          , rightNeighbour = Just bottomRightChild
+          , bottomNeighbour = Maybe.map (.topLeftChild) params.bottomNeighbour
+          , topNeighbour = Just topLeftChild
+          }
+          (UvBounds uLeft vBottom)
+          surface
+      bottomRightChild =
+        subsegment
+          { leftNeighbour = Just bottomLeftChild
+          , rightNeighbour = Maybe.map (.bottomLeftChild) params.rightNeighbour
+          , bottomNeighbour = Maybe.map (.topRightChild) params.bottomNeighbour
+          , topNeighbour = Just topRightChild
+          }
+          (UvBounds uRight vBottom)
+          surface
+      topLeftChild =
+        subsegment
+          { leftNeighbour = Maybe.map (.topRightChild) params.leftNeighbour
+          , rightNeighbour = Just topRightChild
+          , bottomNeighbour = Just bottomLeftChild
+          , topNeighbour = Maybe.map (.bottomLeftChild) params.topNeighbour
+          }
+          (UvBounds uLeft vTop)
+          surface
+      topRightChild =
+        subsegment
+          { leftNeighbour = Just topLeftChild
+          , rightNeighbour = Maybe.map (.topLeftChild) params.rightNeighbour
+          , bottomNeighbour = Just bottomRightChild
+          , topNeighbour = Maybe.map (.bottomRightChild) params.topNeighbour
+          }
+          (UvBounds uRight vTop)
+          surface
   Segment
     { domain = uvRange
     , range = surface @ uvRange
@@ -303,10 +359,14 @@ subsegment uvRange surface = do
     , normalDirectionRange = normalDirection surface @ uvRange
     , isDegenerate = isDegenerateLeft || isDegenerateRight || isDegenerateBottom || isDegenerateTop
     , isMonotonic = VectorBounds3D.areIndependent duRange dvRange
-    , bottomLeftChild = subsegment (UvBounds uLeft vBottom) surface
-    , bottomRightChild = subsegment (UvBounds uRight vBottom) surface
-    , topLeftChild = subsegment (UvBounds uLeft vTop) surface
-    , topRightChild = subsegment (UvBounds uRight vTop) surface
+    , bottomLeftChild
+    , bottomRightChild
+    , topLeftChild
+    , topRightChild
+    , leftNeighbour = params.leftNeighbour
+    , rightNeighbour = params.rightNeighbour
+    , bottomNeighbour = params.bottomNeighbour
+    , topNeighbour = params.topNeighbour
     }
 
 planar ::
@@ -405,7 +465,7 @@ flip surface = recursive \flippedSurface -> do
     , degenerateRight = surface.degenerateLeft
     , degenerateBottom = surface.degenerateBottom
     , degenerateTop = surface.degenerateTop
-    , searchTree = subsegment UvBounds.unitSquare flippedSurface
+    , searchTree = buildSearchTree flippedSurface
     }
 
 -- | Convert a surface defined in local coordinates to one defined in global coordinates.
@@ -423,7 +483,7 @@ placeIn frame surface = recursive \placedSurface -> do
     , degenerateRight = surface.degenerateRight
     , degenerateBottom = surface.degenerateBottom
     , degenerateTop = surface.degenerateTop
-    , searchTree = subsegment UvBounds.unitSquare placedSurface
+    , searchTree = buildSearchTree placedSurface
     }
 
 -- | Convert a surface defined in global coordinates to one defined in local coordinates.

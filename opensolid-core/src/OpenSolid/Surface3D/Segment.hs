@@ -39,6 +39,10 @@ data Segment space = Segment
   , bottomRightChild :: ~(Segment space)
   , topLeftChild :: ~(Segment space)
   , topRightChild :: ~(Segment space)
+  , leftNeighbour :: Maybe (Segment space)
+  , rightNeighbour :: Maybe (Segment space)
+  , bottomNeighbour :: Maybe (Segment space)
+  , topNeighbour :: Maybe (Segment space)
   }
 
 instance Bounded (Segment space) UvBounds where
