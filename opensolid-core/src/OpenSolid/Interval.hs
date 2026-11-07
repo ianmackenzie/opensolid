@@ -565,7 +565,7 @@ resolution (Interval low high)
   | otherwise = 0.0
 
 resolutionThreshold :: Number
-resolutionThreshold = 0.5
+resolutionThreshold = 0.25
 
 isResolved :: Interval units -> Bool
 isResolved interval = Number.abs (resolution interval) >= resolutionThreshold
