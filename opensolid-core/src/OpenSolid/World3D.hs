@@ -1,17 +1,20 @@
 module OpenSolid.World3D
-  ( originPoint
+  ( CardinalDirection (Rightward, Forward, Upward)
+  , originPoint
   , forwardDirection
   , backwardDirection
   , leftwardDirection
   , rightwardDirection
   , upwardDirection
   , downwardDirection
+  , cardinalDirection
   , forwardOrientation
   , backwardOrientation
   , upwardOrientation
   , downwardOrientation
   , rightwardOrientation
   , leftwardOrientation
+  , cardinalOrientation
   , frame
   , frontPlane
   , backPlane
@@ -19,6 +22,7 @@ module OpenSolid.World3D
   , leftPlane
   , topPlane
   , bottomPlane
+  , cardinalPlane
   , forwardPlane
   , backwardPlane
   , rightwardPlane
@@ -31,12 +35,14 @@ module OpenSolid.World3D
   , leftwardPlaneOrientation
   , upwardPlaneOrientation
   , downwardPlaneOrientation
+  , cardinalPlaneOrientation
   , forwardAxis
   , backwardAxis
   , leftwardAxis
   , rightwardAxis
   , upwardAxis
   , downwardAxis
+  , cardinalAxis
   )
 where
 
@@ -52,6 +58,8 @@ import OpenSolid.Primitives
   , PlaneOrientation3D (PlaneOrientation3D)
   , Point3D (Point3D)
   )
+
+data CardinalDirection = Rightward | Forward | Upward deriving (Eq, Ord)
 
 -- | The global origin point of a coordinate system.
 originPoint :: Point3D space
@@ -80,6 +88,13 @@ upwardDirection = Direction3D 0.0 0.0 1.0
 -- | The global downward direction of a coordinate system.
 downwardDirection :: Direction3D space
 downwardDirection = -upwardDirection
+
+-- | Get the given cardinal direction.
+cardinalDirection :: CardinalDirection -> Direction3D space
+cardinalDirection direction = case direction of
+  Rightward -> rightwardDirection
+  Forward -> forwardDirection
+  Upward -> upwardDirection
 
 {-| The forward-facing or 'default' orientation of the global coordinate system.
 
@@ -135,6 +150,13 @@ and the upward direction of the orientation will point forward.
 -}
 downwardOrientation :: Orientation3D space
 downwardOrientation = Orientation3D rightwardDirection downwardDirection forwardDirection
+
+-- | Get the orientation corresponding to the given cardinal direction.
+cardinalOrientation :: CardinalDirection -> Orientation3D space
+cardinalOrientation direction = case direction of
+  Rightward -> rightwardOrientation
+  Forward -> forwardOrientation
+  Upward -> upwardOrientation
 
 -- | A frame of reference defining a global coordinate system.
 frame :: Frame3D space space
@@ -236,6 +258,13 @@ and the Y direction of the orientation will be the global forward direction.
 downwardPlaneOrientation :: PlaneOrientation3D space
 downwardPlaneOrientation = PlaneOrientation3D leftwardDirection forwardDirection downwardDirection
 
+-- | Get the plane orientation corresponding to the given cardinal direction.
+cardinalPlaneOrientation :: CardinalDirection -> PlaneOrientation3D space
+cardinalPlaneOrientation direction = case direction of
+  Rightward -> rightwardPlaneOrientation
+  Forward -> forwardPlaneOrientation
+  Upward -> upwardPlaneOrientation
+
 {-| A rightward-facing plane through the global origin point.
 
 The X direction of the plane will be the global forward direction,
@@ -284,6 +313,13 @@ and the Y direction of the orientation will be the global upward direction.
 leftwardPlaneOrientation :: PlaneOrientation3D space
 leftwardPlaneOrientation = PlaneOrientation3D backwardDirection upwardDirection leftwardDirection
 
+-- | Get the plane corresponding to the given cardinal direction.
+cardinalPlane :: CardinalDirection -> Plane3D space
+cardinalPlane direction = case direction of
+  Rightward -> rightPlane
+  Forward -> frontPlane
+  Upward -> topPlane
+
 -- | A forward-facing axis through the global origin point.
 forwardAxis :: Axis3D space
 forwardAxis = Axis3D originPoint forwardDirection
@@ -307,3 +343,10 @@ leftwardAxis = Axis3D originPoint leftwardDirection
 -- | A rightward-facing axis through the global origin point.
 rightwardAxis :: Axis3D space
 rightwardAxis = Axis3D originPoint rightwardDirection
+
+-- | Get the axis corresponding to the given cardinal direction.
+cardinalAxis :: CardinalDirection -> Axis3D space
+cardinalAxis direction = case direction of
+  Rightward -> rightwardAxis
+  Forward -> forwardAxis
+  Upward -> upwardAxis
