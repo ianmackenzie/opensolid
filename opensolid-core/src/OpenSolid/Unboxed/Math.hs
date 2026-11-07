@@ -269,6 +269,7 @@ determinantBounds2D# m11Min# m11Max# m21Min# m21Max# m12Min# m12Max# m22Min# m22
   let !(# m12m21Min#, m12m21Max# #) = intervalTimesInterval# m12Min# m12Max# m21Min# m21Max#
   intervalMinusInterval# m11m22Min# m11m22Max# m12m21Min# m12m21Max#
 
+{-# INLINEABLE determinantBounds3D# #-}
 determinantBounds3D# ::
   Double# ->
   Double# ->
