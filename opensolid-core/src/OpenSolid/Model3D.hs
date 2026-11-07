@@ -29,7 +29,9 @@ import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3D (Frame3D)
 import OpenSolid.Frame3D qualified as Frame3D
+import OpenSolid.Interval qualified as Interval
 import OpenSolid.List qualified as List
+import OpenSolid.Number qualified as Number
 import OpenSolid.PbrMaterial (PbrMaterial)
 import OpenSolid.PbrMaterial qualified as PbrMaterial
 import OpenSolid.Prelude
@@ -217,7 +219,7 @@ withPbrMaterial value = with (pbrMaterial value)
 
 -- | Create an opacity attribute, where 0 is fully transparent and 1 is fully opaque.
 opacity :: Number -> Attribute
-opacity = Opacity
+opacity = Opacity . Number.clampTo Interval.unit
 
 -- | Set the opacity of a model, where 0 is fully transparent and 1 is fully opaque.
 withOpacity :: Number -> Model3D space -> Model3D space
