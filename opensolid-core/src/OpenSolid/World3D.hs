@@ -1,5 +1,6 @@
 module OpenSolid.World3D
   ( CardinalDirection (Rightward, Forward, Upward)
+  , cardinalDirections
   , originPoint
   , forwardDirection
   , backwardDirection
@@ -49,6 +50,7 @@ where
 import {-# SOURCE #-} OpenSolid.Frame3D (Frame3D)
 import {-# SOURCE #-} OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Length qualified as Length
+import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Prelude
 import OpenSolid.Primitives
   ( Axis3D (Axis3D)
@@ -60,6 +62,9 @@ import OpenSolid.Primitives
   )
 
 data CardinalDirection = Rightward | Forward | Upward deriving (Eq, Ord)
+
+cardinalDirections :: NonEmpty CardinalDirection
+cardinalDirections = NonEmpty.three Rightward Forward Upward
 
 -- | The global origin point of a coordinate system.
 originPoint :: Point3D space
