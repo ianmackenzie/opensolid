@@ -97,8 +97,8 @@ import GHC.Records (HasField (getField))
 import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
 import OpenSolid.Err (Err)
-import OpenSolid.Params (SetField (setField), type (:::) ((:::)))
 import OpenSolid.Show qualified as Show
+import OpenSolid.Struct (SetField (setField), type (:::) ((:::)))
 import OpenSolid.Units (Meters, Radians, Unitless, Units, type (?*?), type (?/?))
 import OpenSolid.Units qualified as Units
 import OpenSolid.Unwrap (Unwrap (unwrap))

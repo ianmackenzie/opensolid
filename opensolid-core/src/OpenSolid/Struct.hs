@@ -3,7 +3,7 @@
 -- whenever it generates setField calls
 {-# LANGUAGE AllowAmbiguousTypes #-}
 
-module OpenSolid.Params
+module OpenSolid.Struct
   ( type (:::) ((:::))
   , SetField (setField)
   , with
@@ -875,7 +875,7 @@ instance
   {-# INLINE getField #-}
   getField (_, _, _, _, _, _, _, _, _, _ ::: value) = value
 
------ Params construction -----
+----- Struct construction -----
 
 with :: ()
 with = ()
@@ -913,6 +913,131 @@ instance
   where
   setField value5 (param1, param2, param3, param4) =
     (param1, param2, param3, param4, name5 ::: value5)
+
+instance
+  SetField
+    name6
+    value6
+    ( name1 ::: value1
+    , name2 ::: value2
+    , name3 ::: value3
+    , name4 ::: value4
+    , name5 ::: value5
+    )
+    ( name1 ::: value1
+    , name2 ::: value2
+    , name3 ::: value3
+    , name4 ::: value4
+    , name5 ::: value5
+    , name6 ::: value6
+    )
+  where
+  setField value6 (param1, param2, param3, param4, param5) =
+    (param1, param2, param3, param4, param5, name6 ::: value6)
+
+instance
+  SetField
+    name7
+    value7
+    ( name1 ::: value1
+    , name2 ::: value2
+    , name3 ::: value3
+    , name4 ::: value4
+    , name5 ::: value5
+    , name6 ::: value6
+    )
+    ( name1 ::: value1
+    , name2 ::: value2
+    , name3 ::: value3
+    , name4 ::: value4
+    , name5 ::: value5
+    , name6 ::: value6
+    , name7 ::: value7
+    )
+  where
+  setField value7 (param1, param2, param3, param4, param5, param6) =
+    (param1, param2, param3, param4, param5, param6, name7 ::: value7)
+
+instance
+  SetField
+    name8
+    value8
+    ( name1 ::: value1
+    , name2 ::: value2
+    , name3 ::: value3
+    , name4 ::: value4
+    , name5 ::: value5
+    , name6 ::: value6
+    , name7 ::: value7
+    )
+    ( name1 ::: value1
+    , name2 ::: value2
+    , name3 ::: value3
+    , name4 ::: value4
+    , name5 ::: value5
+    , name6 ::: value6
+    , name7 ::: value7
+    , name8 ::: value8
+    )
+  where
+  setField value8 (param1, param2, param3, param4, param5, param6, param7) =
+    (param1, param2, param3, param4, param5, param6, param7, name8 ::: value8)
+
+instance
+  SetField
+    name9
+    value9
+    ( name1 ::: value1
+    , name2 ::: value2
+    , name3 ::: value3
+    , name4 ::: value4
+    , name5 ::: value5
+    , name6 ::: value6
+    , name7 ::: value7
+    , name8 ::: value8
+    )
+    ( name1 ::: value1
+    , name2 ::: value2
+    , name3 ::: value3
+    , name4 ::: value4
+    , name5 ::: value5
+    , name6 ::: value6
+    , name7 ::: value7
+    , name8 ::: value8
+    , name9 ::: value9
+    )
+  where
+  setField value9 (param1, param2, param3, param4, param5, param6, param7, param8) =
+    (param1, param2, param3, param4, param5, param6, param7, param8, name9 ::: value9)
+
+instance
+  SetField
+    name10
+    value10
+    ( name1 ::: value1
+    , name2 ::: value2
+    , name3 ::: value3
+    , name4 ::: value4
+    , name5 ::: value5
+    , name6 ::: value6
+    , name7 ::: value7
+    , name8 ::: value8
+    , name9 ::: value9
+    )
+    ( name1 ::: value1
+    , name2 ::: value2
+    , name3 ::: value3
+    , name4 ::: value4
+    , name5 ::: value5
+    , name6 ::: value6
+    , name7 ::: value7
+    , name8 ::: value8
+    , name9 ::: value9
+    , name10 ::: value10
+    )
+  where
+  setField value10 (param1, param2, param3, param4, param5, param6, param7, param8, param9) =
+    (param1, param2, param3, param4, param5, param6, param7, param8, param9, name10 ::: value10)
 
 ----- Function calls -----
 

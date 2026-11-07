@@ -183,7 +183,6 @@ library
     OpenSolid.Orientation3D
     OpenSolid.Pair
     OpenSolid.Parameter
-    OpenSolid.Params
     OpenSolid.PbrMaterial
     OpenSolid.Plane3D
     OpenSolid.PlaneOrientation3D
@@ -216,6 +215,7 @@ library
     OpenSolid.Step.TypeName
     OpenSolid.Stl
     OpenSolid.Stream
+    OpenSolid.Struct
     OpenSolid.Surface1D
     OpenSolid.Surface3D
     OpenSolid.Surface3D.Edge
