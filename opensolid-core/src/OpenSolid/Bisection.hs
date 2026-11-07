@@ -5,6 +5,7 @@ module OpenSolid.Bisection
   , subdomain
   , resolve
   , clusters
+  , resolvedClusters
   , find
   , touching
   )
@@ -88,14 +89,22 @@ touching (Bag.Full existing) cluster =
 clusters ::
   Segment segment domain =>
   Bag domain existing ->
-  (segment -> Fuzzy (Maybe tag)) ->
-  segment ->
+  Bag domain (Tagged tag segment) ->
   List (Set domain (Tagged tag segment))
-clusters existing resolveFunction tree = do
-  resolve existing resolveFunction tree
+clusters existing taggedSubtrees = do
+  taggedSubtrees
     & Bag.clusters (unitless (^)) (\_ _ -> True)
     & List.map Set.build
     & List.filter (not . touching existing)
+
+resolvedClusters ::
+  Segment segment domain =>
+  Bag domain existing ->
+  (segment -> Fuzzy (Maybe tag)) ->
+  segment ->
+  List (Set domain (Tagged tag segment))
+resolvedClusters existing callback segment =
+  resolve existing callback segment & clusters existing
 
 find ::
   Segment segment domain =>

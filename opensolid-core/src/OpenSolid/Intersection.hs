@@ -32,12 +32,13 @@ solveInterior
     , resolveCrossing
     , solveCrossing
     } = do
-    let allTangentClusters = Bisection.clusters Bag.empty resolveTangent searchTree
+    let allTangentClusters = Bisection.resolvedClusters Bag.empty resolveTangent searchTree
     let candidateTangentClusters =
           allTangentClusters & List.filter (not . Bisection.touching boundaryTangentSubdomains)
     let tangentIntersections = List.combine (solveTangent . Queue.fromSet) candidateTangentClusters
     let tangentExclusions = Bag.aggregate (List.map Bag.full allTangentClusters)
-    let allCrossingClusters = Bisection.clusters tangentExclusions resolveCrossing searchTree
+    let allCrossingClusters =
+          Bisection.resolvedClusters tangentExclusions resolveCrossing searchTree
     let candidateCrossingClusters =
           allCrossingClusters & List.filter (not . Bisection.touching boundaryCrossingSubdomains)
     let crossingIntersections = List.combine (solveCrossing . Queue.fromSet) candidateCrossingClusters
