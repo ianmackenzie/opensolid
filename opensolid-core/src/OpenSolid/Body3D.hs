@@ -4,6 +4,7 @@ module OpenSolid.Body3D
   , sphere
   , cylinder
   , cylinderAlong
+  , torus
   , extruded
   , sweptBy
   , revolved
@@ -42,6 +43,7 @@ import OpenSolid.Domain1D qualified as Domain1D
 import OpenSolid.FFI (FFI)
 import OpenSolid.FFI qualified as FFI
 import OpenSolid.Frame3D (Frame3D)
+import OpenSolid.Frame3D qualified as Frame3D
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.IsZero (IsZero (IsZero))
@@ -197,6 +199,28 @@ cylinderAlong params
   | otherwise = Try.do
       profile <- Region2D.circleWith {centerPoint = Point2D.origin, diameter = params.diameter}
       extruded (Axis3D.normalPlane params.axis) profile params.start params.end
+
+torus ::
+  Tolerance Meters =>
+  ( "plane" ::: Plane3D space
+  , "majorDiameter" ::: Length
+  , "minorDiameter" ::: Length
+  ) ->
+  Result Text (Body3D space)
+torus params
+  | not (isPositive params.majorDiameter) = Err "Major diameter must be positive"
+  | not (isPositive params.minorDiameter) = Err "Minor diameter must be positive"
+  | not (isPositive (params.majorDiameter - params.minorDiameter)) =
+      Err "Major diameter must be greater than minor diameter"
+  | otherwise = Try.do
+      let frame = Frame3D.fromTopPlane params.plane
+      let sketchPlane = Frame3D.rightPlane frame
+      profile <-
+        Region2D.circleWith
+          { centerPoint = on Axis2D.x (half params.majorDiameter)
+          , diameter = params.minorDiameter
+          }
+      revolved sketchPlane profile Axis2D.y Angle.fullTurn
 
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::
