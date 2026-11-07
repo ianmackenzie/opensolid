@@ -40,6 +40,8 @@ module OpenSolid.Bounds3D
   , frontFace
   , bottomFace
   , topFace
+  , Octants
+  , octants
   )
 where
 
@@ -70,6 +72,7 @@ import OpenSolid.Primitives
   , VectorTransform3D (VectorTransform3D)
   )
 import OpenSolid.Quantity qualified as Quantity
+import OpenSolid.Struct qualified as Struct
 import OpenSolid.Transform3D (Transform3D)
 import OpenSolid.Transform3D qualified as Transform3D
 import OpenSolid.VectorBounds3D qualified as VectorBounds3D
@@ -290,3 +293,30 @@ bottomFace (Bounds3D r f (Interval b _)) = Bounds3D r f (Interval.constant b)
 
 topFace :: Bounds3D space -> Bounds3D space
 topFace (Bounds3D r f (Interval _ t)) = Bounds3D r f (Interval.constant t)
+
+type Octants space =
+  ( "bottomBackLeft" ::: Bounds3D space
+  , "bottomBackRight" ::: Bounds3D space
+  , "bottomFrontLeft" ::: Bounds3D space
+  , "bottomFrontRight" ::: Bounds3D space
+  , "topBackLeft" ::: Bounds3D space
+  , "topBackRight" ::: Bounds3D space
+  , "topFrontLeft" ::: Bounds3D space
+  , "topFrontRight" ::: Bounds3D space
+  )
+
+octants :: Bounds3D space -> Octants space
+octants (Bounds3D rightward forward upward) = do
+  let (left, right) = Interval.bisect rightward
+  let (back, front) = Interval.bisect forward
+  let (bottom, top) = Interval.bisect upward
+  Struct.with
+    { bottomBackLeft = Bounds3D left back bottom
+    , bottomBackRight = Bounds3D right back bottom
+    , bottomFrontLeft = Bounds3D left front bottom
+    , bottomFrontRight = Bounds3D right front bottom
+    , topBackLeft = Bounds3D left back top
+    , topBackRight = Bounds3D right back top
+    , topFrontLeft = Bounds3D left front top
+    , topFrontRight = Bounds3D right front top
+    }
