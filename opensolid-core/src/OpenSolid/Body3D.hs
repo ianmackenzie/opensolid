@@ -62,6 +62,7 @@ import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Polygon2D (Polygon2D)
 import OpenSolid.Polygon2D qualified as Polygon2D
 import OpenSolid.Prelude
+import OpenSolid.Primitives (Bounds3D (Bounds3D))
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Region2D (Region2D)
 import OpenSolid.Region2D qualified as Region2D
@@ -108,23 +109,26 @@ instance FFI (Body3D Void) where
 
 ----- CONSTRUCTION -----
 
-data EmptyBody = EmptyBody deriving (Show, Err)
+isPositive :: Tolerance Meters => Length -> Bool
+isPositive length = length > ?tolerance
 
 {-| Create a rectangular block body.
 
 Fails if the given bounds are empty (the length, width, or height is zero).
 -}
-block :: Tolerance Meters => Bounds3D space -> Result EmptyBody (Body3D space)
-block bounds =
-  case Region2D.rectangle (Bounds3D.projectInto World3D.topPlane bounds) of
-    Err Region2D.EmptyRegion -> Err EmptyBody
-    Ok profile -> do
-      let Interval h1 h2 = Bounds3D.upwardCoordinate bounds
-      if h1 ~= h2
-        then Err EmptyBody
-        else case extruded World3D.topPlane profile h1 h2 of
-          Ok body -> Ok body
-          Err _ -> error "Constructing block body from non-empty bounds should not fail"
+block :: Tolerance Meters => Bounds3D space -> Result Text (Body3D space)
+block bounds@(Bounds3D rightward forward upward)
+  | let width = Interval.width rightward
+  , let length = Interval.width forward
+  , let height = Interval.width upward
+  , width ~= Length.zero || length ~= Length.zero || height ~= Length.zero =
+      Err "All block dimensions must be non-zero"
+  | otherwise = do
+      let panic = error "Constructing block body from non-empty bounds should not fail"
+      let profile = Region2D.rectangle (Bounds3D.projectInto World3D.topPlane bounds) !! panic
+      let Interval bottom top = upward
+      let body = extruded World3D.topPlane profile bottom top !! panic
+      Ok body
 
 {-| Create a sphere with the given center point and diameter.
 
@@ -135,13 +139,12 @@ sphere ::
   ( "centerPoint" ::: Point3D space
   , "diameter" ::: Length
   ) ->
-  Result EmptyBody (Body3D space)
+  Result Text (Body3D space)
 sphere params
-  | params.diameter ~= Length.zero = Err EmptyBody
-  | params.diameter < Length.zero = error "Diameter must be positive"
+  | not (isPositive params.diameter) = Err "Diameter must be positive"
   | otherwise = Ok do
       let panic = error "Constructing sphere from non-zero diameter should not fail"
-      let r = 0.5 * params.diameter
+      let r = half params.diameter
       let arc = Curve2D.arcFrom (on Axis2D.y r) (on Axis2D.y -r) -Angle.pi !! panic
       let plane = World3D.forwardPlane params.centerPoint
       let revolvedSurface = Surface3D.revolved plane arc Axis2D.y Angle.twoPi !! panic
@@ -157,12 +160,11 @@ cylinder ::
   , "startPoint" ::: Point3D space
   , "endPoint" ::: Point3D space
   ) ->
-  Result EmptyBody (Body3D space)
+  Result Text (Body3D space)
 cylinder params
-  | params.diameter ~= Length.zero = Err EmptyBody
-  | params.diameter < Length.zero = error "Diameter must be positive"
+  | not (isPositive params.diameter) = Err "Diameter must be positive"
   | otherwise = case Vector3D.magnitudeAndDirection (params.endPoint - params.startPoint) of
-      Err IsZero -> Err EmptyBody
+      Err IsZero -> Err "Start and end points must not be coincident"
       Ok (length, direction) ->
         cylinderAlong
           { axis = Axis3D.with {originPoint = params.startPoint, direction}
@@ -188,16 +190,13 @@ cylinderAlong ::
   , "start" ::: Length
   , "end" ::: Length
   ) ->
-  Result EmptyBody (Body3D space)
+  Result Text (Body3D space)
 cylinderAlong params
-  | params.diameter ~= Length.zero = Err EmptyBody
-  | params.diameter < Length.zero = error "Diameter must be positive"
-  | params.start ~= params.end = Err EmptyBody
-  | otherwise = do
-      let panic = error "Constructing non-empty cylinder body should not fail"
-      profile <-
-        Region2D.circleWith {centerPoint = Point2D.origin, diameter = params.diameter} ?? panic
-      extruded (Axis3D.normalPlane params.axis) profile params.start params.end ?? panic
+  | not (isPositive params.diameter) = Err "Diameter must be positive"
+  | params.start ~= params.end = Err "Start and end should not be equal"
+  | otherwise = Try.do
+      profile <- Region2D.circleWith {centerPoint = Point2D.origin, diameter = params.diameter}
+      extruded (Axis3D.normalPlane params.axis) profile params.start params.end
 
 -- | Create an extruded body from a sketch plane and profile.
 extruded ::
