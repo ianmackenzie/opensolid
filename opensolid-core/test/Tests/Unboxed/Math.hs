@@ -23,7 +23,15 @@ inverse2D = Test.check 100 "inverse2D" do
   N# m21# <- Test.generate matrixComponent
   N# m12# <- Test.generate matrixComponent
   N# m22# <- Test.generate matrixComponent
-  let !(# n11#, n21#, n12#, n22# #) = inverse2D# m11# m21# m12# m22#
+  let matrix# =
+        Matrix2D#
+          (# m11#, m12# #)
+          (# m21#, m22# #)
+
+  let !( Matrix2D#
+           (# n11#, n12# #)
+           (# n21#, n22# #)
+         ) = inverse2D# matrix#
   Test.all
     [ Test.expect (N# (m11# *# n11# +# m12# *# n21#) ~~ 1.0)
     , Test.expect (N# (m11# *# n12# +# m12# *# n22#) ~~ 0.0)
@@ -42,8 +50,16 @@ inverse3D = Test.check 100 "inverse3D" do
   N# m13# <- Test.generate matrixComponent
   N# m23# <- Test.generate matrixComponent
   N# m33# <- Test.generate matrixComponent
-  let !(# n11#, n21#, n31#, n12#, n22#, n32#, n13#, n23#, n33# #) =
-        inverse3D# m11# m21# m31# m12# m22# m32# m13# m23# m33#
+  let matrix# =
+        Matrix3D#
+          (# m11#, m12#, m13# #)
+          (# m21#, m22#, m23# #)
+          (# m31#, m32#, m33# #)
+  let !( Matrix3D#
+           (# n11#, n12#, n13# #)
+           (# n21#, n22#, n23# #)
+           (# n31#, n32#, n33# #)
+         ) = inverse3D# matrix#
   Test.all
     [ Test.expect (N# (m11# *# n11# +# m12# *# n21# +# m13# *# n31#) ~~ 1.0)
     , Test.expect (N# (m11# *# n12# +# m12# *# n22# +# m13# *# n32#) ~~ 0.0)

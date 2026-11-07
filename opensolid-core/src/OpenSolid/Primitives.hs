@@ -5,8 +5,8 @@ module OpenSolid.Primitives
   , Direction2D (Unit2D, Direction2D)
   , Orientation2D (Orientation2D)
   , Point2D (Point2D, Position2D)
-  , VectorBounds2D (VectorBounds2D)
-  , Bounds2D (Bounds2D, PositionBounds2D)
+  , VectorBounds2D (VectorBounds2D, VB2D#)
+  , Bounds2D (Bounds2D, PositionBounds2D, B2D#)
   , Axis2D (..)
   , Frame2D (..)
   , VectorTransform2D (VectorTransform2D)
@@ -48,11 +48,11 @@ import OpenSolid.Zero (Zero (zero))
 type role Vector2D phantom
 
 type Vector2D :: Type -> Type
-data Vector2D units = V2D# Double# Double#
+data Vector2D units = V2D# Vector2D#
 
 instance Eq (Vector2D units) where
   {-# INLINE (==) #-}
-  V2D# x1# y1# == V2D# x2# y2# =
+  V2D# (Vector2D# x1# y1#) == V2D# (Vector2D# x2# y2#) =
     B# (x1# ==# x2# &&# y1# ==# y2#)
 
 -- | Construct a vector from its X and Y components.
@@ -60,11 +60,11 @@ instance Eq (Vector2D units) where
 pattern Vector2D :: Quantity units -> Quantity units -> Vector2D units
 pattern Vector2D vx vy <- (viewVector2D -> (# vx, vy #))
  where
-  Vector2D (Q# vx#) (Q# vy#) = V2D# vx# vy#
+  Vector2D (Q# vx#) (Q# vy#) = V2D# (Vector2D# vx# vy#)
 
 {-# INLINE viewVector2D #-}
 viewVector2D :: Vector2D units -> (# Quantity units, Quantity units #)
-viewVector2D (V2D# vx# vy#) = (# Q# vx#, Q# vy# #)
+viewVector2D (V2D# (Vector2D# vx# vy#)) = (# Q# vx#, Q# vy# #)
 
 {-# COMPLETE Vector2D #-}
 
@@ -89,18 +89,18 @@ instance Units.Coercion (Vector2D units1) (Vector2D units2) where
 
 instance ApproximateEquality (Vector2D units) units where
   {-# INLINE (~=) #-}
-  V2D# x1# y1# ~= V2D# x2# y2# = do
+  V2D# (Vector2D# x1# y1#) ~= V2D# (Vector2D# x2# y2#) = do
     let !(Q# tolerance#) = ?tolerance
     let magnitude# = hypot2# (x2# -# x1#) (y2# -# y1#)
-    B# (equalWithin# tolerance# magnitude# 0.0##)
+    B# (magnitude# <=# tolerance#)
 
 instance Zero (Vector2D units) where
   {-# INLINE zero #-}
-  zero = V2D# 0.0## 0.0##
+  zero = V2D# (Vector2D# 0.0## 0.0##)
 
 instance Negation (Vector2D units) where
   {-# INLINE negate #-}
-  negate (V2D# vx# vy#) = V2D# (negate# vx#) (negate# vy#)
+  negate (V2D# vector#) = V2D# (negate# vector#)
 
 instance Multiplication Sign (Vector2D units) (Vector2D units) where
   {-# INLINE (*) #-}
@@ -117,36 +117,36 @@ instance
   Addition (Vector2D units1) (Vector2D units2) (Vector2D units1)
   where
   {-# INLINE (+) #-}
-  V2D# x1# y1# + V2D# x2# y2# = V2D# (x1# +# x2#) (y1# +# y2#)
+  V2D# first# + V2D# second# = V2D# (first# +# second#)
 
 instance
   units1 ~ units2 =>
   Subtraction (Vector2D units1) (Vector2D units2) (Vector2D units1)
   where
   {-# INLINE (-) #-}
-  V2D# x1# y1# - V2D# x2# y2# = V2D# (x1# -# x2#) (y1# -# y2#)
+  V2D# first# - V2D# second# = V2D# (first# -# second#)
 
 instance Multiplication_ (Quantity units1) (Vector2D units2) (Vector2D (units1 ?*? units2)) where
   {-# INLINE (?*?) #-}
-  Q# scale# ?*? V2D# vx# vy# = V2D# (scale# *# vx#) (scale# *# vy#)
+  Q# scale# ?*? V2D# vector# = V2D# (scale# *# vector#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Vector2D units2) (Vector2D units3)
   where
   {-# INLINE (*) #-}
-  Q# scale# * V2D# vx# vy# = V2D# (scale# *# vx#) (scale# *# vy#)
+  Q# scale# * V2D# vector# = V2D# (scale# *# vector#)
 
 instance Multiplication_ (Vector2D units1) (Quantity units2) (Vector2D (units1 ?*? units2)) where
   {-# INLINE (?*?) #-}
-  V2D# vx# vy# ?*? Q# scale# = V2D# (vx# *# scale#) (vy# *# scale#)
+  V2D# vector# ?*? Q# scale# = V2D# (vector# *# scale#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector2D units1) (Quantity units2) (Vector2D units3)
   where
   {-# INLINE (*) #-}
-  V2D# vx# vy# * Q# scale# = V2D# (vx# *# scale#) (vy# *# scale#)
+  V2D# vector# * Q# scale# = V2D# (vector# *# scale#)
 
 instance
   Multiplication_
@@ -155,14 +155,14 @@ instance
     (VectorBounds2D (units1 ?*? units2))
   where
   {-# INLINE (?*?) #-}
-  interval ?*? Vector2D vx vy = VectorBounds2D (interval ?*? vx) (interval ?*? vy)
+  I# interval# ?*? V2D# vector# = VB2D# (interval# *# vector#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Interval units1) (Vector2D units2) (VectorBounds2D units3)
   where
   {-# INLINE (*) #-}
-  interval * Vector2D vx vy = VectorBounds2D (interval * vx) (interval * vy)
+  I# interval# * V2D# vector# = VB2D# (interval# *# vector#)
 
 instance
   Multiplication_
@@ -171,25 +171,25 @@ instance
     (VectorBounds2D (units1 ?*? units2))
   where
   {-# INLINE (?*?) #-}
-  Vector2D vx vy ?*? interval = VectorBounds2D (vx ?*? interval) (vy ?*? interval)
+  V2D# vector# ?*? I# interval# = VB2D# (vector# *# interval#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Vector2D units1) (Interval units2) (VectorBounds2D units3)
   where
   {-# INLINE (*) #-}
-  Vector2D vx vy * interval = VectorBounds2D (vx * interval) (vy * interval)
+  V2D# vector# * I# interval# = VB2D# (vector# *# interval#)
 
 instance Division_ (Vector2D units1) (Quantity units2) (Vector2D (units1 ?/? units2)) where
   {-# INLINE (?/?) #-}
-  Vector2D vx vy ?/? scale = Vector2D (vx ?/? scale) (vy ?/? scale)
+  V2D# vector# ?/? Q# scale# = V2D# (vector# /# scale#)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Vector2D units1) (Quantity units2) (Vector2D units3)
   where
   {-# INLINE (/) #-}
-  Vector2D vx vy / scale = Vector2D (vx / scale) (vy / scale)
+  V2D# vector# / Q# scale# = V2D# (vector# /# scale#)
 
 instance
   DotMultiplication_
@@ -417,10 +417,24 @@ instance units ~ Meters => On (Plane3D space) (Point2D units) (Point3D space) wh
 type role VectorBounds2D phantom
 
 type VectorBounds2D :: Type -> Type
-data VectorBounds2D units
-  = -- | Construct a vector bounding box from its X and Y coordinate bounds.
-    VectorBounds2D (Interval units) (Interval units)
-  deriving (Show)
+data VectorBounds2D units = VB2D# VectorBounds2D#
+
+-- | Construct a vector bounds from its X and Y components.
+{-# INLINE VectorBounds2D #-}
+pattern VectorBounds2D :: Interval units -> Interval units -> VectorBounds2D units
+pattern VectorBounds2D x y <- (viewVectorBounds2D -> (# x, y #))
+ where
+  VectorBounds2D (I# x#) (I# y#) = VB2D# (VectorBounds2D# x# y#)
+
+{-# INLINE viewVectorBounds2D #-}
+viewVectorBounds2D :: VectorBounds2D units -> (# Interval units, Interval units #)
+viewVectorBounds2D (VB2D# (VectorBounds2D# x# y#)) = (# I# x#, I# y# #)
+
+{-# COMPLETE VectorBounds2D #-}
+
+instance Show (VectorBounds2D units) where
+  showsPrec precedence (VectorBounds2D x y) =
+    Show.constructor2 precedence "VectorBounds2D" x y
 
 instance Units (VectorBounds2D units) units
 
@@ -433,7 +447,9 @@ instance
   Intersects (Vector2D units1) (VectorBounds2D units2) units1
   where
   {-# INLINE (^) #-}
-  Vector2D vx vy ^ VectorBounds2D bx by = vx ^ bx && vy ^ by
+  V2D# vector# ^ VB2D# vectorBounds# = do
+    let !(Q# tolerance#) = ?tolerance
+    B# (intersects# tolerance# vector# vectorBounds#)
 
 instance
   units1 ~ units2 =>
@@ -447,11 +463,13 @@ instance
   Intersects (VectorBounds2D units1) (VectorBounds2D units2) units1
   where
   {-# INLINE (^) #-}
-  VectorBounds2D x1 y1 ^ VectorBounds2D x2 y2 = x1 ^ x2 && y1 ^ y2
+  VB2D# first# ^ VB2D# second# = do
+    let !(Q# tolerance#) = ?tolerance
+    B# (intersects# tolerance# first# second#)
 
 instance Negation (VectorBounds2D units) where
   {-# INLINE negate #-}
-  negate (VectorBounds2D x y) = VectorBounds2D (negate x) (negate y)
+  negate (VB2D# vectorBounds#) = VB2D# (negate# vectorBounds#)
 
 instance Multiplication Sign (VectorBounds2D units) (VectorBounds2D units) where
   {-# INLINE (*) #-}
@@ -468,42 +486,42 @@ instance
   Addition (VectorBounds2D units1) (VectorBounds2D units2) (VectorBounds2D units1)
   where
   {-# INLINE (+) #-}
-  VectorBounds2D x1 y1 + VectorBounds2D x2 y2 = VectorBounds2D (x1 + x2) (y1 + y2)
+  VB2D# first# + VB2D# second# = VB2D# (first# +# second#)
 
 instance
   units1 ~ units2 =>
   Addition (VectorBounds2D units1) (Vector2D units2) (VectorBounds2D units1)
   where
   {-# INLINE (+) #-}
-  VectorBounds2D x1 y1 + Vector2D x2 y2 = VectorBounds2D (x1 + x2) (y1 + y2)
+  VB2D# vectorBounds# + V2D# vector# = VB2D# (vectorBounds# +# vector#)
 
 instance
   units1 ~ units2 =>
   Addition (Vector2D units1) (VectorBounds2D units2) (VectorBounds2D units1)
   where
   {-# INLINE (+) #-}
-  Vector2D x1 y1 + VectorBounds2D x2 y2 = VectorBounds2D (x1 + x2) (y1 + y2)
+  V2D# vector# + VB2D# vectorBounds# = VB2D# (vector# +# vectorBounds#)
 
 instance
   units1 ~ units2 =>
   Subtraction (VectorBounds2D units1) (VectorBounds2D units2) (VectorBounds2D units1)
   where
   {-# INLINE (-) #-}
-  VectorBounds2D x1 y1 - VectorBounds2D x2 y2 = VectorBounds2D (x1 - x2) (y1 - y2)
+  VB2D# first# - VB2D# second# = VB2D# (first# -# second#)
 
 instance
   units1 ~ units2 =>
   Subtraction (VectorBounds2D units1) (Vector2D units2) (VectorBounds2D units1)
   where
   {-# INLINE (-) #-}
-  VectorBounds2D x1 y1 - Vector2D x2 y2 = VectorBounds2D (x1 - x2) (y1 - y2)
+  VB2D# vectorBounds# - V2D# vector# = VB2D# (vectorBounds# -# vector#)
 
 instance
   units1 ~ units2 =>
   Subtraction (Vector2D units1) (VectorBounds2D units2) (VectorBounds2D units1)
   where
   {-# INLINE (-) #-}
-  Vector2D x1 y1 - VectorBounds2D x2 y2 = VectorBounds2D (x1 - x2) (y1 - y2)
+  V2D# vector# - VB2D# vectorBounds# = VB2D# (vector# -# vectorBounds#)
 
 instance
   Multiplication_
@@ -512,14 +530,14 @@ instance
     (VectorBounds2D (units1 ?*? units2))
   where
   {-# INLINE (?*?) #-}
-  value ?*? VectorBounds2D x y = VectorBounds2D (value ?*? x) (value ?*? y)
+  Q# value# ?*? VB2D# vectorBounds# = VB2D# (value# *# vectorBounds#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (VectorBounds2D units2) (VectorBounds2D units3)
   where
   {-# INLINE (*) #-}
-  value * VectorBounds2D x y = VectorBounds2D (value * x) (value * y)
+  Q# value# * VB2D# vectorBounds# = VB2D# (value# *# vectorBounds#)
 
 instance
   Multiplication_
@@ -528,14 +546,14 @@ instance
     (VectorBounds2D (units1 ?*? units2))
   where
   {-# INLINE (?*?) #-}
-  VectorBounds2D x y ?*? value = VectorBounds2D (x ?*? value) (y ?*? value)
+  VB2D# vectorBounds# ?*? Q# value# = VB2D# (vectorBounds# *# value#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorBounds2D units1) (Quantity units2) (VectorBounds2D units3)
   where
   {-# INLINE (*) #-}
-  VectorBounds2D x y * value = VectorBounds2D (x * value) (y * value)
+  VB2D# vectorBounds# * Q# value# = VB2D# (vectorBounds# *# value#)
 
 instance
   Multiplication_
@@ -544,14 +562,14 @@ instance
     (VectorBounds2D (units1 ?*? units2))
   where
   {-# INLINE (?*?) #-}
-  interval ?*? VectorBounds2D x y = VectorBounds2D (interval ?*? x) (interval ?*? y)
+  I# interval# ?*? VB2D# vectorBounds# = VB2D# (interval# *# vectorBounds#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Interval units1) (VectorBounds2D units2) (VectorBounds2D units3)
   where
   {-# INLINE (*) #-}
-  interval * VectorBounds2D x y = VectorBounds2D (interval * x) (interval * y)
+  I# interval# * VB2D# vectorBounds# = VB2D# (interval# *# vectorBounds#)
 
 instance
   Multiplication_
@@ -560,14 +578,14 @@ instance
     (VectorBounds2D (units1 ?*? units2))
   where
   {-# INLINE (?*?) #-}
-  VectorBounds2D x y ?*? interval = VectorBounds2D (x ?*? interval) (y ?*? interval)
+  VB2D# vectorBounds# ?*? I# interval# = VB2D# (vectorBounds# *# interval#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (VectorBounds2D units1) (Interval units2) (VectorBounds2D units3)
   where
   {-# INLINE (*) #-}
-  VectorBounds2D x y * interval = VectorBounds2D (x * interval) (y * interval)
+  VB2D# vectorBounds# * I# interval# = VB2D# (vectorBounds# *# interval#)
 
 instance
   Division_
@@ -576,14 +594,14 @@ instance
     (VectorBounds2D (units1 ?/? units2))
   where
   {-# INLINE (?/?) #-}
-  VectorBounds2D x y ?/? value = VectorBounds2D (x ?/? value) (y ?/? value)
+  VB2D# vectorBounds# ?/? Q# value# = VB2D# (vectorBounds# /# value#)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorBounds2D units1) (Quantity units2) (VectorBounds2D units3)
   where
   {-# INLINE (/) #-}
-  VectorBounds2D x y / value = VectorBounds2D (x / value) (y / value)
+  VB2D# vectorBounds# / Q# value# = VB2D# (vectorBounds# /# value#)
 
 instance
   Division_
@@ -592,14 +610,14 @@ instance
     (VectorBounds2D (units1 ?/? units2))
   where
   {-# INLINE (?/?) #-}
-  VectorBounds2D x y ?/? interval = VectorBounds2D (x ?/? interval) (y ?/? interval)
+  VB2D# vectorBounds# ?/? I# interval# = VB2D# (vectorBounds# /# interval#)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorBounds2D units1) (Interval units2) (VectorBounds2D units3)
   where
   {-# INLINE (/) #-}
-  VectorBounds2D x y / interval = VectorBounds2D (x / interval) (y / interval)
+  VB2D# vectorBounds# / I# interval# = VB2D# (vectorBounds# /# interval#)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -750,6 +768,12 @@ pattern Bounds2D :: Interval units -> Interval units -> Bounds2D units
 pattern Bounds2D bx by <- PositionBounds2D (VectorBounds2D bx by)
  where
   Bounds2D bx by = PositionBounds2D (VectorBounds2D bx by)
+
+{-# COMPLETE B2D# #-}
+
+{-# INLINE B2D# #-}
+pattern B2D# :: VectorBounds2D# -> Bounds2D units
+pattern B2D# vectorBounds# = PositionBounds2D (VB2D# vectorBounds#)
 
 instance Show (Bounds2D units) where
   showsPrec precedence (Bounds2D bx by) =
@@ -1025,7 +1049,7 @@ instance Eq (Vector3D units space) where
   V3D# x1# y1# z1# == V3D# x2# y2# z2# =
     B# (x1# ==# x2# &&# y1# ==# y2# &&# z1# ==# z2#)
 
--- | Construct a vector from its X and Y components.
+-- | Construct a vector from its rightward, forward and upward components.
 {-# INLINE Vector3D #-}
 pattern Vector3D :: Quantity units -> Quantity units -> Quantity units -> Vector3D units space
 pattern Vector3D vx vy vz <- (viewVector3D -> (# vx, vy, vz #))
@@ -1351,11 +1375,11 @@ newtype Point3D space = Position3D (Vector3D Meters space)
 
 {-# INLINE Point3D #-}
 
--- | Construct a point from its X and Y coordinates.
+-- | Construct a point from its rightward, forward and upward coordinates.
 pattern Point3D :: Length -> Length -> Length -> Point3D space
-pattern Point3D px py pz <- Position3D (Vector3D px py pz)
+pattern Point3D r f u <- Position3D (Vector3D r f u)
  where
-  Point3D px py pz = Position3D (Vector3D px py pz)
+  Point3D r f u = Position3D (Vector3D r f u)
 
 deriving instance Eq (Point3D space)
 
@@ -1436,7 +1460,7 @@ instance
 type role VectorBounds3D phantom phantom
 
 type VectorBounds3D :: Type -> Type -> Type
-data VectorBounds3D units space = VB3D# Double# Double# Double# Double# Double# Double#
+data VectorBounds3D units space = VB3D# VectorBounds3D#
 
 -- | Construct a vector bounds from its rightward, forward and upward components.
 {-# INLINE VectorBounds3D #-}
@@ -1445,15 +1469,15 @@ pattern VectorBounds3D ::
   Interval units ->
   Interval units ->
   VectorBounds3D units space
-pattern VectorBounds3D x y z <- (viewVectorBounds3D -> (# x, y, z #))
+pattern VectorBounds3D r f u <- (viewVectorBounds3D -> (# r, f, u #))
  where
-  VectorBounds3D (I# xl# xh#) (I# yl# yh#) (I# zl# zh#) = VB3D# xl# xh# yl# yh# zl# zh#
+  VectorBounds3D (I# r#) (I# f#) (I# u#) = VB3D# (VectorBounds3D# r# f# u#)
 
+{-# INLINE viewVectorBounds3D #-}
 viewVectorBounds3D ::
   VectorBounds3D units space ->
   (# Interval units, Interval units, Interval units #)
-viewVectorBounds3D (VB3D# xl# xh# yl# yh# zl# zh#) =
-  (# I# xl# xh#, I# yl# yh#, I# zl# zh# #)
+viewVectorBounds3D (VB3D# (VectorBounds3D# r# f# u#)) = (# I# r#, I# f#, I# u# #)
 
 {-# COMPLETE VectorBounds3D #-}
 
@@ -1486,16 +1510,14 @@ instance
   (space1 ~ space2, units1 ~ units2) =>
   Intersects (VectorBounds3D units1 space1) (VectorBounds3D units2 space2) units1
   where
-  VB3D# xl1# xh1# yl1# yh1# zl1# zh1# ^ VB3D# xl2# xh2# yl2# yh2# zl2# zh2# = do
+  {-# INLINE (^) #-}
+  VB3D# first# ^ VB3D# second# = do
     let !(Q# tolerance#) = ?tolerance
-    let xIntersection# = intervalIntersectsInterval# tolerance# xl1# xh1# xl2# xh2#
-    let yIntersection# = intervalIntersectsInterval# tolerance# yl1# yh1# yl2# yh2#
-    let zIntersection# = intervalIntersectsInterval# tolerance# zl1# zh1# zl2# zh2#
-    B# (xIntersection# &&# yIntersection# &&# zIntersection#)
+    B# (intersects# tolerance# first# second#)
 
 instance Negation (VectorBounds3D units space) where
-  negate (VB3D# xl# xh# yl# yh# zl# zh#) = do
-    VB3D# (negate# xh#) (negate# xl#) (negate# yh#) (negate# yl#) (negate# zh#) (negate# zl#)
+  {-# INLINE negate #-}
+  negate (VB3D# vectorBounds#) = VB3D# (negate# vectorBounds#)
 
 instance
   Multiplication
@@ -1524,11 +1546,8 @@ instance
     (VectorBounds3D units2 space2)
     (VectorBounds3D units1 space1)
   where
-  VB3D# xl1# xh1# yl1# yh1# zl1# zh1# + VB3D# xl2# xh2# yl2# yh2# zl2# zh2# = do
-    let !(# xl#, xh# #) = intervalPlusInterval# xl1# xh1# xl2# xh2#
-    let !(# yl#, yh# #) = intervalPlusInterval# yl1# yh1# yl2# yh2#
-    let !(# zl#, zh# #) = intervalPlusInterval# zl1# zh1# zl2# zh2#
-    VB3D# xl# xh# yl# yh# zl# zh#
+  {-# INLINE (+) #-}
+  VB3D# first# + VB3D# second# = VB3D# (first# +# second#)
 
 instance
   ( space1 ~ space2
@@ -1561,11 +1580,8 @@ instance
     (VectorBounds3D units2 space2)
     (VectorBounds3D units1 space1)
   where
-  VB3D# xl1# xh1# yl1# yh1# zl1# zh1# - VB3D# xl2# xh2# yl2# yh2# zl2# zh2# = do
-    let !(# xl#, xh# #) = intervalMinusInterval# xl1# xh1# xl2# xh2#
-    let !(# yl#, yh# #) = intervalMinusInterval# yl1# yh1# yl2# yh2#
-    let !(# zl#, zh# #) = intervalMinusInterval# zl1# zh1# zl2# zh2#
-    VB3D# xl# xh# yl# yh# zl# zh#
+  {-# INLINE (-) #-}
+  VB3D# first# - VB3D# second# = VB3D# (first# -# second#)
 
 instance
   ( space1 ~ space2
@@ -1589,24 +1605,14 @@ instance
   where
   Vector3D x1 y1 z1 - VectorBounds3D x2 y2 z2 = VectorBounds3D (x1 - x2) (y1 - y2) (z1 - z2)
 
-{-# INLINE quantityTimesVectorBounds3D #-}
-quantityTimesVectorBounds3D ::
-  Quantity units1 ->
-  VectorBounds3D units2 space ->
-  VectorBounds3D units3 space
-quantityTimesVectorBounds3D (Q# v1#) (VB3D# xl2# xh2# yl2# yh2# zl2# zh2#) = do
-  let !(# xl#, xh# #) = doubleTimesInterval# v1# xl2# xh2#
-  let !(# yl#, yh# #) = doubleTimesInterval# v1# yl2# yh2#
-  let !(# zl#, zh# #) = doubleTimesInterval# v1# zl2# zh2#
-  VB3D# xl# xh# yl# yh# zl# zh#
-
 instance
   Multiplication_
     (Quantity units1)
     (VectorBounds3D units2 space)
     (VectorBounds3D (units1 ?*? units2) space)
   where
-  lhs ?*? rhs = quantityTimesVectorBounds3D lhs rhs
+  {-# INLINE (?*?) #-}
+  Q# value# ?*? VB3D# vectorBounds# = VB3D# (value# *# vectorBounds#)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -1615,7 +1621,8 @@ instance
     (VectorBounds3D units2 space)
     (VectorBounds3D units3 space)
   where
-  lhs * rhs = quantityTimesVectorBounds3D lhs rhs
+  {-# INLINE (*) #-}
+  Q# value# * VB3D# vectorBounds# = VB3D# (value# *# vectorBounds#)
 
 instance
   Multiplication_
@@ -1623,7 +1630,8 @@ instance
     (Quantity units2)
     (VectorBounds3D (units1 ?*? units2) space)
   where
-  lhs ?*? rhs = quantityTimesVectorBounds3D rhs lhs
+  {-# INLINE (?*?) #-}
+  VB3D# vectorBounds# ?*? Q# value# = VB3D# (vectorBounds# *# value#)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -1632,18 +1640,8 @@ instance
     (Quantity units2)
     (VectorBounds3D units3 space)
   where
-  lhs * rhs = quantityTimesVectorBounds3D rhs lhs
-
-{-# INLINE boundsTimesVectorBounds3D #-}
-boundsTimesVectorBounds3D ::
-  Interval units1 ->
-  VectorBounds3D units2 space ->
-  VectorBounds3D units3 space
-boundsTimesVectorBounds3D (I# vl1# vh1#) (VB3D# xl2# xh2# yl2# yh2# zl2# zh2#) = do
-  let !(# xl#, xh# #) = intervalTimesInterval# vl1# vh1# xl2# xh2#
-  let !(# yl#, yh# #) = intervalTimesInterval# vl1# vh1# yl2# yh2#
-  let !(# zl#, zh# #) = intervalTimesInterval# vl1# vh1# zl2# zh2#
-  VB3D# xl# xh# yl# yh# zl# zh#
+  {-# INLINE (*) #-}
+  VB3D# vectorBounds# * Q# value# = VB3D# (vectorBounds# *# value#)
 
 instance
   Multiplication_
@@ -1651,7 +1649,8 @@ instance
     (VectorBounds3D units2 space)
     (VectorBounds3D (units1 ?*? units2) space)
   where
-  lhs ?*? rhs = boundsTimesVectorBounds3D lhs rhs
+  {-# INLINE (?*?) #-}
+  I# interval# ?*? VB3D# vectorBounds# = VB3D# (interval# *# vectorBounds#)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -1660,7 +1659,8 @@ instance
     (VectorBounds3D units2 space)
     (VectorBounds3D units3 space)
   where
-  lhs * rhs = boundsTimesVectorBounds3D lhs rhs
+  {-# INLINE (*) #-}
+  I# interval# * VB3D# vectorBounds# = VB3D# (interval# *# vectorBounds#)
 
 instance
   Multiplication_
@@ -1668,7 +1668,8 @@ instance
     (Interval units2)
     (VectorBounds3D (units1 ?*? units2) space)
   where
-  lhs ?*? rhs = boundsTimesVectorBounds3D rhs lhs
+  {-# INLINE (?*?) #-}
+  VB3D# vectorBounds# ?*? I# interval# = VB3D# (vectorBounds# *# interval#)
 
 instance
   Units.Product units1 units2 units3 =>
@@ -1677,7 +1678,8 @@ instance
     (Interval units2)
     (VectorBounds3D units3 space)
   where
-  lhs * rhs = boundsTimesVectorBounds3D rhs lhs
+  {-# INLINE (*) #-}
+  VB3D# vectorBounds# * I# interval# = VB3D# (vectorBounds# *# interval#)
 
 instance
   Division_
@@ -1685,13 +1687,15 @@ instance
     (Quantity units2)
     (VectorBounds3D (units1 ?/? units2) space)
   where
-  VectorBounds3D x y z ?/? value = VectorBounds3D (x ?/? value) (y ?/? value) (z ?/? value)
+  {-# INLINE (?/?) #-}
+  VB3D# vectorBounds# ?/? Q# value# = VB3D# (vectorBounds# /# value#)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorBounds3D units1 space) (Quantity units2) (VectorBounds3D units3 space)
   where
-  VectorBounds3D x y z / value = VectorBounds3D (x / value) (y / value) (z / value)
+  {-# INLINE (/) #-}
+  VB3D# vectorBounds# / Q# value# = VB3D# (vectorBounds# /# value#)
 
 instance
   Division_
@@ -1699,15 +1703,15 @@ instance
     (Interval units2)
     (VectorBounds3D (units1 ?/? units2) space)
   where
-  VectorBounds3D x y z ?/? interval =
-    VectorBounds3D (x ?/? interval) (y ?/? interval) (z ?/? interval)
+  {-# INLINE (?/?) #-}
+  VB3D# vectorBounds# ?/? I# interval# = VB3D# (vectorBounds# /# interval#)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (VectorBounds3D units1 space) (Interval units2) (VectorBounds3D units3 space)
   where
-  VectorBounds3D x y z / interval =
-    VectorBounds3D (x / interval) (y / interval) (z / interval)
+  {-# INLINE (/) #-}
+  VB3D# vectorBounds# / I# interval# = VB3D# (vectorBounds# /# interval#)
 
 instance
   (Units.Product units1 units2 units3, space1 ~ space2) =>
@@ -1877,11 +1881,11 @@ newtype Bounds3D space
 
 {-# INLINE Bounds3D #-}
 
--- | Construct a point from its X and Y coordinates.
+-- | Construct a bounding box from its rightward, forward and upward coordinate intervals.
 pattern Bounds3D :: Interval Meters -> Interval Meters -> Interval Meters -> Bounds3D space
-pattern Bounds3D bx by bz <- PositionBounds3D (VectorBounds3D bx by bz)
+pattern Bounds3D r f u <- PositionBounds3D (VectorBounds3D r f u)
  where
-  Bounds3D bx by bz = PositionBounds3D (VectorBounds3D bx by bz)
+  Bounds3D r f u = PositionBounds3D (VectorBounds3D r f u)
 
 instance Show (Bounds3D space) where
   showsPrec precedence (Bounds3D bx by bz) =

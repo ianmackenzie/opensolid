@@ -63,7 +63,7 @@ import OpenSolid.Primitives
   ( Axis3D
   , Direction3D (Direction3D)
   , Frame3D
-  , Vector3D (Vector3D)
+  , Vector3D (V3D#, Vector3D)
   , VectorBounds3D (VB3D#, VectorBounds3D)
   , VectorTransform3D (VectorTransform3D)
   )
@@ -98,14 +98,8 @@ hull3 ::
   Vector3D units space ->
   Vector3D units space ->
   VectorBounds3D units space
-hull3 (Vector3D x1 y1 z1) (Vector3D x2 y2 z2) (Vector3D x3 y3 z3) = do
-  let minX = min (min x1 x2) x3
-  let maxX = max (max x1 x2) x3
-  let minY = min (min y1 y2) y3
-  let maxY = max (max y1 y2) y3
-  let minZ = min (min z1 z2) z3
-  let maxZ = max (max z1 z2) z3
-  VectorBounds3D (Interval minX maxX) (Interval minY maxY) (Interval minZ maxZ)
+hull3 (V3D# x1# y1# z1#) (V3D# x2# y2# z2#) (V3D# x3# y3# z3#) =
+  VB3D# (VectorBounds3D# (hull3# x1# x2# x3#) (hull3# y1# y2# y3#) (hull3# z1# z2# z3#))
 
 hull4 ::
   Vector3D units space ->
@@ -113,31 +107,41 @@ hull4 ::
   Vector3D units space ->
   Vector3D units space ->
   VectorBounds3D units space
-hull4 (Vector3D x1 y1 z1) (Vector3D x2 y2 z2) (Vector3D x3 y3 z3) (Vector3D x4 y4 z4) = do
-  let minX = min (min (min x1 x2) x3) x4
-  let maxX = max (max (max x1 x2) x3) x4
-  let minY = min (min (min y1 y2) y3) y4
-  let maxY = max (max (max y1 y2) y3) y4
-  let minZ = min (min (min z1 z2) z3) z4
-  let maxZ = max (max (max z1 z2) z3) z4
-  VectorBounds3D (Interval minX maxX) (Interval minY maxY) (Interval minZ maxZ)
+hull4 (V3D# x1# y1# z1#) (V3D# x2# y2# z2#) (V3D# x3# y3# z3#) (V3D# x4# y4# z4#) =
+  VB3D# $
+    VectorBounds3D#
+      (hull4# x1# x2# x3# x4#)
+      (hull4# y1# y2# y3# y4#)
+      (hull4# z1# z2# z3# z4#)
 
 hullN :: NonEmpty (Vector3D units space) -> VectorBounds3D units space
-hullN (Vector3D x0 y0 z0 :| rest) = go x0 x0 y0 y0 z0 z0 rest
- where
-  go ::
-    Quantity units ->
-    Quantity units ->
-    Quantity units ->
-    Quantity units ->
-    Quantity units ->
-    Quantity units ->
-    List (Vector3D units space) ->
-    VectorBounds3D units space
-  go xLow xHigh yLow yHigh zLow zHigh [] =
-    VectorBounds3D (Interval xLow xHigh) (Interval yLow yHigh) (Interval zLow zHigh)
-  go xLow xHigh yLow yHigh zLow zHigh (Vector3D x y z : remaining) =
-    go (min xLow x) (max xHigh x) (min yLow y) (max yHigh y) (min zLow z) (max zHigh z) remaining
+hullN (V3D# x# y# z# :| rest) = hullImpl x# x# y# y# z# z# rest
+
+hullImpl ::
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  List (Vector3D units space) ->
+  VectorBounds3D units space
+hullImpl xLow# xHigh# yLow# yHigh# zLow# zHigh# vectors = case vectors of
+  [] ->
+    VB3D# $
+      VectorBounds3D#
+        (Interval# xLow# xHigh#)
+        (Interval# yLow# yHigh#)
+        (Interval# zLow# zHigh#)
+  V3D# x# y# z# : remaining ->
+    hullImpl
+      (min# xLow# x#)
+      (max# xHigh# x#)
+      (min# yLow# y#)
+      (max# yHigh# y#)
+      (min# zLow# z#)
+      (max# zHigh# z#)
+      remaining
 
 aggregate2 ::
   VectorBounds3D units space ->
@@ -160,32 +164,40 @@ aggregate3 (VectorBounds3D x1 y1 z1) (VectorBounds3D x2 y2 z2) (VectorBounds3D x
 -- | Construct a vector bounding box containing all vector bounding boxes in the given list.
 aggregateN :: NonEmpty (VectorBounds3D units space) -> VectorBounds3D units space
 aggregateN (first :| rest) = do
-  let VectorBounds3D (Interval xLow0 xHigh0) (Interval yLow0 yHigh0) (Interval zLow0 zHigh0) = first
-  aggregateImpl xLow0 xHigh0 yLow0 yHigh0 zLow0 zHigh0 rest
+  let !(VB3D# (VectorBounds3D# x# y# z#)) = first
+  let !(Interval# xLow# xHigh#) = x#
+  let !(Interval# yLow# yHigh#) = y#
+  let !(Interval# zLow# zHigh#) = z#
+  aggregateImpl xLow# xHigh# yLow# yHigh# zLow# zHigh# rest
 
 aggregateImpl ::
-  Quantity units ->
-  Quantity units ->
-  Quantity units ->
-  Quantity units ->
-  Quantity units ->
-  Quantity units ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
   List (VectorBounds3D units space) ->
   VectorBounds3D units space
-aggregateImpl xLow xHigh yLow yHigh zLow zHigh rest = case rest of
-  [] -> VectorBounds3D (Interval xLow xHigh) (Interval yLow yHigh) (Interval zLow zHigh)
+aggregateImpl xLow# xHigh# yLow# yHigh# zLow# zHigh# rest = case rest of
+  [] ->
+    VB3D# $
+      VectorBounds3D#
+        (Interval# xLow# xHigh#)
+        (Interval# yLow# yHigh#)
+        (Interval# zLow# zHigh#)
   next : remaining -> do
-    let VectorBounds3D xNext yNext zNext = next
-    let Interval xLowNext xHighNext = xNext
-    let Interval yLowNext yHighNext = yNext
-    let Interval zLowNext zHighNext = zNext
+    let !(VB3D# (VectorBounds3D# xNext# yNext# zNext#)) = next
+    let !(Interval# xLowNext# xHighNext#) = xNext#
+    let !(Interval# yLowNext# yHighNext#) = yNext#
+    let !(Interval# zLowNext# zHighNext#) = zNext#
     aggregateImpl
-      (min xLow xLowNext)
-      (max xHigh xHighNext)
-      (min yLow yLowNext)
-      (max yHigh yHighNext)
-      (min zLow zLowNext)
-      (max zHigh zHighNext)
+      (min# xLow# xLowNext#)
+      (max# xHigh# xHighNext#)
+      (min# yLow# yLowNext#)
+      (max# yHigh# yHighNext#)
+      (min# zLow# zLowNext#)
+      (max# zHigh# zHighNext#)
       remaining
 
 xComponent :: VectorBounds3D units space -> Interval units
@@ -213,53 +225,61 @@ squaredMagnitude_ (VectorBounds3D x y z) =
 
 magnitude :: VectorBounds3D units space -> Interval units
 magnitude bounds = do
-  let !(VB3D# xMin# xMax# yMin# yMax# zMin# zMax#) = bounds
-  let positiveX# = xMin# >=# 0.0##
-  let negativeX# = xMax# <=# 0.0##
-  let positiveY# = yMin# >=# 0.0##
-  let negativeY# = yMax# <=# 0.0##
-  let positiveZ# = zMin# >=# 0.0##
-  let negativeZ# = zMax# <=# 0.0##
+  let !(VB3D# bounds#) = bounds
+  let !(VectorBounds3D# r# f# u#) = bounds#
+  let !(Interval# rMin# rMax#) = r#
+  let !(Interval# fMin# fMax#) = f#
+  let !(Interval# uMin# uMax#) = u#
+  let positiveR# = rMin# >=# 0.0##
+  let negativeR# = rMax# <=# 0.0##
+  let positiveF# = fMin# >=# 0.0##
+  let negativeF# = fMax# <=# 0.0##
+  let positiveU# = uMin# >=# 0.0##
+  let negativeU# = uMax# <=# 0.0##
   let minMagnitude# =
-        case (# positiveX#, negativeX#, positiveY#, negativeY#, positiveZ#, negativeZ# #) of
-          (# 1#, _, 1#, _, 1#, _ #) -> hypot3# xMin# yMin# zMin#
-          (# 1#, _, 1#, _, _, 1# #) -> hypot3# xMin# yMin# zMax#
-          (# 1#, _, _, 1#, 1#, _ #) -> hypot3# xMin# yMax# zMin#
-          (# 1#, _, _, 1#, _, 1# #) -> hypot3# xMin# yMax# zMax#
-          (# _, 1#, 1#, _, 1#, _ #) -> hypot3# xMax# yMin# zMin#
-          (# _, 1#, 1#, _, _, 1# #) -> hypot3# xMax# yMin# zMax#
-          (# _, 1#, _, 1#, 1#, _ #) -> hypot3# xMax# yMax# zMin#
-          (# _, 1#, _, 1#, _, 1# #) -> hypot3# xMax# yMax# zMax#
-          (# _, _, 1#, _, 1#, _ #) -> hypot2# yMin# zMin#
-          (# _, _, 1#, _, _, 1# #) -> hypot2# yMin# zMax#
-          (# _, _, _, 1#, 1#, _ #) -> hypot2# yMax# zMin#
-          (# _, _, _, 1#, _, 1# #) -> hypot2# yMax# zMax#
-          (# 1#, _, _, _, 1#, _ #) -> hypot2# xMin# zMin#
-          (# 1#, _, _, _, _, 1# #) -> hypot2# xMin# zMax#
-          (# _, 1#, _, _, 1#, _ #) -> hypot2# xMax# zMin#
-          (# _, 1#, _, _, _, 1# #) -> hypot2# xMax# zMax#
-          (# 1#, _, 1#, _, _, _ #) -> hypot2# xMin# yMin#
-          (# 1#, _, _, 1#, _, _ #) -> hypot2# xMin# yMax#
-          (# _, 1#, 1#, _, _, _ #) -> hypot2# xMax# yMin#
-          (# _, 1#, _, 1#, _, _ #) -> hypot2# xMax# yMax#
-          (# 1#, _, _, _, _, _ #) -> xMin#
-          (# _, 1#, _, _, _, _ #) -> negate# xMax#
-          (# _, _, 1#, _, _, _ #) -> yMin#
-          (# _, _, _, 1#, _, _ #) -> negate# yMax#
-          (# _, _, _, _, 1#, _ #) -> zMin#
-          (# _, _, _, _, _, 1# #) -> negate# zMax#
+        case (# positiveR#, negativeR#, positiveF#, negativeF#, positiveU#, negativeU# #) of
+          (# True#, _, True#, _, True#, _ #) -> hypot3# rMin# fMin# uMin#
+          (# True#, _, True#, _, _, True# #) -> hypot3# rMin# fMin# uMax#
+          (# True#, _, _, True#, True#, _ #) -> hypot3# rMin# fMax# uMin#
+          (# True#, _, _, True#, _, True# #) -> hypot3# rMin# fMax# uMax#
+          (# _, True#, True#, _, True#, _ #) -> hypot3# rMax# fMin# uMin#
+          (# _, True#, True#, _, _, True# #) -> hypot3# rMax# fMin# uMax#
+          (# _, True#, _, True#, True#, _ #) -> hypot3# rMax# fMax# uMin#
+          (# _, True#, _, True#, _, True# #) -> hypot3# rMax# fMax# uMax#
+          (# _, _, True#, _, True#, _ #) -> hypot2# fMin# uMin#
+          (# _, _, True#, _, _, True# #) -> hypot2# fMin# uMax#
+          (# _, _, _, True#, True#, _ #) -> hypot2# fMax# uMin#
+          (# _, _, _, True#, _, True# #) -> hypot2# fMax# uMax#
+          (# True#, _, _, _, True#, _ #) -> hypot2# rMin# uMin#
+          (# True#, _, _, _, _, True# #) -> hypot2# rMin# uMax#
+          (# _, True#, _, _, True#, _ #) -> hypot2# rMax# uMin#
+          (# _, True#, _, _, _, True# #) -> hypot2# rMax# uMax#
+          (# True#, _, True#, _, _, _ #) -> hypot2# rMin# fMin#
+          (# True#, _, _, True#, _, _ #) -> hypot2# rMin# fMax#
+          (# _, True#, True#, _, _, _ #) -> hypot2# rMax# fMin#
+          (# _, True#, _, True#, _, _ #) -> hypot2# rMax# fMax#
+          (# True#, _, _, _, _, _ #) -> rMin#
+          (# _, True#, _, _, _, _ #) -> negate# rMax#
+          (# _, _, True#, _, _, _ #) -> fMin#
+          (# _, _, _, True#, _, _ #) -> negate# fMax#
+          (# _, _, _, _, True#, _ #) -> uMin#
+          (# _, _, _, _, _, True# #) -> negate# uMax#
           (# _, _, _, _, _, _ #) -> 0.0##
-  I# minMagnitude# (maxMagnitude# bounds)
+  I# (Interval# minMagnitude# (maxMagnitude# bounds))
 
 maxMagnitude :: VectorBounds3D units space -> Quantity units
 maxMagnitude bounds = Q# (maxMagnitude# bounds)
 
 maxMagnitude# :: VectorBounds3D units space -> Double#
-maxMagnitude# (VB3D# minX# maxX# minY# maxY# minZ# maxZ#) = do
-  let xMagnitude# = max# (abs# minX#) (abs# maxX#)
-  let yMagnitude# = max# (abs# minY#) (abs# maxY#)
-  let zMagnitude# = max# (abs# minZ#) (abs# maxZ#)
-  hypot3# xMagnitude# yMagnitude# zMagnitude#
+maxMagnitude# (VB3D# bounds#) = do
+  let !(VectorBounds3D# r# f# u#) = bounds#
+  let !(Interval# rMin# rMax#) = r#
+  let !(Interval# fMin# fMax#) = f#
+  let !(Interval# uMin# uMax#) = u#
+  let rMagnitude# = max# (abs# rMin#) (abs# rMax#)
+  let fMagnitude# = max# (abs# fMin#) (abs# fMax#)
+  let uMagnitude# = max# (abs# uMin#) (abs# uMax#)
+  hypot3# rMagnitude# fMagnitude# uMagnitude#
 
 maxSquaredMagnitude ::
   Units.Squared units1 units2 =>
@@ -472,27 +492,15 @@ tripleProduct_ ::
   VectorBounds3D units space ->
   Interval ((units ?*? units) ?*? units)
 tripleProduct_ bounds1 bounds2 bounds3 = do
-  let !(VB3D# xMin1# xMax1# yMin1# yMax1# zMin1# zMax1#) = bounds1
-  let !(VB3D# xMin2# xMax2# yMin2# yMax2# zMin2# zMax2#) = bounds2
-  let !(VB3D# xMin3# xMax3# yMin3# yMax3# zMin3# zMax3#) = bounds3
-  let !(# low#, high# #) =
-        determinantBounds3D#
-          xMin1#
-          xMax1#
-          yMin1#
-          yMax1#
-          zMin1#
-          zMax1#
-          xMin2#
-          xMax2#
-          yMin2#
-          yMax2#
-          zMin2#
-          zMax2#
-          xMin3#
-          xMax3#
-          yMin3#
-          yMax3#
-          zMin3#
-          zMax3#
-  I# low# high#
+  let !(VB3D# bounds1#) = bounds1
+  let !(VB3D# bounds2#) = bounds2
+  let !(VB3D# bounds3#) = bounds3
+  let !(VectorBounds3D# r1# f1# u1#) = bounds1#
+  let !(VectorBounds3D# r2# f2# u2#) = bounds2#
+  let !(VectorBounds3D# r3# f3# u3#) = bounds3#
+  let matrix# =
+        MatrixBounds3D#
+          (# r1#, r2#, r3# #)
+          (# f1#, f2#, f3# #)
+          (# u1#, u2#, u3# #)
+  I# (determinantBounds3D# matrix#)

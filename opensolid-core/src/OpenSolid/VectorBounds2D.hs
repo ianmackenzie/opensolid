@@ -33,16 +33,12 @@ module OpenSolid.VectorBounds2D
   , direction
   , normalize
   , exclusion
-  , exclusion#
   , inclusion
-  , inclusion#
   , member
   , contains
   , isContainedIn
   , separation
-  , separation#
   , overlap
-  , overlap#
   , intersection
   , interpolate
   , relativeTo
@@ -66,7 +62,19 @@ import OpenSolid.Maybe qualified as Maybe
 import OpenSolid.NonEmpty qualified as NonEmpty
 import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
-import OpenSolid.Primitives (Direction2D (Direction2D), Direction3D (Direction3D), Frame2D, Orientation2D (Orientation2D), Plane3D, PlaneOrientation3D (PlaneOrientation3D), Vector3D (Vector3D), VectorBounds2D (VectorBounds2D), VectorBounds3D (VectorBounds3D), VectorTransform2D (VectorTransform2D))
+import OpenSolid.Primitives
+  ( Direction2D (Direction2D)
+  , Direction3D (Direction3D)
+  , Frame2D
+  , Orientation2D (Orientation2D)
+  , Plane3D
+  , PlaneOrientation3D (PlaneOrientation3D)
+  , Vector2D (V2D#)
+  , Vector3D (Vector3D)
+  , VectorBounds2D (VB2D#, VectorBounds2D)
+  , VectorBounds3D (VectorBounds3D)
+  , VectorTransform2D (VectorTransform2D)
+  )
 import OpenSolid.Primitives qualified as Primitives
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Unboxed.Math
@@ -94,12 +102,8 @@ hull2 (Vector2D x1 y1) (Vector2D x2 y2) =
   VectorBounds2D (Interval x1 x2) (Interval y1 y2)
 
 hull3 :: Vector2D units -> Vector2D units -> Vector2D units -> VectorBounds2D units
-hull3 (Vector2D x1 y1) (Vector2D x2 y2) (Vector2D x3 y3) = do
-  let minX = min (min x1 x2) x3
-  let maxX = max (max x1 x2) x3
-  let minY = min (min y1 y2) y3
-  let maxY = max (max y1 y2) y3
-  VectorBounds2D (Interval minX maxX) (Interval minY maxY)
+hull3 (V2D# (Vector2D# x1# y1#)) (V2D# (Vector2D# x2# y2#)) (V2D# (Vector2D# x3# y3#)) =
+  VB2D# (VectorBounds2D# (hull3# x1# x2# x3#) (hull3# y1# y2# y3#))
 
 hull4 ::
   Vector2D units ->
@@ -107,26 +111,21 @@ hull4 ::
   Vector2D units ->
   Vector2D units ->
   VectorBounds2D units
-hull4 (Vector2D x1 y1) (Vector2D x2 y2) (Vector2D x3 y3) (Vector2D x4 y4) = do
-  let minX = min (min (min x1 x2) x3) x4
-  let maxX = max (max (max x1 x2) x3) x4
-  let minY = min (min (min y1 y2) y3) y4
-  let maxY = max (max (max y1 y2) y3) y4
-  VectorBounds2D (Interval minX maxX) (Interval minY maxY)
+hull4 v1 v2 v3 v4 = do
+  let !(V2D# (Vector2D# x1# y1#)) = v1
+  let !(V2D# (Vector2D# x2# y2#)) = v2
+  let !(V2D# (Vector2D# x3# y3#)) = v3
+  let !(V2D# (Vector2D# x4# y4#)) = v4
+  VB2D# (VectorBounds2D# (hull4# x1# x2# x3# x4#) (hull4# y1# y2# y3# y4#))
 
 hull :: NonEmpty (Vector2D units) -> VectorBounds2D units
-hull (Vector2D x0 y0 :| rest) = go x0 x0 y0 y0 rest
- where
-  go ::
-    Quantity units ->
-    Quantity units ->
-    Quantity units ->
-    Quantity units ->
-    List (Vector2D units) ->
-    VectorBounds2D units
-  go xLow xHigh yLow yHigh [] = VectorBounds2D (Interval xLow xHigh) (Interval yLow yHigh)
-  go xLow xHigh yLow yHigh (Vector2D x y : remaining) =
-    go (min xLow x) (max xHigh x) (min yLow y) (max yHigh y) remaining
+hull (V2D# (Vector2D# x# y#) :| rest) = hullImpl x# x# y# y# rest
+
+hullImpl :: Double# -> Double# -> Double# -> Double# -> List (Vector2D units) -> VectorBounds2D units
+hullImpl xLow# xHigh# yLow# yHigh# vectors = case vectors of
+  [] -> VB2D# (VectorBounds2D# (Interval# xLow# xHigh#) (Interval# yLow# yHigh#))
+  V2D# (Vector2D# x# y#) : remaining ->
+    hullImpl (min# xLow# x#) (max# xHigh# x#) (min# yLow# y#) (max# yHigh# y#) remaining
 
 hullOf :: (a -> Vector2D units) -> NonEmpty a -> VectorBounds2D units
 hullOf function nonEmpty = hull (NonEmpty.map function nonEmpty)
@@ -148,25 +147,30 @@ aggregate3 (VectorBounds2D x1 y1) (VectorBounds2D x2 y2) (VectorBounds2D x3 y3) 
 
 -- | Construct a vector bounding box containing all vector bounding boxes in the given list.
 aggregate :: NonEmpty (VectorBounds2D units) -> VectorBounds2D units
-aggregate (VectorBounds2D (Interval xLow0 xHigh0) (Interval yLow0 yHigh0) :| rest) =
-  aggregateImpl xLow0 xHigh0 yLow0 yHigh0 rest
+aggregate (first :| rest) = do
+  let !(VB2D# (VectorBounds2D# x# y#)) = first
+  let !(Interval# xLow# xHigh#) = x#
+  let !(Interval# yLow# yHigh#) = y#
+  aggregateImpl xLow# xHigh# yLow# yHigh# rest
 
 aggregateImpl ::
-  Quantity units ->
-  Quantity units ->
-  Quantity units ->
-  Quantity units ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
   List (VectorBounds2D units) ->
   VectorBounds2D units
-aggregateImpl xLow xHigh yLow yHigh [] = VectorBounds2D (Interval xLow xHigh) (Interval yLow yHigh)
-aggregateImpl xLow xHigh yLow yHigh (next : remaining) = do
-  let VectorBounds2D (Interval xLowNext xHighNext) (Interval yLowNext yHighNext) = next
-  aggregateImpl
-    (min xLow xLowNext)
-    (max xHigh xHighNext)
-    (min yLow yLowNext)
-    (max yHigh yHighNext)
-    remaining
+aggregateImpl xLow# xHigh# yLow# yHigh# list = case list of
+  [] -> VB2D# (VectorBounds2D# (Interval# xLow# xHigh#) (Interval# yLow# yHigh#))
+  VB2D# (VectorBounds2D# xNext# yNext#) : remaining -> do
+    let !(Interval# xLowNext# xHighNext#) = xNext#
+    let !(Interval# yLowNext# yHighNext#) = yNext#
+    aggregateImpl
+      (min# xLow# xLowNext#)
+      (max# xHigh# xHighNext#)
+      (min# yLow# yLowNext#)
+      (max# yHigh# yHighNext#)
+      remaining
 
 aggregateOf :: (a -> VectorBounds2D units) -> NonEmpty a -> VectorBounds2D units
 aggregateOf function nonEmpty = aggregate (NonEmpty.map function nonEmpty)
@@ -244,27 +248,10 @@ clampNormalized (Interval low high) =
   Interval (Number.clampTo normalizedBounds low) (Number.clampTo normalizedBounds high)
 
 exclusion :: Vector2D units -> VectorBounds2D units -> Quantity units
-exclusion vector bounds = Q# (exclusion# vector bounds)
-
-{-# INLINEABLE exclusion# #-}
-exclusion# :: Vector2D units -> VectorBounds2D units -> Double#
-exclusion# (Vector2D (Q# vx#) (Q# vy#)) (VectorBounds2D bx by) = do
-  let exclusionX# = Interval.exclusion# vx# bx
-  let exclusionY# = Interval.exclusion# vy# by
-  let positiveX# = exclusionX# >=# 0.0##
-  let positiveY# = exclusionY# >=# 0.0##
-  case (# positiveX#, positiveY# #) of
-    (# 1#, 1# #) -> hypot2# exclusionX# exclusionY#
-    (# 1#, _ #) -> exclusionX#
-    (# _, 1# #) -> exclusionY#
-    (# _, _ #) -> max# exclusionX# exclusionY#
+exclusion (V2D# vector#) (VB2D# bounds#) = Q# (exclusion# vector# bounds#)
 
 inclusion :: Vector2D units -> VectorBounds2D units -> Quantity units
-inclusion vector box = Q# (inclusion# vector box)
-
-{-# INLINE inclusion# #-}
-inclusion# :: Vector2D units -> VectorBounds2D units -> Double#
-inclusion# vector box = negate# (exclusion# vector box)
+inclusion (V2D# vector#) (VB2D# bounds#) = Q# (inclusion# vector# bounds#)
 
 member :: Vector2D units -> VectorBounds2D units -> Bool
 member (Vector2D vx vy) (VectorBounds2D x y) = Interval.member vx x && Interval.member vy y
@@ -277,27 +264,10 @@ isContainedIn :: VectorBounds2D units -> VectorBounds2D units -> Bool
 isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 
 separation :: VectorBounds2D units -> VectorBounds2D units -> Quantity units
-separation bounds1 bounds2 = Q# (separation# bounds1 bounds2)
-
-{-# INLINEABLE separation# #-}
-separation# :: VectorBounds2D units -> VectorBounds2D units -> Double#
-separation# (VectorBounds2D x1 y1) (VectorBounds2D x2 y2) = do
-  let separationX# = Interval.separation# x1 x2
-  let separationY# = Interval.separation# y1 y2
-  let positiveX# = separationX# ># 0.0##
-  let positiveY# = separationY# ># 0.0##
-  case (# positiveX#, positiveY# #) of
-    (# 1#, 1# #) -> hypot2# separationX# separationY#
-    (# 1#, _ #) -> separationX#
-    (# _, 1# #) -> separationY#
-    (# _, _ #) -> max# separationX# separationY#
+separation (VB2D# bounds1#) (VB2D# bounds2#) = Q# (separation# bounds1# bounds2#)
 
 overlap :: VectorBounds2D units -> VectorBounds2D units -> Quantity units
-overlap first second = Q# (overlap# first second)
-
-{-# INLINE overlap# #-}
-overlap# :: VectorBounds2D units -> VectorBounds2D units -> Double#
-overlap# first second = negate# (separation# first second)
+overlap (VB2D# first#) (VB2D# second#) = Q# (overlap# first# second#)
 
 intersection :: VectorBounds2D units -> VectorBounds2D units -> Maybe (VectorBounds2D units)
 intersection (VectorBounds2D x1 y1) (VectorBounds2D x2 y2) =

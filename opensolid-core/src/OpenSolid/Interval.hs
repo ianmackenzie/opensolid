@@ -18,20 +18,16 @@ module OpenSolid.Interval
   , midpoint
   , endpoints
   , width
-  , width#
   , maxAbs
   , minAbs
   , squared
   , squared_
   , member
   , inclusion
-  , inclusion#
   , exclusion
-  , exclusion#
   , contains
   , overlap
   , separation
-  , separation#
   , containedIn
   , bisect
   , isAtomic
@@ -88,7 +84,7 @@ type role Interval phantom
 type Interval :: Type -> Type
 
 -- | A range of possible values, with a lower bound and upper bound.
-data Interval units = Ordered# Double# Double#
+data Interval units = I# Interval#
 
 instance Show (Interval units) where
   showsPrec precedence (Interval low high) =
@@ -107,21 +103,13 @@ If either argument is NaN, then the result will be open/infinite
 pattern Interval :: Quantity units -> Quantity units -> Interval units
 pattern Interval low high <- (viewInterval -> (# low, high #))
  where
-  Interval (Q# a#) (Q# b#) = I# a# b#
+  Interval (Q# a#) (Q# b#) = I# (Interval# a# b#)
 
 {-# INLINE viewInterval #-}
 viewInterval :: Interval units -> (# Quantity units, Quantity units #)
-viewInterval (Ordered# low# high#) = (# Q# low#, Q# high# #)
+viewInterval (I# (Interval# low# high#)) = (# Q# low#, Q# high# #)
 
 {-# COMPLETE Interval #-}
-
-{-# INLINE I# #-}
-pattern I# :: Double# -> Double# -> Interval units
-pattern I# low# high# <- Ordered# low# high#
- where
-  I# a# b# = let !(# low#, high# #) = hull2# a# b# in Ordered# low# high#
-
-{-# COMPLETE I# #-}
 
 instance FFI (Interval Unitless) where
   representation = FFI.classRepresentation "Interval"
@@ -151,11 +139,13 @@ instance Units.Coercion (Interval units1) (Interval units2) where
 
 instance At (Interval units) Number (Quantity units) where
   {-# INLINE (@) #-}
-  Interval low high @ tValue = Quantity.interpolateFrom low high tValue
+  I# (Interval# low# high#) @ Q# t# = Q# (interpolateFrom# low# high# t#)
 
 instance units1 ~ units2 => Intersects (Quantity units1) (Interval units2) units1 where
   {-# INLINE (^) #-}
-  value ^ interval = exclusion value interval <= ?tolerance
+  Q# value# ^ I# interval# = do
+    let !(Q# tolerance#) = ?tolerance
+    B# (intersects# tolerance# value# interval#)
 
 instance units1 ~ units2 => Intersects (Interval units1) (Quantity units2) units1 where
   {-# INLINE (^) #-}
@@ -163,11 +153,13 @@ instance units1 ~ units2 => Intersects (Interval units1) (Quantity units2) units
 
 instance units1 ~ units2 => Intersects (Interval units1) (Interval units2) units1 where
   {-# INLINE (^) #-}
-  first ^ second = separation first second <= ?tolerance
+  I# first# ^ I# second# = do
+    let !(Q# tolerance#) = ?tolerance
+    B# (intersects# tolerance# first# second#)
 
 instance Negation (Interval units) where
   {-# INLINE negate #-}
-  negate (I# low# high#) = I# (negate# high#) (negate# low#)
+  negate (I# interval#) = I# (negate# interval#)
 
 instance Multiplication Sign (Interval units) (Interval units) where
   {-# INLINE (*) #-}
@@ -181,64 +173,60 @@ instance Multiplication (Interval units) Sign (Interval units) where
 
 instance units1 ~ units2 => Addition (Interval units1) (Interval units2) (Interval units1) where
   {-# INLINE (+) #-}
-  I# low1# high1# + I# low2# high2# = I# (low1# +# low2#) (high1# +# high2#)
+  I# first# + I# second# = I# (first# +# second#)
 
 instance units1 ~ units2 => Addition (Interval units1) (Quantity units2) (Interval units1) where
   {-# INLINE (+) #-}
-  I# low# high# + Q# value# = I# (low# +# value#) (high# +# value#)
+  I# interval# + Q# value# = I# (interval# +# value#)
 
 instance units1 ~ units2 => Addition (Quantity units1) (Interval units2) (Interval units1) where
   {-# INLINE (+) #-}
-  Q# value# + I# low# high# = I# (value# +# low#) (value# +# high#)
+  Q# value# + I# interval# = I# (value# +# interval#)
 
 instance units1 ~ units2 => Subtraction (Interval units1) (Interval units2) (Interval units1) where
   {-# INLINE (-) #-}
-  I# low1# high1# - I# low2# high2# = I# (low1# -# high2#) (high1# -# low2#)
+  I# first# - I# second# = I# (first# -# second#)
 
 instance units1 ~ units2 => Subtraction (Interval units1) (Quantity units2) (Interval units1) where
   {-# INLINE (-) #-}
-  I# low# high# - Q# value# = I# (low# -# value#) (high# -# value#)
+  I# interval# - Q# value# = I# (interval# -# value#)
 
 instance units1 ~ units2 => Subtraction (Quantity units1) (Interval units2) (Interval units1) where
   {-# INLINE (-) #-}
-  Q# value# - I# low# high# = I# (value# -# high#) (value# -# low#)
+  Q# value# - I# interval# = I# (value# -# interval#)
 
 instance Multiplication_ (Quantity units1) (Interval units2) (Interval (units1 ?*? units2)) where
   {-# INLINE (?*?) #-}
-  Q# value# ?*? I# low# high# = I# (value# *# low#) (value# *# high#)
+  Q# value# ?*? I# interval# = I# (value# *# interval#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Quantity units1) (Interval units2) (Interval units3)
   where
   {-# INLINE (*) #-}
-  Q# value# * I# low# high# = I# (value# *# low#) (value# *# high#)
+  Q# value# * I# interval# = I# (value# *# interval#)
 
 instance Multiplication_ (Interval units1) (Quantity units2) (Interval (units1 ?*? units2)) where
   {-# INLINE (?*?) #-}
-  I# low# high# ?*? Q# value# = I# (low# *# value#) (high# *# value#)
+  I# interval# ?*? Q# value# = I# (interval# *# value#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Interval units1) (Quantity units2) (Interval units3)
   where
   {-# INLINE (*) #-}
-  I# low# high# * Q# value# = I# (low# *# value#) (high# *# value#)
+  I# interval# * Q# value# = I# (interval# *# value#)
 
 instance Multiplication_ (Interval units1) (Interval units2) (Interval (units1 ?*? units2)) where
   {-# INLINE (?*?) #-}
-  I# low1# high1# ?*? I# low2# high2# = do
-    let !(# low#, high# #) = intervalTimesInterval# low1# high1# low2# high2#
-    Ordered# low# high#
+  I# first# ?*? I# second# = I# (first# *# second#)
 
 instance
   Units.Product units1 units2 units3 =>
   Multiplication (Interval units1) (Interval units2) (Interval units3)
   where
   {-# INLINE (*) #-}
-  I# low1# high1# * I# low2# high2# = do
-    let !(# low#, high# #) = intervalTimesInterval# low1# high1# low2# high2#
-    Ordered# low# high#
+  I# first# * I# second# = I# (first# *# second#)
 
 instance DotMultiplication_ (Quantity units1) (Interval units2) (Interval (units1 ?*? units2)) where
   {-# INLINE dot_ #-}
@@ -275,48 +263,36 @@ instance
 
 instance Division_ (Quantity units1) (Interval units2) (Interval (units1 ?/? units2)) where
   {-# INLINE (?/?) #-}
-  Q# n# ?/? I# dl# dh# = do
-    let !(# low#, high# #) = doubleOverInterval# n# dl# dh#
-    Ordered# low# high#
+  Q# value# ?/? I# interval# = I# (value# /# interval#)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Quantity units1) (Interval units2) (Interval units3)
   where
   {-# INLINE (/) #-}
-  Q# n# / I# dl# dh# = do
-    let !(# low#, high# #) = doubleOverInterval# n# dl# dh#
-    Ordered# low# high#
+  Q# value# / I# interval# = I# (value# /# interval#)
 
 instance Division_ (Interval units1) (Quantity units2) (Interval (units1 ?/? units2)) where
   {-# INLINE (?/?) #-}
-  I# nl# nh# ?/? Q# d# = do
-    let !(# low#, high# #) = intervalOverDouble# nl# nh# d#
-    Ordered# low# high#
+  I# interval# ?/? Q# value# = I# (interval# /# value#)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Interval units1) (Quantity units2) (Interval units3)
   where
   {-# INLINE (/) #-}
-  I# nl# nh# / Q# d# = do
-    let !(# low#, high# #) = intervalOverDouble# nl# nh# d#
-    Ordered# low# high#
+  I# interval# / Q# value# = I# (interval# /# value#)
 
 instance Division_ (Interval units1) (Interval units2) (Interval (units1 ?/? units2)) where
   {-# INLINE (?/?) #-}
-  I# nl# nh# ?/? I# dl# dh# = do
-    let !(# low#, high# #) = intervalOverInterval# nl# nh# dl# dh#
-    Ordered# low# high#
+  I# first# ?/? I# second# = I# (first# /# second#)
 
 instance
   Units.Quotient units1 units2 units3 =>
   Division (Interval units1) (Interval units2) (Interval units3)
   where
   {-# INLINE (/) #-}
-  I# nl# nh# / I# dl# dh# = do
-    let !(# low#, high# #) = intervalOverInterval# nl# nh# dl# dh#
-    Ordered# low# high#
+  I# first# / I# second# = I# (first# /# second#)
 
 -- | Construct a zero-width bounding range containing a single value.
 {-# INLINE constant #-}
@@ -347,22 +323,24 @@ infinite :: Interval units
 infinite = Interval -Quantity.infinity Quantity.infinity
 
 aggregate2 :: Interval units -> Interval units -> Interval units
-aggregate2 (Interval low1 high1) (Interval low2 high2) =
-  Interval (Prelude.min low1 low2) (Prelude.max high1 high2)
+aggregate2 (I# (Interval# low1# high1#)) (I# (Interval# low2# high2#)) =
+  I# (Interval# (min# low1# low2#) (max# high1# high2#))
 
 aggregate3 :: Interval units -> Interval units -> Interval units -> Interval units
-aggregate3 (Interval low1 high1) (Interval low2 high2) (Interval low3 high3) =
-  Interval
-    (Prelude.min (Prelude.min low1 low2) low3)
-    (Prelude.max (Prelude.max high1 high2) high3)
+aggregate3 first second third = do
+  let !(I# (Interval# low1# high1#)) = first
+  let !(I# (Interval# low2# high2#)) = second
+  let !(I# (Interval# low3# high3#)) = third
+  I# (Interval# (low1# `min#` low2# `min#` low3#) (high1# `max#` high2# `max#` high3#))
 
 -- | Build a bounding range containing all ranges in the given non-empty list.
 aggregate :: NonEmpty (Interval units) -> Interval units
-aggregate (Interval low1 high1 :| rest) = do
-  let go low high [] = Interval low high
-      go low high (Interval nextLow nextHigh : remaining) =
-        go (Prelude.min low nextLow) (Prelude.max high nextHigh) remaining
-  go low1 high1 rest
+aggregate (I# (Interval# low# high#) :| rest) = aggregateImpl low# high# rest
+
+aggregateImpl :: Double# -> Double# -> List (Interval units) -> Interval units
+aggregateImpl low# high# [] = I# (Interval# low# high#)
+aggregateImpl low# high# (I# (Interval# nextLow# nextHigh#) : remaining) =
+  aggregateImpl (min# low# nextLow#) (max# high# nextHigh#) remaining
 
 aggregateOf :: (a -> Interval units) -> NonEmpty a -> Interval units
 aggregateOf function nonEmpty = aggregate (NonEmpty.map function nonEmpty)
@@ -376,21 +354,20 @@ intersection (Interval low1 high1) (Interval low2 high2)
 
 {-# INLINE hull3 #-}
 hull3 :: Quantity units -> Quantity units -> Quantity units -> Interval units
-hull3 a b c = Interval (Prelude.min a (Prelude.min b c)) (Prelude.max a (Prelude.max b c))
+hull3 (Q# a#) (Q# b#) (Q# c#) = I# (hull3# a# b# c#)
 
 {-# INLINE hull4 #-}
 hull4 :: Quantity units -> Quantity units -> Quantity units -> Quantity units -> Interval units
-hull4 (Q# a#) (Q# b#) (Q# c#) (Q# d#) = do
-  let !(# low#, high# #) = hull4# a# b# c# d#
-  Ordered# low# high#
+hull4 (Q# a#) (Q# b#) (Q# c#) (Q# d#) = I# (hull4# a# b# c# d#)
 
 -- | Build a bounding range containing all values in the given non-empty list.
 hull :: NonEmpty (Quantity units) -> Interval units
-hull (first :| rest) = do
-  let go low high [] = Interval low high
-      go low high (next : remaining) =
-        go (Prelude.min low next) (Prelude.max high next) remaining
-  go first first rest
+hull (Q# first# :| rest) = hullImpl first# first# rest
+
+hullImpl :: Double# -> Double# -> List (Quantity units) -> Interval units
+hullImpl low# high# [] = I# (Interval# low# high#)
+hullImpl low# high# (Q# next# : remaining) =
+  hullImpl (min# low# next#) (max# high# next#) remaining
 
 hullOf :: (a -> Quantity units) -> NonEmpty a -> Interval units
 hullOf function nonEmpty = hull (NonEmpty.map function nonEmpty)
@@ -415,11 +392,7 @@ endpoints (Interval low high) = (low, high)
 
 {-# INLINE width #-}
 width :: Interval units -> Quantity units
-width interval = Q# (width# interval)
-
-{-# INLINE width# #-}
-width# :: Interval units -> Double#
-width# (I# low# high#) = high# -# low#
+width (I# interval#) = Q# (diameter# interval#)
 
 {-# INLINE maxAbs #-}
 maxAbs :: Interval units -> Quantity units
@@ -454,7 +427,7 @@ sqrt :: Units.Squared units1 units2 => Interval units2 -> Interval units1
 sqrt = sqrt_ . Units.unspecialize
 
 hypot2 :: Interval units -> Interval units -> Interval units
-hypot2 (I# xMin# xMax#) (I# yMin# yMax#) = do
+hypot2 (I# (Interval# xMin# xMax#)) (I# (Interval# yMin# yMax#)) = do
   let positiveX# = xMin# >=# 0.0##
   let negativeX# = xMax# <=# 0.0##
   let positiveY# = yMin# >=# 0.0##
@@ -462,16 +435,16 @@ hypot2 (I# xMin# xMax#) (I# yMin# yMax#) = do
   let xMagnitude# = max# (abs# xMin#) (abs# xMax#)
   let yMagnitude# = max# (abs# yMin#) (abs# yMax#)
   let maxMagnitude# = hypot2# xMagnitude# yMagnitude#
-  case (# positiveX#, negativeX#, positiveY#, negativeY# #) of
-    (# 1#, _, 1#, _ #) -> I# (hypot2# xMin# yMin#) maxMagnitude#
-    (# 1#, _, _, 1# #) -> I# (hypot2# xMin# yMax#) maxMagnitude#
-    (# _, 1#, 1#, _ #) -> I# (hypot2# xMax# yMin#) maxMagnitude#
-    (# _, 1#, _, 1# #) -> I# (hypot2# xMax# yMax#) maxMagnitude#
-    (# 1#, _, _, _ #) -> I# xMin# maxMagnitude#
-    (# _, 1#, _, _ #) -> I# (negate# xMax#) maxMagnitude#
-    (# _, _, 1#, _ #) -> I# yMin# maxMagnitude#
-    (# _, _, _, 1# #) -> I# (negate# yMax#) maxMagnitude#
-    (# _, _, _, _ #) -> I# 0.0## maxMagnitude#
+  I# $ case (# positiveX#, negativeX#, positiveY#, negativeY# #) of
+    (# True#, _, True#, _ #) -> Interval# (hypot2# xMin# yMin#) maxMagnitude#
+    (# True#, _, _, True# #) -> Interval# (hypot2# xMin# yMax#) maxMagnitude#
+    (# _, True#, True#, _ #) -> Interval# (hypot2# xMax# yMin#) maxMagnitude#
+    (# _, True#, _, True# #) -> Interval# (hypot2# xMax# yMax#) maxMagnitude#
+    (# True#, _, _, _ #) -> Interval# xMin# maxMagnitude#
+    (# _, True#, _, _ #) -> Interval# (negate# xMax#) maxMagnitude#
+    (# _, _, True#, _ #) -> Interval# yMin# maxMagnitude#
+    (# _, _, _, True# #) -> Interval# (negate# yMax#) maxMagnitude#
+    (# _, _, _, _ #) -> Interval# 0.0## maxMagnitude#
 
 cubed :: Interval Unitless -> Interval Unitless
 cubed (Interval low high) = Interval (low * low * low) (high * high * high)
@@ -486,18 +459,10 @@ member :: Quantity units -> Interval units -> Bool
 member value (Interval low high) = low <= value && value <= high
 
 exclusion :: Quantity units -> Interval units -> Quantity units
-exclusion (Q# value#) interval = Q# (exclusion# value# interval)
-
-{-# INLINE exclusion# #-}
-exclusion# :: Double# -> Interval units -> Double#
-exclusion# value# (I# low# high#) = max# (low# -# value#) (value# -# high#)
+exclusion (Q# value#) (I# interval#) = Q# (exclusion# value# interval#)
 
 inclusion :: Quantity units -> Interval units -> Quantity units
-inclusion (Q# value#) interval = Q# (inclusion# value# interval)
-
-{-# INLINE inclusion# #-}
-inclusion# :: Double# -> Interval units -> Double#
-inclusion# value# interval = negate# (exclusion# value# interval)
+inclusion (Q# value#) (I# interval#) = Q# (inclusion# value# interval#)
 
 {-| Check if one bounding range contains another.
 
@@ -512,14 +477,10 @@ containedIn :: Interval units -> Interval units -> Bool
 containedIn interval value = contains value interval
 
 separation :: Interval units -> Interval units -> Quantity units
-separation interval1 interval2 = Q# (separation# interval1 interval2)
-
-{-# INLINE separation# #-}
-separation# :: Interval units -> Interval units -> Double#
-separation# (I# low1# high1#) (I# low2# high2#) = intervalSeparation# low1# high1# low2# high2#
+separation (I# first#) (I# second#) = Q# (separation# first# second#)
 
 overlap :: Interval units -> Interval units -> Quantity units
-overlap first second = negate (separation first second)
+overlap (I# first#) (I# second#) = Q# (overlap# first# second#)
 
 bisect :: Interval units -> (Interval units, Interval units)
 bisect (Interval low high) = do

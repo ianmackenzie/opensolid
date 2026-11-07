@@ -24,9 +24,7 @@ module OpenSolid.Bounds2D
   , contains
   , isContainedIn
   , overlap
-  , overlap#
   , separation
-  , separation#
   , intersection
   , lowerLeftCorner
   , lowerRightCorner
@@ -64,7 +62,7 @@ import OpenSolid.Point2D (Point2D (Point2D))
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Prelude
 import OpenSolid.Primitives
-  ( Bounds2D (Bounds2D, PositionBounds2D)
+  ( Bounds2D (B2D#, Bounds2D, PositionBounds2D)
   , Point2D (Position2D)
   , VectorTransform2D (VectorTransform2D)
   )
@@ -124,16 +122,8 @@ aggregateOf function nonEmpty = aggregate (NonEmpty.map function nonEmpty)
 exclusion :: Point2D units -> Bounds2D units -> Quantity units
 exclusion (Position2D p) (PositionBounds2D pb) = VectorBounds2D.exclusion p pb
 
-{-# INLINE exclusion# #-}
-exclusion# :: Point2D units -> Bounds2D units -> Double#
-exclusion# (Position2D p) (PositionBounds2D pb) = VectorBounds2D.exclusion# p pb
-
 inclusion :: Point2D units -> Bounds2D units -> Quantity units
 inclusion (Position2D p) (PositionBounds2D pb) = VectorBounds2D.inclusion p pb
-
-{-# INLINE inclusion# #-}
-inclusion# :: Point2D units -> Bounds2D units -> Double#
-inclusion# (Position2D p) (PositionBounds2D pb) = VectorBounds2D.inclusion# p pb
 
 member :: Point2D units -> Bounds2D units -> Bool
 member (Position2D p) (PositionBounds2D pb) = VectorBounds2D.member p pb
@@ -148,17 +138,9 @@ isContainedIn bounds1 bounds2 = contains bounds2 bounds1
 separation :: Bounds2D units -> Bounds2D units -> Quantity units
 separation (PositionBounds2D pb1) (PositionBounds2D pb2) = VectorBounds2D.separation pb1 pb2
 
-{-# INLINE separation# #-}
-separation# :: Bounds2D units -> Bounds2D units -> Double#
-separation# (PositionBounds2D pb1) (PositionBounds2D pb2) = VectorBounds2D.separation# pb1 pb2
-
 {-# INLINE overlap #-}
 overlap :: Bounds2D units -> Bounds2D units -> Quantity units
 overlap (PositionBounds2D pb1) (PositionBounds2D pb2) = VectorBounds2D.overlap pb1 pb2
-
-{-# INLINE overlap# #-}
-overlap# :: Bounds2D units -> Bounds2D units -> Double#
-overlap# (PositionBounds2D pb1) (PositionBounds2D pb2) = VectorBounds2D.overlap# pb1 pb2
 
 intersection ::
   Bounds2D units ->
@@ -229,11 +211,7 @@ corners box =
 
 {-# INLINE diameter #-}
 diameter :: Bounds2D units -> Quantity units
-diameter bounds = Q# (diameter# bounds)
-
-{-# INLINE diameter# #-}
-diameter# :: Bounds2D units -> Double#
-diameter# (Bounds2D x y) = hypot2# (Interval.width# x) (Interval.width# y)
+diameter (B2D# bounds#) = Q# (diameter# bounds#)
 
 area_ :: Bounds2D units -> Quantity (units ?*? units)
 area_ (Bounds2D x y) = Interval.width x ?*? Interval.width y
