@@ -1,0 +1,55 @@
+#!/bin/bash
+
+set -euo pipefail
+
+if [ $# -ne 1 ]; then
+  echo "Usage: add-executable <name>" >&2
+  exit 1
+fi
+
+name=$1
+
+if ! [[ $name =~ ^[a-z][a-z0-9]*(-[a-z0-9]+)*$ ]]; then
+  echo "Invalid executable name '$name' (expected something like 'torus-intersection')" >&2
+  exit 1
+fi
+
+executables_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../executables" && pwd)"
+cabal_file="$executables_dir/executables.cabal"
+target_dir="$executables_dir/$name"
+
+if [ -e "$target_dir" ]; then
+  echo "Directory '$target_dir' already exists" >&2
+  exit 1
+fi
+
+if grep -q "^executable $name\$" "$cabal_file"; then
+  echo "Executable '$name' already exists in '$cabal_file'" >&2
+  exit 1
+fi
+
+mkdir "$target_dir"
+
+cat > "$target_dir/Main.hs" << 'EOF'
+module Main (main) where
+
+import OpenSolid.Prelude
+
+main :: IO ()
+main = do
+  TODO
+EOF
+
+cat >> "$cabal_file" << EOF
+
+executable $name
+  import: executable-config
+  main-is: Main.hs
+  hs-source-dirs: $name
+  build-depends:
+    base,
+    opensolid-core,
+EOF
+
+echo "Created executable '$name' in '$target_dir'"
+echo "Run with: cabal run $name"
