@@ -220,6 +220,7 @@ library
     OpenSolid.Surface3D
     OpenSolid.Surface3D.Edge
     OpenSolid.Surface3D.Intersections
+    OpenSolid.Surface3D.Intersections.Domain
     OpenSolid.Surface3D.OverlappingSegment
     OpenSolid.Surface3D.Pin
     OpenSolid.Surface3D.Pole
