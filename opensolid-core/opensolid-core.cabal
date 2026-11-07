@@ -375,6 +375,7 @@ test-suite opensolid-core-test
     Tests.SurfaceFunction1D
     Tests.SurfaceFunction3D
     Tests.Text
+    Tests.Unboxed.Math
     Tests.VectorBounds2D
     Tests.VectorBounds3D
     Tests.VectorCurve2D

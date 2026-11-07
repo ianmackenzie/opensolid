@@ -28,6 +28,7 @@ import Tests.Stream qualified
 import Tests.Surface3D qualified
 import Tests.SurfaceFunction1D qualified
 import Tests.Text qualified
+import Tests.Unboxed.Math qualified
 import Tests.VectorBounds2D qualified
 import Tests.VectorBounds3D qualified
 
@@ -60,6 +61,7 @@ tests =
   , Test.group "Tests.Body3D" Tests.Body3D.tests
   , Test.group "Tests.Bezier" Tests.Bezier.tests
   , Test.group "Tests.Surface3D" Tests.Surface3D.tests
+  , Test.group "Tests.Unboxed.Math" Tests.Unboxed.Math.tests
   ]
 
 main :: IO ()
