@@ -1,5 +1,5 @@
 module OpenSolid.Bisection
-  ( Domain
+  ( Domain (contains)
   , Segment (children)
   , Tagged (Tagged)
   , subdomain
