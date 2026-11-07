@@ -43,6 +43,10 @@ module OpenSolid.Unboxed.Math
   , intervalOverInterval#
   , determinantBounds2D#
   , determinantBounds3D#
+  , determinant2D#
+  , determinant3D#
+  , inverse2D#
+  , inverse3D#
   , interpolateFrom#
   , quadraticBezier#
   , cubicBezier#
@@ -324,6 +328,79 @@ determinantBounds3D#
     let !(# dxyMin#, dxyMax# #) =
           intervalMinusInterval# m11ProdMin# m11ProdMax# m21ProdMin# m21ProdMax#
     intervalPlusInterval# dxyMin# dxyMax# m31ProdMin# m31ProdMax#
+
+{-# INLINE determinant2D# #-}
+determinant2D# :: Double# -> Double# -> Double# -> Double# -> Double#
+determinant2D# m11# m21# m12# m22# = m11# *# m22# -# m12# *# m21#
+
+{-# INLINE determinant3D# #-}
+determinant3D# ::
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double#
+determinant3D# m11# m21# m31# m12# m22# m32# m13# m23# m33# = do
+  let cofactor11# = determinant2D# m22# m32# m23# m33#
+  let cofactor21# = negate# (determinant2D# m12# m32# m13# m33#)
+  let cofactor31# = determinant2D# m12# m22# m13# m23#
+  m11# *# cofactor11# +# m21# *# cofactor21# +# m31# *# cofactor31#
+
+{-# INLINE inverse2D# #-}
+inverse2D# ::
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  (# Double#, Double#, Double#, Double# #)
+inverse2D# m11# m21# m12# m22# = do
+  let determinant# = determinant2D# m11# m21# m12# m22#
+  let scale# = 1.0## /# determinant#
+  let m'11# = scale# *# m22#
+  let m'21# = scale# *# negate# m21#
+  let m'12# = scale# *# negate# m12#
+  let m'22# = scale# *# m11#
+  (# m'11#, m'21#, m'12#, m'22# #)
+
+{-# INLINEABLE inverse3D# #-}
+inverse3D# ::
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  Double# ->
+  (# Double#, Double#, Double#, Double#, Double#, Double#, Double#, Double#, Double# #)
+inverse3D# m11# m21# m31# m12# m22# m32# m13# m23# m33# = do
+  let cofactor11# = determinant2D# m22# m32# m23# m33#
+  let cofactor12# = negate# (determinant2D# m21# m31# m23# m33#)
+  let cofactor13# = determinant2D# m21# m31# m22# m32#
+  let cofactor21# = negate# (determinant2D# m12# m32# m13# m33#)
+  let cofactor22# = determinant2D# m11# m31# m13# m33#
+  let cofactor23# = negate# (determinant2D# m11# m31# m12# m32#)
+  let cofactor31# = determinant2D# m12# m22# m13# m23#
+  let cofactor32# = negate# (determinant2D# m11# m21# m13# m23#)
+  let cofactor33# = determinant2D# m11# m21# m12# m22#
+  let determinant# = m11# *# cofactor11# +# m21# *# cofactor21# +# m31# *# cofactor31#
+  let scale# = 1.0## /# determinant#
+  let m'11# = scale# *# cofactor11#
+  let m'21# = scale# *# cofactor12#
+  let m'31# = scale# *# cofactor13#
+  let m'12# = scale# *# cofactor21#
+  let m'22# = scale# *# cofactor22#
+  let m'32# = scale# *# cofactor23#
+  let m'13# = scale# *# cofactor31#
+  let m'23# = scale# *# cofactor32#
+  let m'33# = scale# *# cofactor33#
+  (# m'11#, m'21#, m'31#, m'12#, m'22#, m'32#, m'13#, m'23#, m'33# #)
 
 {-# INLINE interpolateFrom# #-}
 interpolateFrom# :: Double# -> Double# -> Double# -> Double#
