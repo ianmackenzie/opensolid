@@ -168,9 +168,10 @@ gltfMeshes resolution model = case model of
         let Interval yLow yHigh = yBounds
         let Interval zLow zHigh = zBounds
         let pbrMaterial = Model3D.traversal.currentPbrMaterial
+        let opacity = Model3D.traversal.currentMultipliedOpacity
         List.singleton
           GltfMesh
-            { gltfMaterial = encodeMaterial pbrMaterial
+            { gltfMaterial = encodeMaterial pbrMaterial opacity
             , numFaces
             , indexType
             , indices = faceIndicesBuilder indexType meshFaceIndices
@@ -268,16 +269,19 @@ meshBuilder mesh = mesh.indices <> mesh.vertices
 meshByteLength :: GltfMesh -> Int
 meshByteLength mesh = mesh.indicesByteLength + mesh.verticesByteLength
 
-encodeMaterial :: PbrMaterial -> Json
-encodeMaterial material = do
+encodeMaterial :: PbrMaterial -> Number -> Json
+encodeMaterial material opacity = do
   let (r, g, b) = Color.toRgb1 (PbrMaterial.baseColor material)
+  let isOpaque = opacity == 1.0
   Json.object
     [ Json.field "pbrMetallicRoughness" do
         Json.object
-          [ Json.field "baseColorFactor" $ Json.listOf Json.number [r, g, b, 1.0]
+          [ Json.field "baseColorFactor" $ Json.listOf Json.number [r, g, b, opacity]
           , Json.field "metallicFactor" $ Json.number (PbrMaterial.metallic material)
           , Json.field "roughnessFactor" $ Json.number (PbrMaterial.roughness material)
           ]
+    , Json.field "alphaMode" $ Json.text (if isOpaque then "OPAQUE" else "BLEND")
+    , Json.field "doubleSided" $ Json.bool (not isOpaque)
     ]
 
 faceIndicesBuilder :: IndexType -> List (Int, Int, Int) -> Builder
