@@ -1,8 +1,9 @@
 module OpenSolid.Debug
-  ( trace
+  ( (!)
+  , trace
   , show
+  , Log
   , log
-  , intercept
   , callStack
   )
 where
@@ -10,20 +11,32 @@ where
 import Debug.Trace qualified
 import GHC.Stack (HasCallStack)
 import GHC.Stack qualified
+import GHC.TypeLits (KnownSymbol)
 import OpenSolid.Prelude hiding (show)
 import OpenSolid.Text qualified as Text
 
-trace :: Text -> a -> a
-trace message value = Debug.Trace.trace (string message) value
+trace :: Text -> Log
+trace message = Log [message]
 
 show :: Show a => a -> Text
 show = Text.show
 
-log :: Show b => Text -> (a -> b) -> a -> a
-log label function value = trace (label <> ": " <> show (function value)) value
+data Log = Log (List Text)
 
-intercept :: Show a => Text -> a -> a
-intercept label value = log label id value
+(!) :: a -> Log -> a
+value ! Log messages = Debug.Trace.trace (string (Text.multiline messages)) value
+
+infixl 0 !
+
+log :: Log
+log = Log []
+
+instance
+  (KnownSymbol name, Show value) =>
+  SetField name value Log Log
+  where
+  setField value (Log lines) = do
+    Log (lines <> [Text.symbol name <> ": " <> show value])
 
 callStack :: HasCallStack => Text
 callStack = do
