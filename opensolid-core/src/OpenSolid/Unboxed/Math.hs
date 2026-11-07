@@ -264,10 +264,10 @@ determinantBounds2D# ::
   Double# ->
   Double# ->
   (# Double#, Double# #)
-determinantBounds2D# x1Min# x1Max# y1Min# y1Max# x2Min# x2Max# y2Min# y2Max# = do
-  let !(# x1y2Min#, x1y2Max# #) = intervalTimesInterval# x1Min# x1Max# y2Min# y2Max#
-  let !(# x2y1Min#, x2y1Max# #) = intervalTimesInterval# x2Min# x2Max# y1Min# y1Max#
-  intervalMinusInterval# x1y2Min# x1y2Max# x2y1Min# x2y1Max#
+determinantBounds2D# m11Min# m11Max# m21Min# m21Max# m12Min# m12Max# m22Min# m22Max# = do
+  let !(# m11m22Min#, m11m22Max# #) = intervalTimesInterval# m11Min# m11Max# m22Min# m22Max#
+  let !(# m12m21Min#, m12m21Max# #) = intervalTimesInterval# m12Min# m12Max# m21Min# m21Max#
+  intervalMinusInterval# m11m22Min# m11m22Max# m12m21Min# m12m21Max#
 
 determinantBounds3D# ::
   Double# ->
@@ -290,39 +290,39 @@ determinantBounds3D# ::
   Double# ->
   (# Double#, Double# #)
 determinantBounds3D#
-  x1Min#
-  x1Max#
-  y1Min#
-  y1Max#
-  z1Min#
-  z1Max#
-  x2Min#
-  x2Max#
-  y2Min#
-  y2Max#
-  z2Min#
-  z2Max#
-  x3Min#
-  x3Max#
-  y3Min#
-  y3Max#
-  z3Min#
-  z3Max# = do
-    let !(# x1DetMin#, x1DetMax# #) =
-          determinantBounds2D# y2Min# y2Max# z2Min# z2Max# y3Min# y3Max# z3Min# z3Max#
-    let !(# y1DetMin#, y1DetMax# #) =
-          determinantBounds2D# x2Min# x2Max# z2Min# z2Max# x3Min# x3Max# z3Min# z3Max#
-    let !(# z1DetMin#, z1DetMax# #) =
-          determinantBounds2D# x2Min# x2Max# y2Min# y2Max# x3Min# x3Max# y3Min# y3Max#
-    let !(# x1ProdMin#, x1ProdMax# #) =
-          intervalTimesInterval# x1Min# x1Max# x1DetMin# x1DetMax#
-    let !(# y1ProdMin#, y1ProdMax# #) =
-          intervalTimesInterval# y1Min# y1Max# y1DetMin# y1DetMax#
-    let !(# z1ProdMin#, z1ProdMax# #) =
-          intervalTimesInterval# z1Min# z1Max# z1DetMin# z1DetMax#
+  m11Min#
+  m11Max#
+  m21Min#
+  m21Max#
+  m31Min#
+  m31Max#
+  m12Min#
+  m12Max#
+  m22Min#
+  m22Max#
+  m32Min#
+  m32Max#
+  m13Min#
+  m13Max#
+  m23Min#
+  m23Max#
+  m33Min#
+  m33Max# = do
+    let !(# m11DetMin#, m11DetMax# #) =
+          determinantBounds2D# m22Min# m22Max# m32Min# m32Max# m23Min# m23Max# m33Min# m33Max#
+    let !(# m21DetMin#, m21DetMax# #) =
+          determinantBounds2D# m12Min# m12Max# m32Min# m32Max# m13Min# m13Max# m33Min# m33Max#
+    let !(# m31DetMin#, m31DetMax# #) =
+          determinantBounds2D# m12Min# m12Max# m22Min# m22Max# m13Min# m13Max# m23Min# m23Max#
+    let !(# m11ProdMin#, m11ProdMax# #) =
+          intervalTimesInterval# m11Min# m11Max# m11DetMin# m11DetMax#
+    let !(# m21ProdMin#, m21ProdMax# #) =
+          intervalTimesInterval# m21Min# m21Max# m21DetMin# m21DetMax#
+    let !(# m31ProdMin#, m31ProdMax# #) =
+          intervalTimesInterval# m31Min# m31Max# m31DetMin# m31DetMax#
     let !(# dxyMin#, dxyMax# #) =
-          intervalMinusInterval# x1ProdMin# x1ProdMax# y1ProdMin# y1ProdMax#
-    intervalPlusInterval# dxyMin# dxyMax# z1ProdMin# z1ProdMax#
+          intervalMinusInterval# m11ProdMin# m11ProdMax# m21ProdMin# m21ProdMax#
+    intervalPlusInterval# dxyMin# dxyMax# m31ProdMin# m31ProdMax#
 
 {-# INLINE interpolateFrom# #-}
 interpolateFrom# :: Double# -> Double# -> Double# -> Double#
