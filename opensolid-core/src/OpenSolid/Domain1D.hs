@@ -28,7 +28,7 @@ where
 import OpenSolid.Interval (Interval (Interval))
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Number qualified as Number
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (half)
 
 data Domain1D = Domain1D
   { n :: Number

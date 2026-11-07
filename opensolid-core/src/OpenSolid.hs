@@ -56,12 +56,6 @@ product = (*)
 product_ :: Multiplication_ a b c => a -> b -> c
 product_ = (?*?)
 
-twice :: Multiplication Number a a => a -> a
-twice = (2.0 *)
-
-half :: Multiplication Number a a => a -> a
-half = (0.5 *)
-
 quotient :: Division a b c => a -> b -> c
 quotient = (/)
 

@@ -27,7 +27,7 @@ where
 import OpenSolid.Bounds2D (Bounds2D (Bounds2D))
 import OpenSolid.Domain1D (Domain1D)
 import OpenSolid.Domain1D qualified as Domain1D
-import OpenSolid.Prelude
+import OpenSolid.Prelude hiding (half)
 import OpenSolid.UvBounds (UvBounds)
 
 data Domain2D = Domain2D Domain1D Domain1D deriving (Show)

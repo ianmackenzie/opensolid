@@ -72,6 +72,8 @@ module OpenSolid.Prelude
   , curry8
   , curry9
   , curry10
+  , half
+  , twice
   )
 where
 
@@ -876,3 +878,11 @@ curry9 function a b c d e f g h i = function (a, b, c, d, e, f, g, h, i)
 {-# INLINE curry10 #-}
 curry10 :: ((a, b, c, d, e, f, g, h, i, j) -> result) -> (a -> b -> c -> d -> e -> f -> g -> h -> i -> j -> result)
 curry10 function a b c d e f g h i j = function (a, b, c, d, e, f, g, h, i, j)
+
+----- Math syntax sugar -----
+
+half :: Multiplication Number a a => a -> a
+half = (0.5 *)
+
+twice :: Multiplication Number a a => a -> a
+twice = (2.0 *)

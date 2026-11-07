@@ -27,8 +27,7 @@ pickMinimum = Test.check 100 "pickMinimum" do
 reverseMap :: Test
 reverseMap = Test.check 100 "reverseMap" do
   ints <- Test.generate (NonEmpty.random 10 (Random.int 1 10))
-  let twice n = 2 * n
-  Test.expect (NonEmpty.reverseMap twice ints == NonEmpty.reverse (NonEmpty.map twice ints))
+  Test.expect (NonEmpty.reverseMap (2 *) ints == NonEmpty.reverse (NonEmpty.map (2 *) ints))
 
 pairwise :: Test
 pairwise = Test.verify "pairwise" do
