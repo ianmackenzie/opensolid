@@ -1,0 +1,89 @@
+#!/bin/bash
+
+# Claude-generated script to use Blender as a .glb viewer,
+# since e.g. it handles transparency much better than f3d
+
+set -euo pipefail
+
+if [ $# -ne 1 ]; then
+  echo "Usage: view-glb <file.glb>" >&2
+  exit 1
+fi
+
+if [ ! -f "$1" ]; then
+  echo "File not found: $1" >&2
+  exit 1
+fi
+
+GLB_PATH=$(realpath "$1")
+
+PYTHON_SCRIPT=$(cat <<'PYTHON'
+import math
+import sys
+
+import bpy
+from mathutils import Euler
+
+glb_path = sys.argv[sys.argv.index("--") + 1]
+
+# Remove all default objects (cube, camera, light, etc.)
+bpy.ops.object.select_all(action="SELECT")
+bpy.ops.object.delete()
+
+bpy.ops.import_scene.gltf(filepath=glb_path)
+
+# The importer leaves the new objects selected;
+# deselect them to avoid the orange selection highlight
+bpy.ops.object.select_all(action="DESELECT")
+
+# Don't prompt about unsaved changes on quit,
+# and don't persist this setting to the user's preferences
+bpy.context.preferences.view.use_save_prompt = False
+bpy.context.preferences.use_preferences_save = False
+
+# When running a --python script in UI mode,
+# the window and 3D viewport already exist with their real sizes,
+# so everything below can run immediately
+def find_viewport(window):
+    return next(area for area in window.screen.areas if area.type == "VIEW_3D")
+
+window = bpy.context.window_manager.windows[0]
+area = find_viewport(window)
+
+# Hide side panel, toolbar, headers and last-operator panel
+# (these settings carry over to the maximized viewport created below)
+space = area.spaces.active
+space.show_region_ui = False
+space.show_region_toolbar = False
+space.show_region_header = False
+space.show_region_tool_header = False
+space.show_region_hud = False
+space.shading.show_object_outline = False
+
+# Hide some overlays and make the grid finer
+space.overlay.grid_scale = 0.01
+space.overlay.show_text = False
+space.overlay.show_cursor = False
+
+# Maximize the 3D viewport, hiding the top bar, status bar and other editors
+with bpy.context.temp_override(window=window, area=area):
+    bpy.ops.screen.screen_full_area(use_hide_panels=True)
+
+# Maximizing creates a new screen, so look up the (now maximized) viewport again
+area = find_viewport(window)
+region = next(r for r in area.regions if r.type == "WINDOW")
+
+# Isometric-angle view (Z up):
+# atan(sqrt(2)) is the angle between the Z axis and the (1, 1, 1) diagonal
+area.spaces.active.region_3d.view_rotation = Euler(
+    (math.atan(math.sqrt(2)), 0, math.radians(135))
+).to_quaternion()
+
+# Zoom to extents
+with bpy.context.temp_override(window=window, area=area, region=region):
+    bpy.ops.view3d.view_all(center=False)
+PYTHON
+)
+
+# Blender must be run with its UI (not --background) for the viewport to exist
+exec blender --python-expr "$PYTHON_SCRIPT" -- "$GLB_PATH"
