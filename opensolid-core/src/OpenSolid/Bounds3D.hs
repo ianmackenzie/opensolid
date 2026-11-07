@@ -34,6 +34,12 @@ module OpenSolid.Bounds3D
   , projectInto
   , distanceAlong
   , transformBy
+  , leftFace
+  , rightFace
+  , backFace
+  , frontFace
+  , bottomFace
+  , topFace
   )
 where
 
@@ -266,3 +272,21 @@ transformBy transform (Bounds3D pR pF pU) = do
     (Interval (cR' - rR') (cR' + rR'))
     (Interval (cF' - rF') (cF' + rF'))
     (Interval (cU' - rU') (cU' + rU'))
+
+leftFace :: Bounds3D space -> Bounds3D space
+leftFace (Bounds3D (Interval l _) f u) = Bounds3D (Interval.constant l) f u
+
+rightFace :: Bounds3D space -> Bounds3D space
+rightFace (Bounds3D (Interval _ r) f u) = Bounds3D (Interval.constant r) f u
+
+backFace :: Bounds3D space -> Bounds3D space
+backFace (Bounds3D r (Interval b _) u) = Bounds3D r (Interval.constant b) u
+
+frontFace :: Bounds3D space -> Bounds3D space
+frontFace (Bounds3D r (Interval _ f) u) = Bounds3D r (Interval.constant f) u
+
+bottomFace :: Bounds3D space -> Bounds3D space
+bottomFace (Bounds3D r f (Interval b _)) = Bounds3D r f (Interval.constant b)
+
+topFace :: Bounds3D space -> Bounds3D space
+topFace (Bounds3D r f (Interval _ t)) = Bounds3D r f (Interval.constant t)
