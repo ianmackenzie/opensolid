@@ -22,6 +22,7 @@ import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Units qualified as Units
 import OpenSolid.UvBounds (data UvBounds)
 import OpenSolid.UvPoint (data UvPoint)
+import OpenSolid.Vector2D (Vector2D)
 
 lengthScale ::
   CurveExists dimension units space =>
@@ -57,7 +58,7 @@ solve ::
   Curve dimension units space ->
   Interval Unitless ->
   Interval Unitless ->
-  NewtonRaphson.Surface.Function 2 units Void ->
+  NewtonRaphson.Surface.Function (Vector2D units) ->
   Fuzzy (Maybe IntersectionPoint)
 solve curveA curveB tRangeA tRangeB function = do
   UvPoint tA tB <- NewtonRaphson.Surface.solveIn (UvBounds tRangeA tRangeB) function

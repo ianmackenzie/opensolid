@@ -194,7 +194,7 @@ class
       (Direction dimension space)
       (VectorCurve dimension units space)
       (Curve1D units)
-  , NewtonRaphson.Curve.Solver dimension units space
+  , NewtonRaphson.Curve.Solver (Vector dimension units space)
   ) =>
   VectorCurveExists dimension units space
 

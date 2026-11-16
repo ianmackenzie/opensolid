@@ -12,23 +12,17 @@ import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Vector (Vector)
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
 
-type Function dimension units space =
-  Number -> (# Vector dimension units space, Vector dimension units space #)
+type Function value = Number -> (# value, value #)
 
-class Solver dimension units space where
-  solveFrom :: Number -> Function dimension units space -> Fuzzy Number
+class Solver value where
+  solveFrom :: Number -> Function value -> Fuzzy Number
 
-solveIn ::
-  Solver dimension units space =>
-  Interval Unitless ->
-  Function dimension units space ->
-  Fuzzy Number
+solveIn :: Solver value => Interval Unitless -> Function value -> Fuzzy Number
 solveIn tRange evaluate = do
   tSolution <- solveFrom (Interval.midpoint tRange) evaluate
   if unitless (tSolution ^ tRange) then Resolved tSolution else Unresolved
@@ -36,12 +30,12 @@ solveIn tRange evaluate = do
 validateSolution :: Number -> Number -> Fuzzy Number
 validateSolution t1 tStep = if unitless (tStep ~= 0.0) then Resolved t1 else Unresolved
 
-instance Solver 1 units Void where
+instance Solver (Quantity units) where
   solveFrom t1 evaluate = do
     let (# v1, dv1 #) = evaluate t1
     solve1D evaluate t1 v1 dv1
 
-solve1D :: Function 1 units Void -> Number -> Quantity units -> Quantity units -> Fuzzy Number
+solve1D :: Function (Quantity units) -> Number -> Quantity units -> Quantity units -> Fuzzy Number
 solve1D evaluate t1 v1 dv1 = do
   let tStep = v1 / dv1
   let t2 = t1 - tStep
@@ -50,12 +44,12 @@ solve1D evaluate t1 v1 dv1 = do
     then solve1D evaluate t2 v2 dv2
     else validateSolution t1 tStep
 
-instance Solver 2 units Void where
+instance Solver (Vector2D units) where
   solveFrom t1 evaluate = do
     let (# v1, d1 #) = evaluate t1
     solve2D evaluate t1 v1 d1
 
-solve2D :: Function 2 units Void -> Number -> Vector2D units -> Vector2D units -> Fuzzy Number
+solve2D :: Function (Vector2D units) -> Number -> Vector2D units -> Vector2D units -> Fuzzy Number
 solve2D evaluate t1 v1 d1 = do
   let tStep = (v1 `dot_` d1) / (d1 `dot_` d1)
   let t2 = t1 - tStep
@@ -64,13 +58,13 @@ solve2D evaluate t1 v1 d1 = do
     then solve2D evaluate t2 v2 d2
     else validateSolution t1 tStep
 
-instance Solver 3 units space where
+instance Solver (Vector3D units space) where
   solveFrom t1 evaluate = do
     let (# v1, d1 #) = evaluate t1
     solve3D evaluate t1 v1 d1
 
 solve3D ::
-  Function 3 units space ->
+  Function (Vector3D units space) ->
   Number ->
   Vector3D units space ->
   Vector3D units space ->

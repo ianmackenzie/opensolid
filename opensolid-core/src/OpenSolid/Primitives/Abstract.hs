@@ -65,7 +65,6 @@ type family
   Vector dimension units space =
     vector | vector -> dimension units space
   where
-  Vector 1 units Void = Quantity units
   Vector 2 units Void = Vector2D units
   Vector 3 units space = Vector3D units space
 

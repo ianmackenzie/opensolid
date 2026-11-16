@@ -836,8 +836,8 @@ class
       (VectorCurve dimension units space)
   , Intersects (Curve dimension units space) (Point dimension units space) units
   , Intersects (Point dimension units space) (Curve dimension units space) units
-  , NewtonRaphson.Curve.Solver dimension units space
-  , NewtonRaphson.Surface.Solver dimension units space
+  , NewtonRaphson.Curve.Solver (Vector dimension units space)
+  , NewtonRaphson.Surface.Solver (Vector dimension units space)
   ) =>
   CurveExists dimension units space
   where
@@ -1263,7 +1263,7 @@ matchingCurvatures scale (Just (magnitude1, direction1)) (Just (magnitude2, dire
 
 intersections ::
   ( CurveExists dimension units space
-  , NewtonRaphson.Surface.Solver dimension units space
+  , NewtonRaphson.Surface.Solver (Vector dimension units space)
   , Tolerance units
   ) =>
   Curve dimension units space ->

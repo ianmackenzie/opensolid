@@ -12,35 +12,28 @@ import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Prelude
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
-import OpenSolid.Vector (Vector)
 import OpenSolid.Vector2D (Vector2D (Vector2D))
 import OpenSolid.Vector2D qualified as Vector2D
 import OpenSolid.Vector3D (Vector3D)
 import OpenSolid.Vector3D qualified as Vector3D
 
-type Function dimension units space =
-  UvPoint ->
-  (# Vector dimension units space, Vector dimension units space, Vector dimension units space #)
+type Function value = UvPoint -> (# value, value, value #)
 
-class Solver dimension units space where
-  solveFrom :: UvPoint -> Function dimension units space -> Fuzzy UvPoint
+class Solver value where
+  solveFrom :: UvPoint -> Function value -> Fuzzy UvPoint
 
-solveIn ::
-  Solver dimension units space =>
-  UvBounds ->
-  Function dimension units space ->
-  Fuzzy UvPoint
+solveIn :: Solver value => UvBounds -> Function value -> Fuzzy UvPoint
 solveIn uvRange evaluate = do
   uvSolution <- solveFrom (Bounds2D.centerPoint uvRange) evaluate
   if unitless (uvSolution ^ uvRange) then Resolved uvSolution else Unresolved
 
-instance Solver 2 units Void where
+instance Solver (Vector2D units) where
   solveFrom uvPoint1 evaluate = do
     let (# v1, du1, dv1 #) = evaluate uvPoint1
     solve2D evaluate uvPoint1 v1 du1 dv1
 
 solve2D ::
-  Function 2 units Void ->
+  Function (Vector2D units) ->
   UvPoint ->
   Vector2D units ->
   Vector2D units ->
@@ -64,13 +57,13 @@ validateSolution :: UvPoint -> Vector2D Unitless -> Fuzzy UvPoint
 validateSolution uvPoint uvStep =
   if unitless (uvStep ~= Vector2D.zero) then Resolved uvPoint else Unresolved
 
-instance Solver 3 units space where
+instance Solver (Vector3D units space) where
   solveFrom uvPoint1 evaluate = do
     let (# v1, du1, dv1 #) = evaluate uvPoint1
     solve3D evaluate uvPoint1 v1 du1 dv1
 
 solve3D ::
-  Function 3 units space ->
+  Function (Vector3D units space) ->
   UvPoint ->
   Vector3D units space ->
   Vector3D units space ->
