@@ -10,10 +10,8 @@ where
 
 import OpenSolid.Interval (Interval)
 import OpenSolid.Interval qualified as Interval
-import OpenSolid.Number qualified as Number
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.Vector (Vector)
 import OpenSolid.Vector2D (Vector2D)
 import OpenSolid.Vector2D qualified as Vector2D
@@ -33,13 +31,10 @@ solveIn ::
   Fuzzy Number
 solveIn tRange evaluate = do
   tSolution <- solveFrom (Interval.midpoint tRange) evaluate
-  if Interval.inclusion tSolution tRange >= 0.0
-    then Resolved tSolution
-    else Unresolved
+  if unitless (tSolution ^ tRange) then Resolved tSolution else Unresolved
 
 validateSolution :: Number -> Number -> Fuzzy Number
-validateSolution t1 tStep =
-  if Number.abs tStep <= Tolerance.unitless then Resolved t1 else Unresolved
+validateSolution t1 tStep = if unitless (tStep ~= 0.0) then Resolved t1 else Unresolved
 
 instance Solver 1 units Void where
   solveFrom t1 evaluate = do

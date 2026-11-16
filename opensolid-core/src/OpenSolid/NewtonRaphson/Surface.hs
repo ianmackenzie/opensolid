@@ -10,7 +10,6 @@ where
 
 import OpenSolid.Bounds2D qualified as Bounds2D
 import OpenSolid.Prelude
-import OpenSolid.Tolerance qualified as Tolerance
 import OpenSolid.UvBounds (UvBounds)
 import OpenSolid.UvPoint (UvPoint)
 import OpenSolid.Vector (Vector)
@@ -33,9 +32,7 @@ solveIn ::
   Fuzzy UvPoint
 solveIn uvRange evaluate = do
   uvSolution <- solveFrom (Bounds2D.centerPoint uvRange) evaluate
-  if Bounds2D.inclusion uvSolution uvRange >= 0.0
-    then Resolved uvSolution
-    else Unresolved
+  if unitless (uvSolution ^ uvRange) then Resolved uvSolution else Unresolved
 
 instance Solver 2 units Void where
   solveFrom uvPoint1 evaluate = do
@@ -65,7 +62,7 @@ solve2D evaluate uvPoint1 v1 du1 dv1 = do
 
 validateSolution :: UvPoint -> Vector2D Unitless -> Fuzzy UvPoint
 validateSolution uvPoint uvStep =
-  if Vector2D.magnitude uvStep <= Tolerance.unitless then Resolved uvPoint else Unresolved
+  if unitless (uvStep ~= Vector2D.zero) then Resolved uvPoint else Unresolved
 
 instance Solver 3 units space where
   solveFrom uvPoint1 evaluate = do
