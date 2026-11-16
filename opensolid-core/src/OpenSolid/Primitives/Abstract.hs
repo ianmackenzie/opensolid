@@ -19,7 +19,6 @@ module OpenSolid.Primitives.Abstract
 where
 
 import Data.Coerce (Coercible)
-import Data.Coerce qualified
 import GHC.TypeLits (Natural)
 import OpenSolid.Bounds2D (Bounds2D)
 import OpenSolid.Bounds2D qualified as Bounds2D
@@ -33,9 +32,8 @@ import OpenSolid.DirectionBounds2D (DirectionBounds2D)
 import OpenSolid.DirectionBounds2D qualified as DirectionBounds2D
 import OpenSolid.DirectionBounds3D (DirectionBounds3D)
 import OpenSolid.DirectionBounds3D qualified as DirectionBounds3D
-import OpenSolid.Interval (Interval (Interval))
-import OpenSolid.Interval qualified as Interval
-import OpenSolid.IsZero (IsZero (IsZero))
+import OpenSolid.Interval (Interval)
+import OpenSolid.IsZero (IsZero)
 import OpenSolid.Point2D (Point2D)
 import OpenSolid.Point2D qualified as Point2D
 import OpenSolid.Point3D (Point3D)
@@ -43,7 +41,6 @@ import OpenSolid.Point3D qualified as Point3D
 import OpenSolid.Prelude
 import OpenSolid.Quantity qualified as Quantity
 import OpenSolid.Set qualified as Set
-import OpenSolid.Sign qualified as Sign
 import OpenSolid.Transform.Tag qualified as Transform.Tag
 import OpenSolid.Transform2D (Transform2D)
 import OpenSolid.Transform2D qualified as Transform2D
@@ -76,7 +73,6 @@ type family
   Direction (dimension :: Natural) space =
     direction | direction -> dimension space
   where
-  Direction 1 Void = Sign
   Direction 2 Void = Direction2D
   Direction 3 space = Direction3D space
 
@@ -91,7 +87,6 @@ type family
   VectorBounds dimension units space =
     vectorBounds | vectorBounds -> dimension units space
   where
-  VectorBounds 1 units Void = Interval units
   VectorBounds 2 units Void = VectorBounds2D units
   VectorBounds 3 units space = VectorBounds3D units space
 
@@ -99,7 +94,6 @@ type family
   DirectionBounds dimension space =
     directionBounds | directionBounds -> dimension space
   where
-  DirectionBounds 1 Void = Interval Unitless
   DirectionBounds 2 Void = DirectionBounds2D
   DirectionBounds 3 space = DirectionBounds3D space
 
@@ -114,11 +108,8 @@ type family
   VectorTransform dimension tag space =
     transform | transform -> dimension tag space
   where
-  VectorTransform 1 tag Void = VectorTransform1D tag
   VectorTransform 2 tag Void = VectorTransform2D tag
   VectorTransform 3 tag space = VectorTransform3D tag space
-
-newtype VectorTransform1D tag = VectorTransform1D Number
 
 type family
   Transform dimension tag units space =
@@ -207,26 +198,6 @@ class
     Vector dimension units space
   vectorSum :: List (Vector dimension units space) -> Vector dimension units space
 
-instance VectorExists 1 units Void where
-  {-# INLINE vectorZero #-}
-  vectorZero = Quantity.zero
-  {-# INLINE vectorSquaredMagnitude_ #-}
-  vectorSquaredMagnitude_ = Quantity.squared_
-  vectorMagnitude = Quantity.abs
-  vectorDirection value =
-    if value ~= Quantity.zero
-      then Err IsZero
-      else Ok (Quantity.sign value)
-  vectorMagnitudeAndDirection value =
-    if value ~= Quantity.zero
-      then Err IsZero
-      else Ok (Quantity.abs value, Quantity.sign value)
-  vectorCrossProductMagnitude_ _ _ = Quantity.zero
-  vectorComponentIn = (*)
-  vectorProjectionIn _ value = value
-  vectorTransformBy (VectorTransform1D scale) value = scale * value
-  vectorSum = Quantity.sum
-
 instance VectorExists 2 units Void where
   {-# INLINE vectorZero #-}
   vectorZero = Vector2D.zero
@@ -269,18 +240,6 @@ class
   directionAreParallel :: Direction dimension space -> Direction dimension space -> Bool
   directionAreIndependent :: Direction dimension space -> Direction dimension space -> Bool
   directionArePerpendicular :: Direction dimension space -> Direction dimension space -> Bool
-
-instance DirectionExists 1 Void where
-  {-# INLINE directionUnsafe #-}
-  directionUnsafe = Quantity.sign
-  {-# INLINE directionUnwrap #-}
-  directionUnwrap = Sign.value
-  {-# INLINE directionAreParallel #-}
-  directionAreParallel _ _ = True
-  {-# INLINE directionAreIndependent #-}
-  directionAreIndependent _ _ = False
-  {-# INLINE directionArePerpendicular #-}
-  directionArePerpendicular _ _ = False
 
 instance DirectionExists 2 Void where
   {-# INLINE directionUnsafe #-}
@@ -464,25 +423,6 @@ class
     VectorBounds dimension units space ->
     VectorBounds dimension units space
 
-instance VectorBoundsExists 1 units Void where
-  vectorBoundsMember = Interval.member
-  vectorBoundsCenter = Interval.midpoint
-  vectorBoundsSquaredMagnitude_ = Interval.squared_
-  vectorBoundsMagnitude = Interval.abs
-  vectorBoundsDirection (Interval low high)
-    | low > Quantity.zero = Interval.constant 1.0
-    | high < Quantity.zero = Interval.constant -1.0
-    | otherwise = Interval -1.0 1.0
-  vectorBoundsNormalize (Interval low high)
-    | low > Quantity.zero = Interval.constant 1.0
-    | high < Quantity.zero = Interval.constant -1.0
-    | otherwise = Interval -1.0 1.0
-  vectorBoundsDiameter = Interval.width
-  vectorBoundsIsResolved = Interval.isResolved
-  vectorBoundsAreDistinct = Interval.areDistinct
-  vectorBoundsAreIndependent _ _ = False
-  vectorBoundsTransformBy (VectorTransform1D scale) value = scale * value
-
 instance VectorBoundsExists 2 units Void where
   vectorBoundsMember = VectorBounds2D.member
   vectorBoundsCenter = VectorBounds2D.center
@@ -530,16 +470,6 @@ class
     DirectionBounds dimension space ->
     DirectionBounds dimension space ->
     Bool
-
-instance DirectionBoundsExists 1 Void where
-  {-# INLINE directionBoundsUnsafe #-}
-  directionBoundsUnsafe = id
-  {-# INLINE directionBoundsUnwrap #-}
-  directionBoundsUnwrap = id
-  {-# INLINE directionBoundsAreDistinct #-}
-  directionBoundsAreDistinct = Interval.areDistinct
-  {-# INLINE directionBoundsAreIndependent #-}
-  directionBoundsAreIndependent _ _ = False
 
 instance DirectionBoundsExists 2 Void where
   {-# INLINE directionBoundsUnsafe #-}
@@ -640,9 +570,6 @@ class VectorTransformExists dimension space where
   vectorTransformAsAffine ::
     VectorTransform dimension tag space ->
     VectorTransform dimension Transform.Tag.Affine space
-
-instance VectorTransformExists 1 Void where
-  vectorTransformAsAffine = Data.Coerce.coerce
 
 instance VectorTransformExists 2 Void where
   vectorTransformAsAffine = VectorTransform2D.asAffine
